@@ -26,3 +26,15 @@ name = "livediagram-help-staging"
 [env.staging.assets]
 directory = "./out"
 not_found_handling = "404-page"
+
+# ---------------------------------------------------------------------------
+# docs.nu: this fork's own deployment, on its own Cloudflare account.
+# Deploy with `--env docs-nu` (scripts/deploy-docs-nu.sh). Every name below
+# carries the docs-nu prefix; the top-level config stays upstream's.
+# ---------------------------------------------------------------------------
+[env.docs-nu]
+name = "docs-nu-help"
+
+[env.docs-nu.assets]
+directory = "./out"
+not_found_handling = "404-page"

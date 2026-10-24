@@ -43,3 +43,21 @@ run_worker_first = ["/*", "!/_next/*"]
 [[env.staging.services]]
 binding = "API"
 service = "livediagram-api-staging"
+
+# ---------------------------------------------------------------------------
+# docs.nu: this fork's own deployment, on its own Cloudflare account.
+# Deploy with `--env docs-nu` (scripts/deploy-docs-nu.sh). Every name below
+# carries the docs-nu prefix; the top-level config stays upstream's.
+# ---------------------------------------------------------------------------
+[env.docs-nu]
+name = "docs-nu-live"
+
+[env.docs-nu.assets]
+directory = "./out"
+binding = "ASSETS"
+not_found_handling = "404-page"
+run_worker_first = ["/*", "!/_next/*"]
+
+[[env.docs-nu.services]]
+binding = "API"
+service = "docs-nu-api"

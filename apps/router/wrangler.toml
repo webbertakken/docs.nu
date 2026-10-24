@@ -96,3 +96,41 @@ service = "livediagram-community-staging"
 # production's router has no DEPLOY_ENV, so the header is impossible there.
 [env.staging.vars]
 DEPLOY_ENV = "staging"
+
+# ---------------------------------------------------------------------------
+# docs.nu: this fork's own deployment, on its own Cloudflare account.
+# Deploy with `--env docs-nu` (scripts/deploy-docs-nu.sh). Every name below
+# carries the docs-nu prefix; the top-level config stays upstream's.
+# ---------------------------------------------------------------------------
+[env.docs-nu]
+name = "docs-nu-router"
+# The apex is canonical; www.docs.nu is attached so its redirect rule has a
+# proxied host to fire on.
+routes = [
+  { pattern = "docs.nu", custom_domain = true },
+  { pattern = "www.docs.nu", custom_domain = true },
+]
+
+[[env.docs-nu.services]]
+binding = "MARKETING"
+service = "docs-nu-marketing"
+
+[[env.docs-nu.services]]
+binding = "LIVE"
+service = "docs-nu-live"
+
+[[env.docs-nu.services]]
+binding = "API"
+service = "docs-nu-api"
+
+[[env.docs-nu.services]]
+binding = "TELEMETRY"
+service = "docs-nu-telemetry"
+
+[[env.docs-nu.services]]
+binding = "HELP"
+service = "docs-nu-help"
+
+[[env.docs-nu.services]]
+binding = "COMMUNITY"
+service = "docs-nu-community"

@@ -561,3 +561,121 @@ crons = ["0 3 * * *"]
 # Drive UI integration opens https://staging.livediagram.app/drive/open.
 # Worker secrets are per-environment, so staging's never collide with
 # production's.
+
+# ---------------------------------------------------------------------------
+# docs.nu: this fork's own deployment, on its own Cloudflare account.
+# Deploy with `--env docs-nu` (scripts/deploy-docs-nu.sh). Every name below
+# carries the docs-nu prefix; the top-level config stays upstream's.
+# ---------------------------------------------------------------------------
+[env.docs-nu]
+name = "docs-nu-api"
+
+# Guest-only (no Clerk), so guest signing stays off and there is no MCP
+# issuer: empty reads as unset. No AI key yet; the origin lock is set so a key
+# added later can't be spent from elsewhere.
+[env.docs-nu.vars]
+APP_BASE_URL = "https://docs.nu"
+AI_ALLOWED_ORIGINS = "https://docs.nu"
+GUEST_SIGNING_LIVE_AT = ""
+GUEST_SIG_ENFORCE_AFTER = ""
+OAUTH_ISSUER = ""
+
+[[env.docs-nu.d1_databases]]
+binding = "DB"
+database_name = "docs-nu"
+database_id = "33fca348-453a-4812-ac83-064f4d8c8a89"
+migrations_dir = "migrations"
+
+[[env.docs-nu.r2_buckets]]
+binding = "IMAGES"
+bucket_name = "docs-nu-images"
+
+[[env.docs-nu.durable_objects.bindings]]
+name = "DOCUMENT_ROOM"
+class_name = "DocumentRoom"
+
+[[env.docs-nu.migrations]]
+tag = "v1"
+new_classes = ["DiagramRoom"]
+
+[[env.docs-nu.migrations]]
+tag = "v2"
+renamed_classes = [{ from = "DiagramRoom", to = "DocumentRoom" }]
+
+[env.docs-nu.triggers]
+crons = ["0 3 * * *"]
+
+# Rate-limit namespace ids are account-wide: 7001-7012 keep these counters
+# apart from every other worker on the account (1001+ are taken).
+
+[[env.docs-nu.unsafe.bindings]]
+name = "WRITE_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7001"
+simple = { limit = 300, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "EVENTS_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7002"
+simple = { limit = 120, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "AI_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7003"
+simple = { limit = 20, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "SHARE_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7004"
+simple = { limit = 30, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "UNFURL_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7005"
+simple = { limit = 60, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "API_TOKEN_READ_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7006"
+simple = { limit = 120, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "DRIVE_TOKEN_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7007"
+simple = { limit = 10, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "HOME_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7008"
+simple = { limit = 60, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "COMMUNITY_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7009"
+simple = { limit = 30, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "WORKBENCH_TICKET_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7010"
+simple = { limit = 30, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "FORM_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7011"
+simple = { limit = 60, period = 60 }
+
+[[env.docs-nu.unsafe.bindings]]
+name = "TEAM_INVITE_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7012"
+simple = { limit = 20, period = 60 }
