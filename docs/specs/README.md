@@ -2,14 +2,14 @@
 
 Follow the references below only as needed; never upfront.
 
-This folder is the **source of truth** for what livediagram is and how it works. Before building anything, check here. After every product decision, update or add a spec.
+This folder is the **source of truth** for what docs.nu is and how it works. Before building anything, check here. After every product decision, update or add a spec.
 
 Specs live in numbered category folders: the reserved `001`–`005` first (vision, scope, architecture, interface design, roadmap), then one folder per domain concept. The specs themselves are unnumbered and named by subject.
 
 ## Categories
 
 - ./001-project-vision/README.md - when you need the why: the problem, audience and value proposition
-- ./002-project-scope/README.md - when deciding what is in or out: licence, distribution, third-party licences, vulnerability disclosure, hard constraints
+- ./002-project-scope/README.md - when deciding what is in or out: licence, distribution and plans, the livediagram upstream, third-party licences, vulnerability disclosure, hard constraints
 - ./003-system-architecture/README.md - when touching source layout, the test setup, console logging, or cross-cutting code structure
 - ./004-interface-design/README.md - when working on the visual language: colour, fonts, motion, accessibility, shared UI mechanics
 - ./005-project-roadmap/README.md - when asking where the product is now and what is still ahead
