@@ -8,9 +8,10 @@
 // the worker can prove the caller actually owns the guest data it's
 // claiming (see auth/owner-signature.ts + docs/specs/014-identity/auth-and-guest-access.md).
 //
-// When GUEST_ID_HMAC_SECRET is unset (self-host that hasn't configured
-// it), the endpoint still mints an id but with a null signature, and
-// /api/migrate keeps its legacy unsigned behaviour.
+// The key derives from the sign-in secret (auth/guest-key.ts). On a
+// guest-only host (no secret) the endpoint still mints an id, with a null
+// signature: nothing there requires one, and there is no account to
+// migrate into.
 
 import { signOwnerId } from '../auth/owner-signature';
 import { json, notFound } from '../responses';
@@ -21,6 +22,6 @@ export async function handleGuestId(ctx: RouteContext): Promise<Response> {
   if (!(segments[1] === 'guest-id' && segments.length === 2)) return notFound();
   if (request.method !== 'POST') return notFound();
   const ownerId = crypto.randomUUID();
-  const ownerSig = await signOwnerId(env.GUEST_ID_HMAC_SECRET, ownerId);
+  const ownerSig = await signOwnerId(env, ownerId);
   return json({ ownerId, ownerSig });
 }

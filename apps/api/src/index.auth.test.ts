@@ -103,6 +103,70 @@ describe('sign-in at the front door', () => {
     expect(res.status).toBe(200);
   });
 
+  it("moves a signed guest's data into the account it signs in to", async () => {
+    const guest = (await (await call('/api/guest-id', { method: 'POST' })).json()) as {
+      ownerId: string;
+      ownerSig: string;
+    };
+    expect(guest.ownerSig).toEqual(expect.any(String));
+    const asGuest = { 'X-Owner-Id': guest.ownerId, 'X-Owner-Sig': guest.ownerSig };
+    const made = await call('/api/folders', {
+      method: 'POST',
+      headers: asGuest,
+      body: JSON.stringify({ id: 'folder-1', name: 'Built as a guest' }),
+    });
+    expect(made.status).toBe(201);
+
+    const { token } = await signIn('ada@example.com');
+    const bearer = { Authorization: `Bearer ${token}` };
+    const unsigned = await call('/api/migrate', {
+      method: 'POST',
+      headers: bearer,
+      body: JSON.stringify({ guestOwnerId: guest.ownerId }),
+    });
+    expect(unsigned.status).toBe(403);
+    const moved = await call('/api/migrate', {
+      method: 'POST',
+      headers: bearer,
+      body: JSON.stringify({ guestOwnerId: guest.ownerId, guestSignature: guest.ownerSig }),
+    });
+    expect(moved.status).toBe(200);
+    expect(await moved.json()).toMatchObject({ migrated: { folders: 1 } });
+
+    const mine = (await (await call('/api/folders', { headers: bearer })).json()) as {
+      folders: { name: string }[];
+    };
+    expect(mine.folders.map((f) => f.name)).toEqual(['Built as a guest']);
+    const again = await call('/api/migrate', {
+      method: 'POST',
+      headers: bearer,
+      body: JSON.stringify({ guestOwnerId: guest.ownerId, guestSignature: guest.ownerSig }),
+    });
+    expect(await again.json()).toEqual({
+      migrated: { documents: 0, folders: 0, shared: 0, images: 0 },
+    });
+  });
+
+  it('refuses an unsigned guest on owner-scoped routes once sign-in is on', async () => {
+    const res = await call('/api/folders', {
+      headers: { 'X-Owner-Id': '0f5ca4af-9a8a-4a60-be5e-1179e5555880' },
+    });
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'signature_required' });
+    expect(console.warn).toHaveBeenCalledWith('[auth] guest_signature_refused route=folders');
+  });
+
+  it('signs nothing on a guest-only host, and serves the unsigned guest', async () => {
+    env = sqliteD1({}).env;
+    const guest = (await (await call('/api/guest-id', { method: 'POST' })).json()) as {
+      ownerId: string;
+      ownerSig: string | null;
+    };
+    expect(guest.ownerSig).toBeNull();
+    const res = await call('/api/folders', { headers: { 'X-Owner-Id': guest.ownerId } });
+    expect(res.status).toBe(200);
+  });
+
   it('refuses an account id presented as the guest header', async () => {
     const { id } = await signIn('ada@example.com');
     const res = await call('/api/documents', { headers: { 'X-Owner-Id': id } });

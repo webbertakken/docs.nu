@@ -1,155 +1,115 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Flow 2 of /api/migrate (legacy unsigned guest -> signed guest) takes its
-// SOURCE from the unsigned X-Owner-Id header. These cases pin that the
-// header can't name an account (a harvestable account id) and that, once
-// signature enforcement is armed, the source must prove possession too.
+// POST /api/migrate moves a guest's rows into the account a session token proves (docs/specs/014-identity/
+// auth-and-guest-access.md "Guest → account upgrade"). These cases pin who may ask, and that the guest id must be
+// proven with its signature before anything moves.
 
-const { migrateOwnerId, getParticipant } = vi.hoisted(() => ({
-  migrateOwnerId: vi.fn(),
-  getParticipant: vi.fn(),
-}));
-vi.mock('../db', () => ({ migrateOwnerId, getParticipant }));
+const { migrateOwnerId } = vi.hoisted(() => ({ migrateOwnerId: vi.fn() }));
+vi.mock('../db', () => ({ migrateOwnerId }));
 
 import { signOwnerId } from '../auth/owner-signature';
 import type { Env } from '../types';
 import { handleMigrate } from './migrate';
 import { makeTestRouteContext } from './test-route-context';
 
-const SECRET = 'test-secret';
-const LEGACY = '0f5ca4af-9a8a-4a60-be5e-1179e5555880';
-const TARGET = '7d2c1b8e-3f4a-4c5d-9e6f-0a1b2c3d4e5f';
+const SIGN_IN = { BETTER_AUTH_SECRET: 's'.repeat(40) } as Env;
+const GUEST = '0f5ca4af-9a8a-4a60-be5e-1179e5555880';
+const ACCOUNT = 'acct_me000000000000000000000';
 
-async function flow2(
-  from: string,
-  env: Partial<Env>,
-  headers: Record<string, string> = {},
-): Promise<Response> {
-  return handleMigrate(
-    makeTestRouteContext('POST', '/api/migrate', {
-      owner: from,
-      env: { GUEST_ID_HMAC_SECRET: SECRET, ...env } as Env,
-      headers,
-      body: { toOwnerId: TARGET, toSignature: await signOwnerId(SECRET, TARGET) },
-    }),
-  );
+async function migrate(opts: {
+  account?: string | null;
+  body?: unknown;
+  env?: Env;
+  owner?: string;
+}): Promise<Response> {
+  const ctx = makeTestRouteContext('POST', '/api/migrate', {
+    env: opts.env ?? SIGN_IN,
+    owner: opts.owner ?? opts.account ?? undefined,
+    body: opts.body,
+  });
+  ctx.sessionAccountId = opts.account === undefined ? ACCOUNT : opts.account;
+  return handleMigrate(ctx);
 }
 
-beforeEach(() => {
-  getParticipant.mockReset();
-  getParticipant.mockResolvedValue(null);
-  migrateOwnerId.mockReset();
-  migrateOwnerId.mockResolvedValue({ documents: 1, folders: 0, shared: 0, images: 0 });
+const signed = async (id = GUEST) => ({
+  guestOwnerId: id,
+  guestSignature: await signOwnerId(SIGN_IN, id),
 });
 
-describe('POST /api/migrate flow 2 (legacy guest upgrade)', () => {
-  it('moves a legacy guest onto a freshly-signed id', async () => {
-    const res = await flow2(LEGACY, {});
+beforeEach(() => {
+  migrateOwnerId.mockReset();
+  migrateOwnerId.mockResolvedValue({ documents: 2, folders: 1, shared: 0, images: 3 });
+  vi.spyOn(console, 'info').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterEach(() => vi.restoreAllMocks());
+
+describe('POST /api/migrate', () => {
+  it("moves a signed guest's rows into the session's account", async () => {
+    const res = await migrate({ body: await signed() });
     expect(res.status).toBe(200);
-    expect(migrateOwnerId).toHaveBeenCalledWith(expect.anything(), LEGACY, TARGET);
+    expect(await res.json()).toEqual({
+      migrated: { documents: 2, folders: 1, shared: 0, images: 3 },
+    });
+    expect(migrateOwnerId).toHaveBeenCalledWith(expect.anything(), GUEST, ACCOUNT);
+    expect(console.info).toHaveBeenCalledWith('[migrate] moved rows=6');
+  });
+
+  it('moves nothing when the guest id is the account itself', async () => {
+    const res = await migrate({ body: { guestOwnerId: ACCOUNT } });
+    expect(await res.json()).toEqual({
+      migrated: { documents: 0, folders: 0, shared: 0, images: 0 },
+    });
+    expect(migrateOwnerId).not.toHaveBeenCalled();
+  });
+
+  it('refuses a caller with no session, whatever guest header it sends', async () => {
+    const res = await migrate({ account: null, owner: GUEST, body: await signed() });
+    expect(res.status).toBe(400);
+    expect(migrateOwnerId).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('[migrate] refused reason=no_session');
+  });
+
+  it('requires the guest id', async () => {
+    for (const body of [{}, { guestOwnerId: '  ' }, { guestOwnerId: 42 }, null, 'x']) {
+      const res = await migrate({ body });
+      expect(res.status, JSON.stringify(body)).toBe(400);
+    }
+    expect(migrateOwnerId).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('[migrate] refused reason=no_guest_id');
   });
 
   it('refuses an account id as the source', async () => {
-    const res = await flow2('acct_victim', {});
+    const res = await migrate({ body: await signed('acct_victim00000000000000000') });
     expect(res.status).toBe(403);
     expect(migrateOwnerId).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('[migrate] refused reason=account_id');
   });
 
-  it('refuses an unsigned source once enforcement is armed', async () => {
-    const res = await flow2(LEGACY, { GUEST_SIG_ENFORCE_AFTER: '0' });
-    expect(res.status).toBe(403);
-    expect(migrateOwnerId).not.toHaveBeenCalled();
-  });
-
-  // Enforcement armed with a stated signing date: an id that existed before the
-  // deployment signed anything can still make its one-time upgrade unsigned.
-  describe('the legacy exception', () => {
-    const LIVE_AT = 1_000_000;
-    const armed = { GUEST_SIG_ENFORCE_AFTER: '0', GUEST_SIGNING_LIVE_AT: String(LIVE_AT) };
-
-    it('lets a pre-signing guest upgrade unsigned', async () => {
-      getParticipant.mockResolvedValue({ id: LEGACY, createdAt: LIVE_AT - 1 });
-      const res = await flow2(LEGACY, armed);
-      expect(res.status).toBe(200);
-      expect(migrateOwnerId).toHaveBeenCalledWith(expect.anything(), LEGACY, TARGET);
-    });
-
-    it('refuses an unsigned id minted after signing went live', async () => {
-      getParticipant.mockResolvedValue({ id: LEGACY, createdAt: LIVE_AT });
-      expect((await flow2(LEGACY, armed)).status).toBe(403);
-      expect(migrateOwnerId).not.toHaveBeenCalled();
-    });
-
-    it('refuses an unsigned id with no participant row', async () => {
-      expect((await flow2(LEGACY, armed)).status).toBe(403);
-      expect(migrateOwnerId).not.toHaveBeenCalled();
-    });
-
-    it('grants no exception when the signing date is not stated', async () => {
-      getParticipant.mockResolvedValue({ id: LEGACY, createdAt: 1 });
-      expect((await flow2(LEGACY, { GUEST_SIG_ENFORCE_AFTER: '0' })).status).toBe(403);
-    });
-
-    it('still refuses an account id, whatever its age', async () => {
-      getParticipant.mockResolvedValue({ id: 'acct_victim', createdAt: 1 });
-      expect((await flow2('acct_victim', armed)).status).toBe(403);
-      expect(migrateOwnerId).not.toHaveBeenCalled();
-    });
-  });
-
-  it('accepts a signed source once enforcement is armed', async () => {
-    const res = await flow2(
-      LEGACY,
-      { GUEST_SIG_ENFORCE_AFTER: '0' },
-      { 'X-Owner-Sig': (await signOwnerId(SECRET, LEGACY))! },
-    );
-    expect(res.status).toBe(200);
-  });
-});
-
-describe('POST /api/migrate flow 1 (sign-up claim)', () => {
-  // A self-host with Clerk on but no GUEST_ID_HMAC_SECRET skips the signature
-  // check, so the account-id shape is the only thing standing between a
-  // signed-in user and another account's workspace.
-  it('refuses an account id as the guest source even with no secret configured', async () => {
-    const ctx = makeTestRouteContext('POST', '/api/migrate', {
-      env: {} as Env,
-      body: { guestOwnerId: 'acct_victim' },
-    });
-    ctx.sessionAccountId = 'user_attacker';
-    const res = await handleMigrate(ctx);
-    expect(res.status).toBe(403);
-    expect(migrateOwnerId).not.toHaveBeenCalled();
-  });
-
-  it('still claims a guest UUID with no secret configured', async () => {
-    const ctx = makeTestRouteContext('POST', '/api/migrate', {
-      env: {} as Env,
-      body: { guestOwnerId: LEGACY },
-    });
-    ctx.sessionAccountId = 'user_me';
-    const res = await handleMigrate(ctx);
-    expect(res.status).toBe(200);
-    expect(migrateOwnerId).toHaveBeenCalledWith(expect.anything(), LEGACY, 'user_me');
-  });
-});
-
-// A body whose ids are not strings, or that is not an object at all, read `.trim()` off it and threw: a 500.
-describe('POST /api/migrate with a malformed body', () => {
-  const send = (body: unknown) =>
-    handleMigrate(
-      makeTestRouteContext('POST', '/api/migrate', {
-        owner: LEGACY,
-        env: { GUEST_ID_HMAC_SECRET: SECRET } as Env,
-        body,
-      }),
-    );
-
-  it('refuses rather than throwing', async () => {
-    for (const body of [null, 'x', { toOwnerId: 42, toSignature: 7 }]) {
-      const res = await send(body);
-      expect(res.status, JSON.stringify(body)).toBeLessThan(500);
+  it("refuses a guest id without its signature, or with another id's", async () => {
+    const other = await signed('7d2c1b8e-3f4a-4c5d-9e6f-0a1b2c3d4e5f');
+    for (const guestSignature of [undefined, null, '', 7, 'bogus', other.guestSignature]) {
+      const res = await migrate({ body: { guestOwnerId: GUEST, guestSignature } });
+      expect(res.status, String(guestSignature)).toBe(403);
     }
     expect(migrateOwnerId).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('[migrate] refused reason=signature');
+  });
+
+  it('refuses a signature made under another secret', async () => {
+    const elsewhere = { BETTER_AUTH_SECRET: 't'.repeat(40) } as Env;
+    const guestSignature = await signOwnerId(elsewhere, GUEST);
+    const res = await migrate({ body: { guestOwnerId: GUEST, guestSignature } });
+    expect(res.status).toBe(403);
+  });
+
+  it('answers only POST on its own path', async () => {
+    const ctx = makeTestRouteContext('GET', '/api/migrate', { env: SIGN_IN });
+    ctx.sessionAccountId = ACCOUNT;
+    expect((await handleMigrate(ctx)).status).toBe(404);
+    const deeper = makeTestRouteContext('POST', '/api/migrate/x', { env: SIGN_IN });
+    deeper.sessionAccountId = ACCOUNT;
+    expect((await handleMigrate(deeper)).status).toBe(404);
   });
 });

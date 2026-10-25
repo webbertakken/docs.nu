@@ -1,11 +1,10 @@
-// HMAC-SHA256 signature over a guest owner-id.
+// HMAC-SHA256 signature over a guest owner-id (docs/specs/014-identity/auth-and-guest-access.md "Signed guest ids").
 //
 // Why: a guest's owner-id (the `X-Owner-Id` UUID) is a bearer value that
 // leaks — it rides in document DTOs and realtime presence frames. Without
-// a signature, /api/migrate trusted a body-supplied `guestOwnerId` with no
-// proof of possession, so anyone who *observed* a victim's id could claim
-// all of that guest's documents into their own account. The fix is to bind
-// possession to a secret the observer can't have:
+// a signature, anyone who *observed* a guest's id could act as that guest
+// or claim all of that guest's documents into their own account. The
+// signature binds possession to a key the observer can't have:
 //
 //   - The signature is minted server-side at POST /api/guest-id, where the
 //     SERVER chooses the id. A caller can therefore only ever hold a
@@ -13,55 +12,38 @@
 //     saw elsewhere.
 //   - The signature is never returned in any DTO or presence frame; only
 //     the bare id is. So observing the id does not reveal the signature.
-//   - /api/migrate verifies the signature before reassigning ownership.
+//   - Owner-scoped routes, the room's owner leg and /api/migrate verify it.
 //
-// When `GUEST_ID_HMAC_SECRET` is unset (an OSS self-host that hasn't
-// configured it), signing degrades to disabled — `signOwnerId` returns
-// null and migrate skips the check — mirroring how `CLERK_JWKS_URL` makes
-// auth optional. Production sets the secret and is protected.
+// The key is derived from the sign-in secret (auth/guest-key.ts). A host
+// without one signs nothing: `signOwnerId` returns null there.
 
 import { bytesToBase64Url } from '@livediagram/api-schema';
+import type { Env } from '../types';
+import { guestSigningKey } from './guest-key';
 import { timingSafeEqual } from './timing-safe';
 
 const enc = new TextEncoder();
 
-async function hmacKey(secret: string): Promise<CryptoKey> {
-  return crypto.subtle.importKey(
-    'raw',
-    enc.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  );
-}
-
-// The signature itself, for a secret the caller has already established.
-// Split out so `verifyOwnerId` doesn't have to re-handle a null it cannot
-// receive: with the "no secret" case answered once, both callers below work
-// in terms of a string.
-async function hmacSign(secret: string, ownerId: string): Promise<string> {
-  const key = await hmacKey(secret);
+async function hmacSign(key: CryptoKey, ownerId: string): Promise<string> {
   return bytesToBase64Url(await crypto.subtle.sign('HMAC', key, enc.encode(ownerId)));
 }
 
-// Sign `ownerId`; returns null when no secret is configured (signing off).
-export async function signOwnerId(
-  secret: string | undefined,
-  ownerId: string,
-): Promise<string | null> {
-  return secret ? hmacSign(secret, ownerId) : null;
+// Sign `ownerId`; null on a host with no guest signing key.
+export async function signOwnerId(env: Env, ownerId: string): Promise<string | null> {
+  const key = await guestSigningKey(env);
+  return key ? hmacSign(key, ownerId) : null;
 }
 
-// Constant-time verify of `sig` against `ownerId`. With a secret set, a
-// missing or mismatched signature returns false. Callers gate on the
-// secret being present before *requiring* a signature (so an unconfigured
-// self-host keeps its legacy unsigned behaviour).
+// Constant-time verify of `sig` against `ownerId`. Fails closed: a missing or
+// mismatched signature is false, and so is any signature on a host with no key
+// (nothing there was ever signed). Callers that let a guest-only host through
+// decide that before asking (auth/guest-rest.ts guestSignatureEnforced).
 export async function verifyOwnerId(
-  secret: string | undefined,
+  env: Env,
   ownerId: string,
   sig: string | null | undefined,
 ): Promise<boolean> {
-  if (!secret) return true;
-  if (!sig) return false;
-  return timingSafeEqual(await hmacSign(secret, ownerId), sig);
+  const key = await guestSigningKey(env);
+  if (!key || !sig) return false;
+  return timingSafeEqual(await hmacSign(key, ownerId), sig);
 }

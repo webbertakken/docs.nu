@@ -519,8 +519,7 @@ describe('migrateOwnerId moves every guest-holdable row (docs/specs/015-api/api.
     expect(people.map((p) => ({ ...p }))).toEqual([{ id: ACCOUNT, name: 'Ada', color: '#123456' }]);
   });
 
-  // A row older than GUEST_SIGNING_LIVE_AT marks a legacy id that may upgrade unsigned, so the new
-  // id must never inherit the old date (docs/specs/015-api/public-api-and-tokens.md §6).
+  // The account's participant row starts when the account took it over.
   it('stamps the moved participant row with the time of the move, never the old date', async () => {
     const { env, sql } = arrange();
     const before = Date.now();

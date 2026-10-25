@@ -209,29 +209,25 @@ async function routeApiRequest(
     }
   }
 
-  // Guest REST signature gate (docs/specs/015-api/public-api-and-tokens.md §4). On owner-scoped routes, a
-  // presented `X-Owner-Id` must carry a valid HMAC signature once
-  // enforcement is on — so a harvested owner id (a guest UUID, or a
-  // signed-up user's account id slipped into the header) can't be used as a
-  // credential. Skipped for session / token callers (they aren't on the guest
-  // path) and during the grace window. A request with NO `X-Owner-Id` is
-  // untouched (it just resolves to no owner), so public reads still work.
+  // Guest REST signature gate (docs/specs/015-api/public-api-and-tokens.md §4; docs/specs/014-identity/
+  // auth-and-guest-access.md "Signed guest ids"). On owner-scoped routes, a presented `X-Owner-Id` must carry a
+  // valid HMAC signature whenever the host signs guest ids (sign-in on), so a harvested guest id can't be used as a
+  // credential. Skipped for session, token and workbench callers (they aren't on the guest path) and on a
+  // guest-only host, which signs nothing. A request with NO `X-Owner-Id` is untouched (it just resolves to no
+  // owner), so public reads still work.
   if (
     !sessionAccountId &&
     !tokenAuth &&
     !workbench &&
     OWNER_SCOPED_SEGMENTS.has(segments[1] ?? '') &&
-    guestSignatureEnforced(env, Date.now())
+    guestSignatureEnforced(env)
   ) {
     const headerOwner = request.headers.get('X-Owner-Id');
     if (
       headerOwner &&
-      !(await verifyOwnerId(
-        env.GUEST_ID_HMAC_SECRET,
-        headerOwner,
-        request.headers.get('X-Owner-Sig'),
-      ))
+      !(await verifyOwnerId(env, headerOwner, request.headers.get('X-Owner-Sig')))
     ) {
+      console.warn(`[auth] guest_signature_refused route=${segments[1]}`);
       return json({ error: 'signature_required' }, { status: 401 });
     }
   }
