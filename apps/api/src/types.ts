@@ -194,10 +194,9 @@ export type Env = {
   // When the literal string "true", POST /api/ai requires a verified
   // session token and rejects the X-Owner-Id guest path with 401
   // (docs/specs/007-editor/ai-assistance.md). Anything else (unset, "false", any other value) keeps
-  // the guest path open. Hosted livediagram.app sets this to "true";
-  // OSS self-hosters who run Clerk-less stay on the open path by
-  // default.
-  AI_REQUIRE_CLERK?: string;
+  // the guest path open. Self-hosters who run without sign-in stay on
+  // the open path by default.
+  AI_REQUIRE_ACCOUNT?: string;
   // Per-owner soft cap on the number of images one owner may keep
   // in the gallery (docs/specs/009-elements/images.md). Stored as a decimal string in
   // wrangler.toml [vars]; parsed via parseInt at request time.

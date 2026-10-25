@@ -56,7 +56,7 @@ export function handleCapabilities(ctx: RouteContext): Response {
     // resolve from the same keys, so one flag answers for both.
     // Reports whether a provider is CONFIGURED, and deliberately says nothing
     // about whether THIS caller may use the endpoint. That asymmetry matters if
-    // `AI_REQUIRE_CLERK` is ever turned on: the editor shows the AI panel on
+    // `AI_REQUIRE_ACCOUNT` is ever turned on: the editor shows the AI panel on
     // `aiEnabled` alone (useEditorState -> EditorCanvasHost), so a guest would
     // get a panel that 401s on first use rather than no panel. Whoever flips
     // that flag has to make this line auth-aware in the same change — which is
