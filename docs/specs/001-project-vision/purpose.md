@@ -68,7 +68,9 @@ Collaboration earns the second person; sync earns the repository.
 - **Documents of every kind**: markdown pages, diagrams, boards, sheets, forms,
   decks and any other file, organised in folders.
 - **Sync**: the command line mirrors documents to repositories and other systems
-  as plain files, and back.
+  as plain files, and back, on every git branch: each git branch edits its own
+  live [document branches](../006-document/document-branches.md), merged when
+  its pull request merges.
 - **Wikis**, global and per project, with links between pages and search across
   them.
 - **Machine access**: a public API, a command line and an MCP server.
