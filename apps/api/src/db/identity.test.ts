@@ -44,11 +44,11 @@ describe('identity rows', () => {
 
   it('deletes an account with its sessions and pending codes', async () => {
     expect(await accountExists(env, 'acct_a')).toBe(true);
-    expect(await deleteIdentity(env, 'acct_a')).toBe(true);
+    expect(await deleteIdentity(env, 'acct_a')).toBe('a@b.co');
     expect(await accountExists(env, 'acct_a')).toBe(false);
     expect(sql.prepare('SELECT COUNT(*) AS n FROM identity_sessions').get()).toEqual({ n: 0 });
     expect(sql.prepare('SELECT id FROM identity_verifications').all()).toEqual([{ id: 'v-dead' }]);
-    expect(await deleteIdentity(env, 'acct_a')).toBe(false);
+    expect(await deleteIdentity(env, 'acct_a')).toBeNull();
   });
 });
 

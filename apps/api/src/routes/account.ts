@@ -14,7 +14,7 @@ import type { RouteContext } from './context';
 // account able to reach it; a failure between the two leaves an account with no data that can simply be deleted
 // again. Idempotent: re-calling with the same account id is a no-op once the rows are gone.
 export async function handleAccount(ctx: RouteContext): Promise<Response> {
-  const { request, env, segments, sessionAccountId, accountEmail } = ctx;
+  const { request, env, segments, sessionAccountId } = ctx;
   if (!(segments[1] === 'account' && segments.length === 2)) return notFound();
   if (request.method === 'DELETE') {
     if (!sessionAccountId) return missingAuth();
@@ -26,10 +26,11 @@ export async function handleAccount(ctx: RouteContext): Promise<Response> {
     }
     const deleted = await deleteAccount(env, sessionAccountId);
     // The data goes first, then the identity, so no row outlives the only account able to reach it.
-    await deleteIdentity(env, sessionAccountId);
+    // The address is read from the account row before it goes: the goodbye reaches the address the account had.
+    const address = await deleteIdentity(env, sessionAccountId);
     // docs/specs/014-identity/transactional-email.md: a parting confirmation (best-effort, after the rows are gone).
-    if (accountEmail && emailEnabled(env)) {
-      ctx.waitUntil?.(sendEmail(env, { to: accountEmail, ...accountDeletedEmail(env) }));
+    if (address && emailEnabled(env)) {
+      ctx.waitUntil?.(sendEmail(env, { to: address, ...accountDeletedEmail(env) }));
     }
     return json(
       { deleted },

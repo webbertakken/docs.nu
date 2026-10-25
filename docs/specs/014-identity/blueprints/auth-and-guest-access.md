@@ -238,7 +238,8 @@ id (`[guest-identity] unsigned_id_replaced`), and the unsigned id's server rows 
 `deleteAccount(env, id)` (unchanged owner-keyed sweep); then `deleteIdentity(env, id, email)`:
 `DELETE FROM identity_users WHERE id = ?` (cascades sessions and accounts) and
 `DELETE FROM identity_verifications WHERE identifier LIKE ?` for the address's pending codes, in one `batch`. Then the
-goodbye email in `waitUntil`. The response clears the session cookie (`Set-Cookie` with `Max-Age=0`).
+goodbye email (`accountDeletedEmail`) in `waitUntil`, best-effort, to the address `deleteIdentity` read from the account
+row before deleting it (none when there was no account, so a repeat delete sends nothing). The response clears the session cookie (`Set-Cookie` with `Max-Age=0`).
 
 In the browser (`DeleteAccountDialog`): the typed email must match; `deleteAccount()` fetches a fresh session token
 (`skipCache`) and calls `apiDeleteAccount()`. On `not-fresh` the dialog sends a sign-in code to the account's email
@@ -457,7 +458,7 @@ Never logged: tokens, codes, emails, names, IPs.
 | Migration (signature, account-shaped source, idempotent, end to end)                   | `routes/migrate.test.ts`, `index.auth.test.ts`                                                                                |
 | Freshness on delete, unlink, link                                                      | `index.auth.test.ts`, `routes/auth.test.ts`                                                                                   |
 | Deleted account refused on administration                                              | `auth/account-gate.test.ts`                                                                                                   |
-| Deletion removes data then identity                                                    | `db/account.test.ts` (seeded identity rows), `index.auth.test.ts`                                                             |
+| Deletion removes data then identity, then says goodbye once                            | `db/account.test.ts` (seeded identity rows), `index.auth.test.ts`                                                             |
 | Code send failure surfaces                                                             | `email/transport.test.ts`, `routes/auth.test.ts`                                                                              |
 | Hooks: SignedUp once, SignedIn not on sign-up; no IP stored                            | `auth/identity-hooks.test.ts`                                                                                                 |
 | Telemetry off                                                                          | `auth/identity.test.ts` asserts `telemetry.enabled === false`                                                                 |

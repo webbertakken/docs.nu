@@ -21,12 +21,13 @@ export async function deleteOldOutboxMail(env: Env, cutoff: number): Promise<num
 }
 
 // The account itself: its row, and with it (ON DELETE CASCADE) every session and sign-in method, plus any code
-// still pending for its address. Runs after the owner-keyed data is gone (spec "Deleting an account").
-export async function deleteIdentity(env: Env, accountId: string): Promise<boolean> {
+// still pending for its address. Runs after the owner-keyed data is gone (spec "Deleting an account"). Answers the
+// address the account had, read before the row goes (the goodbye email's recipient), or null when there was no account.
+export async function deleteIdentity(env: Env, accountId: string): Promise<string | null> {
   const row = await env.DB.prepare('SELECT email FROM identity_users WHERE id = ?')
     .bind(accountId)
     .first<{ email: string }>();
-  if (!row) return false;
+  if (!row) return null;
   await env.DB.batch([
     env.DB.prepare('DELETE FROM identity_verifications WHERE identifier = ?').bind(
       `sign-in-otp-${row.email}`,
@@ -34,7 +35,7 @@ export async function deleteIdentity(env: Env, accountId: string): Promise<boole
     env.DB.prepare('DELETE FROM identity_users WHERE id = ?').bind(accountId),
   ]);
   console.info('[auth] account_deleted');
-  return true;
+  return row.email;
 }
 
 // Whether an account still exists: a session token outlives its account by up to 15 minutes, and an
