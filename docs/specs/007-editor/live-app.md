@@ -14,7 +14,7 @@ A guest can open `/new`, create a document, and use the full canvas without an a
 
 - `/new` — welcome / template-picker flow for creating a new document (the app's entry point). See [New document route](new-document-route.md).
 - `/document/<id>` — the editor itself, scoped to one document id. Static-exports a single `/document/placeholder` page; the live worker rewrites all `/document/<id>` paths to it at the edge, and the client reads the real id from the path.
-- `/explorer/*`, `/sign-in`, `/get-started`, `/sso-callback`, `/embed` — the library, auth, and read-only embed surfaces.
+- `/explorer/*`, `/sign-in`, `/get-started`, `/embed` — the library, auth, and read-only embed surfaces.
 - `/form/<code>` — a published form's page ([Forms](../030-forms/forms.md#filling-in-a-form)): one placeholder page
   backs every code (the live worker rewrites `/form/<code>` to `/form/placeholder`, as it does `/document/<id>`), with
   none of the editor's chrome or code.
@@ -104,7 +104,7 @@ To cut down on two people fighting over the same element, an element another par
 The live app is the product, not a content surface. Every page the live app serves is one of:
 
 - A signed-in workspace (`/explorer`, `/document/[id]`) carrying private user data that must not appear in search results.
-- An auth flow (`/sign-in`, `/get-started`, `/sso-callback`) that's worthless to crawlers and pointless to index.
+- An auth flow (`/sign-in`, `/get-started`) that's worthless to crawlers and pointless to index.
 - The new-document welcome flow (`/new`) that needs the user's runtime identity to mean anything.
 
 `apps/live/app/layout.tsx` declares `robots: { index: false, follow: false }` in the root metadata so every live-app route inherits the directive. Cascades correctly through the static-export pages: each rendered HTML head carries `<meta name="robots" content="noindex,nofollow">`.

@@ -303,8 +303,8 @@ ascending, `joins` the presence ids of hello'd sessions other than the recipient
 entry's, `self` when the recipient's `personTag` equals it (both non-null), `person` numbered by first appearance
 in the frame. A frame with no live entries carries `agents: []`.
 
-Upgrade: the ticket mint stores `personTagFor(documentId, ctx.resolveOwner())` when a verified account
-(`ctx.verifiedUserId`) mints it, else null (PR2). The upgrade sets `X-Verified-Person` on every path, empty when
+Upgrade: the ticket mint stores `personTagFor(documentId, personId)` when a verified person mints it
+(`personId = ctx.sessionAccountId ?? ctx.workbench?.ownerId`), else null (PR2). The upgrade sets `X-Verified-Person` on every path, empty when
 none, and the room pins it on the session attachment as `personTag`.
 
 ### Editor

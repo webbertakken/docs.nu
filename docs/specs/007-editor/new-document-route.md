@@ -584,8 +584,7 @@ document"**; everything else stays put.
 - **Reduced motion:** the drawing sits finished, the cursor, pulses, glows
   and bar are still.
 - `DiagramBuildAnimation` stays a bare illustration (no surface of its own),
-  so the sso-callback and OAuth consent cards keep composing it inside their
-  own card.
+  so whoever shows it composes it inside their own card.
 - **The family:** a loading Sheet shows its sibling `SheetBuildAnimation`
   ([Sheet](../029-sheets/sheet.md#the-sheet-element), "Loading"), the same
   cursor, timing and colours typing data into a small table, with the same
