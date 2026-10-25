@@ -86,7 +86,7 @@ describe('the shared gate still guards this route', () => {
   });
 
   it('401 on the guest path when the deployment is session-only', async () => {
-    const res = await handleAiReadNotes(makeCtx({ env: { AI_REQUIRE_CLERK: 'true' } }));
+    const res = await handleAiReadNotes(makeCtx({ env: { AI_REQUIRE_ACCOUNT: 'true' } }));
     expect(res.status).toBe(401);
   });
 

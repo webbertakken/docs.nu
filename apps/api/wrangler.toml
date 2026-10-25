@@ -35,7 +35,7 @@ globs = ["**/*.ttf", "**/*.otf"]
 # Scope of the protection, honestly: this stops a third-party WEB PAGE spending
 # the key, because a browser sets Origin and cannot forge it. It does NOT stop a
 # non-browser caller, which can send any Origin it likes. Bounding the budget
-# against that needs AI_REQUIRE_CLERK (deliberately NOT set here: the editor
+# against that needs AI_REQUIRE_ACCOUNT (deliberately NOT set here: the editor
 # offers AI to guests and /api/capabilities reports `aiEnabled` from the key's
 # presence alone, so requiring sign-in would leave guests a visible panel that
 # 401s — see the note in src/routes/capabilities.ts). AI_RATE_LIMITER (20/60s
