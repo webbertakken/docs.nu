@@ -48,7 +48,7 @@ export function EditorStartPanels() {
     pendingDraw,
     activeTab,
     isReadOnly,
-    clerkUserId,
+    accountId,
     tabs,
     loadAllTabs,
     deleteTab,
@@ -74,7 +74,7 @@ export function EditorStartPanels() {
     ownerId: ctx.selfParticipant.id,
     documentId: ctx.documentId,
     tabId: activeTab.id,
-    signedIn: !!clerkUserId,
+    signedIn: !!accountId,
     tabHasContent: activeTab.elements.length > 0,
   });
   const templateStart = templateStartMode({

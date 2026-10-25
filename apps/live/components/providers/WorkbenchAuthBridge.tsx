@@ -35,13 +35,10 @@ export function WorkbenchAuthBridge({
     () => ({
       authLoaded: true,
       isSignedIn: true,
-      userId: person.id,
+      accountId: person.id,
       user: {
         id: person.id,
-        firstName: person.name,
-        lastName: null,
-        fullName: person.name,
-        username: null,
+        name: person.name,
         email: null,
         createdAt: null,
         pictureUrl: person.pictureUrl,

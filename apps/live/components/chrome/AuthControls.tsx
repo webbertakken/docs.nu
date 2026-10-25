@@ -5,20 +5,12 @@
 //   - signed out → "Sign in" link to /live/sign-in/
 //   - signed in  → account avatar (profile picture or initial) + dropdown with "Profile" + "Sign out"
 //
-// Mounted in EditorHeader (and any future header chrome that wants
-// auth controls). Pure presentational — Clerk's `useUser` / `useAuth`
-// hooks read from the same context the ClerkProvider in
-// app/layout.tsx supplies, so this works anywhere under the provider.
+// Mounted in EditorHeader (and any future header chrome that wants auth controls). Reads the session from the
+// auth bridge's context (components/providers/AuthBridge.tsx), so it works anywhere under it.
 //
-// While Clerk is still loading (first paint, before
-// useAuth().isLoaded) we render nothing so the header doesn't flicker
-// a "Sign in" link only to swap it for the user pill a tick later.
-//
-// When Clerk is disabled for the deployment (no publishable key set —
-// docs/specs/002-project-scope/open-source-and-business-model.md self-host path), the component is a no-op. Same module-load
-// hook-swap pattern as `useClerkApiBootstrap` — calling `useAuth`
-// outside a ClerkProvider would throw, so the disabled branch never
-// touches Clerk.
+// While the session is still being read we render nothing, so the header doesn't flicker a "Sign in" link only to
+// swap it for the account pill a tick later. On a host without sign-in (a self-host with no keys,
+// docs/specs/002-project-scope/open-source-and-business-model.md) it renders nothing at all.
 
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
 import Link from 'next/link';
@@ -31,7 +23,7 @@ import {
   useMenuButton,
   PictureDisc,
 } from '@livediagram/ui';
-import { sessionsEnabled } from '@/lib/clerk-config';
+import { useSignInAvailable } from '@/lib/auth-config';
 import { track } from '@/lib/telemetry';
 import { useAuthHrefs } from '@/components/chrome/auth-shared';
 import { accountInitial } from '@/lib/account-avatar';
@@ -87,14 +79,14 @@ function AuthControlsEnabled({ onOpenAccount }: AuthControlsProps) {
     );
   }
 
-  const displayName = user?.fullName ?? user?.username ?? user?.email ?? '';
-  // Pill label: first name only (or the username fallback). Last
+  const displayName = user?.name ?? user?.email ?? '';
+  // Pill label: the name's first word only. Last
   // names get truncated in account UIs because most users don't
   // need the full identity on screen — the avatar dot + first name
   // is the recognisable "this is me" combo. Truncate at 16 chars
   // so a very long first name doesn't push the chevron off-pill.
   const pillLabel = (() => {
-    const raw = user?.firstName ?? user?.username ?? '';
+    const raw = user?.name?.split(/\s+/)[0] ?? '';
     if (!raw) return null;
     return raw.length > 16 ? `${raw.slice(0, 15)}…` : raw;
   })();
@@ -211,12 +203,6 @@ function AccountMenu({
   );
 }
 
-function AuthControlsDisabled(_props: AuthControlsProps) {
-  // Clerk not configured — sign-in is not part of this deployment.
-  // Render nothing so the header just shows the Share button.
-  return null;
-}
-
 // Door-with-arrow glyph — same 13px / 1.6 stroke convention as the
 // other header icons (ShareIcon in EditorHeader, etc.) so the
 // Sign-in pill reads as a peer of those buttons. Exported because the
@@ -232,4 +218,7 @@ export function SignInIcon({ size = 13 }: { size?: number } = {}) {
   );
 }
 
-export const AuthControls = sessionsEnabled ? AuthControlsEnabled : AuthControlsDisabled;
+export function AuthControls(props: AuthControlsProps) {
+  // No sign-in on this host: the header just shows its other actions.
+  return useSignInAvailable() ? <AuthControlsEnabled {...props} /> : null;
+}

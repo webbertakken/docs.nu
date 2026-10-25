@@ -6,21 +6,19 @@ import type { WorkbenchPairingRequestView } from '@livediagram/api-schema';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const env = vi.hoisted(() => ({
-  clerk: true,
+  signIn: true,
   authLoaded: true,
   signedIn: true,
   query: 'code=AAAAAAAAAAAAAAAAAAAAAA',
 }));
-vi.mock('@/lib/clerk-config', () => ({
-  get sessionsEnabled() {
-    return env.clerk;
-  },
+vi.mock('@/lib/auth-config', () => ({
+  useSignInAvailable: () => env.signIn,
 }));
-vi.mock('@/hooks/persistence/useClerkApiBootstrap', () => ({
-  useClerkApiBootstrap: () => ({
+vi.mock('@/hooks/persistence/useAccountApiBootstrap', () => ({
+  useAccountApiBootstrap: () => ({
     authLoaded: env.authLoaded,
     isSignedIn: env.signedIn,
-    clerkUserId: env.signedIn ? 'user_1' : null,
+    accountId: env.signedIn ? 'user_1' : null,
   }),
 }));
 vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams(env.query) }));
@@ -64,7 +62,7 @@ afterEach(() => {
   cleanup();
   vi.clearAllMocks();
   vi.restoreAllMocks();
-  Object.assign(env, { clerk: true, authLoaded: true, signedIn: true, query: `code=${CODE}` });
+  Object.assign(env, { signIn: true, authLoaded: true, signedIn: true, query: `code=${CODE}` });
 });
 
 describe('the pairing route', () => {
@@ -79,7 +77,7 @@ describe('the pairing route', () => {
 
 describe('PairWorkbench', () => {
   it('says pairing is not available when accounts are off', () => {
-    env.clerk = false;
+    env.signIn = false;
     render(<PairWorkbench />);
     expect(heading().textContent).toBe('Workbenches aren’t available');
     expect(

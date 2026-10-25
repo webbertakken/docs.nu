@@ -76,7 +76,7 @@ describe('connectRoom reconnect cursor', () => {
     );
     const first = FakeSocket.all[0]!;
     first.fire('open');
-    const picture = 'https://img.clerk.com/me';
+    const picture = 'https://lh3.googleusercontent.com/a/me';
     room.updateSelf({ id: 'me', name: 'Me', color: '#000', picture });
     expect(first.sent.at(-1)).toEqual({
       kind: 'identity',

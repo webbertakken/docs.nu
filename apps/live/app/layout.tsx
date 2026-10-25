@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import { ClerkProvider } from '@/components/providers/ClerkProvider';
+import { AuthBridge } from '@/components/providers/AuthBridge';
 import { ErrorTelemetryBoot } from '@/components/providers/ErrorTelemetryBoot';
 import { PageViewBoot } from '@/components/providers/PageViewBoot';
 import { TimingTelemetryBoot } from '@/components/providers/TimingTelemetryBoot';
@@ -38,12 +38,11 @@ import './globals.css';
 // `noindex, nofollow` at the root layout cascades through every
 // nested page in the static export. See docs/specs/007-editor/live-app.md "SEO and indexing".
 // Trusted Types before anything else (docs/specs/016-platform/trusted-types.md): the default policy and the
-// violation log, this app's own scripts under its asset prefix, the Clerk origin read from this build's key, and
+// violation log, this app's own scripts under its asset prefix, and
 // Google's script origins where this build offers the Drive mirror (Next inlines only the literal expression).
 const TRUSTED_TYPES_BOOT = trustedTypesBootScript(
   '/live',
   trustedScriptOrigins({
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   }),
 );
@@ -101,15 +100,12 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-// ClerkProvider wraps everything so `useAuth` / `useSignIn` / `useSignUp`
-// work in every page — including the editor. Per docs/specs/014-identity/auth-and-guest-access.md this is NOT a
-// route gate: the editor stays open to guests forever. Auth is purely
-// additive (signed-in users get per-account persistence; guests keep
-// the localStorage participant id).
+// AuthBridge wraps everything so every page reads the session through one context. Per
+// docs/specs/014-identity/auth-and-guest-access.md this is NOT a route gate: the editor stays open to guests forever.
+// Auth is purely additive (an account gets per-account persistence; guests keep the localStorage participant id).
 //
-// The existing app/not-found.tsx → EditorPage mechanism (docs/specs/007-editor/new-document-route.md, fixes
-// the static-export dynamic-segment 404) is unaffected by the provider
-// — ClerkProvider doesn't touch the route tree.
+// The existing app/not-found.tsx → EditorPage mechanism (docs/specs/007-editor/new-document-route.md, fixes the
+// static-export dynamic-segment 404) is unaffected: the bridge doesn't touch the route tree.
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning: the pre-paint inline scripts below add the
@@ -168,7 +164,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <TimingTelemetryBoot />
         <TruthArmBoot />
         <KeyboardAvoidanceBoot />
-        <ClerkProvider>
+        <AuthBridge>
           <ToastProvider>
             <ConfirmProvider>
               {/* The Google Drive mirror (docs/specs/022-drive-mirror/drive-mirror.md): runs in one
@@ -176,7 +172,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <DriveMirrorProvider>{children}</DriveMirrorProvider>
             </ConfirmProvider>
           </ToastProvider>
-        </ClerkProvider>
+        </AuthBridge>
       </body>
     </html>
   );

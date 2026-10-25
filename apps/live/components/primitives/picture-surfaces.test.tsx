@@ -10,7 +10,7 @@ import { RemoteCursor } from '@/components/canvas/RemoteCursor';
 
 afterEach(cleanup);
 
-const PICTURE = 'https://img.clerk.com/ann';
+const PICTURE = 'https://lh3.googleusercontent.com/a/ann';
 
 describe('ParticipantAvatar', () => {
   it('lays the picture over the initials and stays named', () => {
@@ -26,9 +26,7 @@ describe('ParticipantAvatar', () => {
       />,
     );
     expect(view.getByRole('img', { name: 'Ann Lee (Online)' })).toBeTruthy();
-    expect(view.container.querySelector('img')?.getAttribute('src')).toBe(
-      `${PICTURE}?width=96&height=96`,
-    );
+    expect(view.container.querySelector('img')?.getAttribute('src')).toBe(`${PICTURE}=s96-c`);
   });
 
   it('draws initials alone without a picture', () => {

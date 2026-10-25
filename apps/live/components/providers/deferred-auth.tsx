@@ -1,71 +1,58 @@
 'use client';
 
-// The auth surface the app tree consumes INSTEAD of Clerk's hooks, so
-// `@clerk/react` (~96 kB min / ~25 kB gz) stays out of every route's
-// first load and out of the bundle entirely for embeds and Clerk-less
-// self-hosts (docs/specs/002-project-scope/open-source-and-business-model.md/04: Clerk is optional and purely additive). The
-// real Clerk provider mounts inside a lazily-loaded bridge
-// (ClerkBridge) that publishes this state; until that chunk lands the
-// defaults below describe exactly what Clerk-loading always looked
-// like ("not settled yet"), which every consumer already handles.
+// The auth surface the app tree consumes (docs/specs/014-identity/auth-and-guest-access.md). AuthBridge reads the
+// session and publishes this state; every page, the account menu and the settings read it here, never the session
+// layer itself, so the tree stays free of any sign-in library and the workbench route can hold it unsettled.
 //
-// The auth PAGES (/sign-in, /get-started, /sso-callback) don't use
-// this — Clerk IS the page there, so they import it statically via
-// their own page-level provider (StaticClerkProvider).
+// Until the bridge has read the session the defaults below say "not settled yet", which every consumer handles: a
+// guest-only host settles to a guest as soon as `/api/auth/get-session` answers 404.
 
 import { createContext, useContext } from 'react';
-import { clerkEnabled, clerkPublishableKey, e2eAuthEnabled } from '@/lib/clerk-config';
+import type { DeleteAccountOutcome } from '@/lib/api/self';
 
-// The subset of the Clerk user the app actually renders (AuthControls
-// menu, the Settings identity card, the bootstrap's display name).
-type DeferredAuthUser = {
+export type { DeleteAccountOutcome };
+
+// The account as the app renders it (the account menu, the Settings identity card, the bootstrap's display name).
+export type DeferredAuthUser = {
   id: string;
-  firstName: string | null;
-  lastName: string | null;
-  fullName: string | null;
-  username: string | null;
+  // The account's one name (Google's, or the one typed at sign-up), or null when it has none yet.
+  name: string | null;
   email: string | null;
   createdAt: Date | null;
-  // The resolved profile picture (docs/specs/014-identity/profile-picture.md), or null for the
-  // initials avatar.
+  // The resolved profile picture (docs/specs/014-identity/profile-picture.md), or null for the initials avatar.
   pictureUrl: string | null;
 };
 
 export type DeferredAuthState = {
-  // True once auth has SETTLED: Clerk's chunk + clerk-js resolved the
-  // session (or Clerk is disabled for the deployment, where there is
-  // nothing to wait for). Mirrors Clerk's `isLoaded`.
+  // True once auth has SETTLED: the session was read (signed in or not), or could not be read (offline, a guest).
   authLoaded: boolean;
   isSignedIn: boolean;
-  userId: string | null;
+  accountId: string | null;
   user: DeferredAuthUser | null;
-  // Clerk's session-token getter; resolves null when signed out /
-  // disabled. Identity is stable once published. `skipCache` mints a fresh
-  // token instead of returning the cached one.
+  // The session token getter; resolves null when signed out. Identity is stable once published. `skipCache` fetches
+  // a fresh token instead of returning the held one.
   getToken: (opts?: { skipCache?: boolean }) => Promise<string | null>;
+  // Ends the session here and in every tab, then goes to `redirectUrl` when given.
   signOut: (opts?: { redirectUrl?: string }) => Promise<void>;
-  // Reverified account self-deletion (Clerk step-up auth modal +
-  // user.delete). Null until the bridge publishes it / when disabled.
-  deleteAccount: (() => Promise<void>) | null;
-  // Step-up auth on its own, ahead of anything irreversible: resolves true once the session has a strict
-  // reverification (asking for one with Clerk's modal when it has none), false when it was cancelled or failed.
-  // Account deletion runs it BEFORE the server data goes, so a cancelled prompt deletes nothing. Absent outside
-  // Clerk.
-  confirmIdentity?: () => Promise<boolean>;
+  // Deletes the account, its data first (`DELETE /api/account`). Null when signed out.
+  deleteAccount: (() => Promise<DeleteAccountOutcome>) | null;
 };
 
-const clerkConfigured = (clerkEnabled && !!clerkPublishableKey) || e2eAuthEnabled;
-
-// With Clerk disabled the defaults ARE the final state (settled guest
-// mode); with Clerk enabled they are the "still loading" state.
+// Not settled yet: what every page sees before the bridge has read the session.
 export const DEFERRED_AUTH_DEFAULT: DeferredAuthState = {
-  authLoaded: !clerkConfigured,
+  authLoaded: false,
   isSignedIn: false,
-  userId: null,
+  accountId: null,
   user: null,
   getToken: async () => null,
   signOut: async () => {},
   deleteAccount: null,
+};
+
+// A settled guest: signed out, a guest-only host, or a session that could not be read.
+export const DEFERRED_AUTH_GUEST: DeferredAuthState = {
+  ...DEFERRED_AUTH_DEFAULT,
+  authLoaded: true,
 };
 
 // Auth held unsettled, whatever the deployment: what the workbench page's surroundings read
@@ -73,7 +60,6 @@ export const DEFERRED_AUTH_DEFAULT: DeferredAuthState = {
 // above the editor ever reads as a settled guest; the editor itself reads WorkbenchAuthBridge's state.
 export const DEFERRED_AUTH_PENDING: DeferredAuthState = {
   ...DEFERRED_AUTH_DEFAULT,
-  authLoaded: false,
 };
 
 export const DeferredAuthContext = createContext<DeferredAuthState>(DEFERRED_AUTH_DEFAULT);

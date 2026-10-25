@@ -65,7 +65,7 @@ import { EditorAnchoredPopovers } from '@/components/panels/EditorAnchoredPopove
 import { ModifierHint } from '@/components/chrome/ModifierHintBanner';
 import { loadEditorSearchPanel } from '@/lib/editor-deferred-code';
 import { EditorPhotoImport } from '@/components/chrome/EditorPhotoImport';
-import { clerkEnabled } from '@/lib/clerk-config';
+import { useSignInAvailable } from '@/lib/auth-config';
 import { useDismissibleBanner } from '@/hooks/ui/useDismissibleBanner';
 import { useIsOfflineDocument } from '@/hooks/persistence/useIsOfflineDocument';
 import { useDelayedReveal } from '@/hooks/ui/useDelayedReveal';
@@ -108,6 +108,7 @@ const SIGNIN_BANNER_DELAY_MS = 5 * 60_000;
 // threads ~150 props through this JSX. The JSX is verbatim; only its
 // scope changed from the page's locals to the destructured context.
 export function EditorView() {
+  const signInAvailable = useSignInAvailable();
   const ctx = useEditorContext();
   // Offline Mode (docs/specs/006-document/offline-mode.md): a document saved only in this browser. Drives the
   // "This Browser" header badge and hides server-only actions (Share).
@@ -141,7 +142,7 @@ export function EditorView() {
     drag,
     esBoard,
     clearTabContent,
-    clerkUserId,
+    accountId,
     closeContextMenu,
     contextMenu,
     copying,
@@ -248,7 +249,7 @@ export function EditorView() {
   // doesn't restart the countdown; it only hides the card at render.
   const { dismissed: signInDismissed, dismiss: dismissSignIn } =
     useDismissibleBanner(SIGNIN_BANNER_DISMISS_KEY);
-  const signInTimerEnabled = clerkEnabled && !clerkUserId && appChrome && !signInDismissed;
+  const signInTimerEnabled = signInAvailable && !accountId && appChrome && !signInDismissed;
   const signInDelayElapsed = useDelayedReveal(SIGNIN_BANNER_DELAY_MS, signInTimerEnabled);
   const showSignInBanner = signInTimerEnabled && !zenMode && signInDelayElapsed;
   const backdrop = resolveViewBackdrop(
