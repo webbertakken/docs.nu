@@ -66,9 +66,9 @@ describe('rowToCommunityPost', () => {
 
 describe('rowAuthor', () => {
   it('is Anonymous for an anonymous post, whatever the participant row says', () => {
-    expect(rowAuthor(row({ anonymous: 1, author_picture: 'https://img.clerk.com/a.png' }))).toEqual(
-      COMMUNITY_ANONYMOUS_AUTHOR,
-    );
+    expect(
+      rowAuthor(row({ anonymous: 1, author_picture: 'https://lh3.googleusercontent.com/a.png' })),
+    ).toEqual(COMMUNITY_ANONYMOUS_AUTHOR);
   });
 
   it('falls back to a neutral author when the participant row is gone, and to a default colour', () => {

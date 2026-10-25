@@ -43,7 +43,7 @@ describe('worker §4 guest X-Owner-Id signature gate', () => {
   });
 
   it('401s an X-Owner-Id carrying an account id with no signature (signed-up Bearer-only)', async () => {
-    const res = await worker.fetch(get('/api/documents', { 'X-Owner-Id': 'user_abc' }), env());
+    const res = await worker.fetch(get('/api/documents', { 'X-Owner-Id': 'acct_abc' }), env());
     expect(res.status).toBe(401);
   });
 
@@ -83,7 +83,7 @@ describe('worker refusal of an account id in X-Owner-Id', () => {
 
   it('401s an account id presented as the guest header, with the gate disarmed', async () => {
     const res = await worker.fetch(
-      get('/api/documents', { 'X-Owner-Id': 'user_2abcDEF' }),
+      get('/api/documents', { 'X-Owner-Id': 'acct_2abcDEF' }),
       noEnforcement(),
     );
     expect(res.status).toBe(401);
@@ -93,7 +93,7 @@ describe('worker refusal of an account id in X-Owner-Id', () => {
   it('covers every owner-scoped resource, not just documents', async () => {
     for (const seg of ['folders', 'images', 'custom-themes', 'preferences', 'shared', 'timeline']) {
       const res = await worker.fetch(
-        get(`/api/${seg}`, { 'X-Owner-Id': 'user_2abcDEF' }),
+        get(`/api/${seg}`, { 'X-Owner-Id': 'acct_2abcDEF' }),
         noEnforcement(),
       );
       expect(res.status, seg).toBe(401);
@@ -104,7 +104,7 @@ describe('worker refusal of an account id in X-Owner-Id', () => {
   // harvested account id must not reach it either.
   it('refuses an account id as the guest header on the share resolver', async () => {
     const res = await worker.fetch(
-      get('/api/share/abc', { 'X-Owner-Id': 'user_2abcDEF' }),
+      get('/api/share/abc', { 'X-Owner-Id': 'acct_2abcDEF' }),
       noEnforcement(),
     );
     expect(res.status).toBe(401);
@@ -137,7 +137,7 @@ describe('worker refusal of an account id in X-Owner-Id', () => {
     // account id never arrives as a header and must not be penalised for
     // being one.
     resolveApiTokenMock.mockResolvedValue({
-      ownerId: 'user_2abcDEF',
+      ownerId: 'acct_2abcDEF',
       tokenId: 'tok-1',
       readOnly: false,
     });

@@ -16,7 +16,7 @@ vi.mock('./context', async (orig) => ({
 
 import { handleCommentPicturesRoute } from './comment-pictures-routes';
 
-const ANN = 'https://img.clerk.com/ann';
+const ANN = 'https://lh3.googleusercontent.com/ann';
 const comment = (id: string, authorId?: string) => ({
   id,
   text: 't',

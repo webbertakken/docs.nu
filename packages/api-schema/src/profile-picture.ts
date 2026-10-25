@@ -1,11 +1,11 @@
 // A profile picture URL as it may cross to other people (docs/specs/014-identity/profile-picture.md
-// §2, §6): https on Clerk's image host, short enough for a room session attachment. Shared by the
+// §2, §6): https on Google's picture host, short enough for a room session attachment. Shared by the
 // api (participant record, realtime room) and the editor (what it draws), so both apply one rule.
 
-/** Clerk's image host: the one its image optimization and CSP guides name. */
-export const PROFILE_PICTURE_HOST = 'img.clerk.com';
+/** Google's picture host: where a Google sign-in's picture (better-auth's `user.image`) lives. */
+export const PROFILE_PICTURE_HOST = 'lh3.googleusercontent.com';
 
-/** Observed Clerk proxy URLs stay under 350 characters; the cap bounds the room attachment. */
+/** Google picture URLs stay well under 200 characters; the cap bounds the room attachment. */
 export const MAX_PICTURE_URL_LEN = 512;
 
 export function isProfilePictureUrl(url: unknown): url is string {

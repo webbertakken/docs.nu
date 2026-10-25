@@ -2341,7 +2341,8 @@ describe('DocumentRoom tab-scoped sessions', () => {
 // Profile pictures on the roster (docs/specs/014-identity/profile-picture.md §5, §6): kept only
 // from a verified account session, sent only to account sessions, updated by a repeat hello.
 describe('DocumentRoom profile pictures', () => {
-  const PICTURE = 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
+  const PICTURE =
+    'https://lh3.googleusercontent.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
   const hello = (picture?: string) => ({
     kind: 'hello',
     participant: { id: 'x', name: 'Ann', color: '#f00', ...(picture ? { picture } : {}) },
@@ -2366,7 +2367,7 @@ describe('DocumentRoom profile pictures', () => {
     expect(storedPresence(anonymous)?.picture).toBeUndefined();
   });
 
-  it("drops a picture that is not on Clerk's image host", () => {
+  it('drops a picture that is not on the picture host', () => {
     vi.spyOn(console, 'info').mockImplementation(() => {});
     const { room } = newRoom();
     const ws = makeSocket();
@@ -2388,7 +2389,7 @@ describe('DocumentRoom profile pictures', () => {
     sendFrame(room, visitor, hello());
     expect(lastRoster(bob).find((p) => p.name === 'Ann' && p.picture)?.picture).toBe(PICTURE);
     expect(lastRoster(visitor).some((p) => 'picture' in p)).toBe(false);
-    expect(visitor.sent.join('\n')).not.toContain('img.clerk.com');
+    expect(visitor.sent.join('\n')).not.toContain('lh3.googleusercontent.com');
   });
 
   it('an identity update replaces the picture and rebroadcasts, without re-running the join', () => {

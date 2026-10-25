@@ -7,7 +7,8 @@ import { getParticipant, setParticipantPicture, upsertParticipant } from './part
 import { listTeamMembers } from './teams';
 import { consumeWsTicket, createWsTicket } from './ws-tickets';
 
-const PICTURE = 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
+const PICTURE =
+  'https://lh3.googleusercontent.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
 
 describe('participant pictures', () => {
   it('stores, clears and survives a name save', async () => {
