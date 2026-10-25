@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { communityPostFixture } from '@livediagram/api-schema/testing';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   CommunityMinePost,
@@ -16,7 +16,7 @@ import type { CommunitySession } from '@/lib/session';
 
 const h = vi.hoisted(() => ({
   session: null as CommunitySession | null,
-  emit: null as ((s: CommunitySession) => void) | null,
+  accountChanged: null as (() => void) | null,
   telemetry: { selected: vi.fn(), searched: vi.fn() },
 }));
 
@@ -28,18 +28,19 @@ vi.mock('next/link', () => ({
   ),
 }));
 vi.mock('@/lib/telemetry', () => ({ communityTelemetry: h.telemetry }));
+// The session read answers whatever the test set (null: the api never answers).
 vi.mock('@/lib/session', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/session')>()),
-  signInAvailable: true,
+  mineMayBeOffered: () => true,
+  loadCommunitySession: async () => h.session,
 }));
-// Clerk itself is not loaded in tests: the lazy session reports whatever the test set.
-vi.mock('../auth/LazyClerkSession', () => ({
-  LazyClerkSession: ({ onSession }: { onSession: (s: CommunitySession) => void }) => {
-    useEffect(() => {
-      h.emit = onSession;
-      if (h.session) onSession(h.session);
-    }, [onSession]);
-    return null;
+vi.mock('@livediagram/account-session', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@livediagram/account-session')>()),
+  onAccountChange: (listener: () => void) => {
+    h.accountChanged = listener;
+    return () => {
+      if (h.accountChanged === listener) h.accountChanged = null;
+    };
   },
 }));
 
@@ -291,7 +292,13 @@ describe('My Shares', () => {
   const totals: CommunityMineTotals = { posts: 2, likes: 7, copies: 3 };
 
   it("lists the author's own posts with their totals, marking a hidden one and opening it in the editor", async () => {
-    h.session = { loaded: true, signedIn: true, userId: 'user_a', getToken: async () => 'token-1' };
+    h.session = {
+      loaded: true,
+      signedIn: true,
+      accountId: 'acct_a',
+      signInAvailable: true,
+      getToken: async () => 'token-1',
+    };
     window.history.replaceState(null, '', '/?q=is%3Amine');
     route(isMine, () =>
       Response.json({
@@ -327,7 +334,13 @@ describe('My Shares', () => {
   });
 
   it("never shows one account's shares to another", async () => {
-    h.session = { loaded: true, signedIn: true, userId: 'user_a', getToken: async () => 'token-a' };
+    h.session = {
+      loaded: true,
+      signedIn: true,
+      accountId: 'acct_a',
+      signInAvailable: true,
+      getToken: async () => 'token-a',
+    };
     window.history.replaceState(null, '', '/?q=is%3Amine');
     route(isMine, (_url, init) =>
       Response.json({
@@ -345,14 +358,19 @@ describe('My Shares', () => {
     );
     render(<GalleryView />);
     expect(await screen.findByText('A post')).toBeTruthy();
-    act(() =>
-      h.emit!({ loaded: true, signedIn: true, userId: 'user_b', getToken: async () => 'token-b' }),
-    );
+    h.session = {
+      loaded: true,
+      signedIn: true,
+      signInAvailable: true,
+      accountId: 'acct_b',
+      getToken: async () => 'token-b',
+    };
+    act(() => h.accountChanged!());
     expect(await screen.findByText('B post')).toBeTruthy();
     expect(screen.queryByText('A post')).toBeNull();
   });
 
-  it('gives up, with Try Again, when sign-in never loads', async () => {
+  it('gives up, with Try Again, when the session never loads', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     h.session = null;
     window.history.replaceState(null, '', '/?q=is%3Amine');
@@ -380,7 +398,13 @@ describe('My Shares', () => {
   });
 
   it('asks a signed-out visitor to sign in, coming back to the same view', async () => {
-    h.session = { loaded: true, signedIn: false, userId: null, getToken: async () => null };
+    h.session = {
+      loaded: true,
+      signedIn: false,
+      accountId: null,
+      signInAvailable: true,
+      getToken: async () => null,
+    };
     window.history.replaceState(null, '', '/?q=is%3Amine');
     render(<GalleryView />);
     expect(await screen.findByText('Sign in to see your shares.')).toBeTruthy();
@@ -391,7 +415,13 @@ describe('My Shares', () => {
   });
 
   it('says so when you have shared nothing yet', async () => {
-    h.session = { loaded: true, signedIn: true, userId: 'user_a', getToken: async () => 'token-1' };
+    h.session = {
+      loaded: true,
+      signedIn: true,
+      accountId: 'acct_a',
+      signInAvailable: true,
+      getToken: async () => 'token-1',
+    };
     window.history.replaceState(null, '', '/?q=is%3Amine');
     route(isMine, () =>
       Response.json({ posts: [], nextOffset: null, totals: { posts: 0, likes: 0, copies: 0 } }),
@@ -402,7 +432,13 @@ describe('My Shares', () => {
   });
 
   it('turns on from the search box, counted as a choice', async () => {
-    h.session = { loaded: true, signedIn: true, userId: 'user_a', getToken: async () => 'token-1' };
+    h.session = {
+      loaded: true,
+      signedIn: true,
+      accountId: 'acct_a',
+      signInAvailable: true,
+      getToken: async () => 'token-1',
+    };
     route(isPosts, () => Response.json({ posts: [post()], nextOffset: null }));
     route(isMine, () =>
       Response.json({ posts: [], nextOffset: null, totals: { posts: 0, likes: 0, copies: 0 } }),

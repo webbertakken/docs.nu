@@ -1,10 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { onAccountChange } from '@livediagram/account-session';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { hasActiveFilters } from '@/lib/query-state';
-import { SESSION_LOAD_TIMEOUT_MS, signInAvailable, type CommunitySession } from '@/lib/session';
+import {
+  loadCommunitySession,
+  mineMayBeOffered,
+  SESSION_LOAD_TIMEOUT_MS,
+  type CommunitySession,
+} from '@/lib/session';
 import { communityTelemetry } from '@/lib/telemetry';
-import { LazyClerkSession } from '../auth/LazyClerkSession';
 import { PostGrid } from '../shared/PostGrid';
 import {
   GalleryEmpty,
@@ -28,13 +33,44 @@ const SKELETON_MORE = 4;
 // The gallery's top row at its widest (4 columns), whose images load at once: the first thing seen.
 const GALLERY_PRIORITY_CARDS = 4;
 
+const noSubscription = () => () => {};
+// The static page offers no My Shares; the browser decides at hydration.
+const mineNotOfferedOnServer = () => false;
+
 export function GalleryView() {
-  // Who is signed in, known only once My Shares has loaded Clerk.
+  // Who is signed in, known only once My Shares has read the session.
   const [session, setSession] = useState<CommunitySession | null>(null);
   const gallery = useGallery(session);
   const { filters, facets, status, posts, setFilters, mine } = gallery;
-  // My Shares waiting on a Clerk that never answers (a blocked script, a network failure) says so rather than
-  // showing placeholders forever; Try Again reloads the page, which loads Clerk afresh.
+  const mineOffered = useSyncExternalStore(
+    noSubscription,
+    mineMayBeOffered,
+    mineNotOfferedOnServer,
+  );
+  // Known once read: a host without sign-in has no My Shares.
+  const signInAvailable = session ? session.signInAvailable : mineOffered;
+  // My Shares reads the session once it is chosen.
+  useEffect(() => {
+    if (!mine || session) return;
+    let live = true;
+    void loadCommunitySession().then((read) => {
+      if (live && read) setSession(read);
+    });
+    return () => {
+      live = false;
+    };
+  }, [mine, session]);
+  // Another tab signed in, out or as someone else: read again, so one account's shares never show for another.
+  useEffect(() => {
+    if (!mine) return;
+    return onAccountChange(() => {
+      void loadCommunitySession().then((read) => {
+        if (read) setSession(read);
+      });
+    });
+  }, [mine]);
+  // My Shares waiting on a session read that never answers (a network failure) says so rather than showing
+  // placeholders forever; Try Again reloads the page, which reads it afresh.
   const waitingForSession = mine && signInAvailable && session?.loaded !== true;
   const [sessionTimedOut, setSessionTimedOut] = useState(false);
   // Each wait gets its own 10 seconds: once My Shares stops waiting (sign-in arrived, or My Shares was turned off),
@@ -70,10 +106,9 @@ export function GalleryView() {
           onTagChosen={onTagChosen}
           onSortChosen={onSortChosen}
           onCategoryChosen={onCategoryChosen}
-          mineAvailable={signInAvailable}
+          mineAvailable={mineOffered}
           onMineChosen={onMineChosen}
         />
-        {mine && signInAvailable ? <LazyClerkSession onSession={setSession} /> : null}
       </div>
 
       <section aria-label={mine ? 'My Shares' : 'Documents'}>
