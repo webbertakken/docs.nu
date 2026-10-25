@@ -132,7 +132,10 @@ export function AuthBridge({ children }: { children: ReactNode }) {
         // A fresh token first: after verifying again, the held one still carries the old sign-in time.
         await tokens.getToken({ skipCache: true });
         const outcome = await apiDeleteAccount();
-        if (outcome === 'deleted') await forget();
+        if (outcome === 'deleted') {
+          await forget();
+          settle({ status: 'signed-out' });
+        }
         return outcome;
       },
     };
