@@ -1,9 +1,9 @@
 # Auth + guest access
 
-**Status: specified, not built.** Sign-in is **better-auth**, run inside LiveDoc's own api worker with its identity
-data in LiveDoc's own D1. It replaces Clerk, which the code still carries until the change lands; docs.nu runs
-guest-only meanwhile (no Clerk keys, `authEnabled: false`), so no account moves from Clerk. How it is built:
-[the blueprint](blueprints/auth-and-guest-access.md).
+**Status: built; docs.nu runs guest-only until its sign-in secret is set.** Sign-in is **better-auth**, run inside
+LiveDoc's own api worker with its identity data in LiveDoc's own D1. It replaced Clerk, which no account moves from:
+docs.nu never had Clerk accounts. Not built yet: Settings > Account's editable name, sign-in
+methods and sessions lists. How it is built: [the blueprint](blueprints/auth-and-guest-access.md).
 
 ## Principle
 
@@ -74,8 +74,7 @@ An email code is only as good as its delivery, so sign-in email is not best-effo
   reaches a preview host, and a preview's never reaches `docs.nu`.
 - **How the rest of the api knows the caller**. The browser
   asks `/api/auth/token` for a **session token**, a 15-minute EdDSA JWT whose `sub` is the account id and which
-  carries the account's email and whether it is verified, and sends it as `Authorization: Bearer` where the
-  Clerk token rode. The api verifies it against its own keys, in-process, with no network call. A request that
+  carries the account's email and whether it is verified, and sends it as `Authorization: Bearer`. The api verifies it against its own keys, in-process, with no network call. A request that
   carries no cookie cannot be forged from another site, so the api's own routes need no CSRF defence of their own.
 - **Lifetime.** A session lasts 30 days and slides forward at most once a day while used. Signing out ends it at once
   everywhere the api reads it; an issued session token keeps working until its own 15 minutes run out.
@@ -180,7 +179,7 @@ the marketing site's "No Catch" night section:
 - **Phone first.** Below `lg` the card comes first and the pitch follows it, stacked, compact and full width with a
   16px gutter; at `lg` and up the pitch takes the left column and the card the right. The card is first in the DOM at
   every width, so the form is what a screen reader and the Tab key reach first.
-- **Interstitials** (the redirecting card, `/sso-callback`) use the same frame with no pitch, the card centred, so a
+- **Interstitials** (the redirecting card) use the same frame with no pitch, the card centred, so a
   hand-off between pages never flashes a different ground.
 
 Signed-in status surfaces in the editor header via `<AuthControls>` (initial bubble + Sign out menu). Signed-out users see a "Sign in" link in the same slot. Neither blocks the editor: they're purely informational.
@@ -240,11 +239,14 @@ A guest id is a bearer value that **leaks**: it rides in document DTOs and realt
 - **Server-minted.** `POST /api/guest-id` generates the id and returns it with its HMAC signature. Because the server
   chooses the id, a caller only ever holds a signature for an id it was handed. The signature is kept in
   `localStorage` and never appears in a DTO or a presence frame.
-- **One secret.** With sign-in on, the signing key is derived from `BETTER_AUTH_SECRET` (HKDF, purpose
-  `livedoc-guest-id`), so turning sign-in on is one secret, not two. `GUEST_ID_HMAC_SECRET` goes away.
-- **Always enforced with sign-in on.** Owner-scoped routes refuse a guest header without a valid signature, and
+- **One secret.** The signing key is derived from the sign-in secret (HKDF, purpose `livedoc-guest-id`), so turning
+  sign-in on is one secret, not two. It derives from the oldest usable secret (`BETTER_AUTH_SECRET`, else the oldest
+  version in `BETTER_AUTH_SECRETS`), so rotating the sign-in secret never locks a guest out of their documents.
+- **Always enforced where there is a key.** Owner-scoped routes refuse a guest header without a valid signature, and
   `/api/migrate` refuses a guest id without one. There is no grace window: docs.nu has no accounts to protect from a
-  cut-over, and the guests it has were never meant to be claimable. An unsigned guest id from before sign-in stays a guest: it can never move into an account.
+  cut-over, and the guests it has were never meant to be claimable. A browser holding an unsigned guest id from before
+  is handed a fresh signed one: it can never move into an account, and the server documents of the old id stay out of
+  reach. A host with the secret but no sign-in method is guest-only, yet it signs and enforces all the same.
 - **Guest-only hosts sign nothing.** With no secret there is no account to migrate into, so an unsigned guest id is
   all a guest needs, as today.
 - **Defence in depth.** The owner's id is not returned to non-owner readers (`redactDocumentForReader`), on both doors
@@ -296,7 +298,7 @@ be deleted again. The goodbye email goes to the address the account had.
 - **API tokens** are unchanged: `lvd_` secrets, hashed, six months, per-account cap, owned by an account id, minted
   only from a session ([Public API and API tokens](../015-api/public-api-and-tokens.md)).
 - **The MCP server** keeps its own OAuth 2.1 server and its `lvd_` tokens ([MCP server](../015-api/mcp-server.md)
-  §3); its consent page in `apps/live` now trusts the LiveDoc session instead of Clerk's.
+  §3); its consent page in `apps/live` trusts the LiveDoc session.
 - **The CLI** keeps `livedoc auth login` on the MCP worker's OAuth server, which already offers loopback PKCE and the
   device grant (`--device`); better-auth's device plugin would add a second OAuth server for the same job. Its device page in `apps/live`
   likewise trusts the LiveDoc session ([CLI](../015-api/cli.md)).
@@ -317,7 +319,7 @@ be deleted again. The goodbye email goes to the address the account had.
   events (`Session·SignedUp`, `Session·SignedIn`, [Telemetry](../017-telemetry/telemetry.md)), from the server's own
   account and session creation, so every method counts once.
 - **Deleting the account deletes all of it**, sessions and sign-in methods included ([Deleting an account](#deleting-an-account)).
-- The [privacy policy](../../../apps/help/app/policies/privacy-policy/page.mdx) names LiveDoc itself, not Clerk, as
+- The [privacy policy](../../../apps/help/app/policies/privacy-policy/page.mdx) names LiveDoc itself as
   where account data is held, and the email provider as the processor that delivers codes.
 
 ## Self-hosting
@@ -367,6 +369,11 @@ settles signed in and `0` whenever it settles signed out or the person signs out
 
 - **No flag, or `0`**: a guest. The create goes ahead at once, This Browser.
 - **`1`**: probably signed in. The create waits for the session (as it always has) and then uses the settled answer.
+- **Whether the host offers sign-in at all** is the same kind of hint: the last answer this browser saw
+  (`livediagram:v2:sign-in-offered`). A host without sign-in keeps everyone on livediagram at once; only a browser
+  that has never asked waits for the session read before its first create.
+- Starting a Google sign-in writes `1` before leaving for Google, so the page the round trip lands on never hands the
+  new account a document in This Browser; a round trip that fails is the safe direction.
 - The hint only decides a default. Every request still authenticates the real way; a stale `1` (a session that
   expired elsewhere) costs one wait, and a guest whose hint misleads gets a document in This Browser, the safe
   direction.
