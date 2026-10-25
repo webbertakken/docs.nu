@@ -301,4 +301,3 @@ Markdown` (a `.md` file opened as a page), `Tab · Changed · MarkdownConverted`
   from it; that is exactly what an article does, and why this kind exists.
 - **Turning a page into a diagram.** [Markdown import](../020-import-export/markdown-import.md) still turns a markdown
   outline into a diagram on a canvas tab; it reads the text and leaves the page as it is.
-
