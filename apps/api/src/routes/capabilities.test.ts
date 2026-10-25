@@ -95,3 +95,11 @@ describe('the CLI fields (docs/specs/015-api/blueprints/cli.md "Capabilities")',
     expect(await capabilities({ CLI_MIN_VERSION: 'v1' })).not.toHaveProperty('cli');
   });
 });
+
+describe('emailOutbox (docs/specs/014-identity/auth-and-guest-access.md "Previews")', () => {
+  it('is on only where codes land in the outbox', async () => {
+    expect((await capabilities({})).emailOutbox).toBe(false);
+    expect((await capabilities({ EMAIL_OUTBOX: '0' })).emailOutbox).toBe(false);
+    expect((await capabilities({ EMAIL_OUTBOX: '1' })).emailOutbox).toBe(true);
+  });
+});

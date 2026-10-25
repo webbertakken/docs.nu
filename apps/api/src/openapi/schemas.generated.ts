@@ -1525,6 +1525,9 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       emailEnabled: {
         type: 'boolean',
       },
+      emailOutbox: {
+        type: 'boolean',
+      },
       googleClientId: {
         type: ['string', 'null'],
       },
