@@ -1,15 +1,13 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { CommunitySession } from '@/lib/session';
+import { SIGN_IN_OFFERED_KEY } from '@livediagram/account-session';
 
 // The two pieces around the app: CommunityGate (docs/specs/025-community/community.md "Turning the Community
-// off") and the Clerk session My Shares loads ("My Shares").
+// off") and the session My Shares reads ("My Shares").
 
 const h = vi.hoisted(() => ({
   enabled: true,
-  auth: { isLoaded: true, isSignedIn: true, getToken: vi.fn() },
   replace: vi.fn(),
 }));
 
@@ -17,21 +15,13 @@ vi.mock('@livediagram/ui', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@livediagram/ui')>()),
   useCommunityEnabled: () => h.enabled,
 }));
-vi.mock('@clerk/react', () => ({
-  ClerkProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useAuth: () => h.auth,
-}));
-vi.mock('@/lib/session', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/session')>()),
-  clerkPublishableKey: 'pk_test_x',
-}));
 
-import ClerkSession from './auth/ClerkSession';
+import { loadCommunitySession, mineMayBeOffered } from '@/lib/session';
 import { CommunityGate } from './CommunityGate';
 
 beforeEach(() => {
   h.enabled = true;
-  h.auth = { isLoaded: true, isSignedIn: true, getToken: vi.fn() };
+  localStorage.clear();
   h.replace.mockReset();
   vi.spyOn(console, 'warn').mockImplementation(() => {});
   Object.defineProperty(window, 'location', {
@@ -43,6 +33,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('CommunityGate', () => {
@@ -60,34 +51,52 @@ describe('CommunityGate', () => {
   });
 });
 
-describe('ClerkSession', () => {
-  it('reports who is signed in, with their token', async () => {
-    h.auth.getToken.mockResolvedValue('token-1');
-    const onSession = vi.fn<(s: CommunitySession) => void>();
-    render(<ClerkSession onSession={onSession} />);
-    await waitFor(() => expect(onSession).toHaveBeenCalled());
-    const session = onSession.mock.calls.at(-1)![0];
-    expect(session).toMatchObject({ loaded: true, signedIn: true });
-    expect(await session.getToken()).toBe('token-1');
+function answering(answers: Record<string, { status: number; body: unknown }>) {
+  const fetchMock = vi.fn(async (url: string) => {
+    const answer = answers[url];
+    if (!answer) throw new TypeError('Failed to fetch');
+    return new Response(JSON.stringify(answer.body), { status: answer.status });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
+const USER = { id: 'acct_abcdefghijklmnopqrstuvwx', email: 'ada@example.com', name: 'Ada' };
+
+describe('the My Shares session', () => {
+  it('reads a signed-in session and hands out its token', async () => {
+    answering({
+      '/api/auth/get-session': { status: 200, body: { user: USER, session: {} } },
+      '/api/auth/token': { status: 200, body: { token: 'token-1' } },
+    });
+    const session = await loadCommunitySession();
+    expect(session).toMatchObject({
+      loaded: true,
+      signedIn: true,
+      signInAvailable: true,
+      accountId: USER.id,
+    });
+    expect(await session!.getToken()).toBe('token-1');
+    expect(localStorage.getItem(SIGN_IN_OFFERED_KEY)).toBe('1');
   });
 
-  it("retries once when Clerk's token is briefly null on a live session", async () => {
-    h.auth.getToken.mockResolvedValueOnce(null).mockResolvedValueOnce('token-2');
-    const onSession = vi.fn<(s: CommunitySession) => void>();
-    render(<ClerkSession onSession={onSession} />);
-    await waitFor(() => expect(onSession).toHaveBeenCalled());
-    expect(await onSession.mock.calls.at(-1)![0].getToken()).toBe('token-2');
-    expect(h.auth.getToken).toHaveBeenCalledTimes(2);
+  it('reads a signed-out visitor, who has no token', async () => {
+    answering({ '/api/auth/get-session': { status: 200, body: null } });
+    const session = await loadCommunitySession();
+    expect(session).toMatchObject({ loaded: true, signedIn: false, accountId: null });
+    expect(await session!.getToken()).toBeNull();
   });
 
-  it('gives no token, without retrying, when signed out', async () => {
-    h.auth = { isLoaded: true, isSignedIn: false, getToken: vi.fn().mockResolvedValue(null) };
-    const onSession = vi.fn<(s: CommunitySession) => void>();
-    render(<ClerkSession onSession={onSession} />);
-    await waitFor(() => expect(onSession).toHaveBeenCalled());
-    const session = onSession.mock.calls.at(-1)![0];
-    expect(session.signedIn).toBe(false);
-    expect(await session.getToken()).toBeNull();
-    expect(h.auth.getToken).toHaveBeenCalledTimes(1);
+  it('learns a host has no sign-in, and stops offering My Shares', async () => {
+    expect(mineMayBeOffered()).toBe(true);
+    answering({ '/api/auth/get-session': { status: 404, body: {} } });
+    expect(await loadCommunitySession()).toMatchObject({ signInAvailable: false, signedIn: false });
+    expect(mineMayBeOffered()).toBe(false);
+  });
+
+  it('answers nothing when the api cannot be asked, and says so', async () => {
+    answering({});
+    expect(await loadCommunitySession()).toBeNull();
+    expect(console.warn).toHaveBeenCalledWith('[community] session_read_failed');
   });
 });
