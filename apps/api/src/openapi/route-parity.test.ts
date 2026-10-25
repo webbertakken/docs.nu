@@ -28,6 +28,8 @@ vi.mock('../auth/session-token', () => ({
     authTime: null,
   }),
 }));
+// ...whose account exists: the live-account check reads D1, which the probe traps.
+vi.mock('../auth/account-gate', () => ({ requireAccount: async () => null }));
 
 const vocabulary = routeVocabulary();
 const show = (r: Pick<ProbeResult, 'method' | 'path'>) => `${r.method} /${r.path.join('/')}`;
