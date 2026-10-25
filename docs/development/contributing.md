@@ -98,14 +98,13 @@ pnpm --filter @livediagram/live test:e2e
 
 Without a dev stack, it boots its own (`scripts/e2e-stack.mjs`) over the existing `apps/live/out`, which it never rebuilds: run `pnpm --filter @livediagram/live build` first, or it exits naming the missing build.
 
-The signed-in specs (`apps/live/e2e/clerk-stub/`) have their own build and run, on their own ports. They still stub the earlier sign-in provider (Clerk), which the app no longer carries; they are being ported to sign in for real through the api's email outbox, under a new folder and script name:
+The signed-in specs (`apps/live/e2e/account/`) run against the usual build, on their own stack with sign-in on (`:3015`), where each one signs in for real with an email code from the stack's outbox:
 
 ```sh
-pnpm --filter @livediagram/live build:clerk-stub
-pnpm --filter @livediagram/live test:e2e:clerk-stub
+pnpm --filter @livediagram/live test:e2e:account
 ```
 
-The armed guest-signature specs (`apps/live/e2e/armed/`) run against the usual build, on their own stack with guest signature enforcement on (`:3017`):
+The armed guest-signature specs (`apps/live/e2e/armed/`) run against the usual build, on a guest-only stack of their own (`:3017`):
 
 ```sh
 pnpm --filter @livediagram/live test:e2e:armed

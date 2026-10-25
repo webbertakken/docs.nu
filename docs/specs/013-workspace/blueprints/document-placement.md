@@ -146,7 +146,7 @@ No new request on the happy path (one fewer: the follow-up PUT is gone); no layo
 | Team duplicate is one create                                    | `apps/live/lib/duplicate-document.test.ts`                            |
 | Sync refile                                                     | `apps/live/lib/offline/offline-convert.test.ts`                       |
 | OpenAPI parity                                                  | `apps/api/src/openapi/*.test.ts`                                      |
-| Signed-in /new into a team folder; the refusal card             | `apps/live/e2e/clerk-stub/create-placement.spec.ts`                   |
+| Signed-in /new into a team folder; the refusal card             | `apps/live/e2e/account/create-placement.spec.ts`                      |
 
 ## Constants and configuration
 

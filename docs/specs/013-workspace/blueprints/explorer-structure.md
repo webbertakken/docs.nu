@@ -258,7 +258,7 @@ creation).
 | Retired `/explorer/activity` reads as the Inbox      | `routes.test.ts`, `RetiredViewRedirect.test.tsx`                                                                                                                                                                                                                      |
 | Page titles follow the rows                          | `view-titles.test.ts`                                                                                                                                                                                                                                                 |
 | This Browser: space, pill, rows, search, Trash       | `document-space.test.ts`, `ThisBrowserPill.test.tsx`, `explorer-route-document-row.test.tsx`, `document-badges.test.tsx`, `search.test.ts`, `SearchPanel.test.tsx`, `TrashPane.test.tsx`, `SharedBadge.test.tsx`                                                      |
-| Real browser: groups, keyboard, drawer               | `e2e/explorer-sidebar.spec.ts` (page and editor panel), `e2e/clerk-stub/explorer-sidebar.spec.ts`                                                                                                                                                                     |
+| Real browser: groups, keyboard, drawer               | `e2e/explorer-sidebar.spec.ts` (page and editor panel), `e2e/account/explorer-sidebar.spec.ts`                                                                                                                                                                        |
 
 ## Constants and configuration
 

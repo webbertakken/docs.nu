@@ -445,33 +445,33 @@ Never logged: tokens, codes, emails, names, IPs.
 
 ## Testing
 
-| Spec rule                                                                              | Test                                                                                                         |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Modes from configuration                                                               | `auth/identity-config.test.ts` (every row of the table)                                                      |
-| No keys: `/api/auth/*` 404, capabilities off                                           | `routes/auth.test.ts`, `index.auth.test.ts`                                                                  |
-| Capabilities name the methods and the outbox                                           | `routes/capabilities.test.ts`, `index.auth.test.ts`                                                          |
-| Credential order, refusals, fall-through                                               | `index.auth.test.ts`                                                                                         |
-| Session token verify (good, expired, wrong iss/aud/alg, kid rotation, non-account sub) | `auth/session-token.test.ts` (keys minted in the test)                                                       |
-| Account id shape; refused as guest header                                              | `request-auth.test.ts`, `index.auth.test.ts`                                                                 |
-| Guest signing key derived, kept across a rotation, enforced whenever it exists         | `auth/guest-key.test.ts`, `auth/guest-rest.test.ts`, `auth/owner-signature.test.ts`                          |
-| Migration (signature, account-shaped source, idempotent, end to end)                   | `routes/migrate.test.ts`, `index.auth.test.ts`                                                               |
-| Freshness on delete, unlink, link                                                      | `index.auth.test.ts`, `routes/auth.test.ts`                                                                  |
-| Deleted account refused on administration                                              | `auth/account-gate.test.ts`                                                                                  |
-| Deletion removes data then identity                                                    | `db/account.test.ts` (seeded identity rows), `index.auth.test.ts`                                            |
-| Code send failure surfaces                                                             | `email/transport.test.ts`, `routes/auth.test.ts`                                                             |
-| Hooks: SignedUp once, SignedIn not on sign-up; no IP stored                            | `auth/identity-hooks.test.ts`                                                                                |
-| Telemetry off                                                                          | `auth/identity.test.ts` asserts `telemetry.enabled === false`                                                |
-| Schema in step with better-auth                                                        | `identity-schema.test.ts`                                                                                    |
-| Session read, token provider caching, hint, tab nudge                                  | `packages/account-session/src/*.test.ts` (100 % coverage)                                                    |
-| Bridge states, sign-out, deletion, workbench stand-down                                | `apps/live/components/providers/AuthBridge.test.tsx`, `WorkbenchAuthBridge.test.tsx`                         |
-| Sign-in availability at runtime                                                        | `apps/live/lib/auth-config.test.tsx`                                                                         |
-| Where `/new` saves before the session answers                                          | `apps/live/app/new/useNewDocumentLocation.test.tsx`, `lib/signed-in-hint.test.ts`                            |
-| One sentence per failure                                                               | `apps/live/lib/auth-errors.test.ts`                                                                          |
-| Delete with re-verification                                                            | `apps/live/components/dialogs/DeleteAccountDialog.test.tsx`, `lib/reverify.test.ts`                          |
-| Safe redirects on every path                                                           | `auth-shared.test.ts`                                                                                        |
-| My Shares session                                                                      | `apps/community/components/auth-and-gate.test.tsx`, `apps/community/components/gallery/GalleryView.test.tsx` |
-| End to end: email-code sign-up, guest migration, sign-out, delete                      | `apps/live/e2e/account/*.spec.ts` through the outbox, dark mode                                              |
-| No earlier provider left                                                               | `packages/source-ast/src/clerk-free.test.ts`                                                                 |
+| Spec rule                                                                              | Test                                                                                                                          |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Modes from configuration                                                               | `auth/identity-config.test.ts` (every row of the table)                                                                       |
+| No keys: `/api/auth/*` 404, capabilities off                                           | `routes/auth.test.ts`, `index.auth.test.ts`                                                                                   |
+| Capabilities name the methods and the outbox                                           | `routes/capabilities.test.ts`, `index.auth.test.ts`                                                                           |
+| Credential order, refusals, fall-through                                               | `index.auth.test.ts`                                                                                                          |
+| Session token verify (good, expired, wrong iss/aud/alg, kid rotation, non-account sub) | `auth/session-token.test.ts` (keys minted in the test)                                                                        |
+| Account id shape; refused as guest header                                              | `request-auth.test.ts`, `index.auth.test.ts`                                                                                  |
+| Guest signing key derived, kept across a rotation, enforced whenever it exists         | `auth/guest-key.test.ts`, `auth/guest-rest.test.ts`, `auth/owner-signature.test.ts`                                           |
+| Migration (signature, account-shaped source, idempotent, end to end)                   | `routes/migrate.test.ts`, `index.auth.test.ts`                                                                                |
+| Freshness on delete, unlink, link                                                      | `index.auth.test.ts`, `routes/auth.test.ts`                                                                                   |
+| Deleted account refused on administration                                              | `auth/account-gate.test.ts`                                                                                                   |
+| Deletion removes data then identity                                                    | `db/account.test.ts` (seeded identity rows), `index.auth.test.ts`                                                             |
+| Code send failure surfaces                                                             | `email/transport.test.ts`, `routes/auth.test.ts`                                                                              |
+| Hooks: SignedUp once, SignedIn not on sign-up; no IP stored                            | `auth/identity-hooks.test.ts`                                                                                                 |
+| Telemetry off                                                                          | `auth/identity.test.ts` asserts `telemetry.enabled === false`                                                                 |
+| Schema in step with better-auth                                                        | `identity-schema.test.ts`                                                                                                     |
+| Session read, token provider caching, hint, tab nudge                                  | `packages/account-session/src/*.test.ts` (100 % coverage)                                                                     |
+| Bridge states, sign-out, deletion, workbench stand-down                                | `apps/live/components/providers/AuthBridge.test.tsx`, `WorkbenchAuthBridge.test.tsx`                                          |
+| Sign-in availability at runtime                                                        | `apps/live/lib/auth-config.test.tsx`                                                                                          |
+| Where `/new` saves before the session answers                                          | `apps/live/app/new/useNewDocumentLocation.test.tsx`, `lib/signed-in-hint.test.ts`                                             |
+| One sentence per failure                                                               | `apps/live/lib/auth-errors.test.ts`                                                                                           |
+| Delete with re-verification                                                            | `apps/live/components/dialogs/DeleteAccountDialog.test.tsx`, `lib/reverify.test.ts`                                           |
+| Safe redirects on every path                                                           | `auth-shared.test.ts`                                                                                                         |
+| My Shares session                                                                      | `apps/community/components/auth-and-gate.test.tsx`, `apps/community/components/gallery/GalleryView.test.tsx`                  |
+| End to end: email-code sign-up, guest migration, sign-out, delete                      | `apps/live/e2e/account/` `sign-up`, `guest-documents`, `sign-out`, `delete-account` `.spec.ts`, through the outbox, dark mode |
+| No earlier provider left                                                               | `packages/source-ast/src/clerk-free.test.ts`                                                                                  |
 
 Google's round trip has no automated test yet: `fake-google` (`packages/fake-google`) serving the OAuth endpoints the
 provider calls is the intended stand-in.

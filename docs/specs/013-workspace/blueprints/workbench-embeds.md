@@ -114,7 +114,7 @@ It provides these names to sibling blueprints ([CLI](../../015-api/blueprints/cl
 | `apps/live/components/dialogs/settings/SettingsTokenPairings.tsx` (new, + test)                                                                                              | A token card's paired workbenches with **Unpair**                                                                                                                                                                         |
 | `apps/live/components/dialogs/settings/SettingsTokenCard.tsx`, `SettingsTokenList.tsx`, `SettingsTokensRow.tsx`                                                              | The card renders its pairings; the list passes them; the row loads them                                                                                                                                                   |
 | `apps/live/hooks/persistence/useWorkbenchPairings.ts` (new, + test)                                                                                                          | List, group by token, unpair                                                                                                                                                                                              |
-| `apps/live/e2e/clerk-stub/workbench-contrast.spec.ts` (new)                                                                                                                  | The pairing page (pending), the device page (entry, consent) and a paired-workbench row, light and dark, to WCAG 2.2 AA                                                                                                   |
+| `apps/live/e2e/account/workbench-contrast.spec.ts` (new)                                                                                                                     | The pairing page (pending), the device page (entry, consent) and a paired-workbench row, light and dark, to WCAG 2.2 AA                                                                                                   |
 | `apps/live/src/worker.ts` (+ test)                                                                                                                                           | Unchanged code; the test pins `/embed/workbench` frameable and `/workbench/pair` `DENY`                                                                                                                                   |
 | `packages/agent-verbs/src/verbs/workbench.ts` (new, + test), `catalogue.ts`, `index.ts`                                                                                      | `workbench.open`, `workbench.pair` (local); resource `workbench`; `workbenchOriginOf`, `workbenchNameOf`: the refusals both verbs share                                                                                   |
 | `apps/cli/src/commands/workbench-pair.ts` (new, + test)                                                                                                                      | `pairWorkbench(io, api, input, json, log)`: request, print, open, wait                                                                                                                                                    |
@@ -1306,8 +1306,8 @@ editing until you allow it again." with **Unpair** and **Cancel** (WB36). After 
   first of the editor's controls in the focus order, after the canvas itself, and the Header region for F6; a move inside the frame moves focus to the new view's heading (the Explorer's
   pane heading, or the editor's canvas as on a load), and announces nothing more.
 - Reveal outlines honour reduced motion as changeset outlines do.
-- The contrast audit, `apps/live/e2e/clerk-stub/workbench-contrast.spec.ts` (every surface needs a signed-in person,
-  so it runs with the signed-in specs, not the guest-mode `contrast-audit.spec.ts`), holds the pairing page
+- The contrast audit, `apps/live/e2e/account/workbench-contrast.spec.ts` (every surface needs a signed-in person,
+  which only a stack with sign-in on renders, so not the guest-mode `contrast-audit.spec.ts`), holds the pairing page
   (pending), the device page (code entry and consent) and the paired-workbench row, each in both schemes.
 
 ## Web Experience
@@ -1437,10 +1437,9 @@ The workspace scope's tests:
 The fake workbench (`apps/live/e2e/fixtures/fake-workbench.html`) is served by `workbench-support.ts` from a Node `http`
 server on `127.0.0.1` at a free port; it frames the URL it is given, answers `hello` with `hello-ack { name: 'Fake
 Workbench' }`, answers `renew` with a ticket the test mints, and records every message into `window.received`.
-`scripts/e2e-stack.mjs` under `E2E_WORKBENCH=1` signs a person in for the signed-in surfaces and sets `APP_BASE_URL`
-to the live server (the stack still stubs the earlier sign-in provider, Clerk, under `E2E_CLERK_JWKS`, and is being
-ported to sign in for real through the api's email outbox); `test:e2e:workbench` builds with `NEXT_PUBLIC_E2E_AUTH=1`, as under
-`E2E_DRIVE`.
+`test:e2e:workbench` runs against the ordinary `out/` export on a stack with sign-in on (`E2E_SIGN_IN=1`, its own
+ports), whose `APP_BASE_URL` is the live server: the person signs in for real through `e2e/account/sign-in.ts`, and the
+CLI's api calls carry their session token.
 
 ## Constants and configuration
 
