@@ -49,30 +49,21 @@ type Settled = SessionState;
 export function AuthBridge({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const workbenchRoute = pathname?.startsWith(WORKBENCH_ROUTE) === true;
-  const [session, setSession] = useState<Settled | null>(null);
-  // A signed-in session that ended without this page signing out.
-  const [sessionEnded, setSessionEnded] = useState(false);
+  // The settled session, and whether a signed-in one ended without this page signing out.
+  const [{ session, ended: sessionEnded }, setBridge] = useState<BridgeState>(UNSETTLED);
   const sessionRef = useLatest(session);
 
-  const settle = useCallback(
-    (next: Settled) => {
-      if (next.status === 'off') publishSignInAvailability(false);
-      else if (next.status !== 'unreachable') publishSignInAvailability(true);
-      if (next.status === 'signed-in') writeSignedInHint(true);
-      else if (next.status !== 'unreachable') writeSignedInHint(false);
-      const held = sessionRef.current;
-      if (held?.status === 'signed-in' && (next.status === 'signed-out' || next.status === 'off')) {
-        setSessionEnded(true);
-      }
-      if (next.status === 'signed-in') setSessionEnded(false);
-      setSession((prev) => (sameSession(prev, next) ? prev : next));
-    },
-    [sessionRef],
-  );
+  const settle = useCallback((next: Settled) => {
+    if (next.status === 'off') publishSignInAvailability(false);
+    else if (next.status !== 'unreachable') publishSignInAvailability(true);
+    if (next.status === 'signed-in') writeSignedInHint(true);
+    else if (next.status !== 'unreachable') writeSignedInHint(false);
+    setBridge((prev) => advance(prev, next));
+  }, []);
 
   // This page's own sign-out or deletion: not an ending to announce.
   const endHere = useCallback(() => {
-    setSession({ status: 'signed-out' });
+    setBridge({ session: { status: 'signed-out' }, ended: false });
     writeSignedInHint(false);
   }, []);
 
@@ -164,6 +155,19 @@ export function AuthBridge({ children }: { children: ReactNode }) {
       {children}
     </DeferredAuthContext.Provider>
   );
+}
+
+type BridgeState = { session: Settled | null; ended: boolean };
+const UNSETTLED: BridgeState = { session: null, ended: false };
+
+// The next bridge state for a settled read: a signed-in session followed by a signed-out (or sign-in-off) answer has
+// ended elsewhere; a signed-in answer clears that. The same answer keeps the state object.
+function advance(prev: BridgeState, next: Settled): BridgeState {
+  const endedNow =
+    prev.session?.status === 'signed-in' && (next.status === 'signed-out' || next.status === 'off');
+  const ended = next.status === 'signed-in' ? false : prev.ended || endedNow;
+  const session = sameSession(prev.session, next) ? prev.session : next;
+  return session === prev.session && ended === prev.ended ? prev : { session, ended };
 }
 
 // The same answer as before, so consumers keep the state they hold (a re-read on every tab focus or nudge must
