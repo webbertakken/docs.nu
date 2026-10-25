@@ -1,7 +1,5 @@
 # Account settings & email notifications
 
-> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
-
 **Status: shipped.** A signed-in user's account surface: their avatar, name,
 email, and join date, plus the two account actions that once had no home of
 their own, **delete my account** and **email notification preferences**.
@@ -24,8 +22,8 @@ findable only by someone who already knew the page existed. The page was
 retired and its three parts redistributed:
 
 - **Identity** (avatar, name, email, joined) is the `identity` row in the
-  **Account** category. Read from Clerk on the client, never written: names
-  and emails are managed in Clerk itself, so it is a card, not a form. The
+  **Account** category. Read from the account session on the client, never written here: it
+  shows the name and email as the account holds them, so it is a card, not a form. The
   avatar is the [Profile picture](profile-picture.md) when there is one. A
   guest sees a card explaining that they are working as a guest.
 - **Email notifications** are the six rows in **Notifications > Email**
@@ -59,7 +57,7 @@ to hang off the header dropdown; now that there is a dedicated account home,
 the **Delete account** trigger lives on the profile page's Danger zone and is
 **removed from the header menu** (one home for destructive account actions,
 no drift). The dialog component itself is unchanged and simply reused — the
-confirmation flow (type your email, then Clerk re-verification, then wipe) is
+confirmation flow (type your email; when the session was verified more than ten minutes ago, a code to the account's email; then wipe) is
 exactly as [Transactional & lifecycle email (Resend)](transactional-email.md) describes.
 Account deletion is immediate and total: it removes the account's documents
 **including every one in its [Trash](../013-workspace/trash.md)**, which the
@@ -134,7 +132,7 @@ time**: the share-resolve path (`GET /api/share/<code>`) already records a
 visitor in `shared_with` via `recordSharedAccess`, but only when the visitor
 identifies and isn't the owner. `recordSharedAccess` now reports whether the
 row was **new** (first visit) vs a repeat. On a new visit by a **verified**
-visitor (a Clerk session or API token, `ctx.verifiedUserId`) the worker fires
+visitor (a session token or API token, `ctx.verifiedAccountId`) the worker fires
 `notifyDocumentJoin(env, liveDoc, joinerName)`. A guest's `X-Owner-Id` is
 unproven and free to mint, so every fresh one would be another first visit;
 a guest visit is still recorded in `shared_with` and counted as
@@ -142,7 +140,7 @@ a guest visit is still recorded in `shared_with` and counted as
 
 - no-ops unless `emailEnabled(env)`;
 - resolves the owner's email from `email_lifecycle` (so it only fires for a
-  signed-in Clerk owner who has a stored verified address — a guest-owned
+  signed-in owner who has a stored verified address — a guest-owned
   document has no address and is silently skipped);
 - no-ops when the owner's `notifyDocumentJoin` pref is `false`;
 - no-ops unless it wins the per-document throttle: at most one join email per
@@ -202,4 +200,4 @@ transitions do.
 A global "all email off" master switch (the lifecycle onboarding series still
 has no unsubscribe, [Transactional & lifecycle email (Resend)](transactional-email.md) §8), notification batching/digests, in-app
 (non-email) notifications, and editing name/avatar from the profile page
-(identity is managed in Clerk). The page reads identity; it doesn't write it.
+(identity comes from the account). The page reads identity; it doesn't write it.

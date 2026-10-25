@@ -1,7 +1,5 @@
 # Transactional & lifecycle email
 
-> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
-
 **Status: in progress.** Optional, off by default. Lets the api worker send a small set
 of account emails, sign-in codes included. Like sign-in ([Auth + guest access](auth-and-guest-access.md)) and AI
 ([AI Assistance](../007-editor/ai-assistance.md)), it is **entirely gated on configuration**: with no email
@@ -77,7 +75,7 @@ and as switches in Settings > Notifications; every opt-out email's footer links 
 recipient can turn it off in one click. `notifyTips` governs **every** tip /
 check-in after the immediate welcome, i.e. week 1, week 2, the activation nudge,
 and win-back all respect it, and so all four carry that footer and header; only
-the welcome (the first authenticated sighting, before any toggle could exist) is
+the welcome (sent when the account is created, before any toggle could exist) is
 unconditional and carries neither. The opt-out toggles are
 documented for users in the [Email Notifications](../../../apps/help/app/account-and-data/email-notifications/page.mdx)
 help article.
@@ -103,14 +101,14 @@ With none, `emailEnabled(env)` is false and every send is a no-op; no `email_lif
 
 ## 3. Data model
 
-One table, keyed by the owner id (the Clerk `sub` — lifecycle email is
-authenticated-only). Migration `0029_email_lifecycle.sql`:
+One table, keyed by the owner id (the account id — lifecycle email is
+account-only). Migration `0029_email_lifecycle.sql`:
 
 ```sql
 CREATE TABLE IF NOT EXISTS email_lifecycle (
-  owner_id        TEXT PRIMARY KEY,   -- Clerk user id (verified)
-  email           TEXT NOT NULL,      -- from the verified session token only
-  created_at      INTEGER NOT NULL,   -- first authenticated sighting (ms)
+  owner_id        TEXT PRIMARY KEY,   -- account id (acct_…)
+  email           TEXT NOT NULL,      -- the account's verified address
+  created_at      INTEGER NOT NULL,   -- when the account was created (ms)
   welcome_sent_at INTEGER,
   week1_sent_at   INTEGER,
   week2_sent_at   INTEGER
@@ -118,35 +116,24 @@ CREATE TABLE IF NOT EXISTS email_lifecycle (
 CREATE INDEX IF NOT EXISTS idx_email_lifecycle_due ON email_lifecycle (created_at);
 ```
 
-The `email` is only ever the **verified** `email` claim from the Clerk session
-token ([Teams](../013-workspace/teams.md)) — never a client-supplied value, never a guest. Rows exist only
-for authenticated owners.
+The `email` is only ever the address the account was created with, which every account has verified (an email
+code proves it, and Google verifies its own) — never a client-supplied value, never a guest. Rows exist only
+for accounts.
 
-## 4. Sign-up detection — first authenticated sighting
+## 4. Sign-up detection — the account's creation
 
-On any request carrying a verified Clerk identity (userId + email), and only
-when `emailEnabled`, the worker does an `INSERT … ON CONFLICT DO NOTHING` into
-`email_lifecycle`. If a **new** row was created (`meta.changes === 1`), that
-first sighting is treated as sign-up: send the welcome and stamp
-`welcome_sent_at`. On a returning owner's sighting the row instead takes the
-token's address when it differs (an `UPDATE` guarded on `email <> ''` and on the
-address actually changing), so a changed Clerk primary email is where the next
-email goes; a backfilled suppression row (below) keeps its empty sentinel, and
-"is new" stays the insert's answer alone. All of this runs in `ctx.waitUntil(...)` so it never delays
-the response, and is wrapped so an email/D1 hiccup can't fail the user's request.
+Sign-up is the account's creation, which better-auth reports to LiveDoc's own hook (`user.create.after` in
+`apps/api/src/auth/identity-hooks.ts`), once per account whichever method made it. Only when `emailEnabled`, the hook
+does an `INSERT OR IGNORE` into `email_lifecycle` with the account's address. If a **new** row was created
+(`meta.changes === 1`), it sends the welcome and stamps `welcome_sent_at`. Were the row already there, it would
+instead take the given address when it differs (an `UPDATE` guarded on `email <> ''` and on the address actually
+changing), and "is new" stays the insert's answer alone. All of this runs in the background (`waitUntil`) so it never
+delays the sign-up, and is wrapped so an email or D1 hiccup can't fail it.
 
-**Existing-deployment caveat:** first-sighting means that turning Resend on for a
-deployment that already has users would welcome each of them on their next
-sign-in. Before enabling on such a deployment, backfill the table so existing
-owners are marked as already-sent (no email fires for them):
-
-```sql
-INSERT OR IGNORE INTO email_lifecycle
-  (owner_id, email, created_at, welcome_sent_at, week1_sent_at, week2_sent_at)
-SELECT DISTINCT owner_id, '', 0, 0, 0, 0 FROM documents WHERE owner_id LIKE 'user_%';
-```
-
-(The `'user_%'` prefix targets Clerk ids, skipping guest UUID owners.)
+**Turning email on later welcomes nobody already there.** An account created while email was off gets no row, and
+only an account's creation writes one, so a deployment that switches email on never mails the accounts it already
+has. A row whose `email` is the empty string is a **suppression row**: every due-query skips it and an address update
+leaves it as it is, so an operator can keep an account out of the series by writing one.
 
 ## 5. Scheduling the series — the existing daily cron
 
@@ -163,8 +150,8 @@ goes up by one and `last_attempt_at` records when (migration 0086). Once a row
 reaches `MAX_SEND_ATTEMPTS` (3, in `db/email-lifecycle.ts`) every due-query
 skips it, so an address that always fails (a deleted mailbox, a hard bounce)
 cannot hold a place in the oldest-first batch for good; the sweep logs
-`[email-lifecycle] giving up` once, when it does. A successful send, or a
-sighting with a changed address (§4), resets the count to zero.
+`[email-lifecycle] giving up` once, when it does. A successful send, or an
+address update (§4), resets the count to zero.
 
 ## 6. Code shape
 
@@ -193,7 +180,7 @@ sighting with a changed address (§4), resets the count to zero.
 - `apps/api/src/db/email-lifecycle.ts` — sighting upsert (returns "is new", and
   refreshes a returning owner's address), the
   two due-queries + mark-sent, and row deletion (called from `deleteAccount`).
-- Hooks: welcome in the request path (`index.ts`), week1/week2 in `scheduled()`,
+- Hooks: welcome on account creation (`auth/identity-hooks.ts`), week1/week2 in `scheduled()`,
   invite in `routes/teams.ts` (invite create), invite reminders + expiry in
   `scheduled()` via `email/team-invite-reminders.ts`, deletion in `routes/account.ts`.
 
