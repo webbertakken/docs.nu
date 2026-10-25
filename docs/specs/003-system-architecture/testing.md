@@ -209,11 +209,11 @@ head commit (riding out up to three dropped connections; every failure names the
 cause), reads its numbers from Codecov's public API and writes the report into the pull request's
 description, never a comment: a comment emails every watcher, a description edit notifies no one.
 
-The report sits at the bottom of the description, below a `---` separator, between two hidden
-markers (`<!-- livediagram:coverage-report:start -->` and `…:end -->`). Each run reads the
-description just before writing and replaces only that section, so the author's text around it is
-kept; an unchanged report writes nothing. A description without the section gets it appended; one
-whose closing marker was edited away has everything from the opening marker replaced. The report holds:
+The report fills the description's `coverage-report` slot ([Preview deployments](../016-platform/preview-deployments.md#in-the-pull-request)), below a `---`
+separator and above the preview slot, between two hidden markers (`<!-- livedoc:coverage-report:start -->`
+and `…:end -->`). Each run reads the description just before writing and replaces only that slot, so the
+author's text is kept; an unchanged report writes nothing. A slot whose closing marker was edited away
+runs to the end of the description and is replaced whole. The report holds:
 
 - the patch coverage (the changed lines), and the project coverage with its change;
 - Codecov's impacted file tree graph, linked to the pull request's file tree on Codecov (its

@@ -3,6 +3,8 @@
 //
 //   node scripts/preview.mjs deploy <pr> <branch>      create or update the preview; prints both addresses
 //   node scripts/preview.mjs wait-host <pr> <branch>   wait until https://<branch>.preview.docs.nu answers
+//   node scripts/preview.mjs link <pr> <sha> <branch>  name the preview in the pull request's description
+//   node scripts/preview.mjs unlink <pr>               take it out again
 //   node scripts/preview.mjs teardown <pr>             delete every resource the preview owns
 //
 // A preview is reached at https://<branch>.preview.docs.nu (a custom domain on its router) and at its
@@ -19,6 +21,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'smol-toml';
+import { writeSlot } from './pr-description.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PRODUCTION_PREFIX = 'docs-nu-';
@@ -75,6 +78,16 @@ export function previewNames(pr, subdomain, branch) {
     origin: `https://${host}`,
     workersDevOrigin: `https://${resources.prefix}-router.${subdomain}.workers.dev`,
   };
+}
+
+/**
+ * The preview slot's line in the pull request's description: the commit it was built from, and the host.
+ * @param {string} sha the full commit sha
+ * @param {string} branch the pull request's head branch
+ */
+export function previewLine(sha, branch) {
+  if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error(`preview: not a full commit sha: ${sha}`);
+  return `Live preview (\`${sha.slice(0, 7)}\`): https://${branchLabel(branch)}.${PREVIEW_DOMAIN}`;
 }
 
 /** What a pull request's preview owns on Cloudflare, by name: all teardown needs. @param {number} pr */
@@ -372,7 +385,6 @@ async function deploy(pr, branch) {
   await detachStaleHosts(names);
   log(`deployed: ${names.workersDevOrigin}, and ${names.origin} once its certificate is issued`);
   console.log(`PREVIEW_URL=${names.origin}`);
-  console.log(`PREVIEW_WORKERS_DEV_URL=${names.workersDevOrigin}`);
 }
 
 async function waitHost(pr, branch) {
@@ -423,17 +435,36 @@ async function teardown(pr) {
   }
 }
 
-async function main([command, arg, branch]) {
+/** Fills (or, with null, empties) the preview slot of the pull request's description. */
+async function describe(pr, line) {
+  const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+  const repository = process.env.GITHUB_REPOSITORY;
+  if (!token || !repository) throw new Error('preview: set GITHUB_TOKEN and GITHUB_REPOSITORY');
+  const outcome = await writeSlot({ repository, token, pr, name: 'preview', content: line });
+  log(`#${pr} description: preview slot ${outcome}`);
+}
+
+async function main([command, ...args]) {
   switch (command) {
-    case 'deploy':
-      return deploy(prNumber(arg), branch);
-    case 'wait-host':
-      return waitHost(prNumber(arg), branch);
+    case 'deploy': {
+      const [pr, branch] = args;
+      return deploy(prNumber(pr), branch);
+    }
+    case 'wait-host': {
+      const [pr, branch] = args;
+      return waitHost(prNumber(pr), branch);
+    }
+    case 'link': {
+      const [pr, sha, branch] = args;
+      return describe(prNumber(pr), previewLine(sha ?? '', branch));
+    }
+    case 'unlink':
+      return describe(prNumber(args[0]), null);
     case 'teardown':
-      return teardown(prNumber(arg));
+      return teardown(prNumber(args[0]));
     default:
       throw new Error(
-        'usage: node scripts/preview.mjs deploy <pr> <branch> | wait-host <pr> <branch> | teardown <pr>',
+        'usage: node scripts/preview.mjs deploy <pr> <branch> | wait-host <pr> <branch> | link <pr> <sha> <branch> | unlink <pr> | teardown <pr>',
       );
   }
 }

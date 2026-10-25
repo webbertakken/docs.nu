@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   AREAS,
-  REPORT_END,
-  REPORT_START,
   coverageDiffBlock,
   coverageOf,
   failureReason,
@@ -11,7 +9,6 @@ import {
   renderReport,
   sumTotals,
   treeGraph,
-  withReport,
 } from '../../../scripts/coverage-report.mjs';
 
 // scripts/coverage-report.mjs writes the pull request's coverage report into its description from Codecov's public API
@@ -182,33 +179,6 @@ describe('treeGraph', () => {
     });
     expect(report.indexOf('Project coverage')).toBeLessThan(report.indexOf('tree.svg'));
     expect(report.indexOf('tree.svg')).toBeLessThan(report.indexOf('| Area |'));
-  });
-});
-
-describe('withReport', () => {
-  const block = (report: string) => `${REPORT_START}\n\n---\n\n${report}\n\n${REPORT_END}`;
-
-  it('appends the report below a separator, leaving the description intact', () => {
-    expect(withReport('Fixes the thing.\n\n', 'R1')).toBe(`Fixes the thing.\n\n${block('R1')}`);
-  });
-
-  it('is the report alone for an empty description', () => {
-    expect(withReport(null, 'R1')).toBe(block('R1'));
-    expect(withReport('  \n', 'R1')).toBe(block('R1'));
-  });
-
-  it('replaces an earlier report in place, keeping text around it', () => {
-    const body = `Intro\r\n\r\n${block('R1')}\r\n\r\nAfterword`;
-    expect(withReport(body, 'R2')).toBe(`Intro\r\n\r\n${block('R2')}\r\n\r\nAfterword`);
-  });
-
-  it('is unchanged when the report is the same, so nothing is written', () => {
-    const body = withReport('Intro', 'R1');
-    expect(withReport(body, 'R1')).toBe(body);
-  });
-
-  it('replaces to the end when the closing marker was edited away', () => {
-    expect(withReport(`Intro\n\n${REPORT_START}\nstale`, 'R2')).toBe(`Intro\n\n${block('R2')}`);
   });
 });
 

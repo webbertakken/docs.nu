@@ -11,6 +11,7 @@
 // succeeds; it never checks out or runs the pull request's code.
 
 import { fileURLToPath } from 'node:url';
+import { writeSlot } from './pr-description.mjs';
 
 /** Areas of the repo, one row each; a file belongs to the first area whose path prefixes it. */
 export const AREAS = [
@@ -23,10 +24,6 @@ export const AREAS = [
 
 /** Uploads CI makes per commit (codecov.yml `after_n_builds`): Tests and three editor shards. */
 export const EXPECTED_SESSIONS = 4;
-
-/** Bound the section of the description this script owns, so a later run replaces only that. */
-export const REPORT_START = '<!-- livediagram:coverage-report:start -->';
-export const REPORT_END = '<!-- livediagram:coverage-report:end -->';
 
 const CODECOV_API = 'https://api.codecov.io/api/v2/github';
 const CODECOV_GRAPHQL = 'https://api.codecov.io/graphql/gh';
@@ -189,23 +186,6 @@ export function renderReport(report) {
   ].join('\n');
 }
 
-/**
- * The description with the report in its section: replaced in place when present (to the end of the
- * description when the closing marker was edited away), appended below the rest otherwise.
- */
-export function withReport(/** @type {string | null} */ body, /** @type {string} */ report) {
-  const section = `${REPORT_START}\n\n---\n\n${report}\n\n${REPORT_END}`;
-  const text = body ?? '';
-  const start = text.indexOf(REPORT_START);
-  if (start === -1) {
-    const kept = text.trimEnd();
-    return kept ? `${kept}\n\n${section}` : section;
-  }
-  const end = text.indexOf(REPORT_END, start);
-  const after = end === -1 ? '' : text.slice(end + REPORT_END.length);
-  return `${text.slice(0, start)}${section}${after}`;
-}
-
 /** Why a call failed: the message, with the network cause undici keeps behind "fetch failed". */
 export function failureReason(/** @type {unknown} */ error) {
   if (!(error instanceof Error)) return String(error);
@@ -335,27 +315,15 @@ async function main() {
     return;
   }
 
-  const gh = (/** @type {string} */ path, /** @type {RequestInit} */ init = {}) =>
-    json(`https://api.github.com/repos/${GITHUB_REPOSITORY}${path}`, {
-      ...init,
-      headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json',
-      },
-    });
-  // Editing a description notifies no one, unlike a new comment. Read just before writing, so an
-  // edit the author made while Codecov processed is kept.
-  const { body } = await gh(`/pulls/${pr}`);
-  const next = withReport(body, report);
-  if (next === body) {
-    console.log(`[coverage-report] #${pr} already shows this report; nothing to write`);
-    return;
-  }
-  await gh(`/pulls/${pr}`, { method: 'PATCH', body: JSON.stringify({ body: next }) });
-  console.log(
-    `[coverage-report] ${body?.includes(REPORT_START) ? 'updated' : 'added'} the report in the description of #${pr}`,
-  );
+  // The report's slot in the description (scripts/pr-description.mjs), below a separator.
+  const outcome = await writeSlot({
+    repository: GITHUB_REPOSITORY,
+    token: GITHUB_TOKEN,
+    pr,
+    name: 'coverage-report',
+    content: `---\n\n${report}`,
+  });
+  console.log(`[coverage-report] #${pr} description: coverage-report slot ${outcome}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

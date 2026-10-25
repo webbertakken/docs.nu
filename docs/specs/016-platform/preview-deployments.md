@@ -29,6 +29,10 @@ A preview lives at `https://<label>.preview.docs.nu`, where the label is the pul
 - **Named by branch, owned by number.** Every resource is named after the pull request number; only the address follows the branch. Renaming the branch moves the address and detaches the old one.
 - **One host, one pull request.** Two branches can share a label (`feat/x` and `feat-x`). A deploy whose host already serves another preview fails, and asks for the branch to be renamed.
 
+## In the pull request
+
+The preview is named in the pull request's **description**, never a comment: a comment emails every watcher, a description edit notifies no one. The description ends in **slots** that CI fills and empties (`scripts/pr-description.mjs`), always in one order below everything the author wrote: the coverage report ([Testing](../003-system-architecture/testing.md#coverage-report)), then the preview, last. Each slot sits between two hidden markers, `<!-- livedoc:<slot>:start -->` and `<!-- livedoc:<slot>:end -->`. Every write reads the description just before it, so text the author added meanwhile is kept; text written below the slots ends up above them on the next write.
+
 ## Derived, never restated
 
 A preview's configuration is generated from the production `wrangler.toml` of each app by `scripts/preview.mjs`, into a gitignored `wrangler.preview.json` beside it. Nothing about previews is written into the wrangler configs, so a binding added to production is in the next preview without anyone restating it.
@@ -46,8 +50,8 @@ The hosted profile ([Deployment](deployment.md) "Hosted profile") is not applied
 
 ## Lifecycle
 
-- **Open, push or reopen**: refuse a host that already serves another pull request, build every app, create the D1 and R2 when missing, apply migrations, deploy the api first and the router last, detach any host the router kept from a renamed branch, then post or update one comment on the pull request with the workers.dev address. Then wait, up to 15 minutes, until the host answers over HTTPS, and update the comment to lead with it.
-- **Close or merge**: detach every custom domain, then delete the seven workers (router first, so nothing still binds a worker when it goes), the D1, and the R2 bucket after emptying it. The comment says so.
+- **Open, push or reopen**: refuse a host that already serves another pull request, build every app, create the D1 and R2 when missing, apply migrations, deploy the api first and the router last, detach any host the router kept from a renamed branch, then wait, up to 15 minutes, until the host answers over HTTPS. Only then is the preview named in the pull request's description, in its preview slot: ``Live preview (`<sha>`): https://<branch>.preview.docs.nu``, with the short commit it was built from.
+- **Close or merge**: detach every custom domain, then delete the seven workers (router first, so nothing still binds a worker when it goes), the D1, and the R2 bucket after emptying it, and empty the preview slot, so a description never names a preview that is gone.
 - One run per pull request at a time; a newer push or the close cancels an unfinished one.
 - A brand-new worker is briefly invisible to wrangler's workers.dev step, which then fails with `10007` although the upload succeeded. Every first preview deploy creates seven, so the generator retries that one answer, and only that one, up to six times, 30 seconds apart.
 

@@ -4,6 +4,7 @@ import {
   branchLabel,
   previewConfig,
   previewNames,
+  previewLine,
   prNumber,
 } from '../../../scripts/preview.mjs';
 
@@ -249,5 +250,17 @@ describe('previewConfig', () => {
     const source = { name: 'docs-nu-router', routes: [{ pattern: 'docs.nu' }] };
     previewConfig(source, { ...opts, app: 'router' });
     expect(source).toEqual({ name: 'docs-nu-router', routes: [{ pattern: 'docs.nu' }] });
+  });
+});
+
+describe('previewLine', () => {
+  it('names the short commit and the branch host, nothing else', () => {
+    expect(previewLine('1eb158a0fd7f03c3172a64168a54ac6e7cc9fea9', 'feat/Live_Cursors')).toBe(
+      'Live preview (`1eb158a`): https://feat-live-cursors.preview.docs.nu',
+    );
+  });
+
+  it('refuses a commit that is not a full hex sha', () => {
+    expect(() => previewLine('main', 'x')).toThrow(/commit/);
   });
 });
