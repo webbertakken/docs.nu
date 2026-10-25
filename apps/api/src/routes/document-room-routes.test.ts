@@ -224,11 +224,11 @@ describe('WebSocket upgrade — trust headers', () => {
     // An account id is readable by teammates (team member lists), unlike a
     // guest owner's server-minted UUID, so it is never a room credential:
     // signed-in owners come in through the ticket, as on REST (§4.1).
-    db.getDocumentMeta.mockResolvedValue({ ownerId: 'user_2abcDEF', teamId: null });
+    db.getDocumentMeta.mockResolvedValue({ ownerId: 'acct_2abcDEF', teamId: null });
     db.getShareLink.mockResolvedValue(null);
     const { env, seen } = roomEnv();
     const res = await handleDocumentRoomRoutes(
-      makeTestRouteContext('GET', '/api/documents/d1/ws?o=user_2abcDEF', {
+      makeTestRouteContext('GET', '/api/documents/d1/ws?o=acct_2abcDEF', {
         owner: null,
         headers: { Upgrade: 'websocket' },
         env,

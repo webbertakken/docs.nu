@@ -50,7 +50,7 @@ describe('POST /api/migrate flow 2 (legacy guest upgrade)', () => {
   });
 
   it('refuses an account id as the source', async () => {
-    const res = await flow2('user_victim', {});
+    const res = await flow2('acct_victim', {});
     expect(res.status).toBe(403);
     expect(migrateOwnerId).not.toHaveBeenCalled();
   });
@@ -91,8 +91,8 @@ describe('POST /api/migrate flow 2 (legacy guest upgrade)', () => {
     });
 
     it('still refuses an account id, whatever its age', async () => {
-      getParticipant.mockResolvedValue({ id: 'user_victim', createdAt: 1 });
-      expect((await flow2('user_victim', armed)).status).toBe(403);
+      getParticipant.mockResolvedValue({ id: 'acct_victim', createdAt: 1 });
+      expect((await flow2('acct_victim', armed)).status).toBe(403);
       expect(migrateOwnerId).not.toHaveBeenCalled();
     });
   });
@@ -114,7 +114,7 @@ describe('POST /api/migrate flow 1 (sign-up claim)', () => {
   it('refuses an account id as the guest source even with no secret configured', async () => {
     const ctx = makeTestRouteContext('POST', '/api/migrate', {
       env: {} as Env,
-      body: { guestOwnerId: 'user_victim' },
+      body: { guestOwnerId: 'acct_victim' },
     });
     ctx.sessionAccountId = 'user_attacker';
     const res = await handleMigrate(ctx);

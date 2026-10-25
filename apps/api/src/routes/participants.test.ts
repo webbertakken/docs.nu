@@ -134,7 +134,8 @@ describe('handleParticipants', () => {
 
 // The published profile picture (docs/specs/014-identity/profile-picture.md §6).
 describe('participant pictures', () => {
-  const PICTURE = 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
+  const PICTURE =
+    'https://lh3.googleusercontent.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
   const row = { id: 'user_ann', name: 'Ann', color: '#fff', createdAt: 0, pictureUrl: PICTURE };
 
   it('GET hides the picture from a caller who is not signed in', async () => {
@@ -219,9 +220,13 @@ describe('participant pictures', () => {
     expect(info).toHaveBeenCalledWith('[profile-picture] rejected', 'not_account');
   });
 
-  it('PUT picture refuses a URL that is not on Clerk image host', async () => {
+  it('PUT picture refuses a URL that is not on the picture host', async () => {
     vi.spyOn(console, 'info').mockImplementation(() => {});
-    for (const pictureUrl of ['https://evil.example/x.png', 'http://img.clerk.com/x', 42]) {
+    for (const pictureUrl of [
+      'https://evil.example/x.png',
+      'http://lh3.googleusercontent.com/x',
+      42,
+    ]) {
       const res = await handleParticipants(
         makeCtx('PUT', '/api/participants/user_ann/picture', {
           sessionAccountId: 'user_ann',

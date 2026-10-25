@@ -29,7 +29,7 @@ describe('isLoopbackHostname', () => {
 });
 
 describe('isAccountIdShape', () => {
-  // A account id in the GUEST header is always a replay of a harvested
+  // An account id in the GUEST header is always a replay of a harvested
   // account id: the real guest credential is a server-minted UUID, and a
   // signed-in client sends Authorization instead. Unlike the signature gate
   // this needs no rollout, so the worker refuses the shape outright.
@@ -37,8 +37,8 @@ describe('isAccountIdShape', () => {
     expect(isAccountIdShape('acct_0123456789abcdefABCDEFgh')).toBe(true);
   });
 
-  it('is true for an account id', () => {
-    expect(isAccountIdShape('user_2abcDEF456')).toBe(true);
+  it("is false for the previous sign-in provider's user ids", () => {
+    expect(isAccountIdShape('user_2abcDEF456')).toBe(false);
   });
 
   it('is false for the guest UUIDs the server actually mints', () => {
