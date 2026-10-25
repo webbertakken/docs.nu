@@ -223,6 +223,7 @@ packages/
   document-views/ # read-only text views of a tab (outline, graph, layout, ...) for agents and scripts
   api-schema/     # wire-format DTOs the api worker emits + the live editor consumes
   api-client/     # the api client the MCP server and the CLI share (fetch, timeouts, ApiError)
+  account-session/ # the browser's session: read it, session tokens, sign-out, the signed-in hint (plain fetch)
   agent-verbs/    # the verbs the CLI routes to: schemas, handlers, compact text, addressing, guides
   edit-operations/ # the engine agent changesets run on: edit operations and replace, into element ops (pure)
   diagram-lint/   # checks how a tab is drawn (overlaps, crossings, arrows behind boxes), with a fix each
