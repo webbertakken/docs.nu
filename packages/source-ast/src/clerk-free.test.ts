@@ -19,9 +19,14 @@ const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 const CODE_ROOTS = ['apps', 'packages', '.github', 'scripts'];
 
 // Files whose bytes are not text worth reading.
-const BINARY = /\.(png|jpe?g|gif|webp|avif|ico|svgz|woff2?|ttf|otf|wasm|onnx|bin|pdf|zip|gz|mp4|webm)$/i;
+const BINARY =
+  /\.(png|jpe?g|gif|webp|avif|ico|svgz|woff2?|ttf|otf|wasm|onnx|bin|pdf|zip|gz|mp4|webm)$/i;
+
+// This guard's own path, which names what it looks for.
+const SELF = 'packages/source-ast/src/clerk-free.test.ts';
 
 function exempt(path: string): boolean {
+  if (path === SELF) return true;
   const name = posix.basename(path);
   if (/^changelog/i.test(name)) return true;
   if (/\.generated\./.test(name)) return true;
@@ -61,5 +66,6 @@ describe('the earlier sign-in provider', () => {
     expect(files.some((path) => path.startsWith('.github/workflows/'))).toBe(true);
     expect(exempt('apps/api/migrations/0047_auth_sightings.sql')).toBe(true);
     expect(exempt('apps/api/migrations/0102_drop_auth_sightings.sql')).toBe(false);
+    expect(exempt(SELF)).toBe(true);
   });
 });
