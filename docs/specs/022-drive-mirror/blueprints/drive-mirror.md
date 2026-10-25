@@ -606,8 +606,7 @@ beyond D1's own; a connection is re-creatable by reconnecting. `DELETE /api/driv
 - The browser never deletes a Drive file it did not create: tombstones name only files an item recorded.
 - `/drive/open` treats `state` as untrusted JSON; ids are validated before any request; an unknown file is an error.
 - No Google data is used for anything but the mirror (Limited Use); no Drive content reaches the server.
-- No test-only sign-in path is compiled into any build: the e2e signs in through the api like anyone, and the worker
-  trusts nothing new.
+- The e2e signs in for real (an email code from the stack's outbox); the worker trusts nothing new.
 - Every session mount registers the api Bearer (`registerTokenProvider`), so the root-level Drive provider and a
   page never clear each other's credential on unmount.
 
@@ -831,9 +830,10 @@ Events: `elected`, `pass-start`, `pass-end`, `token`, `root-created`, `root-foun
 | Telemetry vocabulary                        | `apps/live/lib/telemetry-coverage.test.ts`, `apps/telemetry` tests      |
 
 The browser e2e is opt-in (`pnpm --filter @livediagram/live test:e2e:drive`), kept out of CI's default run to spare
-its minutes: it boots the stack with `E2E_DRIVE=1` and a signed-in person. Its harness still carries the stub of the
-earlier sign-in provider (Clerk: a `NEXT_PUBLIC_E2E_AUTH=1` build and a test-minted JWT), which the app and the api no
-longer read, and is being ported to sign in for real through the api's email outbox.
+its minutes: it rebuilds the live app with the e2e Google client id and Picker key, and boots the stack with
+`E2E_DRIVE=1` and sign-in on (`E2E_SIGN_IN=1`), on its own ports. Each test account signs in for real through
+`e2e/account/sign-in.ts` (an email code from the stack's outbox), once per fake Google user, and its session is entered
+into each test's browser context.
 
 ## Constants and configuration
 

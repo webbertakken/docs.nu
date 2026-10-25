@@ -39,11 +39,11 @@ pull request never queues two runs of the suite.
 It runs **every** spec file in `apps/live/e2e/` (bar the opt-in Drive, perf and WebKit projects),
 spread over parallel jobs so the wall time is the slowest job, not the sum:
 
-| Job                 | Builds                                           | Runs                                                                      |
-| ------------------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
-| **Smoke shard i/6** | live                                             | `test:e2e:smoke --shard=i/6`: a sixth of the `chromium` project's tests   |
-| **Sites audit**     | live, help, telemetry, community, then marketing | `test:e2e:sites`: the `sites` project, `optical-audit-sites.spec.ts`      |
-| **Signed-in specs** | live with Clerk stubbed (`build:clerk-stub`)     | the `clerk-stub` project ([Signed-in specs](#signed-in-specs-clerk-stub)) |
+| Job                 | Builds                                           | Runs                                                                                      |
+| ------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **Smoke shard i/6** | live                                             | `test:e2e:smoke --shard=i/6`: a sixth of the `chromium` project's tests                   |
+| **Sites audit**     | live, help, telemetry, community, then marketing | `test:e2e:sites`: the `sites` project, `optical-audit-sites.spec.ts`                      |
+| **Signed-in specs** | live                                             | the `account` project ([Signed-in specs](#signed-in-specs)), then the `workbench` project |
 
 Only the sites audit opens help, telemetry, the Community and marketing, so only its job pays for their builds. Marketing builds after the
 others, as `turbo.json` orders it: its licences page runs Next's analyzer in each other app on that
@@ -66,15 +66,14 @@ Cost controls, all in `e2e.yml` and `playwright.config.ts`:
 - **Parallel everywhere** (`fullyParallel`): 4 workers in CI, one per vCPU of the GitHub runner,
   and Playwright's default locally. Tests stay independent because each opens a fresh browser
   context, so a fresh guest owner whose documents no other test sees.
-- **Guest signatures enforced** by default (`E2E_GUEST_SIG_ENFORCE`, unless `0`, sets
-  `GUEST_SIG_ENFORCE_AFTER=1` in `scripts/e2e-stack.mjs`), as
-  production runs once armed ([Public API and API tokens](../015-api/public-api-and-tokens.md) §4).
+- **Guest signatures enforced** by default, as production runs them: `scripts/e2e-stack.mjs` gives the api
+  worker a test-only `BETTER_AUTH_SECRET`, whose derived key signs every guest id and makes owner-scoped routes
+  require the signature ([Auth + guest access](../014-identity/auth-and-guest-access.md) "Signed guest ids").
+  `E2E_GUEST_SIG_ENFORCE=0` leaves the secret blank, a guest-only host that signs nothing.
   A spec seeds through a signed guest: `mintSignedGuest` + `ownerHeaders` for Playwright
   requests, `pageOwnerHeaders` for calls made inside the page (`apps/live/e2e/fixtures.ts`). A
   hand-made `crypto.randomUUID()` owner is refused (401), and so is any entry path that sends an
-  unsigned id. The api cannot make a legacy guest under enforcement, so the stack writes one:
-  `POST /__e2e/legacy-guest` puts a participant row dated before `GUEST_SIGNING_LIVE_AT` (1000 on
-  the stack) and one folder straight into the local D1, for `guest-upgrade.spec.ts`.
+  unsigned id.
 - **Sharded** (`--shard=i/6`, the matrix in `e2e.yml`): Playwright splits the `chromium` project's
   tests evenly by count across six jobs; each boots its own stack, so shards share nothing.
 - **Shards sized to the floor, not beyond.** Every shard pays about two minutes before its first
@@ -90,8 +89,8 @@ Cost controls, all in `e2e.yml` and `playwright.config.ts`:
 - **A warm build cache**: each job restores Turbopack's build cache (`.next/cache`) from the latest
   run on `main` before it builds, so it compiles only what changed
   (`.github/actions/next-cache-restore`, the one place its key is made). Only runs on `main` save it,
-  keyed by version, lockfile and commit, one copy per set of builds (`live`, `live-clerk-stub`,
-  `sites`); pull requests read it and never write their own, so they cannot evict it. Turbopack
+  keyed by version, lockfile and commit, one copy per set of builds (`live`,
+  `sites`; the signed-in job reads `live`, the same build); pull requests read it and never write their own, so they cannot evict it. Turbopack
   re-checks every input, so a cache from an older commit only ever saves work, and a lockfile change
   starts cold. Each restore logs `[next-cache] <name>: restored <key>` or a miss. A cache only ever
   saves time: every build runs through `scripts/next-build-cold-retry.sh`, which, when a build fails
@@ -105,9 +104,9 @@ Cost controls, all in `e2e.yml` and `playwright.config.ts`:
 - **Traces of first failures** in CI (`retain-on-first-failure`): a test that fails and then passes
   on retry still keeps the trace of its failing attempt, so a flaky test can be read rather than
   guessed at. Each invocation keeps its own artefacts (`test-results` and `playwright-report`, or
-  their `-clerk-stub` twins), since a run clears its output folder when it starts. `e2e.yml`
+  their `-account`, `-armed` and `-workbench` twins), since a run clears its output folder when it starts. `e2e.yml`
   uploads them whenever any holds a trace, a timed-out run included, one artefact per job
-  (`playwright-report-shard-i`, `playwright-report-sites`, `playwright-report-clerk-stub`). Locally a trace is kept for a
+  (`playwright-report-shard-i`, `playwright-report-sites`, `playwright-report-account`). Locally a trace is kept for a
   retry only.
 - **No waiting on what is not coming.** A helper waits for a thing only when the app owes it:
   `dismissQuickTour` returns at once unless /new's tour handoff flag is in sessionStorage
@@ -132,7 +131,12 @@ The stack serves whatever `apps/live/out` holds and never rebuilds it, so locall
    `db:migrate:local` applied to a fresh local D1 so persistence works.
    `TELEMETRY_ENABLED` unset (the suite asserts on the app, not the
    events pipe), and `AI_ALLOWED_ORIGINS` blanked with `--var` (production
-   declares it in `[vars]`, which would refuse the localhost editor).
+   declares it in `[vars]`, which would refuse the localhost editor). Every var that decides sign-in
+   (`BETTER_AUTH_SECRET`, `BETTER_AUTH_SECRETS`, `EMAIL_OUTBOX`, `APP_BASE_URL`, `RESEND_API_KEY`,
+   `GOOGLE_AUTH_CLIENT_ID`, `GOOGLE_AUTH_CLIENT_SECRET`) is passed explicitly, so a developer's
+   `apps/api/.dev.vars` never changes the answer: a guest stack is guest-only (sign-in on would start guest
+   documents in This Browser), and `APP_BASE_URL` stays blank there because `wrangler dev` simulates the
+   `EMAIL` binding, which alone is a sign-in method once a base URL exists.
 2. **live**: the static `apps/live/out` served by a minimal Node
    server that reproduces the three things the production router +
    live worker do (so clean routes and the document placeholder resolve
@@ -143,7 +147,11 @@ The stack serves whatever `apps/live/out` holds and never rebuilds it, so locall
      `out/document/[id].html` ([Dedicated route for new-document creation](../007-editor/new-document-route.md): one HTML backs every document
      URL);
    - proxy `/api/*` to the api worker, WebSocket upgrades included (the realtime room), so the app is same-origin (no CORS
-     surprises, mirroring the router);
+     surprises, mirroring the router). Every header passes both ways, as through the router: `Cookie` and `Origin`
+     reach better-auth, and its `Set-Cookie` lands the session cookie on the live origin. A browser context names
+     a client address of its own in the `e2e-client-address` cookie, which the proxy forwards as
+     `CF-Connecting-IP`: each context is its own visitor to the api's per-address sign-in rate limits, as each
+     person is behind Cloudflare, rather than the whole suite sharing loopback's one bucket;
    - serve `apps/help/out` under `/help/*`, `apps/telemetry/out` under `/telemetry/*` and `apps/community/out` under
      `/community/*`, their basePaths, as the router mounts them; a missing build answers a logged 404;
    - cache as production does ([Stale builds](../016-platform/stale-builds.md) "Caching rules"): every
@@ -171,26 +179,31 @@ developer with `pnpm dev` already running (live :3002 + api :8787) runs
 `pnpm --filter @livediagram/live test:e2e` against that stack with no
 extra boot.
 
-## Signed-in specs (Clerk stub)
+## Signed-in specs
 
-Clerk is a build-time switch ([Auth + guest access](../014-identity/auth-and-guest-access.md)), so the
-guest-mode `out/` can never show a signed-in user. The specs in `apps/live/e2e/clerk-stub/` run
-against a second export, `apps/live/.next/out-clerk-stub/` (inside `.next/`, so every ignore and
-source scanner already skips it), built by `pnpm build:clerk-stub` with a
-publishable key for a host that cannot resolve. Each spec installs a fake `window.Clerk`
-(`e2e/clerk-stub/clerk-stub.ts`) before the page loads, which @clerk/react takes in place of
-downloading clerk-js, so a chosen user (name, email, pictures) sits behind the real hooks with no
-Clerk account, secret or network.
+Sign-in is the api's answer at runtime ([Auth + guest access](../014-identity/auth-and-guest-access.md)
+"Deployment modes"), so the signed-in specs run against the same `out/` as the smoke suite; only their stack differs.
+`E2E_SIGN_IN=1` boots it with sign-in on, as docs.nu runs it: the test-only `BETTER_AUTH_SECRET`, email codes as
+the one method with `EMAIL_OUTBOX=1` (nothing is sent; each message waits in `GET /api/preview/outbox?to=<email>`), and
+`APP_BASE_URL` on the live origin (`http://localhost:<live port>`), so better-auth's `Origin` check and its cookies
+match the pages under test. There is no stand-in for sign-in and no special build.
 
-`pnpm --filter @livediagram/live test:e2e:clerk-stub` sets `E2E_CLERK_STUB=1`, which adds the
-`clerk-stub` project and boots the stack with `E2E_LIVE_OUT=.next/out-clerk-stub` on its own ports
-(live `:3015`, api `:8788`, marketing `:3016`), so a guest stack already up on `:3002` is never
-reused for it. The stack also stands in for Clerk (`E2E_CLERK_JWKS=1`): it makes a signing key at
-boot, serves its JWKS on `/e2e/jwks.json`, starts the api worker with `CLERK_JWKS_URL` pointing at
-it, and mints a session token for any test account on `/e2e/token?sub=user_…`, which the fake
-`window.Clerk` hands out. So a stub account is a real verified account to the api and the realtime
-room, and two or three stub browsers can collaborate in one document. A test that changes an
-account's synced settings takes a fresh id (`freshUserId`), since the stack's D1 outlives a test. `e2e.yml` builds and runs them in their own job, beside the smoke shards.
+Each spec signs in for real (`apps/live/e2e/account/sign-in.ts`): `signIn(context, { baseURL, name })` asks for a code
+(`POST /api/auth/email-otp/send-verification-otp`), reads it from the outbox and signs in
+(`POST /api/auth/sign-in/email-otp`, with `Origin`), so the session cookie lands in the browser context and every page
+it opens is signed in. It returns the account's id and email, its session token (`GET /api/auth/token`) for seeding
+through the api as `Authorization: Bearer`, `update` for its name or picture (`POST /api/auth/update-user`; a
+picture is better-auth's `user.image` on Google's picture host, whose requests the spec answers itself,
+`e2e/account/pictures.ts`), and `enter` to sign another context in on the same session. Every account takes a fresh
+address, since parallel tests share the stack's one D1 and it outlives a run, so two or three accounts can collaborate in
+one document as real verified people to the api and the realtime room. Sign-up, sign-out, deleting the account and a
+guest's documents moving in on sign-in go through the pages themselves, as a person does.
+
+`pnpm --filter @livediagram/live test:e2e:account` sets `E2E_ACCOUNT=1`, which adds the `account` project (dark mode)
+and boots that stack on its own ports (live `:3015`, api `:8788`, marketing `:3016`), so a guest stack already up on
+`:3002` is never reused for it. The workbench (`test:e2e:workbench`, `:3021`) and Drive (`test:e2e:drive`, `:3023`)
+runs need an account too and boot the same kind of stack on ports of their own. `e2e.yml` runs the account and
+workbench projects in their own job, beside the smoke shards; Drive stays opt-in.
 
 ## Armed guest signatures
 
@@ -198,10 +211,9 @@ Every stack enforces guest signatures (above), so every spec runs as production 
 The specs in `apps/live/e2e/armed/` focus on the entry paths: a first-time guest who arrives on `/` or `/new`, or opens the
 Explorer first, gets a signed id before any owner-scoped call, creates a document (`201`) and sees
 the canvas, and no api response is `401`. `pnpm --filter @livediagram/live test:e2e:armed` sets
-`E2E_GUEST_SIG_ENFORCE=1`, which adds the `armed` project and boots the stack on its own ports
-(live `:3017`, api `:8789`, marketing `:3018`). It
-reuses the guest-mode export, so `e2e.yml` runs it as a second step of the Sites audit job, which
-has built it already.
+`E2E_GUEST_SIG_ENFORCE=1`, which adds the `armed` project (dark mode) and boots a guest-only stack on its own
+ports (live `:3017`, api `:8789`, marketing `:3018`). It reuses the live export, so `e2e.yml` runs it as a second
+step of the Sites audit job, which has built it already.
 
 ## No uncaught errors
 
@@ -283,9 +295,10 @@ tests where it's cheap.
 - `scripts/e2e-stack.mjs`: the stack boot + static serve (live, help, telemetry, community, marketing).
 - `.github/workflows/e2e.yml`: the sharded workflow, run on every pull request;
   `.github/actions/e2e-setup/`: the setup its jobs share (pnpm, Node, install, image check).
-- `test:e2e`, `test:e2e:smoke`, `test:e2e:sites` and `test:e2e:clerk-stub` scripts in `apps/live/package.json`; `build:clerk-stub`
-  (`apps/live/scripts/build-clerk-stub.mjs`) builds the export the latter runs against.
-- `apps/live/e2e/clerk-stub/`: the fake `window.Clerk` and the signed-in specs.
+- `test:e2e`, `test:e2e:smoke`, `test:e2e:sites`, `test:e2e:account`, `test:e2e:armed`, `test:e2e:workbench` and
+  `test:e2e:drive` scripts in `apps/live/package.json`.
+- `apps/live/e2e/account/`: the real sign-in (`sign-in.ts`), Google-hosted pictures (`pictures.ts`) and the signed-in
+  specs.
 
 Playwright is an `apps/live` dev dependency; it is **not** wired into
 `pnpm test` / `turbo run test` (that stays the fast unit gate), so
