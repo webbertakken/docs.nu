@@ -74,7 +74,7 @@ describe('loading your own profile before you have saved one', () => {
   it('still loads a signed-in profile, anonymously, while the session token is unavailable', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    const participant = { id: 'user_ann', name: 'Ann', color: '#f00', createdAt: 1 };
+    const participant = { id: 'acct_ann', name: 'Ann', color: '#f00', createdAt: 1 };
     vi.stubGlobal(
       'fetch',
       vi.fn((url: string, init?: RequestInit) => {
@@ -82,7 +82,7 @@ describe('loading your own profile before you have saved one', () => {
         return Promise.resolve(new Response(JSON.stringify({ participant }), { status: 200 }));
       }),
     );
-    expect((await apiLoadSelf('user_ann'))?.name).toBe('Ann');
+    expect((await apiLoadSelf('acct_ann'))?.name).toBe('Ann');
     expect(requests[0]!.headers.get('X-Owner-Id')).toBeNull();
     expect(requests[0]!.headers.get('Authorization')).toBeNull();
   });

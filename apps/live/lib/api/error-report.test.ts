@@ -182,7 +182,7 @@ describe('no session token', () => {
     const seen: string[] = [];
     setApiErrorReporter((t) => seen.push(t));
     setTokenProvider(() => Promise.resolve(null));
-    await expect(apiHeaders('user_abc')).rejects.toThrow();
+    await expect(apiHeaders('acct_abc')).rejects.toThrow();
     expect(seen).toEqual(['Auth.NoSessionToken']);
   });
 });
@@ -205,7 +205,7 @@ describe('reportSaveFailure', () => {
     const netErr = await apiFetch('/api/documents/d/tabs/t', { method: 'PUT' }).catch(
       (e: unknown) => e,
     );
-    const noTokenErr = await apiHeaders('user_abc').catch((e: unknown) => e);
+    const noTokenErr = await apiHeaders('acct_abc').catch((e: unknown) => e);
     seen.length = 0;
     for (const e of [apiErr, netErr, noTokenErr]) reportSaveFailure(e);
     expect(seen).toEqual([]);
