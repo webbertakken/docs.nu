@@ -126,7 +126,10 @@ Routes inside `apps/live/`:
 
 - **`/sign-in/`**: the methods `signInMethods` names, Google first. An email that has no account yet is not turned
   away: the code creates the account, then asks for a name. On success (and for a visitor already signed in) it lands
-  on the **Explorer** (`POST_AUTH_SIGNIN_DEFAULT`, `/explorer/recent`), unless a safe `?redirect_url` says otherwise.
+  on the **Explorer** at its own landing, Explorer Home (`POST_AUTH_SIGNIN_DEFAULT`, `/explorer`), unless a safe
+  `?redirect_url` says otherwise. Home rather than Recent: Home is where the Explorer lands everyone
+  ([Explorer Home](../013-workspace/explorer-home.md)), and it shows the recent documents and what happened since, which
+  is what a returning person wants first.
 - **`/get-started/`**: sign-up, the same methods with a name field first (one **name**, not first and last). Its
   default destination is the welcome flow (`POST_AUTH_DEFAULT`, `/new`).
 - **Google's round trip** ends at better-auth's own callback (`/api/auth/callback/google`), which redirects to the
