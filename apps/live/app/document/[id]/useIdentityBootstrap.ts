@@ -14,10 +14,9 @@ import {
   apiListShareLinks,
   apiLoadDocument,
   apiLoadShared,
-  getSessionSharePassword,
-  readCachedSharePassword,
+  readCachedShareGrant,
   setSessionSharePassword,
-  writeCachedSharePassword,
+  writeCachedShareGrant,
   type ShareLink,
   type SharedWithItem,
   type ShareRole,
@@ -398,14 +397,12 @@ export function useIdentityBootstrap(opts: {
       // arrivals get full document data via the share-code endpoint and
       // are flagged `!isOwner` so the Share button hides.
       if (shareCodeParam) {
-        // Warm-cache the share password (docs/specs/013-workspace/share-password.md) before the first
-        // call so a returning visitor whose password didn't change
-        // gets straight to the canvas without the gate. The seed is
-        // a no-op when the cache is empty (apiHeaders sees null and
-        // skips the X-Share-Password header), and if the server
-        // rejects the cached value we'll clear the entry below.
-        const cachedPassword = readCachedSharePassword(shareCodeParam);
-        if (cachedPassword) setSessionSharePassword(cachedPassword);
+        // Seed the session with the cached share grant (docs/specs/013-workspace/share-password.md
+        // "Password cache") before the first call, so a returning visitor whose password didn't change gets
+        // straight to the canvas without the gate. It rides where the password would (X-Share-Password); a
+        // no-op when nothing is cached, and cleared below when the server refuses it.
+        const cachedGrant = readCachedShareGrant(shareCodeParam);
+        if (cachedGrant) setSessionSharePassword(cachedGrant);
         // Pass the visitor's owner id so the api worker can record
         // their visit into shared_with — without it the server can't
         // identify the visitor and the "Shared with you" list stays
@@ -453,8 +450,8 @@ export function useIdentityBootstrap(opts: {
           // on the next retry, and reset the session attempt too so
           // the gate's empty-input prompt isn't lying about what's
           // about to be sent.
-          if (cachedPassword) {
-            writeCachedSharePassword(shareCodeParam, null);
+          if (cachedGrant) {
+            writeCachedShareGrant(shareCodeParam, null);
             setSessionSharePassword(null);
           }
           setSharePasswordGate({ invalid: resolution.invalid });
@@ -462,11 +459,10 @@ export function useIdentityBootstrap(opts: {
           setNameConfirmed(hasConfirmedName());
           return;
         }
-        // Success path. Persist whatever password the session is
-        // currently using (cached seed OR fresh user input) so the
-        // next load skips the gate.
-        const accepted = getSessionSharePassword();
-        if (accepted) writeCachedSharePassword(shareCodeParam, accepted);
+        // Success path. Keep the document's grant, never the password just typed, so the next load skips the
+        // gate; and use the grant from here on, so the password leaves this page's memory too.
+        writeCachedShareGrant(shareCodeParam, resolution.shareGrant ?? null);
+        if (resolution.shareGrant) setSessionSharePassword(resolution.shareGrant);
         {
           const { document: fetched, role, tabId: scopeTabId, community } = resolution;
           const session = resolveDocumentSession({

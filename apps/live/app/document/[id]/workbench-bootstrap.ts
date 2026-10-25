@@ -15,9 +15,9 @@ import {
   apiLoadSelf,
   apiLoadShared,
   getSessionSharePassword,
-  readCachedSharePassword,
+  readCachedShareGrant,
   setSessionSharePassword,
-  writeCachedSharePassword,
+  writeCachedShareGrant,
 } from '@/lib/api-client';
 import { isDocumentTrashedError } from '@/lib/document-trashed';
 import { randomColor, randomName, type Participant } from '@/lib/identity';
@@ -141,18 +141,18 @@ async function loadByLink(
   selfId: string,
   shareCode: string,
 ): Promise<Loaded | 'gone' | PasswordAsked> {
-  const cached = readCachedSharePassword(shareCode);
+  const cached = readCachedShareGrant(shareCode);
   if (cached && getSessionSharePassword() === null) setSessionSharePassword(cached);
   const resolution = await apiLoadShared(shareCode, selfId);
   if (!resolution) return 'gone';
   if ('passwordRequired' in resolution) {
     if (cached) {
-      writeCachedSharePassword(shareCode, null);
+      writeCachedShareGrant(shareCode, null);
       setSessionSharePassword(null);
     }
     return { password: { invalid: resolution.invalid } };
   }
-  const accepted = getSessionSharePassword();
-  if (accepted) writeCachedSharePassword(shareCode, accepted);
+  writeCachedShareGrant(shareCode, resolution.shareGrant ?? null);
+  if (resolution.shareGrant) setSessionSharePassword(resolution.shareGrant);
   return { document: resolution.document, role: resolution.role, tabScope: resolution.tabId };
 }

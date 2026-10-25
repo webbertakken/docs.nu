@@ -37,8 +37,8 @@ export {
   registerTokenProvider,
   setSessionSharePassword,
   getSessionSharePassword,
-  readCachedSharePassword,
-  writeCachedSharePassword,
+  readCachedShareGrant,
+  writeCachedShareGrant,
 } from './api/core';
 
 export * from './api/documents';

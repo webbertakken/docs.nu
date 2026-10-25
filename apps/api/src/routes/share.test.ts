@@ -448,6 +448,22 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
     expect(await res.json()).toMatchObject({ role: 'view', document: { id: 'd1' } });
   });
 
+  it('hands a visitor past the password a grant to keep instead, which then opens the link', async () => {
+    getShareLinkMock.mockResolvedValue({ ...shareLink('d1'), role: 'view' });
+    getSharePasswordMock.mockResolvedValue('hunter2');
+    const first = await handleShare(resolveCtx({ password: 'hunter2' }).ctx);
+    const { shareGrant } = (await first.json()) as { shareGrant: string };
+    expect(shareGrant).toMatch(/^spg_[A-Za-z0-9_-]{43}$/);
+    const again = await handleShare(resolveCtx({ password: shareGrant }).ctx);
+    expect(again.status).toBe(200);
+  });
+
+  it('hands no grant for a document without a password', async () => {
+    getShareLinkMock.mockResolvedValue({ ...shareLink('d1'), role: 'view' });
+    const res = await handleShare(resolveCtx().ctx);
+    expect(await res.json()).toMatchObject({ shareGrant: null });
+  });
+
   it('blanks the owner id for everyone but the owner', async () => {
     // A guest's owner-id is a bearer value: an observer who learns it could
     // once claim that guest's documents via /api/migrate. A visitor never

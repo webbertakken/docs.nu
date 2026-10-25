@@ -21,9 +21,9 @@ const { api, guest, offline, seed } = vi.hoisted(() => ({
 vi.mock('@/lib/api-client', () => ({
   ...api,
   getSessionSharePassword: () => null,
-  readCachedSharePassword: () => null,
+  readCachedShareGrant: () => null,
   setSessionSharePassword: () => {},
-  writeCachedSharePassword: () => {},
+  writeCachedShareGrant: () => {},
 }));
 vi.mock('@/lib/guest-identity', () => guest);
 vi.mock('@/lib/offline/offline-store', () => ({ ...offline, OFFLINE_OWNER_ID: '__offline__' }));

@@ -16,7 +16,7 @@ import {
 import { notifyDocumentJoin } from '../email/notifications';
 import { documentTrashed, forbidden, json, notFound, svgImage } from '../responses';
 import { reportServerEvent } from '../server-telemetry';
-import { sharePasswordStatus, type SharePasswordAttempt } from '../auth/share-access';
+import { shareGrantOf, sharePasswordStatus, type SharePasswordAttempt } from '../auth/share-access';
 import {
   redactDocumentForCommunity,
   redactDocumentForReader,
@@ -131,7 +131,9 @@ export async function handleShare(ctx: RouteContext): Promise<Response> {
         { ...redactDocumentForReader(d, visitor), shareCode: null },
         link.tabId,
       );
-      return json({ document: liveDoc, role: link.role, tabId: link.tabId });
+      // A protected document's grant, for the browser to keep instead of the password it typed.
+      const shareGrant = await shareGrantOf(env, d.id);
+      return json({ document: liveDoc, role: link.role, tabId: link.tabId, shareGrant });
     }
     // No active link resolves this code: expired, revoked, or never
     // existed. `getShareLink` (above) is the single authority — it

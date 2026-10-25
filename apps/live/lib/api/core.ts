@@ -20,7 +20,11 @@ import {
 } from '@livediagram/api-schema';
 import { noteServerBuild, noteServerDocumentFormat } from '../server-release';
 import { stampTabKind, type Tab } from '@livediagram/document';
-import { readLocalStorageSafe, writeLocalStorageSafe } from '../local-storage-safe';
+import {
+  readLocalStorageSafe,
+  removeLocalStorageSafe,
+  writeLocalStorageSafe,
+} from '../local-storage-safe';
 import { getGuestSelfSig } from '../local-identity';
 import { notifyApiWrite } from './write-signal';
 import { API_BASE } from './base';
@@ -182,6 +186,8 @@ export type SharedDocumentResolution =
       role: ShareRole;
       tabId: string | null;
       community: CommunityShareInfo | null;
+      // The grant for a password-protected document, kept instead of the password; null without one.
+      shareGrant?: string | null;
     }
   | { passwordRequired: true; invalid: boolean };
 
@@ -276,29 +282,24 @@ export function getSessionSharePassword(): string | null {
   return sessionSharePassword;
 }
 
-// localStorage cache so a returning visitor on a protected document
-// doesn't have to retype the password every load. Keyed by share code
-// rather than document id because the document id only resolves AFTER
-// the gate is passed; the share code is what the URL carries on
-// arrival. Entry lifetime is bounded by the share code's validity:
-//   - Code revoked: apiLoadShared returns null, no cache read happens
-//     on later loads anyway (the bootstrap surfaces NotFound first).
-//   - Password rotated: the cached value comes back from the server
-//     as passwordRequired { invalid: true }, the bootstrap clears the
-//     entry, and the gate prompts the visitor afresh.
-// Threat model (docs/specs/013-workspace/share-password.md) is anti-URL-guessing, not cryptographic
-// protection of user data; storing plain text mirrors what the api
-// worker already does in D1. The owner cleartext-reads it on the
-// Share dialog anyway.
-const SHARE_PASSWORD_CACHE_PREFIX = 'livediagram:share-password:';
-export function readCachedSharePassword(shareCode: string): string | null {
-  const raw = readLocalStorageSafe(`${SHARE_PASSWORD_CACHE_PREFIX}${shareCode}`);
-  return raw && raw.length > 0 ? raw : null;
+// The share grant cache (docs/specs/013-workspace/share-password.md "Password cache"): a returning visitor on a
+// protected document is not asked for the password again. What is kept is the server's grant for the document,
+// never the password: the grant opens this document through its links and nothing else, and reveals nothing a
+// person might reuse elsewhere. Keyed by share code, which the URL carries on arrival (the document id only
+// resolves after the gate). A grant the server refuses (the password changed or went) is cleared by the bootstrap.
+const SHARE_GRANT_CACHE_PREFIX = 'livedoc:share-grant:';
+const SHARE_GRANT_SHAPE = /^spg_[A-Za-z0-9_-]{43}$/;
+// Where browsers kept the password itself before grants: removed on sight, so no copy outlives the change.
+const LEGACY_SHARE_PASSWORD_PREFIX = 'livediagram:share-password:';
+export function readCachedShareGrant(shareCode: string): string | null {
+  removeLocalStorageSafe(`${LEGACY_SHARE_PASSWORD_PREFIX}${shareCode}`);
+  const raw = readLocalStorageSafe(`${SHARE_GRANT_CACHE_PREFIX}${shareCode}`);
+  return raw && SHARE_GRANT_SHAPE.test(raw) ? raw : null;
 }
-export function writeCachedSharePassword(shareCode: string, password: string | null): void {
-  const key = `${SHARE_PASSWORD_CACHE_PREFIX}${shareCode}`;
-  if (password && password.length > 0) writeLocalStorageSafe(key, password);
-  else writeLocalStorageSafe(key, '');
+export function writeCachedShareGrant(shareCode: string, grant: string | null): void {
+  const key = `${SHARE_GRANT_CACHE_PREFIX}${shareCode}`;
+  if (grant && SHARE_GRANT_SHAPE.test(grant)) writeLocalStorageSafe(key, grant);
+  else removeLocalStorageSafe(key);
 }
 
 // Exported for direct testing of the hybrid identity gate (docs/specs/014-identity/auth-and-guest-access.md):

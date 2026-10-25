@@ -21,9 +21,9 @@ const { api, identity, seed } = vi.hoisted(() => ({
 vi.mock('@/lib/api-client', () => ({
   ...api,
   getSessionSharePassword: () => null,
-  readCachedSharePassword: () => null,
+  readCachedShareGrant: () => null,
   setSessionSharePassword: () => {},
-  writeCachedSharePassword: () => {},
+  writeCachedShareGrant: () => {},
 }));
 vi.mock('@/lib/local-identity', () => identity);
 vi.mock('@/lib/guest-identity', () => ({

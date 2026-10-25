@@ -109,29 +109,32 @@ so the check can spend the caller's guessing budget.
 
 ### Password cache
 
-A visitor who got past the gate is not asked again on their next visit. The
-accepted password is kept in `localStorage` under
-`livediagram:share-password:<code>`, **one entry per share code**, in plain
-text (`readCachedSharePassword` / `writeCachedSharePassword` in
-`lib/api/core.ts`).
+A visitor who got past the gate is not asked again on their next visit. What the browser keeps is a **share
+grant**, never the password: the resolve (`GET /api/share/:code`) answers a protected document with
+`shareGrant`, `spg_` and 43 base64url characters, and the browser keeps that under
+`livedoc:share-grant:<code>` (`readCachedShareGrant` / `writeCachedShareGrant` in `lib/api/core.ts`).
 
-- **Keyed by share code**, not document id: the document id only resolves after
-  the gate is passed, and the code is what the URL carries on arrival.
-- **Read** at the start of a share-link bootstrap and set as the session share
-  password, so the first `GET /api/share/:code` already carries it.
-- **Written** after every successful resolve with whichever password the
-  session used, the cached one or the one just typed.
-- **Cleared** when the server refuses a cached password (a `401` or `403` from
-  the resolve, which the owner rotating or removing the password causes): the
-  entry is emptied, the session password dropped, and the gate shown afresh, so
-  a stale value never loops.
-- **Lifetime** is otherwise unbounded: the entry stays until it is refused or
-  the visitor clears their site data. A revoked link never reaches the cache
-  read (the resolve answers `404` first), so its entry is inert.
-- **Plain text** in the visitor's own browser matches the threat model above:
-  anyone able to read this browser's storage can already open the document in it.
-- In an **embed**, browsers partition third-party iframe storage, so the cache
-  is per embedding site ([Read-only embeds (`/embed`)](embeds.md)).
+- **What a grant is.** SHA-256 of the document id and the **stored** password value (`shareGrantFor` in
+  `apps/api/src/auth/share-access.ts`). The stored value is a salted hash the server never hands out, so only the
+  server can make a grant; it reveals nothing about the password, which a person may use elsewhere; and changing
+  or removing the password voids every grant at once.
+- **Where it is accepted:** wherever the password is (`X-Share-Password`, the room's `p`), on every share-code
+  door. It is checked by equality in constant time, with no derivation and no guess budget spent: it is 256 bits
+  the server made.
+- **Keyed by share code**, not document id: the document id only resolves after the gate is passed, and the code
+  is what the URL carries on arrival.
+- **Read** at the start of a share-link bootstrap and set as the session share password, so the first resolve
+  already carries it.
+- **Written** after every successful resolve, and the session switches to the grant, so the typed password does
+  not stay in the page's memory either.
+- **Cleared** when the server refuses it (a `401` or `403` from the resolve, which the owner rotating or removing
+  the password causes): the entry is removed, the session password dropped, and the gate shown afresh.
+- **Lifetime** is otherwise unbounded: the entry stays until it is refused or the visitor clears their site data.
+  A revoked link never reaches the cache read (the resolve answers `404` first), so its entry is inert.
+- **No password at rest.** Browsers that kept the password itself, under `livediagram:share-password:<code>`
+  before grants, have that entry removed the first time the code is read.
+- In an **embed**, browsers partition third-party iframe storage, so the cache is per embedding site
+  ([Read-only embeds (`/embed`)](embeds.md)).
 
 ## Editor flow (apps/live, viewer)
 
