@@ -99,7 +99,7 @@ the deleted card ahead of every other status while `trashed` is true.
 
 ## Interfaces and contracts
 
-REST (all `guest-or-clerk`, token-usable; a read-only token may only `GET`):
+REST (all `guest-or-session`, token-usable; a read-only token may only `GET`):
 
 | Method | Path                                | Success                                       | Failures                                                                        |
 | ------ | ----------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |

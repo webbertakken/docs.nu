@@ -92,9 +92,10 @@ holding identifiers and states only, never document content:
 - the editor build id;
 - the identity, the same lines on every surface:
   - **Signed in:** yes or no. The editor adds the account id it resolved. The
-    help page, which has no sign-in provider loaded, reads the provider's
-    `__client_uat` cookie (`0` signed out, a timestamp signed in), which says
-    whether but not who; with no such cookie it reports "unknown".
+    help page, which reads no session, reads the signed-in hint the auth bridge
+    keeps in `localStorage` (`livediagram:v2:signed-in`: `1` signed in, `0`
+    signed out), which says whether but not who; with no hint it reports
+    "unknown".
   - **Guest id in this browser:** only its first 8 characters (a full guest id
     is an `X-Owner-Id` credential) and whether it is signed, or "none".
   - **Identity upgrade pending:** yes or no.
@@ -133,8 +134,8 @@ cache, cached share passwords, and the stale-build reload guards.
   `livediagram:drive-mirror*`);
 - the offline store (IndexedDB `livediagram-offline`): Offline Mode documents
   exist nowhere else;
-- cookies and the sign-in provider's own storage: repair never signs anyone
-  out.
+- cookies, the session cookie among them: repair never signs anyone out (the
+  signed-in hint it clears is written again by the next session read).
 
 The kept list lives in one shared module, so the editor's Repair button and the
 help centre's Repair page clear exactly the same set, and a test fails if a

@@ -223,7 +223,7 @@ owner_id = ?` then `DELETE … WHERE owner_id = <guest>`: the account's row for 
 
 ## Security and trust
 
-- Team membership on PUT and on use is read against `ctx.verifiedUserId` only; a guest default is
+- Team membership on PUT and on use is read against `ctx.verifiedAccountId` only; a guest default is
   personal-only.
 - `folder_not_found` covers every invisible folder: setting a default leaks no other person's folder.
 - `placement-defaults` is in `OWNER_SCOPED_SEGMENTS`.

@@ -128,8 +128,8 @@ Invariant: on every path the bootstrap leaves `loadingDocument` false or the wat
 - The report never carries a share code (`?s=` reduced to "share link: yes") or a full guest id
   (8-character prefix, cut inside `readBrowserIdentity` so no caller sees the whole id). A
   signed-in account id is not a credential on its own and is included by the editor only.
-- `__client_uat` is read as a hint (value > 0 means signed in; any `__client_uat_<suffix>`
-  counts); it is never sent anywhere but the copied report.
+- The signed-in hint (`SIGNED_IN_HINT_KEY` from `@livediagram/account-session`, `1` signed in, `0` signed out,
+  absent unknown) is read as a hint; it is never sent anywhere but the copied report.
 - The repair cannot sign anyone out or remove identity; the kept list is guarded by a test against
   `LOCAL_IDENTITY_KEYS`.
 - Telemetry types are fixed tokens; the step is a closed enum.
@@ -168,20 +168,20 @@ after …`, `[browser-repair] cleared N keys`. Telemetry as listed in the spec.
 
 ## Testing
 
-| Spec rule                                  | Test                                                                                                               |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Watchdog, self-healing reload, late load   | `apps/live/lib/load-progress.test.ts`                                                                              |
-| Load ends on hang, throw; late load wins   | `apps/live/app/document/[id]/useIdentityBootstrap.recovery.test.tsx`                                               |
-| Offline store open limit                   | `apps/live/lib/offline/offline-store-timeout.test.ts`                                                              |
-| Session token limit                        | `apps/live/lib/api/core.test.ts` "session token limit"                                                             |
-| Diagnostics contents and redaction         | `apps/live/lib/load-diagnostics.test.ts`                                                                           |
-| Kept list covers the guest identity        | `apps/live/lib/local-identity-repair.test.ts`                                                                      |
-| Clear / keep rules, blocked storage        | `packages/ui/src/browser-repair/repair.test.ts`                                                                    |
-| Browser checks                             | `packages/ui/src/browser-repair/checks.test.ts`                                                                    |
-| Identity lines, cookie hint, not-yet-moved | `packages/ui/src/browser-repair/identity.test.ts`                                                                  |
-| Copy, fallback, confirm, cancel            | `packages/ui/src/browser-repair/BrowserRepairPanel.test.tsx`                                                       |
-| Opening screen messages                    | `apps/live/components/chrome/DocumentLoading.test.tsx`                                                             |
-| Offline: opening screen, card, banner      | `apps/live/components/chrome/DocumentLoading.test.tsx`, `LoadErrorCard.test.tsx`, `OfflineBanner.test.tsx`         |
-| Offline: no phantom tab, no stale reload   | `apps/live/app/document/[id]/editor-page-helpers.test.ts` `autosaveReadOnly`, `apps/live/lib/stale-chunks.test.ts` |
-| Offline: no auto reload, save on reconnect | `apps/live/lib/load-progress.test.ts`, `apps/live/app/document/[id]/useAutosave.test.tsx`                          |
-| Recovery card contents                     | `apps/live/components/chrome/LoadRecoveryCard.test.tsx`                                                            |
+| Spec rule                                     | Test                                                                                                               |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Watchdog, self-healing reload, late load      | `apps/live/lib/load-progress.test.ts`                                                                              |
+| Load ends on hang, throw; late load wins      | `apps/live/app/document/[id]/useIdentityBootstrap.recovery.test.tsx`                                               |
+| Offline store open limit                      | `apps/live/lib/offline/offline-store-timeout.test.ts`                                                              |
+| Session token limit                           | `apps/live/lib/api/core.test.ts` "session token limit"                                                             |
+| Diagnostics contents and redaction            | `apps/live/lib/load-diagnostics.test.ts`                                                                           |
+| Kept list covers the guest identity           | `apps/live/lib/local-identity-repair.test.ts`                                                                      |
+| Clear / keep rules, blocked storage           | `packages/ui/src/browser-repair/repair.test.ts`                                                                    |
+| Browser checks                                | `packages/ui/src/browser-repair/checks.test.ts`                                                                    |
+| Identity lines, signed-in hint, not-yet-moved | `packages/ui/src/browser-repair/identity.test.ts`                                                                  |
+| Copy, fallback, confirm, cancel               | `packages/ui/src/browser-repair/BrowserRepairPanel.test.tsx`                                                       |
+| Opening screen messages                       | `apps/live/components/chrome/DocumentLoading.test.tsx`                                                             |
+| Offline: opening screen, card, banner         | `apps/live/components/chrome/DocumentLoading.test.tsx`, `LoadErrorCard.test.tsx`, `OfflineBanner.test.tsx`         |
+| Offline: no phantom tab, no stale reload      | `apps/live/app/document/[id]/editor-page-helpers.test.ts` `autosaveReadOnly`, `apps/live/lib/stale-chunks.test.ts` |
+| Offline: no auto reload, save on reconnect    | `apps/live/lib/load-progress.test.ts`, `apps/live/app/document/[id]/useAutosave.test.tsx`                          |
+| Recovery card contents                        | `apps/live/components/chrome/LoadRecoveryCard.test.tsx`                                                            |
