@@ -82,21 +82,21 @@ describe('buildManifest', () => {
         work('long', '5.3.2'),
         work('XNNPACK', '5e8033a', { key: 'embedded:xnnpack', kind: 'embedded', carrier: 'tfjs' }),
         work('long', '4.0.0'),
-        work('@clerk/react', '6.17.0', { homepage: 'https://clerk.com/' }),
+        work('@better-auth/core', '1.7.13', { homepage: 'https://www.better-auth.com/' }),
         work('process', 'bundled in next 16.3.6', { key: 'vendored:x/process', kind: 'vendored' }),
         work('Process', 'bundled in next 16.3.6', { key: 'vendored:y/process', kind: 'vendored' }),
       ]),
     ]);
     const works = manifest.sections[0]!.works;
     expect(works.map((w) => [w.name, w.version, w.anchor])).toEqual([
-      ['@clerk/react', '6.17.0', 'browser-clerk-react-6-17-0'],
+      ['@better-auth/core', '1.7.13', 'browser-better-auth-core-1-7-13'],
       ['long', '4.0.0', 'browser-long-4-0-0'],
       ['long', '5.3.2', 'browser-long-5-3-2'],
       ['process', 'bundled in next 16.3.6', 'browser-process-bundled-in-next-16-3-6'],
       ['Process', 'bundled in next 16.3.6', 'browser-process-bundled-in-next-16-3-6-2'],
       ['XNNPACK', '5e8033a', 'browser-xnnpack-5e8033a'],
     ]);
-    expect(works[0]).toMatchObject({ homepage: 'https://clerk.com/' });
+    expect(works[0]).toMatchObject({ homepage: 'https://www.better-auth.com/' });
     expect(works[0]).not.toHaveProperty('carrier');
     expect(works[5]).toMatchObject({ kind: 'embedded', carrier: 'tfjs' });
     expect(works[5]).not.toHaveProperty('homepage');

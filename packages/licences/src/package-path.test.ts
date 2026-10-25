@@ -15,8 +15,11 @@ describe('locatePackage', () => {
 
   it('reads scoped names and drops the peer suffix from the store key', () => {
     const path =
-      'node_modules/.pnpm/@clerk+react@6.17.0_react-dom@19.3.0_react@19.3.0/node_modules/@clerk/react/dist/index.mjs';
-    expect(locatePackage(path)).toMatchObject({ name: '@clerk/react', storeVersion: '6.17.0' });
+      'node_modules/.pnpm/@better-auth+core@1.7.13_react-dom@19.3.0_react@19.3.0/node_modules/@better-auth/core/dist/index.mjs';
+    expect(locatePackage(path)).toMatchObject({
+      name: '@better-auth/core',
+      storeVersion: '1.7.13',
+    });
   });
 
   it('keeps prerelease versions whole', () => {
