@@ -18,17 +18,17 @@ link's text, except to follow a rename ([Renames](#renames)).
 
 ## Link forms
 
-| From → to                                      | Written as                                                           | Resolves to                                                         |
-| ---------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| A page → a page of the same wiki               | `[PM2](../tools/pm2.md)`                                             | The page at that path                                               |
-| A page → a heading                             | `[Ports](../tools/pm2.md#ports)`, or `#ports` within the page        | The heading whose slug matches, as GitHub slugs it                  |
-| A page → a file document                       | `[script](setup.sh)`, `![Flow](img/flow.png)`                        | The file document; an image is drawn                                |
-| A page → a diagram or other document           | `[Architecture](architecture.livedoc.md)`, its outline file          | The document, opened on its first tab; `#<tab name>` opens that tab |
-| A page → a diagram, drawn in the page          | `![Architecture](architecture.livedoc.svg)`, its render              | The document's first tab, drawn live                                |
-| A page → a section                             | `[Tools](../tools/)`                                                 | The section, opened on its `index` or `README` page when it has one |
-| A page → another wiki, or anything outside one | Open (Q8); recommended: `[PM2](https://docs.nu/document/doc_3h9x2a)` | The document, by its id                                             |
-| A page → the repository outside the wiki       | `[the parser](../../apps/cli/src/parse.ts)`                          | [Links out of the wiki](#links-out-of-the-wiki)                     |
-| A page → the web                               | `[Yjs](https://yjs.dev)`                                             | The address, opened in a new browser tab                            |
+| From → to                                      | Target, as written in `[text](target)`                        | Resolves to                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- |
+| A page → a page of the same wiki               | `../tools/pm2.md`                                             | The page at that path                                               |
+| A page → a heading                             | `../tools/pm2.md#ports`, or `#ports` within the page          | The heading whose slug matches, as GitHub slugs it                  |
+| A page → a file document                       | `setup.sh`; `img/flow.png` in an image, `![Flow](…)`          | The file document; an image is drawn                                |
+| A page → a diagram or other document           | `architecture.livedoc.md`, its outline file                   | The document, opened on its first tab; `#<tab name>` opens that tab |
+| A page → a diagram, drawn in the page          | `architecture.livedoc.svg` in an image, its render            | The document's first tab, drawn live                                |
+| A page → a section                             | `../tools/`                                                   | The section, opened on its `index` or `README` page when it has one |
+| A page → another wiki, or anything outside one | Open (Q8); recommended: `https://docs.nu/document/doc_3h9x2a` | The document, by its id                                             |
+| A page → the repository outside the wiki       | `../../apps/cli/src/input.ts`                                 | [Links out of the wiki](#links-out-of-the-wiki)                     |
+| A page → the web                               | `https://yjs.dev`                                             | The address, opened in a new browser tab                            |
 
 - Relative links are written to the **native file** paths a sync writes
   ([Native files](../027-repositories/native-files.md#what-a-link-writes)), so a link that works in livedocs works in
