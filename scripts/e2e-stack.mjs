@@ -241,7 +241,7 @@ async function seedLegacyGuest() {
         'wrangler',
         'd1',
         'execute',
-        'livediagram',
+        'DB',
         '--local',
         '--command',
         sql,

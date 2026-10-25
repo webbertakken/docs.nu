@@ -6,22 +6,22 @@ import { describe, expect, it } from 'vitest';
 import { parsePositiveCap } from './routes/images';
 
 // The hosted profile (docs/specs/016-platform/deployment.md "Hosted profile"):
-// the vars livediagram.app's deploys add, and a fork's do not. Two promises
+// the vars docs.nu's own deploys add, and a fork's do not. Two promises
 // hang on it: a fork deploying the repo as documented is telemetry-off and
 // uncapped, and the hosted deployment's image caps survive every deploy.
 
 type Profile = {
   shared: Record<string, string>;
-  environments: Record<'production' | 'staging', Record<string, string>>;
+  environments: Record<string, Record<string, string>>;
 };
 
 interface HostedVarsModule {
   HOSTED_VARS_PATH: string;
   readHostedProfile: (path?: string) => Profile;
-  hostedEnvironment: (wranglerEnv: string) => 'production' | 'staging';
+  hostedEnvironment: (wranglerEnv: string, profile: Profile) => string;
   resolveHostedVars: (
     profile: Profile,
-    environment: 'production' | 'staging',
+    environment: string,
   ) => { vars: Record<string, string>; unset: string[] };
   splitEnvArg: (args: string[]) => { wranglerEnv: string; rest: string[] };
   unsetVarDrift: (
@@ -61,8 +61,9 @@ function tomlTableKeys(toml: string, header: string): string[] {
 }
 
 describe('hosted profile', () => {
-  it('turns telemetry on and caps every owner gallery', async () => {
-    const vars = (await load()).readHostedProfile().shared;
+  it('turns telemetry on, caps every owner gallery and links emails to docs.nu', async () => {
+    const { shared: vars, environments } = (await load()).readHostedProfile();
+    expect(environments.production!.APP_BASE_URL).toBe('https://docs.nu');
     expect(vars.TELEMETRY_ENABLED).toBe('true');
     // The worker's own parser: a value it reads as "no cap" would leave R2
     // unguarded while this file looked right.
@@ -73,7 +74,7 @@ describe('hosted profile', () => {
   it('names only vars the worker reads', async () => {
     const types = readApiFile('src/types.ts');
     const { shared, environments } = (await load()).readHostedProfile();
-    const names = [...Object.keys(shared), ...Object.keys(environments.production)];
+    const names = [...Object.keys(shared), ...Object.keys(environments.production!)];
     for (const name of names) {
       expect(types, `${name} is not on Env`).toMatch(new RegExp(`\\b${name}\\?: string;`));
     }
@@ -83,17 +84,17 @@ describe('hosted profile', () => {
     const { shared, environments } = (await load()).readHostedProfile();
     const hosted = [
       ...Object.keys(shared),
-      ...Object.keys(environments.production),
-      ...Object.keys(environments.staging),
+      ...Object.values(environments).flatMap((vars) => Object.keys(vars)),
     ];
     const toml = readApiFile('wrangler.toml');
-    for (const table of ['vars', 'env.staging.vars']) {
+    const varTables = [...toml.matchAll(/^\[((?:env\.[\w-]+\.)?vars)\]$/gm)].map((m) => m[1]!);
+    expect(varTables).toContain('vars');
+    for (const table of varTables) {
       const declared = tomlTableKeys(toml, table).filter((k) => hosted.includes(k));
       expect(declared, `[${table}] declares hosted-only vars`).toEqual([]);
     }
     // Vacuity guard: the table reader must still see what IS committed.
     expect(tomlTableKeys(toml, 'vars')).toContain('AI_ALLOWED_ORIGINS');
-    expect(tomlTableKeys(toml, 'env.staging.vars')).toContain('AI_ALLOWED_ORIGINS');
   });
 });
 
@@ -130,23 +131,29 @@ describe('hosted-vars script', () => {
     expect(() => readHostedVars(write('{"lower": "1"}'))).toThrow(/invalid var name/);
     expect(() => readHostedVars(write('{"CAP": 100}'))).toThrow(/non-empty string/);
     expect(() => readHostedVars(write('{"CAP": ""}'))).toThrow(/non-empty string/);
-    const envs = (production: unknown, staging: unknown, extra = '') =>
+    const envs = (production: unknown, preview: unknown) =>
       write(
-        `{"CAP": "1", "environments": {"production": ${JSON.stringify(production)}, "staging": ${JSON.stringify(staging)}${extra}}}`,
+        `{"CAP": "1", "environments": {"production": ${JSON.stringify(production)}, "preview": ${JSON.stringify(preview)}}}`,
       );
-    expect(() => readHostedVars(write('{"environments": {"production": {}}}'))).toThrow(
-      /production and staging/,
+    expect(() => readHostedVars(write('{"environments": {"preview": {}}}'))).toThrow(
+      /must hold production/,
     );
-    expect(() => readHostedVars(envs({ A: '' }, {}, ', "dev": {}'))).toThrow(
-      /production and staging/,
-    );
+    expect(() => readHostedVars(write('{"environments": []}'))).toThrow(/must hold production/);
+    expect(readHostedVars(write('{"environments": {"production": {"A": "x"}}}'))).toEqual({
+      shared: {},
+      environments: { production: { A: 'x' } },
+    });
+    expect(readHostedVars(write('{"CAP": "1"}'))).toEqual({
+      shared: { CAP: '1' },
+      environments: { production: {} },
+    });
     expect(() => readHostedVars(envs({ A: '' }, { B: '' }))).toThrow(/same names/);
     expect(() => readHostedVars(envs({ CAP: '' }, { CAP: '' }))).toThrow(/also shared/);
     expect(() => readHostedVars(envs({ A: 1 }, { A: '' }))).toThrow(/string/);
     expect(() => readHostedVars(envs({ a: '' }, { a: '' }))).toThrow(/invalid var name/);
     expect(readHostedVars(envs({ A: 'x' }, { A: '' }))).toEqual({
       shared: { CAP: '1' },
-      environments: { production: { A: 'x' }, staging: { A: '' } },
+      environments: { production: { A: 'x' }, preview: { A: '' } },
     });
   });
 
@@ -190,40 +197,42 @@ describe('hosted-vars script', () => {
   });
 });
 
-// The Drive mirror's Google identity is per environment: livediagram.app runs one
-// Google Cloud project for production and one for staging
-// (docs/specs/022-drive-mirror/drive-mirror.md, "Hosted deployment").
+// The Drive mirror's Google identity is per environment: each environment is its own
+// Google Cloud project (docs/specs/022-drive-mirror/drive-mirror.md, "Hosted deployment").
+// `preview` stands in for any environment beside production.
 describe('hosted profile per environment', () => {
   const profile: Profile = {
     shared: { TELEMETRY_ENABLED: 'true' },
     environments: {
       production: { GOOGLE_CLIENT_ID: '111-prod.apps.googleusercontent.com' },
-      staging: { GOOGLE_CLIENT_ID: '222-staging.apps.googleusercontent.com' },
+      preview: { GOOGLE_CLIENT_ID: '222-preview.apps.googleusercontent.com' },
     },
   };
 
   it('names the environment by the wrangler env, and refuses any other', async () => {
     const { hostedEnvironment } = await load();
-    expect(hostedEnvironment('')).toBe('production');
-    expect(hostedEnvironment('staging')).toBe('staging');
-    expect(() => hostedEnvironment('prod')).toThrow(/unknown environment/);
+    expect(hostedEnvironment('', profile)).toBe('production');
+    expect(hostedEnvironment('preview', profile)).toBe('preview');
+    expect(() => hostedEnvironment('prod', profile)).toThrow(/unknown environment/);
+    // Production is the unnamed wrangler env; naming it would deploy a second production.
+    expect(() => hostedEnvironment('production', profile)).toThrow(/unknown environment/);
   });
 
   it('reads --env off the command line and leaves the rest for wrangler', async () => {
     const { splitEnvArg } = await load();
     expect(splitEnvArg([])).toEqual({ wranglerEnv: '', rest: [] });
-    expect(splitEnvArg(['--env', 'staging', 'out'])).toEqual({
-      wranglerEnv: 'staging',
+    expect(splitEnvArg(['--env', 'preview', 'out'])).toEqual({
+      wranglerEnv: 'preview',
       rest: ['out'],
     });
   });
 
   it("resolves each environment's own client id, shared vars beside it", async () => {
     const { resolveHostedVars } = await load();
-    expect(resolveHostedVars(profile, 'staging')).toEqual({
+    expect(resolveHostedVars(profile, 'preview')).toEqual({
       vars: {
         TELEMETRY_ENABLED: 'true',
-        GOOGLE_CLIENT_ID: '222-staging.apps.googleusercontent.com',
+        GOOGLE_CLIENT_ID: '222-preview.apps.googleusercontent.com',
       },
       unset: [],
     });
@@ -236,9 +245,9 @@ describe('hosted profile per environment', () => {
     const { resolveHostedVars, wranglerVarFlags, buildEnv } = await load();
     const empty: Profile = {
       ...profile,
-      environments: { ...profile.environments, staging: { GOOGLE_CLIENT_ID: '' } },
+      environments: { ...profile.environments, preview: { GOOGLE_CLIENT_ID: '' } },
     };
-    const { vars, unset } = resolveHostedVars(empty, 'staging');
+    const { vars, unset } = resolveHostedVars(empty, 'preview');
     expect(unset).toEqual(['GOOGLE_CLIENT_ID']);
     expect(wranglerVarFlags(vars)).toEqual(['--var', 'TELEMETRY_ENABLED:true']);
     expect(buildEnv(vars)).toEqual(['NEXT_PUBLIC_TELEMETRY_ENABLED=true']);
@@ -246,9 +255,9 @@ describe('hosted profile per environment', () => {
 
   it('gives the worker and the live build of one environment the same client id', async () => {
     const { resolveHostedVars, wranglerVarFlags, buildEnv } = await load();
-    for (const env of ['production', 'staging'] as const) {
+    for (const env of ['production', 'preview']) {
       const { vars } = resolveHostedVars(profile, env);
-      const id = profile.environments[env].GOOGLE_CLIENT_ID;
+      const id = profile.environments[env]!.GOOGLE_CLIENT_ID;
       expect(wranglerVarFlags(vars)).toContain(`GOOGLE_CLIENT_ID:${id}`);
       expect(buildEnv(vars)).toContain(`NEXT_PUBLIC_GOOGLE_CLIENT_ID=${id}`);
     }
@@ -270,10 +279,10 @@ describe('hosted profile per environment', () => {
   it("verify-build finds the environment's client id in the live build, and never another's", async () => {
     const { clientIdBuildDrift } = await load();
     const prod = '111-prod.apps.googleusercontent.com';
-    const staging = '222-staging.apps.googleusercontent.com';
-    expect(clientIdBuildDrift(['a', `x"${staging}"y`], staging, [prod])).toEqual([]);
-    expect(clientIdBuildDrift(['a'], staging, [prod])).toEqual([`missing ${staging}`]);
-    expect(clientIdBuildDrift([`${staging} ${prod}`], staging, [prod])).toEqual([
+    const preview = '222-preview.apps.googleusercontent.com';
+    expect(clientIdBuildDrift(['a', `x"${preview}"y`], preview, [prod])).toEqual([]);
+    expect(clientIdBuildDrift(['a'], preview, [prod])).toEqual([`missing ${preview}`]);
+    expect(clientIdBuildDrift([`${preview} ${prod}`], preview, [prod])).toEqual([
       `holds another environment's ${prod}`,
     ]);
     // Unset here: no client id may be baked in at all.

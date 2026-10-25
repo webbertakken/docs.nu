@@ -38,7 +38,7 @@ What you do NOT need:
    pnpm --filter @livediagram/api db:migrate:remote
    ```
 
-   (this runs `wrangler d1 migrations apply livediagram --remote` — note it takes the database **name**, `livediagram`, not the binding name `DB`).
+   (this runs `wrangler d1 migrations apply DB --remote`: it takes the binding name `DB`, so it follows whichever database `database_name` and `database_id` name).
 
    This creates every table the worker expects. The same command runs in the deploy workflow on every release, so you only need it once for the first deploy.
 

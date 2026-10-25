@@ -114,12 +114,11 @@ describe('live worker security headers', () => {
   // The headers above only ship if the worker actually runs for page paths.
   // Static Assets serves a matching file BEFORE the worker by default, which
   // once left every real page (consent screen included) frameable in prod.
-  it('runs ahead of the static assets for every page, prod and staging', () => {
+  it('runs ahead of the static assets for every page, in every environment', () => {
     const toml = readFileSync(new URL('../wrangler.toml', import.meta.url), 'utf8');
+    const assetTables = toml.match(/^\[(?:env\.[\w-]+\.)?assets\]$/gm) ?? [];
     const lines = toml.match(/^run_worker_first = .*$/gm) ?? [];
-    expect(lines).toEqual([
-      'run_worker_first = ["/*", "!/_next/*"]',
-      'run_worker_first = ["/*", "!/_next/*"]',
-    ]);
+    expect(assetTables.length).toBeGreaterThan(0);
+    expect(lines).toEqual(assetTables.map(() => 'run_worker_first = ["/*", "!/_next/*"]'));
   });
 });

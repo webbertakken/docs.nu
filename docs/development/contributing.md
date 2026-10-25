@@ -37,7 +37,7 @@ pnpm test
 pnpm build
 ```
 
-CI runs the same five steps on every push, plus `pnpm staging:check`. Failing any of them blocks the merge.
+CI runs the same five steps on every push, plus `pnpm deploy:check`. Failing any of them blocks the merge.
 
 Adding or upgrading a dependency that ships to a browser or a worker can fail `pnpm build` with a named licences error. `LicenceTextMissing` means the package ships no licence file: add its upstream text to `packages/licences/texts/`, list it in `TEXT_SOURCES` with a pinned URL and checksum, and add an `OVERRIDES` entry for that exact version. `UnreviewedBinaryAsset` means a new `.wasm` or font: add an `EMBEDDED_WORKS` entry naming what is compiled into it. `LicenceNotAllowed` is a decision, not a fix: raise it. See [Third-party licences](../specs/002-project-scope/third-party-licences.md).
 
@@ -68,10 +68,8 @@ Two things follow for you as a contributor:
 
 - **Check staging after your PR lands.** It is the cheapest place to notice that
   something works in tests but not in a browser.
-- **If you touch a worker's bindings**, add the same change to its `[env.staging]` block
-  in `wrangler.toml`. Wrangler does not inherit bindings into a named environment, so a
-  binding added only at the top level is silently missing from staging. `pnpm
-staging:check` catches it in CI.
+- **If you touch a worker's bindings**, `pnpm deploy:check` dry-runs the api, mcp and router
+  configs and prints the bindings they resolve to; CI runs it too.
 
 ### TypeScript
 
