@@ -72,10 +72,12 @@ function previewLimiter(binding) {
  * A production wrangler config, as one pull request's preview deploys it.
  * @param {Record<string, any>} config the parsed top-level wrangler.toml
  * @param {{ app: string, names: ReturnType<typeof previewNames>, d1Id: string }} options
+ * @returns {Record<string, any>} the preview's wrangler config, as wrangler.preview.json holds it
  */
 export function previewConfig(config, { app, names, d1Id }) {
   const { env: _env, routes: _routes, ...rest } = structuredClone(config);
   if (rest.kv_namespaces) throw new Error(`preview: ${app} binds KV; previews do not run it`);
+  /** @type {Record<string, any>} */
   const out = {
     ...rest,
     name: previewWorker(rest.name, names.prefix),
