@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '../fixtures';
-import { freshUserId, installClerkStub, type StubUser } from './clerk-stub';
+import { signIn } from './sign-in';
 
 // Placement rides the create (docs/specs/013-workspace/folders.md "Placement on create",
 // docs/specs/007-editor/new-document-route.md): a signed-in member's /new into a team folder files
@@ -9,26 +9,15 @@ import { freshUserId, installClerkStub, type StubUser } from './clerk-stub';
 
 const NEW_EDITOR = /\/document\/[0-9a-f-]{36}$/;
 
-function stubUser(id: string): StubUser {
-  return {
-    id,
-    firstName: 'Pat',
-    lastName: 'Lane',
-    email: `${id}@example.com`,
-    hasImage: false,
-    imageUrl: 'https://img.clerk.com/stub/default',
-    externalAccounts: [],
-  };
-}
-
-async function signedIn(page: Page, baseURL: string, userId: string) {
+// Pat, signed in to the page's context, with the editor's first-run prompts already seen; returns the headers a
+// seeding call as Pat sends.
+async function signedIn(page: Page, baseURL: string) {
   await page.addInitScript(() => {
     localStorage.setItem('livediagram:v2:name-confirmed', '1');
     localStorage.setItem('livediagram:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
-  await installClerkStub(page, stubUser(userId));
-  const token = await (await page.request.get(`/e2e/token?sub=${userId}`)).text();
-  return { Authorization: `Bearer ${token}`, Origin: new URL(baseURL).origin };
+  const pat = await signIn(page.context(), { baseURL, name: 'Pat Lane' });
+  return pat.apiHeaders();
 }
 
 // Every request the page makes to a document's placement route.
@@ -41,8 +30,7 @@ function placementRequests(page: Page): string[] {
 }
 
 test('a create into a team folder lands there in one write', async ({ page, baseURL }) => {
-  const userId = freshUserId('placer');
-  const headers = await signedIn(page, baseURL!, userId);
+  const headers = await signedIn(page, baseURL!);
   const teamId = crypto.randomUUID();
   const folderId = crypto.randomUUID();
   expect(
@@ -74,7 +62,7 @@ test('a create into a team folder lands there in one write', async ({ page, base
 });
 
 test('a refused placement says why and offers another place', async ({ page, baseURL }) => {
-  await signedIn(page, baseURL!, freshUserId('refused'));
+  await signedIn(page, baseURL!);
 
   await page.goto(`/new?blank=1&folder=${crypto.randomUUID()}`);
 

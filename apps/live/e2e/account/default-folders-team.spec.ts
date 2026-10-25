@@ -1,33 +1,22 @@
 import type { Page } from '@playwright/test';
 import { expect, expectNoPageErrors, test, untilHydrated } from '../fixtures';
-import { freshUserId, installClerkStub, type StubUser } from './clerk-stub';
+import { signIn } from './sign-in';
 
 // A signed-in member's default folder in a team (docs/specs/013-workspace/default-folders.md "Use as
 // default for", "The New Document wizard", "Settings"), in dark mode: set from the team library's
 // folder menu, a new document moved into the team when its template is picked on the start screen, named in
 // Settings.
 
-function stubUser(id: string): StubUser {
-  return {
-    id,
-    firstName: 'Pat',
-    lastName: 'Lane',
-    email: `${id}@example.com`,
-    hasImage: false,
-    imageUrl: 'https://img.clerk.com/stub/default',
-    externalAccounts: [],
-  };
-}
-
-async function signedIn(page: Page, baseURL: string, userId: string) {
+// Pat, signed in to the page's context, dark, with the editor's first-run prompts already seen; returns the
+// headers a seeding call as Pat sends.
+async function signedIn(page: Page, baseURL: string) {
   await page.addInitScript(() => {
     localStorage.setItem('livediagram:v2:ui-mode', 'dark');
     localStorage.setItem('livediagram:v2:name-confirmed', '1');
     localStorage.setItem('livediagram:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
-  await installClerkStub(page, stubUser(userId));
-  const token = await (await page.request.get(`/e2e/token?sub=${userId}`)).text();
-  return { Authorization: `Bearer ${token}`, Origin: new URL(baseURL).origin };
+  const pat = await signIn(page.context(), { baseURL, name: 'Pat Lane' });
+  return pat.apiHeaders();
 }
 
 test('a team folder becomes a member’s default, and new boards land in it', async ({
@@ -37,7 +26,7 @@ test('a team folder becomes a member’s default, and new boards land in it', as
 }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.setViewportSize({ width: 1280, height: 800 });
-  const headers = await signedIn(page, baseURL!, freshUserId('defaults'));
+  const headers = await signedIn(page, baseURL!);
   const teamId = crypto.randomUUID();
   const folderId = crypto.randomUUID();
   expect(

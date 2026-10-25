@@ -1,10 +1,11 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import type { Server } from 'node:http';
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
 import type { FakeGoogle } from '@livediagram/fake-google';
 import { DRIVE_FILE_MIME } from '@livediagram/api-schema';
 import { test, expect } from './fixtures';
-import { routeGoogle, startFakeGoogle, TestIdentity } from './drive-support';
+import { signIn, type Account } from './account/sign-in';
+import { routeGoogle, startFakeGoogle } from './drive-support';
 
 // Screenshots of every Google Drive mirror state, in light and dark
 // (docs/specs/022-drive-mirror/drive-mirror.md): Settings > Account > Cloud Sync, Open with, and the Explorer following a change made in
@@ -25,24 +26,21 @@ test.use({
 
 const OUT = process.env.E2E_DRIVE_PR_SHOTS ?? '/tmp/ld-drive-pr-shots';
 const RUN = crypto.randomUUID().slice(0, 6);
-const EMAIL = 'alex@example.com';
 const THEMES = ['light', 'dark'] as const;
 
 const shots: { file: string; shows: string }[] = [];
 
-let identity: TestIdentity;
-let jwks: Server;
 let google: { fake: FakeGoogle; server: Server };
+// Each theme's account is signed in once, in a browser context of its own held open for its session token.
+const holders: BrowserContext[] = [];
 
 test.beforeAll(async () => {
   mkdirSync(OUT, { recursive: true });
-  identity = new TestIdentity();
-  jwks = await identity.serve();
   google = await startFakeGoogle();
 });
 
 test.afterAll(async () => {
-  await new Promise((r) => jwks.close(r));
+  await Promise.all(holders.map((context) => context.close()));
   await new Promise((r) => google.server.close(r));
   const lines = shots.map(
     (s) => `- \`${s.file}\` - ${s.shows}. Source: FAKE Google (e2e harness).`,
@@ -92,7 +90,22 @@ for (const theme of THEMES) {
     const USER = `user_e2e_shots_${theme}_${RUN}`;
     const PLAN = `shots-plan-${theme}-${RUN}`;
     const NOTES = `shots-notes-${theme}-${RUN}`;
-    let token: string;
+    // Alex, signed in for real: one account for every test of this theme.
+    let alex: Promise<Account> | undefined;
+    function alexOn(page: Page): Promise<Account> {
+      if (!alex) {
+        const { baseURL } = test.info().project.use;
+        alex = page
+          .context()
+          .browser()!
+          .newContext({ baseURL })
+          .then((context) => {
+            holders.push(context);
+            return signIn(context, { baseURL: baseURL!, name: 'Alex' });
+          });
+      }
+      return alex;
+    }
 
     async function shot(page: Page, name: string, shows: string) {
       const file = `${name}-${theme}${AT}.png`;
@@ -104,21 +117,21 @@ for (const theme of THEMES) {
     async function api(page: Page, method: string, path: string, data?: unknown) {
       const res = await page.request.fetch(`/api${path}`, {
         method,
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {
+          ...(await (await alexOn(page)).apiHeaders()),
+          'Content-Type': 'application/json',
+        },
         ...(data ? { data } : {}),
       });
       expect(res.ok(), `${method} ${path} ${res.status()}`).toBe(true);
     }
 
     async function setUp(page: Page) {
-      token = identity.token(USER, EMAIL);
+      await (await alexOn(page)).enter(page.context());
       await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
       await page.addInitScript(
-        ([session, mode]) => {
-          localStorage.setItem('livediagram:e2e:session', session);
-          localStorage.setItem('livediagram:v2:ui-mode', mode);
-        },
-        [JSON.stringify({ token, userId: USER, email: EMAIL, firstName: 'Alex' }), theme] as const,
+        (mode) => localStorage.setItem('livediagram:v2:ui-mode', mode),
+        theme,
       );
       await routeGoogle(page, google.fake, USER);
     }

@@ -1,15 +1,13 @@
 import type { Page } from '@playwright/test';
 import { auditContrast, type ContrastReport } from '../contrast';
 import { expect, expectNoPageErrors, test } from '../fixtures';
-import { WEBBER } from './agent-session';
-import { freshUserId, installClerkStub } from './clerk-stub';
+import { signIn } from './sign-in';
 
 // Contrast of the workbench pairing surfaces and the OAuth shell they share (docs/specs/013-workspace/blueprints/
 // workbench-embeds.md "Accessibility"), to WCAG 2.2 AA in both colour schemes: the pairing page in its pending
 // state, the device page (docs/specs/015-api/blueprints/cli.md "The device grant") at its code entry and its
 // consent, both drawn by OauthShell and its primary fill, and a paired-workbench row in Settings > API tokens.
-// All need a signed-in person, so they run against the Clerk-enabled export here rather than in the guest-mode
-// audit. The api's and the MCP worker's answers are stubbed, so each surface renders exactly the state under
+// All need a signed-in person, so they run on the signed-in stack here rather than in the guest-mode audit. The api's and the MCP worker's answers are stubbed, so each surface renders exactly the state under
 // audit.
 
 const CODE = 'AAAAAAAAAAAAAAAAAAAAAA';
@@ -44,8 +42,8 @@ function expectAA(report: ContrastReport, screen: string): void {
   expect(lines, `${screen}: text below WCAG AA`).toEqual([]);
 }
 
-async function signedIn(page: Page, scheme: 'dark' | 'light'): Promise<void> {
-  await installClerkStub(page, { ...WEBBER, id: freshUserId('webber') });
+async function signedIn(page: Page, baseURL: string, scheme: 'dark' | 'light'): Promise<void> {
+  await signIn(page.context(), { baseURL, name: 'Webber Takken' });
   await page.addInitScript((mode) => localStorage.setItem('livediagram:v2:ui-mode', mode), scheme);
 }
 
@@ -60,8 +58,8 @@ for (const scheme of ['dark', 'light'] as const) {
   test.describe(`OAuth shell contrast, ${scheme} mode`, () => {
     test.use({ colorScheme: scheme, reducedMotion: 'reduce', viewport: VIEWPORT });
 
-    test('the pairing page, pending', async ({ page, pageErrors }) => {
-      await signedIn(page, scheme);
+    test('the pairing page, pending', async ({ page, baseURL, pageErrors }) => {
+      await signedIn(page, baseURL!, scheme);
       await page.route(`**/api/workbench/pairing-requests/${CODE}`, (route) =>
         route.fulfill({
           json: {
@@ -83,8 +81,12 @@ for (const scheme of ['dark', 'light'] as const) {
       expectNoPageErrors(pageErrors);
     });
 
-    test('the device page, entering the code and consenting', async ({ page, pageErrors }) => {
-      await signedIn(page, scheme);
+    test('the device page, entering the code and consenting', async ({
+      page,
+      baseURL,
+      pageErrors,
+    }) => {
+      await signedIn(page, baseURL!, scheme);
       await page.route(`${MCP}/oauth/device/session/*`, (route) =>
         route.fulfill({ json: { clientName: 'LiveDoc CLI' } }),
       );
@@ -106,8 +108,8 @@ for (const scheme of ['dark', 'light'] as const) {
   test.describe(`Workbench pairing contrast, Settings, ${scheme} mode`, () => {
     test.use({ colorScheme: scheme, reducedMotion: 'reduce', viewport: VIEWPORT });
 
-    test('a paired workbench under its token', async ({ page, pageErrors }) => {
-      await signedIn(page, scheme);
+    test('a paired workbench under its token', async ({ page, baseURL, pageErrors }) => {
+      await signedIn(page, baseURL!, scheme);
       await page.route('**/api/tokens', (route) =>
         route.request().method() === 'GET'
           ? route.fulfill({ json: { tokens: [TOKEN] } })

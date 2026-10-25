@@ -1,21 +1,18 @@
 import { test, expect, expectNoPageErrors } from '../fixtures';
-import { freshUserId, installClerkStub } from './clerk-stub';
+import { signIn } from './sign-in';
 
 // The account menu by keyboard, signed in (docs/specs/004-interface-design/menus.md): a menu button
 // whose menu is named by the account's name, takes focus on open, and gives it back on Escape.
 
 test.use({ colorScheme: 'dark' });
 
-test('the account menu walks by keyboard and returns focus', async ({ page, pageErrors }) => {
-  await installClerkStub(page, {
-    id: freshUserId('menu-keys'),
-    firstName: 'Ariel',
-    lastName: 'Keys',
-    email: 'ariel@example.com',
-    hasImage: false,
-    imageUrl: '',
-    externalAccounts: [],
-  });
+test('the account menu walks by keyboard and returns focus', async ({
+  page,
+  context,
+  baseURL,
+  pageErrors,
+}) => {
+  await signIn(context, { baseURL: baseURL!, name: 'Ariel Keys' });
   await page.goto('/explorer/timeline');
   const trigger = page.getByRole('button', { name: 'Account menu' });
   await expect(trigger).toHaveAttribute('aria-haspopup', 'menu');

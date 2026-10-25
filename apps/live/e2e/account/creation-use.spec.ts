@@ -1,35 +1,24 @@
 import type { Page } from '@playwright/test';
 import { expect, expectNoPageErrors, test } from '../fixtures';
 import { syntheticExportZip } from '../ms-whiteboard-board';
-import { freshUserId, installClerkStub, type StubUser } from './clerk-stub';
+import { signIn } from './sign-in';
 
 // Making a document is a use, a bulk import is not (docs/specs/013-workspace/explorer-home.md
-// "Making a document"; docs/specs/015-api/api.md "Marking a document used"), signed in, against the
-// Clerk-enabled export: a board imported on its own and a document an API client makes are in Jump
-// back in unopened; one the API client makes with markUsed: false is not, nor a two-board import.
+// "Making a document"; docs/specs/015-api/api.md "Marking a document used"), signed in: a board
+// imported on its own and a document an API client makes are in Jump back in unopened; one the API
+// client makes with markUsed: false is not, nor a two-board import.
 
 test.use({ colorScheme: 'dark', viewport: { width: 1280, height: 800 } });
 
-function stubUser(id: string): StubUser {
-  return {
-    id,
-    firstName: 'Ida',
-    lastName: 'Maker',
-    email: `${id}@example.com`,
-    hasImage: false,
-    imageUrl: '',
-    externalAccounts: [],
-  };
-}
-
-async function signedIn(page: Page, userId: string): Promise<Record<string, string>> {
+// Ida, signed in to the page's context, with the editor's first-run prompts already seen; returns the headers a
+// seeding call as Ida sends.
+async function signedIn(page: Page, baseURL: string): Promise<Record<string, string>> {
   await page.addInitScript(() => {
     localStorage.setItem('livediagram:v2:name-confirmed', '1');
     localStorage.setItem('livediagram:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
-  await installClerkStub(page, stubUser(userId));
-  const token = await (await page.request.get(`/e2e/token?sub=${userId}`)).text();
-  return { Authorization: `Bearer ${token}` };
+  const ida = await signIn(page.context(), { baseURL, name: 'Ida Maker' });
+  return ida.apiHeaders();
 }
 
 async function apiCreate(
@@ -72,9 +61,10 @@ const jumpBackIn = (page: Page) =>
 
 test('an API client’s document is in Jump Back In unless it says markUsed: false', async ({
   page,
+  baseURL,
   pageErrors,
 }) => {
-  const headers = await signedIn(page, freshUserId('maker'));
+  const headers = await signedIn(page, baseURL!);
   await apiCreate(page, headers, 'Made by a script');
   await apiCreate(page, headers, 'One of a batch', { markUsed: false });
 
@@ -88,9 +78,10 @@ test('an API client’s document is in Jump Back In unless it says markUsed: fal
 
 test('signed in, a single imported board is in Jump Back In; a two-board import is not', async ({
   page,
+  baseURL,
   pageErrors,
 }) => {
-  await signedIn(page, freshUserId('importer'));
+  await signedIn(page, baseURL!);
   await importBoards(page, 2);
   await page.goto('/explorer/home');
   await expect(page.getByRole('region', { name: 'Jump Back In' })).toContainText(
