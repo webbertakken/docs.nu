@@ -3,7 +3,7 @@
 **Status: specified.** Nothing is built.
 
 A **markdown tab** is a tab of the `markdown` [tab kind](../006-document/document.md#domain-language): it holds one
-markdown text, edited together live, that leaves livedocs as the very bytes it holds. A markdown file is a document
+markdown text, edited together live, that leaves LiveDoc as the very bytes it holds. A markdown file is a document
 with a single markdown tab ([Purpose](../001-project-vision/purpose.md#what-it-is)); its tab strip is hidden, and the
 tab still holds the data, so a second tab can join it later without changing what the document is.
 
@@ -76,11 +76,11 @@ back, with no edit in between, gives the same bytes.** Every rule below exists t
 The bytes are the UTF-8 encoding of `text`, preceded by the byte order mark when `bom` is set. Nothing is added:
 
 - **Line endings** are the text's own. `\n`, `\r\n` and a lone `\r` are kept per line, so a file with mixed endings
-  keeps them mixed. A line break typed in livedocs inserts the [predominant ending](#domain-language).
-- **The trailing newline** is there when the text ends with one and absent when it does not. livedocs never adds or
+  keeps them mixed. A line break typed in LiveDoc inserts the [predominant ending](#domain-language).
+- **The trailing newline** is there when the text ends with one and absent when it does not. LiveDoc never adds or
   removes one.
 - **Front matter** is text. It is written exactly as it stands, whether or not it parses.
-- **Unknown syntax** (wiki links `[[page]]`, admonitions `:::note`, math `$$`, Liquid tags, a dialect livedocs does
+- **Unknown syntax** (wiki links `[[page]]`, admonitions `:::note`, math `$$`, Liquid tags, a dialect LiveDoc does
   not know) is text, kept verbatim. The rendered page shows what it cannot interpret as literal text, never drops it.
 - **Embedded HTML** is text, kept verbatim, scripts and styles included. Only the [rendered page](#the-rendered-page)
   is sanitised; the text never is.
@@ -201,7 +201,7 @@ Two designs were weighed:
 | **Sequence CRDT**        | Merges offline edits of any age; the room stays a relay; one rule for browsers and the api | Carries per-character identity, compacted in storage                                                       |
 | Server-ordered transform | Small state; the room's sequence numbers already order ops                                 | The room has to transform every op against all it missed; an offline edit needs the history since its base |
 
-The CRDT is chosen because livedocs already promises offline documents and reconnect catch-up, and both arrive as
+The CRDT is chosen because LiveDoc already promises offline documents and reconnect catch-up, and both arrive as
 edits made against an old state. Writes that come from outside the room (a changeset, a [sync](#from-files-and-agents))
 are applied by the api as edits of the current state, so they merge with live typing like anyone's keystrokes.
 

@@ -9,7 +9,7 @@ searched as one. **Wikis are folders** ([Purpose](../001-project-vision/purpose.
 - A **project wiki** holds a project's own knowledge, and syncs to a path inside the project's repository.
 
 Both are edited, linked and searched the same way. Global and project say what a wiki is for and where it syncs;
-livedocs treats them alike, and a person may keep any number of each.
+LiveDoc treats them alike, and a person may keep any number of each.
 
 ## Domain language
 
@@ -38,7 +38,7 @@ livedocs treats them alike, and a person may keep any number of each.
 - A wiki holds **any document**: pages, [file documents](../006-document/file-tab.md), diagrams, boards, sheets. A
   document moved into the folder joins the wiki; moved out, it leaves, and links to it are kept valid
   ([Links](links.md#renames)).
-- A wiki's documents are saved in livedocs, never only in This Browser, so other people and the command line reach
+- A wiki's documents are saved in LiveDoc, never only in This Browser, so other people and the command line reach
   them. Saving a wiki's page to This Browser is not offered.
 - In a wiki, the names of pages, file documents and sections are file names, unique among their siblings, as in any
   folder a link writes native files for ([Native files](../027-repositories/native-files.md#names-and-paths)), whether or not the wiki syncs
@@ -51,11 +51,11 @@ its pages arrive as [native files](../027-repositories/native-files.md). There i
 
 | Target                                  | Link file                                              | `dir`                                |
 | --------------------------------------- | ------------------------------------------------------ | ------------------------------------ |
-| None                                    | None: the wiki lives in livedocs only                  |                                      |
+| None                                    | None: the wiki lives in LiveDoc only                   |                                      |
 | A whole repository (a global wiki)      | At the repository's root                               | Where the pages live, such as `docs` |
 | A path in a repository (a project wiki) | At the repository's root, or a package's in a monorepo | The wiki's path, such as `docs/wiki` |
 
-- `livedocs link init --folder <wiki>` sets `level = "files"` when the folder is a wiki, and says so; any other level
+- `livedoc link init --folder <wiki>` sets `level = "files"` when the folder is a wiki, and says so; any other level
   is refused for a wiki, which is nothing without its files.
 - **One wiki may sync to several targets.** Each link keeps its own snapshot and records, as two links covering one
   document always do.
@@ -68,16 +68,16 @@ its pages arrive as [native files](../027-repositories/native-files.md). There i
 A repository that already holds a wiki (a `docs/` tree of markdown, such as a global wiki kept by agents) comes in
 through the same link:
 
-1. Make an empty folder a wiki; `livedocs link init --folder <wiki> --dir docs` in the repository.
-2. `livedocs sync --dry-run` lists every file it would adopt as a page or file document, every file it would ignore
+1. Make an empty folder a wiki; `livedoc link init --folder <wiki> --dir docs` in the repository.
+2. `livedoc sync --dry-run` lists every file it would adopt as a page or file document, every file it would ignore
    and why, and every name it would refuse ([Native files](../027-repositories/native-files.md#adopting-files)).
-3. `livedocs sync` adopts them. A large first sync writes the record as it goes, so an interrupted one resumes where
+3. `livedoc sync` adopts them. A large first sync writes the record as it goes, so an interrupted one resumes where
    it stopped and never creates a document twice.
 4. The files' bytes are unchanged by adoption: the first commit after it adds only the link file and the sync records.
 
 ## What is mirrored
 
-| In livedocs                                   | In the repository                                                |
+| In LiveDoc                                    | In the repository                                                |
 | --------------------------------------------- | ---------------------------------------------------------------- |
 | A page                                        | Its `.md` file, byte for byte                                    |
 | A file document                               | Its file, byte for byte, with its executable bit                 |
@@ -91,7 +91,7 @@ any other.
 
 **Never mirrored**: margin notes and comments, presence, share links and roles, tags, favourites, the Trash, the
 wiki mark itself, empty sections, documents the link ignores, and the merge state. A repository's history is git's;
-livedocs never writes its own history into files.
+LiveDoc never writes its own history into files.
 
 ## The entry page
 
@@ -99,7 +99,7 @@ Every wiki has one entry page: its root's page named `index`, else `README`, els
 an editor picks another (**Set as entry page**). Opening the wiki opens it, with the wiki's sections and pages beside
 it.
 
-**The entry page stays hand-written**, because its summaries carry judgement a generator cannot, and livedocs keeps
+**The entry page stays hand-written**, because its summaries carry judgement a generator cannot, and LiveDoc keeps
 it honest:
 
 - A page the entry page does not link to is **not in the entry page**, listed in the [wiki health](#wiki-health).
@@ -111,7 +111,7 @@ it honest:
 
 ## Wiki health
 
-The wiki's links are known to livedocs, read from every page as it is saved, so its health is always current and
+The wiki's links are known to LiveDoc, read from every page as it is saved, so its health is always current and
 never needs a scan of files.
 
 - **Orphan pages**: pages no other page of the wiki links to. The entry page is never one. A page linked only from
@@ -126,7 +126,7 @@ Where it shows:
   at its end), **Fix the link** (offers the nearest page by name), **Remove the line**.
 - **On a page**: an orphan page says "No page links here" under its title, with **Link from…**; a broken link is drawn
   struck through, with why on hover and focus.
-- **For agents and CI**: `livedocs wiki check [<wiki>] [--fail-on orphans,broken,unlisted]` prints one line per
+- **For agents and CI**: `livedoc wiki check [<wiki>] [--fail-on orphans,broken,unlisted]` prints one line per
   finding, `path:line: kind: detail`, and exits 1 when a finding of a named kind exists, 0 otherwise. Run in a synced
   checkout, it also reports links that leave the wiki into the repository and no longer resolve there
   ([Links](links.md#links-out-of-the-wiki)).
@@ -141,7 +141,7 @@ A healthy wiki shows nothing: no counts, no panel entry point beyond the menu.
 - **Everywhere**, Search results match page text as well as names, across every document the reader can open. The
   lens gains a **Wiki** dimension: `wiki:<name>` narrows to one wiki, `wiki:any` to every wiki the reader can open
   ([Explorer filters](../013-workspace/explorer-filters.md)).
-- **From the command line and the MCP server**, `livedocs search <words> [--wiki <wiki>|--all-wikis]` prints
+- **From the command line and the MCP server**, `livedoc search <words> [--wiki <wiki>|--all-wikis]` prints
   `path:line: text`, as `rg` does, so an agent searches a wiki it has no checkout of the way it searches one it has.
 - Search reads only what the reader may open, and indexes text as pages are saved. Front matter is searched; margin
   notes are not.
@@ -162,18 +162,18 @@ Linking a repository is the command line's, with the linking person's own access
 ## Privacy
 
 **A wiki synced to a public repository is public**: every page, file, name and path in it, and every change, the
-moment the sync pushes or someone else does. livedocs makes that visible, without second-guessing the repository's
+moment the sync pushes or someone else does. LiveDoc makes that visible, without second-guessing the repository's
 owner:
 
 - **`link init` asks to confirm** when the repository is public: "Everything in “<wiki>” will be public on <repository>.
   Continue?" Declined, nothing is linked.
-- **The wiki is badged Public** in livedocs while a repository it syncs to is public: on the wiki, in the Explorer,
+- **The wiki is badged Public** in LiveDoc while a repository it syncs to is public: on the wiki, in the Explorer,
   and on each of its pages beside the title, with the repository named on hover and focus. Whoever writes a page sees
   that it is published.
 - **A repository that turns public later** is found at the next sync, which badges the wiki and says so once; a
   repository that turns private drops the badge.
 - Whether a repository is public is read from its host when the link's `[repository] web` names one; a repository
-  livedocs cannot ask about is treated as public.
+  LiveDoc cannot ask about is treated as public.
 
 ## Observability and telemetry
 
@@ -185,7 +185,7 @@ WikiText`; `Cli · Used · WikiCheck` and `Search`.
 
 ## Non-goals
 
-- **Publishing a wiki as a website.** A wiki is read in livedocs and in its repository; a public site of it is a
+- **Publishing a wiki as a website.** A wiki is read in LiveDoc and in its repository; a public site of it is a
   separate decision.
-- **A wiki's own history.** Each document's history is livedocs's; the repository's is git's.
+- **A wiki's own history.** Each document's history is LiveDoc's; the repository's is git's.
 - **Wiki-link syntax** (`[[Page]]`) as a link: it is kept as text and drawn as text ([Links](links.md)).

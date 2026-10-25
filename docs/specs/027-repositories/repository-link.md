@@ -6,8 +6,8 @@
 [Branch binding](branch-binding.md), [Committed files](committed-files.md), unlinking, and
 [Diagram sources](diagram-sources.md).
 
-A **repository link** binds a directory in a repository to documents in livedocs, so the people and agents working in
-that repository find, read and change its documents without leaving it. livedocs is the **single source of truth**:
+A **repository link** binds a directory in a repository to documents in LiveDoc, so the people and agents working in
+that repository find, read and change its documents without leaving it. LiveDoc is the **single source of truth**:
 what a repository holds of a document is a **snapshot** of it at a known revision, never its home, as the
 [Google Drive mirror](../022-drive-mirror/drive-mirror.md) is a copy and never a location. A page or a file document
 is written as its own plain file, a [native file](native-files.md), which is a snapshot all the same.
@@ -22,8 +22,8 @@ is written as its own plain file, a [native file](native-files.md), which is a s
 
 ## Principles
 
-1. **livedocs owns every document.** A snapshot in a repository is derived; a change made to it is a proposal that
-   reaches livedocs as a [changeset](../024-agents/agent-changesets.md), or does not count.
+1. **LiveDoc owns every document.** A snapshot in a repository is derived; a change made to it is a proposal that
+   reaches LiveDoc as a [changeset](../024-agents/agent-changesets.md), or does not count.
 2. **Files are optional.** A link works with no files at all; the CLI reaches the covered documents remotely.
 3. **A snapshot says how old it is.** Every mirrored tab records its revision, so any reader knows what it holds.
 4. **Nothing is lost, nothing is silent.** A sync never overwrites a local change it has not sent, and every
@@ -308,18 +308,18 @@ A repository opts in and out at any moment, and neither touches a document or an
   2. lists the open document branches of this repository **not yet in git** (their latest revision in no local git
      branch's records) and, when asked, **writes each to its git branch first**: one sync commit per git branch, made
      in a temporary worktree so the checkout never switches. A git branch only on the remote is fetched; one deleted
-     (its document branches in their grace) or never created (a branch started in livedocs) is created from the main
+     (its document branches in their grace) or never created (a branch started in LiveDoc) is created from the main
      git branch. Pushing them stays the person's;
   3. lists the files [kept out of git](committed-files.md) and offers to commit them or leave them on disk;
-  4. says what never reaches files and stays in livedocs: margin notes, comments, presence, share links and roles,
+  4. says what never reaches files and stays in LiveDoc: margin notes, comments, presence, share links and roles,
      and the Timeline.
-- **The folder in livedocs is then made read-only** (asked, for an Editor of the folder), marked "Unlinked from
+- **The folder in LiveDoc is then made read-only** (asked, for an Editor of the folder), marked "Unlinked from
   <repository> on <git branch>, <when>", so nobody keeps editing documents whose edits no longer reach the
   repository. Nothing in it is lost; **Make editable** lifts it. Unlinked on a git branch other than main, the link
   ends where that commit lands, and the mark names the git branch.
 - `unlink --dry-run` lists all of it and changes nothing; declining any step changes nothing.
-- **Removing the link by hand** (deleting the link file and `.livedocs/` without the CLI) ends it as well, without
-  those steps; the folder in livedocs stays editable, and its open branches stay open until discarded.
+- **Removing the link by hand** (deleting the link file and `.livedoc/` without the CLI) ends it as well, without
+  those steps; the folder in LiveDoc stays editable, and its open branches stay open until discarded.
 - **Re-linking later** (`link init --folder <folder>` on the same folder, while it still exists) reattaches each file
   to its old document by path, and by content where the path moved, as a
   [move](native-files.md#renames-and-moves) is found; a file changed meanwhile folds back from its nearest base, and

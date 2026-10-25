@@ -4,14 +4,14 @@
 
 A repository chooses which of the files a link writes are committed to git. Small files are committed, so GitHub,
 clones and CI read them; large ones are **kept out of git**: still written into the work tree, where people, agents
-and editors read them as before, but never in a commit. The rule is per link, with an override per file in livedocs.
+and editors read them as before, but never in a commit. The rule is per link, with an override per file in LiveDoc.
 
 ## Domain language
 
-| Term                | Means                                                                                    | Never called                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **kept out of git** | Written into the work tree by the sync, listed in the managed section, never committed   | ignored (that is the link's own `ignore`), excluded, untracked |
-| **managed section** | The lines of the link dir's `.gitignore` between `# livedocs:begin` and `# livedocs:end` | livedocs block, generated ignore                               |
+| Term                | Means                                                                                  | Never called                                                   |
+| ------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **kept out of git** | Written into the work tree by the sync, listed in the managed section, never committed | ignored (that is the link's own `ignore`), excluded, untracked |
+| **managed section** | The lines of the link dir's `.gitignore` between `# livedoc:begin` and `# livedoc:end` | LiveDoc block, generated ignore                                |
 
 ## The rule
 
@@ -24,7 +24,7 @@ commit_warn_bytes = 209715200   # warn when the committed files pass this total;
 - **By size**: a file the link writes is committed when it is at most `commit_max_bytes`, and kept out of git when it
   is larger. The size is judged at every write, so a file that grows past it is kept out from then on and one that
   shrinks under it is committed again; each switch is reported.
-- **By choice**: a file document's or page's menu in livedocs offers **Commit to git** and **Keep out of git** while
+- **By choice**: a file document's or page's menu in LiveDoc offers **Commit to git** and **Keep out of git** while
   the document is covered by a link at `files`, and **Follow the size rule** once either is chosen. The choice is the
   document's, on every branch and in every link that covers it.
 - **Never kept out**: the link file, the [sync records](native-files.md#the-sync-record), `INDEX.md`, outline files and
@@ -40,10 +40,10 @@ the link's `dir`:
 
 ```gitignore
 node_modules/
-# livedocs:begin (written by livedocs sync; edit the documents, not these lines)
+# livedoc:begin (written by livedoc sync; edit the documents, not these lines)
 /media/demo-recording.mp4
 /datasets/2026-survey.csv
-# livedocs:end
+# livedoc:end
 ```
 
 - **Lines outside it are the repository's own** and never touched. The section is appended at the end of the file
@@ -63,7 +63,7 @@ node_modules/
 ## Switching
 
 - **To kept out**: the sync adds the entry and removes the file from the index (`git rm --cached`), so the next commit
-  stops carrying it, and leaves it in the work tree. **History keeps every version already committed**; livedocs
+  stops carrying it, and leaves it in the work tree. **History keeps every version already committed**; LiveDoc
   never rewrites git history. Removing them is the repository's own decision and tool (`git filter-repo`), and the
   menu item says so: "Earlier commits keep their copies of this file."
 - **To committed**: the sync removes the entry and stages the file, so the next commit carries it.
@@ -74,14 +74,14 @@ node_modules/
 - **A fresh clone** has no kept-out file: its record says it is kept out, so its absence is never a delete. The first
   sync writes it.
 - **Deleting a kept-out file** from the work tree is not a delete either: the sync writes it again and says "<path> is
-  kept out of git: delete the document in livedocs or with `livedocs document rm`".
+  kept out of git: delete the document in LiveDoc or with `livedoc document rm`".
 - **Editing a kept-out file** folds back as any edit, into the document branch of the work tree's git branch.
 - **CI and GitHub never see it.** `link status` in CI lists kept-out files as not checked.
 
 ## Git LFS
 
 - **Respected, never required.** A path the repository's `.gitattributes` gives `filter=lfs` is written as its real
-  bytes; git's own filter stores it in LFS when it is committed. livedocs never writes `.gitattributes` for LFS.
+  bytes; git's own filter stores it in LFS when it is committed. LiveDoc never writes `.gitattributes` for LFS.
 - **A clone without Git LFS** holds pointer files at those paths. A pointer is neither an edit nor a delete: it is
   reported, "Git LFS is not installed: <path> holds a pointer", and the sync leaves the file and its document as they
   are.
@@ -90,7 +90,7 @@ node_modules/
 
 ## What the link shows
 
-- `link status` and the link's panel in livedocs show **"Committed: <size> · Kept out: <size>"**, with each kept-out
+- `link status` and the link's panel in LiveDoc show **"Committed: <size> · Kept out: <size>"**, with each kept-out
   file's path, size and why (size, choice, or the repository's `.gitignore`).
 - **Past `commit_warn_bytes`** of committed files, both warn once per sync: "<size> of files are committed. Large
   repositories clone slowly: keep large files out of git, or raise `commit_warn_bytes`." Nothing is refused.

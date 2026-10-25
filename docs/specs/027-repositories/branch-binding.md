@@ -7,7 +7,7 @@ A repository link binds **every git branch to the document branches of the same 
 checkout on the link's main git branch syncs with the documents themselves. One rule holds for the whole link:
 pages, file documents and diagrams alike, at every [mirror level](repository-link.md#mirror-levels).
 
-livedocs stays the source of truth; git holds **snapshots of it on every branch**. GitHub, clones, CI and old commits
+LiveDoc stays the source of truth; git holds **snapshots of it on every branch**. GitHub, clones, CI and old commits
 always show real plain files, so a pull request shows its documentation change as a diff beside the code it
 describes, and the same change is a live document branch people and agents edit together.
 
@@ -28,7 +28,7 @@ describes, and the same change is a live document branch people and agents edit 
 | Nothing (outside a git work tree) | Each document's main, as a [local copy](#without-git) | No commits                                                      |
 
 - **The main git branch** is `[git] branch` in the link file. Absent, it is the remote's default branch as the clone
-  knows it (`origin/HEAD`); a clone that does not know it is refused, "Set `[git] branch` in livedocs.toml: this clone
+  knows it (`origin/HEAD`); a clone that does not know it is refused, "Set `[git] branch` in LiveDoc.toml: this clone
   does not know the default branch."
 - **A git branch is an overlay.** On `feature-x`, a document with no `feature-x` branch keeps its files as git holds
   them, main's snapshot from where the git branch started or last took main. A sync there neither writes nor reads
@@ -55,13 +55,13 @@ describes, and the same change is a live document branch people and agents edit 
 A sync runs, on any git branch, only from a clean footing. Anything else is refused with the state and its fix, and
 changes nothing:
 
-| State                                                  | Refusal and fix                                                                                     |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Detached `HEAD`                                        | "HEAD is detached at <sha>: `git switch <branch>` to sync, or `link status --branch <name>`"        |
-| A rebase, merge, cherry-pick, revert or bisect running | "A <operation> is in progress: finish it (`git <operation> --continue`) or abort it, then sync"     |
-| A file git left conflicted                             | Names the file and `livedocs sync --resolve <file>` ([Conflicts git leaves](#conflicts-git-leaves)) |
-| Git is busy (`index.lock` held)                        | Waits up to `SYNC_LOCK_WAIT_MS`, then "Git is busy in this work tree: try again"                    |
-| A shallow clone that lacks a snapshot's commit         | Syncs; a file whose base it cannot reach merges [baseless](repository-link.md#merging)              |
+| State                                                  | Refusal and fix                                                                                    |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Detached `HEAD`                                        | "HEAD is detached at <sha>: `git switch <branch>` to sync, or `link status --branch <name>`"       |
+| A rebase, merge, cherry-pick, revert or bisect running | "A <operation> is in progress: finish it (`git <operation> --continue`) or abort it, then sync"    |
+| A file git left conflicted                             | Names the file and `livedoc sync --resolve <file>` ([Conflicts git leaves](#conflicts-git-leaves)) |
+| Git is busy (`index.lock` held)                        | Waits up to `SYNC_LOCK_WAIT_MS`, then "Git is busy in this work tree: try again"                   |
+| A shallow clone that lacks a snapshot's commit         | Syncs; a file whose base it cannot reach merges [baseless](repository-link.md#merging)             |
 
 `link status` reads on any footing, a detached `HEAD` included: it judges each snapshot against the branch its record
 names ([In CI](#in-ci)).
@@ -96,17 +96,17 @@ names ([In CI](#in-ci)).
   `feature-x`'s snapshot in its files.
 - **A git branch whose document branch has merged** and that changes the document again starts a new branch of the
   same name, from main as the merge left it; its change folds in from the nearest base.
-- **A document branch started in livedocs** reaches git when someone creates a git branch of its name and syncs
+- **A document branch started in LiveDoc** reaches git when someone creates a git branch of its name and syncs
   there: the sync writes the branch's snapshot, and the next commit carries it.
 
 ## While people and agents work
 
-People and agents edit either way, through livedocs (the browser, the CLI, the MCP server) or the files; both reach
+People and agents edit either way, through LiveDoc (the browser, the CLI, the MCP server) or the files; both reach
 the same document branch.
 
-- **`livedocs sync --watch`** on a git branch keeps the work tree and its document branches in step, both ways, as on
+- **`livedoc sync --watch`** on a git branch keeps the work tree and its document branches in step, both ways, as on
   main ([While people and agents edit](native-files.md#while-people-and-agents-edit)): a file saved in the work tree
-  reaches everyone on the branch in livedocs once it settles.
+  reaches everyone on the branch in LiveDoc once it settles.
 - **Git moving under a watch.** The watch reads `HEAD` before every sync. While git works (a checkout, pull, merge,
   rebase or reset; `index.lock` held, or an operation in progress) it folds nothing back; once git is done it
   re-binds to the git branch now checked out and reads the records anew, so a checkout's rewritten files are
@@ -114,30 +114,30 @@ the same document branch.
 - **Worktrees**: each worktree syncs its own git branch, with its own local sync state, so an agent per worktree edits
   its own document branch while another edits main.
 - **A pull or checkout blocked by the sync's own files.** With `[git] commit = "none"`, a sync leaves the snapshots it
-  wrote uncommitted, and git refuses a pull or checkout that would overwrite them. `livedocs link clean` puts back
-  git's version of every file whose bytes are a snapshot livedocs holds (nothing unsent, so nothing is lost) and of
+  wrote uncommitted, and git refuses a pull or checkout that would overwrite them. `livedoc link clean` puts back
+  git's version of every file whose bytes are a snapshot LiveDoc holds (nothing unsent, so nothing is lost) and of
   the records; git then proceeds, and the next sync writes them again. A file holding an unsent edit is kept and
   named.
 - **A git revert or reset of a documentation change** puts an older snapshot back; it is a snapshot, never an edit, so
   the next sync writes the current one and says "<path> held an older snapshot (<rev>): wrote <rev>. To take a change
-  back, undo it in livedocs." livedocs's history is the document's, git's is the files'.
+  back, undo it in LiveDoc." LiveDoc's history is the document's, git's is the files'.
 
 ## The hooks
 
-The hooks keep every commit and push carrying the current snapshot. Each runs the same `livedocs` command through the
+The hooks keep every commit and push carrying the current snapshot. Each runs the same `livedoc` command through the
 guarded hook line ([The hooks](repository-link.md#the-hooks)), so a teammate without the CLI commits as before.
 
 - **Pre-commit** (and **pre-merge-commit**): one sync of the checked-out git branch's binding, then `git add` of
   exactly the files it wrote. Every commit carries the snapshot as it was when the commit was made, on every git
   branch.
 - **Pre-push** checks; it cannot add to the push it runs in, because git has decided what to send before the hook
-  runs. For each pushed git branch it asks whether livedocs moved since that branch's last commit:
+  runs. For each pushed git branch it asks whether LiveDoc moved since that branch's last commit:
   - **Current**: the push goes through.
   - **Moved, the branch checked out**: it syncs, makes one sync commit holding only the link's files (other staged
     changes stay staged, never committed), stops the push and says "Docs updated: <n> documents. Push again."
   - **Moved, the branch not checked out** (`git push origin other-branch`): the push goes through with one line
     naming the documents behind; `[hooks] block = true` stops it instead.
-  - **A push stops once.** A push whose head is the hook's own sync commit goes through even when livedocs moved
+  - **A push stops once.** A push whose head is the hook's own sync commit goes through even when LiveDoc moved
     again since, naming what it leaves behind: a page someone is typing in never holds a push back forever.
   - Offline, signed out, past `SYNC_HOOK_BUDGET_MS`, or a deleted remote branch: the push goes through with one line,
     as the pre-commit hook does.
@@ -145,29 +145,29 @@ guarded hook line ([The hooks](repository-link.md#the-hooks)), so a teammate wit
 
 ### In CI
 
-`livedocs link status --fail-behind` answers whether a commit's snapshots are current, before a pull request merges.
+`livedoc link status --fail-behind` answers whether a commit's snapshots are current, before a pull request merges.
 
 - It judges every snapshot against the document branch its record names, so it works on the detached merge commit a
-  CI service checks out: it fails when a document branch the pull request carries has moved in livedocs since its
+  CI service checks out: it fails when a document branch the pull request carries has moved in LiveDoc since its
   snapshot, and names each.
 - **Main's snapshots count only on main**: `--branch main`, or a checkout on the main git branch, fails when main is
   behind; on a pull request, documents it never branched are listed and never fail it.
 - Without a token (a pull request from a fork, a repository without the secret), it says so and exits 0.
-- A CI job on the main git branch may also run `livedocs sync` with a token: it merges merged pull requests' document
-  branches into main in livedocs ([A pull request merging](#a-pull-request-merging)) and commits nothing unless
+- A CI job on the main git branch may also run `livedoc sync` with a token: it merges merged pull requests' document
+  branches into main in LiveDoc ([A pull request merging](#a-pull-request-merging)) and commits nothing unless
   `[git] commit` says so.
 
 ## Merging in git
 
-Git merges files; livedocs merges documents. Each git merge is recognised from the records the merged files carry,
-and becomes the same merge in livedocs.
+Git merges files; LiveDoc merges documents. Each git merge is recognised from the records the merged files carry,
+and becomes the same merge in LiveDoc.
 
 ### Main into a branch
 
 `git merge main` (or a rebase onto it) on `feature-x` brings main's newer snapshots into the git branch. The next sync
 finds records naming main at a newer revision than `feature-x`'s branch point and **updates the document branch from
 main** ([Merging](../006-document/document-branches.md#merging)); it then writes the branch's result, so the work tree
-holds livedocs's merge.
+holds LiveDoc's merge.
 
 ### A pull request merging
 
@@ -175,7 +175,7 @@ A pull request merged on GitHub (a merge, a squash or a rebase alike) leaves on 
 records. The next sync on main, by anyone (a person, a watch, a hook, a CI job):
 
 1. finds each record naming document branch `feature-x` at revision `N`;
-2. **merges `feature-x` up to `N` into main** in livedocs: what git merged is what the pull request's reviewers saw;
+2. **merges `feature-x` up to `N` into main** in LiveDoc: what git merged is what the pull request's reviewers saw;
 3. **closes the branch** when nothing on it is newer than `N`; edits made on it after `N` stay open on it
    ([Closing a branch](../006-document/document-branches.md#closing-a-branch));
 4. folds back, from the branch's snapshot, any file whose merged bytes differ from it (a conflict resolved by hand in
@@ -190,8 +190,8 @@ records. The next sync on main, by anyone (a person, a watch, a hook, a CI job):
 
 ### Conflicts git leaves
 
-- **A page or file git left conflicted** on any branch is refused until resolved. `livedocs sync --resolve <file>`
-  reads git's three versions, merges the two document branches they name in livedocs (by character for a page, by
+- **A page or file git left conflicted** on any branch is refused until resolved. `livedoc sync --resolve <file>`
+  reads git's three versions, merges the two document branches they name in LiveDoc (by character for a page, by
   element for a diagram, as the branch merge does) and writes and stages the result. Without the CLI, a person
   resolves the file in git; the next sync folds the resolution back as an edit.
 - **A record git left conflicted** happens only when two clones synced the same document branch to different
@@ -201,8 +201,8 @@ records. The next sync on main, by anyone (a person, a watch, a hook, a CI job):
 
 ## Main after a merge
 
-GitHub merges without running local hooks, so when main moved in livedocs while a pull request was open, the merged
-result in livedocs differs from what git's main holds.
+GitHub merges without running local hooks, so when main moved in LiveDoc while a pull request was open, the merged
+result in LiveDoc differs from what git's main holds.
 
 - **Nobody writes a follow-up commit**: no bot and no sync pull request. Git's main stays behind until the next commit
   made on it by anyone, whose pre-commit hook carries the current snapshot.
@@ -245,13 +245,13 @@ Opting in is per person; the repository works the same for everyone else.
 
 - **The hook line is guarded**: a clone without the CLI commits and pushes as before.
 - **A pull request made purely in git** lands on main as file changes with main's records unchanged. The next sync on
-  main folds them back into livedocs from their base, the snapshot their record names, as any file edit.
+  main folds them back into LiveDoc from their base, the snapshot their record names, as any file edit.
 - **A git branch edited without the CLI** while others sync it: the next sync on it by anyone folds the hand-made
   change into its document branch.
 
 ## Without git
 
-Outside a git work tree a link is a **local copy**: a live two-way sync between livedocs and a folder of plain files,
+Outside a git work tree a link is a **local copy**: a live two-way sync between LiveDoc and a folder of plain files,
 always with main. There are no branches, hooks or commits; everything else in
 [Native files](native-files.md) holds.
 

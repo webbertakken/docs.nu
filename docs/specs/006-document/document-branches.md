@@ -6,7 +6,7 @@ A **document branch** is a named, live copy of a document, edited without touchi
 itself is its **main**. A branch is worked on as main is: together, in real time, with presence and the rich editor,
 by people and agents alike; when it is ready it **merges** into main, and when it is not wanted it is **discarded**.
 
-livedocs is the source of truth for every branch, as for main. A
+LiveDoc is the source of truth for every branch, as for main. A
 [repository link](../027-repositories/repository-link.md) binds each git branch to the document branches of the same
 name ([Branch binding](../027-repositories/branch-binding.md)), so a pull request's documentation is a document branch
 that people edit live, review in git and merge with the code it describes. Branches work as well without any
@@ -23,7 +23,7 @@ repository.
 | **unmerged change** | A stretch or field both sides changed differently, kept beside the result, never applied      | conflict (that is a changeset's 409)    |
 | **discard**         | Closing a branch without merging it; restorable for `DOCUMENT_BRANCH_GRACE_DAYS`              | delete, abandon, reject                 |
 
-- "Branch" alone means a document branch in livedocs copy and specs about documents; a git branch is always called a
+- "Branch" alone means a document branch in LiveDoc copy and specs about documents; a git branch is always called a
   git branch.
 - A branch belongs to one document. The same name on several documents (a git branch that changed three pages) is
   several branches, one per document, listed together by name ([Viewing branches](#viewing-branches)).
@@ -56,10 +56,10 @@ ticks) is main's only: a branch shows main's, and offers adding them on main.
   writes to the branch of the work tree's git branch, starting it on its first write ([Agents](#agents)).
 - **From another branch**: a branch may start from another branch of the same document, as a git branch may start
   from another. Its branch point names that branch, and it merges into whatever it is merged into.
-- **The branch point is pinned.** livedocs keeps what a merge needs from the branch point while the branch is open:
+- **The branch point is pinned.** LiveDoc keeps what a merge needs from the branch point while the branch is open:
   main's state at that revision, and for a page every character a branch's edits are anchored to, so a merge always
   merges by character, however old the branch.
-- A branch whose branch point livedocs no longer holds (a git branch started months ago from a revision long
+- A branch whose branch point LiveDoc no longer holds (a git branch started months ago from a revision long
   compacted) starts from that revision's snapshot as git holds it, byte for byte; a page's merge back is then a
   three-way merge of the snapshot's text, the branch and main, still by character.
 
@@ -76,8 +76,8 @@ ticks) is main's only: a branch shows main's, and offers adding them on main.
   (its identity is the repository's first commit, so every clone and fork agrees). Another repository's git branch of
   the same name starts its own branch, and both are listed with their repository. A branch started by hand belongs
   to no repository until a git branch of its name first syncs with it.
-- **Renaming** a branch in livedocs is offered for a branch no repository holds; a bound branch follows its git branch
-  ([Branch binding](../027-repositories/branch-binding.md#renamed-git-branches)), so renaming it in livedocs is
+- **Renaming** a branch in LiveDoc is offered for a branch no repository holds; a bound branch follows its git branch
+  ([Branch binding](../027-repositories/branch-binding.md#renamed-git-branches)), so renaming it in LiveDoc is
   refused with "Rename the git branch <name>; this branch follows it."
 
 ## Viewing branches
@@ -195,7 +195,7 @@ may become. A branch address opened through a participant or viewer link opens m
 ## Where branches do not exist
 
 - **Documents in This Browser** and [offline documents](offline-mode.md) have no branches: **Branch** says "Save to
-  livedocs to branch this document". Taking a document with open branches offline is refused, naming them.
+  LiveDoc to branch this document". Taking a document with open branches offline is refused, naming them.
 - The [Google Drive mirror](../022-drive-mirror/drive-mirror.md) and [Community](../025-community/community.md)
   publish main only.
 

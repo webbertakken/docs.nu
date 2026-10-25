@@ -4,15 +4,15 @@
 
 A **native file** is a document in its own file form: a page as its `.md` file, a file document as its bytes. A
 [repository link](repository-link.md) at the `files` level writes every covered page and file document as a native
-file, so whoever reads the repository with `rg`, `cat` or GitHub reads exactly what people edit in livedocs, and it
+file, so whoever reads the repository with `rg`, `cat` or GitHub reads exactly what people edit in LiveDoc, and it
 folds the changes made to those files back in.
 
 Everything in [Repository link](repository-link.md) holds here; this spec adds what a file that _is_ the document
-asks for. livedocs stays the source of truth: a native file is a snapshot of a document branch (or of main) at a
+asks for. LiveDoc stays the source of truth: a native file is a snapshot of a document branch (or of main) at a
 recorded revision, and a change made to it is a proposal that reaches that branch as a
 [changeset](../024-agents/agent-changesets.md), or does not count ([Branches](#branches)).
 
-This spec names things as livedocs's command line does: the command `livedocs`, the link file `livedocs.toml`, the
+This spec names things as LiveDoc's command line does: the command `livedoc`, the link file `livedoc.toml`, the
 mirror file `<slug>.livedoc.json`. [Repository link](repository-link.md) keeps livediagram's spelling of the same
 names until the rename reaches it.
 
@@ -29,7 +29,7 @@ At the `files` level, per covered document:
 | A document a page embeds as an image                         | Also `<slug>.livedoc.svg`: its first tab drawn, so the page shows it on GitHub too                |
 
 - **The native tab** is the tab a native file holds: the one it was made from, or the first when the document was
-  created in livedocs.
+  created in LiveDoc.
   Its id is kept in the [sync record](#the-sync-record), so reordering tabs never moves the file.
 - **The outline file** is named after its mirror file, `<slug>.livedoc.md`, so it never takes a page's name.
 - **A render** (`.livedoc.svg`) is written while any covered page embeds the document
@@ -47,7 +47,7 @@ At the `files` level the directories under the link's `dir` are the folders of i
 directory of the same name, and a native file's path is its folders' names, then the document's name and its
 extension.
 
-- **The path follows the name.** Renaming or moving a page or file document in livedocs moves its file at the next
+- **The path follows the name.** Renaming or moving a page or file document in LiveDoc moves its file at the next
   sync (`git mv` inside a git work tree). A mirror file keeps its slug when its document is renamed; a native file
   cannot, because the file is the page, and the [links](../032-wikis/links.md) between pages are paths.
 - **A name is a file name.** In a folder a link covers at `files`, a page's, file document's or folder's name must
@@ -63,17 +63,17 @@ extension.
   ([Name length](../006-document/name-length.md#names-from-files)).
 - **Empty folders write nothing**: git keeps no empty directories. An empty directory in the work tree creates no
   folder.
-- A move never lands on a file livedocs did not write ([Repository link](repository-link.md#the-mirror-file)).
+- A move never lands on a file LiveDoc did not write ([Repository link](repository-link.md#the-mirror-file)).
 
 ## The sync record
 
 A native file cannot carry its own sync data without changing its bytes, so a link at `files` keeps its **sync
-records** in `.livedocs/` beside its link file, committed: **one small file per document and per branch**, so two git
+records** in `.livedoc/` beside its link file, committed: **one small file per document and per branch**, so two git
 branches that change different documents never touch the same file.
 
 ```text
-.livedocs/main/doc_3h9x2a.json                 main's snapshot
-.livedocs/branches/feature-x/doc_3h9x2a.json   the document branch feature-x's snapshot
+.livedoc/main/doc_3h9x2a.json                 main's snapshot
+.livedoc/branches/feature-x/doc_3h9x2a.json   the document branch feature-x's snapshot
 
 {"path":"tools/pm2.md","document":"doc_3h9x2a","tab":"0b34","branch":"feature-x","rev":41,"hash":"sha256:9f2c..."}
 ```
@@ -129,11 +129,11 @@ ignore = ["drafts/**", "*.tmp"]   # never adopted, never written
    file; a tie takes the newest. An agent that read a page, waited, and wrote the whole file back started from an
    older snapshot; merging it from the newest would quietly undo everything that arrived in between. With no snapshot
    to reach (a fresh clone of a squashed history, a lost record), the merge is
-   [baseless](repository-link.md#merging): livedocs's text stands, and every stretch where the file differs is a lost
+   [baseless](repository-link.md#merging): LiveDoc's text stands, and every stretch where the file differs is a lost
    local value (below).
-2. **A three-way merge** of the base, the file and the page as livedocs holds it now: by lines, then by words inside
+2. **A three-way merge** of the base, the file and the page as LiveDoc holds it now: by lines, then by words inside
    a line both sides changed. A change only one side made is taken; the same change made on both sides is taken once.
-3. **A stretch both sides changed differently** keeps livedocs's text. The file's version of that stretch is a
+3. **A stretch both sides changed differently** keeps LiveDoc's text. The file's version of that stretch is a
    [lost local value](repository-link.md#merging): in the sync report, and as a margin note on the stretch, "Not
    applied from <path>: <the file's text>", by the person syncing, so whoever reads the page sees it and settles it.
 4. **The send** is one `patch` changeset: the edits that turn the revision the merge read into the merged text, based
@@ -149,39 +149,39 @@ ignore = ["drafts/**", "*.tmp"]   # never adopted, never written
 
 A file document is changed whole ([File tab](../006-document/file-tab.md#changing-it)).
 
-| Local file | livedocs since the base | A sync                                                                                  |
-| ---------- | ----------------------- | --------------------------------------------------------------------------------------- |
-| Changed    | Unchanged               | Replaces the bytes                                                                      |
-| Unchanged  | Changed                 | Writes the new bytes                                                                    |
-| Changed    | Changed                 | A **conflict**: nothing is written or sent; reported, naming the file and both ways out |
+| Local file | LiveDoc since the base | A sync                                                                                  |
+| ---------- | ---------------------- | --------------------------------------------------------------------------------------- |
+| Changed    | Unchanged              | Replaces the bytes                                                                      |
+| Unchanged  | Changed                | Writes the new bytes                                                                    |
+| Changed    | Changed                | A **conflict**: nothing is written or sent; reported, naming the file and both ways out |
 
-A conflicted file document is settled with `livedocs sync --take file <path>` (the file's bytes
-replace livedocs's) or `--take livedocs <path>` (livedocs's bytes replace the file). The bytes that lose stay
+A conflicted file document is settled with `livedoc sync --take file <path>` (the file's bytes
+replace LiveDoc's) or `--take livedoc <path>` (LiveDoc's bytes replace the file). The bytes that lose stay
 restorable ([File tab](../006-document/file-tab.md#changing-it)), or in git's history.
 
 ## Renames and moves
 
-- **In livedocs.** The next sync moves the file and its record line. [Links](../032-wikis/links.md#renames) to it are
+- **In LiveDoc.** The next sync moves the file and its record line. [Links](../032-wikis/links.md#renames) to it are
   rewritten in the pages that hold them, as edits that sync like any other.
 - **In the repository.** A recorded file missing from the work tree and an unrecorded file found in the same sync are
   one **move** when their bytes are equal, or, for pages, when they are at least `SYNC_RENAME_SIMILARITY` alike (as
   git judges a rename). The document is renamed and moved to the folder of the new path, and any change of content is
   folded back as above. Of several candidates the most alike is taken; a tie is no move.
-- **Both sides.** A document renamed differently on each side keeps livedocs's name; the file is moved to it, and the
+- **Both sides.** A document renamed differently on each side keeps LiveDoc's name; the file is moved to it, and the
   repository's name is reported as not applied.
 - **Case only.** A rename that changes only letter case moves through a temporary name, so case-insensitive file
   systems see it.
 
 ## Deletes
 
-- **Deleted in livedocs** (moved to the Trash, or purged): the file is `gone` and removed; git history keeps it. A
+- **Deleted in LiveDoc** (moved to the Trash, or purged): the file is `gone` and removed; git history keeps it. A
   file holding a change nobody has sent stays, and is refused, never removed
   ([Repository link](repository-link.md#sync-states)). Restored from the Trash, the document is written again.
 - **Deleted in the repository** (an agent's `git rm`, a file removed by hand): on the main git branch the document
   moves to the [Trash](../013-workspace/trash.md), recoverable for 30 days, and its record is removed; on any other
   git branch it is deleted on that branch only ([Branches](#branches)). A [kept-out](committed-files.md) file
   removed from the work tree is written again, never a delete. An edit outranks a
-  delete: a file deleted while livedocs changed its document since the file's base is written again, and the sync
+  delete: a file deleted while LiveDoc changed its document since the file's base is written again, and the sync
   says so.
 - **A folder** whose documents have all gone, either way, goes with them.
 
@@ -189,8 +189,8 @@ restorable ([File tab](../006-document/file-tab.md#changing-it)), or in git's hi
 
 A page has two front doors, the document and its file, and both stay one page:
 
-- **With `livedocs sync --watch` running**, a change in either place reaches the other once it settles: a burst of
-  typing in livedocs, or `SYNC_LOCAL_SETTLE_MS` of quiet on the file. A sync never writes over a file edited while it
+- **With `livedoc sync --watch` running**, a change in either place reaches the other once it settles: a burst of
+  typing in LiveDoc, or `SYNC_LOCAL_SETTLE_MS` of quiet on the file. A sync never writes over a file edited while it
   runs ([Repository link](repository-link.md#commands)).
 - **Without it**, files catch up at the next sync: one run by hand, the pre-commit hook, or CI asking `link status`.
 - **Edits from a fresh read are always safe.** An agent's exact-text edit fails cleanly when the words it looked for
@@ -207,7 +207,7 @@ A page has two front doors, the document and its file, and both stay one page:
 The [hooks and the merge driver](repository-link.md#git) apply to native files on every git branch, each syncing
 with its own document branches ([Branch binding](branch-binding.md)).
 
-- **A page git left conflicted** (markers in the text) is refused, naming `livedocs sync --resolve <file>`. Resolve
+- **A page git left conflicted** (markers in the text) is refused, naming `livedoc sync --resolve <file>`. Resolve
   reads git's three versions and merges the two document branches they name, by character, so both branches' words
   arrive, then writes the merged page and stages it ([Conflicts git leaves](branch-binding.md#conflicts-git-leaves)).
 - **The records** merge as [The sync record](#the-sync-record) says.
@@ -216,7 +216,7 @@ with its own document branches ([Branch binding](branch-binding.md)).
   suggests `push` for a whole-repository wiki, which nobody else commits to, and `none` otherwise. Whatever the
   setting, a sync never force-pushes, never rewrites history, commits only files under the link's `dir`, its
   records and its managed `.gitignore` section, refuses partial staging as the hook does, and authors a commit as the work tree's own git identity. A commit message names the
-  pages by path with their revisions, never the names or emails of the people who edited them in livedocs: a public
+  pages by path with their revisions, never the names or emails of the people who edited them in LiveDoc: a public
   repository would publish them.
 - **A rejected push** (the remote moved): fetch, rebase the sync's commit onto it, sync once more, push. Still
   rejected, it is reported and retried at the next sync; the commit stays local, nothing is lost. A push refused by
@@ -236,7 +236,7 @@ git branch with the documents themselves: one rule for pages, file documents and
   that exists only on the branch, a deleted file deletes its document on the branch, and both reach main with the
   merge ([Merging](../006-document/document-branches.md#merging)).
 - **A page changed on both a branch and main** merges by character, as a reconnecting editor's edits do, whether the
-  merge happens in livedocs or is found in git.
+  merge happens in LiveDoc or is found in git.
 
 ## Offline
 

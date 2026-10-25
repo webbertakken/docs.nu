@@ -2,8 +2,8 @@
 
 **Status: specified.** Nothing is built.
 
-Pages link to each other with **ordinary markdown links**, so one text works in livedocs, on GitHub and in a
-checkout read with `rg`. livedocs resolves a link when it draws the page and when it saves it; it never rewrites a
+Pages link to each other with **ordinary markdown links**, so one text works in LiveDoc, on GitHub and in a
+checkout read with `rg`. LiveDoc resolves a link when it draws the page and when it saves it; it never rewrites a
 link's text, except to follow a rename ([Renames](#renames)).
 
 ## Domain language
@@ -14,7 +14,7 @@ link's text, except to follow a rename ([Renames](#renames)).
 | **target**           | What a link points at: a document, a section, a heading of a page, or an address outside                 | destination, href (in copy) |
 | **relative link**    | A link whose target is a path from the page's own folder                                                 | local link                  |
 | **document address** | A document's permanent address, `https://<host>/document/<document id>`                                  | permalink, share link       |
-| **broken link**      | A link whose target livedocs cannot find                                                                 | dead link, 404              |
+| **broken link**      | A link whose target LiveDoc cannot find                                                                  | dead link, 404              |
 
 ## Link forms
 
@@ -31,12 +31,12 @@ link's text, except to follow a rename ([Renames](#renames)).
 | A page → the web                         | `https://yjs.dev`                                    | The address, opened in a new browser tab                               |
 
 - Relative links are written to the **native file** paths a sync writes
-  ([Native files](../027-repositories/native-files.md#what-a-link-writes)), so a link that works in livedocs works in
+  ([Native files](../027-repositories/native-files.md#what-a-link-writes)), so a link that works in LiveDoc works in
   the repository, and the other way round. A wiki that has never synced uses the same paths.
 - **On a branch**, a link opens its target's [document branch](../006-document/document-branches.md) of the same
   name where one exists, and its main otherwise, so a git branch's pages link to each other as that git branch holds
   them.
-- **A path starting with `/`** is relative to the repository's root, as GitHub reads it. In livedocs it resolves
+- **A path starting with `/`** is relative to the repository's root, as GitHub reads it. In LiveDoc it resolves
   inside the wiki when it lands under the link's `dir`, and as a link out otherwise.
 - **Spelling.** `my%20page.md`, `<my page.md>` and `./my page.md` resolve alike. Reference-style links resolve as
   inline ones.
@@ -46,17 +46,17 @@ link's text, except to follow a rename ([Renames](#renames)).
 
 ## Links across wikis
 
-Wiki files stay plain, and keep working on a machine without livedocs. So a link from one wiki to another is a
+Wiki files stay plain, and keep working on a machine without LiveDoc. So a link from one wiki to another is a
 **relative path** too, written between the two wikis' files as their repositories are checked out **side by side**:
 every repository in one parent folder, each in a folder named after the repository (`~/Repositories/wiki`,
 `~/Repositories/spinner`).
 
-- livedocs writes and resolves it from each wiki's sync target: the repository's name and the link's `dir`. A wiki
+- LiveDoc writes and resolves it from each wiki's sync target: the repository's name and the link's `dir`. A wiki
   without a sync target counts as a repository named after the wiki, so a link to it is valid once it syncs under
   that name, and is rewritten when it syncs under another.
-- **In livedocs** it resolves through the sync targets, whatever a machine's layout. **In a checkout** it resolves
+- **In LiveDoc** it resolves through the sync targets, whatever a machine's layout. **In a checkout** it resolves
   where the repositories sit side by side, so `rg`, an editor and an agent follow it. **On GitHub** it does not: it
-  climbs out of the repository. That is the price of plain files, and `livedocs wiki check` names such links as
+  climbs out of the repository. That is the price of plain files, and `livedoc wiki check` names such links as
   `across`, never as broken.
 - Renaming or moving the target, renaming its repository, or changing a wiki's sync target rewrites these links like
   any rename ([Renames](#renames)).
@@ -67,7 +67,7 @@ every repository in one parent folder, each in a folder named after the reposito
 
 When a document or section is renamed or moved, every link that resolved to it before resolves to it after:
 
-- **In livedocs**, the rename rewrites, in every page that holds one, each relative link that resolved to the old path,
+- **In LiveDoc**, the rename rewrites, in every page that holds one, each relative link that resolved to the old path,
   and in a moved page each of its own relative links whose target did not move with it.
 - **In the repository**, a move the sync detects ([Native files](../027-repositories/native-files.md#renames-and-moves))
   is a rename like any other, and rewrites the same links. An agent that already fixed them by hand leaves nothing to
@@ -84,19 +84,19 @@ When a document or section is renamed or moved, every link that resolved to it b
 - **A renamed heading** is not followed: links to its old anchor become broken, with **Point at <nearest heading>**
   offered. Headings change with every keystroke while someone types one, so following them would rewrite other pages
   mid-word.
-- Links in files livedocs does not hold (a project's `README.md` linking into its wiki) cannot be rewritten;
-  `livedocs wiki check` in the checkout lists those that a move broke ([Links out of the wiki](#links-out-of-the-wiki)).
+- Links in files LiveDoc does not hold (a project's `README.md` linking into its wiki) cannot be rewritten;
+  `livedoc wiki check` in the checkout lists those that a move broke ([Links out of the wiki](#links-out-of-the-wiki)).
 
 ## Links out of the wiki
 
-A relative link that climbs out of the link's `dir` points at the repository, not at livedocs: code, a project's
+A relative link that climbs out of the link's `dir` points at the repository, not at LiveDoc: code, a project's
 `README.md`, another documentation tree.
 
-- It is kept as written, and never rewritten by livedocs.
-- In livedocs it opens the file in the repository's web view when the link file names one
+- It is kept as written, and never rewritten by LiveDoc.
+- In LiveDoc it opens the file in the repository's web view when the link file names one
   (`[repository] web = "https://github.com/<owner>/<repo>/blob/main"`), and is drawn as its path, not clickable,
   otherwise.
-- `livedocs wiki check`, run in a checkout, resolves each one against the work tree, and lists links from the
+- `livedoc wiki check`, run in a checkout, resolves each one against the work tree, and lists links from the
   repository's other markdown into the wiki whose target is missing.
 
 ## Broken links
@@ -113,9 +113,9 @@ A link is **broken** when its target does not resolve:
 | `out-missing` | A link out of the wiki misses in the checkout (`wiki check` only) | None; named with its line                  |
 
 - A link to a document the checking person cannot open is never reported as broken: it is `unreadable`, counted apart,
-  because livedocs answers a document someone may not open exactly as an absent one.
+  because LiveDoc answers a document someone may not open exactly as an absent one.
 - Broken links are drawn struck through, with the finding on hover and focus, and listed in the
-  [wiki health](wiki.md#wiki-health). livedocs never removes a link on its own.
+  [wiki health](wiki.md#wiki-health). LiveDoc never removes a link on its own.
 
 ## Backlinks
 

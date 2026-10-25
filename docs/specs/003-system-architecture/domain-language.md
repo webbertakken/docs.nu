@@ -167,14 +167,14 @@ The words for diagrams living beside code ([Repositories](../027-repositories/RE
 | **workbench**           | A developer tool that frames the editor beside an agent (an agent workbench, VS Code) | host (that is a profile's server), IDE |
 | **selection reference** | The text naming what was selected, attached to a person's message to their agent      | context, selection payload             |
 | **native file**         | A document in its own file form: a page as its `.md`, a file document as its bytes    | export, plain copy                     |
-| **sync record**         | `.livedocs/`: per document and branch, a native file's document, tab, revision, hash  | lock file, manifest                    |
+| **sync record**         | `.livedoc/`: per document and branch, a native file's document, tab, revision, hash   | lock file, manifest                    |
 | **nearest base**        | The kept snapshot a changed file is fewest characters away from; its merge's base     | last sync, latest                      |
 | **branch binding**      | Each git branch syncing with the document branches of its name                        | branch mapping, branch sync mode       |
 | **main git branch**     | The git branch bound to the documents themselves: `[git] branch`                      | live branch, trunk                     |
 | **sync commit**         | A commit a sync or a hook makes, holding only the link's files                        | bot commit, docs commit                |
 | **local copy**          | A link outside git: a folder of plain files kept in step with main, live, both ways   | export, backup, mirror (that is Drive) |
 | **kept out of git**     | Written into the work tree by the sync, never committed                               | ignored, excluded, untracked           |
-| **managed section**     | The `.gitignore` lines between `# livedocs:begin` and `# livedocs:end`                | livedocs block, generated ignore       |
+| **managed section**     | The `.gitignore` lines between `# livedoc:begin` and `# livedoc:end`                  | LiveDoc block, generated ignore        |
 
 ## Document branches
 
@@ -206,7 +206,7 @@ The words for folders of pages read together ([Wikis](../032-wikis/README.md)).
 | **document address** | `https://<host>/document/<id>`: a document's permanent address            | permalink, share link                   |
 | **backlink**         | A link to a page, seen from the page it points at                         | reference, mention                      |
 | **orphan page**      | A page no other page of its wiki links to                                 | lost page, unlinked page                |
-| **broken link**      | A link whose target livedocs cannot find                                  | dead link, 404                          |
+| **broken link**      | A link whose target LiveDoc cannot find                                   | dead link, 404                          |
 | **wiki health**      | A wiki's orphan pages, broken links and pages missing from its entry page | lint, audit, report                     |
 
 ## Community

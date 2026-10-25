@@ -3,8 +3,8 @@
 **Status: specified.** Nothing is built.
 
 A **file tab** is a tab of the `file` [tab kind](document.md#domain-language): it holds one file's bytes, exactly, so
-**any file can live in livedocs** ([Purpose](../001-project-vision/purpose.md#what-it-is)). An image, a PDF, a shell
-script, a JSON file: each is a document with a single file tab. livedocs shows what it can of it and keeps the rest
+**any file can live in LiveDoc** ([Purpose](../001-project-vision/purpose.md#what-it-is)). An image, a PDF, a shell
+script, a JSON file: each is a document with a single file tab. LiveDoc shows what it can of it and keeps the rest
 intact, so it syncs back out byte for byte ([Native files](../027-repositories/native-files.md)).
 
 ## Domain language
@@ -63,7 +63,7 @@ are never merged.
 | -------------------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
 | `FILE_TAB_MAX_BYTES` | 26,214,400 (25 MiB) | Inside a Worker's request body limit with headroom; GitHub warns at 50 MB, so a wiki stays cloneable |
 
-A larger file is refused with "This file is larger than 25 MB, the most livedocs holds for one file." A sync leaves
+A larger file is refused with "This file is larger than 25 MB, the most LiveDoc holds for one file." A sync leaves
 it in the repository, untouched, and reports it. Usage counts every distinct blob once per owner
 ([Open source + distribution](../002-project-scope/open-source-and-business-model.md)).
 
@@ -83,5 +83,5 @@ it in the repository, untouched, and reports it. Usage counts every distinct blo
 
 ## Non-goals
 
-- Editing a file's contents in livedocs, other than a markdown file's ([Markdown tab](../031-markdown/markdown-tab.md)).
+- Editing a file's contents in LiveDoc, other than a markdown file's ([Markdown tab](../031-markdown/markdown-tab.md)).
 - Previews of office formats, archives or video.
