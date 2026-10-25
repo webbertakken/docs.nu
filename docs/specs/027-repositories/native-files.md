@@ -164,9 +164,10 @@ restorable ([File tab](../006-document/file-tab.md#changing-it)), or in git's hi
 - **Deleted in livedocs** (moved to the Trash, or purged): the file is `gone` and removed; git history keeps it. A
   file holding a change nobody has sent stays, and is refused, never removed
   ([Repository link](repository-link.md#sync-states)). Restored from the Trash, the document is written again.
-- **Deleted in the repository**: what this means is open ([Open questions](#open-questions), Q2). Whatever is
-  decided, an edit outranks a delete: a file deleted while livedocs changed its document since the file's base is
-  written again, and the sync says so.
+- **Deleted in the repository** (an agent's `git rm`, a file removed by hand): the document moves to the
+  [Trash](../013-workspace/trash.md), recoverable for 30 days, and the record drops its line. An edit outranks a
+  delete: a file deleted while livedocs changed its document since the file's base is written again, and the sync
+  says so.
 - **A folder** whose documents have all gone, either way, goes with them.
 
 ## While people and agents edit
@@ -188,21 +189,46 @@ A page has two front doors, the document and its file, and both stay one page:
 
 ## Git
 
-The [hooks and the merge driver](repository-link.md#git) apply to native files, and pages are not branched: every
-branch's files are views of the one page, and every branch's local changes are proposals to it.
+The [hooks and the merge driver](repository-link.md#git) apply to native files, on the link's live branch only
+([Branches](#branches)).
 
 - **A page git left conflicted** (markers in the text) is refused, naming `livedocs sync --resolve <file>`. Resolve
   reads git's three versions and sends each side's change from the common base as its own proposal, so both
   branches' words arrive, then writes the merged page and stages it.
 - **The record** merges through the driver ([The sync record](#the-sync-record)).
-- **Commits and pushes**: whether a sync commits, and pushes, is open (Q3). Whatever is decided, a sync never
-  force-pushes, never rewrites history, commits only files under the link's `dir` and the record, refuses partial
-  staging as the hook does, and authors a commit as the work tree's own git identity. A commit message names the
+- **Commits and pushes are the link's choice**, `[git] commit` in the link file: `none` writes files only and leaves
+  commits to people and the hook; `commit` commits each settled sync; `push` commits and pushes it. `link init`
+  suggests `push` for a whole-repository wiki, which nobody else commits to, and `none` otherwise. Whatever the
+  setting, a sync never force-pushes, never rewrites history, commits only files under the link's `dir` and the
+  record, refuses partial staging as the hook does, and authors a commit as the work tree's own git identity. A commit message names the
   pages by path with their revisions, never the names or emails of the people who edited them in livedocs: a public
   repository would publish them.
 - **A rejected push** (the remote moved): fetch, rebase the sync's commit onto it, sync once more, push. Still
   rejected, it is reported and retried at the next sync; the commit stays local, nothing is lost.
-- **Branches**: whether a branch other than the default sends its local changes is open (Q4).
+
+## Branches
+
+A link exchanges with **one branch: its live branch**, the repository's default branch unless the link file names
+another (`[git] branch`). livedocs holds one version of a page; every other branch is plain git.
+
+- **On the live branch, a sync runs both ways**, as above, but only from a clean footing: the work tree is on the live
+  branch (not detached), no rebase, merge, cherry-pick or revert is in progress, no file is conflicted, and the commit
+  the link last synced at (kept in the local sync state) is an ancestor of `HEAD`. Anything else is refused with the
+  state and its fix, and changes nothing.
+- **On any other branch, a sync does nothing**: it neither sends nor writes, and says "On <branch>: livedocs syncs
+  <live branch>". The hook lets the commit through. A page edited on a branch is an ordinary change in git.
+- **A branch's changes go live when it merges** into the live branch: the merge (its pre-merge-commit hook, or the
+  next sync there) finds the files changed and folds them back from their base, merging with whatever livedocs gained
+  meanwhile ([Folding a file back](#a-page)). A documentation change in a pull request goes live with the code it
+  describes; an abandoned branch never reaches livedocs.
+- **livedocs's changes reach a branch through git**: they land on the live branch (as `commit` says), and a branch
+  takes them as it takes any change there, by merging or rebasing. A page changed on both sides conflicts like any
+  file; `livedocs sync --resolve <file>` merges both sides from their common base by character, so no words are lost.
+- **History rewritten on the live branch** (the last synced commit is no longer an ancestor of `HEAD`): refused.
+  `livedocs sync --adopt-head` takes the work tree as one new commit: pages that differ from their record fold back as
+  edits, missing files go to the Trash, as in any sync, and a dry run lists both first.
+- **Who syncs the live branch**: any checkout on it, a person's or an agent's `--watch`, or a CI job on the live branch
+  after a merge.
 
 ## Offline
 
@@ -226,18 +252,3 @@ How many revisions a room keeps for a `patch` is the markdown tab's `MARKDOWN_RE
   `[sync] moved`, `[sync] deleted`, `[sync] nearest-base`, `[sync] patched`, `[sync] lost-local-value`,
   `[sync] file-conflict`, `[sync] taken`, `[sync] committed`, `[sync] pushed`, `[sync] push-rejected`.
 - Telemetry: category `Cli`, action `Used`, type `SyncTake` for `--take`; the rest counts as `Sync`.
-
-## Open questions
-
-Each is tracked in `AMBIGUITIES.md` until its answer lands here.
-
-- **Q2. A file deleted in the repository.** Move the document to the Trash (recoverable for 30 days, and true to an
-  agent's `git rm`); write the file back (livedocs keeps the page, as a deleted mirror file is today); or hold the
-  delete as pending until someone confirms it in livedocs. Recommended: the Trash.
-- **Q3. What a sync does in git.** Write files only, and leave commits to people and the hook; commit each settled
-  sync; commit and push each settled sync; or a per-link setting (`[git] commit = "none" | "commit" | "push"`) whose
-  `link init` suggests `push` for a whole-repository wiki. Recommended: the per-link setting.
-- **Q4. Branches.** Every branch sends its local changes (pages are not branched, as diagrams are not); only the
-  default branch sends, and other branches' changes wait until they are merged into it; or each branch's changes
-  become a draft of the page in livedocs, applied when the branch merges. Recommended: only the default branch sends,
-  so a documentation change in a pull request goes live with the code it describes.

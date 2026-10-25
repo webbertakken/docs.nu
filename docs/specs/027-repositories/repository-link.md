@@ -54,6 +54,10 @@ web = "https://github.com/acme/app/blob/main"  # optional; where links out of a 
 [hooks]
 block = false                      # true: a commit fails when its sync cannot run
 
+[git]                              # native files (Native files)
+branch = "main"                    # the live branch; default: the repository's default branch
+commit = "none"                    # none | commit | push; default none
+
 [[sources]]                        # sources without a comment syntax (Diagram sources)
 path = "docs/arch.excalidraw"
 tab = "doc_3h9x2a/0b34"

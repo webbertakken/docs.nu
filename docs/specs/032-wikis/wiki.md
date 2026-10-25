@@ -28,8 +28,7 @@ livedocs treats them alike, and a person may keep any number of each.
 
 ## What makes a folder a wiki
 
-Open ([Open questions](#open-questions), Q5). This spec is written for the recommended answer: **a folder is a wiki
-when it is marked as one**, whether or not it syncs anywhere, so a person without a repository keeps a wiki too.
+**A folder is a wiki when it is marked as one**, whether or not it syncs anywhere, so a person without a repository keeps a wiki too.
 
 - **Make this a wiki** is in a folder's menu, for people who may edit the folder; **Stop being a wiki** undoes it.
   Neither changes a document: unmarking keeps every page, file and link exactly as it is.
@@ -93,8 +92,8 @@ Every wiki has one entry page: its root's page named `index`, else `README`, els
 an editor picks another (**Set as entry page**). Opening the wiki opens it, with the wiki's sections and pages beside
 it.
 
-Keeping it current is open (Q6). Written for the recommended answer, **the entry page stays hand-written** and
-livedocs keeps it honest:
+**The entry page stays hand-written**, because its summaries carry judgement a generator cannot, and livedocs keeps
+it honest:
 
 - A page the entry page does not link to is **not in the entry page**, listed in the [wiki health](#wiki-health).
 - **Add to the entry page** writes one line, `- [<title>](<path>): <summary>`, at the end of the section whose
@@ -156,9 +155,18 @@ Linking a repository is the command line's, with the linking person's own access
 ## Privacy
 
 **A wiki synced to a public repository is public**: every page, file, name and path in it, and every change, the
-moment the sync pushes or someone else does. What livedocs does about it is open (Q7). Today's rule stays until it is
-decided: `link init` says in one line that the mirror is as public as the repository
-([Repository link](../027-repositories/repository-link.md#who-may-sync)).
+moment the sync pushes or someone else does. livedocs makes that visible, without second-guessing the repository's
+owner:
+
+- **`link init` asks to confirm** when the repository is public: "Everything in “<wiki>” will be public on <repository>.
+  Continue?" Declined, nothing is linked.
+- **The wiki is badged Public** in livedocs while a repository it syncs to is public: on the wiki, in the Explorer,
+  and on each of its pages beside the title, with the repository named on hover and focus. Whoever writes a page sees
+  that it is published.
+- **A repository that turns public later** is found at the next sync, which badges the wiki and says so once; a
+  repository that turns private drops the badge.
+- Whether a repository is public is read from its host when the link's `[repository] web` names one; a repository
+  livedocs cannot ask about is treated as public.
 
 ## Observability and telemetry
 
@@ -174,20 +182,3 @@ WikiText`; `Cli · Used · WikiCheck` and `Search`.
   separate decision.
 - **A wiki's own history.** Each document's history is livedocs's; the repository's is git's.
 - **Wiki-link syntax** (`[[Page]]`) as a link: it is kept as text and drawn as text ([Links](links.md)).
-
-## Open questions
-
-Each is tracked in `AMBIGUITIES.md` until its answer lands here.
-
-- **Q5. What makes a folder a wiki.** A **mark** on the folder, sync optional; the **sync** itself (a folder becomes a
-  wiki when a link writes it as native files); or **every folder**, with wiki behaviours everywhere. Recommended: the
-  mark, so a wiki needs no repository and an ordinary folder stays quiet.
-- **Q6. Keeping the entry page current.** A **hand-written** entry page, with pages missing from it flagged and one
-  line offered; a **generated section** inside the hand-written page, between markers, rewritten on every change; a
-  **fully generated** entry page; or **no help**. Recommended: hand-written with flags, because the summaries carry
-  judgement a generator cannot.
-- **Q7. A wiki synced to a public repository.** Say so once at `link init` (today's rule); **confirm** at
-  `link init`, and badge the wiki and its pages **Public** in livedocs while its repository is public; **refuse**
-  unless the wiki is shared publicly in livedocs too; or let each wiki choose between the last two. Recommended:
-  confirm and badge, so whoever writes a page sees that it is published, without livedocs second-guessing the
-  repository's owner. Undecided until the operator answers.

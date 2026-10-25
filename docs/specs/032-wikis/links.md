@@ -18,17 +18,17 @@ link's text, except to follow a rename ([Renames](#renames)).
 
 ## Link forms
 
-| From → to                                      | Target, as written in `[text](target)`                        | Resolves to                                                         |
-| ---------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- |
-| A page → a page of the same wiki               | `../tools/pm2.md`                                             | The page at that path                                               |
-| A page → a heading                             | `../tools/pm2.md#ports`, or `#ports` within the page          | The heading whose slug matches, as GitHub slugs it                  |
-| A page → a file document                       | `setup.sh`; `img/flow.png` in an image, `![Flow](…)`          | The file document; an image is drawn                                |
-| A page → a diagram or other document           | `architecture.livedoc.md`, its outline file                   | The document, opened on its first tab; `#<tab name>` opens that tab |
-| A page → a diagram, drawn in the page          | `architecture.livedoc.svg` in an image, its render            | The document's first tab, drawn live                                |
-| A page → a section                             | `../tools/`                                                   | The section, opened on its `index` or `README` page when it has one |
-| A page → another wiki, or anything outside one | Open (Q8); recommended: `https://docs.nu/document/doc_3h9x2a` | The document, by its id                                             |
-| A page → the repository outside the wiki       | `../../apps/cli/src/input.ts`                                 | [Links out of the wiki](#links-out-of-the-wiki)                     |
-| A page → the web                               | `https://yjs.dev`                                             | The address, opened in a new browser tab                            |
+| From → to                                | Target, as written in `[text](target)`               | Resolves to                                                            |
+| ---------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| A page → a page of the same wiki         | `../tools/pm2.md`                                    | The page at that path                                                  |
+| A page → a heading                       | `../tools/pm2.md#ports`, or `#ports` within the page | The heading whose slug matches, as GitHub slugs it                     |
+| A page → a file document                 | `setup.sh`; `img/flow.png` in an image, `![Flow](…)` | The file document; an image is drawn                                   |
+| A page → a diagram or other document     | `architecture.livedoc.md`, its outline file          | The document, opened on its first tab; `#<tab name>` opens that tab    |
+| A page → a diagram, drawn in the page    | `architecture.livedoc.svg` in an image, its render   | The document's first tab, drawn live                                   |
+| A page → a section                       | `../tools/`                                          | The section, opened on its `index` or `README` page when it has one    |
+| A page → a page of another wiki          | `../../../wiki/docs/tools/pm2.md`                    | The page, across checkouts ([Links across wikis](#links-across-wikis)) |
+| A page → the repository outside the wiki | `../../apps/cli/src/input.ts`                        | [Links out of the wiki](#links-out-of-the-wiki)                        |
+| A page → the web                         | `https://yjs.dev`                                    | The address, opened in a new browser tab                               |
 
 - Relative links are written to the **native file** paths a sync writes
   ([Native files](../027-repositories/native-files.md#what-a-link-writes)), so a link that works in livedocs works in
@@ -43,19 +43,22 @@ link's text, except to follow a rename ([Renames](#renames)).
 
 ## Links across wikis
 
-A global wiki and a project wiki live in different repositories, so no relative path is valid in both. How such a
-link is written is open ([Open questions](#open-questions), Q8). Written for the recommended answer, a link that
-leaves its wiki for a document in livedocs uses the target's **document address**:
+Wiki files stay plain, and keep working on a machine without livedocs. So a link from one wiki to another is a
+**relative path** too, written between the two wikis' files as their repositories are checked out **side by side**:
+every repository in one parent folder, each in a folder named after the repository (`~/Repositories/wiki`,
+`~/Repositories/spinner`).
 
-- It never breaks on a rename or a move: the id is the document's for good.
-- It is clickable everywhere a link is: in livedocs, on GitHub, in a terminal.
-- An agent with the target's wiki checked out finds the file by its id in that wiki's
-  [sync record](../027-repositories/native-files.md#the-sync-record) (`rg doc_3h9x2a`), or asks
-  `livedocs resolve <address>` for the local path, or `livedocs read <address>` for the text.
-- The host is the wiki's own: a self-hosted wiki's links name its host, never docs.nu.
-- An address grants nothing: a reader who may not open the document sees **Can’t open this page**, exactly as for one
-  that does not exist.
-- Inserting a link to a page of another wiki (the link picker, a paste of its address) writes this form.
+- livedocs writes and resolves it from each wiki's sync target: the repository's name and the link's `dir`. A wiki
+  without a sync target counts as a repository named after the wiki, so a link to it is valid once it syncs under
+  that name, and is rewritten when it syncs under another.
+- **In livedocs** it resolves through the sync targets, whatever a machine's layout. **In a checkout** it resolves
+  where the repositories sit side by side, so `rg`, an editor and an agent follow it. **On GitHub** it does not: it
+  climbs out of the repository. That is the price of plain files, and `livedocs wiki check` names such links as
+  `across`, never as broken.
+- Renaming or moving the target, renaming its repository, or changing a wiki's sync target rewrites these links like
+  any rename ([Renames](#renames)).
+- **A document in no wiki has no file path**, so no relative link can name it. The link picker offers documents in
+  wikis only; a pasted document address stays an ordinary web link.
 
 ## Renames
 
@@ -69,8 +72,9 @@ When a document or section is renamed or moved, every link that resolved to it b
 - **A rewrite changes the path and nothing else**: the link text, the anchor, `./`, angle brackets and percent
   encoding stay as written. Each page's rewrites are one changeset by the person who renamed (or the syncing person,
   for a move found in the repository), with the summary "Links to <new path>", and they sync out with the move.
-- **A document moved out of its wiki** has its links from the wiki rewritten into the cross-wiki form, since no
-  relative path from the wiki reaches it in the repository.
+- **A document moved out of every wiki** loses its file path, so the links to it can no longer be written. The move
+  lists the pages that link to it before it lands; after it, those links are broken (`moved-out`), with **Undo the
+  move** offered.
 - **A renamed heading** is not followed: links to its old anchor become broken, with **Point at <nearest heading>**
   offered. Headings change with every keystroke while someone types one, so following them would rewrite other pages
   mid-word.
@@ -99,6 +103,7 @@ A link is **broken** when its target does not resolve:
 | `case`        | Only a case-insensitive match                                     | **Fix the case**                           |
 | `anchor`      | The page exists; no heading has the slug                          | **Point at <nearest heading>**             |
 | `in-trash`    | The target is in the Trash                                        | **Restore** (for whoever may)              |
+| `moved-out`   | The target left every wiki                                        | **Undo the move** (for whoever may)        |
 | `out-missing` | A link out of the wiki misses in the checkout (`wiki check` only) | None; named with its line                  |
 
 - A link to a document the checking person cannot open is never reported as broken: it is `unreadable`, counted apart,
@@ -124,12 +129,3 @@ another, and the line around the link. A page with none, in a wiki, is an [orpha
   `[links] rewrite-capped`, `[links] broken`.
 - Telemetry: `Tab · Linked · PageLink` for a link inserted through the link picker, `PageLinkAcrossWikis` for one
   into another wiki; `UI · Changed · LinkFixed` with the fix as its type.
-
-## Open questions
-
-- **Q8. Links across wikis.** The target's **document address** (`https://docs.nu/document/<id>`): stable and
-  clickable everywhere, opaque to a reader of the text; a **wiki-qualified path** (`livedocs:<wiki>/<path>`):
-  readable, rewritten on renames, not clickable on GitHub; the target's **repository web address** (a GitHub `blob`
-  URL): clickable and readable, rewritten while livedocs knows of it, broken by renames in repositories it does not
-  sync; or a **relative path between checkouts** (`../../wiki/docs/tools/pm2.md`): readable, but true only on
-  machines laid out alike. Recommended: the document address. Tracked in `AMBIGUITIES.md`.
