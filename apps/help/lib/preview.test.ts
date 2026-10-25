@@ -143,10 +143,8 @@ describe('previewConfig', () => {
       },
       opts,
     );
-    expect(config.unsafe.bindings.map((b: { namespace_id: string }) => b.namespace_id)).toEqual([
-      '7101',
-      '7111',
-    ]);
+    const { bindings } = config.unsafe as { bindings: { namespace_id: string }[] };
+    expect(bindings.map((b) => b.namespace_id)).toEqual(['7101', '7111']);
   });
 
   it("refuses a rate limiter outside docs.nu's range, which could share another worker's counter", () => {
