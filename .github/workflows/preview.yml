@@ -25,7 +25,7 @@ env:
   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
   GH_TOKEN: ${{ github.token }}
   # The marker that finds this workflow's own comment on the pull request.
-  MARKER: '<!-- livedocs-preview -->'
+  MARKER: '<!-- livedoc-preview -->'
 
 jobs:
   deploy:
