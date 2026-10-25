@@ -328,7 +328,7 @@ Both default to "no limit" when unset, blank, `0`, or non-numeric, which is the 
 Add a custom-domain route to the router worker (`apps/router/wrangler.toml`) and point your DNS at Cloudflare. The router stitches all paths under one hostname:
 
 - `/` → marketing
-- `/document/*`, `/explorer/*`, `/new`, `/join`, `/sign-in`, `/get-started`, `/embed`, `/sso-callback` → live editor (clean routes; `/live/*` carries only its `_next` assets)
+- `/document/*`, `/explorer/*`, `/new`, `/join`, `/sign-in`, `/get-started`, `/embed` → live editor (clean routes; `/live/*` carries only its `_next` assets)
 - `/telemetry` → telemetry dashboard
 - `/help` → help centre
 - `/community` → Community, the public gallery of shared documents
