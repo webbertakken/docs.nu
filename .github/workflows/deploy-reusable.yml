@@ -74,7 +74,7 @@ on:
 # docs.nu's own deploys add the vars in apps/api/hosted-vars.json (telemetry
 # on, per-owner image caps, its public origin) and a fork's do not, so a fork
 # deploying this repo as documented is telemetry-off and uncapped. Keyed on the
-# repository ID of webbertakken/livedocs rather than its name, so a rename or a
+# repository ID of webbertakken/livedoc rather than its name, so a rename or a
 # transfer keeps the profile and no fork can match it. In a reusable workflow
 # the `github` context is the caller's, so every caller resolves it the same way.
 env:

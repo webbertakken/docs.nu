@@ -1,6 +1,6 @@
 # docs.nu deployment
 
-Livedocs runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The top-level `wrangler.toml` of every app is docs.nu's production; nothing points at livediagram's infrastructure ([docs.nu vision, PR #1](https://github.com/webbertakken/livedocs/pull/1)). The general steps are in [Self-hosting](./self-hosting.md); this page records only what is specific to docs.nu.
+Livedoc runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The top-level `wrangler.toml` of every app is docs.nu's production; nothing points at livediagram's infrastructure ([docs.nu vision, PR #1](https://github.com/webbertakken/livedoc/pull/1)). The general steps are in [Self-hosting](./self-hosting.md); this page records only what is specific to docs.nu.
 
 ## Shape
 
@@ -8,7 +8,7 @@ Livedocs runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The t
 - Resources: D1 `docs-nu` and R2 `docs-nu-images` (western Europe), and the KV namespace `docs-nu-mcp-oauth` for the MCP worker.
 - Rate limiters use namespace ids `7001`-`7012`: the ids are account-wide, and other workers on the account hold `1001` onwards.
 - Hostnames: `docs.nu` is canonical. `www.docs.nu` is attached to the router too, and a zone redirect rule (301, path and query kept) sends it to the apex. The zone has Always Use HTTPS on. Both zone settings live in the dashboard, not in this repo.
-- Hosted profile (`apps/api/hosted-vars.json`, applied only in `webbertakken/livedocs`): telemetry on, image gallery caps of 100 images and 100 MB per owner, `APP_BASE_URL` `https://docs.nu`. No Google client id yet, so the Drive mirror is off.
+- Hosted profile (`apps/api/hosted-vars.json`, applied only in `webbertakken/livedoc`): telemetry on, image gallery caps of 100 images and 100 MB per owner, `APP_BASE_URL` `https://docs.nu`. No Google client id yet, so the Drive mirror is off.
 - Guest-only: no Clerk, so no sign-in, teams, API tokens or MCP. AI and email are off until their keys are set.
 - No staging environment. Pull requests are meant to get their own preview deployment on `webber.workers.dev` instead.
 
