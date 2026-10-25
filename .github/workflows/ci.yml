@@ -189,14 +189,8 @@ jobs:
         working-directory: apps/cli/dist
         run: npm pack --dry-run
 
-      # Resolve the staging wrangler configs without deploying anything
-      # (docs/specs/016-platform/staging-environment.md). Wrangler does NOT inherit bindings into a named
-      # environment, so a binding left out of an `[env.staging]` block is
-      # simply absent from the staging worker, and a `service =` value that
-      # lost its `-staging` suffix points the staging router at PRODUCTION.
-      # Neither is a type error and neither shows up in a test — without this
-      # step the first sign of either is a deploy. Covers the three workers
-      # that carry bindings; the five static apps have nothing in their
-      # staging block but an assets directory.
-      - name: Staging config check
-        run: pnpm staging:check
+      # Resolve the wrangler configs of the three workers that carry bindings
+      # (api, mcp, router) without deploying anything, so a broken binding,
+      # database or service name fails here rather than in a deploy.
+      - name: Deploy config check
+        run: pnpm deploy:check

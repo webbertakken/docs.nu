@@ -1,27 +1,29 @@
 // The hosted profile (docs/specs/016-platform/deployment.md "Hosted profile"): the
-// plain vars livediagram.app's own deploys add on top of wrangler.toml, and a
+// plain vars docs.nu's own deploys add on top of wrangler.toml, and a
 // fork's do not. They live in `hosted-vars.json`, not in `[vars]`, because a
 // committed `[vars]` value is every fork's default too; and not in the
 // Cloudflare dashboard, because `wrangler deploy` replaces a worker's plain
 // vars with whatever the deploy declares, silently wiping dashboard-only ones.
 //
 // Most hosted vars are shared by every environment; a few are per environment
-// under `environments` (production, staging): the Google Drive mirror's OAuth
-// client id, because livediagram.app runs one Google Cloud project per
-// environment (docs/specs/022-drive-mirror/drive-mirror.md, "Hosted deployment").
+// under `environments`: the public origin and the Google Drive mirror's OAuth
+// client id, because each environment is its own Google Cloud project
+// (docs/specs/022-drive-mirror/drive-mirror.md, "Hosted deployment").
+// `production` is required and is the unnamed wrangler env; any other entry is
+// the wrangler env of the same name. Every environment declares the same names.
 // An empty per-environment value means unset there: the feature stays off.
 //
-// Run from apps/api; `--env staging` picks staging, none picks production:
+// Run from apps/api; `--env <name>` picks that environment, none picks production:
 //
-//   node scripts/hosted-vars.mjs flags [--env staging]
+//   node scripts/hosted-vars.mjs flags [--env <name>]
 //       One token per line (`--var`, `KEY:VALUE`, ...) for `wrangler deploy`.
-//   node scripts/hosted-vars.mjs build-env [--env staging]
+//   node scripts/hosted-vars.mjs build-env [--env <name>]
 //       The frontends' build-time mirror, as `KEY=VALUE` lines for $GITHUB_ENV.
-//   node scripts/hosted-vars.mjs verify [--env staging] [wrangler args...]
+//   node scripts/hosted-vars.mjs verify [--env <name>] [wrangler args...]
 //       Exits non-zero unless the worker's live deployment carries every hosted
 //       var of the environment with its value, and none it leaves unset. The
 //       args, `--env` included, reach wrangler.
-//   node scripts/hosted-vars.mjs verify-build <dir> [--env staging]
+//   node scripts/hosted-vars.mjs verify-build <dir> [--env <name>]
 //       Exits non-zero unless the built live app in <dir> carries the
 //       environment's Google client id (when set) and no other environment's,
 //       so the api and the live build of one environment agree.
@@ -36,10 +38,10 @@ import { fileURLToPath } from 'node:url';
 export const HOSTED_VARS_PATH = fileURLToPath(new URL('../hosted-vars.json', import.meta.url));
 
 const VAR_NAME = /^[A-Z][A-Z0-9_]*$/;
-const ENVIRONMENTS = ['production', 'staging'];
+const PRODUCTION = 'production';
 
 /** Reads and validates the profile: shared NAME → non-empty string, plus
- *  `environments` with exactly production and staging, each declaring the same
+ *  `environments` holding production and any others, each declaring the same
  *  names (none of them also shared), whose values are strings, empty = unset. */
 export function readHostedProfile(path = HOSTED_VARS_PATH) {
   const raw = JSON.parse(readFileSync(path, 'utf8'));
@@ -53,13 +55,15 @@ export function readHostedProfile(path = HOSTED_VARS_PATH) {
       throw new Error(`hosted-vars: ${name} must be a non-empty string`);
     }
   }
-  const environments = { production: {}, staging: {} };
-  if (rawEnvs === undefined) return { shared, environments };
-  const names = rawEnvs && typeof rawEnvs === 'object' ? Object.keys(rawEnvs).sort() : [];
-  if (names.join() !== [...ENVIRONMENTS].sort().join()) {
-    throw new Error('hosted-vars: environments must hold exactly production and staging');
+  if (rawEnvs === undefined) return { shared, environments: { [PRODUCTION]: {} } };
+  const names =
+    rawEnvs && typeof rawEnvs === 'object' && !Array.isArray(rawEnvs) ? Object.keys(rawEnvs) : [];
+  if (!names.includes(PRODUCTION)) {
+    throw new Error('hosted-vars: environments must hold production');
   }
-  for (const env of ENVIRONMENTS) {
+  /** @type {Record<string, Record<string, string>>} */
+  const environments = {};
+  for (const env of names) {
     const vars = rawEnvs[env];
     if (!vars || typeof vars !== 'object' || Array.isArray(vars)) {
       throw new Error(`hosted-vars: environments.${env} must be an object`);
@@ -74,16 +78,19 @@ export function readHostedProfile(path = HOSTED_VARS_PATH) {
     environments[env] = vars;
   }
   const keys = (env) => Object.keys(environments[env]).sort().join();
-  if (keys('production') !== keys('staging')) {
-    throw new Error('hosted-vars: production and staging must declare the same names');
+  for (const env of names) {
+    if (keys(env) !== keys(PRODUCTION)) {
+      throw new Error(`hosted-vars: ${env} and production must declare the same names`);
+    }
   }
   return { shared, environments };
 }
 
-/** The profile environment a wrangler env deploys: none is production. */
-export function hostedEnvironment(wranglerEnv) {
-  if (wranglerEnv === '') return 'production';
-  if (wranglerEnv === 'staging') return 'staging';
+/** The profile environment a wrangler env deploys: none is production, and
+ *  any other must be declared. Naming production would be a second production. */
+export function hostedEnvironment(wranglerEnv, profile) {
+  if (wranglerEnv === '') return PRODUCTION;
+  if (wranglerEnv !== PRODUCTION && wranglerEnv in profile.environments) return wranglerEnv;
   throw new Error(`hosted-vars: unknown environment ${wranglerEnv}`);
 }
 
@@ -173,9 +180,10 @@ function wranglerJson(args) {
 
 function verify(args) {
   const { wranglerEnv } = splitEnvArg(args);
+  const profile = readHostedProfile();
   const { vars: expected, unset } = resolveHostedVars(
-    readHostedProfile(),
-    hostedEnvironment(wranglerEnv),
+    profile,
+    hostedEnvironment(wranglerEnv, profile),
   );
   const wranglerArgs = args;
   const versionIds = activeVersionIds(wranglerJson(['deployments', 'status', ...wranglerArgs]));
@@ -216,15 +224,15 @@ function verifyBuild(args) {
   const { wranglerEnv, rest } = splitEnvArg(args);
   const [dir] = rest;
   if (!dir) {
-    console.error('usage: hosted-vars.mjs verify-build <dir> [--env staging]');
+    console.error('usage: hosted-vars.mjs verify-build <dir> [--env <name>]');
     return 2;
   }
   const profile = readHostedProfile();
-  const environment = hostedEnvironment(wranglerEnv);
+  const environment = hostedEnvironment(wranglerEnv, profile);
   const expected = profile.environments[environment].GOOGLE_CLIENT_ID || null;
-  const others = ENVIRONMENTS.filter((e) => e !== environment).map(
-    (e) => profile.environments[e].GOOGLE_CLIENT_ID ?? '',
-  );
+  const others = Object.keys(profile.environments)
+    .filter((e) => e !== environment)
+    .map((e) => profile.environments[e].GOOGLE_CLIENT_ID ?? '');
   const problems = clientIdBuildDrift(buildTexts(dir), expected, others);
   for (const p of problems)
     console.error(`hosted-vars verify-build (${environment}): FAILED, ${p}`);
@@ -236,7 +244,8 @@ function verifyBuild(args) {
 }
 
 function resolvedFor(args) {
-  return resolveHostedVars(readHostedProfile(), hostedEnvironment(splitEnvArg(args).wranglerEnv));
+  const profile = readHostedProfile();
+  return resolveHostedVars(profile, hostedEnvironment(splitEnvArg(args).wranglerEnv, profile));
 }
 
 function main([command, ...rest]) {
@@ -253,7 +262,7 @@ function main([command, ...rest]) {
       return verifyBuild(rest);
     default:
       console.error(
-        'usage: hosted-vars.mjs flags | build-env | verify | verify-build <dir>  [--env staging]',
+        'usage: hosted-vars.mjs flags | build-env | verify | verify-build <dir>  [--env <name>]',
       );
       return 2;
   }

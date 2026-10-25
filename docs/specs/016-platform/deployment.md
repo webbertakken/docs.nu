@@ -37,15 +37,15 @@ Three jobs run in parallel, each after its own `pnpm install --frozen-lockfile`,
 - **Checks**: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`.
 - **Tests**: `pnpm turbo run test --concurrency=2` for every workspace without `test:coverage`, then `pnpm turbo run test:coverage --concurrency=2 --filter=!@livediagram/live` for those with it (enforcing the per-file coverage thresholds), and uploads their coverage to Codecov.
 - **Editor unit tests i/3**: the editor's suite (`apps/live`) under coverage, a third of its files per job (`vitest run --shard=i/3`), each uploading its coverage to Codecov ([Coverage report](../003-system-architecture/testing.md#coverage-report)). Each suite runs exactly once; `scripts/ci-test-filters.mjs` derives the exclusions from the manifests, so adding or removing a coverage script needs no CI edit.
-- **Build**: `pnpm build`, then `pnpm staging:check`.
+- **Build**: `pnpm build`, then `pnpm deploy:check`.
 
 No job needs another's output: only the nine apps have a `build` script, and no workspace depends on an app, so checks and tests build nothing. The `main` ruleset requires all three checks by name.
 
 The two test steps run two packages at a time. Each package's Vitest already fills the runner's cores, and turbo's default fan-out on the 4-vCPU runner slowed the CPU-heavy `sticky-vision` suite about 70x, into timeouts. `pnpm test` cannot carry the flag: it is pnpm's built-in test command, so CI calls turbo directly.
 
-CI is the gate you check before deploying to production, but it does **not** trigger that deploy — production is a separate, manually-dispatched workflow (see below). It **does** trigger the staging deploy, via `workflow_run` on a successful CI run on `main` ([Staging environment](staging-environment.md)).
+CI is the gate you check before deploying to production, but it does **not** trigger that deploy: production is a separate, manually-dispatched workflow (see below).
 
-`pnpm staging:check` runs `wrangler deploy --dry-run --env staging` for the three workers that carry bindings (api, mcp, router). Wrangler does not inherit bindings into a named environment, so a binding missing from an `[env.staging]` block — or a `service =` that lost its `-staging` suffix, pointing the staging router at **production** — is neither a type error nor a test failure. Without this step the first sign of either is a deploy.
+`pnpm deploy:check` runs `wrangler deploy --dry-run` for the three workers that carry bindings (api, mcp, router), so a broken binding, database or service name fails in CI rather than in a deploy.
 
 `.github/workflows/codeql.yml` runs CodeQL (advanced setup) on every PR, every push to `main`, and weekly. A single `Analyze` job scans both `actions` and `javascript-typescript`, so it shows as one check. The repository's CodeQL default setup stays disabled: GitHub rejects advanced-setup uploads while it is on. GitHub Code Quality remains a separate, GitHub-managed check.
 

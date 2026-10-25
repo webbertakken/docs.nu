@@ -1,4 +1,4 @@
-name = "livediagram-live"
+name = "docs-nu-live"
 main = "src/worker.ts"
 compatibility_date = "2026-05-29"
 
@@ -21,43 +21,5 @@ run_worker_first = ["/*", "!/_next/*"]
 # The api, for the name a share link's preview shows (docs/specs/013-workspace/share-link-previews.md). Optional:
 # without it the share page is served as built and previews show the brand card.
 [[services]]
-binding = "API"
-service = "livediagram-api"
-
-# Staging (docs/specs/016-platform/staging-environment.md): same path-rewrite worker, same static `./out`, deployed
-# as `livediagram-live-staging`. `main` is inheritable; the assets binding is
-# restated so this block describes the staging worker in full.
-# Named explicitly: wrangler would append "-staging" to the top-level
-# name on its own, but nothing in `--dry-run` prints the name it resolved,
-# and the router's service bindings depend on this exact string.
-[env.staging]
-name = "livediagram-live-staging"
-
-[env.staging.assets]
-directory = "./out"
-binding = "ASSETS"
-not_found_handling = "404-page"
-run_worker_first = ["/*", "!/_next/*"]
-
-# Service bindings are not inherited: staging reads the staging api.
-[[env.staging.services]]
-binding = "API"
-service = "livediagram-api-staging"
-
-# ---------------------------------------------------------------------------
-# docs.nu: this fork's own deployment, on its own Cloudflare account.
-# Deploy with `--env docs-nu` (scripts/deploy-docs-nu.sh). Every name below
-# carries the docs-nu prefix; the top-level config stays upstream's.
-# ---------------------------------------------------------------------------
-[env.docs-nu]
-name = "docs-nu-live"
-
-[env.docs-nu.assets]
-directory = "./out"
-binding = "ASSETS"
-not_found_handling = "404-page"
-run_worker_first = ["/*", "!/_next/*"]
-
-[[env.docs-nu.services]]
 binding = "API"
 service = "docs-nu-api"

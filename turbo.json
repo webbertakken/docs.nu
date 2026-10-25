@@ -110,7 +110,7 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
-    "staging:check": {
+    "deploy:check": {
       "dependsOn": ["^build"]
     },
     "clean": {
