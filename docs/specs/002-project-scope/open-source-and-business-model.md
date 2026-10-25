@@ -1,6 +1,6 @@
 # Open source + distribution
 
-Livedoc is **open source software** (MIT), hosted free for everyone at
+LiveDoc is **open source software** (MIT), hosted free for everyone at
 [docs.nu](https://docs.nu), with **usage-based plans** for power users. Plans
 exist to pay for hosting; they never buy features.
 
@@ -13,7 +13,7 @@ The third-party work the apps ship is credited on the generated `/licences` page
 
 ## Distribution model
 
-There are two ways people use Livedoc:
+There are two ways people use LiveDoc:
 
 1. **Hosted at docs.nu.** Free for everyone, generously. Above a certain usage, a person can subscribe to a plan for
    more usage.
@@ -27,10 +27,10 @@ Both paths get the same feature set.
 
 - **Self-hosting is highly encouraged** for anyone who wants full control over their data. It is a first-class path,
   documented and kept working, not a courtesy.
-- **Contributing is the way to change Livedoc.** Improvements are welcome back under the same MIT license, so everyone
+- **Contributing is the way to change LiveDoc.** Improvements are welcome back under the same MIT license, so everyone
   gets them.
 - **Forking is allowed and not encouraged.** The license permits it; the project would rather have the change in
-  Livedoc itself.
+  LiveDoc itself.
 
 ## Plans
 
@@ -58,6 +58,6 @@ Both paths get the same feature set.
 
 ## What this means for contributors
 
-- External contributors can use, modify and ship Livedoc however they want.
+- External contributors can use, modify and ship LiveDoc however they want.
 - Contributions back to the project are welcome under the same MIT license.
-- This spec does not yet cover trademark or the "Livedoc" name.
+- This spec does not yet cover trademark or the "LiveDoc" name.

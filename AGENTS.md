@@ -1,10 +1,10 @@
-# Livedoc
+# LiveDoc
 
-Monorepo for Livedoc, hosted at [docs.nu](https://docs.nu). Multiple apps share code through internal packages.
+Monorepo for LiveDoc, hosted at [docs.nu](https://docs.nu). Multiple apps share code through internal packages.
 
-- Livedoc is a parallel product to livediagram, which it grew from: see [Purpose](docs/specs/001-project-vision/purpose.md).
+- LiveDoc is a parallel product to livediagram, which it grew from: see [Purpose](docs/specs/001-project-vision/purpose.md).
 - Changes from livediagram are picked by hand, never merged: see [livediagram upstream](docs/specs/002-project-scope/livediagram-upstream.md).
-- Code, packages and specs still named `livediagram` keep that name until a Livedoc change renames them.
+- Code, packages and specs still named `livediagram` keep that name until a LiveDoc change renames them.
 
 ## Before you start
 
