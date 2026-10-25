@@ -1,5 +1,7 @@
 # API app
 
+> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](../014-identity/auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
+
 The HTTP + WebSocket layer the live editor calls for document persistence and realtime collab.
 
 - **Workspace:** `apps/api` (`@livediagram/api`).

@@ -1,5 +1,7 @@
 # MCP server
 
+> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](../014-identity/auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
+
 **Status: live.** Merged and deployed at `mcp.livediagram.app`; connect flow
 verified end-to-end from Claude. Builds directly on [Public API and API tokens](public-api-and-tokens.md)
 (API tokens), which it picks up where §7 left off: [Public API and API tokens](public-api-and-tokens.md) deferred "OAuth /

@@ -1,5 +1,7 @@
 # Teams
 
+> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](../014-identity/auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
+
 Groups of signed-in users, managed from the Explorer page. v1 is membership only: a team is a named group with roles. Sharing documents with a team (the payoff) is a follow-up spec built on top of this one.
 
 ## Why

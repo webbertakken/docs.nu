@@ -112,6 +112,20 @@ The words for a program working on documents for a person ([Agents](../024-agent
 - An **element op** (`ElementOp`) stays the room's unit; an edit operation is the agent's, and compiles into them.
 - A CLI **command** and an MCP **tool** are the two front doors to one **verb** (`tab.view`, `element.set`).
 
+## Identity
+
+The words for who is calling ([Auth + guest access](../014-identity/auth-and-guest-access.md#who-is-who)).
+
+| Term               | Means                                                                                 | Never called                     |
+| ------------------ | ------------------------------------------------------------------------------------- | -------------------------------- |
+| **guest**          | A visitor without an account, keyed to one browser                                    | anonymous user, visitor account  |
+| **guest id**       | A guest's owner id: a server-minted UUID, proven by its **guest signature**           | anonymous id, device id          |
+| **account**        | A person who signed in, whatever their sign-in methods                                | user (outside better-auth's API) |
+| **account id**     | An account's owner id, `acct_…`                                                       | user id, Clerk id, sub           |
+| **sign-in method** | A way to prove who you are: Google, an email code                                     | provider, connection, login type |
+| **session**        | A signed-in browser; it proves itself to the api with a short-lived **session token** | Clerk session, login             |
+| **owner id**       | A guest id or an account id, whichever owns a row                                     | user id                          |
+
 ## Colours
 
 The words for choosing a colour ([Colour picker](../004-interface-design/colour-picker.md)).

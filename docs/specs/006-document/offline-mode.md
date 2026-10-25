@@ -131,7 +131,7 @@ auth has settled, the path names a document registered in the local index
   then the participant row), followed by the Explorer lists and the guest naming
   nudge. The document is not reloaded: an offline document is the reader's own
   whoever they turn out to be.
-- **`/new` does not wait either.** For a guest ([Who is a guest, before Clerk answers](../014-identity/auth-and-guest-access.md#who-is-a-guest-before-clerk-answers))
+- **`/new` does not wait either.** For a guest ([Who is a guest, before the session answers](../014-identity/auth-and-guest-access.md#who-is-a-guest-before-the-session-answers))
   creating This Browser, the create writes to IndexedDB and hands off without
   waiting on auth, the guest id or the participant, which resolve in the
   background (`commitNewDocument` in `app/new/page.tsx`).

@@ -35,7 +35,7 @@ Why a guest starts local: [Auth + guest access → Guest documents start local](
 - A `/new?folder=` / `?team=` context names a server place, so it is
   livediagram whoever is creating.
 - Before Clerk has answered, `signedIn` is the `__client_uat` hint
-  ([Who is a guest, before Clerk answers](../014-identity/auth-and-guest-access.md#who-is-a-guest-before-clerk-answers)).
+  ([Who is a guest, before the session answers](../014-identity/auth-and-guest-access.md#who-is-a-guest-before-the-session-answers)).
   A browser that looks signed in waits for the settled answer before creating, so a signed-in person is never handed
   a document in This Browser; a guest never waits.
 - There is no per-person override: no setting chooses the store. Where a document is **filed** on livediagram is the
