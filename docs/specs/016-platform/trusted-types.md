@@ -25,8 +25,8 @@ All three come from one shared module, `@livediagram/ui`'s `trusted-types`, and 
   (`trustedTypesBootScript`), before any other script can reach a sink. It is what the browser calls for a sink
   given a plain string by code that has no policy. It allows a script URL on the page's own origin under the app's
   own `<asset prefix>/_next/` (`/_next/` for marketing, `/live/_next/`, `/help/_next/` and so on), one on an origin in
-  "Third parties", and a worker from the page's own `blob:` URL; it refuses everything else: HTML, script text, and
-  any other URL. A `blob:` URL can only be minted by script already running on the page, and a worker has no DOM.
+  "Third parties"; it refuses everything else: HTML, script text, and any other URL, a `blob:`, `data:` or
+  `javascript:` one included, for a worker too.
   For HTML it allows exactly `<script></script>`, the empty script React DOM parses to create a `<script>` element on
   a client render (a script inserted through `innerHTML` never runs); any other HTML string is refused.
 - **`livediagram-markup`** turns markup that livediagram's own builders produced into `TrustedHTML`
@@ -60,10 +60,10 @@ file to this.
 | Next.js's own script helper                                | Its pass-through policy                                                                                                                                            | The `nextjs` policy name                                               |
 | ProseMirror (the article editor)                           | Parsing pasted HTML into an inert template                                                                                                                         | The `ProseMirrorClipboard` policy name                                 |
 | Our web workers                                            | Their script URLs under `/_next/`                                                                                                                                  | `default`                                                              |
-| Clerk (editor, community sign-in)                          | Script URLs on the Clerk frontend API origin                                                                                                                       | `default`, origin from the publishable key                             |
-| Clerk's sign-up bot protection                             | Cloudflare Turnstile's script on `https://challenges.cloudflare.com`                                                                                               | `default`, beside Clerk's origin                                       |
-| Clerk's session timers                                     | A `Worker` from the page's own `blob:` URL (its fixed timer source)                                                                                                | `default`, for the Worker constructor sink alone                       |
 | The Drive mirror (editor, a build with a Google client id) | Google Identity Services (`https://accounts.google.com/gsi/client`) and the API loader with the Picker (`https://apis.google.com/js/api.js`, then the same origin) | `default`, those two origins, only with `NEXT_PUBLIC_GOOGLE_CLIENT_ID` |
+
+Sign-in needs no row here: its client is part of the app's own build, and Google sign-in is a full-page redirect
+through the api, not a script on the page ([Auth + guest access](../014-identity/auth-and-guest-access.md)).
 
 A worker's own scope is not the page's: its script is served from `/_next/` with no policy header, so the libraries
 it runs (transformers.js, TensorFlow.js, jsquash) are outside this boundary.
