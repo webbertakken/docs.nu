@@ -189,7 +189,7 @@ simple = { limit = 120, period = 60 }
 
 # Per-owner limiter for POST /api/drive/token (docs/specs/022-drive-mirror/drive-mirror.md,
 # "Tokens"): each call reaches Google's token endpoint to mint a one-hour access
-# token, so a healthy browser needs about one an hour. 10 / 60s per Clerk user
+# token, so a healthy browser needs about one an hour. 10 / 60s per account
 # id bounds a looping client far below the general write limiter's 300. The
 # route answers 429 drive_token_rate_limited, which the browser treats like
 # Google's own rate limit (it backs off). Absent binding → allow (self-host).
