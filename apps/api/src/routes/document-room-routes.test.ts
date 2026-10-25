@@ -112,11 +112,11 @@ describe('WebSocket upgrade — trust headers', () => {
     expect(seen[0]!.headers.get('X-Verified-Role')).toBe('edit');
   });
 
-  // Once the guest signature gate is armed, `o` is the same bearer value as
+  // Wherever guest ids are signed (sign-in on), `o` is the same bearer value as
   // REST's X-Owner-Id and needs the same proof, on `os`.
-  describe('with the guest signature gate armed', () => {
-    const armed = (env: Env) =>
-      Object.assign(env, { GUEST_ID_HMAC_SECRET: 'sek', GUEST_SIG_ENFORCE_AFTER: '0' });
+  describe('on a host that signs guest ids', () => {
+    const SIGN_IN = { BETTER_AUTH_SECRET: 's'.repeat(40) } as Env;
+    const armed = (env: Env) => Object.assign(env, SIGN_IN);
 
     it('refuses an unsigned owner id', async () => {
       db.getDocumentMeta.mockResolvedValue({ ownerId: 'owner-uuid', teamId: null });
@@ -135,7 +135,7 @@ describe('WebSocket upgrade — trust headers', () => {
 
     it('seats a correctly signed owner id', async () => {
       db.getDocumentMeta.mockResolvedValue({ ownerId: 'owner-uuid', teamId: null });
-      const sig = encodeURIComponent((await signOwnerId('sek', 'owner-uuid'))!);
+      const sig = encodeURIComponent((await signOwnerId(SIGN_IN, 'owner-uuid'))!);
       const { env, seen } = roomEnv();
       const res = await handleDocumentRoomRoutes(
         makeTestRouteContext('GET', `/api/documents/d1/ws?o=owner-uuid&os=${sig}`, {

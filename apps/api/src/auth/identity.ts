@@ -12,7 +12,7 @@ import { betterAuth, type BetterAuthOptions } from 'better-auth';
 import { emailOTP } from 'better-auth/plugins/email-otp';
 import { jwt } from 'better-auth/plugins/jwt';
 import { generateAccountId } from './account-id';
-import { identityConfigOf, reportIdentityConfig } from './identity-config';
+import { identityConfigOf, reportIdentityConfig, versionedSecrets } from './identity-config';
 import { identityHooks, sendSignInCode } from './identity-hooks';
 import type { Env } from '../types';
 
@@ -65,19 +65,12 @@ export function identityOptions(
 ): BetterAuthOptions {
   const { origin, secret, googleClientId } = identityConfigOf(env);
   if (!origin || !secret) throw new Error('identityOptions: sign-in is off on this host');
-  const rotated = env.BETTER_AUTH_SECRETS?.trim();
+  const rotated = versionedSecrets(env);
   return {
     appName: 'LiveDoc',
     baseURL: origin,
     basePath: '/api/auth',
-    ...(rotated
-      ? {
-          secrets: rotated.split(',').map((entry) => {
-            const [version, ...value] = entry.split(':');
-            return { version: Number(version), value: value.join(':').trim() };
-          }),
-        }
-      : { secret }),
+    ...(rotated.length > 0 ? { secrets: rotated } : { secret }),
     trustedOrigins: [origin],
     database: env.DB,
     telemetry: { enabled: false },

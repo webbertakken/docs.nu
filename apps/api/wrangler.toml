@@ -42,25 +42,6 @@ globs = ["**/*.ttf", "**/*.otf"]
 # per IP) remains the only other control.
 AI_ALLOWED_ORIGINS = "https://docs.nu"
 
-# Guest signature enforcement (docs/specs/015-api/public-api-and-tokens.md §4). Stated here,
-# never only in the dashboard: every `wrangler deploy` replaces the worker's
-# plain vars with the ones this file declares, so a dashboard-only value is
-# silently wiped by the next deploy.
-#
-# GUEST_SIGNING_LIVE_AT: when production started signing guest ids (epoch ms).
-# An id whose participant row is older may still run its one-time upgrade
-# unsigned. Blank: docs.nu has no GUEST_ID_HMAC_SECRET yet, so it signs nothing.
-#
-# GUEST_SIG_ENFORCE_AFTER: from this instant, owner-scoped routes, the room's
-# owner leg and the legacy upgrade require a valid guest signature. Blank: not
-# armed. Every e2e stack runs with enforcement on (scripts/e2e-stack.mjs), so a
-# regression fails the suite (docs/specs/015-api/public-api-and-tokens.md §6).
-# `pnpm dev` keeps it blank (apps/api/package.json): a developer's local guests
-# can predate their local signing secret and would be locked out of their own
-# test data.
-GUEST_SIGNING_LIVE_AT = ""
-GUEST_SIG_ENFORCE_AFTER = ""
-
 # The CLI signs in through the MCP worker's OAuth server (docs/specs/015-api/cli.md "Authentication"); the
 # api names it in /api/capabilities. CLI_MIN_VERSION (unset until a release needs a floor) refuses writes
 # from an older CLI. Blank: docs.nu's MCP worker is not deployed yet.
@@ -334,17 +315,14 @@ name = "EMAIL"
 # `openssl rand -base64 32 | wrangler secret put BETTER_AUTH_SECRET`. Google sign-in adds GOOGLE_AUTH_CLIENT_ID
 # ([vars] or hosted-vars.json) and the secret GOOGLE_AUTH_CLIENT_SECRET.
 
-# GUEST_ID_HMAC_SECRET is provisioned out-of-band (`.dev.vars` locally,
-# `wrangler secret put GUEST_ID_HMAC_SECRET` + a matching GitHub repo
-# secret in prod; never in [vars] — it's secret material). When set, the
-# worker mints signed guest ids and /api/migrate requires a valid
-# signature, closing the "observe a guest id, claim its data" hole
-# (docs/specs/014-identity/auth-and-guest-access.md). Generate with `openssl rand -hex 32`. Unset = legacy unsigned
-# migrate (pure-guest / single-user self-host).
+# Guest ids are signed with a key derived from BETTER_AUTH_SECRET (src/auth/guest-key.ts), so a host with
+# sign-in on signs and requires guest signatures, and a guest-only host signs nothing. No separate secret.
+# Rotating the sign-in secret through BETTER_AUTH_SECRETS keeps BETTER_AUTH_SECRET in place, and the guest key
+# with it; removing the secret the key derives from re-keys every guest.
 
 # INTERNAL_EVENTS_KEY marks a POST to /api/events as coming from one of our
 # OWN workers over a service binding, rather than from the open internet
-# (docs/specs/017-telemetry/telemetry.md, issue #36). Provisioned out-of-band like the two above; never in
+# (docs/specs/017-telemetry/telemetry.md, issue #36). Provisioned out-of-band; never in
 # [vars] — it is secret material:
 #
 #   - Local dev: `INTERNAL_EVENTS_KEY=...` in `apps/api/.dev.vars`

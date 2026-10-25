@@ -1,99 +1,53 @@
-// /api/migrate — guest -> authed (and legacy guest -> signed-guest)
-// ownership migration.
+// POST /api/migrate: a guest's data moves into the account it signed in to (docs/specs/014-identity/
+// auth-and-guest-access.md "Guest → account upgrade"; blueprint "Guest migration").
 
 import { isAccountIdShape } from '@livediagram/api-schema';
-import { guestSignatureEnforced, isLegacyGuestEra } from '../auth/guest-rest';
 import { verifyOwnerId } from '../auth/owner-signature';
-import { getParticipant, migrateOwnerId } from '../db';
+import { migrateOwnerId } from '../db';
 import { badRequest, forbidden, json, missingAuth, notFound } from '../responses';
 import { readOptionalBody, type RouteContext } from './context';
 
 const ZERO = { documents: 0, folders: 0, shared: 0, images: 0 };
 
-// Moves every `owner_id` row (documents, folders, prefs, images, shared
-// list) from a source owner to a target owner. Two flows:
+// Moves every guest-holdable row (docs/specs/015-api/api.md "Owner-keyed data") from a guest id to the account a
+// session token proves. The live app calls this once a session settles while a guest id is still in the browser.
 //
-//  1. Sign-up (guest → Clerk): the live app calls this once Clerk reports
-//     a session, to bind the caller's guest data to their account. The
-//     SOURCE guest id must prove possession via its HMAC signature
-//     (`guestSignature`) when signing is configured — otherwise anyone who
-//     merely observed a guest's id (it leaks via DTOs / presence) could
-//     claim that guest's entire data set. See auth/owner-signature.ts.
+// - Session only: no guest-header fallback, no API token, no workbench session.
+// - The SOURCE guest id must prove possession with its HMAC signature (`guestSignature`, minted with it at
+//   POST /api/guest-id); otherwise anyone who merely observed a guest's id (it leaks via DTOs and presence) could
+//   claim that guest's entire data set. See auth/owner-signature.ts. An unsigned guest id never moves.
+// - The source is never an account id: account ids are harvestable (team member lists).
 //
-//  2. Legacy upgrade (unsigned guest → freshly-minted signed guest): an
-//     existing guest created before signing shipped has an unsigned id and
-//     so can't satisfy flow 1. The live app mints a signed id (POST
-//     /api/guest-id) and calls this with no session token to move the old
-//     data onto the new id. The SOURCE here is the caller's current
-//     `X-Owner-Id` (the same bearer credential every guest request uses);
-//     the TARGET is the new signed id, proven by `toSignature`. NOTE: the
-//     source is only bearer-authenticated, so this path carries the same
-//     residual exposure as the pre-signing guest model for legacy ids
-//     during the transition window (docs/specs/014-identity/auth-and-guest-access.md). New guests never use it.
-//
-// Idempotent: a no-op (source == target) moves zero rows.
+// Idempotent: a retry with the same guest id moves zero rows.
 export async function handleMigrate(ctx: RouteContext): Promise<Response> {
-  const { request, env, segments, sessionAccountId, resolveOwner } = ctx;
+  const { request, env, segments, sessionAccountId } = ctx;
   if (!(segments[1] === 'migrate' && segments.length === 2)) return notFound();
   if (request.method !== 'POST') return notFound();
+  if (!sessionAccountId) return refused('no_session', missingAuth());
 
   const body = (await readOptionalBody(request)) as {
     guestOwnerId?: unknown;
     guestSignature?: unknown;
-    toOwnerId?: unknown;
-    toSignature?: unknown;
   };
-  const secret = env.GUEST_ID_HMAC_SECRET;
-
-  // Flow 1 — sign-up: claim guest data into the account.
-  if (sessionAccountId) {
-    const fromOwnerId = typeof body.guestOwnerId === 'string' ? body.guestOwnerId.trim() : '';
-    if (!fromOwnerId) return badRequest('guestOwnerId is required');
-    if (fromOwnerId === sessionAccountId) return json({ migrated: ZERO });
-    // A guest id is a server-minted UUID, never an account id. Without this,
-    // a deployment with no GUEST_ID_HMAC_SECRET (the signature check below is
-    // skipped) would let any signed-in user take over another account's whole
-    // workspace by naming its (harvestable) account id.
-    if (isAccountIdShape(fromOwnerId)) return forbidden();
-    // Possession proof: the caller must hold the source id's signature.
-    if (secret && !(await verifyOwnerId(secret, fromOwnerId, stringOrNull(body.guestSignature)))) {
-      return forbidden();
-    }
-    const migrated = await migrateOwnerId(env, fromOwnerId, sessionAccountId);
-    return json({ migrated });
+  const fromOwnerId = typeof body.guestOwnerId === 'string' ? body.guestOwnerId.trim() : '';
+  if (!fromOwnerId) return refused('no_guest_id', badRequest('guestOwnerId is required'));
+  if (fromOwnerId === sessionAccountId) return moved(ZERO);
+  if (isAccountIdShape(fromOwnerId)) return refused('account_id', forbidden());
+  if (!(await verifyOwnerId(env, fromOwnerId, stringOrNull(body.guestSignature)))) {
+    return refused('signature', forbidden());
   }
+  return moved(await migrateOwnerId(env, fromOwnerId, sessionAccountId));
+}
 
-  // Flow 2 — legacy upgrade (guest -> signed guest). Only meaningful when
-  // signing is on; with no secret there are no signed ids to upgrade to.
-  if (!secret) return missingAuth();
-  const fromOwnerId = resolveOwner();
-  const toOwnerId = typeof body.toOwnerId === 'string' ? body.toOwnerId.trim() : '';
-  if (!fromOwnerId) return missingAuth();
-  // The source here is only the unsigned bearer header, so it must never be
-  // an account id: account ids are harvestable (team member lists), and this
-  // path would otherwise move a signed-up user's whole workspace to whoever
-  // names it. The global Clerk-shape refusal in index.ts only covers
-  // OWNER_SCOPED_SEGMENTS, which deliberately leaves `migrate` out.
-  if (isAccountIdShape(fromOwnerId)) return forbidden();
-  // Once enforcement is armed an unsigned source must prove possession, with
-  // one exception: an id that existed before this deployment signed anything
-  // (its participant row predates GUEST_SIGNING_LIVE_AT) can still move onto a
-  // signed id, so a legacy guest who returns keeps their documents. Such an id
-  // is no more exposed than it was before enforcement; every id minted signed
-  // is refused here without its signature.
-  if (
-    guestSignatureEnforced(env, Date.now()) &&
-    !(await verifyOwnerId(secret, fromOwnerId, request.headers.get('X-Owner-Sig')))
-  ) {
-    const participant = await getParticipant(env, fromOwnerId);
-    if (!isLegacyGuestEra(env, participant?.createdAt ?? null)) return forbidden();
-    console.warn('[migrate] legacy unsigned guest upgraded under enforcement');
-  }
-  if (!toOwnerId) return badRequest('toOwnerId is required');
-  if (fromOwnerId === toOwnerId) return json({ migrated: ZERO });
-  if (!(await verifyOwnerId(secret, toOwnerId, stringOrNull(body.toSignature)))) return forbidden();
-  const migrated = await migrateOwnerId(env, fromOwnerId, toOwnerId);
+function moved(migrated: typeof ZERO): Response {
+  const rows = Object.values(migrated).reduce((sum, n) => sum + n, 0);
+  console.info(`[migrate] moved rows=${rows}`);
   return json({ migrated });
+}
+
+function refused(reason: string, response: Response): Response {
+  console.warn(`[migrate] refused reason=${reason}`);
+  return response;
 }
 
 // A signature as sent: anything but a string is no signature at all.

@@ -5,8 +5,8 @@
 // the `X-Owner-Id` bearer value itself, so handing it to a reader hands them
 // the thing the server uses to recognise that guest — and `POST /api/migrate`
 // will reassign every document, folder, image and preference belonging to an
-// owner id to whoever presents it (gated on an HMAC signature only when
-// `GUEST_ID_HMAC_SECRET` is configured; unset, knowing the id is enough).
+// owner id to whoever presents it (gated on an HMAC signature wherever sign-in
+// is on; on a guest-only host, knowing the id is enough to act as that guest).
 // See docs/specs/014-identity/auth-and-guest-access.md + docs/specs/015-api/public-api-and-tokens.md §4.
 //
 // This lived as a private `redactOwner` inside routes/share.ts, applied to the

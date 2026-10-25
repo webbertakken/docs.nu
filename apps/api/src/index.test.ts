@@ -25,11 +25,9 @@ import type { RouteContext, WorkbenchContext } from './routes/context';
 import { signOwnerId } from './auth/owner-signature';
 import type { Env } from './types';
 
-const SECRET = 'test-hmac-secret';
-
-// Enforcement on: secret set + a cutoff in the past.
+// Enforcement on: the host has a sign-in secret, so it signs guest ids.
 function env(): Env {
-  return { GUEST_ID_HMAC_SECRET: SECRET, GUEST_SIG_ENFORCE_AFTER: '1' } as unknown as Env;
+  return { BETTER_AUTH_SECRET: 's'.repeat(40) } as unknown as Env;
 }
 function get(path: string, headers: Record<string, string> = {}): Request {
   return new Request(`https://api.test${path}`, { method: 'GET', headers });
@@ -56,7 +54,7 @@ describe('worker §4 guest X-Owner-Id signature gate', () => {
   });
 
   it('lets a validly signed X-Owner-Id through the gate', async () => {
-    const sig = (await signOwnerId(SECRET, 'guest-1'))!;
+    const sig = (await signOwnerId(env(), 'guest-1'))!;
     const res = await worker.fetch(
       get('/api/documents', { 'X-Owner-Id': 'guest-1', 'X-Owner-Sig': sig }),
       env(),
@@ -70,13 +68,12 @@ describe('worker §4 guest X-Owner-Id signature gate', () => {
   });
 });
 
-// The Clerk-shape refusal sits BEFORE the signature gate above and, unlike it,
-// is unconditional — the shape has never been a legitimate guest credential, so
-// there is no legacy caller to grandfather and nothing to arm. That matters
-// because the signature gate ships OFF by default (`GUEST_SIG_ENFORCE_AFTER`
-// unset), which is the configuration these tests use.
+// The account-id refusal sits BEFORE the signature gate above and, unlike it,
+// is unconditional: the shape has never been a legitimate guest credential, so
+// it holds on a guest-only host too, where the signature gate is off. That is
+// the configuration these tests use.
 describe('worker refusal of an account id in X-Owner-Id', () => {
-  // Enforcement OFF: no secret, no cutoff. The gate above cannot fire here.
+  // Enforcement OFF: a guest-only host, no sign-in secret. The gate above cannot fire here.
   const noEnforcement = () => ({}) as unknown as Env;
 
   beforeEach(() => resolveApiTokenMock.mockResolvedValue(null));
