@@ -714,8 +714,8 @@ type `frontDoorOf(request)`: `Mcp`, `Cli`, `Api` or, for the toast's Undo, `Edit
 | OpenAPI parity                                                                                                | `apps/api/src/openapi/*.test.ts`                                                                              |
 | Owner columns                                                                                                 | `account-owner-columns.test.ts` entry for `agent_changesets.author_id`                                        |
 
-The end-to-end spec (`apps/live/e2e/clerk-stub/agent-changesets.spec.ts`, dark mode, signed in through the Clerk
-stub, since only an account mints tokens) opens a personal document, submits a changeset with an
+The end-to-end spec (`apps/live/e2e/clerk-stub/agent-changesets.spec.ts`, dark mode, signed in, since only an account
+mints tokens; it is among the signed-in specs being ported from a stub of the earlier sign-in provider to real sign-in) opens a personal document, submits a changeset with an
 API token, and checks the element appears, the outline shows, the toast reads, Show frames it, the next autosave
 keeps it, and Undo reverts it.
 
