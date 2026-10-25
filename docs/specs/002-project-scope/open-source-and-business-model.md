@@ -1,6 +1,6 @@
 # Open source + distribution
 
-docs.nu is **open source software** (MIT), hosted free for everyone at
+livedocs is **open source software** (MIT), hosted free for everyone at
 [docs.nu](https://docs.nu), with **usage-based plans** for power users. Plans
 exist to pay for hosting; they never buy features.
 
@@ -13,7 +13,7 @@ The third-party work the apps ship is credited on the generated `/licences` page
 
 ## Distribution model
 
-There are two ways people use docs.nu:
+There are two ways people use livedocs:
 
 1. **Hosted at docs.nu.** Free for everyone, generously. Above a certain usage, a person can subscribe to a plan for
    more usage.
@@ -27,16 +27,18 @@ Both paths get the same feature set.
 
 - **Self-hosting is highly encouraged** for anyone who wants full control over their data. It is a first-class path,
   documented and kept working, not a courtesy.
-- **Contributing is the way to change docs.nu.** Improvements are welcome back under the same MIT license, so everyone
+- **Contributing is the way to change livedocs.** Improvements are welcome back under the same MIT license, so everyone
   gets them.
 - **Forking is allowed and not encouraged.** The license permits it; the project would rather have the change in
-  docs.nu itself.
+  livedocs itself.
 
 ## Plans
 
 - **Free comes first.** Nobody chooses a plan to start; nobody meets a price before they have used the product.
 - **Plans are found under Usage**, in the menus, beside what a person has used. They are not on the marketing pages,
   and nothing in the product nudges toward them before usage approaches the free amount.
+- **Usage is storage and sync volume**: what a person's documents occupy, and what the command line syncs in and
+  out of them. Both are shown under Usage, beside the free amount.
 - **A plan buys usage, never features.** No feature is gated on a plan; the codebase holds no "Pro features" flag.
 - **A plan pays for hosting.** Its price follows what hosting costs, not what the market would bear.
 
@@ -56,6 +58,6 @@ Both paths get the same feature set.
 
 ## What this means for contributors
 
-- External contributors can use, modify and ship docs.nu however they want.
+- External contributors can use, modify and ship livedocs however they want.
 - Contributions back to the project are welcome under the same MIT license.
-- This spec does not yet cover trademark or the "docs.nu" name.
+- This spec does not yet cover trademark or the "livedocs" name.

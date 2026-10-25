@@ -1,6 +1,6 @@
 # Purpose
 
-docs.nu is where anyone keeps **documents of every kind, together, in real time**,
+livedocs, at [docs.nu](https://docs.nu), is where anyone keeps **documents of every kind, together, in real time**,
 and where each document can live on as a plain file in a repository.
 
 This is the root of the spec tree: every other spec is a decision taken inside
@@ -18,10 +18,10 @@ live, and contribute simultaneously.
 - **A document holds tabs, and every tab has a kind.** A document with one tab
   hides its tab strip: it reads as a single page, while the tab still holds its
   data, so a second tab can arrive later without changing what the document is.
-- **Markdown is native.** A markdown file is a document like any other, edited
-  together live, and it stays a markdown file: wherever it syncs to, it arrives
+- **Markdown is native.** A markdown file is a document with a single tab of the
+  **markdown** kind, edited together live, and it stays a markdown file: wherever it syncs to, it arrives
   as plain markdown that any tool can read.
-- **Documents sync to where they are used.** docs.nu is the source of truth;
+- **Documents sync to where they are used.** livedocs is the source of truth;
   the command line syncs documents out to repositories and other systems as
   plain files, and folds changes made there back in. Agents that read files with
   `rg` read the same words people edit in the browser.
@@ -30,15 +30,14 @@ live, and contribute simultaneously.
   repository. Both are edited, linked and searched the same way.
 
 It grew out of livediagram, and keeps everything that made livediagram's canvas
-good: the diagram, board, sheet and form tabs are docs.nu tab kinds, worked on as
+good: the diagram, board, sheet and form tabs are livedocs tab kinds, worked on as
 they are there ([livediagram upstream](../002-project-scope/livediagram-upstream.md)).
 
 ## The product comes first
 
-Opening docs.nu lands in the **Explorer**, not on a marketing page. The first
+Opening docs.nu lands in the **Explorer**, at `/`, not on a marketing page. The first
 thing anyone sees is their own workspace, ready to use; there is nothing to read
-before there is something to do. The marketing pages exist, under a route of
-their own, and are secondary to an extremely well tailored experience of the
+before there is something to do. The marketing pages exist, under `/about`, and are secondary to an extremely well tailored experience of the
 product itself.
 
 Pricing follows the same rule. Hosting is free and generous for everyone, so
@@ -79,22 +78,22 @@ Collaboration earns the second person; sync earns the repository.
 
 - **Not a marketing site with an app behind it.** The product is the front door.
 - **Not a lock-in.** Every document can leave as a plain file; a markdown file
-  never becomes a format only docs.nu reads.
+  never becomes a format only livedocs reads.
 - **Not the home of source code.** Code lives in repositories and their editors;
-  docs.nu holds what is written about it, beside it.
+  livedocs holds what is written about it, beside it.
 - **Not a paywall.** No feature is reserved for a plan: plans buy more usage,
   never more product.
 
 ## Boundaries that have moved
 
 When a boundary moves, it is recorded here in the same change, with the spec
-that moved it. docs.nu started from livediagram's purpose, and these moved at
+that moved it. livedocs started from livediagram's purpose, and these moved at
 the start:
 
 - **"The canvas is the product"**: widened by this spec. Documents are the
   product; the canvas is one of their tab kinds.
 - **"Not a documentation platform"**: reversed by this spec. Documentation and
-  wikis are what docs.nu is for.
+  wikis are what livedocs is for.
 - **"Not a paid product, ever"**: narrowed by
   [Open source + distribution](../002-project-scope/open-source-and-business-model.md).
   Hosting stays free; usage beyond it can be bought, to pay for hosting. No
@@ -106,13 +105,13 @@ the start:
 
 Knowledge gets split between tools that are good at prose, tools that are good
 at drawing, and repositories where agents and tools can actually read it. Each
-copy drifts from the others. docs.nu exists to be **one place where every kind
+copy drifts from the others. livedocs exists to be **one place where every kind
 of document is written together, live, and still lands as a plain file wherever
 it is needed**.
 
 ## How it ships
 
-docs.nu is **open source** (MIT), self-hostable in full, and runs as a
+livedocs is **open source** (MIT), self-hostable in full, and runs as a
 **hosted product** at [docs.nu](https://docs.nu), free for everyone, with
 usage-based plans for power users. See
 [Open source + distribution](../002-project-scope/open-source-and-business-model.md).
