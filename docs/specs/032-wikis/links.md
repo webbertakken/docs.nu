@@ -33,6 +33,9 @@ link's text, except to follow a rename ([Renames](#renames)).
 - Relative links are written to the **native file** paths a sync writes
   ([Native files](../027-repositories/native-files.md#what-a-link-writes)), so a link that works in livedocs works in
   the repository, and the other way round. A wiki that has never synced uses the same paths.
+- **On a branch**, a link opens its target's [document branch](../006-document/document-branches.md) of the same
+  name where one exists, and its main otherwise, so a git branch's pages link to each other as that git branch holds
+  them.
 - **A path starting with `/`** is relative to the repository's root, as GitHub reads it. In livedocs it resolves
   inside the wiki when it lands under the link's `dir`, and as a link out otherwise.
 - **Spelling.** `my%20page.md`, `<my page.md>` and `./my page.md` resolve alike. Reference-style links resolve as
@@ -69,6 +72,9 @@ When a document or section is renamed or moved, every link that resolved to it b
 - **In the repository**, a move the sync detects ([Native files](../027-repositories/native-files.md#renames-and-moves))
   is a rename like any other, and rewrites the same links. An agent that already fixed them by hand leaves nothing to
   rewrite: only links still pointing at the old path change.
+- **On a branch**, a rename or move rewrites links on that branch only: each page holding a link to it changes on
+  its own branch of the same name, started for it, so main's links change when the branch merges and a git branch's
+  pull request shows the rewrites beside the move.
 - **A rewrite changes the path and nothing else**: the link text, the anchor, `./`, angle brackets and percent
   encoding stay as written. Each page's rewrites are one changeset by the person who renamed (or the syncing person,
   for a move found in the repository), with the summary "Links to <new path>", and they sync out with the move.

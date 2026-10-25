@@ -167,8 +167,29 @@ The words for diagrams living beside code ([Repositories](../027-repositories/RE
 | **workbench**           | A developer tool that frames the editor beside an agent (an agent workbench, VS Code) | host (that is a profile's server), IDE |
 | **selection reference** | The text naming what was selected, attached to a person's message to their agent      | context, selection payload             |
 | **native file**         | A document in its own file form: a page as its `.md`, a file document as its bytes    | export, plain copy                     |
-| **sync record**         | `livedocs-sync.jsonl`: each native file's document, tab, revision and hash            | lock file, manifest                    |
+| **sync record**         | `.livedocs/`: per document and branch, a native file's document, tab, revision, hash  | lock file, manifest                    |
 | **nearest base**        | The kept snapshot a changed file is fewest characters away from; its merge's base     | last sync, latest                      |
+| **branch binding**      | Each git branch syncing with the document branches of its name                        | branch mapping, branch sync mode       |
+| **main git branch**     | The git branch bound to the documents themselves: `[git] branch`                      | live branch, trunk                     |
+| **sync commit**         | A commit a sync or a hook makes, holding only the link's files                        | bot commit, docs commit                |
+| **local copy**          | A link outside git: a folder of plain files kept in step with main, live, both ways   | export, backup, mirror (that is Drive) |
+| **kept out of git**     | Written into the work tree by the sync, never committed                               | ignored, excluded, untracked           |
+| **managed section**     | The `.gitignore` lines between `# livedocs:begin` and `# livedocs:end`                | livedocs block, generated ignore       |
+
+## Document branches
+
+The words for named live copies of a document ([Document branches](../006-document/document-branches.md)).
+
+| Term                | Means                                                                                    | Never called                            |
+| ------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| **document branch** | A named, live copy of a document, edited without touching main                           | fork, draft, copy, variant, version     |
+| **main**            | The document itself, as its branches see it                                              | trunk, master, original, default branch |
+| **branch point**    | What a branch started from: main or another branch, at a revision of each tab            | fork point, base (that is the sync's)   |
+| **merge**           | Bringing a branch's changes into main (or another branch) from their latest shared state | publish, apply, accept                  |
+| **unmerged change** | A stretch or field both sides changed differently, kept beside the result as a note      | conflict (that is a changeset's 409)    |
+| **discard**         | Closing a branch without merging it; restorable for 30 days                              | delete, abandon, reject                 |
+
+- A git branch is always called a git branch; "branch" alone, in documents, means a document branch.
 
 ## Wikis
 

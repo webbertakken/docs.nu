@@ -115,6 +115,10 @@ The editor is real:
 ## Next
 
 - **Pages and wikis** ([Markdown tab](../031-markdown/markdown-tab.md), [File tab](../006-document/file-tab.md), [Native files](../027-repositories/native-files.md), [Wiki](../032-wikis/wiki.md), [Links](../032-wikis/links.md)): specified, nothing built. Markdown as a native tab kind edited together live and synced byte for byte, any file as a document, and global and project wikis synced both ways with their repositories.
+- **Documents in repositories, in three outcomes, in this order** ([Repository link](../027-repositories/repository-link.md), [Native files](../027-repositories/native-files.md), [Branch binding](../027-repositories/branch-binding.md), [Document branches](../006-document/document-branches.md), [Committed files](../027-repositories/committed-files.md)): specified, nothing built.
+  1. **Local copies**: a live two-way sync between livedocs and a folder of plain files, without git. The global wiki moves into livedocs and is edited there and in its files alike.
+  2. **Committed main**: main's snapshots committed on the main git branch, the pre-commit and pre-push hooks and the CI check. Project wikis show on GitHub as the plain files people edit live.
+  3. **Document branches bound to git branches**: every git branch edits its own live document branches, a pull request carries their snapshots, and its merge merges them.
 - **Agents as collaborators** ([Agents](../024-agents/README.md)): with changesets, views, edit operations, the [lint](../024-agents/diagram-lint.md), presence and the [CLI](../015-api/cli.md) built and published, the CLI's update check next.
 - **Repository sync** ([Repository link](../027-repositories/repository-link.md), [Diagram sources](../027-repositories/diagram-sources.md)): merging offline edits back, the git hooks and merge driver, adopting existing Mermaid, PlantUML, DOT, draw.io and Excalidraw diagrams, and strict and relaxed compatibility.
 - **Access levels, the rest** ([Share roles](../013-workspace/share-roles.md#later)): Participant links are built; token levels, ownership as separate powers, server-derived collaboration keys and a look-only Viewer are next.

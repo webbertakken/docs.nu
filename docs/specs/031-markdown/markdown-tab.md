@@ -217,6 +217,9 @@ are applied by the api as edits of the current state, so they merge with live ty
 - The room keeps the states of the last `MARKDOWN_REVISIONS_KEPT` revisions, so a `patch` written against a recent
   revision lands on the characters it was written against ([Agents](#writing)).
 - `text` is always readable on its own: search, views and exports read it without the merge state.
+- **A page's [branches](../006-document/document-branches.md)** each hold their own text and merge state, started
+  from main's at the branch point, which main keeps while the branch is open, so a branch merges back by character
+  however old it is.
 
 ## From files and agents
 

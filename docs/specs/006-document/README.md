@@ -3,6 +3,7 @@
 Follow the references below only as needed; never upfront.
 
 - ./document.md - when naming things: a document holds tabs; diagram, event-storming board, markdown and file are tab kinds; whiteboarding is an editor mode
+- ./document-branches.md - when a document has named live copies beside main: starting, naming, viewing, comparing, merging (pages by character, diagrams by element), unmerged changes, discarding and restoring
 - ./file-tab.md - when any file (an image, a PDF, a script) lives in livedocs as a document: the file tab kind, its bytes, previews, whole-file changes, limits
 - ./document-structure.md - when working on Document structure: Documents contain tabs; elements can link across tabs
 - ./per-tab-storage.md - when working on Per-tab storage: Split tabs into their own D1 rows so autosave scope shrinks

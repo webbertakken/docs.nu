@@ -53,6 +53,9 @@ are never merged.
   them, with who replaced them and when, and restores one as a new replace.
 - A replace from a file whose recorded base is no longer the tab's revision is a conflict, handled by the sync
   ([Native files](../027-repositories/native-files.md#a-file-document)).
+- **On a [branch](document-branches.md)** a file tab holds the branch's bytes. A merge takes the side that replaced
+  them; when both did, main's stand and the branch's become a previous version, with a note on the tab
+  ([Merging](document-branches.md#merging)).
 
 ## Limits
 

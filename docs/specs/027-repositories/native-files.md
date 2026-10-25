@@ -8,8 +8,9 @@ file, so whoever reads the repository with `rg`, `cat` or GitHub reads exactly w
 folds the changes made to those files back in.
 
 Everything in [Repository link](repository-link.md) holds here; this spec adds what a file that _is_ the document
-asks for. livedocs stays the source of truth: a native file is a snapshot at a recorded revision, and a change made
-to it is a proposal that reaches livedocs as a [changeset](../024-agents/agent-changesets.md), or does not count.
+asks for. livedocs stays the source of truth: a native file is a snapshot of a document branch (or of main) at a
+recorded revision, and a change made to it is a proposal that reaches that branch as a
+[changeset](../024-agents/agent-changesets.md), or does not count ([Branches](#branches)).
 
 This spec names things as livedocs's command line does: the command `livedocs`, the link file `livedocs.toml`, the
 mirror file `<slug>.livedoc.json`. [Repository link](repository-link.md) keeps livediagram's spelling of the same
@@ -34,7 +35,7 @@ At the `files` level, per covered document:
 - **A render** (`.livedoc.svg`) is written while any covered page embeds the document
   (`![Architecture](architecture.livedoc.svg)`) and removed when none does. Its bytes are deterministic, like every
   file a link writes.
-- **Generated files are never documents.** Mirror files, outline files, renders, `INDEX.md` and the sync record are
+- **Generated files are never documents.** Mirror files, outline files, renders, `INDEX.md` and the sync records are
   never adopted as pages; an edit made to an outline or a render is reported as not sent and overwritten at their next
   write.
 - `INDEX.md` is not written where a page's file would take its path, compared case-insensitively: a wiki's
@@ -66,19 +67,31 @@ extension.
 
 ## The sync record
 
-A native file cannot carry its own sync data without changing its bytes, so a link at `files` keeps
-**`livedocs-sync.jsonl`** beside its link file, committed. One line per native file, sorted by path:
+A native file cannot carry its own sync data without changing its bytes, so a link at `files` keeps its **sync
+records** in `.livedocs/` beside its link file, committed: **one small file per document and per branch**, so two git
+branches that change different documents never touch the same file.
 
 ```text
-{"path":"tools/pm2.md","document":"doc_3h9x2a","tab":"0b34","rev":41,"hash":"sha256:9f2c..."}
+.livedocs/main/doc_3h9x2a.json                 main's snapshot
+.livedocs/branches/feature-x/doc_3h9x2a.json   the document branch feature-x's snapshot
+
+{"path":"tools/pm2.md","document":"doc_3h9x2a","tab":"0b34","branch":"feature-x","rev":41,"hash":"sha256:9f2c..."}
 ```
 
+- A record names the document, its native tab, the [document branch](../006-document/document-branches.md) (absent
+  for main) and the revision the file holds, and `"git":"out"` when the file is
+  [kept out of git](committed-files.md). A branch name's `/` is a directory, as git's refs are.
 - It holds no time, so a sync at unchanged revisions writes the same bytes, as a mirror file does.
-- `hash` is over the file's bytes. A file whose hash matches its line is unchanged since the sync wrote it.
+- `hash` is over the file's bytes. **A file is a snapshot of whichever record its bytes match**; a file matching none
+  of its document's records is a local edit ([Branch binding](branch-binding.md#files-on-every-branch)).
+- A sync writes only the records of the branch it syncs with. On the main git branch it also removes the records of
+  branches that have merged; on any other git branch it never touches another branch's records, so a merge in git
+  never meets a record changed on both sides by different branches.
 - **A missing or partial record is rebuilt**, never trusted blindly: a file at the path of a covered document is that
   document, and its base is found as for any file ([Folding a file back](#a-page)).
-- **In git** the record merges by line through the merge driver: a path only one side changed takes that side; a path
-  both changed takes the higher revision, and the merge of the file itself decides the rest ([Git](#git)).
+- **In git** two clones that synced the same branch of a document to different revisions change the same record; the
+  merge driver takes the higher revision, which on one branch holds the lower, and the merge of the file itself
+  decides the rest ([Git](#git)). Every other record merges in git's own merge, GitHub's included.
 
 ## Sync states
 
@@ -164,8 +177,10 @@ restorable ([File tab](../006-document/file-tab.md#changing-it)), or in git's hi
 - **Deleted in livedocs** (moved to the Trash, or purged): the file is `gone` and removed; git history keeps it. A
   file holding a change nobody has sent stays, and is refused, never removed
   ([Repository link](repository-link.md#sync-states)). Restored from the Trash, the document is written again.
-- **Deleted in the repository** (an agent's `git rm`, a file removed by hand): the document moves to the
-  [Trash](../013-workspace/trash.md), recoverable for 30 days, and the record drops its line. An edit outranks a
+- **Deleted in the repository** (an agent's `git rm`, a file removed by hand): on the main git branch the document
+  moves to the [Trash](../013-workspace/trash.md), recoverable for 30 days, and its record is removed; on any other
+  git branch it is deleted on that branch only ([Branches](#branches)). A [kept-out](committed-files.md) file
+  removed from the work tree is written again, never a delete. An edit outranks a
   delete: a file deleted while livedocs changed its document since the file's base is written again, and the sync
   says so.
 - **A folder** whose documents have all gone, either way, goes with them.
@@ -189,46 +204,39 @@ A page has two front doors, the document and its file, and both stay one page:
 
 ## Git
 
-The [hooks and the merge driver](repository-link.md#git) apply to native files, on the link's live branch only
-([Branches](#branches)).
+The [hooks and the merge driver](repository-link.md#git) apply to native files on every git branch, each syncing
+with its own document branches ([Branch binding](branch-binding.md)).
 
 - **A page git left conflicted** (markers in the text) is refused, naming `livedocs sync --resolve <file>`. Resolve
-  reads git's three versions and sends each side's change from the common base as its own proposal, so both
-  branches' words arrive, then writes the merged page and stages it.
-- **The record** merges through the driver ([The sync record](#the-sync-record)).
+  reads git's three versions and merges the two document branches they name, by character, so both branches' words
+  arrive, then writes the merged page and stages it ([Conflicts git leaves](branch-binding.md#conflicts-git-leaves)).
+- **The records** merge as [The sync record](#the-sync-record) says.
 - **Commits and pushes are the link's choice**, `[git] commit` in the link file: `none` writes files only and leaves
   commits to people and the hook; `commit` commits each settled sync; `push` commits and pushes it. `link init`
   suggests `push` for a whole-repository wiki, which nobody else commits to, and `none` otherwise. Whatever the
-  setting, a sync never force-pushes, never rewrites history, commits only files under the link's `dir` and the
-  record, refuses partial staging as the hook does, and authors a commit as the work tree's own git identity. A commit message names the
+  setting, a sync never force-pushes, never rewrites history, commits only files under the link's `dir`, its
+  records and its managed `.gitignore` section, refuses partial staging as the hook does, and authors a commit as the work tree's own git identity. A commit message names the
   pages by path with their revisions, never the names or emails of the people who edited them in livedocs: a public
   repository would publish them.
 - **A rejected push** (the remote moved): fetch, rebase the sync's commit onto it, sync once more, push. Still
-  rejected, it is reported and retried at the next sync; the commit stays local, nothing is lost.
+  rejected, it is reported and retried at the next sync; the commit stays local, nothing is lost. A push refused by
+  the remote's rules (a protected branch) is never forced or retried around
+  ([Main after a merge](branch-binding.md#main-after-a-merge)).
+- **Which files are committed** at all is the repository's choice: [Committed files](committed-files.md).
 
 ## Branches
 
-A link exchanges with **one branch: its live branch**, the repository's default branch unless the link file names
-another (`[git] branch`). livedocs holds one version of a page; every other branch is plain git.
+Every git branch syncs with the [document branches](../006-document/document-branches.md) of its name, and the main
+git branch with the documents themselves: one rule for pages, file documents and diagrams alike, written in
+[Branch binding](branch-binding.md). For a native file that means:
 
-- **On the live branch, a sync runs both ways**, as above, but only from a clean footing: the work tree is on the live
-  branch (not detached), no rebase, merge, cherry-pick or revert is in progress, no file is conflicted, and the commit
-  the link last synced at (kept in the local sync state) is an ancestor of `HEAD`. Anything else is refused with the
-  state and its fix, and changes nothing.
-- **On any other branch, a sync does nothing**: it neither sends nor writes, and says "On <branch>: livedocs syncs
-  <live branch>". The hook lets the commit through. A page edited on a branch is an ordinary change in git.
-- **A branch's changes go live when it merges** into the live branch: the merge (its pre-merge-commit hook, or the
-  next sync there) finds the files changed and folds them back from their base, merging with whatever livedocs gained
-  meanwhile ([Folding a file back](#a-page)). A documentation change in a pull request goes live with the code it
-  describes; an abandoned branch never reaches livedocs.
-- **livedocs's changes reach a branch through git**: they land on the live branch (as `commit` says), and a branch
-  takes them as it takes any change there, by merging or rebasing. A page changed on both sides conflicts like any
-  file; `livedocs sync --resolve <file>` merges both sides from their common base by character, so no words are lost.
-- **History rewritten on the live branch** (the last synced commit is no longer an ancestor of `HEAD`): refused.
-  `livedocs sync --adopt-head` takes the work tree as one new commit: pages that differ from their record fold back as
-  edits, missing files go to the Trash, as in any sync, and a dry run lists both first.
-- **Who syncs the live branch**: any checkout on it, a person's or an agent's `--watch`, or a CI job on the live branch
-  after a merge.
+- **A page or file document changed on a git branch** changes its document branch, never main, and its file on that
+  git branch holds the branch's snapshot. Main changes when the branch merges.
+- **Adopting, renaming, moving and deleting** on a git branch happen on the document branch: a new file is a document
+  that exists only on the branch, a deleted file deletes its document on the branch, and both reach main with the
+  merge ([Merging](../006-document/document-branches.md#merging)).
+- **A page changed on both a branch and main** merges by character, as a reconnecting editor's edits do, whether the
+  merge happens in livedocs or is found in git.
 
 ## Offline
 

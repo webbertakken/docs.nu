@@ -57,8 +57,11 @@ its pages arrive as [native files](../027-repositories/native-files.md). There i
 
 - `livedocs link init --folder <wiki>` sets `level = "files"` when the folder is a wiki, and says so; any other level
   is refused for a wiki, which is nothing without its files.
-- **One wiki may sync to several targets.** Each link keeps its own snapshot and record, as two links covering one
+- **One wiki may sync to several targets.** Each link keeps its own snapshot and records, as two links covering one
   document always do.
+- **Every git branch of a target has its own pages.** A checkout on a git branch syncs with the wiki's document
+  branches of that name, and the main git branch with the wiki itself, so a pull request's page changes are a branch
+  people edit live and merge with the code ([Branch binding](../027-repositories/branch-binding.md)).
 
 ### Bringing an existing wiki in
 
@@ -70,7 +73,7 @@ through the same link:
    and why, and every name it would refuse ([Native files](../027-repositories/native-files.md#adopting-files)).
 3. `livedocs sync` adopts them. A large first sync writes the record as it goes, so an interrupted one resumes where
    it stopped and never creates a document twice.
-4. The files' bytes are unchanged by adoption: the first commit after it adds only the link file and the record.
+4. The files' bytes are unchanged by adoption: the first commit after it adds only the link file and the sync records.
 
 ## What is mirrored
 
@@ -81,6 +84,10 @@ through the same link:
 | A diagram, board, sheet or any other document | Its mirror file and outline file; a render when a page embeds it |
 | A section (subfolder)                         | A directory of the same name                                     |
 | The wiki's structure: names, folders, moves   | Paths                                                            |
+
+Files larger than the link's `commit_max_bytes`, or chosen **Keep out of git**, are written into the checkout and
+kept out of commits ([Committed files](../027-repositories/committed-files.md)); their links work in the checkout as
+any other.
 
 **Never mirrored**: margin notes and comments, presence, share links and roles, tags, favourites, the Trash, the
 wiki mark itself, empty sections, documents the link ignores, and the merge state. A repository's history is git's;
