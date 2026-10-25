@@ -4,14 +4,11 @@ import {
   toLegacyResponse,
 } from './legacy-documents-alias';
 import { runTabStatsBackfill } from './tab-stats-backfill';
-import { getClerkIdentity } from './auth/clerk';
 import { getAccountSession } from './auth/session-token';
 import { handleAuth } from './routes/auth';
 import { handlePreviewOutbox } from './routes/preview-outbox';
 import { deleteExpiredIdentityRows, deleteOldOutboxMail } from './db/identity';
-import { noteAuthSighting } from './auth/session-telemetry';
-import { emailEnabled } from './email/client';
-import { runLifecycleSweep, welcomeOnSighting } from './email/lifecycle';
+import { runLifecycleSweep } from './email/lifecycle';
 import { runTokenExpirySweep } from './email/token-expiry';
 import { runTeamInviteSweep } from './email/team-invite-reminders';
 import { NOTIFY_EMAIL_DEDUPE_MS } from './email/notifications';
@@ -21,7 +18,6 @@ import {
   deleteOldEvents,
   deleteOldChangesets,
   deleteOldNotifyEmailClaims,
-  deleteOldSessionSightings,
   deleteOldTimelineEvents,
   purgeExpiredTrash,
   resolveApiToken,
@@ -106,10 +102,6 @@ async function isWriteRateLimited(env: Env, ownerId: string): Promise<boolean> {
   return !result.success;
 }
 
-// Owners whose first-sighting write already ran in this isolate — see
-// the welcomeOnSighting call below.
-const sightedThisIsolate = new Set<string>();
-
 // Every request the worker answers; `fetch` below stamps the document format number on it.
 async function routeApiRequest(
   request: Request,
@@ -135,128 +127,78 @@ async function routeApiRequest(
   if (segments[1] === 'auth') return handleAuth(request, env, executionCtx);
   if (segments[1] === 'preview') return handlePreviewOutbox(request, env);
 
-  // Hybrid identity (docs/specs/014-identity/auth-and-guest-access.md). Verify a Clerk Bearer token once at
-  // the top of the handler — null when `CLERK_JWKS_URL` is unset,
-  // no Bearer was sent, or the token failed verification. Every
-  // dispatch site below uses `resolveOwner()` instead of the legacy
-  // `ownerOf(request)`, so a signed-in user's documents come back
-  // under their Clerk userId and guests keep working via the
-  // legacy `X-Owner-Id` header.
-  const clerkIdentity = await getClerkIdentity(env, request);
-  // A LiveDoc session token (docs/specs/014-identity/auth-and-guest-access.md "How the api knows who is calling"):
-  // any bearer that is not an API token or a workbench session. Null when sign-in is off or it does not verify.
-  const sessionBearer = bearerTokenOf(request.headers.get('Authorization'));
-  const accountSession =
-    !clerkIdentity &&
-    sessionBearer &&
-    !isApiTokenFormat(sessionBearer) &&
-    !isWorkbenchSessionFormat(sessionBearer) &&
-    !sessionBearer.startsWith(API_TOKEN_PREFIX) &&
-    !sessionBearer.startsWith(WORKBENCH_SESSION_PREFIX)
-      ? await getAccountSession(env, sessionBearer)
-      : null;
-  const clerkUserId = clerkIdentity?.userId ?? accountSession?.accountId ?? null;
-  // Email used for team-invite matching (docs/specs/013-workspace/teams.md). ONLY the verified
-  // `email` claim from the JWKS-checked session token is trusted —
-  // never a client-supplied header. A `X-Owner-Email` fallback used to
-  // exist here, but it let a signed-in caller forge another address and
-  // claim that address's pending team invites (join the team + read its
-  // private library). Invite auto-connection now degrades gracefully to
-  // off when the deployment hasn't added the email claim to the Clerk
-  // session token (dashboard → Sessions → Customize session token →
-  // `{"email": "{{user.primary_email_address}}"}`); see auth/clerk.ts.
-  const clerkEmail =
-    clerkIdentity?.email ?? (accountSession?.emailVerified ? accountSession.email : null);
-  // docs/specs/017-telemetry/telemetry.md: Session·SignedUp / SignedIn are counted here, server-side, on
-  // the first request of each new Clerk session, so every auth method
-  // (email code, Google OAuth) counts once. Off the response path.
-  noteAuthSighting(env, clerkIdentity, executionCtx?.waitUntil?.bind(executionCtx));
-  // docs/specs/014-identity/transactional-email.md: first authenticated sighting => sign-up. Fire-and-forget (the
-  // sighting + welcome run in the background) so it never delays the response;
-  // a no-op when RESEND_API_KEY is unset.
-  if (clerkUserId && clerkEmail && emailEnabled(env) && !sightedThisIsolate.has(clerkUserId)) {
-    // Once per isolate, not per request: a signed-in editor autosaves
-    // every ~600ms, and each request was scheduling a (no-op after the
-    // first) INSERT OR IGNORE into email_lifecycle — ~100 wasted D1
-    // writes a minute. The INSERT stays idempotent, so a cold isolate
-    // simply pays it once more.
-    sightedThisIsolate.add(clerkUserId);
-    executionCtx?.waitUntil(welcomeOnSighting(env, clerkUserId, clerkEmail));
-  }
-  // API token (docs/specs/015-api/public-api-and-tokens.md): a `Bearer lvd_…` resolves to its owner — always a
-  // Clerk account — via the hashed-token lookup. Only consulted when no Clerk
-  // JWT verified (a token and a JWT can't both be the bearer). The resolved
-  // owner is the token's Clerk userId, so a token request flows through the
-  // exact same ownership / gate checks as a signed-in one.
+  // Who is calling (docs/specs/014-identity/auth-and-guest-access.md "How the api knows who is calling"), resolved
+  // once here; the first credential present decides, and one that is present but wrong is refused, never read as
+  // a guest. Token prefixes are checked first: they are cheap string tests, and a session token never carries one.
+  const bearer = bearerTokenOf(request.headers.get('Authorization'));
+  // 1. API token (docs/specs/015-api/public-api-and-tokens.md): a `Bearer lvd_…` resolves to its owner account
+  // via the hashed-token lookup, so a token request flows through the same ownership and gate checks as a
+  // signed-in one. A bearer that carries the prefix claims to be a token even when it is cut short or mistyped
+  // (a copy-paste slip): unknown, revoked or expired, it is refused here (§3.3).
   let tokenAuth: { ownerId: string; tokenId: string; readOnly: boolean } | null = null;
-  if (!clerkUserId) {
-    const bearer = bearerTokenOf(request.headers.get('Authorization'));
-    // A bearer that carries the token prefix claims to be a token even when it is cut short or mistyped (a
-    // copy-paste slip): it is refused as one below, never read as a guest or handed to the Clerk path.
-    if (bearer?.startsWith(API_TOKEN_PREFIX)) {
-      tokenAuth = isApiTokenFormat(bearer) ? await resolveApiToken(env, bearer) : null;
-      // A token-shaped bearer claims to be a token: unknown, revoked or expired, it is refused here, never
-      // read as a guest or as nobody (docs/specs/015-api/public-api-and-tokens.md §3.3).
-      if (!tokenAuth) {
-        console.warn('[tokens] invalid bearer refused', { path: url.pathname });
-        return json(
-          { error: 'invalid_token' },
-          { status: 401, headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } },
-        );
-      }
+  if (bearer?.startsWith(API_TOKEN_PREFIX)) {
+    tokenAuth = isApiTokenFormat(bearer) ? await resolveApiToken(env, bearer) : null;
+    if (!tokenAuth) {
+      console.warn('[tokens] invalid bearer refused', { path: url.pathname });
+      return json(
+        { error: 'invalid_token' },
+        { status: 401, headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } },
+      );
     }
   }
-  // Workbench session (docs/specs/013-workspace/workbench-embeds.md): a `Bearer lvw_…` is a person's editor
-  // on one document, minted from their token's ticket. Consulted only when neither a Clerk JWT nor a token
-  // resolved. A session-shaped bearer that does not resolve is refused, never read as a guest. A resolved one
-  // is confined at once (auth/workbench-confinement.ts): another document reads as absent, any route outside
-  // the allow-list is refused, and a view session writes nothing.
+  // 2. Workbench session (docs/specs/013-workspace/workbench-embeds.md): a `Bearer lvw_…` is a person's editor
+  // on one document, minted from their token's ticket. One that does not resolve is refused, cut short or
+  // mistyped included. A resolved one is confined at once (auth/workbench-confinement.ts): another document reads
+  // as absent, any route outside the allow-list is refused, and a view session writes nothing.
   let workbench: WorkbenchContext | null = null;
-  if (!clerkUserId && !tokenAuth) {
-    const bearer = bearerTokenOf(request.headers.get('Authorization'));
-    if (bearer?.startsWith(WORKBENCH_SESSION_PREFIX)) {
-      // Cut short or mistyped, a session-shaped bearer is refused as a session too (as a token is, above).
-      const resolved = isWorkbenchSessionFormat(bearer)
-        ? await resolveWorkbenchSession(env, bearer, Date.now())
-        : ({ ok: false, reason: 'malformed', sessionPrefix: '' } as const);
-      if (!resolved.ok) {
-        console.warn('[workbench] bearer-refused', {
-          reason: resolved.reason,
-          sessionPrefix: resolved.sessionPrefix,
-        });
-        return json(
-          { error: 'invalid_session' },
-          { status: 401, headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } },
-        );
-      }
-      workbench = resolved.workbench;
-      const refusal = workbenchRefusal(workbench, request.method, segments, request.headers);
-      if (refusal) return refusal;
+  if (bearer?.startsWith(WORKBENCH_SESSION_PREFIX)) {
+    const resolved = isWorkbenchSessionFormat(bearer)
+      ? await resolveWorkbenchSession(env, bearer, Date.now())
+      : ({ ok: false, reason: 'malformed', sessionPrefix: '' } as const);
+    if (!resolved.ok) {
+      console.warn('[workbench] bearer-refused', {
+        reason: resolved.reason,
+        sessionPrefix: resolved.sessionPrefix,
+      });
+      return json(
+        { error: 'invalid_session' },
+        { status: 401, headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } },
+      );
     }
+    workbench = resolved.workbench;
+    const refusal = workbenchRefusal(workbench, request.method, segments, request.headers);
+    if (refusal) return refusal;
   }
-  // An empty guest header is no identity at all: as '' it would be one shared,
-  // writable owner namespace (and one shared rate-limit bucket) for everyone.
+  // 3. Session token: any other bearer, the account when it verifies. One that does not verify falls through to
+  // the guest header (logged by getAccountSession), because the guest path must always serve.
+  const accountSession =
+    bearer && !tokenAuth && !workbench ? await getAccountSession(env, bearer) : null;
+  // The account a session token proves: the only credential that administers (teams, tokens, migration,
+  // deleting the account).
+  const sessionAccountId = accountSession?.accountId ?? null;
+  // The email used for team-invite matching (docs/specs/013-workspace/teams.md): ONLY the session token's
+  // verified email claim, never a client-supplied header, which would let a caller claim another address's
+  // pending invites.
+  const accountEmail = accountSession?.emailVerified ? accountSession.email : null;
+  // 4. Guest header. An empty one is no identity at all: as '' it would be one shared, writable owner namespace
+  // (and one shared rate-limit bucket) for everyone.
   const resolveOwner = (): string | null =>
-    clerkUserId ??
+    sessionAccountId ??
     tokenAuth?.ownerId ??
     workbench?.ownerId ??
     (request.headers.get('X-Owner-Id') || null);
-  // Server-verified Clerk account id from either credential (session JWT
-  // or API token). Feeds the team-membership content gates + teams-surface
-  // reads (see RouteContext.verifiedUserId); administration surfaces keep
-  // reading `clerkUserId` directly.
-  const verifiedUserId = clerkUserId ?? tokenAuth?.ownerId ?? workbench?.ownerId ?? null;
+  // The server-verified account from any credential (session, token or workbench owner). Feeds the
+  // team-membership content gates and the teams-surface reads (RouteContext.verifiedAccountId); administration
+  // keeps reading `sessionAccountId`.
+  const verifiedAccountId = sessionAccountId ?? tokenAuth?.ownerId ?? workbench?.ownerId ?? null;
 
-  // A Clerk account id presented as the GUEST header is always a replay of
-  // a harvested id, never a real client (see auth/guest-rest.ts): the guest
-  // credential is a server-minted UUID, and a signed-in caller sends
-  // `Authorization` instead. Refused unconditionally, BEFORE the signature
-  // gate below, because that gate is off until an operator arms it — and
-  // this shape needs no grace window, having never been legitimate.
-  // `share` is included even though it is not owner-scoped: its resolver
-  // compares the header with the document's owner to decide redaction.
+  // An account id presented as the GUEST header is always a replay of a harvested id, never a real client (see
+  // auth/guest-rest.ts): the guest credential is a server-minted UUID, and a signed-in caller sends
+  // `Authorization` instead. Refused unconditionally, BEFORE the signature gate below, because that gate is off
+  // on a host without sign-in. `share` is included even though it is not owner-scoped: its resolver compares the
+  // header with the document's owner to decide redaction.
   if (
-    !clerkUserId &&
+    !sessionAccountId &&
     !tokenAuth &&
     !workbench &&
     (OWNER_SCOPED_SEGMENTS.has(segments[1] ?? '') || segments[1] === 'share')
@@ -270,12 +212,12 @@ async function routeApiRequest(
   // Guest REST signature gate (docs/specs/015-api/public-api-and-tokens.md §4). On owner-scoped routes, a
   // presented `X-Owner-Id` must carry a valid HMAC signature once
   // enforcement is on — so a harvested owner id (a guest UUID, or a
-  // signed-up user's Clerk `sub` slipped into the header) can't be used as a
-  // credential. Skipped for Clerk / token callers (they aren't on the guest
+  // signed-up user's account id slipped into the header) can't be used as a
+  // credential. Skipped for session / token callers (they aren't on the guest
   // path) and during the grace window. A request with NO `X-Owner-Id` is
   // untouched (it just resolves to no owner), so public reads still work.
   if (
-    !clerkUserId &&
+    !sessionAccountId &&
     !tokenAuth &&
     !workbench &&
     OWNER_SCOPED_SEGMENTS.has(segments[1] ?? '') &&
@@ -441,9 +383,9 @@ async function routeApiRequest(
     env,
     url,
     segments,
-    clerkUserId,
-    verifiedUserId,
-    clerkEmail,
+    clerkUserId: sessionAccountId,
+    verifiedUserId: verifiedAccountId,
+    clerkEmail: accountEmail,
     sessionAuthTime: accountSession?.authTime ?? null,
     resolveOwner,
     token: tokenAuth ? { id: tokenAuth.tokenId, readOnly: tokenAuth.readOnly } : null,
@@ -578,15 +520,6 @@ const worker = {
     if (event.cron === '0 3 * * *') {
       const now = Date.now();
       scheduleSweep(ctx, env, 'events', 'rows', now - EVENTS_RETENTION_MS, deleteOldEvents);
-      // docs/specs/017-telemetry/telemetry.md: session ids seen for the sign-in count (auth/session-telemetry.ts).
-      scheduleSweep(
-        ctx,
-        env,
-        'auth_sessions',
-        'rows',
-        now - AUTH_SESSION_RETENTION_MS,
-        deleteOldSessionSightings,
-      );
       // docs/specs/014-identity/blueprints/auth-and-guest-access.md: expired sessions and sign-in codes, and the
       // outbox's day of mail (previews only).
       scheduleSweep(ctx, env, 'identity', 'rows', now, deleteExpiredIdentityRows);
@@ -726,10 +659,6 @@ function scheduleSweep(
 
 // A day in ms: how long a preview's outbox keeps mail (routes/preview-outbox.ts).
 const OUTBOX_RETENTION_MS = 86_400_000;
-
-// 90 days in ms: how long a seen Clerk session id is kept for the sign-in
-// count (docs/specs/017-telemetry/telemetry.md). Longer than any session Clerk keeps alive by default.
-const AUTH_SESSION_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
 
 // 60 days in ms. The /telemetry dashboard's longest window is
 // "Last 30 days", so anything past 60 days is dead storage (twice

@@ -334,27 +334,7 @@ name = "EMAIL"
 # `openssl rand -base64 32 | wrangler secret put BETTER_AUTH_SECRET`. Google sign-in adds GOOGLE_AUTH_CLIENT_ID
 # ([vars] or hosted-vars.json) and the secret GOOGLE_AUTH_CLIENT_SECRET.
 
-# CLERK_JWKS_URL is provisioned out-of-band so the value never lands
-# in the public repo (docs/specs/002-project-scope/secrets-policy.md):
-#
-#   - Local dev: drop `CLERK_JWKS_URL=https://...` into
-#     `apps/api/.dev.vars` (gitignored). Wrangler reads it on the
-#     next `wrangler dev`.
-#   - Production: stored as a Cloudflare Worker secret via
-#     `wrangler secret put CLERK_JWKS_URL`. The deploy workflow
-#     pulls it from the GitHub repo secret `CLERK_JWKS_URL` and
-#     pipes it into `wrangler secret put` on every deploy so the
-#     value can rotate by editing the GitHub secret. Secrets
-#     persist across deploys independently of this file.
-#
-# When the secret is unset the api worker stays in pure-guest mode
-# and trusts `X-Owner-Id` exclusively (docs/specs/014-identity/auth-and-guest-access.md + docs/specs/015-api/api.md). Get the
-# URL from the Clerk dashboard → API Keys → "Show JWKS URL"; format
-# is `https://<your-instance>.clerk.accounts.dev/.well-known/jwks.json`
-# (test tenant) or `https://clerk.<your-domain>/.well-known/jwks.json`
-# (production tenant).
-#
-# GUEST_ID_HMAC_SECRET is provisioned the same way (`.dev.vars` locally,
+# GUEST_ID_HMAC_SECRET is provisioned out-of-band (`.dev.vars` locally,
 # `wrangler secret put GUEST_ID_HMAC_SECRET` + a matching GitHub repo
 # secret in prod; never in [vars] — it's secret material). When set, the
 # worker mints signed guest ids and /api/migrate requires a valid

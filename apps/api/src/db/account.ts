@@ -124,8 +124,6 @@ export async function deleteAccount(
   // email_lifecycle (docs/specs/014-identity/transactional-email.md): drop the onboarding-email row so the address
   // isn't retained and a re-signup starts the series fresh.
   await env.DB.prepare('DELETE FROM email_lifecycle WHERE owner_id = ?').bind(ownerId).run();
-  // auth_accounts (docs/specs/017-telemetry/telemetry.md): the first-seen row the sign-up count keys on.
-  await env.DB.prepare('DELETE FROM auth_accounts WHERE owner_id = ?').bind(ownerId).run();
   // notify_email_claims (docs/specs/012-collaboration/comment-mentions.md "The email"): the claims of the
   // mention and action-assigned emails they sent. Hashes only, but keyed on their id.
   await env.DB.prepare('DELETE FROM notify_email_claims WHERE sender_id = ?').bind(ownerId).run();

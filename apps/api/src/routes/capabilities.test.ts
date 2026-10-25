@@ -75,7 +75,9 @@ describe('the CLI fields (docs/specs/015-api/blueprints/cli.md "Capabilities")',
 
   it('reports sign-in, an https issuer as its origin, and a well-formed version floor', async () => {
     const caps = await capabilities({
-      CLERK_JWKS_URL: 'https://clerk/jwks',
+      BETTER_AUTH_SECRET: 's'.repeat(40),
+      APP_BASE_URL: 'https://docs.test',
+      EMAIL_OUTBOX: '1',
       OAUTH_ISSUER: 'https://mcp.livediagram.app/',
       CLI_MIN_VERSION: ' 1.2.3 ',
     });
@@ -84,6 +86,12 @@ describe('the CLI fields (docs/specs/015-api/blueprints/cli.md "Capabilities")',
       oauthIssuer: 'https://mcp.livediagram.app',
       cli: { minVersion: '1.2.3' },
     });
+  });
+
+  it('reports sign-in off without a sign-in secret', async () => {
+    expect(
+      (await capabilities({ APP_BASE_URL: 'https://docs.test', EMAIL_OUTBOX: '1' })).authEnabled,
+    ).toBe(false);
   });
 
   it('leaves out an issuer that is not https, or not a URL, and a malformed floor', async () => {

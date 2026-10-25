@@ -78,7 +78,6 @@ const OWNER_COLUMNS: OwnerColumn[] = [
   { table: 'community_posts', column: 'author_id', migrate: { kind: 'account-only' } },
   { table: 'api_tokens', column: 'owner_id', migrate: { kind: 'account-only' } },
   { table: 'email_lifecycle', column: 'owner_id', migrate: { kind: 'account-only' } },
-  { table: 'auth_accounts', column: 'owner_id', migrate: { kind: 'account-only' } },
   // Mention and action-assigned email claims (docs/specs/012-collaboration/comment-mentions.md "The email"):
   // only a joined team member sends them.
   { table: 'notify_email_claims', column: 'sender_id', migrate: { kind: 'account-only' } },
@@ -282,7 +281,6 @@ function seedAccountOnly(sql: DatabaseSync, id: string, peer: string) {
     read_only: 0,
   });
   insert(sql, 'email_lifecycle', { owner_id: id, email: `${id}@example.com`, created_at: T0 });
-  insert(sql, 'auth_accounts', { owner_id: id, first_seen_at: T0 });
   insert(sql, 'notify_email_claims', { claim_key: `claim-${id}`, sender_id: id, created_at: T0 });
   insert(sql, 'drive_connections', { owner_id: id, status: 'connected', connected_at: T0 });
   insert(sql, 'drive_items', {
