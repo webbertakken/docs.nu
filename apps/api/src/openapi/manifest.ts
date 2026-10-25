@@ -2607,8 +2607,7 @@ export const ROUTE_MANIFEST: RouteSpec[] = [
     path: '/drive/state',
     segment: 'drive',
     tag: 'Google Drive',
-    summary:
-      'Mint the signed consent `state` for a redirect URI (broker mode). Session only.',
+    summary: 'Mint the signed consent `state` for a redirect URI (broker mode). Session only.',
     auth: 'session',
     requestSchema: {
       type: 'object',
