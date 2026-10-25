@@ -74,7 +74,9 @@ function call(
     makeTestRouteContext(method, `/api/drive${path}`, {
       owner: opts.owner ?? sessionAccountId,
       sessionAccountId,
-      ...(opts.verifiedAccountId !== undefined ? { verifiedAccountId: opts.verifiedAccountId } : {}),
+      ...(opts.verifiedAccountId !== undefined
+        ? { verifiedAccountId: opts.verifiedAccountId }
+        : {}),
       body: opts.body,
       env: db.env,
     }),
@@ -145,7 +147,10 @@ describe('gates', () => {
 
   it('refuses a guest (X-Owner-Id) with 401', async () => {
     const db = sqliteD1(BROKER);
-    const res = await call(db, 'GET', '/connection', { sessionAccountId: null, owner: 'guest-uuid' });
+    const res = await call(db, 'GET', '/connection', {
+      sessionAccountId: null,
+      owner: 'guest-uuid',
+    });
     expect(res.status).toBe(401);
   });
 

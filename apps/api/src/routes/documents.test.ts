@@ -379,7 +379,10 @@ describe('GET /documents/:id owner-id redaction (docs/specs/014-identity/auth-an
     db.getDocument.mockResolvedValue(fakeDocument('user_owner', 'team-1'));
     canReadDocument.mockResolvedValue(true);
     const res = await handleDocuments(
-      makeCtx('GET', '/api/documents/d1', { owner: 'user_member', sessionAccountId: 'user_member' }),
+      makeCtx('GET', '/api/documents/d1', {
+        owner: 'user_member',
+        sessionAccountId: 'user_member',
+      }),
     );
     const { document: liveDoc } = (await res.json()) as { document: DocumentDTO };
     // No regression for them: a teammate already computed isOwner=false from

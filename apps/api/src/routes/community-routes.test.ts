@@ -40,7 +40,11 @@ const body = {
   anonymous: false,
 };
 
-function owner(method: string, path: string, opts: { body?: unknown; account?: string | null } = {}) {
+function owner(
+  method: string,
+  path: string,
+  opts: { body?: unknown; account?: string | null } = {},
+) {
   const account = opts.account === undefined ? AUTHOR : opts.account;
   return makeTestRouteContext(method, path, {
     env,

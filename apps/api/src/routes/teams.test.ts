@@ -81,7 +81,8 @@ const makeCtx = (
   } = {},
 ): RouteContext => {
   const sessionAccountId = opts.sessionAccountId === undefined ? 'user-1' : opts.sessionAccountId;
-  const verifiedAccountId = opts.verifiedAccountId === undefined ? sessionAccountId : opts.verifiedAccountId;
+  const verifiedAccountId =
+    opts.verifiedAccountId === undefined ? sessionAccountId : opts.verifiedAccountId;
   return makeTestRouteContext(method, path, {
     body: opts.body,
     sessionAccountId,

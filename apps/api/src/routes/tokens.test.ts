@@ -34,7 +34,11 @@ const makeCtx = (
   opts: { sessionAccountId?: string | null; body?: unknown } = {},
 ): RouteContext => {
   const sessionAccountId = opts.sessionAccountId === undefined ? 'user_1' : opts.sessionAccountId;
-  return makeTestRouteContext(method, path, { body: opts.body, sessionAccountId, owner: sessionAccountId });
+  return makeTestRouteContext(method, path, {
+    body: opts.body,
+    sessionAccountId,
+    owner: sessionAccountId,
+  });
 };
 
 beforeEach(() => {
@@ -73,7 +77,9 @@ describe('handleTokens — signed-in gate', () => {
     expect(res.status).toBe(403);
   });
   it('403s a guest on POST (no token minted)', async () => {
-    const res = await handleTokens(makeCtx('POST', '/api/tokens', { sessionAccountId: null, body: {} }));
+    const res = await handleTokens(
+      makeCtx('POST', '/api/tokens', { sessionAccountId: null, body: {} }),
+    );
     expect(res.status).toBe(403);
     expect(db.mintApiToken).not.toHaveBeenCalled();
   });

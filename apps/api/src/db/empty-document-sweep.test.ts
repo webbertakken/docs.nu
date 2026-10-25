@@ -147,9 +147,9 @@ describe('trashEmptyDocuments', () => {
     liveDoc(db.sql, 'team-empty', { savedAt: STALE, team: 'tm', owner: 'user_bob' });
 
     expect(await trashEmptyDocuments(db.env, NOW)).toBe(1);
-    expect(await listTrash(db.env, { owner: 'user_me', verifiedAccountId: 'user_me' })).toMatchObject([
-      { id: 'team-empty', teamId: 'tm', reason: 'empty' },
-    ]);
+    expect(
+      await listTrash(db.env, { owner: 'user_me', verifiedAccountId: 'user_me' }),
+    ).toMatchObject([{ id: 'team-empty', teamId: 'tm', reason: 'empty' }]);
   });
 
   it('leaves a document already in the Trash with its first time and reason', async () => {

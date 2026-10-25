@@ -119,7 +119,11 @@ describe('POST /documents/:id/copy — who counts as a visitor', () => {
   });
 
   it('records no visitor copy when a joined teammate duplicates a team document', async () => {
-    const { ctx, settle } = ctxWith('POST', path, { owner: 'bob', sessionAccountId: 'bob', body: {} });
+    const { ctx, settle } = ctxWith('POST', path, {
+      owner: 'bob',
+      sessionAccountId: 'bob',
+      body: {},
+    });
     await handleDocuments(ctx);
     await settle();
     expect(timeline.recordVisitorCopied).not.toHaveBeenCalled();
