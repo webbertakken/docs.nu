@@ -51,8 +51,8 @@ Each AI request optionally includes a `history` array of prior `{ role, content 
   worker returns `403 { error: 'origin_not_allowed' }` before reaching OpenAI. Unset =
   no origin check (preserves the historical behaviour). The hosted deployment locks this
   down in `apps/api/wrangler.toml`'s `[vars]` — **not** the Cloudflare dashboard, because
-  a dashboard-only var is wiped by the next `wrangler deploy` ([Staging environment](../016-platform/staging-environment.md)
-  predicted exactly this) and is invisible to code review either way. It was in fact unset
+  a dashboard-only var is wiped by the next `wrangler deploy` ([Preview deployments](../016-platform/preview-deployments.md)
+  "Configuration lives in the file") and is invisible to code review either way. It was in fact unset
   in production for an unknown period, so the endpoint served any origin while this spec
   described it as locked down; a probe (`POST /api/ai` with no `Origin` answering
   `400 invalid mode` instead of `403 origin_not_allowed`) is how to tell.

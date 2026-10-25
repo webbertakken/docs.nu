@@ -1,0 +1,124 @@
+name: Preview
+
+# One complete, isolated copy of docs.nu per pull request, on workers.dev
+# (docs/specs/016-platform/preview-deployments.md). Deployed on every push to the
+# pull request, deleted when it closes. Pull requests from forks get none: they
+# run without this repository's secrets, and a preview would deploy their code
+# with our Cloudflare token.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# One run per pull request at a time. A newer push, or the close, supersedes an
+# unfinished deploy: the preview is rebuilt or deleted either way.
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PR: ${{ github.event.pull_request.number }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+  GH_TOKEN: ${{ github.token }}
+  # The marker that finds this workflow's own comment on the pull request.
+  MARKER: '<!-- livedoc-preview -->'
+
+jobs:
+  deploy:
+    name: Deploy preview
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The help centre dates its articles from history (apps/help/lib/article-dates.ts).
+          fetch-depth: 0
+          filter: blob:none
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all apps
+        env:
+          # The api's BUILD_ID is set to the same value (docs/specs/016-platform/stale-builds.md).
+          NEXT_PUBLIC_BUILD_ID: ${{ github.event.pull_request.head.sha }}
+        run: pnpm build
+
+      - name: Deploy the preview
+        id: deploy
+        env:
+          NEXT_PUBLIC_BUILD_ID: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          node scripts/preview.mjs deploy "$PR" | tee preview.log
+          url="$(sed -n 's/^PREVIEW_URL=//p' preview.log)"
+          [ -n "$url" ] || { echo "::error::the preview printed no URL"; exit 1; }
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Link the preview on the pull request
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          body="$(printf '%s\n**Preview:** %s\n\nBuilt from %s. Deleted when this pull request closes.' "$MARKER" "$URL" "$SHA")"
+          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq "map(select(.body | startswith(\"$MARKER\"))) | .[0].id // empty")"
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -f body="$body" > /dev/null
+          fi
+
+  teardown:
+    name: Delete preview
+    if: >-
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Delete the preview
+        run: node scripts/preview.mjs teardown "$PR"
+
+      - name: Mark the comment
+        run: |
+          set -euo pipefail
+          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq "map(select(.body | startswith(\"$MARKER\"))) | .[0].id // empty")"
+          [ -z "$id" ] && exit 0
+          body="$(printf '%s\n**Preview:** deleted when this pull request closed.' "$MARKER")"
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null

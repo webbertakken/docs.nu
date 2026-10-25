@@ -53,23 +53,13 @@ A Dependabot alert is fixed by upgrading the direct dependency that pulls the vu
 
 Drop an entry once an upstream release makes it redundant.
 
-### Merging to `main` deploys
+### Every pull request gets a preview
 
-A merge to `main` that passes CI **deploys automatically to staging** —
-[staging.livediagram.app](https://staging.livediagram.app), a complete copy of the
-platform with its own database ([Staging environment](../specs/016-platform/staging-environment.md)). Nobody
-presses anything. Within a few minutes your change is running somewhere public, and any
-D1 migration in it has been applied to a real remote database.
-
-Production is **not** affected: that deploy stays manual (`Deploy Production` in the
-Actions tab) and someone decides when to press it.
-
-Two things follow for you as a contributor:
-
-- **Check staging after your PR lands.** It is the cheapest place to notice that
-  something works in tests but not in a browser.
-- **If you touch a worker's bindings**, `pnpm deploy:check` dry-runs the api, mcp and router
-  configs and prints the bindings they resolve to; CI runs it too.
+Every push to a pull request from this repository deploys a complete copy of the
+platform with its own database, on workers.dev, and a comment on the pull request links it
+([Preview deployments](../specs/016-platform/preview-deployments.md)). Any D1 migration in it
+has run against a real remote database before the merge. Merging does not deploy: production
+is deployed by hand.
 
 ### TypeScript
 

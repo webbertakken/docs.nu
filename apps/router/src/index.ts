@@ -22,9 +22,9 @@ export interface Env {
   TELEMETRY_ORIGIN?: string;
   HELP_ORIGIN?: string;
   COMMUNITY_ORIGIN?: string;
-  // Set to "staging" on the staging router only (docs/specs/016-platform/staging-environment.md). Marks every
-  // response noindex so the public staging mirror can't compete with
-  // production in search results. Absent in production and in local dev.
+  // "preview" on a pull request preview's router (docs/specs/016-platform/preview-deployments.md): marks every
+  // response noindex so a public preview can't compete with production in
+  // search results. "local" under `wrangler dev`. Absent in production.
   DEPLOY_ENV?: string;
 }
 
@@ -141,18 +141,18 @@ function forward(
   );
 }
 
-// Stamp `X-Robots-Tag: noindex, nofollow` on a staging response (docs/specs/016-platform/staging-environment.md).
+// Stamp `X-Robots-Tag: noindex, nofollow` on a preview response (docs/specs/016-platform/preview-deployments.md).
 //
-// Staging is deliberately public — no auth wall, so a change can be shared
-// with someone before it ships — which makes keeping it out of search results
+// A preview is deliberately public, with no auth wall, so a change can be shared
+// with someone before it ships, which makes keeping it out of search results
 // this header's job. Done once here rather than as a build flag threaded into
 // five static apps: every app on the hostname passes through the router, the
 // api's JSON included.
 //
 // A 101 is returned UNTOUCHED. The realtime room answers
 // `/api/documents/<id>/ws` with a WebSocket upgrade, and a Response carrying a
-// `webSocket` cannot be reconstructed — `new Response(body, res)` drops the
-// socket and takes realtime collab down on staging alone, on one path, which
+// `webSocket` cannot be reconstructed: `new Response(body, res)` drops the
+// socket and takes realtime collab down on previews alone, on one path, which
 // is precisely the sort of breakage that survives a smoke test. Crawlers do
 // not open WebSockets, so there is nothing to mark noindex here anyway.
 function markNoIndex(response: Response): Response {
@@ -175,14 +175,14 @@ async function withCachePolicy(request: Request, env: Env): Promise<Response> {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    if (env.DEPLOY_ENV === 'staging') {
+    if (env.DEPLOY_ENV === 'preview') {
       return markNoIndex(await withCachePolicy(request, env));
     }
     return withCachePolicy(request, env);
   },
 } satisfies ExportedHandler<Env>;
 
-// The routing table itself. Split from `fetch` so the staging header wrapper
+// The routing table itself. Split from `fetch` so the preview header wrapper
 // has a single return value to decorate instead of nine.
 async function route(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);

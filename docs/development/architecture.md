@@ -142,17 +142,8 @@ Two equivalent identity paths: an `X-Owner-Id` header (a per-browser UUID from `
 
 GitHub Actions → Cloudflare Workers. Build artefacts get uploaded once, then marketing / telemetry / help / api ship in parallel; live, community and mcp deploy after `api` (all three have service bindings to it), and the router deploys last because its service bindings need the others to exist.
 
-Two environments run that same sequence, from one reusable workflow (`deploy-reusable.yml`) so they cannot drift:
+Production runs that sequence from one reusable workflow (`deploy-reusable.yml`), on `docs.nu`. Every pull request also gets a preview: a complete copy of the platform with its own workers, D1 and R2 on workers.dev, generated from the production configs, migrated and deployed on every push and deleted when the pull request closes. A preview is public but `noindex` (the router stamps `X-Robots-Tag` when its `DEPLOY_ENV` is `preview`). See [Preview deployments](../specs/016-platform/preview-deployments.md).
 
-|         | Production                                 | Staging                                                |
-| ------- | ------------------------------------------ | ------------------------------------------------------ |
-| Host    | `livediagram.app`                          | `staging.livediagram.app`                              |
-| Trigger | Manual, after a green CI run               | Automatic, on every green CI run on `main`             |
-| Workers | `livediagram-<app>`                        | `livediagram-<app>-staging` (wrangler `[env.staging]`) |
-| Data    | `livediagram` D1 + `livediagram-images` R2 | Its own D1 / R2 / KV — no production data, ever        |
-
-Staging exists mainly so a D1 migration runs against a real remote database one deploy before it reaches the one holding people's documents. It is public but `noindex` (the router stamps `X-Robots-Tag` when its `DEPLOY_ENV` is `staging`). See [Staging environment](../specs/016-platform/staging-environment.md).
-
-Both environments also get the **hosted profile** (`apps/api/hosted-vars.json`: telemetry on, per-owner image caps), which the workflow adds with `wrangler deploy --var` only in livediagram.app's own repository and then reads back off the live api worker. A fork deploys the committed config alone, so it is telemetry-off and uncapped. See [Deployment](../specs/016-platform/deployment.md) "Hosted profile".
+Production also gets the **hosted profile** (`apps/api/hosted-vars.json`: telemetry on, per-owner image caps, its public origin), which the workflow adds with `wrangler deploy --var` only in docs.nu's own repository and then reads back off the live api worker. A fork deploys the committed config alone, so it is telemetry-off and uncapped. See [Deployment](../specs/016-platform/deployment.md) "Hosted profile".
 
 See [Self-hosting](../operations/self-hosting.md) for the step-by-step, and [Deployment](../specs/016-platform/deployment.md) for the deeper deployment contract.
