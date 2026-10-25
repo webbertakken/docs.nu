@@ -1,6 +1,6 @@
 # docs.nu deployment
 
-Livedocs runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The top-level `wrangler.toml` of every app is docs.nu's production; nothing points at livediagram's infrastructure ([livediagram upstream](../specs/002-project-scope/livediagram-upstream.md)). The general steps are in [Self-hosting](./self-hosting.md); this page records only what is specific to docs.nu.
+Livedocs runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The top-level `wrangler.toml` of every app is docs.nu's production; nothing points at livediagram's infrastructure ([docs.nu vision, PR #1](https://github.com/webbertakken/docs.nu/pull/1)). The general steps are in [Self-hosting](./self-hosting.md); this page records only what is specific to docs.nu.
 
 ## Shape
 
