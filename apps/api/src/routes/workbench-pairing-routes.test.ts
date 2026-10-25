@@ -283,7 +283,10 @@ describe('workbench pairing routes', () => {
       const db = await workbenchDb();
       pairToken(db);
 
-      const other = await call(db, 'DELETE', 'pairings/pair1', { kind: 'session', userId: 'user_2' });
+      const other = await call(db, 'DELETE', 'pairings/pair1', {
+        kind: 'session',
+        userId: 'user_2',
+      });
       const mine = await call(db, 'DELETE', 'pairings/pair1', OWNER);
       const gone = await call(db, 'DELETE', 'pairings/pair1', OWNER);
 

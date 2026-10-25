@@ -50,7 +50,8 @@ export function makeTestRouteContext(
     body: opts.rawBody ?? (opts.body === undefined ? undefined : JSON.stringify(opts.body)),
   });
   const sessionAccountId = opts.sessionAccountId ?? null;
-  const verifiedAccountId = opts.verifiedAccountId === undefined ? sessionAccountId : opts.verifiedAccountId;
+  const verifiedAccountId =
+    opts.verifiedAccountId === undefined ? sessionAccountId : opts.verifiedAccountId;
   return {
     request,
     env: opts.env ?? ({} as Env),

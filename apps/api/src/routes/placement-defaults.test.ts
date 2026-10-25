@@ -52,7 +52,11 @@ describe('GET /api/placement-defaults', () => {
   });
 
   it('answers the missing-owner refusal without an identity', async () => {
-    const res = await call({ owner: null, sessionAccountId: null }, 'GET', '/api/placement-defaults');
+    const res = await call(
+      { owner: null, sessionAccountId: null },
+      'GET',
+      '/api/placement-defaults',
+    );
     expect(res.status).toBe(400);
   });
 });

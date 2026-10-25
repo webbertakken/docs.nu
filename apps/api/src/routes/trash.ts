@@ -29,7 +29,9 @@ export async function handleTrash(ctx: RouteContext): Promise<Response> {
 
   if (segments.length === 2) {
     if (request.method === 'GET') {
-      return json({ trash: await listTrash(env, { owner, verifiedAccountId: ctx.verifiedAccountId }) });
+      return json({
+        trash: await listTrash(env, { owner, verifiedAccountId: ctx.verifiedAccountId }),
+      });
     }
     if (request.method === 'DELETE') {
       const teamId = url.searchParams.get('team');

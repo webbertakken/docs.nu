@@ -83,7 +83,9 @@ export async function handleCommunityOwnerRoutes(ctx: RouteContext): Promise<Res
   if ((await firstTabElementCount(env, id)) === 0) {
     return reject(conflict('empty_document'), 'empty_document');
   }
-  if ((await countCommunityPostsByAuthor(env, ctx.sessionAccountId)) >= COMMUNITY_POSTS_PER_AUTHOR) {
+  if (
+    (await countCommunityPostsByAuthor(env, ctx.sessionAccountId)) >= COMMUNITY_POSTS_PER_AUTHOR
+  ) {
     return reject(conflict('post_limit'), 'post_limit');
   }
   if (stale) {

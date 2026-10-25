@@ -21,7 +21,11 @@ const makeCtx = (
   opts: { sessionAccountId?: string | null; body?: unknown } = {},
 ): RouteContext => {
   const sessionAccountId = opts.sessionAccountId === undefined ? 'user_1' : opts.sessionAccountId;
-  return makeTestRouteContext(method, path, { body: opts.body, sessionAccountId, owner: sessionAccountId });
+  return makeTestRouteContext(method, path, {
+    body: opts.body,
+    sessionAccountId,
+    owner: sessionAccountId,
+  });
 };
 
 beforeEach(() => {
