@@ -30,6 +30,7 @@ So the markdown tab holds **the text itself**, and every view of it, the editor 
 | **text**               | The markdown tab's characters, exactly as written                                    | content, body, source (as a noun) |
 | **front matter**       | A YAML (`---`) or TOML (`+++`) block opening the text                                | metadata, header                  |
 | **rendered page**      | The text drawn as formatted prose: headings, lists, tables, images                   | preview (that is the sync's)      |
+| **editing surface**    | How one person sees the page while editing it: **Rich**, **Split** or **Source**     | mode, view, preview               |
 | **margin note**        | A comment thread on a stretch of the text, as on an article                          | annotation                        |
 | **predominant ending** | The line ending most of the text's lines use: `\n` or `\r\n`; `\n` when none or tied | newline style, EOL mode           |
 
@@ -106,8 +107,33 @@ A conversion is one undo step and is recorded on the document's [timeline](../01
 
 ## Editing
 
-How the text looks while it is edited is open ([Open questions](#open-questions), Q1). Whatever the surface, these
-hold:
+### Editing surfaces
+
+A page is edited on one of three **editing surfaces**, chosen with one control at the right edge of the tab strip,
+left to right:
+
+| Surface    | Shows                                                                      |
+| ---------- | -------------------------------------------------------------------------- |
+| **Rich**   | the rendered page, edited in place (the default)                           |
+| **Split**  | the source and the rendered page side by side, both editable, kept in step |
+| **Source** | the text itself, with syntax colouring                                     |
+
+- **Rich is the default.** A page opens on Rich unless the person chose otherwise (below).
+- **A surface is personal.** It is how one person sees the page, never a property of the page: switching it changes
+  no content, is no undo step, and nobody else on the page follows. That is why it is not a mode, which is the tab's
+  and shared by everyone on it ([Domain language](../003-system-architecture/domain-language.md#mode)).
+- **A surface belongs to a page in a window**, as in Spinner's editor: every open page keeps the surface it is
+  read in, and switching one never changes another. The last surface chosen is the window's default for a page shown
+  for the first time, so a page opened from a link in a Rich page opens on Rich.
+- **A switch keeps the reading position**: the new surface opens where the old one was being read, never at the top.
+- **Rich edits the text, never a copy of it.** Every edit made on Rich is turned into the smallest text edit that
+  produces it, and only that edit is applied (the rules below hold on every surface). The rendered page is redrawn
+  from the text, so Rich can never hold a page that differs from what syncs out.
+- **What Rich cannot edit in place, it edits as source.** HTML, unknown syntax, a malformed table or front matter
+  that does not parse is drawn as a block of its own text, editable as text where it stands; the rest of the page
+  stays Rich.
+
+Whatever the surface, these hold:
 
 - **Every edit is a text edit** at the caret or selection. The editor never rewrites text it was not asked to: no
   reformatting on save, no trailing whitespace trimmed (two trailing spaces are a markdown line break), no list
@@ -276,9 +302,3 @@ Markdown` (a `.md` file opened as a page), `Tab · Changed · MarkdownConverted`
 - **Turning a page into a diagram.** [Markdown import](../020-import-export/markdown-import.md) still turns a markdown
   outline into a diagram on a canvas tab; it reads the text and leaves the page as it is.
 
-## Open questions
-
-- **Q1. The editing surface.** How the text looks while it is edited: the source with syntax colouring; a live
-  preview that renders every line but the one with the caret, which shows its markdown (as Obsidian does); a rich
-  editor with the source one toggle away; or source and rendered page side by side. Recommended: the live preview,
-  because it edits the text itself and so keeps the round trip without a second model. Tracked in `AMBIGUITIES.md`.

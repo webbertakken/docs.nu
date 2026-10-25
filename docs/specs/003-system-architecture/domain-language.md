@@ -36,6 +36,7 @@ interchangeable. These are design decisions, taken before any feature that uses 
 - **Markdown** and **File** are kinds outside the canvas, worked on in no mode: a markdown tab holds one text
   ([Markdown tab](../031-markdown/markdown-tab.md)), a file tab one file's bytes ([File tab](../006-document/file-tab.md)).
   Every file is a document; a markdown file is a document with one markdown tab, people call it a **page**.
+  A page is edited on an **editing surface** (Rich, Split or Source), which is one person's choice, never a mode.
 - A new kind is added only when no mode can serve the use.
 - "Board type" means a kind. It never names a template or a mode.
 
