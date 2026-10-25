@@ -88,7 +88,7 @@ export const DELETE_ACCOUNT_GUEST =
   'Available once you sign in: a guest browser has no verified account to delete.';
 
 export function SettingsDeleteAccountRow({ row }: { row: SettingsDeleteAccountRowSpec }) {
-  const { authLoaded, isSignedIn, user, signOut } = useDeferredAuth();
+  const { authLoaded, isSignedIn, user } = useDeferredAuth();
   const signedIn = Boolean(authLoaded && isSignedIn && user);
   const [open, setOpen] = useState(false);
 
@@ -118,10 +118,10 @@ export function SettingsDeleteAccountRow({ row }: { row: SettingsDeleteAccountRo
         <DeleteAccountDialog
           open={open}
           onClose={() => setOpen(false)}
-          onDeleted={async () => {
-            // Data and identity already deleted inside the dialog;
-            // sign out to clear client state and land on marketing.
-            await signOut({ redirectUrl: '/' });
+          onDeleted={() => {
+            // The account and its session are gone and this browser has forgotten them (AuthBridge's
+            // deleteAccount): land on marketing with a fresh load.
+            window.location.assign('/');
           }}
         />
       ) : null}

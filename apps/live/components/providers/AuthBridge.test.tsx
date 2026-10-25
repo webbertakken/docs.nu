@@ -254,6 +254,7 @@ describe('AuthBridge', () => {
     expect(outcome).toBe('deleted');
     expect(fetchMock).toHaveBeenCalledWith('/api/auth/token', expect.anything());
     expect(localStorage.getItem(SIGNED_IN_HINT_KEY)).toBe('0');
+    expect(probe.state!.isSignedIn).toBe(false);
     expect(forgetRecentDiagrams).toHaveBeenCalledOnce();
   });
 
