@@ -284,16 +284,34 @@ describe('withPageSplit', () => {
   });
 });
 
-// Entering the mode runs on every switch: linear, never the O(n²) clustering (measured ~2 ms at
-// 3000 elements; the budget is generous so a loaded CI machine never flakes).
+// Entering the mode runs on every switch: linear, never the O(n²) clustering (measured ~2 ms at 3000 elements).
+// Asserted as growth, not as a wall-clock budget: a fixed millisecond budget failed on a machine busy with other
+// work while the code was as fast as ever. Four times the elements must cost well under the sixteen times a
+// quadratic pass would; each size takes its best of five runs, so a stall in one run does not count.
 describe('withContentOnAPage: cost', () => {
-  it('handles a 5000-element board well inside a frame budget', () => {
-    const elements = Array.from({ length: 5000 }, (_, i) =>
+  const board = (n: number) =>
+    Array.from({ length: n }, (_, i) =>
       box(`e${i}`, (i % 50) * 180, Math.floor(i / 50) * 120, 150, 92),
     );
-    const start = performance.now();
+  const bestOf = (runs: number, work: () => void) => {
+    let best = Infinity;
+    for (let i = 0; i < runs; i++) {
+      const start = performance.now();
+      work();
+      best = Math.min(best, performance.now() - start);
+    }
+    return best;
+  };
+  const enter = (elements: ReturnType<typeof board>) => () => {
     withContentOnAPage({ elements });
     withContentOnAPage({ elements, pages: [{ id: 'x', orientation: 'portrait' }] });
-    expect(performance.now() - start).toBeLessThan(150);
+  };
+
+  it('grows linearly with the board, never quadratically', () => {
+    const small = board(1250);
+    const large = board(5000);
+    enter(large)(); // warm the code paths before timing
+    const ratio = bestOf(5, enter(large)) / Math.max(bestOf(5, enter(small)), 0.05);
+    expect(ratio).toBeLessThan(8);
   });
 });
