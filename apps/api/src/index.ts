@@ -5,6 +5,7 @@ import {
 } from './legacy-documents-alias';
 import { runTabStatsBackfill } from './tab-stats-backfill';
 import { getAccountSession } from './auth/session-token';
+import { requireAccount } from './auth/account-gate';
 import { handleAuth } from './routes/auth';
 import { handlePreviewOutbox } from './routes/preview-outbox';
 import { deleteExpiredIdentityRows, deleteOldOutboxMail } from './db/identity';
@@ -191,6 +192,11 @@ async function routeApiRequest(
   // team-membership content gates and the teams-surface reads (RouteContext.verifiedAccountId); administration
   // keeps reading `sessionAccountId`.
   const verifiedAccountId = sessionAccountId ?? tokenAuth?.ownerId ?? workbench?.ownerId ?? null;
+  // A session token outlives an account deleted within its 15 minutes: administration asks for the live account.
+  if (sessionAccountId) {
+    const refusal = await requireAccount(env, sessionAccountId, segments[1] ?? '');
+    if (refusal) return refusal;
+  }
 
   // An account id presented as the GUEST header is always a replay of a harvested id, never a real client (see
   // auth/guest-rest.ts): the guest credential is a server-minted UUID, and a signed-in caller sends

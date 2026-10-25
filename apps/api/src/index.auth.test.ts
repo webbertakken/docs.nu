@@ -189,6 +189,24 @@ describe('sign-in at the front door', () => {
     expect(await session.json()).toBeNull();
   });
 
+  it("refuses administration to a deleted account's token still within its 15 minutes", async () => {
+    const { token } = await signIn('ada@example.com');
+    const bearer = { Authorization: `Bearer ${token}` };
+    expect((await call('/api/account', { method: 'DELETE', headers: bearer })).status).toBe(200);
+
+    for (const [method, path] of [
+      ['GET', '/api/tokens'],
+      ['POST', '/api/teams'],
+      ['DELETE', '/api/account'],
+      ['POST', '/api/migrate'],
+    ] as const) {
+      const res = await call(path, { method, headers: bearer });
+      expect(res.status, `${method} ${path}`).toBe(401);
+      expect(await res.json()).toEqual({ error: 'account_not_found' });
+    }
+    expect(console.warn).toHaveBeenCalledWith('[auth] account_not_found route=tokens');
+  });
+
   it('refuses to delete for a session older than ten minutes', async () => {
     const { token } = await signIn('ada@example.com');
     vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 11 * 60_000);
