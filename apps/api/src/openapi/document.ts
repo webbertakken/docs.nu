@@ -23,16 +23,16 @@ const ERROR_SCHEMA: JsonSchema = {
 };
 
 const SECURITY_SCHEMES: Record<string, JsonSchema> = {
-  // A Clerk session JWT OR an API token (`lvd_…`), both presented as
+  // A LiveDoc session token OR an API token (`lvd_…`), both presented as
   // `Authorization: Bearer <credential>` (docs/specs/014-identity/auth-and-guest-access.md, docs/specs/015-api/public-api-and-tokens.md).
   Bearer: {
     type: 'http',
     scheme: 'bearer',
     description:
-      'A Clerk session JWT or an API token (`lvd_…`). API tokens are the credential for external callers; create one in the Explorer (see the API tokens help article).',
+      'A LiveDoc session token or an API token (`lvd_…`). API tokens are the credential for external callers; create one in the Explorer (see the API tokens help article).',
   },
-  // The guest path: an unsigned per-browser owner id (docs/specs/014-identity/auth-and-guest-access.md). First-party
-  // app use; an `X-Owner-Sig` HMAC is also required once enforcement is on.
+  // The guest path: a per-browser owner id (docs/specs/014-identity/auth-and-guest-access.md). First-party app use;
+  // where sign-in is on, its `X-Owner-Sig` HMAC is required too.
   GuestId: {
     type: 'apiKey',
     in: 'header',
@@ -48,9 +48,9 @@ function securityFor(auth: AuthMode): Record<string, string[]>[] {
       // Explicit empty requirement = "no auth needed" (and satisfies tooling
       // that wants every operation's security stated).
       return [];
-    case 'clerk':
+    case 'session':
       return [{ Bearer: [] }];
-    case 'guest-or-clerk':
+    case 'guest-or-session':
       return [{ Bearer: [] }, { GuestId: [] }];
   }
 }
