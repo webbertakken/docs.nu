@@ -236,30 +236,30 @@ describe('bare help-article paths', () => {
   });
 });
 
-// The staging environment's noindex header (docs/specs/016-platform/staging-environment.md). Staging is public on
-// purpose, so this header is the only thing keeping a second copy of every
-// marketing and help page out of search results — and it has to reach every
+// A pull request preview's noindex header (docs/specs/016-platform/preview-deployments.md). A preview is
+// public on purpose, so this header is the only thing keeping another copy of every
+// marketing and help page out of search results, and it has to reach every
 // app on the hostname without touching any of their builds.
-describe('staging noindex header', () => {
-  const staging = (base: Env): Env => ({ ...base, DEPLOY_ENV: 'staging' });
+describe('preview noindex header', () => {
+  const preview = (base: Env): Env => ({ ...base, DEPLOY_ENV: 'preview' });
 
-  it('marks a marketing response noindex on staging', async () => {
+  it('marks a marketing response noindex on a preview', async () => {
     const { env } = makeEnv();
-    const res = await dispatch('/faq', staging(env));
+    const res = await dispatch('/faq', preview(env));
     expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
   });
 
   it('marks the api and the editor too, not just the indexable pages', async () => {
     for (const path of ['/api/documents/abc', '/document/xyz', '/help/canvas/shadows/']) {
       const { env } = makeEnv();
-      const res = await dispatch(path, staging(env));
+      const res = await dispatch(path, preview(env));
       expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     }
   });
 
   it('marks the 308 redirect for a prefix-less help article', async () => {
     const { env } = makeEnv();
-    const res = await dispatch('/canvas/shadows/', staging(env));
+    const res = await dispatch('/canvas/shadows/', preview(env));
     expect(res.status).toBe(308);
     expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
   });
@@ -270,9 +270,15 @@ describe('staging noindex header', () => {
     expect(res.headers.get('X-Robots-Tag')).toBeNull();
   });
 
+  it('leaves any other environment name untouched', async () => {
+    const { env } = makeEnv();
+    const res = await dispatch('/faq', { ...env, DEPLOY_ENV: 'staging' });
+    expect(res.headers.get('X-Robots-Tag')).toBeNull();
+  });
+
   it('keeps the response body and status intact', async () => {
     const { env } = makeEnv();
-    const res = await dispatch('/faq', staging(env));
+    const res = await dispatch('/faq', preview(env));
     expect(res.status).toBe(200);
     await expect(res.text()).resolves.toBe('ok');
   });
@@ -280,13 +286,13 @@ describe('staging noindex header', () => {
   it('passes a 101 WebSocket upgrade through UNTOUCHED', async () => {
     // A Response carrying a `webSocket` cannot be reconstructed: wrapping it
     // to add a header drops the socket and takes realtime collab down on
-    // staging only, on the one path a smoke test is least likely to open.
+    // previews only, on the one path a smoke test is least likely to open.
     const socket = { accept: () => {} } as unknown as WebSocket;
     const upgrade = { status: 101, webSocket: socket } as unknown as Response;
     const env: Env = {
       ...makeEnv().env,
       API: { fetch: () => Promise.resolve(upgrade) } as unknown as Fetcher,
-      DEPLOY_ENV: 'staging',
+      DEPLOY_ENV: 'preview',
     };
     const res = await dispatch('/api/documents/abc/ws', env);
     expect(res).toBe(upgrade);

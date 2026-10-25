@@ -149,9 +149,9 @@ Or just push to `main` and use the bundled GitHub Actions workflows:
 - `.github/workflows/canvas-perf.yml` runs the canvas performance probe nightly and reports through one issue; optional, disable it in a fork that does not want it.
 - `.github/workflows/deploy-reusable.yml` holds the deploy itself — build, then all eight workers (marketing, live, telemetry, help, community, api, mcp, router) in the right order. The `deploy-mcp` job always runs, so a fork without the MCP server removes it or provisions its KV namespace first. It is a reusable workflow, not directly triggerable.
 - `.github/workflows/deploy.yml` calls it for **production**, **manually** from the Actions tab.
-- `.github/workflows/deploy-staging.yml` calls it for **staging**, automatically, whenever CI goes green on `main`.
+- `.github/workflows/preview.yml` deploys a preview of every pull request and deletes it when the pull request closes.
 
-Self-hosting needs only the production pair: staging is a second copy of the platform the hosted deployment runs for its own rehearsals (own hostname, own D1 / R2 / KV), and deleting `deploy-staging.yml` costs a fork nothing. Keeping it means adding the `_STAGING` secrets and staging resources from [Staging environment](../specs/016-platform/staging-environment.md); without them the workflow simply fails on every merge.
+Self-hosting needs only the production pair. `preview.yml` uses the same two secrets; a fork that does not want a preview per pull request deletes it ([Preview deployments](../specs/016-platform/preview-deployments.md))
 
 See [Deployment](../specs/016-platform/deployment.md) for the deeper deploy mechanics, including how D1 migrations run BEFORE the worker deploy so the new code never briefly runs against the old schema.
 

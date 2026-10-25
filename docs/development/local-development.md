@@ -57,9 +57,9 @@ The `router` dev server (`wrangler dev --env local`, port 3000) gives you the pr
 NEXT_PUBLIC_API_BASE=http://localhost:8787/api
 ```
 
-A remote api works too, and there are now two of them: `https://staging.livediagram.app/api`
-reaches [staging](../specs/016-platform/staging-environment.md), which has its own database and is
-the one to reach for; the production api reads and writes real people's documents.
+A remote api works too: a pull request's preview api (the address in its preview comment,
+followed by `/api`) has its own database and is the one to reach for; the production api reads
+and writes real people's documents ([Preview deployments](../specs/016-platform/preview-deployments.md)).
 
 Without it the editor loads, the canvas works, and the first save fails with **“Couldn’t create the document”** — which reads like a broken api worker rather than a missing variable, so it is worth setting up front. `apps/telemetry`, `apps/help` and `apps/community` read the same variable: the dashboard needs it to show anything on `:3003`, the Community needs it to list any posts on `:3005`, and the help centre only loses its telemetry posts without it. To work on the dashboard against real numbers without seeding a local database, point it at production's summary instead: `NEXT_PUBLIC_API_BASE=https://www.livediagram.app/api` in `apps/telemetry/.env.local`. `GET /api/telemetry/summary` is public, read-only and allows any origin, and the dashboard only sends events itself when `NEXT_PUBLIC_TELEMETRY_ENABLED=true`, which local builds leave unset.
 

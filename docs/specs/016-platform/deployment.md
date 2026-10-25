@@ -2,7 +2,7 @@
 
 All deployments run **via GitHub Actions** to **Cloudflare Workers**. The **production** deploy is **manually triggered** — a green CI run no longer ships on its own.
 
-There is a second environment, **staging**, which does deploy on its own: every green CI run on `main` lands on `staging.livediagram.app`. It runs the same jobs described below through the same reusable workflow, against its own workers and its own D1 / R2 / KV. This spec covers production; [Staging environment](staging-environment.md) covers what staging changes and why.
+Every pull request also gets a preview, which does deploy on its own: a complete copy with its own workers, D1 and R2 on workers.dev, deleted when the pull request closes. This spec covers production; [Preview deployments](preview-deployments.md) covers previews.
 
 ## Apps and their Cloudflare Workers
 
@@ -59,11 +59,11 @@ CI is the gate you check before deploying to production, but it does **not** tri
 
 `ci.yml`, `e2e.yml` and `codeql.yml` cancel a run only on a pull request, where a newer push makes the older run moot. On `main` every commit runs to the end, each in a concurrency group of its own (keyed by the commit), because a shared group keeps only one pending run and a burst of merges would still drop the middle ones. Cancelling there left most merges without a result (37 of 42 CI runs on `main` cancelled in the 11 hours to 2026-10-15), so a failure could not be pinned on its commit, and a pull request whose base had no finished run had no Codecov base to compare against, failing its [Coverage report](../003-system-architecture/testing.md#coverage-report) with a 404.
 
-The cost is runner time: a merge on `main` is about a dozen jobs (CI's six, E2E's shards, CodeQL), so a burst of merges queues for runners alongside open pull requests' runs. Runs on `main` finishing out of order is handled by the staging deploy, which deploys only `main`'s tip ([Staging environment](staging-environment.md)).
+The cost is runner time: a merge on `main` is about a dozen jobs (CI's six, E2E's shards, CodeQL), so a burst of merges queues for runners alongside open pull requests' runs.
 
 ## Deploy
 
-The deploy is split in two: `.github/workflows/deploy-reusable.yml` holds every job below as a **reusable workflow** (`workflow_call`), and two thin callers trigger it — `deploy.yml` for production and `deploy-staging.yml` for staging. Both environments therefore run byte-identical steps; the only difference is the inputs (`wrangler_env`, the MCP origin) and which secrets the caller passes. One body, because a staging deploy that has drifted from production's tests nothing.
+The deploy is split in two: `.github/workflows/deploy-reusable.yml` holds every job below as a **reusable workflow** (`workflow_call`), and `deploy.yml` triggers it for production. Its inputs (`wrangler_env`, the MCP origin, `deploy_mcp`) and the secrets the caller passes are all that would differ for another environment. Previews deploy through `preview.yml` and `scripts/preview.mjs` instead, from configs generated off the same production files ([Preview deployments](preview-deployments.md)).
 
 `.github/workflows/deploy.yml` is **manual-only** (`workflow_dispatch`). It does not chain off CI; trigger it yourself from the Actions tab, where it appears as **Deploy Production** (or `gh workflow run deploy.yml --ref main` — the file name is passed rather than the display name, so a future rename can't stale this out) once CI on `main` is green and you've decided to ship. It checks out and builds whatever the current `main` is at trigger time.
 
@@ -109,7 +109,7 @@ There is no down migration; a problem after a renaming migration is fixed forwar
 
 ## Hosted profile
 
-Some configuration is what **livediagram.app** runs with, not what the software defaults to. Committed `[vars]` would make it every fork's default; a value set only in the Cloudflare dashboard would be wiped by the next `wrangler deploy`, which replaces a worker's plain vars with exactly the ones it declares ([Staging environment](staging-environment.md) "Known sharp edge"). So it has a seam of its own: the **hosted profile**.
+Some configuration is what **docs.nu** runs with, not what the software defaults to. Committed `[vars]` would make it every fork's default; a value set only in the Cloudflare dashboard would be wiped by the next `wrangler deploy`, which replaces a worker's plain vars with exactly the ones it declares ([Preview deployments](preview-deployments.md) "Configuration lives in the file"). So it has a seam of its own: the **hosted profile**.
 
 - **What it holds.** `apps/api/hosted-vars.json`: `TELEMETRY_ENABLED = "true"` ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)) and the per-owner image gallery caps `IMAGE_MAX_PER_OWNER = "100"` and `IMAGE_MAX_BYTES_PER_OWNER = "104857600"` ([Image element + per-owner gallery](../009-elements/images.md)). Its frontend mirror, `NEXT_PUBLIC_TELEMETRY_ENABLED`, is derived from it rather than stated twice. A few vars are **per environment**, under `environments.production` and `environments.staging`: the Google Drive mirror's `GOOGLE_CLIENT_ID`, because production and staging are separate Google Cloud projects ([Google Drive mirror](../022-drive-mirror/drive-mirror.md), "Hosted deployment"), mirrored into the live build as `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. Also per environment, `APP_BASE_URL`: the canonical public origin that email, workbench and pairing links are built from (`https://www.livediagram.app` in production, never the apex that redirects to it; [Workbench embeds](../013-workspace/workbench-embeds.md)). An empty per-environment value is unset there.
 - **Who gets it.** The reusable workflow resolves `HOSTED` from the repository ID of `livediagram-app/livediagram.app`, so production and staging both apply it, a rename or transfer keeps it, and no fork matches. A fork's deploy applies nothing, so a fork is **telemetry-off and uncapped** until it opts in by declaring the vars in its own `[vars]`.
@@ -137,7 +137,7 @@ Set in the repo under **Settings → Secrets and variables → Actions**:
 
 Syncing on every deploy means these rotate by editing the GitHub secret rather than by running `wrangler` against production. [Secrets policy](../002-project-scope/secrets-policy.md) holds the full worker-secret table.
 
-Staging has a `_STAGING`-suffixed twin of each optional secret plus its own Clerk publishable key, listed in [Staging environment](staging-environment.md). `CF_API_TOKEN` and `CF_ACCOUNT_ID` are shared: both environments live in the same Cloudflare account.
+Previews use `CF_API_TOKEN` and `CF_ACCOUNT_ID` too: they live in the same Cloudflare account ([Preview deployments](preview-deployments.md)).
 
 ### Creating the API token
 
@@ -176,6 +176,5 @@ The workers themselves remain reachable at their default `*.workers.dev` URLs fo
 
 ## What this spec does **not** yet cover
 
-- Preview deploys for PRs (one environment tracking `main` is all there is — see [Staging environment](staging-environment.md) "What staging is not").
 - Rollback procedure (currently: `wrangler rollback` via dashboard or CLI).
 - Per-worker secrets that are **not** in the optional sync table above (e.g. the model key (`GOOGLE_AI_STUDIO_API_KEY` / `OPENAI_API_KEY` / `AI_API_KEY`), `RESEND_API_KEY`) — those are set by hand with `wrangler secret put` and persist across deploys.
