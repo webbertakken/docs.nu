@@ -3,8 +3,7 @@
 **Status: specified, not built.** Sign-in is **better-auth**, run inside LiveDoc's own api worker with its identity
 data in LiveDoc's own D1. It replaces Clerk, which the code still carries until the change lands; docs.nu runs
 guest-only meanwhile (no Clerk keys, `authEnabled: false`), so no account moves from Clerk. How it is built:
-[the blueprint](blueprints/auth-and-guest-access.md). Choices still open are listed in [Open decisions](#open-decisions);
-every statement they touch is marked _(open)_.
+[the blueprint](blueprints/auth-and-guest-access.md).
 
 ## Principle
 
@@ -48,15 +47,13 @@ across devices, teams, tokens, collaborating under one name).
 
 ## Sign-in methods
 
-_(open: which ship first, [Open decisions](#open-decisions) 1.)_ The proposal:
+Two methods ship first:
 
 - **Google.** "Continue with Google" on both auth pages. The account takes Google's verified email, name and picture.
-  On docs.nu, **Google One Tap** offers the same sign-in as a small prompt on the landing page and the Explorer, once
-  per visit and never over the canvas; dismissing it is remembered by Google, not by us.
 - **Email code.** Type an email, receive a 6-digit code valid for 5 minutes, type it. Three wrong tries spend the
   code. The first sign-in with a new address creates the account with that address verified.
 - **Not in the first release:** passwords (they need hashing budget on the worker and a reset flow), magic links (a
-  second email method for the same job), passkeys and two-factor. Each is a later addition to this list.
+  second email method for the same job), Google One Tap, passkeys and two-factor. Each is a later addition to this list.
 
 ### Email for sign-in
 
@@ -65,8 +62,8 @@ An email code is only as good as its delivery, so sign-in email is not best-effo
 
 - A code that could not be handed to the provider fails the request with `email_send_failed`, and the page says
   "We couldn't send the code. Try again in a minute." rather than waiting for a code that will never come.
-- Sending goes through one email sender with two possible providers, Resend (an API key) or Cloudflare Email Service
-  (a Workers binding) _(open: [Open decisions](#open-decisions) 4)_. With neither configured, email codes are off and
+- Sending goes through one email sender with two possible providers, Cloudflare Email Service (the
+  `EMAIL` Workers binding) when bound, else Resend (`RESEND_API_KEY`). With neither configured, email codes are off and
   only the other methods show.
 - Codes are stored hashed, never in plain text.
 
@@ -75,7 +72,7 @@ An email code is only as good as its delivery, so sign-in email is not best-effo
 - **Where a session lives.** better-auth's session cookie (`__Secure-livedoc.session_token`: `HttpOnly`, `Secure`,
   `SameSite=Lax`, host-only, `Path=/`) is set and read only by `/api/auth/*`. Host-only means `docs.nu`'s cookie never
   reaches a preview host, and a preview's never reaches `docs.nu`.
-- **How the rest of the api knows the caller** _(open: [Open decisions](#open-decisions) 6)_. The proposal: the browser
+- **How the rest of the api knows the caller**. The browser
   asks `/api/auth/token` for a **session token**, a 15-minute EdDSA JWT whose `sub` is the account id and which
   carries the account's email and whether it is verified, and sends it as `Authorization: Bearer` where the
   Clerk token rode. The api verifies it against its own keys, in-process, with no network call. A request that
@@ -214,9 +211,8 @@ a name never hits a `403` even for a read-only viewer.
 
 When a guest signs in, the documents they built as a guest **move into their account** rather than being lost.
 
-_(open: guests stay signed guest ids, or become better-auth anonymous accounts, [Open decisions](#open-decisions) 2.)_
-The proposal keeps today's guest model and its migration, which better-auth's anonymous accounts would not save us:
-they still leave the moving of data to us, mint a new account id on sign-in, delete the guest's row afterwards even
+Guests keep today's signed guest ids and their migration rather than becoming better-auth anonymous accounts, which
+would still leave the moving of data to us, mint a new account id on sign-in, delete the guest's row afterwards even
 when our move failed, write an account row for every visitor, and need a secret that a no-keys self-host does not
 have.
 
@@ -248,8 +244,7 @@ A guest id is a bearer value that **leaks**: it rides in document DTOs and realt
   `livedoc-guest-id`), so turning sign-in on is one secret, not two. `GUEST_ID_HMAC_SECRET` goes away.
 - **Always enforced with sign-in on.** Owner-scoped routes refuse a guest header without a valid signature, and
   `/api/migrate` refuses a guest id without one. There is no grace window: docs.nu has no accounts to protect from a
-  cut-over, and the guests it has were never meant to be claimable _(open: whether today's unsigned docs.nu guests may
-  still move into an account, [Open decisions](#open-decisions) 3)_.
+  cut-over, and the guests it has were never meant to be claimable. An unsigned guest id from before sign-in stays a guest: it can never move into an account.
 - **Guest-only hosts sign nothing.** With no secret there is no account to migrate into, so an unsigned guest id is
   all a guest needs, as today.
 - **Defence in depth.** The owner's id is not returned to non-owner readers (`redactDocumentForReader`), on both doors
@@ -265,7 +260,7 @@ A guest id is a bearer value that **leaks**: it rides in document DTOs and realt
 - **Removing a method.** Allowed while another remains, after a fresh verification ([Sessions](#sessions)); the last
   one cannot be removed (delete the account instead).
 - **The account's email** is the address it was created with. Changing it sends a code to the new address and
-  switches only once that code is entered _(open: in the first release or later, [Open decisions](#open-decisions) 8)_.
+  switches only once that code is entered. Not in the first release: the email is shown read-only until then.
 
 ## Account settings
 
@@ -295,16 +290,15 @@ be deleted again. The goodbye email goes to the address the account had.
 
 ## Teams, tokens, the CLI and the MCP server
 
-- **Teams** stay LiveDoc's own ([Teams](../013-workspace/teams.md)), not better-auth's organisations _(open:
-  [Open decisions](#open-decisions) 7)_. A pending email invite becomes a membership when its address equals the
+- **Teams** stay LiveDoc's own ([Teams](../013-workspace/teams.md)), not better-auth's organisations. A pending email invite becomes a membership when its address equals the
   account's email **and** that email is verified; the address is read from the verified session token, never a
   header.
 - **API tokens** are unchanged: `lvd_` secrets, hashed, six months, per-account cap, owned by an account id, minted
   only from a session ([Public API and API tokens](../015-api/public-api-and-tokens.md)).
 - **The MCP server** keeps its own OAuth 2.1 server and its `lvd_` tokens ([MCP server](../015-api/mcp-server.md)
   §3); its consent page in `apps/live` now trusts the LiveDoc session instead of Clerk's.
-- **The CLI** _(open: [Open decisions](#open-decisions) 5)_. The proposal keeps `livedoc auth login` on the MCP
-  worker's OAuth server (loopback PKCE, `--device` for machines without a browser), whose device page in `apps/live`
+- **The CLI** keeps `livedoc auth login` on the MCP worker's OAuth server, which already offers loopback PKCE and the
+  device grant (`--device`); better-auth's device plugin would add a second OAuth server for the same job. Its device page in `apps/live`
   likewise trusts the LiveDoc session ([CLI](../015-api/cli.md)).
 - **Workbench embeds** are unchanged: minted from a token, never from a session.
 - **The Google Drive mirror** stays its own Google grant, asked for when the mirror is turned on, separate from
@@ -343,15 +337,16 @@ be deleted again. The goodbye email goes to the address the account had.
 ## Previews
 
 A preview (`<branch>.preview.docs.nu`, [Preview deployments](../016-platform/preview-deployments.md)) runs as a fork
-would, with its own D1. _(open: how much sign-in a preview gets, [Open decisions](#open-decisions) 9.)_ Whatever it
+would, with its own D1. It gets email codes, but sends no
+email: a code goes to the preview's **outbox** (`EMAIL_OUTBOX`), which the sign-in page links to, so anyone can try
+sign-in on a preview without a mailbox. That is safe only because a preview's D1 holds nothing but test data. Whatever it
 gets, a preview never shares a session, a cookie or a key with docs.nu: its secret is its own, its cookies are
 host-only, and docs.nu trusts no preview host as an origin.
 
 - Sign-in works on a deployment's canonical host only (`APP_BASE_URL`). The preview's workers.dev address still
   serves guests, and its auth pages link to the canonical host.
 - Google cannot sign in on a preview without help: Google takes no wildcard redirect addresses or JavaScript
-  origins, so every `<branch>.preview.docs.nu` would need registering by hand. One Tap is off on previews for the
-  same reason.
+  origins, so every `<branch>.preview.docs.nu` would need registering by hand.
 
 ## Guest documents start local
 
@@ -398,22 +393,3 @@ Signing in never moves a document in This Browser by itself ([Offline Mode → A
 - The app and the api share an origin (the router stitches `/api/*` under the app's host), which is what lets the
   session cookie stay host-only and `SameSite=Lax`. A host that splits them across sites is not supported for
   sign-in; local development signs in through the router on port 3000.
-
-## Open decisions
-
-Each is asked in the pull request that adds this spec; the answer replaces the _(open)_ text above and its entry
-here.
-
-1. **Sign-in methods first.** Proposed: Google (with One Tap) and email codes.
-2. **Guests.** Proposed: keep signed guest ids and migrate on sign-in, rather than better-auth anonymous accounts.
-3. **Today's unsigned docs.nu guests.** Proposed: drop the legacy unsigned-to-signed upgrade; they stay guests and
-   cannot move into an account.
-4. **Email provider.** Resend, Cloudflare Email Service, or both behind one sender.
-5. **CLI sign-in.** Proposed: keep the MCP worker's OAuth server (loopback and device grant).
-6. **How the api reads a session.** Proposed: a short-lived session token (JWT) as `Bearer`, rather than the cookie
-   on every request.
-7. **Teams.** Proposed: keep LiveDoc's own teams, not better-auth organisations.
-8. **Changing the account's email** in the first release, or later.
-9. **Sign-in on previews.** Proposed: email codes only, through the real sender.
-10. **Uploaded profile pictures.** Clerk hosted uploads; proposed: the Google picture now, uploads later
-    ([Profile picture](profile-picture.md)).
