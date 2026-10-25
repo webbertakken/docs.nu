@@ -98,7 +98,7 @@ describe('identity', () => {
     expect(generateId({ model: 'user' })).toMatch(/^acct_/);
     expect(generateId({ model: 'session' })).toMatch(/^[0-9A-Za-z]{32}$/);
     expect(
-      identityOptions({ ...SIGN_IN_ENV, APP_BASE_URL: 'http://localhost:3000' } as Env).advanced
+      identityOptions({ ...SIGN_IN_ENV, APP_BASE_URL: 'http://localhost:4000' } as Env).advanced
         ?.useSecureCookies,
     ).toBe(false);
   });

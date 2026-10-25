@@ -8,7 +8,7 @@ const isCI = !!process.env.CI;
 const CI_WORKERS = 4;
 
 // The runs that need a stack of their own, each selected by its script and booted on its own ports, so a
-// guest stack already up on :3002 (or another run's) is never mistaken for it. Every one serves the same
+// guest stack already up on :4002 (or another run's) is never mistaken for it. Every one serves the same
 // `out/` export: sign-in is the api's answer at runtime, so a signed-in run differs only in its stack.
 type OwnStack = {
   name: string;
@@ -52,7 +52,7 @@ const ownStack = account
         : null;
 const BASE_URL =
   process.env.E2E_BASE_URL ??
-  (ownStack ? `http://localhost:${ownStack.ports.live}` : 'http://localhost:3002');
+  (ownStack ? `http://localhost:${ownStack.ports.live}` : 'http://localhost:4002');
 const runName = ownStack ? `-${ownStack.name}` : '';
 
 export default defineConfig({

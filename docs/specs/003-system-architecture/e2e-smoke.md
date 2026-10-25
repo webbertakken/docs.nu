@@ -175,7 +175,7 @@ key (`E2E_NO_AI`) or with its AI budget spent (`E2E_AI_BUDGET_SPENT`); see
 [Local development](../../development/local-development.md).
 
 Locally the same `playwright.config.ts` sets `reuseExistingServer`, so a
-developer with `pnpm dev` already running (live :3002 + api :8787) runs
+developer with `pnpm dev` already running (live :4002 + api :8787) runs
 `pnpm --filter @livediagram/live test:e2e` against that stack with no
 extra boot.
 
@@ -201,7 +201,7 @@ guest's documents moving in on sign-in go through the pages themselves, as a per
 
 `pnpm --filter @livediagram/live test:e2e:account` sets `E2E_ACCOUNT=1`, which adds the `account` project (dark mode)
 and boots that stack on its own ports (live `:3015`, api `:8788`, marketing `:3016`), so a guest stack already up on
-`:3002` is never reused for it. The workbench (`test:e2e:workbench`, `:3021`) and Drive (`test:e2e:drive`, `:3023`)
+`:4002` is never reused for it. The workbench (`test:e2e:workbench`, `:3021`) and Drive (`test:e2e:drive`, `:3023`)
 runs need an account too and boot the same kind of stack on ports of their own. `e2e.yml` runs the account and
 workbench projects in their own job, beside the smoke shards; Drive stays opt-in.
 

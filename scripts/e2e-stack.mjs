@@ -89,7 +89,7 @@ function assetsOutOfCacheFor(req) {
   return cookiesOf(req).get(OUT_OF_CACHE_COOKIE) === '1';
 }
 
-const LIVE_PORT = Number(process.env.E2E_LIVE_PORT ?? 3002);
+const LIVE_PORT = Number(process.env.E2E_LIVE_PORT ?? 4002);
 const API_PORT = Number(process.env.E2E_API_PORT ?? 8787);
 // The other sites, for the audits that open them (docs/specs/004-interface-design/blueprints/
 // optical-alignment.md, "Ink audit"). Help, telemetry and the Community sit under their basePath on the

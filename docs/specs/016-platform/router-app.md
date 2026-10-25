@@ -92,19 +92,19 @@ The help articles renamed with it ([Help app, Renamed articles](../018-help/help
 
 ## Local development
 
-The router **also runs locally**, so `pnpm dev` gives you the production URL shape on one port — `http://localhost:3000` serves marketing at `/`, the editor at `/new` etc., `/telemetry`, `/help`, `/community`, and `/api`, with no per-app port to remember. Each app still runs on its own port underneath and stays directly reachable:
+The router **also runs locally**, so `pnpm dev` gives you the production URL shape on one port — `http://localhost:4000` serves marketing at `/`, the editor at `/new` etc., `/telemetry`, `/help`, `/community`, and `/api`, with no per-app port to remember. Each app still runs on its own port underneath and stays directly reachable:
 
 | App       | Local URL                                                           |
 | --------- | ------------------------------------------------------------------- |
-| router    | `http://localhost:3000/` — everything, stitched like production     |
-| marketing | `http://localhost:3001/`                                            |
-| live      | `http://localhost:3002/new`, `/explorer/recent`, ... (clean routes) |
-| telemetry | `http://localhost:3003/telemetry` (basePath baked in)               |
-| help      | `http://localhost:3004/help` (basePath baked in)                    |
-| community | `http://localhost:3005/community` (basePath baked in)               |
+| router    | `http://localhost:4000/` — everything, stitched like production     |
+| marketing | `http://localhost:4001/`                                            |
+| live      | `http://localhost:4002/new`, `/explorer/recent`, ... (clean routes) |
+| telemetry | `http://localhost:4003/telemetry` (basePath baked in)               |
+| help      | `http://localhost:4004/help` (basePath baked in)                    |
+| community | `http://localhost:4005/community` (basePath baked in)               |
 | api       | `http://localhost:8787/api/...` (wrangler dev)                      |
 
-**How local mode works.** Service bindings only exist between deployed Workers, so the router's `wrangler.toml` carries an `[env.local]` environment that defines no service bindings and instead sets `<APP>_ORIGIN` vars (`http://127.0.0.1:<port>` for each downstream app). The worker resolves each target as _binding if present, else proxy to the origin_; `pnpm --filter @livediagram/router dev` runs `wrangler dev --env local --port 3000`, and the root `pnpm dev` includes it.
+**How local mode works.** Service bindings only exist between deployed Workers, so the router's `wrangler.toml` carries an `[env.local]` environment that defines no service bindings and instead sets `<APP>_ORIGIN` vars (`http://127.0.0.1:<port>` for each downstream app). The worker resolves each target as _binding if present, else proxy to the origin_; `pnpm --filter @livediagram/router dev` runs `wrangler dev --env local --port 4000`, and the root `pnpm dev` includes it.
 
 Origin mode forwards **as-is, never stripped**: unlike the deployed static-asset workers (which hold prefix-free `out/` files), the local Next dev servers serve their own prefixes themselves — `basePath` for telemetry/help/community, and the live app's `/live` assetPrefix, which applies **in dev too** (Next's dev server serves both the prefixed and unprefixed asset paths) precisely so the local router can tell live's `/live/_next/*` apart from marketing's `/_next/*` the same way production does.
 

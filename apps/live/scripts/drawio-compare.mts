@@ -20,7 +20,7 @@ import { chromium, type Page } from '@playwright/test';
 type Args = { paths: string[]; out: string; base: string; drawio?: string; only?: string };
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { paths: [], out: '', base: 'http://localhost:3002' };
+  const args: Args = { paths: [], out: '', base: 'http://localhost:4002' };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i]!;
     if (flag === '--out') args.out = argv[++i]!;

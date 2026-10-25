@@ -39,18 +39,18 @@ Turbo spins up all eight dev servers in parallel:
 
 | App              | Dev URL                                                                                            |
 | ---------------- | -------------------------------------------------------------------------------------------------- |
-| `apps/router`    | `http://localhost:3000` — **everything on one port**, stitched like production                     |
-| `apps/marketing` | `http://localhost:3001`                                                                            |
-| `apps/live`      | `http://localhost:3002` (clean routes: /new, /explorer, ...)                                       |
-| `apps/telemetry` | `http://localhost:3003/telemetry`                                                                  |
-| `apps/help`      | `http://localhost:3004/help`                                                                       |
-| `apps/community` | `http://localhost:3005/community`                                                                  |
+| `apps/router`    | `http://localhost:4000` — **everything on one port**, stitched like production                     |
+| `apps/marketing` | `http://localhost:4001`                                                                            |
+| `apps/live`      | `http://localhost:4002` (clean routes: /new, /explorer, ...)                                       |
+| `apps/telemetry` | `http://localhost:4003/telemetry`                                                                  |
+| `apps/help`      | `http://localhost:4004/help`                                                                       |
+| `apps/community` | `http://localhost:4005/community`                                                                  |
 | `apps/api`       | `http://localhost:8787/api`                                                                        |
 | `apps/mcp`       | `http://localhost:8788` (MCP server, [MCP server](../specs/015-api/mcp-server.md); signed-in only) |
 
-The `router` dev server (`wrangler dev --env local`, port 3000) gives you the production URL shape locally: `/` is marketing, `/new` and `/document/*` are the editor, plus `/telemetry`, `/help`, `/community`, and `/api` — no per-app port to remember. It has no service bindings in dev; the `[env.local]` environment in `apps/router/wrangler.toml` points it at the localhost origins above and it proxies plain HTTP (see [Router app](../specs/016-platform/router-app.md)).
+The `router` dev server (`wrangler dev --env local`, port 4000) gives you the production URL shape locally: `/` is marketing, `/new` and `/document/*` are the editor, plus `/telemetry`, `/help`, `/community`, and `/api` — no per-app port to remember. It has no service bindings in dev; the `[env.local]` environment in `apps/router/wrangler.toml` points it at the localhost origins above and it proxies plain HTTP (see [Router app](../specs/016-platform/router-app.md)).
 
-**Use port 3000 unless you have a reason not to.** Each app's own port still serves its pages, but only the router puts the API on the same origin. The frontends call `NEXT_PUBLIC_API_BASE`, defaulting to the relative `/api` — correct in production and behind the router, and a dead end on an app's own port, where nothing serves `/api` (these are static exports; there are no Next API routes, see [Architecture](architecture.md)). So the editor on `http://localhost:3002` cannot reach the api worker until you tell it where the worker is:
+**Use port 4000 unless you have a reason not to.** Each app's own port still serves its pages, but only the router puts the API on the same origin. The frontends call `NEXT_PUBLIC_API_BASE`, defaulting to the relative `/api` — correct in production and behind the router, and a dead end on an app's own port, where nothing serves `/api` (these are static exports; there are no Next API routes, see [Architecture](architecture.md)). So the editor on `http://localhost:4002` cannot reach the api worker until you tell it where the worker is:
 
 ```sh
 # apps/live/.env.local  (gitignored; see apps/live/.env.example)
@@ -61,9 +61,9 @@ A remote api works too: a pull request's preview api (the address in its preview
 followed by `/api`) has its own database and is the one to reach for; the production api reads
 and writes real people's documents ([Preview deployments](../specs/016-platform/preview-deployments.md)).
 
-Without it the editor loads, the canvas works, and the first save fails with **“Couldn’t create the document”** — which reads like a broken api worker rather than a missing variable, so it is worth setting up front. `apps/telemetry`, `apps/help` and `apps/community` read the same variable: the dashboard needs it to show anything on `:3003`, the Community needs it to list any posts on `:3005`, and the help centre only loses its telemetry posts without it. To work on the dashboard against real numbers without seeding a local database, point it at production's summary instead: `NEXT_PUBLIC_API_BASE=https://www.livediagram.app/api` in `apps/telemetry/.env.local`. `GET /api/telemetry/summary` is public, read-only and allows any origin, and the dashboard only sends events itself when `NEXT_PUBLIC_TELEMETRY_ENABLED=true`, which local builds leave unset.
+Without it the editor loads, the canvas works, and the first save fails with **“Couldn’t create the document”** — which reads like a broken api worker rather than a missing variable, so it is worth setting up front. `apps/telemetry`, `apps/help` and `apps/community` read the same variable: the dashboard needs it to show anything on `:4003`, the Community needs it to list any posts on `:4005`, and the help centre only loses its telemetry posts without it. To work on the dashboard against real numbers without seeding a local database, point it at production's summary instead: `NEXT_PUBLIC_API_BASE=https://www.livediagram.app/api` in `apps/telemetry/.env.local`. `GET /api/telemetry/summary` is public, read-only and allows any origin, and the dashboard only sends events itself when `NEXT_PUBLIC_TELEMETRY_ENABLED=true`, which local builds leave unset.
 
-The editor works in pure-guest mode without any auth setup: `pnpm dev` and open `http://localhost:3000/new`. Documents persist to the local D1 file the api worker creates on first start. (On `http://localhost:3002/new` instead, set `NEXT_PUBLIC_API_BASE` first — see the note above.)
+The editor works in pure-guest mode without any auth setup: `pnpm dev` and open `http://localhost:4000/new`. Documents persist to the local D1 file the api worker creates on first start. (On `http://localhost:4002/new` instead, set `NEXT_PUBLIC_API_BASE` first — see the note above.)
 
 ## Scoping commands to one workspace
 
@@ -113,19 +113,19 @@ ask the api at runtime, so nothing changes in their env files:
 ```sh
 # apps/api/.dev.vars (gitignored)
 BETTER_AUTH_SECRET=<openssl rand -base64 32>
-APP_BASE_URL=http://localhost:3000
+APP_BASE_URL=http://localhost:4000
 # Email codes without a mailbox: each code lands in the outbox instead of being sent.
 EMAIL_OUTBOX=1
 ```
 
-Restart `pnpm dev` and sign in **through the router on port 3000** (`http://localhost:3000/sign-in`): the session
+Restart `pnpm dev` and sign in **through the router on port 4000** (`http://localhost:4000/sign-in`): the session
 cookie belongs to the api, so the page and the api must share an origin, which only the router gives you locally. Type
 any email, choose **Send code**, and follow the code step's **This preview sends no email: see the code** link (or open
-`http://localhost:3000/api/preview/outbox?to=<email>`): the subject starts with the 6-digit code. The first code for
+`http://localhost:4000/api/preview/outbox?to=<email>`): the subject starts with the 6-digit code. The first code for
 an address creates its account.
 
 To add **Continue with Google**, create a Google OAuth client (web application) with
-`http://localhost:3000/api/auth/callback/google` as an authorised redirect URI and `http://localhost:3000` as a
+`http://localhost:4000/api/auth/callback/google` as an authorised redirect URI and `http://localhost:4000` as a
 JavaScript origin, and add `GOOGLE_AUTH_CLIENT_ID` and `GOOGLE_AUTH_CLIENT_SECRET` to `apps/api/.dev.vars`.
 
 Without `BETTER_AUTH_SECRET` (or with it but no sign-in method), `/api/auth/*` answers 404, the auth pages say sign-in
@@ -183,7 +183,7 @@ Workbench embeds have an opt-in end-to-end run ([Workbench embeds](../specs/013-
 
 ## Enabling the Google Drive mirror locally (optional)
 
-The mirror needs a Google Cloud OAuth client (web application) with `http://localhost:3000/drive/connected` as an authorised redirect URI and `http://localhost:3000` as a JavaScript origin, and the Drive API enabled:
+The mirror needs a Google Cloud OAuth client (web application) with `http://localhost:4000/drive/connected` as an authorised redirect URI and `http://localhost:4000` as a JavaScript origin, and the Drive API enabled:
 
 ```sh
 # apps/api/.dev.vars (gitignored)
@@ -236,4 +236,4 @@ to the in-browser model and says so ([Event storming](../specs/021-event-stormin
 
 - **The api worker's local D1 file lives at `apps/api/.wrangler/state/v3/d1/`.** Delete the folder to start over with an empty database.
 
-- **Open the editor on `localhost`, not on the machine's LAN address.** Over plain `http` from any other address (`http://192.168.x.x:3002`, `http://<machine-name>:3002`) the browser is not in a secure context, withholds `crypto.randomUUID`, and the editor fails to load with "This page couldn't load". A known gap, not yet fixed: the editor calls `crypto.randomUUID` directly in about 75 places. Testing from a phone or a second laptop needs https (a tunnel, or a dev certificate) until it is.
+- **Open the editor on `localhost`, not on the machine's LAN address.** Over plain `http` from any other address (`http://192.168.x.x:4002`, `http://<machine-name>:4002`) the browser is not in a secure context, withholds `crypto.randomUUID`, and the editor fails to load with "This page couldn't load". A known gap, not yet fixed: the editor calls `crypto.randomUUID` directly in about 75 places. Testing from a phone or a second laptop needs https (a tunnel, or a dev certificate) until it is.

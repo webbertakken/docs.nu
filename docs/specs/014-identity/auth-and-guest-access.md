@@ -402,4 +402,4 @@ Signing in never moves a document in This Browser by itself ([Offline Mode → A
   tokens ([Secrets policy](../002-project-scope/secrets-policy.md)).
 - The app and the api share an origin (the router stitches `/api/*` under the app's host), which is what lets the
   session cookie stay host-only and `SameSite=Lax`. A host that splits them across sites is not supported for
-  sign-in; local development signs in through the router on port 3000.
+  sign-in; local development signs in through the router on port 4000.
