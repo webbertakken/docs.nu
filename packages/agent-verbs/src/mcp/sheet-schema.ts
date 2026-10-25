@@ -23,7 +23,7 @@ import { BORDER_COLOUR_DEFAULT } from '../sheets/sheet-shape-change';
 import { DESIGN_ACCENT_DEFAULT } from '../sheets/sheet-design';
 import { SHEET_CHART_SIZE } from '../sheets/sheet-charts';
 
-const url = z.string().describe('Link that opens the document in the livediagram editor.');
+const url = z.string().describe('Link that opens the document in the LiveDoc editor.');
 const documentId = z.string().describe('The document (from find_documents).');
 const sheetArg = z
   .string()

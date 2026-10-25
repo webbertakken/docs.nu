@@ -69,7 +69,7 @@ async function waitForAnswer(
     refused(
       'pairing_expired',
       'the pairing request expired before it was answered',
-      `livediagram workbench pair --origin ${origin}${scope === 'workspace' ? ' --workspace' : ''}`,
+      `livedoc workbench pair --origin ${origin}${scope === 'workspace' ? ' --workspace' : ''}`,
     );
   let interval = request.interval;
   let slowDown = 0;

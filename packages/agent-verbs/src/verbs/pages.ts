@@ -17,13 +17,13 @@ import {
 import { resolveTab } from '../addressing';
 import { documentOf, tabPath } from './shared';
 
-const docArg = z.string().describe('A name, id prefix or livediagram URL');
+const docArg = z.string().describe('A name, id prefix or LiveDoc URL');
 const tabFlag = z
   .string()
   .optional()
   .describe('A tab name or id prefix; the first tab in Pages mode when omitted');
-const LS_HINT = 'list the pages with: livediagram page ls <doc>';
-const CHANGES_HINT = 'see the changes with: livediagram help page set';
+const LS_HINT = 'list the pages with: livedoc page ls <doc>';
+const CHANGES_HINT = 'see the changes with: livedoc help page set';
 
 const refusal = (r: PagesRefused) =>
   new VerbRefusal({
@@ -94,7 +94,7 @@ export const pageLs = defineVerb({
   text: ({ text }) => [text],
   cli: {
     positionals: ['doc'],
-    examples: ['livediagram page ls "Pitch deck"', 'livediagram page ls 3f9c --tab Slides'],
+    examples: ['livedoc page ls "Pitch deck"', 'livedoc page ls 3f9c --tab Slides'],
     prints: 'the pages view as the api serves it',
   },
 });
@@ -144,8 +144,8 @@ export const pageSet = defineVerb({
   cli: {
     positionals: ['doc'],
     examples: [
-      'livediagram page set "Pitch deck" --add slide --layout slide-title',
-      'livediagram page set 3f9c --changes changes.json',
+      'livedoc page set "Pitch deck" --add slide --layout slide-title',
+      'livedoc page set 3f9c --changes changes.json',
     ],
     prints: 'what changed, then each page: place, kind, size, rectangle, name',
   },
@@ -252,8 +252,8 @@ export const articleGet = defineVerb({
   cli: {
     positionals: ['doc'],
     examples: [
-      'livediagram article get "Project brief" > brief.md',
-      'livediagram article get 3f9c --article Notes',
+      'livedoc article get "Project brief" > brief.md',
+      'livedoc article get 3f9c --article Notes',
     ],
     prints: 'the article as Markdown',
   },
@@ -314,8 +314,8 @@ export const articleSet = defineVerb({
   cli: {
     positionals: ['doc', 'file'],
     examples: [
-      'livediagram article set "Project brief" brief.md',
-      'cat notes.md | livediagram article set 3f9c - --article Notes --append',
+      'livedoc article set "Project brief" brief.md',
+      'cat notes.md | livedoc article set 3f9c - --article Notes --append',
     ],
     prints: 'what was written',
   },

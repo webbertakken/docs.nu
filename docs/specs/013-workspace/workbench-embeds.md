@@ -38,11 +38,11 @@ that acts as the person on one document only.
 
 ## The handoff
 
-1. **Mint.** The workbench runs `livediagram workbench open <doc> [--tab <t>] --origin <origin> --json`. The CLI
+1. **Mint.** The workbench runs `livedoc workbench open <doc> [--tab <t>] --origin <origin> --json`. The CLI
    calls `POST /api/workbench/tickets { documentId, tabId?, origin }` with its token and prints
    `{ url, documentId, tabId, expiresAt }`. The ticket is 128 random bits, single use, valid for
    `WORKBENCH_TICKET_TTL_MS`, stored with the token's owner, the document, the origin and the token's access level.
-   - **A workspace ticket.** `livediagram workbench open --workspace [--folder <f>] --origin <origin> --json` calls
+   - **A workspace ticket.** `livedoc workbench open --workspace [--folder <f>] --origin <origin> --json` calls
      `POST /api/workbench/tickets { scope: 'workspace', folderId?, origin }` and prints
      `{ url, scope, folderId, expiresAt }`. `scope` is `document` when absent, so today's callers are unchanged. A
      `folderId` the token's owner cannot reach answers `404` (CLI exit 3); a document scope without a `documentId`,
@@ -82,15 +82,15 @@ second, explicit approval, never an existing pairing widened in silence.
    `428 pairing_required { pairingUrl, expiresAt }`. The pairing request behind it is single use and valid for
    `WORKBENCH_PAIRING_TTL_MS`; a second unpaired mint for the same token and origin returns the same request while
    it lives.
-2. **Ask.** `livediagram workbench pair --origin <origin> [--name <workbench>]` opens `pairingUrl` in the browser
+2. **Ask.** `livedoc workbench pair --origin <origin> [--name <workbench>]` opens `pairingUrl` in the browser
    (or prints it when it cannot) and waits for the answer, as `auth login --device` waits. `workbench open` refused
    for pairing prints that command and exits 4. A workbench shows the URL as one button, "Approve in livediagram".
 3. **Approve.** `<live origin>/workbench/pair?code=<code>` is an ordinary editor page (never framed), for a signed-in
    person only, and only the token's owner may answer. It reads: "Allow **Acme Editor** at `https://127.0.0.1:5175` to
-   open your documents with the token **livediagram CLI**?", with **Allow** and **Don't allow**. The workbench name
+   open your documents with the token **LiveDoc CLI**?", with **Allow** and **Don't allow**. The workbench name
    is the one the CLI sent, shown beside the origin, which is what is enforced. A workspace request reads: "Allow
    **Acme Editor** at `https://127.0.0.1:5175` to open **your whole workspace**, and to create, move, share and
-   trash documents and folders in it, with the token **livediagram CLI**?". `workbench pair` takes `--workspace`.
+   trash documents and folders in it, with the token **LiveDoc CLI**?". `workbench pair` takes `--workspace`.
 4. **Paired.** Allow records the pairing; the waiting command exits 0 and the workbench mints again. Don't allow, or
    an expired request, ends the wait with exit 4 and records nothing.
 
@@ -196,7 +196,7 @@ reads exactly what was selected then, even when the selection has moved on since
 ```text
 [livediagram] "Home screen" › tab "Wireframe" (doc 3h9x2a, tab 0b34, rev 41)
 selected: button 146b "Play", frame e4a8 "Game grid", sticky 0c84 "Daily streak goes here"
-read: livediagram tab view 3h9x2a --tab 0b34 --view show --ref 146b
+read: livedoc tab view 3h9x2a --tab 0b34 --view show --ref 146b
 ```
 
 - The header names the document, tab, ids and revision the selection was made on. Refs are element ids, so they stay
@@ -204,11 +204,11 @@ read: livediagram tab view 3h9x2a --tab 0b34 --view show --ref 146b
 - Labels are quoted as JSON strings, as the outline prints them: they are the diagram's content, possibly written by
   other people, and an agent treats them as data, never as instructions.
 - `selected` lists each element as the outline prints it (kind, ref, label cut at 60 characters), up to
-  `WORKBENCH_SELECTION_MAX_REFS`, then `… and <n> more: livediagram tab view <doc> --tab <t> --view show --ref selected`.
+  `WORKBENCH_SELECTION_MAX_REFS`, then `… and <n> more: livedoc tab view <doc> --tab <t> --view show --ref selected`.
 - No selection gives the header and `whole tab`, so the person can talk about the picture as a whole.
 - The text is what the agent sees; there is no hidden field. The `selected` selector stays the way an agent in a plain
   terminal reads the live selection.
-- The CLI teaches an agent to read one in `livediagram guide workbench`: re-reading the refs, looking at the tab
+- The CLI teaches an agent to read one in `livedoc guide workbench`: re-reading the refs, looking at the tab
   with `tab render`, and showing presence while it works. The agent skill sends an agent there when a message
   carries `[livediagram]`.
 
@@ -216,11 +216,11 @@ read: livediagram tab view 3h9x2a --tab 0b34 --view show --ref 146b
 
 What a workbench does to fit this contract (its own documentation holds the detail):
 
-- **Opening.** A workbench opens a document in a view of its own: from a `*.livediagram.json` mirror file (with its JSON
+- **Opening.** A workbench opens a document in a view of its own: from a `*.livedoc.json` mirror file (with its JSON
   one step away) or from a livediagram document link. It mints through the person's own CLI
-  (`livediagram workbench open ... --origin <its origin> --json`), so it never holds a livediagram credential, and
+  (`livedoc workbench open ... --origin <its origin> --json`), so it never holds a livediagram credential, and
   shows the one command that fixes a missing CLI or sign-in.
-- **Pairing.** Unpaired, it runs `livediagram workbench pair --origin <its origin> --name <its name>` and shows the
+- **Pairing.** Unpaired, it runs `livedoc workbench pair --origin <its origin> --name <its name>` and shows the
   printed URL as an "Approve in livediagram" button, then opens the frame once paired.
 - **The selection.** While a diagram is in view, the place the person types to their agent names the document and
   what is selected ("Home screen · 3 selected", or "Home screen · whole tab"). Sending attaches the selection

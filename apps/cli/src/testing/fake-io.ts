@@ -129,8 +129,8 @@ export function fakeIo(
   const loopbackWaiting: ((r: LoopbackRequest) => void)[] = [];
   const loopbackQueued: LoopbackRequest[] = [];
   return {
-    // Quiet by default: a suite about the usage count turns it on with LIVEDIAGRAM_TELEMETRY: '1'.
-    env: { LIVEDIAGRAM_TELEMETRY: '0', ...options.env },
+    // Quiet by default: a suite about the usage count turns it on with LIVEDOC_TELEMETRY: '1'.
+    env: { LIVEDOC_TELEMETRY: '0', ...options.env },
     stdout: (text) => void (out += text),
     stderr: (text) => void (err += text),
     readStdin: async () => options.stdin ?? '',
@@ -290,12 +290,12 @@ export function fakeIo(
   };
 }
 
-// A host that has sign-in, at livediagram.app.
+// A host that has sign-in, at docs.nu.
 export const capabilities: Route = (_, url) =>
   url.pathname === '/api/capabilities'
     ? Response.json({
         aiEnabled: false,
-        apiBase: 'https://livediagram.app/api',
+        apiBase: 'https://docs.nu/api',
         authEnabled: true,
         documentFormat: 2,
       })

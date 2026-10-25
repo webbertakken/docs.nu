@@ -40,7 +40,7 @@ export function route(words: readonly string[]): Routed {
       code: 'usage',
       message: `unknown command "${first}"`,
       ...(near ? { lines: [`did you mean: ${near}`] } : {}),
-      hint: 'livediagram --help',
+      hint: 'livedoc --help',
     });
   }
   if (second === undefined) return { kind: 'resource', resource };
@@ -55,6 +55,6 @@ export function route(words: readonly string[]): Routed {
     code: 'usage',
     message: `unknown verb "${second}" for "${resource}"`,
     ...(near ? { lines: [`did you mean: ${near}`] } : {}),
-    hint: `livediagram ${resource} --help`,
+    hint: `livedoc ${resource} --help`,
   });
 }

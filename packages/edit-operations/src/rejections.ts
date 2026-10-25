@@ -166,9 +166,7 @@ export function invalidResult(
   return {
     code: 'invalid_result',
     details: [`${subject} ${issue.field}: ${issue.rule}`],
-    hint: kind
-      ? `see the format: livediagram schema ${kind}`
-      : 'see the format: livediagram schema',
+    hint: kind ? `see the format: livedoc schema ${kind}` : 'see the format: livedoc schema',
   };
 }
 

@@ -159,7 +159,7 @@ export async function exportAll(
       exit: EXIT.usage,
       code: 'usage',
       message: 'export writes every document: add --all',
-      hint: 'one document: livediagram pull <doc>',
+      hint: 'one document: livedoc pull <doc>',
     });
   const formats = formatsOf(input.format);
   const documents = await patiently(ctx, () => listAllDocuments(ctx.api));

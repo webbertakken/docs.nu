@@ -16,7 +16,7 @@ const tab = (id: string, label: string): Tab => ({
 });
 
 async function tracked(tabs: Tab[] = [tab('t1', 'A'), tab('t2', 'B')]) {
-  const recorded: MirrorFile['livediagramSync']['tabs'] = {};
+  const recorded: MirrorFile['livedocSync']['tabs'] = {};
   const hashes: TabHashes = {};
   for (const [i, t] of tabs.entries()) {
     hashes[t.id] = await tabHashes(t);
@@ -26,7 +26,7 @@ async function tracked(tabs: Tab[] = [tab('t1', 'A'), tab('t2', 'B')]) {
     kind: 'livediagram.document',
     schemaVersion: 1,
     document: { id: 'd1', name: 'Home', presentation: null, tabs },
-    livediagramSync: { host: 'https://livediagram.app', tabs: recorded },
+    livedocSync: { host: 'https://docs.nu', tabs: recorded },
   };
   return { file, hashes };
 }
@@ -116,7 +116,7 @@ describe('syncStateOf', () => {
     );
   });
 
-  it('reads a tab added or removed in livediagram as a remote change', async () => {
+  it('reads a tab added or removed in LiveDoc as a remote change', async () => {
     const clean = await tracked();
     const added = readable([
       ['t1', 1],

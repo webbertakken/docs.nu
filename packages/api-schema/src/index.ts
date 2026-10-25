@@ -684,7 +684,7 @@ export * from './ref-errors';
 export * from './recent-diagrams';
 
 // GET /api/tokens/current (docs/specs/015-api/blueprints/cli.md "Token self-service"): the token a request
-// presented, for `livediagram auth status`. `role` is `full` or `read-only`.
+// presented, for `livedoc auth status`. `role` is `full` or `read-only`.
 export type CurrentTokenResponse = {
   accountId: string;
   accountName: string | null;

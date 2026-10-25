@@ -19,7 +19,7 @@ test('a signed-in person connects the CLI with the code their terminal shows', a
   const completed: unknown[] = [];
   await page.route(`${MCP}/oauth/device/session/*`, (route) =>
     route.request().url().endsWith('/BCDF-GHJK')
-      ? route.fulfill({ json: { clientName: 'livediagram CLI' } })
+      ? route.fulfill({ json: { clientName: 'LiveDoc CLI' } })
       : route.fulfill({ status: 404, json: { error: 'invalid_code' } }),
   );
   await page.route(`${MCP}/oauth/device/complete`, async (route) => {
@@ -35,7 +35,7 @@ test('a signed-in person connects the CLI with the code their terminal shows', a
 
   await page.getByLabel('Code shown in your terminal').fill('bcdf ghjk');
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('heading', { name: 'Connect livediagram CLI' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Connect LiveDoc CLI' })).toBeVisible();
   await page.screenshot({ path: test.info().outputPath('oauth-device-consent.png') });
 
   await page.getByRole('button', { name: 'Connect', exact: true }).click();
@@ -50,7 +50,7 @@ test('cancelling refuses the code, so the terminal stops waiting', async ({ page
   await installClerkStub(page, { ...WEBBER, id: freshUserId('webber') });
   const denied: unknown[] = [];
   await page.route(`${MCP}/oauth/device/session/*`, (route) =>
-    route.fulfill({ json: { clientName: 'livediagram CLI' } }),
+    route.fulfill({ json: { clientName: 'LiveDoc CLI' } }),
   );
   await page.route(`${MCP}/oauth/device/deny`, async (route) => {
     denied.push(route.request().postDataJSON());

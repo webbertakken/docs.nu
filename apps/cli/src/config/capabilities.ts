@@ -71,9 +71,9 @@ export async function loadCapabilities(
   if (typeof capabilities !== 'object' || capabilities === null)
     throw new CliError({
       exit: EXIT.failure,
-      code: 'not_livediagram',
-      message: `${profile.host} does not answer as a livediagram host`,
-      hint: 'check the host: --host https://<your livediagram>',
+      code: 'not_livedoc',
+      message: `${profile.host} does not answer as a LiveDoc host`,
+      hint: 'check the host: --host https://<your livedoc>',
     });
   const entry: CacheEntry = {
     fetchedAt: io.now(),

@@ -6,7 +6,7 @@
 import { EMPTY_DOCUMENT_STALE_DAYS, TRASH_REASONS } from '@livediagram/api-schema';
 import { z } from 'zod';
 
-const url = z.string().describe('Link that opens the document in the livediagram editor.');
+const url = z.string().describe('Link that opens the document in the LiveDoc editor.');
 const documentId = z.string().describe('The document id.');
 const tabId = z.string().describe('The tab id.');
 

@@ -43,7 +43,7 @@ export function selectionReference(input: SelectionReferenceInput): SelectionRef
   const selected = tab.elements.filter((el) => wanted.has(el.id));
   if (selected.length === 0) return { text: `${header}\nwhole tab`, count: 0 };
 
-  const view = `livediagram tab view ${documentId} --tab ${tabRef} --view show --ref`;
+  const view = `livedoc tab view ${documentId} --tab ${tabRef} --view show --ref`;
   const shown = selected.slice(0, WORKBENCH_SELECTION_MAX_REFS).map((el) => item(model, el));
   const more = selected.length - shown.length;
   const tail = more > 0 ? ` … and ${more} more: ${view} selected` : '';

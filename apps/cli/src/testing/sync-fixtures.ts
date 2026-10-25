@@ -58,7 +58,7 @@ export async function trackedFile(
 ): Promise<Extract<ScannedFile, { class: 'tracked' }>> {
   const tabs = doc.tabs.map(tabOf);
   const hashes: TabHashes = {};
-  const recorded: MirrorFile['livediagramSync']['tabs'] = {};
+  const recorded: MirrorFile['livedocSync']['tabs'] = {};
   for (const [i, t] of doc.tabs.entries()) {
     hashes[t.id] = await tabHashes(tabs[i]!);
     recorded[t.id] = { rev: t.rev, ...hashes[t.id]! };
@@ -71,7 +71,7 @@ export async function trackedFile(
       kind: 'livediagram.document',
       schemaVersion: 1,
       document: { id: doc.id, name: doc.name, presentation: null, tabs },
-      livediagramSync: { host: 'https://livediagram.app', tabs: recorded },
+      livedocSync: { host: 'https://docs.nu', tabs: recorded },
     },
     hashes,
   };

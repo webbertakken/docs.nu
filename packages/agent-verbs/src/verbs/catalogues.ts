@@ -71,7 +71,7 @@ export const templateLs = defineVerb({
   quiet: ({ templates }) => templates.map((t) => t.kind),
   cli: {
     positionals: [],
-    examples: ['livediagram template ls', 'livediagram template ls -q'],
+    examples: ['livedoc template ls', 'livedoc template ls -q'],
     prints: 'one template a line: kind, title, category',
   },
 });
@@ -90,13 +90,13 @@ export const templateView = defineVerb({
       `/templates/${encodeURIComponent(kind)}`,
       'template',
       kind,
-      'livediagram template ls',
+      'livedoc template ls',
     ),
   }),
   text: ({ text }) => [text],
   cli: {
     positionals: ['kind'],
-    examples: ['livediagram template view kanban', 'livediagram template view start-stop-continue'],
+    examples: ['livedoc template view kanban', 'livedoc template view start-stop-continue'],
     prints: 'the outline of the tab the template builds',
   },
 });
@@ -134,10 +134,7 @@ export const iconSearch = defineVerb({
   quiet: ({ icons }) => icons.map((i) => i.id),
   cli: {
     positionals: ['text'],
-    examples: [
-      'livediagram icon search database',
-      'livediagram icon search "message queue" --limit 5',
-    ],
+    examples: ['livedoc icon search database', 'livedoc icon search "message queue" --limit 5'],
     prints: 'one icon a line: id, label, catalogue',
   },
 });
@@ -161,13 +158,13 @@ export const schemaView = defineVerb({
             `/schema/${encodeURIComponent(kind)}`,
             'element kind',
             kind,
-            'livediagram schema',
+            'livedoc schema',
           ),
   }),
   text: ({ text }) => [text],
   cli: {
     positionals: ['kind'],
-    examples: ['livediagram schema', 'livediagram schema sticky'],
+    examples: ['livedoc schema', 'livedoc schema sticky'],
     prints: 'the kinds, or one kind\u2019s format',
   },
 });

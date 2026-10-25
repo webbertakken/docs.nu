@@ -73,14 +73,14 @@ The editor is real:
 - **Agent changesets** ([Agent changesets](../024-agents/agent-changesets.md)): the MCP server and API-token scripts change tabs with changesets that reach anyone with the tab open, live, outlined in their author's colour with a toast offering Show and Undo, survive a person's next save, refuse an element a person has selected, and revert as one unit for 30 days; every server-stored document, personal ones included, has a room. Closed livediagram-app/livediagram.app#343.
 - **Document views and edit operations** ([Document views](../024-agents/document-views.md), [Edit operations](../024-agents/edit-operations.md)): agents read a tab as compact text (outline, graph, layout, comments, show, find) addressed by refs, and change it with twelve intent-level operations (`add set rm move connect rewire insert wrap unwrap order layout test`) in the line form or JSON, by ref or selector, placed beside what they name, making room on insert, and answered with one result line per element. The [diagram lint](../024-agents/diagram-lint.md) checks every
   changeset's result (overlaps, crossings, arrows behind boxes, overflowing labels) and names a fix for each finding.
-- **The CLI** ([CLI](../015-api/cli.md)): `livediagram` signs in through the browser, with a code on another device
+- **The CLI** ([CLI](../015-api/cli.md)): `livedoc` signs in through the browser, with a code on another device
   (`--device`) or with a token, keeping it in the system's own keychain; reads every view, lint and diff; edits with
   edit operations based on read copies; creates, renames, shares and removes documents and tabs; comments, shows its
   presence, and waits on or watches a document's room; pulls a document to a file and pushes it back, exports every
   document, and draws tabs and graph files as SVG or PNG. It counts its commands like the MCP's tools, and the MCP's
-  tools are verbs of the same catalogue. Published on npm as `@livediagram/cli`, with provenance.
-- **Repository links** ([Repository link](../027-repositories/repository-link.md)): `livediagram.toml` binds a
-  directory to a folder or documents; `livediagram sync` writes an `INDEX.md` agents find with a search, plus a
+  tools are verbs of the same catalogue. Published on npm as `@livedoc/cli`, with provenance.
+- **Repository links** ([Repository link](../027-repositories/repository-link.md)): `livedoc.toml` binds a
+  directory to a folder or documents; `livedoc sync` writes an `INDEX.md` agents find with a search, plus a
   snapshot and a text outline per document at the `files` level, and `sync --watch` keeps them in step live.
 - **Workbench embeds** ([Workbench embeds](../013-workspace/workbench-embeds.md)): a developer tool, once paired in the
   person's browser, opens a document signed in inside its own frame through a ticket the person's CLI mints; the

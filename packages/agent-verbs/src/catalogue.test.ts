@@ -37,12 +37,12 @@ import {
   watch,
 } from './verbs/local';
 
-// The command a `livediagram …` line names: a top-level verb, or a resource (or alias) and a verb.
+// The command a `livedoc …` line names: a top-level verb, or a resource (or alias) and a verb.
 function routes(line: string): boolean {
   const words = line.split(/\s+/);
   // Global flags may come first; --host and --profile take a value.
   const [first, second] = words
-    .slice(words.indexOf('livediagram') + 1)
+    .slice(words.indexOf('livedoc') + 1)
     .filter((w, i, all) => !w.startsWith('-') && !['--host', '--profile'].includes(all[i - 1]!));
   if (TOP_LEVEL.some((t) => t === first) || first! in COMMAND_ALIASES) return true;
   const resource = RESOURCE_ALIASES[first!] ?? first!;
@@ -51,7 +51,7 @@ function routes(line: string): boolean {
 
 // Commands as written to be run: on their own line, in backticks, in parentheses, or after a pipe.
 const commandsIn = (text: string) =>
-  [...text.matchAll(/(?:^\s*|[`(|]\s*)(livediagram [a-z]+(?: [a-z]+)?)/gm)].map((m) => m[1]!);
+  [...text.matchAll(/(?:^\s*|[`(|]\s*)(livedoc [a-z]+(?: [a-z]+)?)/gm)].map((m) => m[1]!);
 describe('the catalogue', () => {
   it('gives every verb a unique id, a resource or a top-level place, and a CLI projection', () => {
     expect(new Set(VERBS.map((v) => v.id)).size).toBe(VERBS.length);
@@ -163,10 +163,10 @@ describe('the guides and the skill', () => {
     const text = GUIDE_TOPICS.workbench.text;
     expect(text).toContain('[livediagram] "Home screen" › tab "Wireframe"');
     for (const command of [
-      'livediagram tab view',
-      'livediagram tab render',
-      'livediagram presence set',
-      'livediagram presence clear',
+      'livedoc tab view',
+      'livedoc tab render',
+      'livedoc presence set',
+      'livedoc presence clear',
     ])
       expect(text, command).toContain(command);
     // The tail of a long selection reads the live selection (document-views "show selected").
@@ -177,7 +177,7 @@ describe('the guides and the skill', () => {
   it('send an agent to the workbench guide when a message carries [livediagram]', () => {
     expect(SKILL_DESCRIPTION).toContain('[livediagram]');
     expect(renderSkill()).toContain(
-      'A message carrying a `[livediagram]` line is a selection reference from a workbench: read `livediagram guide workbench` first.',
+      'A message carrying a `[livediagram]` line is a selection reference from a workbench: read `livedoc guide workbench` first.',
     );
   });
 

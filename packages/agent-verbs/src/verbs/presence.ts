@@ -14,7 +14,7 @@ import {
 import { defineVerb, VerbRefusal } from '../define';
 import { tabOf, tabPath } from './shared';
 
-const docArg = z.string().describe('A name, id prefix or livediagram URL');
+const docArg = z.string().describe('A name, id prefix or LiveDoc URL');
 const tabFlag = z
   .string()
   .optional()
@@ -75,7 +75,7 @@ export const presenceSet = defineVerb({
         status: 400,
         code: parsed.code,
         message: REFUSALS[parsed.code],
-        hint: 'livediagram presence set --help',
+        hint: 'livedoc presence set --help',
       });
     const { document, tab } = await tabOf(ctx, input.doc, input.tab);
     const { presence } = await ctx.api.json<{ presence: AgentPresenceResult }>(
@@ -90,8 +90,8 @@ export const presenceSet = defineVerb({
   cli: {
     positionals: ['doc'],
     examples: [
-      'livediagram presence set "Shop" --status "Adding the payment flow" --focus api,db',
-      'livediagram presence set 3f9c --tab Flow --status "Reviewing" --ttl 120',
+      'livedoc presence set "Shop" --status "Adding the payment flow" --focus api,db',
+      'livedoc presence set 3f9c --tab Flow --status "Reviewing" --ttl 120',
     ],
     prints: 'the tab and when the presence goes (UTC)',
   },
@@ -115,7 +115,7 @@ export const presenceClear = defineVerb({
   text: ({ text }) => [text],
   cli: {
     positionals: ['doc'],
-    examples: ['livediagram presence clear "Shop"', 'livediagram presence clear 3f9c --tab Flow'],
+    examples: ['livedoc presence clear "Shop"', 'livedoc presence clear 3f9c --tab Flow'],
     prints: 'the tab it left',
   },
 });

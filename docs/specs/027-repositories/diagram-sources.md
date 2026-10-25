@@ -4,7 +4,7 @@
 
 Most repositories already hold diagrams as text: Mermaid in READMEs, PlantUML beside the code, Graphviz written by
 generators such as code2flow. A **source** is one such diagram, a file or a fenced block in Markdown, **bound** to a
-livediagram tab through a [repository link](repository-link.md). Binding is the onboarding: every source comes into
+livedoc tab through a [repository link](repository-link.md). Binding is the onboarding: every source comes into
 livediagram (forward compatible), and livediagram writes back what the format can say (backward compatible, as far
 as the format goes).
 
@@ -31,7 +31,7 @@ naming what the format can express. Bridges reuse the existing importers ([Merma
 
 ## Binding
 
-- **Adopt.** `livediagram link adopt [<glob>...]` finds the sources under the link, lists them with their format and
+- **Adopt.** `livedoc link adopt [<glob>...]` finds the sources under the link, lists them with their format and
   the direction it would use, and, confirmed (or `--yes` when piped), creates one document per source file in the
   link's folder (one tab per fenced block for a Markdown file holding several), and binds each.
 - **The marker.** A binding is written into the source itself, as a comment in the format's own syntax on its first

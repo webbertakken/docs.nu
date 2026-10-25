@@ -16,7 +16,7 @@ import { graphBodyIssue } from '@livediagram/edit-operations';
 import { defineVerb, VerbRefusal } from '../define';
 import { classifySource } from '../source-kind';
 
-const refuse = (message: string, hint = 'livediagram guide build') =>
+const refuse = (message: string, hint = 'livedoc guide build') =>
   new VerbRefusal({ status: 400, code: 'invalid_value', message, hint });
 
 // The graph a file holds: graph JSON (bare or as a replace), or Mermaid.
@@ -50,7 +50,7 @@ export function graphLint(
     return { text: formatLintReport(report), errors: report.counts.error };
   }
   const dims = parseCompareDimensions(compare);
-  if ('error' in dims) throw refuse(dims.error, 'livediagram graph lint --help');
+  if ('error' in dims) throw refuse(dims.error, 'livedoc graph lint --help');
   return {
     text: formatCompareTable(compareGraphLayouts(graph, dims, { log: lintLog })),
     errors: 0,
@@ -75,8 +75,8 @@ export const graphLintVerb = defineVerb({
   cli: {
     positionals: ['file'],
     examples: [
-      'livediagram graph lint arch.json',
-      'livediagram graph lint arch.json --compare direction,groups',
+      'livedoc graph lint arch.json',
+      'livedoc graph lint arch.json --compare direction,groups',
     ],
     prints: 'the lint summary and findings, or one line per variant',
   },

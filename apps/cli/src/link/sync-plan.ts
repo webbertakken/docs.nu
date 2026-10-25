@@ -97,7 +97,7 @@ function tabMoves(overview: OverviewView, before: Record<string, number>): TabMo
 }
 
 const revsOf = (file: MirrorFile) =>
-  Object.fromEntries(Object.entries(file.livediagramSync.tabs).map(([id, t]) => [id, t.rev]));
+  Object.fromEntries(Object.entries(file.livedocSync.tabs).map(([id, t]) => [id, t.rev]));
 
 // The index order (RL41): folder path, then name, then id, in code units.
 function indexOrder(keyOf: (id: string) => { path: readonly string[]; name: string }) {

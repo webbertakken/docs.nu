@@ -3,7 +3,7 @@
 // editor's /oauth/device page and the CLI.
 
 export const CLI_CLIENT_ID = 'livediagram-cli';
-export const CLI_CLIENT_NAME = 'livediagram CLI';
+export const CLI_CLIENT_NAME = 'LiveDoc CLI';
 // Loopback callbacks, matched on any port (RFC 8252 §7.3).
 export const CLI_REDIRECT_URIS: readonly string[] = [
   'http://127.0.0.1/callback',

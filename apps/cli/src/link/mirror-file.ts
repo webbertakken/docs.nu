@@ -7,8 +7,8 @@ import type { PullFile, PullSync } from '../sync/pull-file';
 import { canonicalJson } from '@livediagram/document';
 import { isRecord } from '@livediagram/document';
 
-export type MirrorFile = Omit<PullFile, 'exportedAt' | 'livediagramSync'> & {
-  livediagramSync: Omit<PullSync, 'pulledAt'>;
+export type MirrorFile = Omit<PullFile, 'exportedAt' | 'livedocSync'> & {
+  livedocSync: Omit<PullSync, 'pulledAt'>;
 };
 
 // As `JSON.stringify(value, null, 2)` prints, keys sorted; an array at `document.tabs[i].elements` prints each
@@ -36,8 +36,8 @@ function print(value: unknown, indent: string, path: string): string {
 }
 
 export function mirrorFileText(file: MirrorFile): string {
-  const { kind, schemaVersion, document, livediagramSync } = file;
-  return `${print({ kind, schemaVersion, document, livediagramSync }, '', '')}\n`;
+  const { kind, schemaVersion, document, livedocSync } = file;
+  return `${print({ kind, schemaVersion, document, livedocSync }, '', '')}\n`;
 }
 
 // A line git writes around a conflict: `<<<<<<< `, `=======` alone, or `>>>>>>> `.

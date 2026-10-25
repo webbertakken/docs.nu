@@ -118,7 +118,7 @@ export const AI_CLIENTS: readonly AiClient[] = [
         code: { lang: 'text', code: '/mcp', label: 'In Claude Code' },
       },
     ],
-    note: 'Working in a repository? The livediagram CLI is another way in, on the same account.',
+    note: 'Working in a repository? The LiveDoc CLI is another way in, on the same account.',
   },
   {
     id: 'codex',

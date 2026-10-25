@@ -14,13 +14,13 @@ import { isNetworkFailure } from './output/failure-of';
 const TELEMETRY_FLUSH_TIMEOUT_MS = 300;
 
 export const telemetryNotice = (host: string) =>
-  `livediagram counts which commands succeed (the command's name only: never arguments, documents or hosts) and sends the count to ${host}. Turn it off: livediagram telemetry off, or LIVEDIAGRAM_TELEMETRY=0.`;
+  `livedoc counts which commands succeed (the command's name only: never arguments, documents or hosts) and sends the count to ${host}. Turn it off: livedoc telemetry off, or LIVEDOC_TELEMETRY=0.`;
 
 export type TelemetrySink = { io: CliIo; apiBase: string; log: DebugLog };
 
 // Why the count is off, or null when it is on.
 export function telemetryOffReason(io: CliIo, config: ConfigFile): string | null {
-  if (io.env.LIVEDIAGRAM_TELEMETRY === '0') return 'env';
+  if (io.env.LIVEDOC_TELEMETRY === '0') return 'env';
   const dnt = io.env.DO_NOT_TRACK;
   if (dnt !== undefined && dnt !== '' && dnt !== '0') return 'do-not-track';
   if (config.telemetry === false) return 'config';

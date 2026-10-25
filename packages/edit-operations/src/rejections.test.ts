@@ -151,12 +151,12 @@ describe('rejection builders', () => {
     expect(invalidResult('x', 'shape', { field: 'x', rule: 'a finite number' })).toEqual({
       code: 'invalid_result',
       details: ['x x: a finite number'],
-      hint: 'see the format: livediagram schema shape',
+      hint: 'see the format: livedoc schema shape',
     });
     expect(invalidResult('the tab', undefined, { field: 'elements', rule: 'unique ids' })).toEqual({
       code: 'invalid_result',
       details: ['the tab elements: unique ids'],
-      hint: 'see the format: livediagram schema',
+      hint: 'see the format: livedoc schema',
     });
   });
 });

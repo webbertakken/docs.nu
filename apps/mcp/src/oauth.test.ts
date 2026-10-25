@@ -466,7 +466,7 @@ describe('the CLI client (docs/specs/015-api/blueprints/cli.md "OAuth server", C
       const session = new URL(res.headers.get('Location')!).searchParams.get('session')!;
       const looked = await app.request(`/oauth/session/${session}`, {}, env);
       expect(await looked.json()).toMatchObject({
-        clientName: 'livediagram CLI',
+        clientName: 'LiveDoc CLI',
         clientId: 'livediagram-cli',
       });
     }

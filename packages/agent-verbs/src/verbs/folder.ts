@@ -31,10 +31,10 @@ export const folderLs = defineVerb({
   text: ({ folders }) =>
     folders.length
       ? columns(folders.map((f) => [f.id, JSON.stringify(f.path), f.library]))
-      : ['no folders yet: livediagram folder create <name>'],
+      : ['no folders yet: livedoc folder create <name>'],
   cli: {
     positionals: [],
-    examples: ['livediagram folder ls', 'livediagram folder ls --json'],
+    examples: ['livedoc folder ls', 'livedoc folder ls --json'],
     prints: '<id>  "<path>"  <library> per folder; --json [{ id, path, library }]',
   },
 });
@@ -73,8 +73,8 @@ export const folderCreate = defineVerb({
   cli: {
     positionals: ['name'],
     examples: [
-      'livediagram folder create "Minigames" --json',
-      'livediagram folder create "Screens" --in Minigames',
+      'livedoc folder create "Minigames" --json',
+      'livedoc folder create "Screens" --in Minigames',
     ],
     prints: '+ folder <id> "<path>"; --json { id, path }',
   },

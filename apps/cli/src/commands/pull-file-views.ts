@@ -53,7 +53,7 @@ const tabIdsOf = (file: PullFile) => file.document.tabs.map((t) => t.id);
 // When the file's document was last saved: its pull, or for a mirror file, which holds no time, its newest tab
 // (RL10).
 function savedAtOf(file: PullFile): number {
-  if (file.livediagramSync.pulledAt !== undefined) return file.livediagramSync.pulledAt;
+  if (file.livedocSync.pulledAt !== undefined) return file.livedocSync.pulledAt;
   const updated = file.document.tabs.map((t): unknown => Reflect.get(t, 'updatedAt'));
   return Math.max(0, ...updated.filter((at): at is number => typeof at === 'number'));
 }
@@ -75,7 +75,7 @@ export function pullFileView(
       hint: `name the document instead of the file: ${file.document.id}`,
     });
   log(`address document file ${path}`);
-  const { document, livediagramSync: sync } = file;
+  const { document, livedocSync: sync } = file;
   if (verb.id === 'tab.ls') return { tabs: tabListOf(summariesOf(file)) };
   const tabIds = tabIdsOf(file);
   if (verb.id === 'document.view') {

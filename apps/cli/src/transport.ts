@@ -37,7 +37,7 @@ export function transport(io: CliIo, apiBase: string, log: DebugLog): Transport 
       headers: () => ({
         Authorization: `Bearer ${token()}`,
         'X-Livediagram-Client': 'cli',
-        'User-Agent': `livediagram-cli/${CLI_VERSION} ${io.runtime}`,
+        'User-Agent': `livedoc-cli/${CLI_VERSION} ${io.runtime}`,
         ...(shareCode ? { 'X-Share-Code': shareCode } : {}),
       }),
     });

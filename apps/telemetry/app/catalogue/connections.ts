@@ -27,7 +27,7 @@ export const CLI_SIGN_INS: Metric = {
   action: 'Created',
   type: 'Cli',
   title: 'CLI Sign-ins',
-  blurb: 'The livediagram CLI signed in, through the browser or with a code on another device.',
+  blurb: 'The LiveDoc CLI signed in, through the browser or with a code on another device.',
 };
 
 export const TOKENS_REVOKED: Metric = {

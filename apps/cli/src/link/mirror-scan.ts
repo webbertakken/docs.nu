@@ -1,6 +1,6 @@
 // Scanning the mirror directory (docs/specs/027-repositories/blueprints/repository-link.md "Scanning the mirror
-// directory"): every `*.livediagram.json` under the link's `dir`, walked as `linksBelow` walks and skipping a
-// subdirectory that holds its own livediagram.toml (that link's files are its own, RL4), each classified in order.
+// directory"): every `*.livedoc.json` under the link's `dir`, walked as `linksBelow` walks and skipping a
+// subdirectory that holds its own livedoc.toml (that link's files are its own, RL4), each classified in order.
 // Paths are relative to the mirror directory.
 
 import { posix } from 'node:path';
@@ -28,7 +28,7 @@ export type ScannedFile = (
 };
 
 const hasSyncKey = (text: string) =>
-  Object.prototype.hasOwnProperty.call(Object(JSON.parse(text)), 'livediagramSync');
+  Object.prototype.hasOwnProperty.call(Object(JSON.parse(text)), 'livedocSync');
 
 async function classify(io: CliIo, path: string, rel: string, host: string): Promise<ScannedFile> {
   const text = (await io.files.read(path)) ?? '';
@@ -49,10 +49,10 @@ async function classifyText(text: string, rel: string, host: string): Promise<Sc
   }
   const { file } = parsed;
   // A host edited into something that is not a URL refuses this one file; it never stops the pass (E5a).
-  if (!URL.canParse(file.livediagramSync.host))
-    return { class: 'invalid', path: rel, message: 'livediagramSync.host is not a URL' };
-  if (!sameHost(file.livediagramSync.host, host))
-    return { class: 'foreign-host', path: rel, host: file.livediagramSync.host };
+  if (!URL.canParse(file.livedocSync.host))
+    return { class: 'invalid', path: rel, message: 'livedocSync.host is not a URL' };
+  if (!sameHost(file.livedocSync.host, host))
+    return { class: 'foreign-host', path: rel, host: file.livedocSync.host };
   const hashes: TabHashes = {};
   for (const tab of file.document.tabs) hashes[tab.id] = await tabHashes(tab);
   return { class: 'tracked', path: rel, file, hashes };

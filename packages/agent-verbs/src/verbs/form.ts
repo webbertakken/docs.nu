@@ -11,14 +11,14 @@ import type { FormReading } from '../forms/form-read';
 import type { QuestionInput } from '../forms/form-question';
 import { documentOf } from './shared';
 
-const docArg = z.string().describe('A name, id prefix or livediagram URL');
+const docArg = z.string().describe('A name, id prefix or LiveDoc URL');
 const tabFlag = z
   .string()
   .optional()
   .describe('The Form tab, by name or id; the first when omitted');
-const HINT = 'read the form with: livediagram form get <doc>';
+const HINT = 'read the form with: livedoc form get <doc>';
 // A document with no Form tab has no form to read: the hint makes one instead.
-const NO_FORM_HINT = 'make one with: livediagram form add <doc> --starter contact';
+const NO_FORM_HINT = 'make one with: livedoc form add <doc> --starter contact';
 
 const readingOutput = z.object({
   documentId: z.string(),
@@ -89,7 +89,7 @@ async function jsonFrom<T>(ctx: VerbContext, path: string, what: string): Promis
       status: 400,
       code: 'usage',
       message: `${what} is not JSON`,
-      hint: 'see: livediagram help form',
+      hint: 'see: livedoc help form',
     });
   }
 }
@@ -110,7 +110,7 @@ export const formGet = defineVerb({
   quiet: (o) => (o.link ? [o.link] : []),
   cli: {
     positionals: ['doc'],
-    examples: ['livediagram form get "Team offsite"', 'livediagram form get 3f9c --tab RSVP'],
+    examples: ['livedoc form get "Team offsite"', 'livedoc form get 3f9c --tab RSVP'],
     prints:
       'the form: state and link, where responses go, each question with its id, then any problems',
   },
@@ -160,8 +160,8 @@ export const formAdd = defineVerb({
   cli: {
     positionals: ['doc'],
     examples: [
-      'livediagram form add --starter rsvp --name "Summer Party"',
-      'livediagram form add "Ops" --from survey.json',
+      'livedoc form add --starter rsvp --name "Summer Party"',
+      'livedoc form add "Ops" --from survey.json',
     ],
     prints: 'what was made, then the form as form get prints it',
   },
@@ -189,8 +189,8 @@ export const formChange = defineVerb({
   cli: {
     positionals: ['doc', 'changes'],
     examples: [
-      'livediagram form change "Team offsite" changes.json',
-      'cat changes.json | livediagram form change 3f9c -',
+      'livedoc form change "Team offsite" changes.json',
+      'cat changes.json | livedoc form change 3f9c -',
     ],
     prints: 'what changed, then the form as form get prints it',
   },
@@ -216,10 +216,7 @@ export const formShare = defineVerb({
   quiet: (o) => (o.link ? [o.link] : []),
   cli: {
     positionals: ['doc', 'action'],
-    examples: [
-      'livediagram form share "Team offsite" publish',
-      'livediagram form share 3f9c close',
-    ],
+    examples: ['livedoc form share "Team offsite" publish', 'livedoc form share 3f9c close'],
     prints: 'the form as form get prints it, its link when published',
   },
 });
@@ -269,8 +266,8 @@ export const formTry = defineVerb({
   cli: {
     positionals: ['doc', 'answers'],
     examples: [
-      'livediagram form try "Team offsite" answers.json',
-      'echo \'{"Your name": "Ada"}\' | livediagram form try 3f9c -',
+      'livedoc form try "Team offsite" answers.json',
+      'echo \'{"Your name": "Ada"}\' | livedoc form try 3f9c -',
     ],
     prints: 'the card or row it made and where, and whether it counted',
   },

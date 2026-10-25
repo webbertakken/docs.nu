@@ -6,7 +6,7 @@ import { EXIT, exitCodeForStatus } from './exit-codes';
 import { failureOf, ISSUES_URL } from './failure-of';
 import { render } from './print';
 
-const HOST = 'https://livediagram.app';
+const HOST = 'https://docs.nu';
 const apiError = (status: number, body: unknown) =>
   new ApiError(status, typeof body === 'string' ? body : JSON.stringify(body));
 
@@ -24,12 +24,12 @@ describe('formatError', () => {
     code: 'not_found',
     message: 'no tab',
     lines: ['  a1  "A"'],
-    hint: 'livediagram tab ls x',
+    hint: 'livedoc tab ls x',
   };
 
   it('prints the message, the indented lines and the hint as text', () => {
     expect(formatError(failure, false)).toBe(
-      'error: no tab\n    a1  "A"\nhint: livediagram tab ls x\n',
+      'error: no tab\n    a1  "A"\nhint: livedoc tab ls x\n',
     );
     expect(formatError({ exit: EXIT.usage, code: 'usage', message: 'bad' }, false)).toBe(
       'error: bad\n',
@@ -41,7 +41,7 @@ describe('formatError', () => {
       error: 'not_found',
       message: 'no tab',
       candidates: ['a1  "A"'],
-      hint: 'livediagram tab ls x',
+      hint: 'livedoc tab ls x',
     });
     expect(
       JSON.parse(formatError({ exit: EXIT.usage, code: 'usage', message: 'bad', lines: [] }, true)),
@@ -60,7 +60,7 @@ describe('failureOf', () => {
 
   it('reads an address failure: not found with the nearest, ambiguous, usage', () => {
     const candidates = [{ ref: 'aaaa1', name: 'Auth flow', detail: 'personal' }];
-    const base = { what: 'document' as const, input: 'Auth', hint: 'livediagram document ls' };
+    const base = { what: 'document' as const, input: 'Auth', hint: 'livedoc document ls' };
     expect(
       failureOf(
         new AddressError({
@@ -76,7 +76,7 @@ describe('failureOf', () => {
       code: 'not_found',
       message: 'no document matches "Auth"; the nearest:',
       lines: ['aaaa1     "Auth flow"             personal'],
-      hint: 'livediagram document ls',
+      hint: 'livedoc document ls',
     });
     expect(
       failureOf(
@@ -97,11 +97,11 @@ describe('failureOf', () => {
       exit: EXIT.auth,
       code: 'token_revoked',
       message: `${HOST} did not accept the credential (token_revoked)`,
-      hint: 'livediagram auth login --with-token, or set LIVEDIAGRAM_TOKEN',
+      hint: 'livedoc auth login --with-token, or set LIVEDOC_TOKEN',
     });
     expect(failureOf(apiError(403, { error: 'read_only' }), HOST)).toMatchObject({
       message: 'refused: read_only',
-      hint: 'livediagram auth status',
+      hint: 'livedoc auth status',
     });
     expect(failureOf(apiError(429, ''), HOST)).toMatchObject({ exit: 6, code: 'http_429' });
     expect(failureOf(apiError(502, 'bad gateway'), HOST)).toMatchObject({
@@ -140,7 +140,7 @@ describe('failureOf', () => {
       exit: EXIT.failure,
       code: 'internal',
       message: 'internal error (RangeError)',
-      hint: `run again with LIVEDIAGRAM_DEBUG=1 and report it at ${ISSUES_URL}`,
+      hint: `run again with LIVEDOC_DEBUG=1 and report it at ${ISSUES_URL}`,
     });
     expect(failureOf('boom', HOST).message).toBe('internal error (string)');
   });

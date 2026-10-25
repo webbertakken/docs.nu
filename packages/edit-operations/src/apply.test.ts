@@ -219,7 +219,7 @@ describe('applyEditOperations', () => {
       expect(refused(run([set('n3', { width: -5 })]))).toEqual({
         code: 'invalid_result',
         details: ['n3 width: a finite number, 0 or more'],
-        hint: 'see the format: livediagram schema square',
+        hint: 'see the format: livedoc schema square',
       });
     });
 

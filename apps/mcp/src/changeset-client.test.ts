@@ -361,7 +361,7 @@ describe('mcpResultText', () => {
   it('leaves off the CLI revert line no MCP tool runs, keeping the rest', () => {
     expect(
       mcpResultText(
-        '+ a\nrev 1→2 · cs_1 · lint clean · revert: livediagram changeset revert doc_1 cs_1',
+        '+ a\nrev 1→2 · cs_1 · lint clean · revert: livedoc changeset revert doc_1 cs_1',
       ),
     ).toBe('+ a\nrev 1→2 · cs_1 · lint clean');
     expect(mcpResultText('dry run · rev 4 · lint clean · nothing written')).toBe(
