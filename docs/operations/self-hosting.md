@@ -238,20 +238,19 @@ reader prefers Google, each falling back to whichever key exists, and
 
 The last two are the spend-DoS defence: on a public deployment they stop a third-party site from minting fresh owner ids to drain your model budget. The hosted livediagram.app sets `AI_ALLOWED_ORIGINS` and deliberately leaves `AI_REQUIRE_CLERK` unset so guests keep AI; a private or Clerk-less fork can leave both unset. Two further defences live alongside them: the `AI_RATE_LIMITER` binding (declared in `apps/api/wrangler.toml` as a Cloudflare rate-limit binding, 20 requests / 60 s per IP) caps how fast one client can drive the endpoint; absent binding falls through to "allow" so a self-host without the paid Cloudflare feature still works. AI is also per-user opt-in via the Settings dialog even once the key is present.
 
-## Email (optional, Resend)
+## Email (optional: Cloudflare Email Service or Resend)
 
-The api worker can send a small set of account emails via [Resend](https://resend.com) ([Transactional & lifecycle email (Resend)](../specs/014-identity/transactional-email.md)): a welcome on first sign-in; week-1 (Explorer) and week-2 (Teams) onboarding tips, an activation nudge and a win-back note off the daily cron; a warning before an API token expires; notifications (someone opened, commented on or mentioned you in a document, assigned you an action, or answered your team invite) plus first-share and document-count milestone notes; and transactional team-invite (with a Decline link that needs no account), team-invite reminder (1, 7 and 21 days after an unanswered invite) and account-deleted messages. The whole feature is **off until you provide a key** — no key, no sends, and the `email_lifecycle` table is never touched. Guests never receive email (it's authenticated-only).
+The api worker can send a small set of account emails ([Transactional & lifecycle email](../specs/014-identity/transactional-email.md)): sign-in codes; a welcome on sign-up; week-1 (Explorer) and week-2 (Teams) onboarding tips, an activation nudge and a win-back note off the daily cron; a warning before an API token expires; notifications (someone opened, commented on or mentioned you in a document, assigned you an action, or answered your team invite) plus first-share and document-count milestone notes; and transactional team-invite (with a Decline link that needs no account), team-invite reminder (1, 7 and 21 days after an unanswered invite) and account-deleted messages. The whole feature is **off until a transport is configured**: no sends, and the `email_lifecycle` table is never touched. Guests never receive email.
 
-To turn it on, verify a sending domain in Resend, then:
+The worker picks the first transport it has (`apps/api/src/email/transport.ts`):
 
-```bash
-pnpm --filter @livediagram/api exec wrangler secret put RESEND_API_KEY
-```
+1. **Cloudflare Email Service**, through the `[[send_email]]` binding `EMAIL` that `apps/api/wrangler.toml` declares. Onboard your sending domain under **Compute > Email Service > Email Sending** in the Cloudflare dashboard first. Sending to any address needs the Workers Paid plan, and Cloudflare takes transactional mail only.
+2. **Resend**, when the binding is absent: remove the `[[send_email]]` block, verify a domain in Resend, then `pnpm --filter @livediagram/api exec wrangler secret put RESEND_API_KEY`.
 
 Optional knobs (plain `[vars]`):
 
-- `RESEND_FROM`: the From identity, e.g. `livediagram <hello@livediagram.app>` (the default). Must be on your verified domain.
-- `APP_BASE_URL`: public origin for links in emails, defaults to `https://livediagram.app`.
+- `EMAIL_FROM`: the From identity, `LiveDoc <hello@docs.nu>` by default. Must be on your sending domain.
+- `APP_BASE_URL`: public origin for links in emails (and sign-in's base URL), `https://docs.nu` by default.
 
 If you enable this on a deployment that already has signed-in users, run the one-time backfill in [Transactional & lifecycle email (Resend) §4](../specs/014-identity/transactional-email.md) first, so existing users aren't "welcomed" on their next sign-in.
 

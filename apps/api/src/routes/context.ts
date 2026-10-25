@@ -59,6 +59,10 @@ export type RouteContext = {
   // template doesn't carry the claim. Never read from a header — it
   // drives teams' invite auto-connection so it must be unforgeable.
   clerkEmail: string | null;
+  // When the presenting LiveDoc session was created (seconds), from its session token's `auth_time`; null for any
+  // other caller. How fresh a sign-in is, for deleting the account (docs/specs/014-identity/auth-and-guest-access.md
+  // "Sessions"). Optional so unit tests can leave it out.
+  sessionAuthTime?: number | null;
   // Hybrid identity (docs/specs/014-identity/auth-and-guest-access.md): the verified Clerk userId, else the
   // legacy X-Owner-Id header, else null. Resolved once in `fetch`.
   resolveOwner: () => string | null;

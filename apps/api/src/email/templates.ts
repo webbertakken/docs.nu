@@ -75,12 +75,14 @@ export type EmailKind =
   | 'FormResponse'
   | 'FormSuspended'
   | 'TokenExpiring'
-  | 'AccountDeleted';
+  | 'AccountDeleted'
+  | 'SignInCode';
 
 export type RenderedEmail = {
   kind: EmailKind;
   subject: string;
   html: string;
+  text?: string;
   unsubscribeUrl?: string;
 };
 
@@ -326,6 +328,22 @@ export function teamInviteReminderEmail(
     kind: `TeamInviteReminder${stage}`,
     subject,
     html: shell(env, teamInviteSection(env, copy, declineToken)),
+  };
+}
+
+// A sign-in code (docs/specs/014-identity/auth-and-guest-access.md "Email code"). The code leads the subject so it
+// reads in a notification without opening the email; nothing in it is tracked.
+export function signInCodeEmail(env: Env, code: string): RenderedEmail {
+  return {
+    kind: 'SignInCode',
+    subject: `${code} is your LiveDoc code`,
+    text: `Your LiveDoc sign-in code is ${code}. It works for 5 minutes. If you didn't ask for it, ignore this email: nobody can sign in without the code.`,
+    html: shell(env, {
+      heading: `Your code is ${code}`,
+      preheader: `Your LiveDoc sign-in code is ${code}.`,
+      intro: `Type <strong style="font-size:20px;letter-spacing:4px">${code}</strong> on the sign-in page. It works for 5 minutes.`,
+      footer: 'If you didn’t ask for this code, ignore this email: nobody can sign in without it.',
+    }),
   };
 }
 

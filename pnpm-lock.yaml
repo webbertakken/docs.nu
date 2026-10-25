@@ -95,6 +95,9 @@ importers:
       '@livediagram/templates':
         specifier: workspace:*
         version: link:../../packages/templates
+      better-auth:
+        specifier: 1.7.13
+        version: 1.7.13(next@16.4.1(@playwright/test@1.63.0)(@types/node@26.6.4)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.3)
       jose:
         specifier: ^6.2.12
         version: 6.2.12
@@ -125,7 +128,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
       wrangler:
         specifier: ^4.148.0
         version: 4.148.0(@cloudflare/workers-types@5.20261007.1)(@types/node@26.6.4)
@@ -189,7 +192,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   apps/community:
     dependencies:
@@ -247,7 +250,7 @@ importers:
         version: 19.3.0(@types/react@19.3.0)
       jsdom:
         specifier: ^30.1.2
-        version: 30.1.2
+        version: 30.1.2(@noble/hashes@2.4.0)
       oxlint:
         specifier: ^1.88.0
         version: 1.88.0(oxlint-tsgolint@7.0.2004)
@@ -259,7 +262,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   apps/help:
     dependencies:
@@ -344,7 +347,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   apps/live:
     dependencies:
@@ -501,7 +504,7 @@ importers:
         version: 6.2.5
       jsdom:
         specifier: ^30.1.2
-        version: 30.1.2
+        version: 30.1.2(@noble/hashes@2.4.0)
       oxlint:
         specifier: ^1.88.0
         version: 1.88.0(oxlint-tsgolint@7.0.2004)
@@ -513,7 +516,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   apps/marketing:
     dependencies:
@@ -583,7 +586,7 @@ importers:
         version: 5.0.3(vitest@5.0.3)
       jsdom:
         specifier: ^30.1.2
-        version: 30.1.2
+        version: 30.1.2(@noble/hashes@2.4.0)
       oxlint:
         specifier: ^1.88.0
         version: 1.88.0(oxlint-tsgolint@7.0.2004)
@@ -595,7 +598,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   apps/mcp:
     dependencies:
@@ -674,7 +677,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
       wrangler:
         specifier: ^4.148.0
         version: 4.148.0(@cloudflare/workers-types@5.20261007.1)(@types/node@26.6.4)
@@ -707,7 +710,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
       wrangler:
         specifier: ^4.148.0
         version: 4.148.0(@cloudflare/workers-types@5.20261007.1)(@types/node@26.6.4)
@@ -777,7 +780,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/agent-verbs:
     dependencies:
@@ -835,7 +838,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/api-client:
     devDependencies:
@@ -856,7 +859,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/api-schema:
     dependencies:
@@ -887,7 +890,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/diagram-lint:
     dependencies:
@@ -924,7 +927,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/document:
     dependencies:
@@ -964,7 +967,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/document-views:
     dependencies:
@@ -998,7 +1001,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/edit-operations:
     dependencies:
@@ -1038,7 +1041,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/explorer-lens:
     dependencies:
@@ -1066,7 +1069,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/fake-google:
     devDependencies:
@@ -1087,7 +1090,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/forms:
     dependencies:
@@ -1118,7 +1121,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/help-registry:
     devDependencies:
@@ -1161,7 +1164,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/items:
     devDependencies:
@@ -1182,7 +1185,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/licences:
     devDependencies:
@@ -1206,7 +1209,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/next-config:
     dependencies:
@@ -1219,7 +1222,7 @@ importers:
         version: link:../vitest-config
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/oxlint-config:
     dependencies:
@@ -1244,7 +1247,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/page-background:
     devDependencies:
@@ -1265,7 +1268,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/plan-art:
     dependencies:
@@ -1302,7 +1305,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/prettier-config: {}
 
@@ -1332,7 +1335,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/sheets:
     devDependencies:
@@ -1356,7 +1359,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/source-ast:
     dependencies:
@@ -1381,7 +1384,7 @@ importers:
         version: 1.88.0(oxlint-tsgolint@7.0.2004)
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/sticky-model:
     dependencies:
@@ -1409,7 +1412,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/sticky-vision:
     dependencies:
@@ -1437,7 +1440,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/tailwind-config:
     dependencies:
@@ -1462,7 +1465,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/telemetry-client:
     dependencies:
@@ -1484,7 +1487,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/template-previews:
     dependencies:
@@ -1536,7 +1539,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/templates:
     dependencies:
@@ -1570,7 +1573,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/ui:
     dependencies:
@@ -1619,7 +1622,7 @@ importers:
         version: 19.3.0(@types/react@19.3.0)
       jsdom:
         specifier: ^30.1.2
-        version: 30.1.2
+        version: 30.1.2(@noble/hashes@2.4.0)
       next:
         specifier: ^16.4.1
         version: 16.4.1(@playwright/test@1.63.0)(@types/node@26.6.4)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -1631,7 +1634,7 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.0.1
-        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   packages/vitest-config:
     dependencies:
@@ -1641,7 +1644,7 @@ importers:
     devDependencies:
       vitest:
         specifier: ^5.0.1
-        version: 5.0.2(@types/node@26.6.4)(@vitest/coverage-v8@5.0.2)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 5.0.2(@types/node@26.6.4)(@vitest/coverage-v8@5.0.2)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
 packages:
 
@@ -1689,6 +1692,82 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
+
+  '@better-auth/core@1.7.13':
+    resolution: {integrity: sha512-h7zk+hwNxNxva2I49ELg1b3yNVG5CneluIp860DYcikWWZlCd3Kh6zYiDcY0Bvt/meRl0XBoQhjp7WlNk4a9fQ==}
+    peerDependencies:
+      '@better-auth/utils': ^0.4.2 || ^0.5.0
+      '@better-fetch/fetch': 1.3.3
+      '@opentelemetry/api': ^1.9.0
+      better-call: 1.4.4
+      jose: ^6.1.0
+      kysely: ^0.28.5 || ^0.29.0
+      nanostores: ^1.0.1
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+
+  '@better-auth/drizzle-adapter@1.7.13':
+    resolution: {integrity: sha512-BCA2uJQJ9/GrIt/RvnDIVBlo7r1ZgkAICLG20wxjxLIvSLVVlpuZhjNUFf8FtaHYmRXOCYL566hZ114MAvl4lg==}
+    peerDependencies:
+      '@better-auth/core': ^1.7.13
+      '@better-auth/utils': ^0.4.2 || ^0.5.0
+      drizzle-orm: ^0.45.2 || >=1.0.0-rc.1 <2.0.0
+    peerDependenciesMeta:
+      drizzle-orm:
+        optional: true
+
+  '@better-auth/kysely-adapter@1.7.13':
+    resolution: {integrity: sha512-Pw6roVatSW+B3McdTJv+sS0V5EnwSPS3v/IcYCLcoWTy9LaMSUa/jmGZQarQJ0jAawtv+PFTcYQKXS1Glvjpbg==}
+    peerDependencies:
+      '@better-auth/core': ^1.7.13
+      '@better-auth/utils': ^0.4.2 || ^0.5.0
+      kysely: ^0.28.17 || ^0.29.0
+    peerDependenciesMeta:
+      kysely:
+        optional: true
+
+  '@better-auth/memory-adapter@1.7.13':
+    resolution: {integrity: sha512-9rnOCaXgeiXNTr4EZOAI75xyt+pg7+ILhuY/AP4fpBVnrA9B5RZNg6wrPVUwo9YU5HsK/Ho1Ov4ikAOUicJixQ==}
+    peerDependencies:
+      '@better-auth/core': ^1.7.13
+      '@better-auth/utils': ^0.4.2 || ^0.5.0
+
+  '@better-auth/mongo-adapter@1.7.13':
+    resolution: {integrity: sha512-U/wnes25UBiKA7Kfz8tiimSs8BF1+h05ro99arzFis186XwRpFdD/YvtErmcXH5jMVAvIoCUZNmso+SNQQtsgA==}
+    peerDependencies:
+      '@better-auth/core': ^1.7.13
+      '@better-auth/utils': ^0.4.2 || ^0.5.0
+      mongodb: ^6.0.0 || ^7.0.0
+    peerDependenciesMeta:
+      mongodb:
+        optional: true
+
+  '@better-auth/prisma-adapter@1.7.13':
+    resolution: {integrity: sha512-401uXNuw8TR/u/dRasmLPRhDW+eqr6NUX6o0D7bq9gCTf4vP4DK1vYSOmG0SJJt5KC1mM1g4n4HtQI2Tq2eLZw==}
+    peerDependencies:
+      '@better-auth/core': ^1.7.13
+      '@better-auth/utils': ^0.4.2 || ^0.5.0
+      '@prisma/client': ^5.0.0 || ^6.0.0 || ^7.0.0
+      prisma: ^5.0.0 || ^6.0.0 || ^7.0.0
+    peerDependenciesMeta:
+      '@prisma/client':
+        optional: true
+      prisma:
+        optional: true
+
+  '@better-auth/telemetry@1.7.13':
+    resolution: {integrity: sha512-+v9bIV837pBPLWAB1MLpqY+4MDgetiqv1A2tw3gFYseiz/+2FxfAt0FXbpYHGf9fEaGtPaPWMvBE9dNyIE74MQ==}
+    peerDependencies:
+      '@better-auth/core': ^1.7.13
+      '@better-auth/utils': ^0.4.2 || ^0.5.0
+      '@better-fetch/fetch': 1.3.3
+
+  '@better-auth/utils@0.5.1':
+    resolution: {integrity: sha512-WETqw5vQ52uQ/xwWR4E8rTgT6fDEr/wnS+otDNkBCa/69281FCF32OKDdQUcahMCnjsvqXBNiEvAQHFB0EVRRg==}
+
+  '@better-fetch/fetch@1.3.3':
+    resolution: {integrity: sha512-U6SlDt/GUWtK2JAxS/NhdoYTEim+EL1G5byz2TUj83KjLZBUpYzb5SmX0aXaCnbGkAjFKnV/o/0+cyXMbEcqqg==}
 
   '@bramus/specificity@2.4.3':
     resolution: {integrity: sha512-0GEz8qJWokkUVYQYRukmkSHIFNoBH8QTreeHrAFbvz1XFYc3Y+puhMs8PQ5x8GNugiC2l5jvDBXKLbBIByeSBw==}
@@ -2247,6 +2326,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@noble/ciphers@2.4.0':
+    resolution: {integrity: sha512-AnjFn0Jv92laAkvMrghlFZq4qQCIN/4DxFV/eooqtC2YTjB7kBeLMS2T9KJX4Dn+ZVXLOwK0lSgqDtx9gvxtiw==}
+    engines: {node: '>= 20.19.0'}
+
+  '@noble/hashes@2.4.0':
+    resolution: {integrity: sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA==}
+    engines: {node: '>= 20.19.0'}
+
   '@oxlint-tsgolint/darwin-arm64@7.0.2004':
     resolution: {integrity: sha512-uJk3ttju7Lz+Nv8WG4CsLyewoL1qf/Ny8S8OksJ7Bm/F14Tc9gMfW6arM1PCc57IzH/X/I79YsCWTgxX1FKibQ==}
     cpu: [arm64]
@@ -2571,6 +2658,9 @@ packages:
 
   '@speed-highlight/core@1.2.24':
     resolution: {integrity: sha512-qeW2e1l78afw8VhRPfPQ1Gjj+KU5XFQ/OFV5ti6eTa9bruO7mJyZtA4vw0ofqmA3tKCkROE9xLk3VZoeRc98nw==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
@@ -3089,6 +3179,73 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
+  better-auth@1.7.13:
+    resolution: {integrity: sha512-ncevUrVAWmYbC6Jjxadeh2QLBGMbsfenu8pwgAHJRexXJ4ifPCMbT4e4u79QKPuGpR5Wjw9yPReedVoh6m/qBg==}
+    peerDependencies:
+      '@lynx-js/react': '*'
+      '@prisma/client': ^5.0.0 || ^6.0.0 || ^7.0.0
+      '@sveltejs/kit': ^2.0.0 || ^3.0.0
+      '@tanstack/react-start': ^1.0.0
+      '@tanstack/solid-start': ^1.0.0
+      drizzle-kit: '>=0.31.4 || >=1.0.0-beta.1'
+      drizzle-orm: ^0.45.2 || >=1.0.0-rc.1 <2.0.0
+      mongodb: ^6.0.0 || ^7.0.0
+      mysql2: ^3.0.0
+      next: ^14.0.0 || ^15.0.0 || ^16.0.0
+      pg: ^8.0.0
+      prisma: ^5.0.0 || ^6.0.0 || ^7.0.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+      solid-js: ^1.0.0
+      svelte: ^4.0.0 || ^5.0.0
+      vitest: ^5.0.1
+      vue: ^3.0.0
+    peerDependenciesMeta:
+      '@lynx-js/react':
+        optional: true
+      '@prisma/client':
+        optional: true
+      '@sveltejs/kit':
+        optional: true
+      '@tanstack/react-start':
+        optional: true
+      '@tanstack/solid-start':
+        optional: true
+      drizzle-kit:
+        optional: true
+      drizzle-orm:
+        optional: true
+      mongodb:
+        optional: true
+      mysql2:
+        optional: true
+      next:
+        optional: true
+      pg:
+        optional: true
+      prisma:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      solid-js:
+        optional: true
+      svelte:
+        optional: true
+      vitest:
+        optional: true
+      vue:
+        optional: true
+
+  better-call@1.4.4:
+    resolution: {integrity: sha512-Gq4XdGFy4dmUxFEAX2nj0ycFcFbD9ZWh8YROouZoyXeF1M11TpYbplk0pDByTFF8Wz+MYa6W9052c9m7dD+mfw==}
+    peerDependencies:
+      zod: ^4.0.0
+    peerDependenciesMeta:
+      zod:
+        optional: true
+
   bidi-js@1.1.0:
     resolution: {integrity: sha512-fX1Onk0tdVPC7obPWB5EbJ1z7NVhLq4m2xZLq2YXBkxzMXIGRpNMU88n0EPgWseKl12J7zXs7qrDxPK4sRs2fg==}
 
@@ -3244,6 +3401,9 @@ packages:
   define-properties@1.2.1:
     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
     engines: {node: '>= 0.4'}
+
+  defu@6.1.7:
+    resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
 
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
@@ -3600,6 +3760,10 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
+  kysely@0.29.7:
+    resolution: {integrity: sha512-fmIq+7kv4WbFm2tcfznRzikqB4cuNpgZ40PSU2fAJ2/OO5XhojqnTPrmgrCjYSRJVwBln03XcRXJGnw9H099IQ==}
+    engines: {node: '>=22.0.0'}
+
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
     engines: {node: '>= 12.0.0'}
@@ -3926,6 +4090,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanostores@1.5.5:
+    resolution: {integrity: sha512-FixtE239Gl6Gz0ZGCK0WzvNwObNCIwVT+L7zQcf1QgcA6AzBxblzqe9OT88qiucNkhsjSOqiogSaF5jVbJiqSA==}
+    engines: {node: ^20.0.0 || >=22.0.0}
+
   negotiator@1.1.0:
     resolution: {integrity: sha512-NMPBRMJgiQHjbd8phG3Vebdx4kZ1H121rbl5IkMqeOsahptB9BKo/d7oJ3zTXqTgagn2bWlNSXkh0QUGM31RYg==}
     engines: {node: '>=18'}
@@ -4216,6 +4384,9 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  rou3@0.9.2:
+    resolution: {integrity: sha512-3SOzvaAg8rkHrXtRjpCvCvbyO5to9oOO27Z/XqHEYXfMRVSw/qMIVdmaOk9W2lcRLtR6dlqTjo9hDeJk70QBYQ==}
+
   router@2.2.0:
     resolution: {integrity: sha512-nLTrUKm2UyiL7rlhapu/Zl45FwNgkZGaCpZbIHajDYgwlJCOzLSk+cIPAnsEqV955GjILJnKbdQC1nVPz+gAYQ==}
     engines: {node: '>= 18'}
@@ -4256,6 +4427,9 @@ packages:
   serve-static@2.2.1:
     resolution: {integrity: sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw==}
     engines: {node: '>= 18'}
+
+  set-cookie-parser@3.2.1:
+    resolution: {integrity: sha512-Npd1Pt+4zb3BrSZDPd2qFwRpS6b1EUEasRrO8xS0zMJi0fApXXK5YuzP0minyJnxwnFHoVoJwA55q0A0cu63gQ==}
 
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
@@ -4788,6 +4962,56 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
+  '@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)':
+    dependencies:
+      '@better-auth/utils': 0.5.1
+      '@better-fetch/fetch': 1.3.3
+      '@standard-schema/spec': 1.1.0
+      better-call: 1.4.4(zod@4.6.7)
+      jose: 6.2.12
+      kysely: 0.29.7
+      nanostores: 1.5.5
+      zod: 4.6.7
+
+  '@better-auth/drizzle-adapter@1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)':
+    dependencies:
+      '@better-auth/core': 1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)
+      '@better-auth/utils': 0.5.1
+
+  '@better-auth/kysely-adapter@1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(kysely@0.29.7)':
+    dependencies:
+      '@better-auth/core': 1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)
+      '@better-auth/utils': 0.5.1
+    optionalDependencies:
+      kysely: 0.29.7
+
+  '@better-auth/memory-adapter@1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)':
+    dependencies:
+      '@better-auth/core': 1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)
+      '@better-auth/utils': 0.5.1
+
+  '@better-auth/mongo-adapter@1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)':
+    dependencies:
+      '@better-auth/core': 1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)
+      '@better-auth/utils': 0.5.1
+
+  '@better-auth/prisma-adapter@1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)':
+    dependencies:
+      '@better-auth/core': 1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)
+      '@better-auth/utils': 0.5.1
+
+  '@better-auth/telemetry@1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)':
+    dependencies:
+      '@better-auth/core': 1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)
+      '@better-auth/utils': 0.5.1
+      '@better-fetch/fetch': 1.3.3
+
+  '@better-auth/utils@0.5.1':
+    dependencies:
+      '@noble/hashes': 2.4.0
+
+  '@better-fetch/fetch@1.3.3': {}
+
   '@bramus/specificity@2.4.3':
     dependencies:
       css-tree: 3.2.1
@@ -4945,7 +5169,9 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@exodus/bytes@1.16.0': {}
+  '@exodus/bytes@1.16.0(@noble/hashes@2.4.0)':
+    optionalDependencies:
+      '@noble/hashes': 2.4.0
 
   '@hono/node-server@2.1.4(hono@4.13.13)':
     dependencies:
@@ -5201,6 +5427,10 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.4.1':
     optional: true
 
+  '@noble/ciphers@2.4.0': {}
+
+  '@noble/hashes@2.4.0': {}
+
   '@oxlint-tsgolint/darwin-arm64@7.0.2004':
     optional: true
 
@@ -5394,6 +5624,8 @@ snapshots:
   '@sindresorhus/is@7.2.0': {}
 
   '@speed-highlight/core@1.2.24': {}
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@swc/helpers@0.5.23':
     dependencies:
@@ -5726,7 +5958,7 @@ snapshots:
       obug: 2.2.1
       std-env: 4.3.0
       tinyrainbow: 3.2.0
-      vitest: 5.0.2(@types/node@26.6.4)(@vitest/coverage-v8@5.0.2)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+      vitest: 5.0.2(@types/node@26.6.4)(@vitest/coverage-v8@5.0.2)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
     optional: true
 
   '@vitest/coverage-v8@5.0.3(vitest@5.0.3)':
@@ -5739,7 +5971,7 @@ snapshots:
       obug: 2.2.1
       std-env: 4.3.0
       tinyrainbow: 3.2.0
-      vitest: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+      vitest: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
 
   '@vitest/istanbul-lib-coverage@1.0.2': {}
 
@@ -5830,6 +6062,42 @@ snapshots:
   balanced-match@4.0.4: {}
 
   baseline-browser-mapping@2.11.28: {}
+
+  better-auth@1.7.13(next@16.4.1(@playwright/test@1.63.0)(@types/node@26.6.4)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.3):
+    dependencies:
+      '@better-auth/core': 1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5)
+      '@better-auth/drizzle-adapter': 1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)
+      '@better-auth/kysely-adapter': 1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(kysely@0.29.7)
+      '@better-auth/memory-adapter': 1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)
+      '@better-auth/mongo-adapter': 1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)
+      '@better-auth/prisma-adapter': 1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)
+      '@better-auth/telemetry': 1.7.13(@better-auth/core@1.7.13(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(better-call@1.4.4(zod@4.6.7))(jose@6.2.12)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)
+      '@better-auth/utils': 0.5.1
+      '@better-fetch/fetch': 1.3.3
+      '@noble/ciphers': 2.4.0
+      '@noble/hashes': 2.4.0
+      better-call: 1.4.4(zod@4.6.7)
+      defu: 6.1.7
+      jose: 6.2.12
+      kysely: 0.29.7
+      nanostores: 1.5.5
+      zod: 4.6.7
+    optionalDependencies:
+      next: 16.4.1(@playwright/test@1.63.0)(@types/node@26.6.4)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+      vitest: 5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  better-call@1.4.4(zod@4.6.7):
+    dependencies:
+      '@better-auth/utils': 0.5.1
+      '@better-fetch/fetch': 1.3.3
+      rou3: 0.9.2
+      set-cookie-parser: 3.2.1
+    optionalDependencies:
+      zod: 4.6.7
 
   bidi-js@1.1.0:
     dependencies:
@@ -5946,10 +6214,10 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  data-urls@8.0.0:
+  data-urls@8.0.0(@noble/hashes@2.4.0):
     dependencies:
       whatwg-mimetype: 5.0.0
-      whatwg-url: 17.2.0
+      whatwg-url: 17.2.0(@noble/hashes@2.4.0)
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -5974,6 +6242,8 @@ snapshots:
       define-data-property: 1.1.4
       has-property-descriptors: 1.0.2
       object-keys: 1.1.1
+
+  defu@6.1.7: {}
 
   delayed-stream@1.0.0: {}
 
@@ -6315,9 +6585,9 @@ snapshots:
 
   hono@4.13.13: {}
 
-  html-encoding-sniffer@7.0.0:
+  html-encoding-sniffer@7.0.0(@noble/hashes@2.4.0):
     dependencies:
-      '@exodus/bytes': 1.16.0
+      '@exodus/bytes': 1.16.0(@noble/hashes@2.4.0)
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -6372,17 +6642,17 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  jsdom@30.1.2:
+  jsdom@30.1.2(@noble/hashes@2.4.0):
     dependencies:
       '@asamuzakjp/css-color': 7.1.4
       '@asamuzakjp/dom-selector': 9.2.4
       '@bramus/specificity': 2.4.3
       '@csstools/css-syntax-patches-for-csstree': 1.1.15(css-tree@3.2.1)
-      '@exodus/bytes': 1.16.0
+      '@exodus/bytes': 1.16.0(@noble/hashes@2.4.0)
       css-tree: 3.2.1
-      data-urls: 8.0.0
+      data-urls: 8.0.0(@noble/hashes@2.4.0)
       decimal.js: 10.6.0
-      html-encoding-sniffer: 7.0.0
+      html-encoding-sniffer: 7.0.0(@noble/hashes@2.4.0)
       is-potential-custom-element-name: 1.0.1
       lru-cache: 11.5.3
       parse5: 8.0.1
@@ -6392,7 +6662,7 @@ snapshots:
       w3c-xmlserializer: 6.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
-      whatwg-url: 17.2.0
+      whatwg-url: 17.2.0(@noble/hashes@2.4.0)
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - '@noble/hashes'
@@ -6404,6 +6674,8 @@ snapshots:
   json5@2.2.3: {}
 
   kleur@4.1.5: {}
+
+  kysely@0.29.7: {}
 
   lightningcss-android-arm64@1.32.0:
     optional: true
@@ -6968,6 +7240,8 @@ snapshots:
 
   nanoid@3.3.20: {}
 
+  nanostores@1.5.5: {}
+
   negotiator@1.1.0:
     dependencies:
       content-type: 2.1.0
@@ -7358,6 +7632,8 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.64.8
       fsevents: 2.3.3
 
+  rou3@0.9.2: {}
+
   router@2.2.0:
     dependencies:
       debug: 4.4.3
@@ -7412,6 +7688,8 @@ snapshots:
       send: 1.2.1
     transitivePeerDependencies:
       - supports-color
+
+  set-cookie-parser@3.2.1: {}
 
   setprototypeof@1.2.0: {}
 
@@ -7717,7 +7995,7 @@ snapshots:
       jiti: 2.7.0
       lightningcss: 1.32.0
 
-  vitest@5.0.2(@types/node@26.6.4)(@vitest/coverage-v8@5.0.2)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0)):
+  vitest@5.0.2(@types/node@26.6.4)(@vitest/coverage-v8@5.0.2)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.2(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
@@ -7736,11 +8014,11 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.6.4
       '@vitest/coverage-v8': 5.0.2(vitest@5.0.2)
-      jsdom: 30.1.2
+      jsdom: 30.1.2(@noble/hashes@2.4.0)
     transitivePeerDependencies:
       - msw
 
-  vitest@5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2)(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0)):
+  vitest@5.0.3(@types/node@26.6.4)(@vitest/coverage-v8@5.0.3)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.3(vite@7.3.5(@types/node@26.6.4)(jiti@2.7.0)(lightningcss@1.32.0))
@@ -7759,7 +8037,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.6.4
       '@vitest/coverage-v8': 5.0.3(vitest@5.0.3)
-      jsdom: 30.1.2
+      jsdom: 30.1.2(@noble/hashes@2.4.0)
     transitivePeerDependencies:
       - msw
 
@@ -7777,9 +8055,9 @@ snapshots:
 
   whatwg-mimetype@5.0.0: {}
 
-  whatwg-url@17.2.0:
+  whatwg-url@17.2.0(@noble/hashes@2.4.0):
     dependencies:
-      '@exodus/bytes': 1.16.0
+      '@exodus/bytes': 1.16.0(@noble/hashes@2.4.0)
       tr46: 7.0.0
       webidl-conversions: 8.0.1
     transitivePeerDependencies:

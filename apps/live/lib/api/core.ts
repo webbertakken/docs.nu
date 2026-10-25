@@ -15,7 +15,7 @@ import type {
 import {
   BUILD_ID_HEADER,
   DOCUMENT_FORMAT_HEADER,
-  isClerkIdShape,
+  isAccountIdShape,
   readErrorCode,
 } from '@livediagram/api-schema';
 import { noteServerBuild, noteServerDocumentFormat } from '../server-release';
@@ -325,7 +325,7 @@ export class SessionTokenUnavailableError extends Error {
 // mutually exclusive, and an account id never rides as the guest header.
 export function identityHeaders(ownerId: string, token: string | null): Record<string, string> {
   if (token) return { Authorization: `Bearer ${token}` };
-  if (isClerkIdShape(ownerId)) throw new SessionTokenUnavailableError();
+  if (isAccountIdShape(ownerId)) throw new SessionTokenUnavailableError();
   // Proof of possession for the guest id (docs/specs/015-api/public-api-and-tokens.md
   // section 4): the api worker can require a valid signature on owner-scoped
   // routes, which a harvested id wouldn't have. Absent for legacy unsigned

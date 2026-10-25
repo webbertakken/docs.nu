@@ -6,7 +6,7 @@
 
 import {
   capWorkbenchRole,
-  isClerkIdShape,
+  isAccountIdShape,
   type AccessLevel,
   type RoomTicketResponse,
 } from '@livediagram/api-schema';
@@ -148,7 +148,7 @@ export async function handleDocumentRoomRoutes(ctx: RouteContext): Promise<Respo
     // (docs/specs/015-api/public-api-and-tokens.md §4.1): teammates can read it, so
     // it proves nothing. A signed-in owner of a personal document comes in through
     // the ticket like a team owner.
-    const accountIdClaimed = !!claimedOwnerId && isClerkIdShape(claimedOwnerId);
+    const accountIdClaimed = !!claimedOwnerId && isAccountIdShape(claimedOwnerId);
     if (accountIdClaimed)
       console.warn('[room-upgrade] account id refused as ?o=', { documentId: id });
     // The guest owner id is the same bearer value REST carries as X-Owner-Id,

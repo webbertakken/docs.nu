@@ -1,7 +1,7 @@
 // /api/migrate — guest -> authed (and legacy guest -> signed-guest)
 // ownership migration.
 
-import { isClerkIdShape } from '@livediagram/api-schema';
+import { isAccountIdShape } from '@livediagram/api-schema';
 import { guestSignatureEnforced, isLegacyGuestEra } from '../auth/guest-rest';
 import { verifyOwnerId } from '../auth/owner-signature';
 import { getParticipant, migrateOwnerId } from '../db';
@@ -54,7 +54,7 @@ export async function handleMigrate(ctx: RouteContext): Promise<Response> {
     // a deployment with no GUEST_ID_HMAC_SECRET (the signature check below is
     // skipped) would let any signed-in user take over another account's whole
     // workspace by naming its (harvestable) Clerk id.
-    if (isClerkIdShape(fromOwnerId)) return forbidden();
+    if (isAccountIdShape(fromOwnerId)) return forbidden();
     // Possession proof: the caller must hold the source id's signature.
     if (secret && !(await verifyOwnerId(secret, fromOwnerId, stringOrNull(body.guestSignature)))) {
       return forbidden();
@@ -74,7 +74,7 @@ export async function handleMigrate(ctx: RouteContext): Promise<Response> {
   // path would otherwise move a signed-up user's whole workspace to whoever
   // names it. The global Clerk-shape refusal in index.ts only covers
   // OWNER_SCOPED_SEGMENTS, which deliberately leaves `migrate` out.
-  if (isClerkIdShape(fromOwnerId)) return forbidden();
+  if (isAccountIdShape(fromOwnerId)) return forbidden();
   // Once enforcement is armed an unsigned source must prove possession, with
   // one exception: an id that existed before this deployment signed anything
   // (its participant row predates GUEST_SIGNING_LIVE_AT) can still move onto a

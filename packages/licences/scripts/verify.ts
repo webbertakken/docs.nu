@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 
 import type { LicencesManifest } from '../src/contract.ts';
 import { LicencesError } from '../src/errors.ts';
-import { checkExport } from '../src/verify-export.ts';
+import { checkExport, textFingerprint } from '../src/verify-export.ts';
 import { log, logFailure } from './log.ts';
 
 function sizeOf(path: string): number | undefined {
@@ -31,8 +31,15 @@ try {
     readFileSync(join(appDir, 'generated', 'licences.json'), 'utf8'),
   ) as LicencesManifest;
   const htmlBytes = sizeOf(join(appDir, 'out', 'licences.html'));
-  const exportedTexts = listed(join(appDir, 'out', 'licences', 'texts'));
-  const problems = checkExport({ manifest, htmlBytes, exportedTexts });
+  const textsDir = join(appDir, 'out', 'licences', 'texts');
+  const exportedTexts = listed(textsDir);
+  const html =
+    htmlBytes === undefined ? '' : readFileSync(join(appDir, 'out', 'licences.html'), 'utf8');
+  const inlinedTexts = exportedTexts.flatMap((file) => {
+    const fingerprint = textFingerprint(readFileSync(join(textsDir, file), 'utf8'));
+    return fingerprint && html.includes(fingerprint) ? [file.replace(/\.txt$/, '')] : [];
+  });
+  const problems = checkExport({ manifest, htmlBytes, exportedTexts, inlinedTexts });
   if (problems.length > 0) {
     for (const reason of problems)
       log('licences.verify.failed', { reason: JSON.stringify(reason) });

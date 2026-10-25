@@ -215,16 +215,22 @@ describe('previewConfig', () => {
     ).toThrow(/KV/);
   });
 
-  it("locks the api's AI origin and email links to the preview's own origin", () => {
+  it("locks the api's AI origin, email links and sign-in to the preview's own origin, and keeps its mail", () => {
     const config = previewConfig(
-      { name: 'docs-nu-api', vars: { AI_ALLOWED_ORIGINS: 'https://docs.nu', OAUTH_ISSUER: '' } },
+      {
+        name: 'docs-nu-api',
+        vars: { AI_ALLOWED_ORIGINS: 'https://docs.nu', OAUTH_ISSUER: '' },
+        send_email: [{ name: 'EMAIL' }],
+      },
       opts,
     );
     expect(config.vars).toEqual({
       AI_ALLOWED_ORIGINS: names.origin,
       APP_BASE_URL: names.origin,
       OAUTH_ISSUER: '',
+      EMAIL_OUTBOX: '1',
     });
+    expect(config).not.toHaveProperty('send_email');
   });
 
   it('marks the router as a preview, so every response is noindex', () => {

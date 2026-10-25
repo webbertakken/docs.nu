@@ -128,16 +128,30 @@ export type Env = {
   // unset means no caller is ever exempt, which is the pre-existing
   // behaviour and keeps self-hosting working with no configuration.
   INTERNAL_EVENTS_KEY?: string;
-  // Resend API key for transactional + lifecycle email (docs/specs/014-identity/transactional-email.md). When absent
-  // the whole email feature is inert: no sends, and the email_lifecycle table
-  // is never touched. Set via `wrangler secret put RESEND_API_KEY` for prod;
-  // drop into `apps/api/.dev.vars` for local dev (gitignored, never commit).
+  // Resend API key (docs/specs/014-identity/transactional-email.md): the email transport when no `EMAIL` binding
+  // exists (email/transport.ts). `wrangler secret put RESEND_API_KEY`; `apps/api/.dev.vars` locally.
   RESEND_API_KEY?: string;
-  // From identity for outbound email (optional). Defaults to
-  // "livediagram <hello@livediagram.app>". The domain must be verified in Resend.
-  RESEND_FROM?: string;
-  // Public origin used to build links in emails (optional). Defaults to
-  // "https://livediagram.app".
+  // Cloudflare Email Service's send_email binding: the preferred email transport (email/transport.ts).
+  EMAIL?: { send: (message: Record<string, unknown>) => Promise<{ messageId: string }> };
+  // "1" on previews and in the local e2e stack: every email is kept in `email_outbox` instead of being sent,
+  // and `GET /api/preview/outbox` reads it back (docs/specs/014-identity/auth-and-guest-access.md "Previews").
+  EMAIL_OUTBOX?: string;
+  // From identity for outbound email (optional). Defaults to "LiveDoc <hello@docs.nu>". Its domain must be one
+  // the transport may send from.
+  EMAIL_FROM?: string;
+  // Sign-in (docs/specs/014-identity/auth-and-guest-access.md). The secret is the switch: unset, the deployment is
+  // guest-only. BETTER_AUTH_SECRETS ("2:new,1:old") rotates it. Secrets via `wrangler secret put`.
+  BETTER_AUTH_SECRET?: string;
+  BETTER_AUTH_SECRETS?: string;
+  // Google sign-in: the OAuth client (a var) and its secret. Separate from the Drive mirror's client.
+  GOOGLE_AUTH_CLIENT_ID?: string;
+  GOOGLE_AUTH_CLIENT_SECRET?: string;
+  // Sign-in rate limits (blueprint "Security and trust"): every POST under /api/auth per IP, and code sends per
+  // address. Absent bindings (self-host) allow.
+  AUTH_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
+  AUTH_EMAIL_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
+  // Public origin of the deployment: links in emails, and sign-in's base URL and token issuer. Defaults to
+  // "https://docs.nu" for emails; sign-in is off without it.
   APP_BASE_URL?: string;
   // WHOSE model, and where (docs/specs/007-editor/ai-assistance.md). The PROVIDER is inferred from which of
   // these keys is set, because a key is provider-specific and its name should

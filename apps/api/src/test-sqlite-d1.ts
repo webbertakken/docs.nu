@@ -73,7 +73,18 @@ export function sqliteD1(base: Partial<Env> = {}, opts: { before?: string } = {}
         const row = rows()[0] ?? null;
         return column && row ? (row[column] ?? null) : row;
       },
-      all: async () => ({ results: rows(), success: true, meta: {} }),
+      // A write through all() (better-auth's D1 dialect sends every statement this way) answers its change
+      // count, as D1 does; a read answers its rows.
+      all: async () => {
+        const prepared = sql.prepare(query);
+        if (prepared.columns().length > 0) return { results: rows(), success: true, meta: {} };
+        const res = prepared.run(...args);
+        return {
+          results: [],
+          success: true,
+          meta: { changes: Number(res.changes), last_row_id: Number(res.lastInsertRowid) },
+        };
+      },
       run: async () => {
         const res = sql.prepare(query).run(...args);
         return {
@@ -112,6 +123,11 @@ export function sqliteD1(base: Partial<Env> = {}, opts: { before?: string } = {}
   };
   const db = {
     prepare: (query: string) => statement(query, []),
+    // Present so better-auth recognises the binding as D1 (it tests for prepare, batch and exec).
+    exec: async (query: string) => {
+      sql.exec(query);
+      return { count: 0, duration: 0 };
+    },
     // D1 runs a batch as one transaction: all of it lands or none of it does.
     batch: (statements: { batchResult: () => Promise<unknown> }[]) => {
       const run = batches.then(() => runBatch(statements));

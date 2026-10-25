@@ -1,20 +1,21 @@
-// docs/specs/014-identity/transactional-email.md: Resend client. The whole email feature is gated on RESEND_API_KEY:
-// absent, every send is a no-op and the lifecycle table is never touched, so a
-// deployment with email off does zero extra work (mirrors the OPENAI_API_KEY ->
-// AI-hidden pattern). Sends are best-effort: this never throws, so an email or
-// network failure can't fail or delay the request that triggered it (callers
-// run sends inside ctx.waitUntil or the daily cron).
+// docs/specs/014-identity/transactional-email.md: the product's email. Gated on a configured transport
+// (email/transport.ts: the outbox, Cloudflare Email Service, or Resend): with none, every send is a no-op and the
+// lifecycle table is never touched, so a deployment with email off does zero extra work. `sendEmail` is
+// best-effort and never throws, so a failure can't fail or delay the request that triggered it (callers run it in
+// ctx.waitUntil or the daily cron). `sendEmailNow` is for sign-in codes, whose failure the person must see.
 
 import type { Env } from '../types';
 import { reportServerEvent } from '../server-telemetry';
 import type { EmailKind } from './templates';
+import { deliver, emailTransportKind, type SendOutcome } from './transport';
 
-const RESEND_ENDPOINT = 'https://api.resend.com/emails';
-const DEFAULT_FROM = 'livediagram <hello@livediagram.app>';
-const DEFAULT_BASE_URL = 'https://livediagram.app';
+export { EMAIL_SEND_TIMEOUT_MS } from './transport';
+
+const DEFAULT_FROM = 'LiveDoc <hello@docs.nu>';
+const DEFAULT_BASE_URL = 'https://docs.nu';
 
 export function emailEnabled(env: Env): boolean {
-  return typeof env.RESEND_API_KEY === 'string' && env.RESEND_API_KEY.length > 0;
+  return emailTransportKind(env) !== null;
 }
 
 // Public origin for links in emails. Trailing slashes stripped so callers can
@@ -39,6 +40,8 @@ type EmailMessage = {
   to: string;
   subject: string;
   html: string;
+  // Plain-text alternative; mail clients and screen readers prefer it when present.
+  text?: string;
   // For opt-out emails: a URL where the recipient can manage / turn off this
   // category. Emitted as a `List-Unsubscribe` header so mail clients can surface
   // a native unsubscribe affordance (we point it at the profile page rather than
@@ -46,51 +49,44 @@ type EmailMessage = {
   unsubscribeUrl?: string;
 };
 
-// The longest a send may wait on Resend, which answers in well under a second. Sends run in the daily
-// email cron and in waitUntil after a response: a hung call held the whole cron batch behind it.
-// A timed-out send is a failed send, logged like any other. Safe range: 3 s to 30 s.
-export const EMAIL_SEND_TIMEOUT_MS = 10_000;
-
+// Best-effort send: logs and counts a failure, never throws.
 export async function sendEmail(env: Env, msg: EmailMessage): Promise<{ sent: boolean }> {
   if (!emailEnabled(env)) return { sent: false };
-  try {
-    const headers: Record<string, string> = msg.unsubscribeUrl
-      ? { 'List-Unsubscribe': `<${msg.unsubscribeUrl}>` }
-      : {};
-    const res = await fetch(RESEND_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: env.RESEND_FROM ?? DEFAULT_FROM,
-        to: [msg.to],
-        subject: msg.subject,
-        html: msg.html,
-        ...(msg.unsubscribeUrl ? { headers } : {}),
-      }),
-      signal: AbortSignal.timeout(EMAIL_SEND_TIMEOUT_MS),
-    });
-    // One anonymous telemetry row per outcome (docs/specs/017-telemetry/telemetry.md), written server-side
-    // because nothing about an email reaches a browser: the send happens in a
-    // cron or a waitUntil after the response has gone. Without it the lifecycle
-    // series (docs/specs/014-identity/transactional-email.md) was unmeasurable and a dead RESEND_API_KEY was invisible.
-    // reportServerEvent gates on TELEMETRY_ENABLED and swallows its own failure.
-    if (!res.ok) {
-      console.error(
-        `[email] send failed (${res.status}) subject="${msg.subject}" to=${redact(msg.to)}`,
-      );
-      await reportServerEvent(env, 'Error', 'Api', `Http${res.status}.SendEmail`);
-      return { sent: false };
-    }
-    await reportServerEvent(env, 'Email', 'Sent', msg.kind);
-    return { sent: true };
-  } catch (err) {
-    console.error(`[email] send threw subject="${msg.subject}" to=${redact(msg.to)}`, err);
-    await reportServerEvent(env, 'Error', 'Api', 'Network.SendEmail');
-    return { sent: false };
+  const outcome = await sendEmailNow(env, msg);
+  return { sent: outcome.ok };
+}
+
+// Send and answer how it went, for a caller that must tell the person (a sign-in code). Never throws either.
+export async function sendEmailNow(env: Env, msg: EmailMessage): Promise<SendOutcome> {
+  const provider = emailTransportKind(env);
+  const outcome = await deliver(env, {
+    from: env.EMAIL_FROM ?? DEFAULT_FROM,
+    to: msg.to,
+    subject: msg.subject,
+    html: msg.html,
+    ...(msg.text ? { text: msg.text } : {}),
+    ...(msg.unsubscribeUrl ? { headers: { 'List-Unsubscribe': `<${msg.unsubscribeUrl}>` } } : {}),
+  });
+  // One anonymous telemetry row per outcome (docs/specs/017-telemetry/telemetry.md), written server-side
+  // because nothing about an email reaches a browser. reportServerEvent gates on TELEMETRY_ENABLED and swallows
+  // its own failure.
+  if (!outcome.ok) {
+    console.error(
+      `[email] send failed provider=${provider} status=${outcome.status} kind=${msg.kind} to=${redact(msg.to)}`,
+    );
+    await reportServerEvent(env, 'Error', 'Api', sendFailureType(outcome.status));
+    return outcome;
   }
+  await reportServerEvent(env, 'Email', 'Sent', msg.kind);
+  return outcome;
+}
+
+// The telemetry type of a failed send: `Http<status>.SendEmail` for an HTTP answer, `Network.SendEmail` when
+// nothing answered, `<code>.SendEmail` for a provider error code (Cloudflare's `E_…`).
+function sendFailureType(status: string): string {
+  if (/^\d{3}$/.test(status)) return `Http${status}.SendEmail`;
+  if (status === 'network') return 'Network.SendEmail';
+  return `${status}.SendEmail`;
 }
 
 // Log addresses partially so `wrangler tail` stays useful without dumping full
