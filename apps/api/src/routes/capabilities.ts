@@ -27,8 +27,8 @@ function cliCapabilities({ env, url }: RouteContext) {
   return {
     apiBase: `${url.origin}/api`,
     // Sign-in (docs/specs/014-identity/auth-and-guest-access.md "Deployment modes"): on with better-auth's
-    // secret and a method, or with Clerk until it leaves the code.
-    authEnabled: identity.enabled || Boolean(env.CLERK_JWKS_URL),
+    // secret and a method.
+    authEnabled: identity.enabled,
     signInMethods: identity.methods,
     googleClientId: identity.googleClientId,
     // Codes land in the outbox, not a mailbox (previews and the e2e stack): the code step links to it

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // A workspace session at the front door (docs/specs/013-workspace/blueprints/workbench-embeds.md "The choke point
 // by scope"): every route class the Explorer uses reaches its route as the person, and every account class is
 // refused before any route runs. Each route module is a stub that answers 204, so reaching it is the proof.
-vi.mock('./auth/clerk', () => ({ getClerkIdentity: async () => null }));
+vi.mock('./auth/session-token', () => ({ getAccountSession: async () => null }));
 vi.mock('./db', () => ({ resolveApiToken: vi.fn(), deleteOldEvents: async () => {} }));
 
 // One stub per route module the dispatch names: it records the context it was handed and answers 204.

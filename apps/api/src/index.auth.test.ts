@@ -88,6 +88,21 @@ describe('sign-in at the front door', () => {
     );
   });
 
+  it('serves the guest behind a bearer that is not a session token', async () => {
+    const guest = (await (await call('/api/guest-id', { method: 'POST' })).json()) as {
+      ownerId: string;
+      ownerSig: string | null;
+    };
+    const res = await call('/api/documents', {
+      headers: {
+        Authorization: 'Bearer not-a-session',
+        'X-Owner-Id': guest.ownerId,
+        ...(guest.ownerSig ? { 'X-Owner-Sig': guest.ownerSig } : {}),
+      },
+    });
+    expect(res.status).toBe(200);
+  });
+
   it('refuses an account id presented as the guest header', async () => {
     const { id } = await signIn('ada@example.com');
     const res = await call('/api/documents', { headers: { 'X-Owner-Id': id } });

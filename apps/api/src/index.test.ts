@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the two async deps the request path touches before dispatch, so we can
 // drive the worker's top-level §4 guest-signature gate (docs/specs/015-api/public-api-and-tokens.md) directly.
-vi.mock('./auth/clerk', () => ({ getClerkIdentity: async () => null }));
+vi.mock('./auth/session-token', () => ({ getAccountSession: async () => null }));
 const { resolveApiTokenMock } = vi.hoisted(() => ({ resolveApiTokenMock: vi.fn() }));
 vi.mock('./db', () => ({
   resolveApiToken: resolveApiTokenMock,

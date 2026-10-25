@@ -33,23 +33,10 @@ export type Env = {
   // NEXT_PUBLIC_BUILD_ID (docs/specs/016-platform/stale-builds.md). Unset (local dev, a self-host that
   // sets neither) leaves it off the server release signal.
   BUILD_ID?: string;
-  // Clerk JWKS URL: when set, the request handler verifies Bearer
-  // tokens against it via `src/auth/clerk.ts` and prefers the
-  // resulting userId over `X-Owner-Id`. When unset, the worker stays
-  // in pure-guest mode (X-Owner-Id only). See docs/specs/014-identity/auth-and-guest-access.md + docs/specs/015-api/api.md.
-  CLERK_JWKS_URL?: string;
   // The OAuth server the CLI signs in through (docs/specs/015-api/cli.md), an https origin.
   OAUTH_ISSUER?: string;
   // The oldest CLI the api accepts writes from, x.y.z; unset for no floor.
   CLI_MIN_VERSION?: string;
-  // Optional: when set, the Clerk JWT verifier also asserts the `iss`
-  // claim (docs/specs/014-identity/auth-and-guest-access.md) so a token from another instance sharing the JWKS
-  // host can't be replayed. Unset → issuer not asserted (back-compat).
-  CLERK_ISSUER?: string;
-  // Optional: when set, the Clerk JWT verifier also asserts the `aud`
-  // claim (docs/specs/014-identity/auth-and-guest-access.md) so a token minted for a different audience/app can't
-  // be replayed here. Unset → audience not asserted (back-compat).
-  CLERK_AUDIENCE?: string;
   // HMAC secret for signing guest owner-ids (docs/specs/014-identity/auth-and-guest-access.md + auth/
   // owner-signature.ts). When set, POST /api/guest-id mints a signed id
   // and /api/migrate requires a valid signature before reassigning a
