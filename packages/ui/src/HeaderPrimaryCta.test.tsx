@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import { render } from '@testing-library/react';
+import { SIGNED_IN_HINT_KEY } from '@livediagram/account-session';
 import { afterEach, describe, expect, it } from 'vitest';
 import { HeaderPrimaryCta } from './HeaderPrimaryCta';
 
 // docs/specs/019-marketing/marketing-site.md "Header": Choose Template for a visitor, Open Explorer for
-// someone signed in, as the sign-in provider's readable cookie says.
+// someone signed in, as the signed-in hint says.
 afterEach(() => {
-  document.cookie = '__client_uat=; max-age=0; path=/';
+  localStorage.clear();
 });
 
 describe('the header primary', () => {
@@ -18,11 +19,11 @@ describe('the header primary', () => {
   });
 
   it('is Open Explorer for someone signed in, and stays Choose Template when signed out', () => {
-    document.cookie = '__client_uat=1792100000; path=/';
+    localStorage.setItem(SIGNED_IN_HINT_KEY, '1');
     const signedIn = render(<HeaderPrimaryCta ctaSurface="Home" />).container.querySelector('a')!;
     expect(signedIn.getAttribute('aria-label')).toBe('Open Explorer');
     expect(signedIn.getAttribute('href')).toBe('/explorer/home');
-    document.cookie = '__client_uat=0; path=/';
+    localStorage.setItem(SIGNED_IN_HINT_KEY, '0');
     const signedOut = render(<HeaderPrimaryCta />).container.querySelector('a')!;
     expect(signedOut.getAttribute('href')).toBe('/new');
   });

@@ -2,7 +2,6 @@
 import { communityPostFixture } from '@livediagram/api-schema/testing';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { clerkPublishableKeyOrNull } from '../clerk-key';
 import { CommunityAuthorBadge, communityAuthorInitial } from './CommunityAuthorBadge';
 import { CommunityCopyCount, CommunityLikeCount } from './CommunityCounts';
 import { CommunityPostTile } from './CommunityPostTile';
@@ -95,13 +94,13 @@ describe('CommunityAuthorBadge', () => {
 
     rerender(
       <CommunityAuthorBadge
-        author={{ ...post.author, picture: 'https://img.clerk.com/a.png' }}
+        author={{ ...post.author, picture: 'https://lh3.googleusercontent.com/a/a' }}
         showName={false}
       />,
     );
     const img = container.querySelector('img')!;
     // Asked for at the disc's size, as every profile picture is; the initial holds the box meanwhile.
-    expect(img.getAttribute('src')).toBe('https://img.clerk.com/a.png?width=96&height=96');
+    expect(img.getAttribute('src')).toBe('https://lh3.googleusercontent.com/a/a=s96-c');
     expect(screen.getByText('A')).toBeTruthy();
     expect(screen.queryByText('ada lovelace')).toBeNull();
     fireEvent.error(img);
@@ -127,15 +126,5 @@ describe('counts', () => {
   it('hold a placeholder card hidden from screen readers', () => {
     const { container } = render(<CommunityPostTileSkeleton />);
     expect(container.firstElementChild?.getAttribute('aria-hidden')).toBe('true');
-  });
-});
-
-describe('clerkPublishableKeyOrNull', () => {
-  it('turns sign-in on only for a real publishable key', () => {
-    expect(clerkPublishableKeyOrNull('pk_test_abc')).toBe('pk_test_abc');
-    expect(clerkPublishableKeyOrNull('pk_live_abc')).toBe('pk_live_abc');
-    expect(clerkPublishableKeyOrNull('sk_test_abc')).toBeNull();
-    expect(clerkPublishableKeyOrNull('')).toBeNull();
-    expect(clerkPublishableKeyOrNull(undefined)).toBeNull();
   });
 });

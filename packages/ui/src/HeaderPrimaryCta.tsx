@@ -2,20 +2,21 @@
 
 import { ctaHref, type CtaSurface } from '@livediagram/api-schema';
 import { useSyncExternalStore } from 'react';
-import { signedInFromCookie } from './browser-repair/identity';
+import { readSignedInHint } from '@livediagram/account-session';
 import { ButtonContent, buttonClassName } from './Button';
 
 // The site header's primary (docs/specs/019-marketing/marketing-site.md "Header"): Choose Template
 // (/new, the encouraged wizard path) for a visitor, Open Explorer (their documents) for someone signed
-// in. Who is signed in comes from the sign-in provider's readable `__client_uat` cookie, so the public
-// sites stay free of the provider's script; it only picks a link, it authenticates nothing. The static
+// in. Who is signed in comes from the signed-in hint the editor's auth bridge keeps in localStorage on this origin
+// (docs/specs/014-identity/auth-and-guest-access.md), so the public sites read no session; it only picks a link, it
+// authenticates nothing. The static
 // HTML is Choose Template for everyone, and both labels share one cell sized to the wider, so the swap
 // after hydration moves nothing in the bar.
 
 export const EXPLORER_HOME_HREF = '/explorer/home';
 
 const noSubscription = () => () => {};
-const signedInNow = () => signedInFromCookie(document.cookie) === true;
+const signedInNow = () => readSignedInHint() === true;
 const signedOutOnServer = () => false;
 
 function useSignedInHint(): boolean {
