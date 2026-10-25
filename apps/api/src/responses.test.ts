@@ -165,16 +165,15 @@ describe('signInRequired', () => {
 describe('missingAuth', () => {
   it('returns a 400 naming both legitimate identity sources in the message', async () => {
     // The message text is load-bearing for developer debugging:
-    // pre-Clerk it just said "missing X-Owner-Id", which
-    // misdirected signed-in users debugging auth failures. The
-    // current copy names BOTH paths so the caller can tell which
-    // one they're missing. Asserting the substrings rather than
+    // naming only "X-Owner-Id" would misdirect signed-in users
+    // debugging auth failures. The copy names BOTH paths so the
+    // caller can tell which one they're missing. Asserting the substrings rather than
     // exact equality keeps room for future polish.
     const res = missingAuth();
     expect(res.status).toBe(400);
     const body = (await readJson(res)) as { error: string; message: string };
     expect(body.error).toBe('bad_request');
-    expect(body.message).toContain('Clerk Bearer token');
+    expect(body.message).toContain('session token');
     expect(body.message).toContain('X-Owner-Id');
   });
 });

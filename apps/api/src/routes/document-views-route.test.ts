@@ -67,8 +67,8 @@ function call(db: SqliteD1, method: string, path: string, body?: unknown, who: W
     makeTestRouteContext(method, path, {
       env: db.env,
       owner,
-      clerkUserId: owner,
-      verifiedUserId: owner,
+      sessionAccountId: owner,
+      verifiedAccountId: owner,
       body,
       headers: who.headers,
       waitUntil: (p) => void pending.push(p),

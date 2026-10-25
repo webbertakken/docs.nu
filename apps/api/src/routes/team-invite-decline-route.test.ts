@@ -34,7 +34,7 @@ function setup() {
     handleTeams(
       makeTestRouteContext(method, `/api/teams/invite-decline/${encodeURIComponent(token)}`, {
         owner: null,
-        clerkUserId: null,
+        sessionAccountId: null,
         env: db.env,
         waitUntil: (p) => void background.push(p),
       }),

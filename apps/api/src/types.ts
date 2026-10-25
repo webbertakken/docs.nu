@@ -40,7 +40,7 @@ export type Env = {
   // HMAC secret for signing guest owner-ids (docs/specs/014-identity/auth-and-guest-access.md + auth/
   // owner-signature.ts). When set, POST /api/guest-id mints a signed id
   // and /api/migrate requires a valid signature before reassigning a
-  // guest's data to a Clerk account — closing the "observe a guest id,
+  // guest's data to an account — closing the "observe a guest id,
   // claim its data" hole. Unset → migrate keeps its legacy unsigned
   // behaviour (OSS self-host that hasn't configured it).
   GUEST_ID_HMAC_SECRET?: string;
@@ -85,7 +85,7 @@ export type Env = {
   UNFURL_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
   // Per-owner limiter for POST /api/drive/token (docs/specs/022-drive-mirror/drive-mirror.md,
   // "Tokens"): each call reaches Google's token endpoint, so it gets a far
-  // tighter bound than the general write limiter. Keyed on the Clerk user id.
+  // tighter bound than the general write limiter. Keyed on the account id.
   // Optional: absent (self-host) → "allow".
   DRIVE_TOKEN_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
   // Per-network limiter for Community likes and reports (docs/specs/025-community/blueprints/community.md §7),
@@ -192,7 +192,7 @@ export type Env = {
   // value would 403 every request the editor makes.
   AI_ALLOWED_ORIGINS?: string;
   // When the literal string "true", POST /api/ai requires a verified
-  // Clerk Bearer JWT and rejects the X-Owner-Id guest path with 401
+  // session token and rejects the X-Owner-Id guest path with 401
   // (docs/specs/007-editor/ai-assistance.md). Anything else (unset, "false", any other value) keeps
   // the guest path open. Hosted livediagram.app sets this to "true";
   // OSS self-hosters who run Clerk-less stay on the open path by

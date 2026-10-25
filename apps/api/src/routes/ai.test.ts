@@ -40,7 +40,7 @@ afterEach(() => {
 function makeCtx(opts: {
   env: Partial<Env>;
   origin?: string | null;
-  clerkUserId?: string | null;
+  sessionAccountId?: string | null;
   body?: string;
 }): RouteContext {
   const headers = new Headers();
@@ -57,10 +57,10 @@ function makeCtx(opts: {
     env: { OPENAI_API_KEY: 'test-key', ...opts.env } as Env,
     url: new URL(request.url),
     segments: ['api', 'ai'],
-    clerkUserId: opts.clerkUserId ?? null,
-    verifiedUserId: opts.clerkUserId ?? null,
-    clerkEmail: null,
-    resolveOwner: () => opts.clerkUserId ?? 'owner-anon',
+    sessionAccountId: opts.sessionAccountId ?? null,
+    verifiedAccountId: opts.sessionAccountId ?? null,
+    accountEmail: null,
+    resolveOwner: () => opts.sessionAccountId ?? 'owner-anon',
   };
 }
 
@@ -100,9 +100,9 @@ describe('handleAi origin allow-list (AI_ALLOWED_ORIGINS)', () => {
   });
 });
 
-describe('handleAi Clerk-only gate (AI_REQUIRE_CLERK)', () => {
-  it('allows guest path (clerkUserId null) when AI_REQUIRE_CLERK is unset', async () => {
-    const ctx = makeCtx({ env: {}, clerkUserId: null });
+describe('handleAi session-only gate (AI_REQUIRE_CLERK)', () => {
+  it('allows guest path (sessionAccountId null) when AI_REQUIRE_CLERK is unset', async () => {
+    const ctx = makeCtx({ env: {}, sessionAccountId: null });
     const res = await handleAi(ctx);
     expect(res.status).not.toBe(401);
   });
@@ -110,17 +110,17 @@ describe('handleAi Clerk-only gate (AI_REQUIRE_CLERK)', () => {
   it('rejects guest path with 401 sign_in_required when AI_REQUIRE_CLERK="true"', async () => {
     const ctx = makeCtx({
       env: { AI_REQUIRE_CLERK: 'true' },
-      clerkUserId: null,
+      sessionAccountId: null,
     });
     const res = await handleAi(ctx);
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'sign_in_required' });
   });
 
-  it('allows Clerk-authenticated path when AI_REQUIRE_CLERK="true"', async () => {
+  it('allows signed-in path when AI_REQUIRE_CLERK="true"', async () => {
     const ctx = makeCtx({
       env: { AI_REQUIRE_CLERK: 'true' },
-      clerkUserId: 'user_abc',
+      sessionAccountId: 'user_abc',
     });
     const res = await handleAi(ctx);
     expect(res.status).not.toBe(401);
@@ -131,7 +131,7 @@ describe('handleAi Clerk-only gate (AI_REQUIRE_CLERK)', () => {
     // like "yes" or "1" must NOT silently lock guests out.
     const ctx = makeCtx({
       env: { AI_REQUIRE_CLERK: 'yes' },
-      clerkUserId: null,
+      sessionAccountId: null,
     });
     const res = await handleAi(ctx);
     expect(res.status).not.toBe(401);

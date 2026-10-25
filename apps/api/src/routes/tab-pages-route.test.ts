@@ -36,8 +36,8 @@ const call = (
     makeTestRouteContext('POST', path, {
       env: db.env,
       owner,
-      clerkUserId: token ? null : owner,
-      verifiedUserId: owner,
+      sessionAccountId: token ? null : owner,
+      verifiedAccountId: owner,
       body,
       token: token ? { id: 'tok_1' } : null,
     }),
@@ -50,8 +50,8 @@ async function setUp(status = 204, tab: Record<string, unknown> = {}) {
     makeTestRouteContext('POST', '/api/documents', {
       env: db.env,
       owner: 'user_o',
-      clerkUserId: 'user_o',
-      verifiedUserId: 'user_o',
+      sessionAccountId: 'user_o',
+      verifiedAccountId: 'user_o',
       body: { id: 'D', name: 'Doc', tabs: [{ id: 't1', name: 'Board', elements: [], ...tab }] },
     }),
   );

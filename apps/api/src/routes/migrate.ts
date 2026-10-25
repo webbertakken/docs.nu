@@ -23,7 +23,7 @@ const ZERO = { documents: 0, folders: 0, shared: 0, images: 0 };
 //  2. Legacy upgrade (unsigned guest → freshly-minted signed guest): an
 //     existing guest created before signing shipped has an unsigned id and
 //     so can't satisfy flow 1. The live app mints a signed id (POST
-//     /api/guest-id) and calls this with no Clerk token to move the old
+//     /api/guest-id) and calls this with no session token to move the old
 //     data onto the new id. The SOURCE here is the caller's current
 //     `X-Owner-Id` (the same bearer credential every guest request uses);
 //     the TARGET is the new signed id, proven by `toSignature`. NOTE: the
@@ -33,7 +33,7 @@ const ZERO = { documents: 0, folders: 0, shared: 0, images: 0 };
 //
 // Idempotent: a no-op (source == target) moves zero rows.
 export async function handleMigrate(ctx: RouteContext): Promise<Response> {
-  const { request, env, segments, clerkUserId, resolveOwner } = ctx;
+  const { request, env, segments, sessionAccountId, resolveOwner } = ctx;
   if (!(segments[1] === 'migrate' && segments.length === 2)) return notFound();
   if (request.method !== 'POST') return notFound();
 
@@ -45,21 +45,21 @@ export async function handleMigrate(ctx: RouteContext): Promise<Response> {
   };
   const secret = env.GUEST_ID_HMAC_SECRET;
 
-  // Flow 1 — sign-up: claim guest data into the Clerk account.
-  if (clerkUserId) {
+  // Flow 1 — sign-up: claim guest data into the account.
+  if (sessionAccountId) {
     const fromOwnerId = typeof body.guestOwnerId === 'string' ? body.guestOwnerId.trim() : '';
     if (!fromOwnerId) return badRequest('guestOwnerId is required');
-    if (fromOwnerId === clerkUserId) return json({ migrated: ZERO });
+    if (fromOwnerId === sessionAccountId) return json({ migrated: ZERO });
     // A guest id is a server-minted UUID, never an account id. Without this,
     // a deployment with no GUEST_ID_HMAC_SECRET (the signature check below is
     // skipped) would let any signed-in user take over another account's whole
-    // workspace by naming its (harvestable) Clerk id.
+    // workspace by naming its (harvestable) account id.
     if (isAccountIdShape(fromOwnerId)) return forbidden();
     // Possession proof: the caller must hold the source id's signature.
     if (secret && !(await verifyOwnerId(secret, fromOwnerId, stringOrNull(body.guestSignature)))) {
       return forbidden();
     }
-    const migrated = await migrateOwnerId(env, fromOwnerId, clerkUserId);
+    const migrated = await migrateOwnerId(env, fromOwnerId, sessionAccountId);
     return json({ migrated });
   }
 
@@ -70,7 +70,7 @@ export async function handleMigrate(ctx: RouteContext): Promise<Response> {
   const toOwnerId = typeof body.toOwnerId === 'string' ? body.toOwnerId.trim() : '';
   if (!fromOwnerId) return missingAuth();
   // The source here is only the unsigned bearer header, so it must never be
-  // an account id: Clerk ids are harvestable (team member lists), and this
+  // an account id: account ids are harvestable (team member lists), and this
   // path would otherwise move a signed-up user's whole workspace to whoever
   // names it. The global Clerk-shape refusal in index.ts only covers
   // OWNER_SCOPED_SEGMENTS, which deliberately leaves `migrate` out.

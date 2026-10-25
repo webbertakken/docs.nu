@@ -134,10 +134,10 @@ describe('a workspace session at the front door', () => {
     expect(reached).toHaveBeenCalledWith(handler, expect.anything());
     const ctx = reached.mock.calls[0]![1] as RouteContext;
     expect(ctx.workbench).toEqual(SESSION);
-    expect(ctx.clerkUserId).toBeNull();
+    expect(ctx.sessionAccountId).toBeNull();
     expect(ctx.token).toBeNull();
     expect(ctx.resolveOwner()).toBe('user_1');
-    expect(ctx.verifiedUserId).toBe('user_1');
+    expect(ctx.verifiedAccountId).toBe('user_1');
   });
 
   it.each([

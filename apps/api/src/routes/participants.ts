@@ -25,7 +25,7 @@ import { requireOwner, type RouteContext, readBody } from './context';
 // caller who knew (or guessed) another participant's id could
 // rewrite their display name + colour, and that vandalism would
 // propagate across every document they'd collaborated on. The guard requires the caller's resolved
-// owner (Clerk Bearer OR X-Owner-Id, docs/specs/014-identity/auth-and-guest-access.md) to match the
+// owner (session token OR X-Owner-Id, docs/specs/014-identity/auth-and-guest-access.md) to match the
 // participant id being mutated.
 export async function handleParticipants(ctx: RouteContext): Promise<Response> {
   const { request, env, segments } = ctx;
@@ -47,7 +47,7 @@ export async function handleParticipants(ctx: RouteContext): Promise<Response> {
       }
       return notFound();
     }
-    return json({ participant: { ...p, pictureUrl: ctx.verifiedUserId ? p.pictureUrl : null } });
+    return json({ participant: { ...p, pictureUrl: ctx.verifiedAccountId ? p.pictureUrl : null } });
   }
   if (request.method === 'PUT') {
     const owner = requireOwner(ctx);
@@ -85,15 +85,15 @@ export async function handleParticipants(ctx: RouteContext): Promise<Response> {
   return notFound();
 }
 
-// Only the participant's own verified Clerk session may publish a picture: a guest header proves
-// nothing about a Clerk picture, and an API token must not be able to change how its owner looks
-// to other people. The URL must be on Clerk's image host (docs/specs/014-identity/profile-picture.md §6).
+// Only the participant's own verified session may publish a picture: a guest header proves
+// nothing about an account's picture, and an API token must not be able to change how its owner looks
+// to other people. The URL must be on the picture host (docs/specs/014-identity/profile-picture.md §6).
 async function putPicture(ctx: RouteContext, id: string): Promise<Response> {
-  if (!ctx.clerkUserId) {
+  if (!ctx.sessionAccountId) {
     console.info('[profile-picture] rejected', 'not_account');
     return signInRequired();
   }
-  if (ctx.clerkUserId !== id) {
+  if (ctx.sessionAccountId !== id) {
     console.info('[profile-picture] rejected', 'not_account');
     return forbidden();
   }

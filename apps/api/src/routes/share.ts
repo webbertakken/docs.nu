@@ -111,7 +111,7 @@ export async function handleShare(ctx: RouteContext): Promise<Response> {
           // Only a verified visitor emails: a guest's X-Owner-Id is unproven
           // and free to mint, so each fresh one would be another "first
           // visit" and another email carrying a name the visitor chose.
-          if (ctx.verifiedUserId && visitor === ctx.verifiedUserId) {
+          if (ctx.verifiedAccountId && visitor === ctx.verifiedAccountId) {
             ctx.waitUntil?.(
               getParticipant(env, visitor)
                 .catch(() => null)

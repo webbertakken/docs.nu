@@ -140,7 +140,7 @@ describe('GET /api/documents?include=team-recent', () => {
   async function list(
     env: ReturnType<typeof sqliteD1>['env'],
     path: string,
-    who: { owner: string; verifiedUserId: string | null },
+    who: { owner: string; verifiedAccountId: string | null },
   ): Promise<DocumentListResponse> {
     const res = await handleDocuments(makeTestRouteContext('GET', path, { env, ...who }));
     expect(res.status).toBe(200);
@@ -153,7 +153,7 @@ describe('GET /api/documents?include=team-recent', () => {
     member('t1', ME, 'joined');
     await doc('mine', 1, { owner: ME });
     await doc('team', 2, { teamId: 't1' });
-    const me = { owner: ME, verifiedUserId: ME };
+    const me = { owner: ME, verifiedAccountId: ME };
 
     const asked = await list(env, '/api/documents?include=team-recent', me);
     expect(asked.documents.map((d) => d.id)).toEqual(['mine']);
@@ -171,7 +171,7 @@ describe('GET /api/documents?include=team-recent', () => {
     // A guest whose X-Owner-Id names a member's account id: no team documents.
     const spoofed = await list(env, '/api/documents?include=team-recent', {
       owner: ME,
-      verifiedUserId: null,
+      verifiedAccountId: null,
     });
     expect(spoofed.teamRecent).toEqual([]);
   });

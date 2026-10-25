@@ -40,12 +40,12 @@ const body = {
   anonymous: false,
 };
 
-function owner(method: string, path: string, opts: { body?: unknown; clerk?: string | null } = {}) {
-  const clerk = opts.clerk === undefined ? AUTHOR : opts.clerk;
+function owner(method: string, path: string, opts: { body?: unknown; account?: string | null } = {}) {
+  const account = opts.account === undefined ? AUTHOR : opts.account;
   return makeTestRouteContext(method, path, {
     env,
-    owner: clerk ?? 'guest-1',
-    clerkUserId: clerk,
+    owner: account ?? 'guest-1',
+    sessionAccountId: account,
     body: opts.body,
   });
 }
@@ -53,14 +53,14 @@ function owner(method: string, path: string, opts: { body?: unknown; clerk?: str
 function publicCtx(
   method: string,
   path: string,
-  opts: { body?: unknown; key?: string | null; clerk?: string | null; ip?: string } = {},
+  opts: { body?: unknown; key?: string | null; account?: string | null; ip?: string } = {},
 ) {
   const headers: Record<string, string> = {};
   if (opts.key !== null) headers['X-Community-Key'] = opts.key ?? KEY;
   if (opts.ip) headers['CF-Connecting-IP'] = opts.ip;
   return makeTestRouteContext(method, path, {
     env,
-    clerkUserId: opts.clerk ?? null,
+    sessionAccountId: opts.account ?? null,
     body: opts.body,
     headers,
   });
@@ -182,7 +182,7 @@ describe('owner routes', () => {
 
   it('is not someone else’s to publish', async () => {
     const res = (await handleCommunityOwnerRoutes(
-      owner('PUT', '/api/documents/d1/community', { body, clerk: 'user_other' }),
+      owner('PUT', '/api/documents/d1/community', { body, account: 'user_other' }),
     ))!;
     expect(res.status).toBe(403);
   });
@@ -221,7 +221,7 @@ describe('public routes', () => {
 
     expect((await handleCommunity(publicCtx('GET', '/api/community/mine'))).status).toBe(401);
 
-    const res = await handleCommunity(publicCtx('GET', '/api/community/mine', { clerk: AUTHOR }));
+    const res = await handleCommunity(publicCtx('GET', '/api/community/mine', { account: AUTHOR }));
     expect(res.status).toBe(200);
     expect(res.headers.get('Cache-Control')).toBe('private, no-store');
     const body = (await res.json()) as {
@@ -238,7 +238,7 @@ describe('public routes', () => {
 
     // Someone else signed in has none; the public list never shows the hidden one.
     const other = await handleCommunity(
-      publicCtx('GET', '/api/community/mine', { clerk: 'user_x' }),
+      publicCtx('GET', '/api/community/mine', { account: 'user_x' }),
     );
     expect(await other.json()).toMatchObject({
       posts: [],
@@ -370,7 +370,7 @@ describe('a hidden post', () => {
     ] as const) {
       const res = await handleCommunity(
         publicCtx(method, path, {
-          clerk: AUTHOR,
+          account: AUTHOR,
           body: method === 'PUT' ? { state: 'listed' } : undefined,
         }),
       );
@@ -417,11 +417,11 @@ describe('the community link', () => {
 
   it("stops serving a hidden post's image", async () => {
     const post = await publish();
-    const image = (clerk: string | null = null) =>
+    const image = (account: string | null = null) =>
       handleShare(
         makeTestRouteContext('GET', `/api/share/${post.shareCode}/image.svg`, {
           env,
-          clerkUserId: clerk,
+          sessionAccountId: account,
         }),
       );
     const listed = await image();
@@ -680,13 +680,13 @@ describe('a document that changes hands', () => {
     };
     expect(listed.posts).toEqual([]);
     const mine = (await (
-      await handleCommunity(publicCtx('GET', '/api/community/mine', { clerk: AUTHOR }))
+      await handleCommunity(publicCtx('GET', '/api/community/mine', { account: AUTHOR }))
     ).json()) as { posts: unknown[] };
     expect(mine.posts).toEqual([]);
 
     const bob = (method: string, opts: { body?: unknown } = {}) =>
       handleCommunityOwnerRoutes(
-        owner(method, '/api/documents/d1/community', { ...opts, clerk: 'user_bob' }),
+        owner(method, '/api/documents/d1/community', { ...opts, account: 'user_bob' }),
       );
     expect(await (await bob('GET'))!.json()).toEqual({ post: null });
     const published = (await bob('PUT', { body }))!;

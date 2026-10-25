@@ -66,7 +66,7 @@ async function setDefault(ctx: RouteContext, owner: string, key: PlacementDefaul
   const folderId = await folderIdOf(ctx.request);
   if (folderId === null) return rejected('default_folder_invalid');
   const lookups = placementLookups(ctx.env);
-  const caller = { ownerId: owner, verifiedUserId: ctx.verifiedUserId };
+  const caller = { ownerId: owner, verifiedAccountId: ctx.verifiedAccountId };
   const folder = await lookups.getFolder(folderId);
   const joined = await joinedFolderTeam(folder, caller, lookups.isJoinedMember);
   if (!folder || judgeDefaultFolder(folder, caller, joined) !== 'ok') {

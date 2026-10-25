@@ -40,12 +40,12 @@ import { handleTimeline } from './timeline';
 const makeCtx = (
   method: string,
   path: string,
-  opts: { owner?: string | null; verifiedUserId?: string | null } = {},
+  opts: { owner?: string | null; verifiedAccountId?: string | null } = {},
 ): RouteContext => {
   const ctx = makeTestRouteContext(method, path, {
     owner: opts.owner === undefined ? 'owner-1' : opts.owner,
   });
-  if (opts.verifiedUserId !== undefined) ctx.verifiedUserId = opts.verifiedUserId;
+  if (opts.verifiedAccountId !== undefined) ctx.verifiedAccountId = opts.verifiedAccountId;
   return ctx;
 };
 
@@ -151,7 +151,7 @@ describe('handleTimeline read', () => {
   it('serves a team scope to a joined member', async () => {
     db.getMembership.mockResolvedValue({ status: 'joined', role: 'member' });
     const res = await handleTimeline(
-      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedUserId: 'owner-1' }),
+      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedAccountId: 'owner-1' }),
     );
     expect(res.status).toBe(200);
     expect(store.readTimeline).toHaveBeenCalledWith(
@@ -162,7 +162,7 @@ describe('handleTimeline read', () => {
 
   it('403s a team scope for a non-member', async () => {
     const res = await handleTimeline(
-      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedUserId: 'stranger' }),
+      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedAccountId: 'stranger' }),
     );
     expect(res.status).toBe(403);
     expect(store.readTimeline).not.toHaveBeenCalled();
@@ -173,14 +173,14 @@ describe('handleTimeline read', () => {
   it('403s a team scope for an invited-but-not-joined member', async () => {
     db.getMembership.mockResolvedValue({ status: 'invited', role: 'member' });
     const res = await handleTimeline(
-      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedUserId: 'owner-1' }),
+      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedAccountId: 'owner-1' }),
     );
     expect(res.status).toBe(403);
   });
 
-  it('403s a team scope for a guest — teams are Clerk-only', async () => {
+  it('403s a team scope for a guest — teams are session-only', async () => {
     const res = await handleTimeline(
-      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedUserId: null }),
+      makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedAccountId: null }),
     );
     expect(res.status).toBe(403);
     expect(db.getMembership).not.toHaveBeenCalled();
@@ -190,7 +190,7 @@ describe('handleTimeline read', () => {
   it('does not seed a team scope', async () => {
     db.getMembership.mockResolvedValue({ status: 'joined', role: 'member' });
     store.getScopeState.mockResolvedValue(null);
-    const ctx = makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedUserId: 'owner-1' });
+    const ctx = makeCtx('GET', '/api/timeline?scope=team:t-1', { verifiedAccountId: 'owner-1' });
     const scheduled: Promise<unknown>[] = [];
     ctx.waitUntil = (p) => scheduled.push(p);
     await handleTimeline(ctx);

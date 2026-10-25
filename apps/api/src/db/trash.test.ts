@@ -254,7 +254,7 @@ describe('listTrash', () => {
     await trashDocument(env, 'invited', T0);
     await trashDocument(env, 'stranger', T0);
 
-    expect(await listTrash(env, { owner: 'user_me', verifiedUserId: 'user_me' })).toEqual([
+    expect(await listTrash(env, { owner: 'user_me', verifiedAccountId: 'user_me' })).toEqual([
       {
         id: 'teammate',
         name: 'Document teammate',
@@ -284,7 +284,7 @@ describe('listTrash', () => {
     await trashDocument(env, 'mine', T0);
     await trashDocument(env, 'team', T0);
 
-    const items = await listTrash(env, { owner: 'guest-1', verifiedUserId: null });
+    const items = await listTrash(env, { owner: 'guest-1', verifiedAccountId: null });
 
     expect(items.map((i) => i.id)).toEqual(['mine']);
   });
@@ -295,7 +295,7 @@ describe('listTrash', () => {
     liveDoc(sql, 'T', { owner: 'user_me', team: 'left' });
     await trashDocument(env, 'T', T0);
 
-    expect(await listTrash(env, { owner: 'user_me', verifiedUserId: 'user_me' })).toEqual([]);
+    expect(await listTrash(env, { owner: 'user_me', verifiedAccountId: 'user_me' })).toEqual([]);
   });
 });
 

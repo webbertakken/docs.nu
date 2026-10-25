@@ -59,9 +59,9 @@ export async function handleCommunityOwnerRoutes(ctx: RouteContext): Promise<Res
   }
 
   // PUT: publish, or save an Edit Listing.
-  // G1: every public post is tied to an account, so publishing needs a verified Clerk session (never a guest id or
+  // G1: every public post is tied to an account, so publishing needs a verified session (never a guest id or
   // an API token), and a team library document is not one person's to give away.
-  if (!ctx.clerkUserId || ctx.clerkUserId !== doc.ownerId)
+  if (!ctx.sessionAccountId || ctx.sessionAccountId !== doc.ownerId)
     return reject(signInRequired(), 'sign_in_required');
   if (doc.teamId) return reject(conflict('team_document'), 'team_document');
   const parsed = validateCommunityPostInput(await request.json().catch(() => null));
@@ -83,7 +83,7 @@ export async function handleCommunityOwnerRoutes(ctx: RouteContext): Promise<Res
   if ((await firstTabElementCount(env, id)) === 0) {
     return reject(conflict('empty_document'), 'empty_document');
   }
-  if ((await countCommunityPostsByAuthor(env, ctx.clerkUserId)) >= COMMUNITY_POSTS_PER_AUTHOR) {
+  if ((await countCommunityPostsByAuthor(env, ctx.sessionAccountId)) >= COMMUNITY_POSTS_PER_AUTHOR) {
     return reject(conflict('post_limit'), 'post_limit');
   }
   if (stale) {
@@ -92,7 +92,7 @@ export async function handleCommunityOwnerRoutes(ctx: RouteContext): Promise<Res
   }
   let postId: string;
   try {
-    postId = await createCommunityPost(env, id, ctx.clerkUserId, parsed.value);
+    postId = await createCommunityPost(env, id, ctx.sessionAccountId, parsed.value);
   } catch (err) {
     // Two first publishes of one document at once: the second meets the one-post-per-document rule.
     if (String(err).includes('UNIQUE'))
