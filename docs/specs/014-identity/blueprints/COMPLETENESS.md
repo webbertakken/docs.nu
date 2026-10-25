@@ -13,7 +13,7 @@
 - [x] Accessibility
 - [x] Web Experience
 - [x] Observability
-- [x] Testing
+- [ ] Testing
 - [x] Constants and configuration
 - [x] Assets and external resources
 - [x] Defaults ledger

@@ -1,7 +1,5 @@
 # Sign-in encouragement
 
-> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
-
 A dismissible bottom-of-screen banner that nudges unsigned (guest)
 visitors to sign in, plus a "Learn more" modal that lists the concrete
 benefits. It shows on the Explorer and, after a delay, inside the
@@ -26,10 +24,10 @@ hides it everywhere.
 
 Common gate (all must hold):
 
-- Clerk is configured for the deployment (`clerkEnabled`). A
-  self-hosted, Clerk-less install ([Open source + distribution](../002-project-scope/open-source-and-business-model.md) + [Auth + guest access](auth-and-guest-access.md)) has no working
+- The deployment offers sign-in (`useSignInAvailable`). A
+  guest-only install ([Open source + distribution](../002-project-scope/open-source-and-business-model.md) + [Auth + guest access](auth-and-guest-access.md)) has no working
   sign-in, so the banner never renders there.
-- The visitor is **not** signed in (no `clerkUserId`; a guest owner id
+- The visitor is **not** signed in (no `accountId`; a guest owner id
   doesn't count).
 - The visitor hasn't dismissed it (see Dismissal).
 
@@ -53,8 +51,8 @@ dismiss it to reach the timer or the vote. It is drawn over the canvas, and is a
 
 - in **embed** mode (the read-only `/embed` iframe, [Read-only embeds (`/embed`)](../013-workspace/embeds.md)), and
 - in **zen** mode ([Zen mode](../007-editor/zen-mode.md)), but entering/leaving zen does **not**
-  restart the delay; the timer runs on the stable gate (Clerk / signed
-  in / embed / dismissed) and zen only hides the card at render, and
+  restart the delay; the timer runs on the stable gate (sign-in offered /
+  signed in / embed / dismissed) and zen only hides the card at render, and
 - while a **tour's offer or last card** is up ([Editor tour](../007-editor/editor-tour.md)): they take the same place
   at the bottom, so the banner steps aside until the card goes (`data-tour-card-open` on the body), and
 - while a **panel opened from the chrome** is open (Tidy Up, Layers, Style and the rest of the bottom-right cluster, the
