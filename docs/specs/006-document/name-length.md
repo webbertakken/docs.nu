@@ -99,6 +99,14 @@ carry `maxLength={NAME_MAX_LENGTH}`. That is a **third** line of defence, not
 the enforcement: it makes the limit visible while typing instead of silently
 eating the end of what someone wrote.
 
+### Names from files
+
+A document a sync adopts from a file ([Native files](../027-repositories/native-files.md#adopting-files)) is named
+after the file, and its name is the file's path: shortening it, or collapsing its whitespace, would move the file.
+Such a name is kept whole, up to the 255 bytes a file name may hold on every common file system, and stored as it
+came. The cap and the collapse still apply to every name typed or derived in livedocs, a rename of an adopted
+document included. The Explorer, the header and the tab pill shorten a long name on screen only.
+
 ## Out of scope
 
 - **Retro-truncating names already stored.** Existing over-long names render as

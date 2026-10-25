@@ -5,10 +5,11 @@
 `ahead` and `diverged` documents, `local-new` creation, `sync --resolve`, the git hooks and the merge driver, and
 [Diagram sources](diagram-sources.md).
 
-A **repository link** binds a directory in a code repository to documents in livediagram, so the people and agents
-working in that repository find, read and change its diagrams without leaving it. livediagram is the **single source
-of truth**: what a repository holds of a document is a **snapshot** of it at a known revision, never its home, as
-the [Google Drive mirror](../022-drive-mirror/drive-mirror.md) is a copy and never a location.
+A **repository link** binds a directory in a repository to documents in livedocs, so the people and agents working in
+that repository find, read and change its documents without leaving it. livedocs is the **single source of truth**:
+what a repository holds of a document is a **snapshot** of it at a known revision, never its home, as the
+[Google Drive mirror](../022-drive-mirror/drive-mirror.md) is a copy and never a location. A page or a file document
+is written as its own plain file, a [native file](native-files.md), which is a snapshot all the same.
 
 ## Why
 
@@ -20,8 +21,8 @@ the [Google Drive mirror](../022-drive-mirror/drive-mirror.md) is a copy and nev
 
 ## Principles
 
-1. **livediagram owns every document.** A snapshot in a repository is derived; a change made to it is a proposal that
-   reaches livediagram as a [changeset](../024-agents/agent-changesets.md), or does not count.
+1. **livedocs owns every document.** A snapshot in a repository is derived; a change made to it is a proposal that
+   reaches livedocs as a [changeset](../024-agents/agent-changesets.md), or does not count.
 2. **Files are optional.** A link works with no files at all; the CLI reaches the covered documents remotely.
 3. **A snapshot says how old it is.** Every mirrored tab records its revision, so any reader knows what it holds.
 4. **Nothing is lost, nothing is silent.** A sync never overwrites a local change it has not sent, and every
@@ -45,6 +46,10 @@ documents = ["doc_3h9x2a"]         # and any single documents, from anywhere the
 [mirror]
 level = "files"                    # none | index | files; default index
 dir = "docs/diagrams"              # relative to this file; default diagrams
+ignore = ["drafts/**"]             # paths never adopted or written (Native files)
+
+[repository]
+web = "https://github.com/acme/app/blob/main"  # optional; where links out of a wiki open (Links)
 
 [hooks]
 block = false                      # true: a commit fails when its sync cannot run
@@ -54,7 +59,9 @@ path = "docs/arch.excalidraw"
 tab = "doc_3h9x2a/0b34"
 ```
 
-These are every table and key a link file holds; [Diagram sources](diagram-sources.md) owns `[[sources]]`.
+These are every table and key a link file holds; [Diagram sources](diagram-sources.md) owns `[[sources]]`,
+[Native files](native-files.md#adopting-files) owns `ignore`, and [Links](../032-wikis/links.md#links-out-of-the-wiki)
+owns `[repository]`.
 
 - **Covers.** A link covers the documents in its `folder` (subfolders included) and its listed `documents`. Either
   may be absent, not both. A document moved out of the folder leaves the link's coverage; a listed document stays
@@ -67,11 +74,11 @@ These are every table and key a link file holds; [Diagram sources](diagram-sourc
 
 ## Mirror levels
 
-| Level   | Writes                                                                  | For                                                          |
-| ------- | ----------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `none`  | Nothing                                                                 | Remote-only projects; agents use the CLI against the link    |
-| `index` | `<dir>/INDEX.md` only                                                   | Agents find diagrams with `rg` and read them through the CLI |
-| `files` | `INDEX.md`, plus per document a mirror file and an outline file (below) | Diagrams readable offline, in reviews and in git history     |
+| Level   | Writes                                                                                                                                                         | For                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `none`  | Nothing                                                                                                                                                        | Remote-only projects; agents use the CLI against the link    |
+| `index` | `<dir>/INDEX.md` only                                                                                                                                          | Agents find diagrams with `rg` and read them through the CLI |
+| `files` | `INDEX.md`, plus per document its files: a page or file document as its [native file](native-files.md), any other as a mirror file and an outline file (below) | Documents readable offline, in reviews and in git history    |
 
 `index` is the default: it makes every covered document discoverable at almost no cost in the tree.
 
@@ -100,14 +107,16 @@ tab names and counts; at `files` the outlines are in the outline files.
 
 ### The outline file
 
-`<slug>.md` beside the mirror file: generated, opening with a line that says so and links the document, then one
+`<slug>.livediagram.md` beside the mirror file, named after it so it never takes the name of a page's own `.md`
+file: generated, opening with a line that says so and links the document, then one
 section per tab holding its [outline view](../024-agents/document-views.md#the-outline-default) in a `text` fence.
 It is what an agent reads first, at a tenth of the JSON's tokens, and what a reviewer reads in a pull request.
 
 ## Sync states
 
 A covered document is in one state, from comparing its mirror file, the file's recorded revisions and hashes, and
-the document now:
+the document now. A native file reads its revision and hash from the sync record instead, and adds the `deleted` and
+`moved` states ([Native files](native-files.md#sync-states)):
 
 | State        | Means                                                                                    | A sync                                       |
 | ------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------- |

@@ -114,6 +114,7 @@ The editor is real:
 
 ## Next
 
+- **Pages and wikis** ([Markdown tab](../031-markdown/markdown-tab.md), [File tab](../006-document/file-tab.md), [Native files](../027-repositories/native-files.md), [Wiki](../032-wikis/wiki.md), [Links](../032-wikis/links.md)): specified, nothing built. Markdown as a native tab kind edited together live and synced byte for byte, any file as a document, and global and project wikis synced both ways with their repositories.
 - **Agents as collaborators** ([Agents](../024-agents/README.md)): with changesets, views, edit operations, the [lint](../024-agents/diagram-lint.md), presence and the [CLI](../015-api/cli.md) built and published, the CLI's update check next.
 - **Repository sync** ([Repository link](../027-repositories/repository-link.md), [Diagram sources](../027-repositories/diagram-sources.md)): merging offline edits back, the git hooks and merge driver, adopting existing Mermaid, PlantUML, DOT, draw.io and Excalidraw diagrams, and strict and relaxed compatibility.
 - **Access levels, the rest** ([Share roles](../013-workspace/share-roles.md#later)): Participant links are built; token levels, ownership as separate powers, server-derived collaboration keys and a look-only Viewer are next.
