@@ -2,13 +2,15 @@
 
 **Status: first slice built.** The link file, the `none`, `index` and `files` mirror levels, every sync state,
 `link init|status|ls`, `sync` (`--relocate`, `--dry-run`, `--all`) and `sync --watch` (CLI 0.2). Ahead: the merge of
-`ahead` and `diverged` documents, `local-new` creation, `sync --resolve`, the git hooks and the merge driver, and
+`ahead` and `diverged` documents, `local-new` creation, `sync --resolve`, the git hooks and the merge driver,
+[Branch binding](branch-binding.md), [Committed files](committed-files.md), unlinking, and
 [Diagram sources](diagram-sources.md).
 
-A **repository link** binds a directory in a code repository to documents in LiveDoc, so the people and agents
-working in that repository find, read and change its diagrams without leaving it. LiveDoc is the **single source
-of truth**: what a repository holds of a document is a **snapshot** of it at a known revision, never its home, as
-the [Google Drive mirror](../022-drive-mirror/drive-mirror.md) is a copy and never a location.
+A **repository link** binds a directory in a repository to documents in LiveDoc, so the people and agents working in
+that repository find, read and change its documents without leaving it. LiveDoc is the **single source of truth**:
+what a repository holds of a document is a **snapshot** of it at a known revision, never its home, as the
+[Google Drive mirror](../022-drive-mirror/drive-mirror.md) is a copy and never a location. A page or a file document
+is written as its own plain file, a [native file](native-files.md), which is a snapshot all the same.
 
 ## Why
 
@@ -45,16 +47,31 @@ documents = ["doc_3h9x2a"]         # and any single documents, from anywhere the
 [mirror]
 level = "files"                    # none | index | files; default index
 dir = "docs/diagrams"              # relative to this file; default diagrams
+ignore = ["drafts/**"]             # paths never adopted or written (Native files)
+
+[repository]
+web = "https://github.com/acme/app/blob/main"  # optional; where links out of a wiki open (Links)
 
 [hooks]
 block = false                      # true: a commit fails when its sync cannot run
+
+[git]                              # native files (Native files)
+branch = "main"                    # the main git branch (Branch binding); default: the remote's default branch
+commit = "none"                    # none | commit | push; default none
+
+[files]                            # which written files are committed (Committed files)
+commit_max_bytes = 1048576         # default 1 MB
+commit_warn_bytes = 209715200      # default 200 MB
 
 [[sources]]                        # sources without a comment syntax (Diagram sources)
 path = "docs/arch.excalidraw"
 tab = "doc_3h9x2a/0b34"
 ```
 
-These are every table and key a link file holds; [Diagram sources](diagram-sources.md) owns `[[sources]]`.
+These are every table and key a link file holds; [Diagram sources](diagram-sources.md) owns `[[sources]]`,
+[Native files](native-files.md#adopting-files) owns `ignore`, [Links](../032-wikis/links.md#links-out-of-the-wiki)
+owns `[repository]`, [Branch binding](branch-binding.md) owns `[git] branch`, and
+[Committed files](committed-files.md) owns `[files]`.
 
 - **Covers.** A link covers the documents in its `folder` (subfolders included) and its listed `documents`. Either
   may be absent, not both. A document moved out of the folder leaves the link's coverage; a listed document stays
@@ -67,11 +84,11 @@ These are every table and key a link file holds; [Diagram sources](diagram-sourc
 
 ## Mirror levels
 
-| Level   | Writes                                                                  | For                                                          |
-| ------- | ----------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `none`  | Nothing                                                                 | Remote-only projects; agents use the CLI against the link    |
-| `index` | `<dir>/INDEX.md` only                                                   | Agents find diagrams with `rg` and read them through the CLI |
-| `files` | `INDEX.md`, plus per document a mirror file and an outline file (below) | Diagrams readable offline, in reviews and in git history     |
+| Level   | Writes                                                                                                                                                         | For                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `none`  | Nothing                                                                                                                                                        | Remote-only projects; agents use the CLI against the link    |
+| `index` | `<dir>/INDEX.md` only                                                                                                                                          | Agents find diagrams with `rg` and read them through the CLI |
+| `files` | `INDEX.md`, plus per document its files: a page or file document as its [native file](native-files.md), any other as a mirror file and an outline file (below) | Documents readable offline, in reviews and in git history    |
 
 `index` is the default: it makes every covered document discoverable at almost no cost in the tree.
 
@@ -89,7 +106,8 @@ tab names and counts; at `files` the outlines are in the outline files.
 
 - **One element per line**, in the tab's stored order, keys sorted. A change to one element is a one-line diff, and
   `rg "Play button"` lands on the element's line.
-- `livedocSync` keeps the host and each tab's `rev`, `hash` and `settingsHash`. It holds **no time** (a pull at
+- `livedocSync` keeps the host, the [document branch](../006-document/document-branches.md) the file is a
+  snapshot of (absent for main) and each tab's `rev`, `hash` and `settingsHash`. It holds **no time** (a pull at
   an unchanged revision writes the same bytes); when it was last synced lives in the local sync state.
 - The slug comes from the document's name at first mirror and then stays: the path is stable while the document is
   renamed or moved, and a sync names the files whose path would now differ (`sync --relocate` moves them, through
@@ -100,14 +118,16 @@ tab names and counts; at `files` the outlines are in the outline files.
 
 ### The outline file
 
-`<slug>.md` beside the mirror file: generated, opening with a line that says so and links the document, then one
+`<slug>.livedoc.md` beside the mirror file, named after it so it never takes the name of a page's own `.md`
+file: generated, opening with a line that says so and links the document, then one
 section per tab holding its [outline view](../024-agents/document-views.md#the-outline-default) in a `text` fence.
 It is what an agent reads first, at a tenth of the JSON's tokens, and what a reviewer reads in a pull request.
 
 ## Sync states
 
 A covered document is in one state, from comparing its mirror file, the file's recorded revisions and hashes, and
-the document now:
+the document now. A native file reads its revision and hash from the sync record instead, and adds the `deleted` and
+`moved` states ([Native files](native-files.md#sync-states)):
 
 | State        | Means                                                                                    | A sync                                       |
 | ------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------- |
@@ -187,14 +207,17 @@ report and the changeset's summary.
 
 ## Commands
 
-| Command                                             | Does                                                                                 |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `link init [--folder <f>] [--doc <d>]... [--level]` | Writes `livedoc.toml`; with no folder, a picker of the person's folders              |
-| `link status`                                       | Every covered document with its state; exits 0 ([In CI](#in-ci) for `--fail-behind`) |
-| `link ls`                                           | The covered documents, as `document ls` prints them                                  |
-| `sync [--watch] [--relocate] [--dry-run] [--all]`   | One sync of the link; `--watch` keeps syncing until interrupted                      |
-| `sync --resolve <file>`                             | A mirror file git left conflicted, resolved by the driver's table                    |
-| `link hooks install\|uninstall`                     | The git hooks and the merge driver ([Git](#git))                                     |
+| Command                                             | Does                                                                                                                                                                                    |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `link init [--folder <f>] [--doc <d>]... [--level]` | Writes `livedoc.toml`; with no folder, a picker of the person's folders                                                                                                                 |
+| `link status [--branch <name>]`                     | Every covered document with its state and branch; exits 0 ([In CI](#in-ci) for `--fail-behind`)                                                                                         |
+| `link ls`                                           | The covered documents, as `document ls` prints them                                                                                                                                     |
+| `sync [--watch] [--relocate] [--dry-run] [--all]`   | One sync of the link; `--watch` keeps syncing until interrupted                                                                                                                         |
+| `sync --resolve <file>`                             | A file git left conflicted, resolved ([Conflicts git leaves](branch-binding.md#conflicts-git-leaves))                                                                                   |
+| `link clean`                                        | Puts git's version back over unsent-free snapshots, so a pull or checkout proceeds ([Branch binding](branch-binding.md#while-people-and-agents-work))                                   |
+| `sync --carry-main [--dry-run]`                     | Writes main's current snapshot of documents git's main is behind onto the current git branch, as one commit for a pull request ([Branch binding](branch-binding.md#main-after-a-merge)) |
+| `link hooks install\|uninstall`                     | The git hooks and the merge driver ([Git](#git))                                                                                                                                        |
+| `unlink [--dry-run]`                                | Ends the link in one commit, leaving every file as it is ([Unlinking](#unlinking-and-re-linking))                                                                                       |
 
 - `link init` without `--folder` or `--doc` shows a picker of the person's folders on a terminal; where stdin or
   stdout is not a terminal it refuses, listing the folders as runnable `link init --folder <id>` commands.
@@ -214,21 +237,27 @@ report and the changeset's summary.
 
 ## Git
 
-Git moves slower than diagrams, so the repository holds **snapshots at commit time**. Diagrams are not branched:
-every branch's snapshots are views of the one document, and every branch's local changes are proposals to it.
+Git moves slower than documents, so the repository holds **snapshots at commit time**. Every git branch is bound to
+the [document branches](../006-document/document-branches.md) of its name, and the main git branch to the documents
+themselves: each git branch's snapshots are of its own document branches, and its local changes are proposals to
+them. One rule holds for diagrams, pages and file documents alike: [Branch binding](branch-binding.md).
 
 ### The hooks
 
 - **Pre-commit** (and **pre-merge-commit**, which `git merge` runs instead) runs `livedoc sync --hook`: one sync,
   then `git add` of exactly the files it wrote. A commit carries the diagrams as they were when it was made, and the
   local changes it carries have reached LiveDoc.
+- **Pre-push** runs `livedoc sync --hook=pre-push`: it checks that each pushed git branch's snapshots are still
+  current, and when they are not it makes one sync commit and stops the push once
+  ([The hooks](branch-binding.md#the-hooks)).
 - **Partial staging is refused.** A mirror file whose staged content differs from the work tree, or a commit with
   its own index (`git commit -o`, `GIT_INDEX_FILE`), would commit what the person did not stage; the hook fails
   naming the file and the fix (`git add <file>`), and syncs nothing.
 - **Never in the way.** Past `SYNC_HOOK_BUDGET_MS`, offline, or signed out, the commit goes through with one
   stderr line naming the revisions its snapshots hold. `[hooks] block = true` fails the commit instead.
 - **The hook line** is guarded, so a teammate without the CLI commits as before:
-  `if command -v livedoc >/dev/null 2>&1; then livedoc sync --hook; fi`. `link hooks install` appends it,
+  `if command -v livedoc >/dev/null 2>&1; then livedoc sync --hook; fi`, and likewise for pre-push.
+  `link hooks install` appends each,
   never replacing a hook, to the tracked hook file where a hook manager keeps one (Husky's `.husky/pre-commit`,
   never its generated `.husky/_`; a `pre-commit` command in `lefthook.yml`), committed for everyone, and otherwise
   to `.git/hooks`, for this clone only.
@@ -240,15 +269,18 @@ every branch's snapshots are views of the one document, and every branch's local
 LiveDoc's history from local changes by each copy's own record: a tab whose hash equals its recorded hash is a
 **clean snapshot**, any other tab carries a **local change**.
 
-| Ours           | Theirs         | Result                                                                              |
-| -------------- | -------------- | ----------------------------------------------------------------------------------- |
-| clean snapshot | clean snapshot | The higher revision's tab, verbatim                                                 |
-| local change   | clean snapshot | Ours, with its own recorded revision; the next sync merges it with LiveDoc          |
-| clean snapshot | local change   | Theirs, likewise                                                                    |
-| local change   | local change   | Ours; theirs is kept as a **pending proposal** in the local sync state and reported |
+| Ours           | Theirs                          | Result                                                                                                                                                 |
+| -------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| clean snapshot | clean snapshot, the same branch | The higher revision's tab, verbatim                                                                                                                    |
+| clean snapshot | clean snapshot, another branch  | Merged element by element from git's base copy, as the branch merge would; marked a snapshot of both, so the next sync makes the same merge in LiveDoc |
+| local change   | clean snapshot                  | Ours, with its own recorded revision; the next sync merges it with LiveDoc                                                                             |
+| clean snapshot | local change                    | Theirs, likewise                                                                                                                                       |
+| local change   | local change                    | Ours; theirs is kept as a **pending proposal** in the local sync state and reported                                                                    |
 
-- The driver never merges two snapshots element by element: two revisions of LiveDoc are not two edits, and
-  their difference is never sent back.
+- The driver never merges two snapshots of one document branch element by element: two revisions of one branch are
+  not two edits, and their difference is never sent back. Two branches' snapshots are two edits, and merge as the
+  [branch merge](../006-document/document-branches.md#merging) does; the merge it writes is provisional, and the
+  next sync replaces it with LiveDoc's ([Merging in git](branch-binding.md#merging-in-git)).
 - It works offline and sends nothing. The next sync sends pending proposals first, each merged against LiveDoc
   from its own base, so both branches' changes arrive.
 - A tab in only one copy is kept; the document envelope's other fields come from the copy with the higher revision.
@@ -259,7 +291,40 @@ LiveDoc's history from local changes by each copy's own record: a tab whose hash
 ### In CI
 
 `link status` answers whether the committed snapshots are current; it fails a build only when asked
-(`--fail-behind`), and without a token it says so and exits 0.
+(`--fail-behind`), and without a token it says so and exits 0. On a pull request it judges the document branches the
+pull request carries, and main only on main ([In CI](branch-binding.md#in-ci)).
+
+## Unlinking and re-linking
+
+A repository opts in and out at any moment, and neither touches a document or any file's bytes.
+
+- **Linking adopts what is there.** `link init` on a folder of existing files adopts them unchanged: the first commit
+  after it adds only the link file and the sync records
+  ([Wiki](../032-wikis/wiki.md#bringing-an-existing-wiki-in)).
+- **`livedoc unlink`** ends the link in one commit: it removes the link file, the sync records, the managed
+  `.gitignore` section ([Committed files](committed-files.md#the-managed-section)) and the hook lines it installed in
+  tracked hook files; this clone's own `.git/hooks` lines and merge driver registration go too. Every other file stays
+  exactly as it is. Before it commits, it:
+  1. syncs once, so the files hold the current snapshot of the git branch it runs on;
+  2. lists the open document branches of this repository **not yet in git** (their latest revision in no local git
+     branch's records) and, when asked, **writes each to its git branch first**: one sync commit per git branch, made
+     in a temporary worktree so the checkout never switches. A git branch only on the remote is fetched; one deleted
+     (its document branches in their grace) or never created (a branch started in LiveDoc) is created from the main
+     git branch. Pushing them stays the person's;
+  3. lists the files [kept out of git](committed-files.md) and offers to commit them or leave them on disk;
+  4. says what never reaches files and stays in LiveDoc: margin notes, comments, presence, share links and roles,
+     and the Timeline.
+- **The folder in LiveDoc is then made read-only** (asked, for an Editor of the folder), marked "Unlinked from
+  <repository> on <git branch>, <when>", so nobody keeps editing documents whose edits no longer reach the
+  repository. Nothing in it is lost; **Make editable** lifts it. Unlinked on a git branch other than main, the link
+  ends where that commit lands, and the mark names the git branch.
+- `unlink --dry-run` lists all of it and changes nothing; declining any step changes nothing.
+- **Removing the link by hand** (deleting the link file and `.livedoc/` without the CLI) ends it as well, without
+  those steps; the folder in LiveDoc stays editable, and its open branches stay open until discarded.
+- **Re-linking later** (`link init --folder <folder>` on the same folder, while it still exists) reattaches each file
+  to its old document by path, and by content where the path moved, as a
+  [move](native-files.md#renames-and-moves) is found; a file changed meanwhile folds back from its nearest base, and
+  the read-only mark lifts. A folder purged since links as new: its files are adopted as new documents.
 
 ## Local sync state
 
@@ -291,6 +356,7 @@ holds the base snapshots (the latest `SYNC_BASES_KEPT` per tab), the pending pro
 ## Observability and telemetry
 
 - CLI debug fingerprints: `[sync] state`, `[sync] wrote`, `[sync] sent`, `[sync] merged`, `[sync] lost-local-value`,
-  `[sync] gone`, `[sync] unreadable`, `[sync] pending`, `[sync] resolved`, `[sync] refused`, `[sync] lock-wait`, each with the document and tab ids, never content.
-- Telemetry: category `Cli`, action `Used`, type the verb (`LinkInit`, `Sync`, `SyncWatch`, `LinkHooks`), as every
+  `[sync] gone`, `[sync] unreadable`, `[sync] pending`, `[sync] resolved`, `[sync] refused`, `[sync] lock-wait`, `[unlink] started`, `[unlink] branch-written`, `[unlink] committed`,
+  `[unlink] declined`, `[relink] reattached`, each with the document and tab ids, never content.
+- Telemetry: category `Cli`, action `Used`, type the verb (`LinkInit`, `Sync`, `SyncWatch`, `LinkHooks`, `Unlink`), as every
   command ([CLI](../015-api/cli.md#telemetry)).

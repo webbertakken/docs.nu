@@ -75,6 +75,12 @@ Elements are [refs and selectors](../024-agents/edit-operations.md#selectors); t
 element whose thread they act on, and `--cell <A1>` on a Sheet for a cell's thread
 ([Cell comments](../029-sheets/sheet.md#cell-comments)).
 
+**Branches** (specified, not built). Document commands and changesets take `--branch <name>` and act on that
+[document branch](../006-document/document-branches.md#agents); inside a linked work tree they default to the branch
+bound to the work tree's git branch ([Branch binding](../027-repositories/branch-binding.md)). `document branches`,
+`document merge` and `document discard` list, merge and discard them; `link clean` and `unlink` join the link
+commands ([Repository link](../027-repositories/repository-link.md#commands)).
+
 **Files.** `-f <file>` holds edit operations, a graph, Mermaid, or elements, told apart by their content; a file
 that is none of them is refused.
 

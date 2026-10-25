@@ -5,11 +5,11 @@
 Three words describe how a document and its tabs differ. They answer different questions and are never
 interchangeable. These are design decisions, taken before any feature that uses them.
 
-| Term         | Answers                        | Values                                                      | Where it lives                                |
-| ------------ | ------------------------------ | ----------------------------------------------------------- | --------------------------------------------- |
-| **mode**     | How is a tab worked on?        | Diagram, Draw, Workshop, Pages, Plan (`EditorMode`)         | Per tab, the same for everyone; `Tab.opensIn` |
-| **kind**     | What is a tab?                 | the general diagram tab, or Event Storming (`TabKind`)      | `Tab.kind`                                    |
-| **template** | What was a document made from? | a template (`TemplateKind`), grouped into template families | Captured once, at creation                    |
+| Term         | Answers                        | Values                                                                   | Where it lives                                |
+| ------------ | ------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------- |
+| **mode**     | How is a tab worked on?        | Diagram, Draw, Workshop, Pages, Plan (`EditorMode`)                      | Per tab, the same for everyone; `Tab.opensIn` |
+| **kind**     | What is a tab?                 | the general diagram tab, Event Storming, Markdown, File, ... (`TabKind`) | `Tab.kind`                                    |
+| **template** | What was a document made from? | a template (`TemplateKind`), grouped into template families              | Captured once, at creation                    |
 
 ### Mode
 
@@ -33,6 +33,10 @@ interchangeable. These are design decisions, taken before any feature that uses 
 - The general diagram tab is the default kind. **Event Storming** is the only other kind among the canvas modes;
   Plan's tabs are kinds of their own ([Plan tabs](../026-plan/plan-tabs.md): Board, Sheet and Dashboard, and the Form
   tab of [Forms](../030-forms/forms.md)), each always in Plan.
+- **Markdown** and **File** are kinds outside the canvas, worked on in no mode: a markdown tab holds one text
+  ([Markdown tab](../031-markdown/markdown-tab.md)), a file tab one file's bytes ([File tab](../006-document/file-tab.md)).
+  Every file is a document; a markdown file is a document with one markdown tab, people call it a **page**.
+  A page is edited on an **editing surface** (Rich, Split or Source), which is one person's choice, never a mode.
 - A new kind is added only when no mode can serve the use.
 - "Board type" means a kind. It never names a template or a mode.
 
@@ -162,6 +166,48 @@ The words for diagrams living beside code ([Repositories](../027-repositories/RE
 | **residue**             | What a bound tab holds that its source's format cannot express                        | extras, unsupported                    |
 | **workbench**           | A developer tool that frames the editor beside an agent (an agent workbench, VS Code) | host (that is a profile's server), IDE |
 | **selection reference** | The text naming what was selected, attached to a person's message to their agent      | context, selection payload             |
+| **native file**         | A document in its own file form: a page as its `.md`, a file document as its bytes    | export, plain copy                     |
+| **sync record**         | `.livedoc/`: per document and branch, a native file's document, tab, revision, hash   | lock file, manifest                    |
+| **nearest base**        | The kept snapshot a changed file is fewest characters away from; its merge's base     | last sync, latest                      |
+| **branch binding**      | Each git branch syncing with the document branches of its name                        | branch mapping, branch sync mode       |
+| **main git branch**     | The git branch bound to the documents themselves: `[git] branch`                      | live branch, trunk                     |
+| **sync commit**         | A commit a sync or a hook makes, holding only the link's files                        | bot commit, docs commit                |
+| **local copy**          | A link outside git: a folder of plain files kept in step with main, live, both ways   | export, backup, mirror (that is Drive) |
+| **kept out of git**     | Written into the work tree by the sync, never committed                               | ignored, excluded, untracked           |
+| **managed section**     | The `.gitignore` lines between `# livedoc:begin` and `# livedoc:end`                  | LiveDoc block, generated ignore        |
+
+## Document branches
+
+The words for named live copies of a document ([Document branches](../006-document/document-branches.md)).
+
+| Term                | Means                                                                                    | Never called                            |
+| ------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| **document branch** | A named, live copy of a document, edited without touching main                           | fork, draft, copy, variant, version     |
+| **main**            | The document itself, as its branches see it                                              | trunk, master, original, default branch |
+| **branch point**    | What a branch started from: main or another branch, at a revision of each tab            | fork point, base (that is the sync's)   |
+| **merge**           | Bringing a branch's changes into main (or another branch) from their latest shared state | publish, apply, accept                  |
+| **unmerged change** | A stretch or field both sides changed differently, kept beside the result as a note      | conflict (that is a changeset's 409)    |
+| **discard**         | Closing a branch without merging it; restorable for 30 days                              | delete, abandon, reject                 |
+
+- A git branch is always called a git branch; "branch" alone, in documents, means a document branch.
+
+## Wikis
+
+The words for folders of pages read together ([Wikis](../032-wikis/README.md)).
+
+| Term                 | Means                                                                     | Never called                            |
+| -------------------- | ------------------------------------------------------------------------- | --------------------------------------- |
+| **wiki**             | A folder marked as a wiki, with everything below it                       | space, notebook, vault, knowledge base  |
+| **global wiki**      | A wiki for knowledge across projects, synced to a repository of its own   | personal wiki, main wiki                |
+| **project wiki**     | A wiki for one project, synced to a path inside that project's repository | docs folder, repo wiki                  |
+| **section**          | A folder inside a wiki                                                    | sub-wiki, chapter                       |
+| **entry page**       | The page a wiki opens on                                                  | home page, index (that is `INDEX.md`'s) |
+| **sync target**      | Where a wiki's link writes it: a whole repository, or a path inside one   | remote, destination                     |
+| **document address** | `https://<host>/document/<id>`: a document's permanent address            | permalink, share link                   |
+| **backlink**         | A link to a page, seen from the page it points at                         | reference, mention                      |
+| **orphan page**      | A page no other page of its wiki links to                                 | lost page, unlinked page                |
+| **broken link**      | A link whose target LiveDoc cannot find                                   | dead link, 404                          |
+| **wiki health**      | A wiki's orphan pages, broken links and pages missing from its entry page | lint, audit, report                     |
 
 ## Community
 

@@ -53,7 +53,7 @@ An **aggregate view** lists documents from every place at once: **Recent**, **Fa
 
 Every document view shows one row of chips under its page header and breadcrumb:
 
-- One chip per dimension, in dimension order (Opens in, Kind, Template, Made by AI, Edited, People), then **Space**
+- One chip per dimension, in dimension order (Opens in, Kind, Template, Wiki, Made by AI, Edited, People), then **Space**
   on aggregate views only. The folder or team the reader is in is the breadcrumb, never a chip.
 - **Clear** ends the row while the lens is set and empties `q`. It keeps its place when hidden, so nothing moves.
 - A chip opens a listbox of its values under it. Choosing a value toggles it and leaves the listbox open; Escape,
@@ -70,10 +70,11 @@ general diagram tab's environment.
 
 | Dimension | Key        | Chip label  | Values and their labels                                                                                                              |
 | --------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Text      | (none)     | (the field) | Free words                                                                                                                           |
+| Text      | (none)     | (the field) | Free words, matched against names and the text of pages ([Wiki](../032-wikis/wiki.md#search))                                        |
 | Opens in  | `opens-in` | Opens in    | `diagram` Diagram, `draw` Draw, `pages` Pages, `plan` Plan, `workshop` Workshop: the editor mode the document was created to open in |
-| Kind      | `kind`     | Kind        | `event-storming` Event Storming: the first tab's kind when the document was created                                                  |
+| Kind      | `kind`     | Kind        | `event-storming` Event Storming, `markdown` Markdown, `file` File: the first tab's kind when the document was created                |
 | Template  | `template` | Template    | `retrospective` Retrospective, `kanban` Kanban: the template family the document was made from                                       |
+| Wiki      | `wiki`     | Wiki        | `<name>` one wiki the reader can open, `any` every wiki ([Wiki](../032-wikis/wiki.md#search))                                        |
 | Made by   | `made-by`  | Made by AI  | `ai` Made by AI: the document's `source` is the AI assistant or an AI tool through the MCP server (not the CLI)                      |
 | Edited    | `edited`   | Edited      | `today` Today, `7d` Last 7 days, `30d` Last 30 days, `12m` Last 12 months, `this-year` This year                                     |
 | People    | `people`   | People      | `me` Me, `others` Others: the owner of a document; the actor of a Timeline event                                                     |
@@ -82,7 +83,7 @@ general diagram tab's environment.
 - **Opens in**, **Kind** and **Template** read the creation intent recorded on the document
   (Default folders: `opensIn`, `tabKind`, `templateFamily` on the document
   summary). Opens in offers one value per editor mode (`EDITOR_MODES`); Kind offers the specific tab kinds, every
-  creatable kind but the general diagram tab, so today only Event Storming; Template offers the template families
+  creatable kind but the general diagram tab (Event Storming, Markdown and File among them); Template offers the template families
   (`TEMPLATE_FAMILIES`). A document whose recorded value is unknown (made before the intent was recorded) matches no
   value of that dimension; it shows whenever that dimension is not set. A general diagram tab matches no Kind value, and
   a document made from no family matches no Template value.
