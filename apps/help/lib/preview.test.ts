@@ -1,20 +1,58 @@
 import { describe, expect, it } from 'vitest';
-import { PREVIEW_APPS, previewConfig, previewNames, prNumber } from '../../../scripts/preview.mjs';
+import {
+  PREVIEW_APPS,
+  branchLabel,
+  previewConfig,
+  previewNames,
+  prNumber,
+} from '../../../scripts/preview.mjs';
 
 // scripts/preview.mjs derives a pull request's preview deployment from the production wrangler configs
 // (docs/specs/016-platform/preview-deployments.md). It lives here with the other repo-wide guards because
 // scripts/ belongs to no workspace.
 
-const names = previewNames(12, 'webber');
+const names = previewNames(12, 'webber', 'feat/live-cursors');
 
 describe('previewNames', () => {
-  it('names every resource after the pull request', () => {
+  it('names resources after the pull request and the address after its branch', () => {
     expect(names).toEqual({
       prefix: 'docs-nu-pr-12',
       d1: 'docs-nu-pr-12',
       bucket: 'docs-nu-pr-12-images',
-      origin: 'https://docs-nu-pr-12-router.webber.workers.dev',
+      host: 'feat-live-cursors.preview.docs.nu',
+      origin: 'https://feat-live-cursors.preview.docs.nu',
+      workersDevOrigin: 'https://docs-nu-pr-12-router.webber.workers.dev',
     });
+  });
+});
+
+describe('branchLabel', () => {
+  it('keeps a branch name that is already a DNS label', () => {
+    expect(branchLabel('pr-previews')).toBe('pr-previews');
+  });
+
+  it('lowercases and turns every run of other characters into one hyphen', () => {
+    expect(branchLabel('Feat/Live_Cursors')).toBe('feat-live-cursors');
+    expect(branchLabel('fix//two..dots')).toBe('fix-two-dots');
+  });
+
+  it('never starts or ends with a hyphen', () => {
+    expect(branchLabel('/release/')).toBe('release');
+    expect(branchLabel('-x-')).toBe('x');
+  });
+
+  it('fits a DNS label, keeping long names apart by a hash of the full name', () => {
+    const long = 'a'.repeat(70);
+    const label = branchLabel(long);
+    expect(label.length).toBeLessThanOrEqual(63);
+    expect(label).toMatch(/^a+-[0-9a-f]{6}$/);
+    expect(branchLabel(`${long}b`)).not.toBe(label);
+  });
+
+  it('refuses a branch with nothing left to name it by', () => {
+    for (const bad of ['', '///', '...', undefined]) {
+      expect(() => branchLabel(bad)).toThrow(/branch/);
+    }
   });
 });
 
@@ -55,7 +93,7 @@ describe('previewConfig', () => {
     });
   });
 
-  it('drops the production routes and every named environment', () => {
+  it("replaces production's routes with the preview's own host, and drops every named environment", () => {
     const config = previewConfig(
       {
         name: 'docs-nu-router',
@@ -64,8 +102,16 @@ describe('previewConfig', () => {
       },
       { ...opts, app: 'router' },
     );
-    expect(config.routes).toBeUndefined();
+    expect(config.routes).toEqual([{ pattern: names.host, custom_domain: true }]);
     expect(config.env).toBeUndefined();
+  });
+
+  it('gives only the router a custom domain', () => {
+    const config = previewConfig(
+      { name: 'docs-nu-api', routes: [{ pattern: 'docs.nu/api/*' }] },
+      opts,
+    );
+    expect(config.routes).toBeUndefined();
   });
 
   it("binds the preview's own workers, never production's", () => {
