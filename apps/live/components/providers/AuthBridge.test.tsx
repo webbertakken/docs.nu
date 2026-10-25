@@ -201,7 +201,19 @@ describe('AuthBridge', () => {
       expect(await probe.state!.getToken()).toBeNull();
     });
     expect(probe.state!.isSignedIn).toBe(false);
+    expect(probe.state!.sessionEnded).toBe(true);
     expect(localStorage.getItem(SIGNED_IN_HINT_KEY)).toBe('0');
+  });
+
+  it('says the session ended when another tab signed it out', async () => {
+    answer('/api/auth/get-session', { status: 200, body: SIGNED_IN }, { status: 200, body: null });
+    mount();
+    await waitFor(() => expect(probe.state!.isSignedIn).toBe(true));
+    const other = new BroadcastChannel(ACCOUNT_CHANNEL_NAME);
+    other.postMessage({ signedIn: false, from: 'another-tab' });
+    other.close();
+    await waitFor(() => expect(probe.state!.isSignedIn).toBe(false));
+    expect(probe.state!.sessionEnded).toBe(true);
   });
 
   it('signs out here and in every tab, then goes where it was asked', async () => {
@@ -225,6 +237,7 @@ describe('AuthBridge', () => {
     expect(localStorage.getItem(SIGNED_IN_HINT_KEY)).toBe('0');
     expect(forgetRecentDiagrams).toHaveBeenCalledOnce();
     expect(assign).toHaveBeenCalledWith('/');
+    expect(probe.state!.sessionEnded).toBeFalsy();
     await waitFor(() => expect(nudges).toEqual([{ signedIn: false, from: expect.any(String) }]));
     other.close();
   });

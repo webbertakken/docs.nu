@@ -50,14 +50,30 @@ export function AuthBridge({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const workbenchRoute = pathname?.startsWith(WORKBENCH_ROUTE) === true;
   const [session, setSession] = useState<Settled | null>(null);
+  // A signed-in session that ended without this page signing out.
+  const [sessionEnded, setSessionEnded] = useState(false);
   const sessionRef = useLatest(session);
 
-  const settle = useCallback((next: Settled) => {
-    if (next.status === 'off') publishSignInAvailability(false);
-    else if (next.status !== 'unreachable') publishSignInAvailability(true);
-    if (next.status === 'signed-in') writeSignedInHint(true);
-    else if (next.status !== 'unreachable') writeSignedInHint(false);
-    setSession((prev) => (sameSession(prev, next) ? prev : next));
+  const settle = useCallback(
+    (next: Settled) => {
+      if (next.status === 'off') publishSignInAvailability(false);
+      else if (next.status !== 'unreachable') publishSignInAvailability(true);
+      if (next.status === 'signed-in') writeSignedInHint(true);
+      else if (next.status !== 'unreachable') writeSignedInHint(false);
+      const held = sessionRef.current;
+      if (held?.status === 'signed-in' && (next.status === 'signed-out' || next.status === 'off')) {
+        setSessionEnded(true);
+      }
+      if (next.status === 'signed-in') setSessionEnded(false);
+      setSession((prev) => (sameSession(prev, next) ? prev : next));
+    },
+    [sessionRef],
+  );
+
+  // This page's own sign-out or deletion: not an ending to announce.
+  const endHere = useCallback(() => {
+    setSession({ status: 'signed-out' });
+    writeSignedInHint(false);
   }, []);
 
   const tokens = useMemo(
@@ -99,7 +115,9 @@ export function AuthBridge({ children }: { children: ReactNode }) {
 
   const state = useMemo<DeferredAuthState>(() => {
     if (!session) return DEFERRED_AUTH_DEFAULT;
-    if (session.status !== 'signed-in') return DEFERRED_AUTH_GUEST;
+    if (session.status !== 'signed-in') {
+      return sessionEnded ? { ...DEFERRED_AUTH_GUEST, sessionEnded: true } : DEFERRED_AUTH_GUEST;
+    }
     const { user } = session;
     // Everything a session leaves behind in this browser, and every other tab told.
     const forget = async () => {
@@ -125,7 +143,7 @@ export function AuthBridge({ children }: { children: ReactNode }) {
       signOut: async (opts) => {
         if (!(await endSession({ apiBase: API_BASE }))) console.warn('[auth] sign_out_failed');
         await forget();
-        settle({ status: 'signed-out' });
+        endHere();
         if (opts?.redirectUrl) window.location.assign(opts.redirectUrl);
       },
       deleteAccount: async () => {
@@ -134,12 +152,12 @@ export function AuthBridge({ children }: { children: ReactNode }) {
         const outcome = await apiDeleteAccount();
         if (outcome === 'deleted') {
           await forget();
-          settle({ status: 'signed-out' });
+          endHere();
         }
         return outcome;
       },
     };
-  }, [session, settle, tokens]);
+  }, [session, sessionEnded, endHere, tokens]);
 
   return (
     <DeferredAuthContext.Provider value={workbenchRoute ? DEFERRED_AUTH_PENDING : state}>

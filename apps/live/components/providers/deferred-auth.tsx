@@ -36,6 +36,9 @@ export type DeferredAuthState = {
   signOut: (opts?: { redirectUrl?: string }) => Promise<void>;
   // Deletes the account, its data first (`DELETE /api/account`). Null when signed out.
   deleteAccount: (() => Promise<DeleteAccountOutcome>) | null;
+  // True once a session this page held ended somewhere else (signed out in another browser or tab, expired, revoked),
+  // so the page can say so rather than turn into a guest silently. False after this page's own sign-out.
+  sessionEnded?: boolean;
 };
 
 // Not settled yet: what every page sees before the bridge has read the session.

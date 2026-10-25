@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { AuthBridge } from '@/components/providers/AuthBridge';
+import { SessionEndedNotice } from '@/components/chrome/SessionEndedNotice';
 import { ErrorTelemetryBoot } from '@/components/providers/ErrorTelemetryBoot';
 import { PageViewBoot } from '@/components/providers/PageViewBoot';
 import { TimingTelemetryBoot } from '@/components/providers/TimingTelemetryBoot';
@@ -166,6 +167,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <KeyboardAvoidanceBoot />
         <AuthBridge>
           <ToastProvider>
+            <SessionEndedNotice />
             <ConfirmProvider>
               {/* The Google Drive mirror (docs/specs/022-drive-mirror/drive-mirror.md): runs in one
                   tab per browser, signed in, on a deployment that offers it. */}
