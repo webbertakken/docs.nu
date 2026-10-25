@@ -66,8 +66,8 @@ test.describe('a first-time guest with signatures enforced', () => {
   });
 
   // A first mint that never lands (offline, or a navigation that cuts it short) leaves a local unsigned
-  // id. The next load must not stay locked out with it: the worker refuses its upgrade, and the browser
-  // adopts the signed id ("A refused upgrade adopts the signed id").
+  // id. The next load must not stay locked out with it: it mints again and replaces the unsigned id with
+  // the signed one, moving nothing (lib/guest-identity.ts; an unsigned id can never move into anything).
   test('recovers from a first mint that never landed', async ({ page, pageErrors }) => {
     await page.route('**/api/guest-id', (route) => route.abort('internetdisconnected'), {
       times: 1,
@@ -76,6 +76,7 @@ test.describe('a first-time guest with signatures enforced', () => {
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem('livediagram:v2:self-id')))
       .toBeTruthy();
+    const unsignedId = await page.evaluate(() => localStorage.getItem('livediagram:v2:self-id'));
     expect(await page.evaluate(() => localStorage.getItem('livediagram:v2:self-sig'))).toBeNull();
     // That page is unsigned under enforcement, so its create is refused; it settles on the failure
     // card before the next load, so none of its answers land in the next load's record.
@@ -84,8 +85,12 @@ test.describe('a first-time guest with signatures enforced', () => {
     const api = recordApi(page);
     await page.goto('/new?blank=1');
     await page.locator('[data-canvas-a11y-root]').waitFor();
-    expect(api).toContain('POST 403 /api/migrate');
+    expect(api).toContain('POST 200 /api/guest-id');
+    expect(api.filter((line) => line.endsWith(' /api/migrate'))).toEqual([]);
     await expectSignedGuestCreated(page, api);
+    expect(await page.evaluate(() => localStorage.getItem('livediagram:v2:self-id'))).not.toBe(
+      unsignedId,
+    );
     expectNoPageErrors(pageErrors);
   });
 });
