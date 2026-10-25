@@ -110,7 +110,7 @@ describe('flushDocumentSavesBeacon', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     flushDocumentSavesBeacon({
       ...base,
-      ownerId: 'user_abc',
+      ownerId: 'acct_abc',
       changedTabs: [makeTab('t1')],
       deletedIds: ['t2'],
       tabs: [makeTab('t1')],

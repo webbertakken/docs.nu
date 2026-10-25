@@ -52,8 +52,8 @@ describe('formatDiagnostics', () => {
   });
 
   it('names a signed-in account, and flags guest documents not yet moved to it', () => {
-    const text = formatDiagnostics({ ...base, ownerId: 'user_2abcDEF' });
-    expect(text).toContain('Signed in: yes (user_2abcDEF)');
+    const text = formatDiagnostics({ ...base, ownerId: 'acct_2abcDEF' });
+    expect(text).toContain('Signed in: yes (acct_2abcDEF)');
     expect(text).toContain('Guest documents moved to the account: NOT YET');
   });
 
