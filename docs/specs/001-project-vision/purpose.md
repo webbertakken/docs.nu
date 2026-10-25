@@ -1,6 +1,7 @@
 # Purpose
 
-livediagram is a web app where teams build **diagrams together, in real time**.
+livedocs, at [docs.nu](https://docs.nu), is where anyone keeps **documents of every kind, together, in real time**,
+and where each document can live on as a plain file in a repository.
 
 This is the root of the spec tree: every other spec is a decision taken inside
 the boundaries set here. That only works if it stays true, so it carries a
@@ -9,139 +10,108 @@ than quietly describing a product that no longer exists.
 
 ## What it is
 
-A multiplayer canvas in the browser. Anyone with access to a document can join,
-see other collaborators' cursors and edits live, and contribute simultaneously.
-The output is a shared visual artifact (a flowchart, an architecture diagram, a
-mindmap, a retro board) that a team builds together rather than one person
-authoring and the rest reviewing.
+A multiplayer workspace of documents in the browser. **Every file is a
+document**: a page of prose, a diagram, a board, a sheet, a form, a deck. People
+and agents open the same document at once, see each other's cursors and edits
+live, and contribute simultaneously.
 
-The canvas is the product. Everything else exists because a team building a
-diagram together is usually doing it **in a session** with other people, and the
-things that session needs (a way to vote, a timer, someone running it, a way to
-present the result at the end) were otherwise a second tool and a context
-switch.
+- **A document holds tabs, and every tab has a kind.** A document with one tab
+  hides its tab strip: it reads as a single page, while the tab still holds its
+  data, so a second tab can arrive later without changing what the document is.
+- **Markdown is native.** A markdown file is a document with a single tab of the
+  **markdown** kind, edited together live, and it stays a markdown file: wherever it syncs to, it arrives
+  as plain markdown that any tool can read.
+- **Documents sync to where they are used.** livedocs is the source of truth;
+  the command line syncs documents out to repositories and other systems as
+  plain files, and folds changes made there back in. Agents that read files with
+  `rg` read the same words people edit in the browser.
+- **Wikis are folders.** A global wiki is a folder that syncs to a repository of
+  its own; a project wiki is a folder that syncs to a path inside the project's
+  repository. Both are edited, linked and searched the same way.
+
+It grew out of livediagram, and keeps everything that made livediagram's canvas
+good: the diagram, board, sheet and form tabs are livedocs tab kinds, worked on as
+they are there ([livediagram upstream](../002-project-scope/livediagram-upstream.md)).
+
+## The product comes first
+
+Opening docs.nu lands in the **Explorer**, at `/`, not on a marketing page. The first
+thing anyone sees is their own workspace, ready to use; there is nothing to read
+before there is something to do. The marketing pages exist, under `/about`, and are secondary to an extremely well tailored experience of the
+product itself.
+
+Pricing follows the same rule. Hosting is free and generous for everyone, so
+nobody thinks about a plan when they start. Plans live in the menus, under
+**Usage**, for the people whose usage grows past what free hosting covers
+([Open source + distribution](../002-project-scope/open-source-and-business-model.md)).
 
 ## Target users
 
-Teams that think visually and need to do that thinking together:
+Anyone who writes things down to think, alone or together, and wants what they
+write to stay theirs:
 
-- Engineering teams sketching architecture, sequence flows, and system designs.
-- Product and design teams mapping user journeys, information architecture, and
-  brainstorms.
-- Cross-functional groups in workshops, planning sessions, and retrospectives.
+- People keeping a personal or shared wiki of what they know.
+- Engineering teams whose documentation, diagrams and decisions belong next to
+  their code, and stay readable there.
+- Teams that plan, run sessions and record outcomes in the same place they
+  write.
+- **Agents.** A command line, an API and an MCP server read and write documents,
+  so an agent works in the same documents as the people it works for.
 
-The unit of value is the **team**. The entry point is one person: the canvas
-works fully without signing in, and a guest gets persistence, share links and
-real-time collaboration ([Auth + guest access](../014-identity/auth-and-guest-access.md)). That is not a
-contradiction, it is the funnel. Somebody tries it alone, and the product earns
-the second person. What it must not become is a tool where the second person
-never arrives.
+The entry point is one person: the workspace works fully without signing in.
+Collaboration earns the second person; sync earns the repository.
 
 ## Core capabilities
 
-- **Real-time multiplayer canvas** ([Live app](../007-editor/live-app.md),
-  [Realtime conflict resolution](../012-collaboration/realtime-conflict-resolution.md)): live cursors, selection
-  awareness, per-element merge so concurrent edits don't clobber, and an ordered
-  room with reconnect catch-up. Plus the verbs a session needs: Follow Me
-  ([Follow-me viewport](../012-collaboration/follow-me-viewport.md)), Bring Focus
-  ([Bring Focus](../012-collaboration/bring-focus.md)), and a facilitator baton so one person runs
-  the room ([Facilitator](../012-collaboration/facilitator.md)).
-- **Diagrams** ([Canvas and palette](../008-canvas/canvas-and-palette.md)): shapes, arrows,
-  connectors, text, tables, code blocks, checklists, images and embeds, plus
-  web components that lay themselves out
-  ([Web components are elements; groups are gone](../009-elements/web-components-and-no-groups.md)).
-- **Mindmaps** ([The mind node](../009-elements/mind-node.md)): hierarchical node/branch
-  structures with keyboard-driven expansion.
-- **Structure**: tabs, tab folders, per-tab layers ([Layers](../006-document/layers.md)),
-  themes and templates.
-- **Running the session**: timers and dot votes
-  ([Session tools (timer + voting)](../012-collaboration/session-tools.md)), live polls ([Live poll (ephemeral pulse-check)](../012-collaboration/live-poll.md)),
-  and the ask-the-room elements that followed: estimates
-  ([Estimate card](../012-collaboration/estimate-card.md)), temperature checks
-  ([Temperature check](../012-collaboration/temperature-check.md)), idea boxes
-  ([Idea box](../012-collaboration/idea-box.md)), agendas ([Agenda](../012-collaboration/agenda.md)), decision
-  records ([Decision record](../012-collaboration/decision-record.md)) and roll calls
-  ([Roll call](../012-collaboration/roll-call.md)). These are elements on the canvas, not a side
-  panel, which is why they keep arriving: the canvas already knew how to hold
+- **Real-time collaboration** on every tab kind, markdown included: live
+  cursors, concurrent edits that merge rather than clobber, reconnect catch-up.
+- **Documents of every kind**: markdown pages, diagrams, boards, sheets, forms,
+  decks and any other file, organised in folders.
+- **Sync**: the command line mirrors documents to repositories and other systems
+  as plain files, and back.
+- **Wikis**, global and per project, with links between pages and search across
   them.
-- **Presenting the result** ([Presentation mode](../012-collaboration/presentation-mode.md)): full-screen
-  slide decks built from element sets that can span tabs.
-- **Getting work in and out**: import/export as JSON, Mermaid
-  ([Mermaid import & export](../020-import-export/mermaid.md)), Markdown and Excalidraw
-  ([Excalidraw import & export](../020-import-export/excalidraw-import-export.md)); draw.io import
-  ([draw.io import](../020-import-export/drawio-import.md)); image export
-  ([Export fidelity](../020-import-export/export-fidelity.md)); read-only embeds.
-- **Teams** ([Teams](../013-workspace/teams.md), [Team shared documents](../013-workspace/team-shared-documents.md)): a
-  named group with Admin/Member roles and a shared library of documents and
-  folders. A document lives in exactly one place: someone's personal tree, or one
-  team's library. Personal is the default; a team is opt-in.
-- **Persistence and history**: every change is saved; undo and redo step
-  back and forth through your own recent edits, and the
-  [Timeline](../013-workspace/timeline.md) records what happened to each document.
-- **Machine access**: a public REST API with signed-in tokens
-  ([Public API and API tokens](../015-api/public-api-and-tokens.md)) and an MCP server so AI tools can
-  read and write documents ([MCP server](../015-api/mcp-server.md)).
+- **Machine access**: a public API, a command line and an MCP server.
+- **Self-hosting**: the whole product runs on anyone's own infrastructure.
 
 ## What it is _not_
 
-- **Not a documentation platform.** Diagrams may be embedded elsewhere, but
-  long-form prose is not the goal.
-- **Not a general-purpose whiteboard.** Freehand, the Shape Pen and the
-  Highlighter exist ([Two pens instead of a pen and a mode](../008-canvas/two-pens.md), [Highlighter](../008-canvas/highlighter.md)),
-  and so do stickers, emoji and avatars, but structured output is still the
-  point: the test for a new drawing affordance is whether it helps produce a
-  diagram someone would keep, not whether a whiteboard has one.
-- **Not a desktop app.** The web, with collaboration, is the product. Offline
-  Mode is a per-document choice, not the default posture (see below).
-- **Not a paid product, ever.** No tier, no billing, no feature flags gating the
-  core editor ([Open source + distribution](../002-project-scope/open-source-and-business-model.md)).
+- **Not a marketing site with an app behind it.** The product is the front door.
+- **Not a lock-in.** Every document can leave as a plain file; a markdown file
+  never becomes a format only livedocs reads.
+- **Not the home of source code.** Code lives in repositories and their editors;
+  livedocs holds what is written about it, beside it.
+- **Not a paywall.** No feature is reserved for a plan: plans buy more usage,
+  never more product.
 
 ## Boundaries that have moved
 
-This section exists because this document sat unrevised for four months while
-126 specs landed, and by the end it disclaimed things the product shipped. A
-boundary nobody maintains is not a boundary. When one moves, it gets recorded
-here in the same change, with the spec that moved it.
+When a boundary moves, it is recorded here in the same change, with the spec
+that moved it. livedocs started from livediagram's purpose, and these moved at
+the start:
 
-- **"Not a presentation or slide tool"**: reversed by
-  [Presentation mode](../012-collaboration/presentation-mode.md). Presentation mode is full-screen slide
-  decks with their own panel and presenting HUD. That is a presentation tool,
-  and the product is better for it, because the session that built the diagram
-  usually ends by showing it.
-- **"Not an offline-first desktop app"**: narrowed by
-  [Offline Mode](../006-document/offline-mode.md). Still not a desktop app, and cloud is still the
-  default, but a document can now be kept only in this browser's IndexedDB and
-  converted back and forth. Offline is a supported mode, not merely an
-  unsupported state.
-- **"Freehand is not the primary medium"**: still true, and now load-bearing
-  rather than obvious. Three drawing tools shipped without displacing structured
-  elements; the bullet above states the test that keeps it that way.
+- **"The canvas is the product"**: widened by this spec. Documents are the
+  product; the canvas is one of their tab kinds.
+- **"Not a documentation platform"**: reversed by this spec. Documentation and
+  wikis are what livedocs is for.
+- **"Not a paid product, ever"**: narrowed by
+  [Open source + distribution](../002-project-scope/open-source-and-business-model.md).
+  Hosting stays free; usage beyond it can be bought, to pay for hosting. No
+  feature is ever gated.
+- **The landing page leads**: reversed by this spec. The Explorer is the front
+  door; marketing is secondary.
 
 ## Why it matters
 
-Most teams bounce between tools that are either single-player (Lucidchart,
-draw.io for casual users), heavyweight and slow (enterprise diagram suites), or
-general-purpose whiteboards that don't produce clean, structured output (Miro,
-FigJam). livediagram exists to be the **fast, focused, multiplayer-from-the-start**
-option for teams whose primary need is producing diagrams together.
-
-"Focused" is the load-bearing word and the hardest to keep. The surface is now
-large, and the honest check on any new feature is not "is this good?" but "does
-a team building a diagram together need this in the room?".
+Knowledge gets split between tools that are good at prose, tools that are good
+at drawing, and repositories where agents and tools can actually read it. Each
+copy drifts from the others. livedocs exists to be **one place where every kind
+of document is written together, live, and still lands as a plain file wherever
+it is needed**.
 
 ## How it ships
 
-livediagram is **open source** (MIT) and also runs as a **hosted product**, free
-for everyone, no paid tier. Anyone can self-host the entire codebase; the hosted
-version is the easy default. See
-[03-open-source-and-business-model.md](../002-project-scope/open-source-and-business-model.md).
-
-The canvas is **always available without signing in**: a visitor can build a
-real diagram before being asked to create an account. Auth (Clerk) unlocks sync,
-teams and per-account history on top of that. See
-[04-auth-and-guest-access.md](../014-identity/auth-and-guest-access.md).
-
-Usage is measured, anonymously and first-party, and published at `/telemetry`
-([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)). That dashboard is how a claim on this page gets
-checked: "the unit of value is the team" is a statement the Collaboration tab
-can agree or disagree with.
+livedocs is **open source** (MIT), self-hostable in full, and runs as a
+**hosted product** at [docs.nu](https://docs.nu), free for everyone, with
+usage-based plans for power users. See
+[Open source + distribution](../002-project-scope/open-source-and-business-model.md).

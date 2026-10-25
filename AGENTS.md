@@ -1,6 +1,10 @@
-# livediagram
+# livedocs
 
-Monorepo for the livediagram product. Multiple apps share code through internal packages.
+Monorepo for livedocs, hosted at [docs.nu](https://docs.nu). Multiple apps share code through internal packages.
+
+- livedocs is a parallel product to livediagram, which it grew from: see [Purpose](docs/specs/001-project-vision/purpose.md).
+- Changes from livediagram are picked by hand, never merged: see [livediagram upstream](docs/specs/002-project-scope/livediagram-upstream.md).
+- Code, packages and specs still named `livediagram` keep that name until a livedocs change renames them.
 
 ## Before you start
 
@@ -251,9 +255,9 @@ Workspaces are managed with **pnpm** (`pnpm-workspace.yaml`). Tasks are orchestr
 See [Open source + distribution](docs/specs/002-project-scope/open-source-and-business-model.md).
 
 - The codebase is **MIT-licensed** and **publicly viewable**. Anyone can self-host.
-- A free hosted version runs alongside at livediagram.app. **No paid tier and no plan to introduce one.**
+- A free hosted version runs at docs.nu. Usage-based plans (storage and sync volume) are found under Usage, never on marketing pages, and buy usage, never features.
 - Don't add code that breaks self-hosting (no required SaaS calls, no license checks gating the core editor). Clerk auth is optional: when unset the api worker and live frontend degrade to pure-guest mode.
-- No "Pro features" flags, no billing integration. If we ship it, every user gets it.
+- No "Pro features" flags. Billing is a hosted concern, optional and off for self-hosters. If we ship it, every user gets it.
 
 ## Secrets policy
 
