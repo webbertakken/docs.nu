@@ -15,7 +15,7 @@ A small Cloudflare Worker that fronts the apex domain (`livediagram.app`) and ro
 | `/help`, `/help/*`                                                                                                                                         | help app (`apps/help`), stripped       |
 | `/community`, `/community/*`                                                                                                                               | Community (`apps/community`), stripped |
 | `/live/*` (the live app's `_next` assets only)                                                                                                             | live app (`apps/live`), stripped       |
-| live page routes: `/document/*`, `/explorer/*`, `/form/*`, `/new`, `/join`, `/sign-in`, `/get-started`, `/embed`, `/oauth/*`, `/sso-callback`, `/icon.svg` | live app (`apps/live`), as-is          |
+| live page routes: `/document/*`, `/explorer/*`, `/form/*`, `/new`, `/join`, `/sign-in`, `/get-started`, `/embed`, `/oauth/*`, `/icon.svg` | live app (`apps/live`), as-is          |
 | a help category segment with no `/help` prefix (`/canvas/*`, `/policies/*`, ...)                                                                           | 308 redirect to `/help/<path>`         |
 | everything else                                                                                                                                            | marketing app (`apps/marketing`)       |
 
@@ -52,7 +52,6 @@ const LIVE_ROUTE_SEGMENTS = new Set([
   'new',
   'oauth',
   'sign-in',
-  'sso-callback',
 ]);
 export default {
   async fetch(request, env) {
