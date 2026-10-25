@@ -18,7 +18,7 @@ const LAST_RESORT = /^Someone did /;
 // Words a reader shouldn't meet: spec numbers, infra and vendor names, code
 // vocabulary, and the old "One occurrence of" filler.
 const JARGON =
-  /spec\/\d|\bClerk\b|api worker|Durable Object|\bD1\b|\bemit|\bmint|One occurrence|localStorage|IndexedDB|—/;
+  /spec\/\d|better-auth|api worker|Durable Object|\bD1\b|\bemit|\bmint|One occurrence|localStorage|IndexedDB|—/;
 // A camelCase or PascalCase token ("FillColor", "SessionButton") is a code
 // name leaking into the copy. Product and brand names are allowed.
 const CODE_NAME =

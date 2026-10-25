@@ -19,12 +19,12 @@ If sign-in is failing and you just want to get on with it, leave the sign-in pag
 
 ## Sign-in checklist
 
-<Figure caption="A wrong code shows an error above the form. Choose Resend code for a fresh one, or Back to change the email.">
+<Figure caption="A wrong code shows an error above the form. Choose Send a new code for a fresh one, or Use a different email to change the address.">
   <SignInError />
 </Figure>
 
-1. **Check the email code.** Sign-in uses a 6-digit code sent to your email. Look in spam, and choose **Resend code** for a fresh one if the first is slow or has expired. Typing or pasting all six digits submits the code on its own; otherwise choose **Verify**.
-2. **Use the same email** you originally signed up with. Signing in with an address that has no account takes you to sign-up instead, with that address filled in; choose **Back** on the code step if you mistyped it.
+1. **Check the email code.** Sign-in uses a 6-digit code sent to your email, valid for 5 minutes. Look in spam. If it is slow or has expired, choose **Send a new code** (it is available 30 seconds after the last one) and use the newest code: an earlier one stops working. Typing or pasting all six digits signs you in on its own. Three wrong tries use a code up; send a new one.
+2. **Use the same email** you originally signed up with. An address that has no account yet is not turned away: the code creates a new, empty account for it. Choose **Use a different email** on the code step if you mistyped it.
 3. **Reload and retry.** A stalled sign-in form usually clears with a refresh.
 4. **Disable interfering extensions.** Privacy or script-blocking extensions can break the sign-in flow. Try an incognito window with extensions off.
 5. **Check the Google option.** If you signed up with Google, use **Continue with Google** rather than the email code. It takes you to Google and back in the same tab, so allow the redirect and third-party sign-in for the site if your browser blocks them.
@@ -33,7 +33,7 @@ If sign-in is failing and you just want to get on with it, leave the sign-in pag
 
 On some deployments, sign-in is simply not turned on. This is a fully supported mode, not an error.
 
-- If the sign-in page says "Sign-in isn't enabled on this deployment", the instance is running in guest-only mode. There is no account to sign into: choose **Continue as guest**.
+- If the sign-in page says "Sign-in isn't turned on for this site", the instance is running in guest-only mode. There is no account to sign into: choose **Continue as guest**.
 - This is common on self-hosted instances. See [configuration and optional auth](/help/self-hosting/configuration/).
 
 If you are on the hosted site, expected sign-in to work, and it still will not complete after the checklist above, [contact us](/help/contact/) with the email address you are using and the error you see. Keep working as a guest in the meantime, your documents are safe.
