@@ -50,8 +50,8 @@ identity, share-code path) and [11-api](../015-api/api.md) (share links).
   own per-network request throttle on the same binding.
 - It is **never** returned anywhere: not in the document DTO, and not to the
   owner either.
-- The **owner always bypasses** the password (identified by `ownerId` / Clerk
-  `sub`). The gate only applies to non-owner, share-code access.
+- The **owner always bypasses** the password (identified by `ownerId` / the
+  account id). The gate only applies to non-owner, share-code access.
 
 ## API (apps/api)
 
@@ -74,7 +74,7 @@ identity, share-code path) and [11-api](../015-api/api.md) (share links).
   password and the provided one doesn't match, access is denied. The header is
   `X-Share-Password`, read via `sharePasswordOf(request)` (`routes/context.ts`),
   threaded at every call site (the document read/write/log routes + the image
-  route). Owner-id and Clerk paths short-circuit before the password check.
+  route). Owner-id and account paths short-circuit before the password check.
 - `GET /api/documents/:id/ws` (realtime upgrade): browsers can't set headers on a
   WS upgrade, so the editor never sends the password there. It sends the password
   as `X-Share-Password` to `POST /api/documents/:id/room-ticket`, whose gate checks
@@ -95,8 +95,8 @@ so the check can spend the caller's guessing budget.
 ## Client (apps/live)
 
 - `api-client.ts` holds a module-level **session share password**
-  (`setSessionSharePassword(pw | null)`), mirroring how the Clerk token provider
-  is registered. `apiHeaders` attaches `X-Share-Password` when it is set, and
+  (`setSessionSharePassword(pw | null)`), mirroring how the session token provider
+  (`setTokenProvider`) is registered. `apiHeaders` attaches `X-Share-Password` when it is set, and
   `connectRoom` appends `&p=`. This keeps the password plumbing in one place
   instead of threading it through every call site.
 - `apiLoadShared(code, ownerId)` returns a discriminated result:

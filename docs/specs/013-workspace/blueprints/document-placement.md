@@ -46,7 +46,7 @@ concept: cloud or this browser).
 `resolvePlacement(requested, caller, lookups)` is a pure sequence over injected lookups:
 
 1. **Team.** `requested.teamId === null` → space `personal`. Otherwise
-   `judgeTeam(caller.verifiedUserId, joined)`: no verified id → `team_forbidden` (the membership lookup is not
+   `judgeTeam(caller.verifiedAccountId, joined)`: no verified id → `team_forbidden` (the membership lookup is not
    made); `joined === false` → `team_forbidden`; else space `team`.
 2. **Folder steps** (`FOLDER_STEPS`), first non-null wins: `explicitFolder` (null when
    `requested.folderId === null`; else `judgeFolder`). When none answers, `spaceRoot` does (`folderId: null`,
@@ -96,7 +96,7 @@ Invariant: no write happens before resolution has succeeded.
 
 ## Security and trust
 
-- Team membership is read against `ctx.verifiedUserId` only (Clerk session or API token); `X-Owner-Id`
+- Team membership is read against `ctx.verifiedAccountId` only (session token or API token); `X-Owner-Id`
   never reaches `judgeTeam`.
 - `folder_not_found` covers every folder the caller cannot see, so the 404/400 split leaks nothing about
   other people's folders or teams the caller has not joined.

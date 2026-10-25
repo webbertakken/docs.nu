@@ -321,7 +321,7 @@ What remains:
 
 ```sql
 CREATE TABLE document_opens (
-  owner_id       TEXT NOT NULL,   -- the person: guest id or Clerk id
+  owner_id       TEXT NOT NULL,   -- the person: guest id or account id
   document_id    TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   last_opened_at INTEGER NOT NULL,
   last_open_day  TEXT NOT NULL,   -- 'YYYY-MM-DD', UTC
@@ -393,10 +393,10 @@ from` moves every row the account does not already hold; each leftover (opened u
 
 ## Security and trust
 
-- `home` is in `OWNER_SCOPED_SEGMENTS`: a Clerk-shaped `X-Owner-Id` is refused and, when armed, the guest signature
+- `home` is in `OWNER_SCOPED_SEGMENTS`: an account-shaped (`acct_…`) `X-Owner-Id` is refused (`401 account_id_not_a_guest_credential`) and, when armed, the guest signature
   is required.
 - `visible` is the boundary: an event, an open or an entry about a document the person cannot open is never read.
-  Team membership is matched on the resolved owner id, as the Inbox does; teams are Clerk-only and a Clerk-shaped
+  Team membership is matched on the resolved owner id, as the Inbox does; teams are account-only and an account-shaped
   guest header never reaches a route.
 - Opens are private: the event is scoped to `user:<person>` only, left out of the feed, and not a What Happened
   verb. Nobody's open is in anybody else's response.

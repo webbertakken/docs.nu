@@ -152,8 +152,8 @@ export type SidebarRowKind =
   | 'library'
   | 'trash';
 export type SidebarLayoutInput = {
-  signedIn: boolean; // teamsEnabled: a Clerk session
-  signInAvailable: boolean; // clerkEnabled: the deployment offers sign-in
+  signedIn: boolean; // a signed-in session (teams exist only for one)
+  signInAvailable: boolean; // the deployment offers sign-in at all
   pendingInvites: number;
   offlineDocuments: number;
   selected: SelectedNode['kind'];
