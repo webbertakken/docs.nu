@@ -10,7 +10,7 @@ LiveDoc runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The to
 - Hostnames: `docs.nu` is canonical. `www.docs.nu` is attached to the router too, and a zone redirect rule (301, path and query kept) sends it to the apex. The zone has Always Use HTTPS on. Both zone settings live in the dashboard, not in this repo.
 - Hosted profile (`apps/api/hosted-vars.json`, applied only in `webbertakken/livedoc`): telemetry on, image gallery caps of 100 images and 100 MB per owner, `APP_BASE_URL` `https://docs.nu`. No Google client id yet, so the Drive mirror is off.
 - Guest-only: no Clerk, so no sign-in, teams, API tokens or MCP. AI and email are off until their keys are set.
-- No staging environment: every pull request gets its own preview on `webber.workers.dev` ([Preview deployments](../specs/016-platform/preview-deployments.md)).
+- No staging environment: every pull request gets its own preview at `https://<branch>.preview.docs.nu` ([Preview deployments](../specs/016-platform/preview-deployments.md)).
 
 ## Deploy
 

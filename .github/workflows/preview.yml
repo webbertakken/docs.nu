@@ -1,7 +1,7 @@
 name: Preview
 
-# One complete, isolated copy of docs.nu per pull request, on workers.dev
-# (docs/specs/016-platform/preview-deployments.md). Deployed on every push to the
+# One complete, isolated copy of docs.nu per pull request, at
+# https://<branch>.preview.docs.nu (docs/specs/016-platform/preview-deployments.md). Deployed on every push to the
 # pull request, deleted when it closes. Pull requests from forks get none: they
 # run without this repository's secrets, and a preview would deploy their code
 # with our Cloudflare token.
@@ -24,8 +24,6 @@ env:
   CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
   GH_TOKEN: ${{ github.token }}
-  # The marker that finds this workflow's own comment on the pull request.
-  MARKER: '<!-- livedoc-preview -->'
 
 jobs:
   deploy:
@@ -67,27 +65,41 @@ jobs:
         id: deploy
         env:
           NEXT_PUBLIC_BUILD_ID: ${{ github.event.pull_request.head.sha }}
+          # Through the environment, never inline: a branch name is text anyone with push access chooses.
+          BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
-          node scripts/preview.mjs deploy "$PR" | tee preview.log
+          node scripts/preview.mjs deploy "$PR" "$BRANCH" | tee preview.log
           url="$(sed -n 's/^PREVIEW_URL=//p' preview.log)"
-          [ -n "$url" ] || { echo "::error::the preview printed no URL"; exit 1; }
+          dev="$(sed -n 's/^PREVIEW_WORKERS_DEV_URL=//p' preview.log)"
+          [ -n "$url" ] && [ -n "$dev" ] || { echo "::error::the preview printed no URL"; exit 1; }
           echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "dev=$dev" >> "$GITHUB_OUTPUT"
 
+      # Linked at once on workers.dev: a new host's certificate takes a few minutes, and the
+      # preview is usable before it.
       - name: Link the preview on the pull request
         env:
           URL: ${{ steps.deploy.outputs.url }}
+          DEV: ${{ steps.deploy.outputs.dev }}
           SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          body="$(printf '%s\n**Preview:** %s\n\nBuilt from %s. Deleted when this pull request closes.' "$MARKER" "$URL" "$SHA")"
-          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
-            --jq "map(select(.body | startswith(\"$MARKER\"))) | .[0].id // empty")"
-          if [ -n "$id" ]; then
-            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
-          else
-            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -f body="$body" > /dev/null
-          fi
+          scripts/preview-comment.sh "$PR" "$(printf '**Preview:** %s\n\n%s follows once its certificate is issued, usually within five minutes. Built from %s. Deleted when this pull request closes.' "$DEV" "$URL" "$SHA")"
+
+      - name: Wait for the preview host
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: node scripts/preview.mjs wait-host "$PR" "$BRANCH"
+
+      - name: Link the preview host on the pull request
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+          DEV: ${{ steps.deploy.outputs.dev }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          scripts/preview-comment.sh "$PR" "$(printf '**Preview:** %s\n\nAlso at %s. Built from %s. Deleted when this pull request closes.' "$URL" "$DEV" "$SHA")"
 
   teardown:
     name: Delete preview
@@ -115,10 +127,4 @@ jobs:
         run: node scripts/preview.mjs teardown "$PR"
 
       - name: Mark the comment
-        run: |
-          set -euo pipefail
-          id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
-            --jq "map(select(.body | startswith(\"$MARKER\"))) | .[0].id // empty")"
-          [ -z "$id" ] && exit 0
-          body="$(printf '%s\n**Preview:** deleted when this pull request closed.' "$MARKER")"
-          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
+        run: scripts/preview-comment.sh "$PR" '**Preview:** deleted when this pull request closed.' --update-only

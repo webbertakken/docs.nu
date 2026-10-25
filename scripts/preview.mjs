@@ -1,14 +1,20 @@
 // Pull request previews (docs/specs/016-platform/preview-deployments.md): one complete, isolated copy of
 // docs.nu per pull request, on workers.dev, derived from the production wrangler configs.
 //
-//   node scripts/preview.mjs deploy <pr>     create or update the preview; prints its origin
-//   node scripts/preview.mjs teardown <pr>   delete every resource the preview owns
+//   node scripts/preview.mjs deploy <pr> <branch>      create or update the preview; prints both addresses
+//   node scripts/preview.mjs wait-host <pr> <branch>   wait until https://<branch>.preview.docs.nu answers
+//   node scripts/preview.mjs teardown <pr>             delete every resource the preview owns
+//
+// A preview is reached at https://<branch>.preview.docs.nu (a custom domain on its router) and at its
+// router's workers.dev address. Every resource is named after the pull request, so a renamed branch
+// moves the address and nothing else.
 //
 // Needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID. `deploy` expects `pnpm build` to have run; its
 // NEXT_PUBLIC_BUILD_ID, when set, becomes the api's BUILD_ID. The pure helpers are exported for
 // apps/help/lib/preview.test.ts.
 
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +24,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PRODUCTION_PREFIX = 'docs-nu-';
 const PREVIEW_CONFIG = 'wrangler.preview.json';
 const LOCATION = 'weur';
+const PREVIEW_DOMAIN = 'preview.docs.nu';
+const DNS_LABEL_MAX = 63;
+const HASH_LENGTH = 6;
 
 /** Deploy order: the api first (two apps bind it), the router, which binds the other six, last. */
 export const PREVIEW_APPS = [
@@ -30,15 +39,48 @@ export const PREVIEW_APPS = [
   'router',
 ];
 
-/** @param {number} pr @param {string} subdomain the account's workers.dev subdomain */
-export function previewNames(pr, subdomain) {
-  const prefix = `docs-nu-pr-${pr}`;
+/**
+ * A branch name as one DNS label: lowercase letters, digits and single hyphens, never at either end. A
+ * name too long for a label keeps its start and gains a hash of the whole name, so two long branches that
+ * share a start still get different labels.
+ * @param {string | undefined} branch
+ */
+export function branchLabel(branch) {
+  const slug = (branch ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  if (!slug)
+    throw new Error(`preview: the branch name "${branch ?? ''}" has nothing to name a host by`);
+  if (slug.length <= DNS_LABEL_MAX) return slug;
+  const hash = createHash('sha256')
+    .update(branch ?? '')
+    .digest('hex')
+    .slice(0, HASH_LENGTH);
+  const head = slug.slice(0, DNS_LABEL_MAX - HASH_LENGTH - 1).replace(/-+$/, '');
+  return `${head}-${hash}`;
+}
+
+/**
+ * @param {number} pr
+ * @param {string} subdomain the account's workers.dev subdomain
+ * @param {string} branch the pull request's head branch
+ */
+export function previewNames(pr, subdomain, branch) {
+  const resources = previewResources(pr);
+  const host = `${branchLabel(branch)}.${PREVIEW_DOMAIN}`;
   return {
-    prefix,
-    d1: prefix,
-    bucket: `${prefix}-images`,
-    origin: `https://${prefix}-router.${subdomain}.workers.dev`,
+    ...resources,
+    host,
+    origin: `https://${host}`,
+    workersDevOrigin: `https://${resources.prefix}-router.${subdomain}.workers.dev`,
   };
+}
+
+/** What a pull request's preview owns on Cloudflare, by name: all teardown needs. @param {number} pr */
+function previewResources(pr) {
+  const prefix = `docs-nu-pr-${pr}`;
+  return { prefix, d1: prefix, bucket: `${prefix}-images` };
 }
 
 /** @param {string | undefined} arg */
@@ -107,7 +149,10 @@ export function previewConfig(config, { app, names, d1Id }) {
   if (app === 'api') {
     out.vars = { ...rest.vars, AI_ALLOWED_ORIGINS: names.origin, APP_BASE_URL: names.origin };
   }
-  if (app === 'router') out.vars = { ...rest.vars, DEPLOY_ENV: 'preview' };
+  if (app === 'router') {
+    out.vars = { ...rest.vars, DEPLOY_ENV: 'preview' };
+    out.routes = [{ pattern: names.host, custom_domain: true }];
+  }
   return out;
 }
 
@@ -213,8 +258,95 @@ async function wranglerDeploy(app, extraArgs) {
   }
 }
 
-async function deploy(pr) {
-  const names = previewNames(pr, await workersSubdomain());
+/** Custom domains on the account, filtered by the API on hostname or worker. */
+async function customDomains(filter) {
+  const { json } = await cf('GET', `/workers/domains?${new URLSearchParams(filter)}`);
+  return json.result;
+}
+
+async function detachDomain(domain, why) {
+  await cf('DELETE', `/workers/domains/${domain.id}`);
+  log(`detached ${domain.hostname} from ${domain.service} (${why})`);
+}
+
+// Two branches can share a label (feat/x and feat-x). The second must not take the first one's host.
+async function refuseTakenHost(names) {
+  const router = `${names.prefix}-router`;
+  const taken = (await customDomains({ hostname: names.host })).find((d) => d.service !== router);
+  if (taken) {
+    throw new Error(
+      `preview: ${names.host} already serves ${taken.service}; rename this branch to get a host of its own`,
+    );
+  }
+}
+
+// A host stays attached until removed: after a branch rename, the old one goes.
+async function detachStaleHosts(names) {
+  const router = `${names.prefix}-router`;
+  for (const domain of await customDomains({ service: router })) {
+    if (domain.hostname !== names.host) await detachDomain(domain, 'the branch was renamed');
+  }
+}
+
+// A new custom domain answers once its DNS record exists and its certificate is issued: about four
+// minutes when measured. Its DNS is asked of Cloudflare directly first, because a resolver that is asked
+// too early caches "no such host" for the zone's negative TTL (1800 s on docs.nu); the system resolver
+// is only asked once the record exists, so it never caches the miss.
+const HOST_WAIT_MS = 15 * 60_000;
+const HOST_POLL_MS = 10_000;
+// By address, not by name: networks that filter DNS often block the DoH hostnames themselves.
+const DOH = 'https://1.1.1.1/dns-query';
+
+async function hostResolves(host) {
+  const res = await fetch(`${DOH}?name=${encodeURIComponent(host)}&type=A`, {
+    headers: { accept: 'application/dns-json' },
+  }).catch((error) => {
+    throw new Error(`preview: DNS over HTTPS at ${DOH} failed: ${describeFetchError(error)}`);
+  });
+  if (!res.ok) throw new Error(`preview: DNS over HTTPS answered ${res.status} for ${host}`);
+  const answer = /** @type {{ Answer?: unknown[] }} */ (await res.json());
+  return (answer.Answer?.length ?? 0) > 0;
+}
+
+/** "fetch failed" alone hides whether DNS, TLS or the connection failed; the cause names it. */
+function describeFetchError(error) {
+  if (!(error instanceof Error)) return String(error);
+  const cause = /** @type {{ code?: string, message?: string } | undefined} */ (error.cause);
+  return cause
+    ? `${error.message}: ${cause.code ?? ''} ${cause.message ?? ''}`.trim()
+    : error.message;
+}
+
+async function waitForHost(host) {
+  const origin = `https://${host}`;
+  const started = Date.now();
+  const deadline = started + HOST_WAIT_MS;
+  while (!(await hostResolves(host))) {
+    if (Date.now() > deadline)
+      throw new Error(`preview: ${host} has no DNS record after 15 minutes`);
+    log(`waiting for the DNS record of ${host}`);
+    await new Promise((resolve) => setTimeout(resolve, HOST_POLL_MS));
+  }
+  log(`${host} resolves after ${Math.round((Date.now() - started) / 1000)} s`);
+  for (;;) {
+    const status = await fetch(`${origin}/api/capabilities`)
+      .then((res) => res.status)
+      .catch(describeFetchError);
+    if (status === 200) {
+      log(`${origin} answers after ${Math.round((Date.now() - started) / 1000)} s`);
+      return;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(`preview: ${origin} still answers ${status} after 15 minutes`);
+    }
+    log(`waiting for ${origin} (answered ${status})`);
+    await new Promise((resolve) => setTimeout(resolve, HOST_POLL_MS));
+  }
+}
+
+async function deploy(pr, branch) {
+  const names = previewNames(pr, await workersSubdomain(), branch);
+  await refuseTakenHost(names);
   const d1Id = await ensureDatabase(names.d1);
   await ensureBucket(names.bucket);
   for (const app of PREVIEW_APPS) {
@@ -237,7 +369,15 @@ async function deploy(pr) {
     log(`deploying ${app}`);
     await wranglerDeploy(app, app === 'api' && buildId ? ['--var', `BUILD_ID:${buildId}`] : []);
   }
-  log(`live: ${names.origin}`);
+  await detachStaleHosts(names);
+  log(`deployed: ${names.workersDevOrigin}, and ${names.origin} once its certificate is issued`);
+  console.log(`PREVIEW_URL=${names.origin}`);
+  console.log(`PREVIEW_WORKERS_DEV_URL=${names.workersDevOrigin}`);
+}
+
+async function waitHost(pr, branch) {
+  const names = previewNames(pr, await workersSubdomain(), branch);
+  await waitForHost(names.host);
   console.log(`PREVIEW_URL=${names.origin}`);
 }
 
@@ -257,10 +397,13 @@ async function emptyBucket(name) {
 }
 
 async function teardown(pr) {
-  const names = previewNames(pr, await workersSubdomain());
+  const names = previewResources(pr);
   // Reverse order: nothing still binds a worker when it goes.
   for (const app of [...PREVIEW_APPS].reverse()) {
     const worker = `${names.prefix}-${app}`;
+    for (const domain of await customDomains({ service: worker })) {
+      await detachDomain(domain, 'the pull request closed');
+    }
     const { status } = await cf('DELETE', `/workers/scripts/${worker}?force=true`, {
       allow: [404],
     });
@@ -280,14 +423,18 @@ async function teardown(pr) {
   }
 }
 
-async function main([command, arg]) {
+async function main([command, arg, branch]) {
   switch (command) {
     case 'deploy':
-      return deploy(prNumber(arg));
+      return deploy(prNumber(arg), branch);
+    case 'wait-host':
+      return waitHost(prNumber(arg), branch);
     case 'teardown':
       return teardown(prNumber(arg));
     default:
-      throw new Error('usage: node scripts/preview.mjs deploy|teardown <pr>');
+      throw new Error(
+        'usage: node scripts/preview.mjs deploy <pr> <branch> | wait-host <pr> <branch> | teardown <pr>',
+      );
   }
 }
 
