@@ -98,7 +98,7 @@ together or not at all: one flag answers for both.
 
 ### `POST /api/ai`
 
-Auth required (Clerk Bearer JWT **or** `X-Owner-Id`).
+Auth required (a session token as `Authorization: Bearer` **or** `X-Owner-Id`).
 
 Request body:
 
@@ -171,7 +171,7 @@ exactly six:
 | `ai_error`           | 502    | The upstream model call failed.                            |
 | `ai_not_configured`  | 503    | No model key on this deployment (the self-host default).   |
 
-A request with no identity at all (neither a Clerk session nor an `X-Owner-Id`)
+A request with no identity at all (neither a session token nor an `X-Owner-Id`)
 gets the worker-wide `bad_request` 400 every owner-scoped route sends.
 
 **`off_topic` is not one of them.** A prompt the model judges off-topic still returns **200**: the
@@ -265,7 +265,7 @@ stickies are FOUND in the browser by classical computer vision; this route is
 asked only to read the handwriting on the crops that came out of that.
 
 - Same admission sequence as `/api/ai` (shared `routes/ai-gate.ts`): the
-  reader's provider resolves → origin allow-list → Clerk-only flag → owner → method → rate limiter.
+  reader's provider resolves → origin allow-list → account-only flag (`AI_REQUIRE_ACCOUNT`) → owner → method → rate limiter.
 - **Body**: `{ crops: { id, image }[] }` — at most `READ_MAX_CROPS_PER_REQUEST`
   (6) crops per call, each a data URL of at most `CROP_MAX_BYTES` in one of
   `image/jpeg`, `image/png`, `image/webp`. The client batches a bigger run and
