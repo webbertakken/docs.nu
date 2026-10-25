@@ -105,42 +105,36 @@ Run from the repo root:
 
 Turbo caches results, so re-running with no changes is a no-op.
 
-## Enabling Clerk auth locally (optional)
+## Signing in locally (optional)
 
-The editor works without Clerk. To exercise the signed-in code paths:
-
-1. Create a Clerk application in the [Clerk dashboard](https://dashboard.clerk.com).
-2. Copy the **publishable key** and the **JWKS URL**.
-3. Drop them into the two env files:
-
-   ```sh
-   # apps/live/.env.local (gitignored)
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-
-   # apps/community/.env.local (gitignored), optional: turns on My Shares
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-
-   # apps/api/.dev.vars (gitignored)
-   CLERK_JWKS_URL=https://<your-instance>.clerk.accounts.dev/.well-known/jwks.json
-   ```
-
-4. Restart `pnpm dev`.
-
-To also show the **"Continue with Google"** button on `/sign-in` and `/get-started`, enable the Google SSO connection in the Clerk dashboard (dev instances can use Clerk's shared Google credentials with no Google Cloud setup) and add to `apps/live/.env.local`:
+The editor works without sign-in. To exercise the signed-in code paths, turn it on in the api worker; the frontends
+ask the api at runtime, so nothing changes in their env files:
 
 ```sh
-NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED=true
+# apps/api/.dev.vars (gitignored)
+BETTER_AUTH_SECRET=<openssl rand -base64 32>
+APP_BASE_URL=http://localhost:3000
+# Email codes without a mailbox: each code lands in the outbox instead of being sent.
+EMAIL_OUTBOX=1
 ```
 
-It only takes effect when `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` is also set, and like any `NEXT_PUBLIC_*` change it needs a `pnpm dev` restart to bake in. Leave it unset to keep just the email-code flow.
+Restart `pnpm dev` and sign in **through the router on port 3000** (`http://localhost:3000/sign-in`): the session
+cookie belongs to the api, so the page and the api must share an origin, which only the router gives you locally. Type
+any email, choose **Send code**, and follow the code step's **This preview sends no email: see the code** link (or open
+`http://localhost:3000/api/preview/outbox?to=<email>`): the subject starts with the 6-digit code. The first code for
+an address creates its account.
 
-With these set the editor's sign-in flow at `/sign-in` becomes functional. The api worker verifies the Bearer JWT and derives the owner id from the `sub` claim instead of falling back to the `X-Owner-Id` header.
+To add **Continue with Google**, create a Google OAuth client (web application) with
+`http://localhost:3000/api/auth/callback/google` as an authorised redirect URI and `http://localhost:3000` as a
+JavaScript origin, and add `GOOGLE_AUTH_CLIENT_ID` and `GOOGLE_AUTH_CLIENT_SECRET` to `apps/api/.dev.vars`.
 
-Without these set: the api worker silently treats every request as a guest (the `X-Owner-Id` header path), and the live frontend's ClerkProvider becomes a pass-through that renders the editor without any auth UI. This is the self-host default. See [Auth + guest access](../specs/014-identity/auth-and-guest-access.md) for the full hybrid model.
+Without `BETTER_AUTH_SECRET` (or with it but no sign-in method), `/api/auth/*` answers 404, the auth pages say sign-in
+isn't turned on for this site, and every request is a guest (the `X-Owner-Id` header path). This is the self-host
+default. See [Auth + guest access](../specs/014-identity/auth-and-guest-access.md) for the full hybrid model.
 
 ## Running the CLI from source (optional)
 
-The [CLI](../specs/015-api/cli.md) acts only with an API token, so it needs a host with sign-in: enable Clerk as
+The [CLI](../specs/015-api/cli.md) acts only with an API token, so it needs a host with sign-in: turn it on as
 above, sign in, and create a token in Settings › API Tokens. Then build the bundle and point it at the local api:
 
 ```bash
@@ -169,7 +163,7 @@ OPENAI_API_KEY=...             # or GOOGLE_AI_STUDIO_API_KEY=..., or both:
 #                              # which reads handwriting better than the big model.
 ```
 
-Restart `pnpm dev`. `GET /api/capabilities` will start reporting `{ aiEnabled: true }`, the Settings dialog grows an "AI Assistant" toggle, and the editor surfaces the panel once the user opts in. The two spend-DoS knobs `AI_ALLOWED_ORIGINS` and `AI_REQUIRE_CLERK` are hosted-only; leave them unset locally so the guest path keeps working. Production declares `AI_ALLOWED_ORIGINS` in `apps/api/wrangler.toml` `[vars]`, which `wrangler dev` also reads, so the api's `dev` script (and the e2e stack) blank it with `--var AI_ALLOWED_ORIGINS:`; without that, every AI request from a localhost editor answers 403 `origin_not_allowed`. See `apps/api/.env.example` for the full set of vars the worker reads.
+Restart `pnpm dev`. `GET /api/capabilities` will start reporting `{ aiEnabled: true }`, the Settings dialog grows an "AI Assistant" toggle, and the editor surfaces the panel once the user opts in. The two spend-DoS knobs `AI_ALLOWED_ORIGINS` and `AI_REQUIRE_ACCOUNT` are hosted-only; leave them unset locally so the guest path keeps working. Production declares `AI_ALLOWED_ORIGINS` in `apps/api/wrangler.toml` `[vars]`, which `wrangler dev` also reads, so the api's `dev` script (and the e2e stack) blank it with `--var AI_ALLOWED_ORIGINS:`; without that, every AI request from a localhost editor answers 403 `origin_not_allowed`. See `apps/api/.env.example` for the full set of vars the worker reads.
 
 ## Running tests
 
@@ -202,7 +196,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=123456789012-abc.apps.googleusercontent.com
 NEXT_PUBLIC_GOOGLE_API_KEY=... # optional: the Picker's browser key, for adopting a folder
 ```
 
-It is signed-in only, so Clerk must be enabled too (above). Without these Settings has no Cloud Sync section and every `/api/drive` route answers `503 drive_not_configured`.
+It is signed-in only, so sign-in must be on too (above). Without these Settings has no Cloud Sync section and every `/api/drive` route answers `503 drive_not_configured`.
 
 ## Trying the photo import without an AI key
 

@@ -186,7 +186,7 @@ export type SharedDocumentResolution =
   | { passwordRequired: true; invalid: boolean };
 
 // Hybrid identity (docs/specs/014-identity/auth-and-guest-access.md, docs/specs/015-api/api.md). When a token provider has been
-// registered via `setTokenProvider` and resolves to a non-null Clerk
+// registered via `setTokenProvider` and resolves to a non-null
 // session token, every request goes out with
 // `Authorization: Bearer <jwt>` and NO `X-Owner-Id` — the api worker
 // verifies the token, derives the owner from the `sub` claim, and
