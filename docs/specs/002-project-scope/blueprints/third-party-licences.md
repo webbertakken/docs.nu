@@ -235,7 +235,9 @@ copy in the same box.
 - Page weight measured: 173.8 KB raw, 20.3 KB gzipped for 54 works. A static export ships the
   server-rendered entries twice (HTML and RSC payload), so repeated chrome is short `lic-*`
   classes (per-element utilities made it 353 KB) and no per-entry SVG (D16).
-- Budget: `LICENCES_HTML_BUDGET_BYTES` (D14) on the exported `licences.html`, checked by `verify.ts`.
+- Budget: `LICENCES_HTML_BYTES_PER_WORK` (D14) times the works listed, on the exported `licences.html`, checked by
+  `verify.ts`, which also refuses any text whose fingerprint (`textFingerprint`: its first long line HTML leaves
+  unescaped) appears in the page: an inlined text is caught directly, whatever the size.
 
 ## Presentation and UX
 
@@ -322,15 +324,15 @@ Every line is `[licences] <fingerprint> key=value …` on stdout (errors on stde
 
 ## Constants and configuration
 
-| Constant                     | Value                                 | Provenance                                      | Safe range          |
-| ---------------------------- | ------------------------------------- | ----------------------------------------------- | ------------------- |
-| `BINARY_ASSET_EXTENSIONS`    | `wasm`, `ttf`, `otf`, `woff`, `woff2` | Spec: binaries the bundler cannot see into      | add, never remove   |
-| `NEXT_ANALYZE_DISTDIR`       | `.next-analyze`                       | Keeps the analysis off `.next` and `.next-dev`  | any ignored dir     |
-| `TEXT_HASH_LENGTH`           | 16 hex                                | D3: 64 bits, no collision at thousands of texts | 12 to 64            |
-| `TEXTS_URL_PREFIX`           | `/licences/texts/`                    | Under the page's own path on marketing          | fixed               |
-| `TEXT_BOX_MAX_LINES`         | 24                                    | D1: a licence's opening fits; long ones scroll  | 12 to 40            |
-| `TEXT_BOX_LINE_HEIGHT_REM`   | 1.25                                  | D2: Tailwind `text-xs leading-5`                | tied to the class   |
-| `LICENCES_HTML_BUDGET_BYTES` | 260,000                               | D14: 1.5 times the 173.5 KB first measured      | measured × 1.3 to 2 |
+| Constant                       | Value                                 | Provenance                                                | Safe range          |
+| ------------------------------ | ------------------------------------- | --------------------------------------------------------- | ------------------- |
+| `BINARY_ASSET_EXTENSIONS`      | `wasm`, `ttf`, `otf`, `woff`, `woff2` | Spec: binaries the bundler cannot see into                | add, never remove   |
+| `NEXT_ANALYZE_DISTDIR`         | `.next-analyze`                       | Keeps the analysis off `.next` and `.next-dev`            | any ignored dir     |
+| `TEXT_HASH_LENGTH`             | 16 hex                                | D3: 64 bits, no collision at thousands of texts           | 12 to 64            |
+| `TEXTS_URL_PREFIX`             | `/licences/texts/`                    | Under the page's own path on marketing                    | fixed               |
+| `TEXT_BOX_MAX_LINES`           | 24                                    | D1: a licence's opening fits; long ones scroll            | 12 to 40            |
+| `TEXT_BOX_LINE_HEIGHT_REM`     | 1.25                                  | D2: Tailwind `text-xs leading-5`                          | tied to the class   |
+| `LICENCES_HTML_BYTES_PER_WORK` | 4,820                                 | D14: 1.5 times the 173.5 KB first measured, per work (54) | measured × 1.3 to 2 |
 
 ## Assets and external resources
 
