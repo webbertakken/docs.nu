@@ -209,6 +209,14 @@ result in LiveDoc differs from what git's main holds.
 - `link status` reports main as `behind`, with the revisions it lacks; it never fails a build unless asked
   (`--fail-behind` on main).
 - **A protected main** follows the same rule: its files catch up when a commit lands on it carrying a newer snapshot.
+  A git branch is an overlay ([Files on every branch](#files-on-every-branch)), so a document edited only in LiveDoc
+  reaches a protected main only when some pull request carries it.
+- **`livedoc sync --carry-main`** lets a person carry it, on purpose: on the current git branch (never main itself), it
+  writes main's current snapshot of every covered document whose committed file on main is behind, as one commit
+  "Docs: carry main from LiveDoc" listing the pages by path with their revisions. It is the same snapshot the pre-commit
+  hook would write on main, so the pull request's diff shows exactly what main lacks. `--dry-run` lists the documents
+  first. A document that the current git branch has its own branch of is left out and named, so the carry never mixes
+  a branch's work with main's. Nothing runs it on its own: no bot, no schedule.
 - **`[git] commit`** (`none`, `commit`, `push`) stays for links whose main git branch accepts direct commits, such as a
   whole-repository global wiki. On any git branch, a push the remote refuses for its rules (a protected branch, no
   permission) is never forced or retried around: the sync commit stays local, is reported once with "<branch> refuses
@@ -261,7 +269,7 @@ always with main. There are no branches, hooks or commits; everything else in
   `[binding] bound` (main or branch), `[binding] refused` (with the state), `[binding] started-branch`,
   `[binding] updated-from-main`, `[binding] merge-found` (with the revision), `[binding] merged`,
   `[binding] renamed`, `[binding] deleted-branch`, `[binding] rebound` (after git moved under a watch),
-  `[binding] older-snapshot`, `[hook] pre-push-current`, `[hook] pre-push-stopped`, `[hook] pre-push-passed-stale`,
+  `[binding] older-snapshot`, `[binding] carried-main` (with the count), `[hook] pre-push-current`, `[hook] pre-push-stopped`, `[hook] pre-push-passed-stale`,
   `[sync] push-refused-rules`, `[sync] cleaned`.
-- Telemetry: category `Cli`, action `Used`, type `LinkClean` for `link clean` and `SyncResolve` for `--resolve`; a
+- Telemetry: category `Cli`, action `Used`, type `LinkClean` for `link clean`, `SyncResolve` for `--resolve` and `SyncCarryMain` for `--carry-main`; a
   pre-push stop counts as `HookPrePush`.

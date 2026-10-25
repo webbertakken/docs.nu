@@ -207,16 +207,17 @@ report and the changeset's summary.
 
 ## Commands
 
-| Command                                             | Does                                                                                                                                                  |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `link init [--folder <f>] [--doc <d>]... [--level]` | Writes `livediagram.toml`; with no folder, a picker of the person's folders                                                                           |
-| `link status [--branch <name>]`                     | Every covered document with its state and branch; exits 0 ([In CI](#in-ci) for `--fail-behind`)                                                       |
-| `link ls`                                           | The covered documents, as `document ls` prints them                                                                                                   |
-| `sync [--watch] [--relocate] [--dry-run] [--all]`   | One sync of the link; `--watch` keeps syncing until interrupted                                                                                       |
-| `sync --resolve <file>`                             | A file git left conflicted, resolved ([Conflicts git leaves](branch-binding.md#conflicts-git-leaves))                                                 |
-| `link clean`                                        | Puts git's version back over unsent-free snapshots, so a pull or checkout proceeds ([Branch binding](branch-binding.md#while-people-and-agents-work)) |
-| `link hooks install\|uninstall`                     | The git hooks and the merge driver ([Git](#git))                                                                                                      |
-| `unlink [--dry-run]`                                | Ends the link in one commit, leaving every file as it is ([Unlinking](#unlinking-and-re-linking))                                                     |
+| Command                                             | Does                                                                                                                                                                                    |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `link init [--folder <f>] [--doc <d>]... [--level]` | Writes `livediagram.toml`; with no folder, a picker of the person's folders                                                                                                             |
+| `link status [--branch <name>]`                     | Every covered document with its state and branch; exits 0 ([In CI](#in-ci) for `--fail-behind`)                                                                                         |
+| `link ls`                                           | The covered documents, as `document ls` prints them                                                                                                                                     |
+| `sync [--watch] [--relocate] [--dry-run] [--all]`   | One sync of the link; `--watch` keeps syncing until interrupted                                                                                                                         |
+| `sync --resolve <file>`                             | A file git left conflicted, resolved ([Conflicts git leaves](branch-binding.md#conflicts-git-leaves))                                                                                   |
+| `link clean`                                        | Puts git's version back over unsent-free snapshots, so a pull or checkout proceeds ([Branch binding](branch-binding.md#while-people-and-agents-work))                                   |
+| `sync --carry-main [--dry-run]`                     | Writes main's current snapshot of documents git's main is behind onto the current git branch, as one commit for a pull request ([Branch binding](branch-binding.md#main-after-a-merge)) |
+| `link hooks install\|uninstall`                     | The git hooks and the merge driver ([Git](#git))                                                                                                                                        |
+| `unlink [--dry-run]`                                | Ends the link in one commit, leaving every file as it is ([Unlinking](#unlinking-and-re-linking))                                                                                       |
 
 - `link init` without `--folder` or `--doc` shows a picker of the person's folders on a terminal; where stdin or
   stdout is not a terminal it refuses, listing the folders as runnable `link init --folder <id>` commands.
