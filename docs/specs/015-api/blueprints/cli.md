@@ -567,7 +567,7 @@ type CapabilitiesResponse = {
   emailEnabled?: boolean;
   driveMode?: DriveMode;
   apiBase?: string; // `${url.origin}/api` (CLI9)
-  authEnabled?: boolean; // CLERK_JWKS_URL is set (CLI11)
+  authEnabled?: boolean; // sign-in is on: BETTER_AUTH_SECRET and a method (CLI11)
   oauthIssuer?: string; // OAUTH_ISSUER, an https origin; absent when unset or invalid
   documentFormat?: number; // DOCUMENT_FORMAT
   cli?: { minVersion: string }; // CLI_MIN_VERSION when it is x.y.z; absent otherwise

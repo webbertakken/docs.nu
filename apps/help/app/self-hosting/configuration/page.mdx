@@ -6,13 +6,13 @@ import { ConfigSources, GuestFallback } from '@/components/illustrations/self-ho
 export const metadata = helpMetadata({
   title: 'Configuration and Optional Auth',
   description:
-    'How a self-hosted livediagram is configured: environment variables, optional Clerk sign-in, and the pure-guest fallback.',
+    'How a self-hosted livediagram is configured: environment variables, optional sign-in, and the pure-guest fallback.',
   path: '/help/self-hosting/configuration/',
 });
 
 <ArticleLayout title="Configuration and Optional Auth" description="The environment variables that shape a self-hosted instance, and how sign-in degrades gracefully to pure-guest mode." categoryTitle="Self-Hosting" categorySlug="self-hosting" subArticles={getSubArticles("configuration")}>
 
-A self-hosted livediagram is configured through environment variables, secrets and each Worker's `wrangler.toml`, not application code. A few `wrangler.toml` values ship with livediagram.app's own settings (the database and KV ids, the allowed AI origins, the MCP issuer and consent URL, and the guest-signing date), so a fork replaces those with its own. The most important thing to understand is that the optional features are genuinely optional: leave them unset and the editor still works perfectly, just in a simpler mode. This page covers how configuration is supplied and the main toggles you will care about.
+A self-hosted livediagram is configured through environment variables, secrets and each Worker's `wrangler.toml`, not application code. A few `wrangler.toml` values ship with livediagram.app's own settings (the database and KV ids, the allowed AI origins, the MCP issuer and consent URL), so a fork replaces those with its own. The most important thing to understand is that the optional features are genuinely optional: leave them unset and the editor still works perfectly, just in a simpler mode. This page covers how configuration is supplied and the main toggles you will care about.
 
 ## How configuration is supplied
 
@@ -30,13 +30,21 @@ Each app that needs configuration ships an example file documenting which variab
 
 ## Optional sign-in
 
-Authentication is provided by an optional integration with Clerk, and the app supports three modes depending on what you configure.
+Sign-in runs inside your own api Worker, with its accounts in your own database, so it needs no outside service and no build-time key: the editor asks the api whether sign-in is on and which methods it offers. There are two modes.
 
-1. **Hybrid**, the production setup: both the publishable key (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, on the live and community builds; a repository secret when you deploy through GitHub Actions) and the API's verification URL (`CLERK_JWKS_URL`) are set, so guests and signed-in users coexist.
-2. **Guest-only**, the typical self-host: leave the auth variables unset. The app runs without an account system, sign-in routes say sign-in isn't enabled and offer **Continue as guest**, and the editor is unchanged.
-3. A partial misconfiguration (frontend configured, API not) exists only for debugging and is not meant for production: people can sign in, but the API treats everyone as a guest.
+1. **Sign-in on**: set `BETTER_AUTH_SECRET` and at least one sign-in method, so guests and signed-in people coexist.
+2. **Guest-only**, the typical self-host: leave the secret unset. The app runs without an account system, sign-in pages say sign-in isn't enabled here and offer **Continue as guest**, and the editor is unchanged.
 
-With sign-in on, also set `GUEST_ID_HMAC_SECRET` so guest ids are signed and nobody can claim another guest's documents when they sign up. Accounts unlock the features that need one: [teams](/help/collaboration/teams/), [API tokens](/help/account-and-data/api-tokens/), and, if you set them up, email, the Google Drive mirror and the MCP server.
+| Variable                            | Where             | What it does                                                                                                                                                                                                                                 |
+| ----------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`                | api Worker secret | Turns sign-in on. At least 32 random characters (`openssl rand -base64 32`). It also signs guest ids, so nobody can claim another guest's documents when they sign in. Rotate it with `BETTER_AUTH_SECRETS` beside it, never by replacing it |
+| `APP_BASE_URL`                      | api `[vars]`      | The origin people open the editor on. Required for sign-in, and used for links in emails                                                                                                                                                     |
+| `GOOGLE_AUTH_CLIENT_ID`             | api `[vars]`      | Your Google OAuth client, for **Continue with Google**. Register `https://<your-host>/api/auth/callback/google` as its redirect URI                                                                                                          |
+| `GOOGLE_AUTH_CLIENT_SECRET`         | api Worker secret | The same client's secret; Google sign-in needs both                                                                                                                                                                                          |
+| `EMAIL` binding or `RESEND_API_KEY` | api Worker        | An email sender, for sign-in with an email code: Cloudflare Email Service, or Resend. Set `EMAIL_FROM` to an address on your sending domain                                                                                                  |
+| `EMAIL_OUTBOX`                      | api `[vars]`      | `1` keeps codes in your database instead of sending them, for previews and testing only. Never on a real deployment                                                                                                                          |
+
+Accounts unlock the features that need one: [teams](/help/collaboration/teams/), [API tokens](/help/account-and-data/api-tokens/), and, if you set them up, email, the Google Drive mirror and the MCP server.
 
 Guest-only is what lets a self-hoster run with zero outbound runtime traffic beyond their own hosting if they want to.
 
@@ -44,7 +52,7 @@ Guest-only is what lets a self-hoster run with zero outbound runtime traffic bey
 
 The API identifies the owner of a request in one of two equivalent ways: a verified sign-in token, or a per-browser guest id sent as a header. When sign-in is not configured, every request simply uses the guest path, and the editor stays fully usable, with persistence, sharing, and real-time collaboration all working.
 
-<Figure caption="Whether Clerk is configured or not, requests resolve to a working editor.">
+<Figure caption="Whether sign-in is configured or not, requests resolve to a working editor.">
   <GuestFallback />
 </Figure>
 
@@ -56,14 +64,13 @@ Every other optional feature follows the same pattern: unset means off, and the 
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Image uploads, thumbnails                                                            | Create the `livediagram-images` R2 bucket the api `wrangler.toml` already binds (or delete that binding to leave uploads off). Optional per-owner caps: `IMAGE_MAX_PER_OWNER`, `IMAGE_MAX_BYTES_PER_OWNER`                                                                                                                |
 | AI assistant, server-side photo reading (without it, photos are read in the browser) | One AI key on the api Worker: `OPENAI_API_KEY`, `GOOGLE_AI_STUDIO_API_KEY`, or `AI_API_KEY` with `AI_BASE_URL` and `AI_MODEL`. Also set `AI_ALLOWED_ORIGINS` to your own origin or remove it: it ships with livediagram.app's, and any other origin gets a 403                                                            |
-| Email                                                                                | `RESEND_API_KEY` on the api Worker, plus `RESEND_FROM` on a domain verified in Resend and `APP_BASE_URL` set to your origin, since both default to livediagram.app (needs sign-in)                                                                                                                                        |
+| Email                                                                                | The `EMAIL` binding (Cloudflare Email Service) or `RESEND_API_KEY` on the api Worker, plus `EMAIL_FROM` on your sending domain and `APP_BASE_URL` set to your origin, since both default to docs.nu                                                                                                                       |
 | Google Drive mirror                                                                  | `GOOGLE_CLIENT_ID` on the api Worker and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` on the live build; `GOOGLE_CLIENT_SECRET` and `DRIVE_TOKEN_KEY` keep it syncing (needs sign-in). See [Google Drive and MCP](/help/self-hosting/configuration/drive-and-mcp/)                                                                      |
 | MCP server for AI tools                                                              | Deploy the mcp Worker with its own KV namespace and hostname, then point `CONSENT_BASE_URL` (mcp Worker) at your editor's origin, and `NEXT_PUBLIC_MCP_ORIGIN` (live build) and `OAUTH_ISSUER` (api Worker) at your MCP host (needs sign-in). See [Google Drive and MCP](/help/self-hosting/configuration/drive-and-mcp/) |
 | Telemetry                                                                            | `TELEMETRY_ENABLED` on the api Worker and `NEXT_PUBLIC_TELEMETRY_ENABLED` on every frontend build                                                                                                                                                                                                                         |
 | Workbenches                                                                          | Nothing extra beyond sign-in, but set `APP_BASE_URL` on the api Worker to the origin that serves the app, or pairing and frame links point at livediagram.app (needs sign-in)                                                                                                                                             |
-| Continue with Google                                                                 | `NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED` on the live build, with Google enabled in Clerk. The bundled deploy workflow already sets it, so enable Google in Clerk or remove that line                                                                                                                                            |
 
-The `NEXT_PUBLIC_*` values above are baked in at build time. When you deploy through the bundled GitHub Actions workflow, add them to the workflow's build step (or set `mcp_origin` in `deploy.yml`); apart from the Clerk publishable key and the Google Picker key, they are not read from repository secrets.
+The `NEXT_PUBLIC_*` values above are baked in at build time. When you deploy through the bundled GitHub Actions workflow, add them to the workflow's build step (or set `mcp_origin` in `deploy.yml`); apart from the Google Picker key, they are not read from repository secrets. Sign-in needs none: the workflow syncs `BETTER_AUTH_SECRET` and `GOOGLE_AUTH_CLIENT_SECRET` to the api Worker from repository secrets of the same name.
 
 The Community is the one feature that is on by default; set `COMMUNITY_ENABLED` to `false` on the api Worker to switch it off.
 

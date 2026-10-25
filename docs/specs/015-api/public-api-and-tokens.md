@@ -1,12 +1,10 @@
 # Public API and API tokens
 
-> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](../014-identity/auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
-
 **Status: shipped.** Everything below is live on `main`: API tokens (§3),
-the `X-Owner-Id` hardening (§4, §4.1) and the input validation (§5). One part
-is an operator switch rather than code: the guest signature requirement of §4
-is enforced only once a deployment sets `GUEST_ID_HMAC_SECRET` and a past
-`GUEST_SIG_ENFORCE_AFTER` ([§6](#6-rollout)). This spec sequenced opening the
+the `X-Owner-Id` hardening (§4, §4.1) and the input validation (§5). The guest
+signature requirement of §4 holds wherever sign-in is on: its key derives from
+`BETTER_AUTH_SECRET`, so a guest-only host signs nothing and requires nothing
+([§6](#6-rollout)). This spec sequenced opening the
 REST API to external, programmatic callers.
 
 ## 1. Goal
@@ -19,7 +17,7 @@ the app uses, under an explicit, revocable credential.
 **Signed-in only (gated like teams, [Teams](../013-workspace/teams.md)).** API tokens are an
 advanced, opt-in feature for users with an account; the canvas, guests, and the
 share/realtime flows are unaffected and stay account-free ([Auth + guest access](../014-identity/auth-and-guest-access.md)).
-A token always acts as a Clerk user; there are **no guest-owned tokens**. This
+A token always acts as an account; there are **no guest-owned tokens**. This
 is a deliberate constraint, not a limitation to apologise for: programmatic API
 use is a power-user need, requiring an account for it is reasonable, and it
 keeps tokens off the spoofable guest-identity path entirely (the guest REST
@@ -38,7 +36,8 @@ what is still a deployment switch.
 The worker resolved the caller two ways ([Auth + guest access](../014-identity/auth-and-guest-access.md)):
 
 - **Clerk JWT** in `Authorization: Bearer <jwt>`, verified (signature, exp,
-  optional issuer/audience) in `apps/api/src/auth/clerk.ts`. Sound.
+  optional issuer/audience) by the api worker's Clerk verifier, since replaced by
+  the session token (`apps/api/src/auth/session-token.ts`). Sound.
 - **Guest path**: an `X-Owner-Id` header carrying a per-browser UUID, **trusted
   verbatim** by `resolveOwner()` in `apps/api/src/index.ts`, with **no
   signature** on the REST path. (The realtime WS upgrade of the time required an
@@ -83,17 +82,16 @@ closed the escalation. The fix is [§4](#4-x-owner-id-trust-change).
 - **Presence carries no owner id.** The room mints a random presence id per
   socket and builds each presence entry itself (`helloPresence`,
   `document-room-rules.ts`); a client never supplies or learns one.
-- **An account id is never a guest credential.** A Clerk-shaped `X-Owner-Id`
-  is refused on every owner-scoped route with `401
-account_id_not_a_guest_credential`, unconditionally ([§4.1](#41-a-clerk-account-id-in-x-owner-id-is-refused-unconditionally)).
+- **An account id is never a guest credential.** An account-shaped `X-Owner-Id`
+  (`acct_…`) is refused on every owner-scoped route with `401
+account_id_not_a_guest_credential`, unconditionally ([§4.1](#41-an-account-id-in-x-owner-id-is-refused-unconditionally)).
 - **External callers have a real credential**: API tokens ([§3](#3-design-api-tokens)).
-- **Still a switch, not a guarantee:** the signature requirement on a _guest_
-  `X-Owner-Id` (§4) is enforced only when a deployment sets
-  `GUEST_ID_HMAC_SECRET` and a past `GUEST_SIG_ENFORCE_AFTER`. Until then REST
-  accepts an unsigned guest id, so a guest id obtained some other way still acts
-  as that guest; the surfaces above simply stop handing it out. Check the
-  deployment, not the source: `POST /api/guest-id` answering
-  `"ownerSig": null` means signing is off.
+- **Guests prove their id wherever sign-in is on.** The signature requirement on
+  a _guest_ `X-Owner-Id` (§4) holds whenever the host has a sign-in secret, with
+  no grace window. A guest-only host signs nothing, so there a guest id obtained
+  some other way still acts as that guest; the surfaces above simply stop
+  handing it out. Check the deployment, not the source: `POST /api/guest-id`
+  answering `"ownerSig": null` means signing is off.
 
 ## 3. Design: API tokens
 
@@ -101,7 +99,7 @@ account_id_not_a_guest_credential`, unconditionally ([§4.1](#41-a-clerk-account
 
 - An opaque secret with a visible prefix for greppability + leak-scanning:
   `lvd_<base64url(32 random bytes)>`. The prefix also disambiguates it from a
-  Clerk JWT in the same `Authorization: Bearer` header.
+  session token in the same `Authorization: Bearer` header.
 - Shown **once** at creation; never retrievable again.
 - Stored **hashed** (SHA-256), never in plaintext. Auth hashes the presented
   token and looks the hash up by its UNIQUE-indexed column — an indexed
@@ -116,7 +114,7 @@ A new owner-scoped table, migration with the worker that owns the binding:
 ```
 api_tokens(
   id            TEXT PRIMARY KEY,     -- public token id (for listing / revoke)
-  owner_id      TEXT NOT NULL,        -- the Clerk userId this token acts as (never a guest id)
+  owner_id      TEXT NOT NULL,        -- the account id this token acts as (never a guest id)
   token_hash    TEXT NOT NULL UNIQUE, -- SHA-256 of the secret
   name          TEXT,                 -- user label ("CI bot")
   created_at    INTEGER NOT NULL,
@@ -141,24 +139,26 @@ regardless.
 
 ### 3.3 Resolution
 
-A token authenticates as a third identity path, resolved once in `fetch`
-alongside Clerk + the guest header:
+A token authenticates as its own identity path, resolved once in `fetch`
+alongside the session token and the guest header ([API app](api.md#auth) has the
+full order, workbench sessions included):
 
-1. A Clerk JWT in `Authorization: Bearer`, when it verifies.
-2. Else `Authorization: Bearer lvd_…` → hash → look up a non-revoked,
+1. `Authorization: Bearer lvd_…` → hash → look up a non-revoked,
    non-expired row → the request's owner id is the row's `owner_id`; stamp
    `last_used_at`. The column means "the last request this token made, to
    within a minute": a request writes it only when the stored value is older
    than `LAST_USED_STAMP_WINDOW_MS` (60 s, `apps/api/src/db/api-tokens.ts`),
    checked again in the UPDATE's WHERE, so a burst of MCP tool calls (3 to 6
    api requests each) costs one write a minute rather than one per request.
-   Its only reader, the Settings token card, works at day grain. (A token and a JWT can't both be the bearer.) An `lvd_`
+   Its only reader, the Settings token card, works at day grain. (A token and a session token can't both be the bearer.) An `lvd_`
    bearer with no such row (unknown, revoked or expired), or one too short to be a token at all (cut short or
    mistyped when pasted), is refused there and then with `401 invalid_token` and `WWW-Authenticate: Bearer
 error="invalid_token"`, on every route: it never falls through to the guest
    path or to no owner, so a script holding a dead token is told so.
-3. Else the guest `X-Owner-Id` path — now requiring a valid HMAC signature on
-   the header (see [§4](#4-x-owner-id-trust-change)). Tokens never resolve to a
+2. Else a session token in `Authorization: Bearer`, when it verifies (a bearer
+   with neither prefix).
+3. Else the guest `X-Owner-Id` path — requiring a valid HMAC signature on
+   the header wherever sign-in is on (see [§4](#4-x-owner-id-trust-change)). Tokens never resolve to a
    guest id, so this path is for the first-party app only; it grants no token.
 
 The resolved owner id flows through the **same** `gateRead` / `gateEdit` /
@@ -186,10 +186,10 @@ finer-grained scope vocabulary (per-resource, per-verb); that remains deferred
 ([§7](#7-out-of-scope-for-now)) — `read_only` is a single boolean, not a general
 scopes system.
 
-**Team content counts as "the same surface".** A token's owner is always a
-Clerk account ([§3.3](#33-resolution)), and both credentials — session JWT and
-token — are server-verified, so the token identity feeds the same
-team-membership checks the session does (`RouteContext.verifiedUserId`, used by
+**Team content counts as "the same surface".** A token's owner is always an
+account ([§3.3](#33-resolution)), and both credentials — session token and
+API token — are server-verified, so the token identity feeds the same
+team-membership checks the session does (`RouteContext.verifiedAccountId`, used by
 `gateRead`/`gateEdit` and the team-scoped document/folder verbs). Concretely: a
 token can read and edit the documents in the shared libraries of the teams its
 owner has joined ([Team shared documents](../013-workspace/team-shared-documents.md)), and can `GET` the
@@ -200,7 +200,10 @@ personal `GET /documents` excludes team documents by design.
 **Administration stays interactive-session-only.** Every teams MUTATION
 (create, invite, role change, join/accept/leave, invite links, team deletion)
 plus token management (`/api/tokens`), account deletion, and guest migration
-require a verified Clerk **session** (`clerkUserId`), never a token. Boundary
+require a verified **session** (`sessionAccountId`), never a token, and the
+session's account must still exist: a session token verifies on its own for 15
+minutes, so a deleted account's token gets `401 account_not_found` there
+(`requireAccount`, `apps/api/src/auth/account-gate.ts`). Boundary
 rationale: a leaked token already exposes the owner's content (that's §3.4's
 deal, revocable + 6-month-capped), but it must not be able to escalate — mint
 further credentials, grant other people membership, or destroy the account.
@@ -288,8 +291,8 @@ category.
 sign-in rule in [User preferences](../007-editor/user-preferences.md)).
 
 Behind it, a new `GET/POST/DELETE /api/tokens` surface, **gated exactly like
-the team routes** ([Teams](../013-workspace/teams.md)): it requires a verified Clerk
-identity and rejects a guest (`X-Owner-Id`-only) caller outright (`401`/`403`,
+the team routes** ([Teams](../013-workspace/teams.md)): it requires a verified session
+and rejects a guest (`X-Owner-Id`-only) caller outright (`401`/`403`,
 mirroring `routes/teams.ts`) — so the manager is inert for guests, the
 same way the rest of the signed-in surface is. A token can only ever be minted
 by, and act as, a signed-in account. Creation returns the secret **once**
@@ -327,28 +330,28 @@ Every other `/api/tokens` route stays session-only.
 
 ### 3.7 Self-hosting
 
-API tokens are gated on **auth being enabled**, exactly as teams and sign-in
-are ([Teams](../013-workspace/teams.md), [Auth + guest access](../014-identity/auth-and-guest-access.md)). A
-self-host that hasn't configured Clerk runs in pure-guest mode, and in that
-mode the feature is **absent end to end** — there is no API Tokens category to
-open and no way to mint one:
+API tokens are gated on **sign-in being on**, exactly as teams are
+([Teams](../013-workspace/teams.md), [Auth + guest access](../014-identity/auth-and-guest-access.md)). A
+self-host that sets no `BETTER_AUTH_SECRET` runs guest-only, and in that mode
+the feature is **absent end to end**: there is no API Tokens category to open
+and no way to mint one:
 
-- **Frontend** — the Settings API Tokens category (and the AI Tools link row to
-  it) renders only when `clerkEnabled` (`apps/live/lib/clerk-config.ts`, derived
-  from the presence of `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`). This is the **same
-  flag** that already hides the teams / sign-in sections of the sidebar, so when
-  auth is off the category simply isn't in the list.
-- **Backend** — the `/api/tokens` routes require a verified Clerk identity, and
-  with `CLERK_JWKS_URL` unset the worker resolves no Clerk identity at all
-  ([`auth/clerk.ts`](../../../apps/api/src/auth/clerk.ts) returns null), so the
-  routes reject every caller. Belt and suspenders: even if the UI were somehow
-  reached, token creation / use is impossible without auth configured.
+- **Frontend**: the Settings API Tokens category (and the AI Tools link row to
+  it) renders only when sign-in is on (`authEnabled` from `/api/capabilities`),
+  the same answer that hides the teams and sign-in sections of the sidebar, so
+  when sign-in is off the category simply isn't in the list.
+- **Backend**: the `/api/tokens` routes require a verified session, and with
+  no `BETTER_AUTH_SECRET` the worker verifies no session token at all
+  (`getAccountSession` in [`auth/session-token.ts`](../../../apps/api/src/auth/session-token.ts)
+  returns null), so the routes reject every caller. Belt and suspenders: even
+  if the UI were somehow reached, token creation or use is impossible without
+  sign-in.
 
-So enabling tokens is opt-in with auth, and disabling auth removes them
-cleanly — no orphaned page, no half-working endpoint. This takes nothing away
-from a guest-only self-host, because the whole canvas / guest model stays fully
-available without an account ([Auth + guest access](../014-identity/auth-and-guest-access.md)). No new
-SaaS dependency beyond the optional Clerk that teams already need.
+So enabling tokens is opt-in with sign-in, and disabling sign-in removes them
+cleanly: no orphaned page, no half-working endpoint. This takes nothing away
+from a guest-only self-host, because the whole canvas and guest model stays fully
+available without an account ([Auth + guest access](../014-identity/auth-and-guest-access.md)). No
+SaaS dependency: sign-in runs inside the api worker.
 
 <!-- legacy-names -->
 
@@ -393,20 +396,21 @@ escalation. Two options were weighed:
 - **(b) Require an HMAC proof on the header — chosen.** Extend the guest-id
   HMAC (`auth/owner-signature.ts`, then also carried on the WS upgrade as
   `?g=`, since replaced by the room ticket) to REST: an `X-Owner-Id` request must also carry a valid `X-Owner-Sig` for that
-  id, verified against `GUEST_ID_HMAC_SECRET`. The legitimate guest holds its
+  id, verified with the guest signing key (HKDF of `BETTER_AUTH_SECRET`,
+  `apps/api/src/auth/guest-key.ts`). The legitimate guest holds its
   signature (minted at `POST /api/guest-id`); a collaborator who merely
-  _harvested_ an id (a guest UUID, or a Clerk `sub`) has no valid signature, so
-  the spoof is rejected. Signed-in users keep using the Clerk Bearer (a real
+  _harvested_ an id (a guest UUID, or an account id) has no valid signature, so
+  the spoof is rejected. Signed-in users send their session token (a real
   credential) and never the header.
 
 **Explicit guarantee for signed-up users.** Before this work `resolveOwner()`
 (`apps/api/src/index.ts`) was `clerkUserId ?? X-Owner-Id`, with no check binding
 the credential _type_ to the owner id, so a caller with no Bearer and
-`X-Owner-Id: <a Clerk sub>` was accepted AS that account (verified at the time:
-the sub leaked via presence / the change-log, and nothing rejected it). After (b), a Clerk
+`X-Owner-Id: <an account id>` was accepted AS that account (verified at the time:
+the sub leaked via presence / the change-log, and nothing rejected it). After (b), an
 account's documents are reachable **only via a verified Bearer token**: an
-`X-Owner-Id` carrying a Clerk `sub` has no guest signature (one is never minted
-for a Clerk id), so it is rejected. The post-fix invariant is therefore "once
+`X-Owner-Id` carrying an account id has no guest signature (one is never minted
+for an account id), and its shape is refused outright (§4.1). The post-fix invariant is therefore "once
 signed up, your documents require your Bearer token; the header can't reach
 them" — which is the property to assert in tests.
 
@@ -416,44 +420,31 @@ its signature, so wiring it onto REST requests is incremental. API tokens
 ([§3](#3-design-api-tokens)) are a parallel server-verifiable credential for
 external callers.
 
-**Compatibility — legacy unsigned guests (recommended approach).**
-`verifyOwnerId` returns true when `GUEST_ID_HMAC_SECRET` is unset, so self-hosts
-without the secret opt out of the guard entirely (as today). Where the secret
-IS set, the migration follows from one hard truth: **an unsigned id can't be
-retroactively secured** — there is no proof bound to it, so the server cannot
-tell its real owner from someone who harvested it (that's exactly why we're
-adding signatures). So don't try; bound the window instead and lean on the
-self-heal that already exists:
+**Compatibility: one rule, no grace window.** The signature is required
+wherever the host has a guest signing key, which is wherever sign-in is on
+(`guestSignatureEnforced`, `apps/api/src/auth/guest-rest.ts`). A guest-only
+host has no key: it signs nothing and requires nothing, so it opts out of the
+guard entirely. An unsigned guest id can't be retroactively secured (there is
+no proof bound to it, so the server cannot tell its real owner from someone who
+harvested it), so none is upgraded: an unsigned id from before sign-in was
+turned on is refused on owner-scoped routes and never moves into an account
+([Auth + guest access](../014-identity/auth-and-guest-access.md) "Signed guest ids"). Its rows are
+never deleted for it; they stay under that id. The guest's browser starts
+afresh with a signed id from `POST /api/guest-id`.
 
-1. The app already, on load, mints a _signed_ id and migrates a legacy unsigned
-   id's documents onto it (`apps/live/lib/guest-identity.ts` → `apiUpgradeGuestId`).
-   Active guests largely hold a signed id already (they migrated when signing
-   first shipped, [Auth + guest access](../014-identity/auth-and-guest-access.md)).
-2. Ship the `X-Owner-Sig` requirement **behind a grace flag / cutoff date.**
-   Before the cutoff, an unsigned `X-Owner-Id` is still accepted (today's
-   behaviour) so every returning guest self-heals to a signed id; at the
-   cutoff, unsigned ids are rejected for writes.
-3. **Never delete the orphaned data.** A long-dormant guest who only returns
-   after the cutoff finds their old unsigned id rejected, but the documents
-   still exist server-side under that id — recoverable via the migrate tooling
-   / a "sign in to recover" path, so it's a re-auth, never data loss.
+The key outlasts a rotation of the sign-in secret: it derives from the oldest
+usable secret (`BETTER_AUTH_SECRET`, which better-auth keeps as its legacy
+secret once `BETTER_AUTH_SECRETS` takes over, else the lowest version there),
+never the current one, so rotating does not re-key every guest. Removing the
+secret the key derives from does.
 
-The grace window IS the residual exposure (unsigned ids stay spoofable until
-migrated) — the same residual [Auth + guest access](../014-identity/auth-and-guest-access.md) /
-`routes/migrate.ts` already acknowledge — so set the cutoff far enough out
-(e.g. 30–90 days after the migrate code is live) that the active-guest
-population has rotated to signed ids, and keep it short enough to close the
-window. No active user is ever hard-locked.
-
-### 4.1 A Clerk account id in `X-Owner-Id` is refused unconditionally
+### 4.1 An account id in `X-Owner-Id` is refused unconditionally
 
 The "explicit guarantee for signed-up users" above is the most valuable half of
-§4, and it was the half the grace flag was **needlessly** holding hostage.
+§4, and it needs no signing key at all, so it holds on a guest-only host too.
 
-The compatibility argument for a grace window is entirely about **guest UUIDs**:
-a legacy guest has real data under an unsigned id and rejecting it early locks
-them out, so the cutoff exists to let them self-heal. A Clerk `sub` presented as
-`X-Owner-Id` has no such story. No client has ever sent one:
+An account id presented as `X-Owner-Id` has no legitimate story. No client has
+ever sent one:
 
 - The guest credential is always a server-minted `crypto.randomUUID()`
   (`POST /api/guest-id`), and `apps/live/lib/local-identity.ts` only ever writes
@@ -461,20 +452,20 @@ them out, so the cutoff exists to let them self-heal. A Clerk `sub` presented as
 - A signed-in caller sends `Authorization` **instead** — the live app's
   `lib/api/core.ts` sends one or the other, never both.
 
-So a `user_…` value in that header is only ever a replay of an account id
-someone harvested, and Clerk ids are harvestable by design: `GET /api/teams/<id>`
+So an `acct_…` value in that header is only ever a replay of an account id
+someone harvested, and account ids are harvestable by design: `GET /api/teams/<id>`
 lists `members[].userId` to every member of the team, invitees included.
 
 The worker therefore refuses the **shape** outright, on every owner-scoped
-segment, before the signature gate and independent of
-`GUEST_SIG_ENFORCE_AFTER` (`isClerkIdShape`, `apps/api/src/auth/guest-rest.ts`;
+segment, before the signature gate and independent of it (`isAccountIdShape`,
+`packages/api-schema/src/request-auth.ts`, applied in `apps/api/src/index.ts`;
 `401 account_id_not_a_guest_credential`). Nothing legitimate is grandfathered
 because nothing legitimate ever had this shape, so there is no window to bound
 and nothing for an operator to arm.
 
 The realtime room's upgrade refuses the same shape on its owner leg (`?o=`, `routes/document-room-routes.ts`):
 a signed-in owner of a personal document joins through the one-time room ticket, as a team owner does, and an
-account id presented as `?o=` admits nobody. Once the guest signature gate is armed, a guest owner id on `?o=`
+account id presented as `?o=` admits nobody. Wherever guest ids are signed, a guest owner id on `?o=`
 needs its signature on `?os=` (the same value REST carries as `X-Owner-Sig`); without it the leg admits nobody.
 
 `GET /api/share/<code>` also refuses an account id as `X-Owner-Id`, because its resolver compares that header with
@@ -488,8 +479,7 @@ personal owner id is an unguessable UUID, which an account id is not. The
 `ownsDocument` ([Team shared documents §Access](../013-workspace/team-shared-documents.md)), so it holds
 whatever a deployment has configured.
 
-The signature gate keeps its grace flag and its job: proving possession of a
-**guest** id.
+The signature gate keeps its own job: proving possession of a **guest** id.
 
 ## 5. Input validation (prerequisite — shipped)
 
@@ -506,7 +496,7 @@ hardening landed first:
   (`apps/api/src/limits.ts`); a per-frame cap in the realtime room. Document
   and tab names are shortened to the 60-character name cap rather than
   rejected (`apps/api/src/names.ts`, [Tab and document name length](../006-document/name-length.md)).
-- **Already solid** (pre-existing): D1 is fully parameterized; Clerk JWT
+- **Already solid** (pre-existing): D1 is fully parameterized; sign-in token
   verification; share-link expiry + constant-time password compare + per-IP
   brute-force limiter; WS-upgrade auth; realtime role re-stamping + op-rate cap.
 
@@ -514,31 +504,19 @@ hardening landed first:
 
 1. ✅ Input hardening (done).
 2. ✅ **The `X-Owner-Id` HMAC requirement ([§4](#4-x-owner-id-trust-change)).**
-   Shipped behind the grace switch; the operator arms it by setting
-   `GUEST_SIG_ENFORCE_AFTER` ([Self-hosting](../../operations/self-hosting.md)).
-   **Not armed.** It is stated in `apps/api/wrangler.toml` `[vars]` (a
-   dashboard-only value is wiped by every deploy), blank. It was armed in
-   production on 2026-10-06 and un-armed the same day: `/new` mints a local
-   unsigned id, so a first-time visitor arriving there from the landing page was
-   refused (`401 signature_required`) and could not create a document, against
-   the rule that the canvas always works without signing in. Every entry path
-   now resolves a signed id before its first owner-scoped call
-   ([Auth and guest access](../014-identity/auth-and-guest-access.md) "Signed
-   guest ids"), and every e2e stack runs with enforcement armed
-   (`scripts/e2e-stack.mjs`), so a regression of that kind fails the suite. **Re-arming
-   production is Tom's or Webber's call**, made by setting
-   `GUEST_SIG_ENFORCE_AFTER` in `apps/api/wrangler.toml` again. What follows
-   holds from then. Production only
-   started signing on 2026-09-25 (`GUEST_SIGNING_LIVE_AT`), so most guest ids
-   were still unsigned when it was armed: about 219, holding 274 documents. An
-   id whose participant row predates `GUEST_SIGNING_LIVE_AT` keeps the legacy
-   upgrade (migrate flow 2) without a signature, so those guests self-heal
-   whenever they return. Every id minted signed must prove possession, which
-   includes the id a legacy guest moves onto: its participant row is stamped
-   with the time of the move, never the legacy date (`migrateOwnerId`,
-   `apps/api/src/db/account.ts`). Retire
-   the exception (unset `GUEST_SIGNING_LIVE_AT`) once the remaining legacy ids
-   are judged gone.
+   Enforced wherever sign-in is on, with no grace window and no operator switch:
+   the key derives from `BETTER_AUTH_SECRET`, and every e2e stack signs in, so a
+   regression fails the suite. History: it first shipped behind a cutoff
+   (`GUEST_SIG_ENFORCE_AFTER`, with `GUEST_ID_HMAC_SECRET` as its own secret) and
+   a legacy upgrade for ids older than `GUEST_SIGNING_LIVE_AT` (migrate's second
+   flow). It was armed in production on 2026-10-06 and un-armed the same day:
+   `/new` minted a local unsigned id, so a first-time visitor arriving there from
+   the landing page was refused (`401 signature_required`) and could not create
+   a document, against the rule that the canvas always works without signing
+   in. Every entry path now resolves a signed id before its first owner-scoped
+   call ([Auth and guest access](../014-identity/auth-and-guest-access.md) "Signed
+   guest ids"). Moving sign-in to better-auth replaced the cutoff, the separate
+   secret and the legacy upgrade with the one rule of §4.
    Pulled to the FRONT: it closed the cross-object escalation in
    [§2](#2-why-the-api-wasnt-safe-to-expose-as-is-history) and
    is independent of the token work, so it ships first (with the legacy-guest
@@ -564,12 +542,12 @@ hardening landed first:
      explains why the owner id can't be it and why leaving the key claimable
      costs nothing.
 3. ✅ `api_tokens` table + migration (`expires_at` fixed to +6 months) + token
-   mint/verify (`auth/`), Clerk-gated `/api/tokens` routes (the team-route
+   mint/verify (`auth/`), session-gated `/api/tokens` routes (the team-route
    gate, [Teams](../013-workspace/teams.md)).
 4. ✅ The **Settings API Tokens category** (`SettingsTokensRow`) — the management
    UI ([§3.6](#36-management--the-settings-dialogs-api-tokens-category)); it
    replaced the original Explorer "API tokens" page,
-   rendered only when `clerkEnabled` so it's absent on a no-auth self-host
+   rendered only when sign-in is on, so it's absent on a guest-only self-host
    ([§3.7](#37-self-hosting)).
 5. ✅ Wire token resolution into `resolveOwner`; enforce the read-only flag
    ([§3.4](#34-access--full-read--write-with-an-optional-read-only-flag)).
@@ -583,8 +561,8 @@ hardening landed first:
    - Add API tokens to the "what signing in unlocks" list in the
      `account-and-data/signing-in` article (next to teams + cross-device sync).
    - `docs/` updates: note the new `/api/tokens` surface + its account
-     requirement in `docs/development/architecture.md`, and the Clerk-gated nature in
-     `docs/operations/self-hosting.md` (tokens need Clerk, like teams).
+     requirement in `docs/development/architecture.md`, and the sign-in-gated nature in
+     `docs/operations/self-hosting.md` (tokens need sign-in, like teams).
    - ✅ Public API reference for the existing routes. Two layers, both
      shipped: the machine-readable `GET /api/openapi.json`
      ([API documentation (OpenAPI)](api-documentation.md)), and a human-facing **Developers**
