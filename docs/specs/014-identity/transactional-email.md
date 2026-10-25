@@ -1,12 +1,12 @@
-# Transactional & lifecycle email (Resend)
+# Transactional & lifecycle email
 
 > **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
 
-**Status: in progress.** Optional, off by default. Wires [Resend](https://resend.com)
-into the api worker so the product can send a small set of account emails. Like
-Clerk ([Auth + guest access](auth-and-guest-access.md)) and AI ([AI Assistance](../007-editor/ai-assistance.md)), it is **entirely gated on a secret**: when
-`RESEND_API_KEY` is absent the whole feature is inert — no sends, no new request
-work — and everything else behaves exactly as before. Guests and the canvas stay
+**Status: in progress.** Optional, off by default. Lets the api worker send a small set
+of account emails, sign-in codes included. Like sign-in ([Auth + guest access](auth-and-guest-access.md)) and AI
+([AI Assistance](../007-editor/ai-assistance.md)), it is **entirely gated on configuration**: with no email
+transport the whole feature is inert (no sends, no new request work) and everything else behaves exactly as
+before. Guests and the canvas stay
 account-free and never receive email.
 
 ## 1. What we send
@@ -82,19 +82,24 @@ unconditional and carries neither. The opt-out toggles are
 documented for users in the [Email Notifications](../../../apps/help/app/account-and-data/email-notifications/page.mdx)
 help article.
 
-## 2. Gating — the secret is the switch
+## 2. Gating: a transport is the switch
 
-- `RESEND_API_KEY` (secret) — when **unset**, `emailEnabled(env)` is false and
-  every send is a no-op. No `email_lifecycle` writes happen either (the
-  first-sighting upsert is itself guarded), so a deployment with email off does
-  zero extra work. This mirrors the model-key-absent → AI-hidden pattern.
-- `RESEND_FROM` (plain var, optional) — the From identity. Default
-  `livediagram <hello@livediagram.app>`. Requires a domain verified in Resend.
-- `APP_BASE_URL` (plain var, optional) — public origin for links in emails.
-  Default `https://livediagram.app`.
+One port (`apps/api/src/email/transport.ts`), and the first transport configured carries every email:
 
-Local dev: drop `RESEND_API_KEY=re_…` into `apps/api/.dev.vars` (gitignored).
-Production: `wrangler secret put RESEND_API_KEY`.
+1. **The outbox**, when `EMAIL_OUTBOX` is `1` (previews and the local e2e stack): nothing is sent; each message
+   is kept in `email_outbox` and `GET /api/preview/outbox?to=<address>` reads the newest back. The daily cron
+   keeps a day of it.
+2. **Cloudflare Email Service**, through the `EMAIL` send_email binding: docs.nu's transport. It needs the From
+   domain onboarded under Email Sending, and it takes transactional mail only.
+3. **Resend**, when `RESEND_API_KEY` (secret) is set and there is no binding: a self-host off Cloudflare's
+   sending.
+
+With none, `emailEnabled(env)` is false and every send is a no-op; no `email_lifecycle` writes happen either.
+
+- `EMAIL_FROM` (plain var, optional): the From identity, `LiveDoc <hello@docs.nu>` by default.
+- `APP_BASE_URL` (plain var, optional): public origin for links in emails, `https://docs.nu` by default.
+- Every send but a sign-in code is best-effort (`sendEmail` never throws). A sign-in code's failure is the
+  person's to see (`sendEmailNow`, [Auth + guest access](auth-and-guest-access.md#email-for-sign-in)).
 
 ## 3. Data model
 

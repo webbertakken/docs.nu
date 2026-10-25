@@ -12,7 +12,7 @@
 //   RESEND_API_KEY=re_...
 //   RESEND_TEST_TO=you@example.com   # for an UNVERIFIED Resend domain this
 //                                    # must be your Resend account email
-//   RESEND_FROM=...                  # optional; defaults to onboarding@resend.dev
+//   EMAIL_FROM=...                   # optional; defaults to onboarding@resend.dev
 //                                    # (the sender that works without a verified domain)
 
 import { readFileSync } from 'node:fs';
@@ -64,7 +64,7 @@ const ENABLED = nodeEnv.RESEND_LIVE_TEST === '1' && !!TO && !!KEY;
 
 const env = {
   RESEND_API_KEY: KEY,
-  RESEND_FROM: vars.RESEND_FROM ?? 'livediagram <onboarding@resend.dev>',
+  EMAIL_FROM: vars.EMAIL_FROM ?? 'livediagram <onboarding@resend.dev>',
   APP_BASE_URL: vars.APP_BASE_URL ?? 'https://livediagram.app',
 } as unknown as Env;
 

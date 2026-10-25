@@ -553,7 +553,8 @@ export { BUILD_ID_HEADER, parseBuildId } from './build-id';
 // so the two can't disagree on what a request presented (see ./request-auth.ts).
 export {
   bearerTokenOf,
-  isClerkIdShape,
+  ACCOUNT_ID_PREFIX,
+  isAccountIdShape,
   isLoopbackHostname,
   oauthRedirectUrl,
 } from './request-auth';
@@ -586,6 +587,9 @@ export type AiRequest = {
   history?: AiConversationTurn[];
 };
 
+// A way to prove who you are (docs/specs/014-identity/auth-and-guest-access.md "Sign-in methods").
+export type SignInMethod = 'google' | 'email-code';
+
 // Response body for GET /api/capabilities.
 export type CapabilitiesResponse = {
   aiEnabled: boolean;
@@ -594,6 +598,10 @@ export type CapabilitiesResponse = {
   // oldest CLI accepted for writes.
   apiBase?: string;
   authEnabled?: boolean;
+  // Sign-in (docs/specs/014-identity/auth-and-guest-access.md "Deployment modes"): the methods this host offers,
+  // and the public Google client id when Google is one. Absent on an older worker: read as none.
+  signInMethods?: SignInMethod[];
+  googleClientId?: string | null;
   oauthIssuer?: string;
   documentFormat?: number;
   cli?: { minVersion: string };

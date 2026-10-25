@@ -16,7 +16,7 @@
 // apps/help/lib/preview.test.ts.
 
 import { spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -160,7 +160,15 @@ export function previewConfig(config, { app, names, d1Id }) {
     out.unsafe = { ...rest.unsafe, bindings: rest.unsafe.bindings.map(previewLimiter) };
   }
   if (app === 'api') {
-    out.vars = { ...rest.vars, AI_ALLOWED_ORIGINS: names.origin, APP_BASE_URL: names.origin };
+    // A preview sends no email: sign-in codes land in its outbox (docs/specs/014-identity/auth-and-guest-access.md
+    // "Previews"), so the send_email binding is dropped.
+    out.vars = {
+      ...rest.vars,
+      AI_ALLOWED_ORIGINS: names.origin,
+      APP_BASE_URL: names.origin,
+      EMAIL_OUTBOX: '1',
+    };
+    delete out.send_email;
   }
   if (app === 'router') {
     out.vars = { ...rest.vars, DEPLOY_ENV: 'preview' };
@@ -216,6 +224,18 @@ async function ensureDatabase(name) {
   });
   log(`created D1 ${name}`);
   return json.result.uuid;
+}
+
+// Sign-in on a preview needs its own BETTER_AUTH_SECRET, never production's. Made once, when the api worker has
+// none, so sessions survive later pushes; it goes with the worker when the preview is torn down.
+async function ensureAuthSecret(worker) {
+  const { json } = await cf('GET', `/workers/scripts/${worker}/secrets`);
+  if (json.result.some((secret) => secret.name === 'BETTER_AUTH_SECRET')) return;
+  const text = randomBytes(32).toString('base64');
+  await cf('PUT', `/workers/scripts/${worker}/secrets`, {
+    body: { name: 'BETTER_AUTH_SECRET', text, type: 'secret_text' },
+  });
+  log(`set BETTER_AUTH_SECRET on ${worker}`);
 }
 
 async function ensureBucket(name) {
@@ -381,6 +401,7 @@ async function deploy(pr, branch) {
   for (const app of PREVIEW_APPS) {
     log(`deploying ${app}`);
     await wranglerDeploy(app, app === 'api' && buildId ? ['--var', `BUILD_ID:${buildId}`] : []);
+    if (app === 'api') await ensureAuthSecret(previewWorker('docs-nu-api', names.prefix));
   }
   await detachStaleHosts(names);
   log(`deployed: ${names.workersDevOrigin}, and ${names.origin} once its certificate is issued`);

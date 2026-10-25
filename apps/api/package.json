@@ -30,6 +30,7 @@
     "@livediagram/render-png": "workspace:*",
     "@livediagram/sheets": "workspace:*",
     "@livediagram/templates": "workspace:*",
+    "better-auth": "1.7.13",
     "jose": "^6.2.12"
   },
   "devDependencies": {

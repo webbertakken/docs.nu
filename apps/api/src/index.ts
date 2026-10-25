@@ -5,6 +5,10 @@ import {
 } from './legacy-documents-alias';
 import { runTabStatsBackfill } from './tab-stats-backfill';
 import { getClerkIdentity } from './auth/clerk';
+import { getAccountSession } from './auth/session-token';
+import { handleAuth } from './routes/auth';
+import { handlePreviewOutbox } from './routes/preview-outbox';
+import { deleteExpiredIdentityRows, deleteOldOutboxMail } from './db/identity';
 import { noteAuthSighting } from './auth/session-telemetry';
 import { emailEnabled } from './email/client';
 import { runLifecycleSweep, welcomeOnSighting } from './email/lifecycle';
@@ -28,7 +32,7 @@ import {
   CHANGESET_RETENTION_MS,
   bearerTokenOf,
   errorTypeToken,
-  isClerkIdShape,
+  isAccountIdShape,
   TIMELINE_RETENTION_MS,
 } from '@livediagram/api-schema';
 import {
@@ -126,6 +130,10 @@ async function routeApiRequest(
   const url = new URL(request.url);
   const segments = url.pathname.replace(/^\//, '').split('/');
   if (segments[0] !== 'api') return notFound();
+  // Sign-in (docs/specs/014-identity/auth-and-guest-access.md): better-auth's routes authenticate themselves, so
+  // they are answered before the api's own identity resolution and gates.
+  if (segments[1] === 'auth') return handleAuth(request, env, executionCtx);
+  if (segments[1] === 'preview') return handlePreviewOutbox(request, env);
 
   // Hybrid identity (docs/specs/014-identity/auth-and-guest-access.md). Verify a Clerk Bearer token once at
   // the top of the handler — null when `CLERK_JWKS_URL` is unset,
@@ -135,7 +143,19 @@ async function routeApiRequest(
   // under their Clerk userId and guests keep working via the
   // legacy `X-Owner-Id` header.
   const clerkIdentity = await getClerkIdentity(env, request);
-  const clerkUserId = clerkIdentity?.userId ?? null;
+  // A LiveDoc session token (docs/specs/014-identity/auth-and-guest-access.md "How the api knows who is calling"):
+  // any bearer that is not an API token or a workbench session. Null when sign-in is off or it does not verify.
+  const sessionBearer = bearerTokenOf(request.headers.get('Authorization'));
+  const accountSession =
+    !clerkIdentity &&
+    sessionBearer &&
+    !isApiTokenFormat(sessionBearer) &&
+    !isWorkbenchSessionFormat(sessionBearer) &&
+    !sessionBearer.startsWith(API_TOKEN_PREFIX) &&
+    !sessionBearer.startsWith(WORKBENCH_SESSION_PREFIX)
+      ? await getAccountSession(env, sessionBearer)
+      : null;
+  const clerkUserId = clerkIdentity?.userId ?? accountSession?.accountId ?? null;
   // Email used for team-invite matching (docs/specs/013-workspace/teams.md). ONLY the verified
   // `email` claim from the JWKS-checked session token is trusted —
   // never a client-supplied header. A `X-Owner-Email` fallback used to
@@ -145,7 +165,8 @@ async function routeApiRequest(
   // off when the deployment hasn't added the email claim to the Clerk
   // session token (dashboard → Sessions → Customize session token →
   // `{"email": "{{user.primary_email_address}}"}`); see auth/clerk.ts.
-  const clerkEmail = clerkIdentity?.email ?? null;
+  const clerkEmail =
+    clerkIdentity?.email ?? (accountSession?.emailVerified ? accountSession.email : null);
   // docs/specs/017-telemetry/telemetry.md: Session·SignedUp / SignedIn are counted here, server-side, on
   // the first request of each new Clerk session, so every auth method
   // (email code, Google OAuth) counts once. Off the response path.
@@ -241,7 +262,7 @@ async function routeApiRequest(
     (OWNER_SCOPED_SEGMENTS.has(segments[1] ?? '') || segments[1] === 'share')
   ) {
     const headerOwner = request.headers.get('X-Owner-Id');
-    if (headerOwner && isClerkIdShape(headerOwner)) {
+    if (headerOwner && isAccountIdShape(headerOwner)) {
       return json({ error: 'account_id_not_a_guest_credential' }, { status: 401 });
     }
   }
@@ -423,6 +444,7 @@ async function routeApiRequest(
     clerkUserId,
     verifiedUserId,
     clerkEmail,
+    sessionAuthTime: accountSession?.authTime ?? null,
     resolveOwner,
     token: tokenAuth ? { id: tokenAuth.tokenId, readOnly: tokenAuth.readOnly } : null,
     workbench,
@@ -565,6 +587,17 @@ const worker = {
         now - AUTH_SESSION_RETENTION_MS,
         deleteOldSessionSightings,
       );
+      // docs/specs/014-identity/blueprints/auth-and-guest-access.md: expired sessions and sign-in codes, and the
+      // outbox's day of mail (previews only).
+      scheduleSweep(ctx, env, 'identity', 'rows', now, deleteExpiredIdentityRows);
+      scheduleSweep(
+        ctx,
+        env,
+        'email_outbox',
+        'rows',
+        now - OUTBOX_RETENTION_MS,
+        deleteOldOutboxMail,
+      );
       // docs/specs/013-workspace/timeline.md §3.5: the Timeline feed keeps a year.
       scheduleSweep(
         ctx,
@@ -690,6 +723,9 @@ function scheduleSweep(
       }),
   );
 }
+
+// A day in ms: how long a preview's outbox keeps mail (routes/preview-outbox.ts).
+const OUTBOX_RETENTION_MS = 86_400_000;
 
 // 90 days in ms: how long a seen Clerk session id is kept for the sign-in
 // count (docs/specs/017-telemetry/telemetry.md). Longer than any session Clerk keeps alive by default.

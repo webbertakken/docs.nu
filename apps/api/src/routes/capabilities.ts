@@ -1,4 +1,5 @@
 import { DOCUMENT_FORMAT } from '@livediagram/api-schema';
+import { identityConfigOf } from '../auth/identity-config';
 import { aiConfigured } from '../ai-provider';
 import { communityEnabled } from '../community-enabled';
 import { emailEnabled } from '../email/client';
@@ -21,9 +22,14 @@ function cliCapabilities({ env, url }: RouteContext) {
     }
   })();
   const minVersion = env.CLI_MIN_VERSION?.trim();
+  const identity = identityConfigOf(env);
   return {
     apiBase: `${url.origin}/api`,
-    authEnabled: Boolean(env.CLERK_JWKS_URL),
+    // Sign-in (docs/specs/014-identity/auth-and-guest-access.md "Deployment modes"): on with better-auth's
+    // secret and a method, or with Clerk until it leaves the code.
+    authEnabled: identity.enabled || Boolean(env.CLERK_JWKS_URL),
+    signInMethods: identity.methods,
+    googleClientId: identity.googleClientId,
     ...(issuer ? { oauthIssuer: issuer } : {}),
     documentFormat: DOCUMENT_FORMAT,
     ...(minVersion && VERSION.test(minVersion) ? { cli: { minVersion } } : {}),

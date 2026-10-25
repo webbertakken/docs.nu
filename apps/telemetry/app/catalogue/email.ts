@@ -148,6 +148,13 @@ export const ACCOUNT_DELETED_EMAILS = email(
   'bad',
 );
 
+export const SIGN_IN_CODE_EMAILS = email(
+  'SignInCode',
+  'Sign-in Codes',
+  'A code sent to sign in or create an account with an email address.',
+  'neutral',
+);
+
 export const EMAIL_KIND_METRICS: readonly Metric[] = [
   WELCOME_EMAILS,
   WEEK1_EMAILS,
@@ -169,6 +176,7 @@ export const EMAIL_KIND_METRICS: readonly Metric[] = [
   FORM_SUSPENDED_EMAILS,
   TOKEN_EXPIRING_EMAILS,
   ACCOUNT_DELETED_EMAILS,
+  SIGN_IN_CODE_EMAILS,
 ];
 
 export const EMAILS_SENT: MetricStack = {

@@ -1,6 +1,9 @@
 name = "docs-nu-api"
 main = "src/index.ts"
 compatibility_date = "2026-05-29"
+# better-auth (sign-in, docs/specs/014-identity/auth-and-guest-access.md) imports node:crypto and uses
+# AsyncLocalStorage.
+compatibility_flags = ["nodejs_compat"]
 
 # Bundle the share card's fonts (packages/render-png/fonts, Inter Regular and Bold) as raw bytes for the resvg PNG
 # renderer (docs/specs/013-workspace/share-link-previews.md): a Worker has no system fonts, so without this the card
@@ -263,6 +266,27 @@ type = "ratelimit"
 namespace_id = "7012"
 simple = { limit = 20, period = 60 }
 
+# Sign-in (docs/specs/014-identity/blueprints/auth-and-guest-access.md "Security and trust"): every POST under
+# /api/auth, keyed on CF-Connecting-IP, and each sign-in code send, keyed on a hash of the address. better-auth's
+# own limiter stays off (it would keep IP keys in D1). Absent bindings → allow (self-host).
+[[unsafe.bindings]]
+name = "AUTH_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7013"
+simple = { limit = 20, period = 60 }
+
+[[unsafe.bindings]]
+name = "AUTH_EMAIL_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7014"
+simple = { limit = 3, period = 60 }
+
+# Cloudflare Email Service (docs/specs/014-identity/transactional-email.md): the preferred email transport. Sending
+# needs the From domain onboarded under Email Service > Email Sending; a self-host without it removes this block
+# and sets RESEND_API_KEY instead, or runs without email. Previews drop it and keep mail in an outbox.
+[[send_email]]
+name = "EMAIL"
+
 # The AI features (docs/specs/007-editor/ai-assistance.md) talk to ANY OpenAI-compatible chat-completions
 # endpoint, and WHICH provider is inferred from which key is set — a key is
 # provider-specific, so its name says whose it is (see src/ai-provider.ts):
@@ -301,19 +325,14 @@ simple = { limit = 20, period = 60 }
 # sets them in [vars] above, never only in the Cloudflare dashboard: every
 # `wrangler deploy` replaces the worker's plain vars with the ones it declares.
 
-# RESEND_API_KEY + RESEND_FROM + APP_BASE_URL drive transactional &
-# lifecycle email (docs/specs/014-identity/transactional-email.md). All optional; an absent RESEND_API_KEY makes
-# the whole email feature inert — no sends, and the email_lifecycle table
-# is never touched, so a deployment with email off does zero extra work:
+# Email (docs/specs/014-identity/transactional-email.md): the EMAIL binding above, else RESEND_API_KEY (a worker
+# secret; locally `RESEND_API_KEY=re_...` in `apps/api/.dev.vars`), else none and email is inert. EMAIL_FROM is
+# an optional [vars] From identity (default "LiveDoc <hello@docs.nu>"). APP_BASE_URL is the public origin for
+# links in emails and sign-in's base URL; production sets it in hosted-vars.json.
 #
-#   - RESEND_API_KEY: worker secret. Local dev: drop
-#     `RESEND_API_KEY=re_...` into `apps/api/.dev.vars` (gitignored).
-#     Production: `wrangler secret put RESEND_API_KEY`.
-#   - RESEND_FROM: optional [vars] From identity, e.g.
-#     "livediagram <hello@livediagram.app>" (the default). The domain
-#     must be verified in Resend.
-#   - APP_BASE_URL: optional [vars] public origin for links in emails.
-#     Defaults to "https://livediagram.app".
+# Sign-in (docs/specs/014-identity/auth-and-guest-access.md) is off until BETTER_AUTH_SECRET is set:
+# `openssl rand -base64 32 | wrangler secret put BETTER_AUTH_SECRET`. Google sign-in adds GOOGLE_AUTH_CLIENT_ID
+# ([vars] or hosted-vars.json) and the secret GOOGLE_AUTH_CLIENT_SECRET.
 
 # CLERK_JWKS_URL is provisioned out-of-band so the value never lands
 # in the public repo (docs/specs/002-project-scope/secrets-policy.md):

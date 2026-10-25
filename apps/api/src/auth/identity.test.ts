@@ -1,0 +1,193 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { sqliteD1 } from '../test-sqlite-d1';
+import { handleAuth } from '../routes/auth';
+import { handlePreviewOutbox } from '../routes/preview-outbox';
+import type { Env } from '../types';
+import { createIdentity, identityOptions } from './identity';
+import { getAccountSession, resetSessionKeyCache } from './session-token';
+
+const ORIGIN = 'https://docs.test';
+const SIGN_IN_ENV = {
+  BETTER_AUTH_SECRET: 's'.repeat(40),
+  APP_BASE_URL: ORIGIN,
+  EMAIL_OUTBOX: '1',
+} as Partial<Env>;
+
+function post(path: string, body: unknown, headers: Record<string, string> = {}): Request {
+  return new Request(`${ORIGIN}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: ORIGIN, ...headers },
+    body: JSON.stringify(body),
+  });
+}
+
+function cookieOf(res: Response): string {
+  return res.headers
+    .getSetCookie()
+    .map((c) => c.split(';')[0])
+    .join('; ');
+}
+
+async function codeFor(env: Env, email: string): Promise<string> {
+  const res = await handlePreviewOutbox(
+    new Request(`${ORIGIN}/api/preview/outbox?to=${encodeURIComponent(email)}`),
+    env,
+  );
+  const { subject } = (await res.json()) as { subject: string };
+  return subject.slice(0, 6);
+}
+
+// Signs `email` in with a code, as the browser does, and answers the session cookie.
+async function signIn(
+  env: Env,
+  email: string,
+  name?: string,
+): Promise<{ cookie: string; body: SignedIn }> {
+  const sent = await handleAuth(
+    post('/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }),
+    env,
+  );
+  expect(sent.status).toBe(200);
+  const otp = await codeFor(env, email);
+  const res = await handleAuth(
+    post('/api/auth/sign-in/email-otp', { email, otp, ...(name ? { name } : {}) }),
+    env,
+  );
+  expect(res.status).toBe(200);
+  return { cookie: cookieOf(res), body: await res.json<SignedIn>() };
+}
+
+type SignedIn = { user: { id: string; name: string; emailVerified: boolean } };
+
+afterEach(() => {
+  resetSessionKeyCache();
+  vi.restoreAllMocks();
+});
+
+describe('identity', () => {
+  it('is null on a host with no secret, and has no options there', () => {
+    expect(createIdentity({ APP_BASE_URL: ORIGIN } as Env)).toBeNull();
+    expect(() => identityOptions({ APP_BASE_URL: ORIGIN } as Env)).toThrow('sign-in is off');
+  });
+
+  it('keeps better-auth telemetry and its own rate limiter off, and stores no IP', () => {
+    const options = identityOptions({ ...SIGN_IN_ENV } as Env);
+    expect(options.telemetry).toEqual({ enabled: false });
+    expect(options.rateLimit).toEqual({ enabled: false });
+    expect(options.advanced?.ipAddress).toEqual({ disableIpTracking: true });
+    expect(options.advanced?.useSecureCookies).toBe(true);
+  });
+
+  it('rotates secrets, offers Google when keyed, and mints account ids for users only', () => {
+    const options = identityOptions({
+      ...SIGN_IN_ENV,
+      BETTER_AUTH_SECRETS:
+        '2:nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn,1:oooooooooooooooooooooooooooooooooooooooo',
+      GOOGLE_AUTH_CLIENT_ID: 'gid',
+      GOOGLE_AUTH_CLIENT_SECRET: 'gsecret',
+    } as Env);
+    expect(options.secrets).toEqual([
+      { version: 2, value: 'n'.repeat(40) },
+      { version: 1, value: 'o'.repeat(40) },
+    ]);
+    expect(options.socialProviders?.google).toMatchObject({
+      clientId: 'gid',
+      clientSecret: 'gsecret',
+    });
+    const generateId = options.advanced?.database?.generateId as (o: { model: string }) => string;
+    expect(generateId({ model: 'user' })).toMatch(/^acct_/);
+    expect(generateId({ model: 'session' })).toMatch(/^[0-9A-Za-z]{32}$/);
+    expect(
+      identityOptions({ ...SIGN_IN_ENV, APP_BASE_URL: 'http://localhost:3000' } as Env).advanced
+        ?.useSecureCookies,
+    ).toBe(false);
+  });
+
+  it('signs up with an email code, then proves the account to the api with a session token', async () => {
+    const { env, sql } = sqliteD1(SIGN_IN_ENV);
+    const { cookie, body } = await signIn(env, 'Ada@Example.com', 'Ada Lovelace');
+
+    expect(body.user.id).toMatch(/^acct_[0-9A-Za-z]{24}$/);
+    expect(body.user.emailVerified).toBe(true);
+    expect(body.user.name).toBe('Ada Lovelace');
+    expect(cookie).toContain('__Secure-livedoc.session_token=');
+    const session = sql.prepare('SELECT ipAddress FROM identity_sessions').get() as {
+      ipAddress: string | null;
+    };
+    expect(session.ipAddress ?? '').toBe('');
+
+    const tokenRes = await handleAuth(
+      new Request(`${ORIGIN}/api/auth/token`, { headers: { Cookie: cookie } }),
+      env,
+    );
+    expect(tokenRes.status).toBe(200);
+    const { token } = (await tokenRes.json()) as { token: string };
+
+    const account = await getAccountSession(env, token);
+    expect(account).toMatchObject({
+      accountId: body.user.id,
+      email: 'ada@example.com',
+      emailVerified: true,
+    });
+    expect(account!.authTime).toBeGreaterThan(0);
+  });
+
+  it('signs a returning address into the same account', async () => {
+    const { env } = sqliteD1(SIGN_IN_ENV);
+    const first = await signIn(env, 'grace@example.com', 'Grace');
+    const second = await signIn(env, 'grace@example.com');
+    expect(second.body.user.id).toBe(first.body.user.id);
+  });
+
+  it('refuses a wrong code', async () => {
+    const { env } = sqliteD1(SIGN_IN_ENV);
+    await handleAuth(
+      post('/api/auth/email-otp/send-verification-otp', {
+        email: 'x@example.com',
+        type: 'sign-in',
+      }),
+      env,
+    );
+    const res = await handleAuth(
+      post('/api/auth/sign-in/email-otp', { email: 'x@example.com', otp: '000000' }),
+      env,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('answers 502 EMAIL_SEND_FAILED when the code cannot be sent', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { env } = sqliteD1({
+      ...SIGN_IN_ENV,
+      EMAIL_OUTBOX: undefined,
+      EMAIL: {
+        send: async () => {
+          throw Object.assign(new Error('nope'), { code: 'E_SENDER_NOT_VERIFIED' });
+        },
+      },
+    });
+    const res = await handleAuth(
+      post('/api/auth/email-otp/send-verification-otp', {
+        email: 'y@example.com',
+        type: 'sign-in',
+      }),
+      env,
+    );
+    expect(res.status).toBe(502);
+    expect(await res.json()).toMatchObject({ code: 'EMAIL_SEND_FAILED' });
+  });
+
+  it('refuses a cookie-bearing request from another origin', async () => {
+    const { env } = sqliteD1(SIGN_IN_ENV);
+    const { cookie } = await signIn(env, 'z@example.com', 'Z');
+    const res = await handleAuth(
+      post(
+        '/api/auth/sign-out',
+        {},
+        { Cookie: cookie, Origin: 'https://feat-x.preview.docs.test' },
+      ),
+      env,
+    );
+    expect(res.status).toBe(403);
+  });
+});

@@ -15,8 +15,7 @@ describe('emailEnabled', () => {
 });
 
 describe('appBaseUrl', () => {
-  it('defaults to livediagram.app', () =>
-    expect(appBaseUrl(noKey)).toBe('https://livediagram.app'));
+  it('defaults to docs.nu', () => expect(appBaseUrl(noKey)).toBe('https://docs.nu'));
   it('uses + trims a trailing slash from APP_BASE_URL', () =>
     expect(appBaseUrl({ APP_BASE_URL: 'https://example.com/' } as unknown as Env)).toBe(
       'https://example.com',
@@ -57,14 +56,14 @@ describe('sendEmail', () => {
     expect(JSON.parse(init.body as string)).toMatchObject({
       to: ['a@b.com'],
       subject: 'Hi',
-      from: expect.stringContaining('hello@livediagram.app'),
+      from: 'LiveDoc <hello@docs.nu>',
     });
   });
 
-  it('honours a RESEND_FROM override', async () => {
+  it('honours an EMAIL_FROM override', async () => {
     const f = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }));
     vi.stubGlobal('fetch', f);
-    await sendEmail({ RESEND_API_KEY: 're', RESEND_FROM: 'X <x@y.com>' } as unknown as Env, {
+    await sendEmail({ RESEND_API_KEY: 're', EMAIL_FROM: 'X <x@y.com>' } as unknown as Env, {
       kind: 'Welcome',
       to: 'a@b.com',
       subject: 's',
