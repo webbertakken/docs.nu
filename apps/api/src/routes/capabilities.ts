@@ -3,6 +3,7 @@ import { identityConfigOf } from '../auth/identity-config';
 import { aiConfigured } from '../ai-provider';
 import { communityEnabled } from '../community-enabled';
 import { emailEnabled } from '../email/client';
+import { emailTransportKind } from '../email/transport';
 import { driveMode } from '../drive/config';
 import { json, methodNotAllowed, notFound } from '../responses';
 import type { RouteContext } from './context';
@@ -30,6 +31,9 @@ function cliCapabilities({ env, url }: RouteContext) {
     authEnabled: identity.enabled || Boolean(env.CLERK_JWKS_URL),
     signInMethods: identity.methods,
     googleClientId: identity.googleClientId,
+    // Codes land in the outbox, not a mailbox (previews and the e2e stack): the code step links to it
+    // (docs/specs/014-identity/auth-and-guest-access.md "Previews").
+    emailOutbox: emailTransportKind(env) === 'outbox',
     ...(issuer ? { oauthIssuer: issuer } : {}),
     documentFormat: DOCUMENT_FORMAT,
     ...(minVersion && VERSION.test(minVersion) ? { cli: { minVersion } } : {}),

@@ -602,6 +602,9 @@ export type CapabilitiesResponse = {
   // and the public Google client id when Google is one. Absent on an older worker: read as none.
   signInMethods?: SignInMethod[];
   googleClientId?: string | null;
+  // Sign-in codes land in the preview outbox (`GET /api/preview/outbox`) instead of a mailbox: previews and the
+  // local e2e stack. Absent on an older worker: read as false.
+  emailOutbox?: boolean;
   oauthIssuer?: string;
   documentFormat?: number;
   cli?: { minVersion: string };
