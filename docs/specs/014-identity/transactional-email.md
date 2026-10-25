@@ -117,10 +117,10 @@ CREATE INDEX IF NOT EXISTS idx_email_lifecycle_due ON email_lifecycle (created_a
 ```
 
 The `email` is only ever the address the account was created with, which every account has verified (an email
-code proves it, and Google verifies its own) — never a client-supplied value, never a guest. Rows exist only
+code proves it, and Google verifies its own): never a client-supplied value, never a guest. Rows exist only
 for accounts.
 
-## 4. Sign-up detection — the account's creation
+## 4. Sign-up detection: the account's creation
 
 Sign-up is the account's creation, which better-auth reports to LiveDoc's own hook (`user.create.after` in
 `apps/api/src/auth/identity-hooks.ts`), once per account whichever method made it. Only when `emailEnabled`, the hook
