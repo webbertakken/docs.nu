@@ -31,8 +31,8 @@ export async function joinedFolderTeam(
   caller: PlacementCaller,
   isJoinedMember: (teamId: string, userId: string) => Promise<boolean>,
 ): Promise<boolean> {
-  if (!folder?.teamId || caller.verifiedUserId === null) return false;
-  return isJoinedMember(folder.teamId, caller.verifiedUserId);
+  if (!folder?.teamId || caller.verifiedAccountId === null) return false;
+  return isJoinedMember(folder.teamId, caller.verifiedAccountId);
 }
 
 export const defaultFolder: FolderStep = async ({

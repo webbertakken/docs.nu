@@ -115,7 +115,7 @@ export async function trashedIdsIn(env: Env, ids: string[]): Promise<Set<string>
 // (docs/specs/013-workspace/team-shared-documents.md trust boundary). Newest first.
 export async function listTrash(
   env: Env,
-  caller: { owner: string; verifiedUserId: string | null },
+  caller: { owner: string; verifiedAccountId: string | null },
 ): Promise<TrashedDocument[]> {
   const res = await env.DB.prepare(
     `SELECT d.id, d.name, d.team_id, t.name AS team_name, d.trashed_at, d.trash_reason
@@ -127,7 +127,7 @@ export async function listTrash(
                   (SELECT team_id FROM team_members WHERE user_id = ?2 AND status = 'joined')))
       ORDER BY d.trashed_at DESC, d.id ASC`,
   )
-    .bind(caller.owner, caller.verifiedUserId)
+    .bind(caller.owner, caller.verifiedAccountId)
     .all<{
       id: string;
       name: string;

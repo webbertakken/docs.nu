@@ -84,7 +84,7 @@ export async function handleDocumentShareRoutes(ctx: RouteContext): Promise<Resp
       // owner's business — a team member seeing "a link was created"
       // learns nothing they can act on.
       // The one who shared: on a team document a joined member as often as its owner.
-      const sharer = ctx.verifiedUserId ?? access.ownerId;
+      const sharer = ctx.verifiedAccountId ?? access.ownerId;
       ctx.waitUntil?.(recordShareLinkCreated(env, access, role, sharer));
       // docs/specs/014-identity/transactional-email.md (#6): a first-ever share link is a milestone. Best-effort,
       // off the response path; claimFirstShare dedups so it fires only once.

@@ -82,12 +82,12 @@ export async function handleCommunity(ctx: RouteContext): Promise<Response> {
   // author's own posts under the same search words, hidden ones included, with their totals. Personal, so
   // never cached.
   if (segments.length === 3 && segments[2] === 'mine' && method === 'GET') {
-    if (!ctx.clerkUserId) return signInRequired();
+    if (!ctx.sessionAccountId) return signInRequired();
     const query = parseCommunityListQuery(url.searchParams);
     if (!query.ok) return json({ error: 'invalid_query' }, { status: 400 });
     const [{ rows, nextOffset }, totals] = await Promise.all([
-      listCommunityPosts(env, query.value, ctx.clerkUserId),
-      communityMineTotals(env, ctx.clerkUserId),
+      listCommunityPosts(env, query.value, ctx.sessionAccountId),
+      communityMineTotals(env, ctx.sessionAccountId),
     ]);
     const liked = await withLikes(env, key, rows);
     const posts: CommunityMinePost[] = rows.map((row, i) => ({

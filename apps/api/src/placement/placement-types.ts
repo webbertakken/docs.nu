@@ -15,8 +15,8 @@ import type {
 export type RequestedPlacement = DocumentPlacement & { chosen: boolean };
 
 /** Who is creating: the hybrid owner (guest or account) and the verified account id, if any. Team
- *  membership is only ever read against `verifiedUserId`, never the guest header. */
-export type PlacementCaller = { ownerId: string; verifiedUserId: string | null };
+ *  membership is only ever read against `verifiedAccountId`, never the guest header. */
+export type PlacementCaller = { ownerId: string; verifiedAccountId: string | null };
 
 /** The folder fields placement reads. */
 export type PlacementFolder = { ownerId: string; teamId: string | null };

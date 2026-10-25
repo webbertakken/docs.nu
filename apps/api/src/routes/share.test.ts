@@ -95,9 +95,9 @@ function imageCtx(code: string, tab?: string): RouteContext {
     env: FAKE_ENV,
     url,
     segments: url.pathname.replace(/^\//, '').split('/'),
-    clerkUserId: null,
-    verifiedUserId: null,
-    clerkEmail: null,
+    sessionAccountId: null,
+    verifiedAccountId: null,
+    accountEmail: null,
     resolveOwner: () => null,
   };
 }
@@ -381,7 +381,7 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
       code?: string;
       visitor?: string | null;
       password?: string;
-      // The visitor proved their id (a Clerk session or token), not just sent X-Owner-Id.
+      // The visitor proved their id (a session or token), not just sent X-Owner-Id.
       signedIn?: boolean;
     } = {},
   ): {
@@ -398,9 +398,9 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
         env: FAKE_ENV,
         url,
         segments: url.pathname.replace(/^\//, '').split('/'),
-        clerkUserId: opts.signedIn ? (opts.visitor ?? null) : null,
-        verifiedUserId: opts.signedIn ? (opts.visitor ?? null) : null,
-        clerkEmail: null,
+        sessionAccountId: opts.signedIn ? (opts.visitor ?? null) : null,
+        verifiedAccountId: opts.signedIn ? (opts.visitor ?? null) : null,
+        accountEmail: null,
         resolveOwner: () => opts.visitor ?? null,
         waitUntil: (p: Promise<unknown>) => {
           dispatched.push(p);
@@ -670,9 +670,9 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
         env: FAKE_ENV,
         url,
         segments: url.pathname.replace(/^\//, '').split('/'),
-        clerkUserId: null,
-        verifiedUserId: null,
-        clerkEmail: null,
+        sessionAccountId: null,
+        verifiedAccountId: null,
+        accountEmail: null,
         resolveOwner: () => null,
       });
       expect(res.status, `${method} ${path}`).toBe(404);

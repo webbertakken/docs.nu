@@ -64,17 +64,17 @@ function call(
   path: string,
   opts: {
     body?: unknown;
-    clerkUserId?: string | null;
+    sessionAccountId?: string | null;
     owner?: string | null;
-    verifiedUserId?: string | null;
+    verifiedAccountId?: string | null;
   } = {},
 ) {
-  const clerkUserId = opts.clerkUserId === undefined ? 'user_a' : opts.clerkUserId;
+  const sessionAccountId = opts.sessionAccountId === undefined ? 'user_a' : opts.sessionAccountId;
   return handleDrive(
     makeTestRouteContext(method, `/api/drive${path}`, {
-      owner: opts.owner ?? clerkUserId,
-      clerkUserId,
-      ...(opts.verifiedUserId !== undefined ? { verifiedUserId: opts.verifiedUserId } : {}),
+      owner: opts.owner ?? sessionAccountId,
+      sessionAccountId,
+      ...(opts.verifiedAccountId !== undefined ? { verifiedAccountId: opts.verifiedAccountId } : {}),
       body: opts.body,
       env: db.env,
     }),
@@ -91,7 +91,7 @@ async function connect(db: SqliteD1, owner = 'user_a', refreshToken = 'rt-1') {
     status: 200,
     body: { access_token: 'at', refresh_token: refreshToken, expires_in: 3600 },
   });
-  return call(db, 'POST', '/connect', { body: { code: 'code-1', state }, clerkUserId: owner });
+  return call(db, 'POST', '/connect', { body: { code: 'code-1', state }, sessionAccountId: owner });
 }
 
 // The account columns of user_a's connection row.
@@ -145,16 +145,16 @@ describe('gates', () => {
 
   it('refuses a guest (X-Owner-Id) with 401', async () => {
     const db = sqliteD1(BROKER);
-    const res = await call(db, 'GET', '/connection', { clerkUserId: null, owner: 'guest-uuid' });
+    const res = await call(db, 'GET', '/connection', { sessionAccountId: null, owner: 'guest-uuid' });
     expect(res.status).toBe(401);
   });
 
-  it('refuses an API token caller (verified id without a Clerk session)', async () => {
+  it('refuses an API token caller (verified id without a session)', async () => {
     const db = sqliteD1(BROKER);
     const res = await call(db, 'GET', '/connection', {
-      clerkUserId: null,
+      sessionAccountId: null,
       owner: 'user_a',
-      verifiedUserId: 'user_a',
+      verifiedAccountId: 'user_a',
     });
     expect(res.status).toBe(401);
   });
@@ -627,7 +627,7 @@ describe('items', () => {
     await call(db, 'PUT', '/connection', { body: {} });
     await call(db, 'PUT', '/items', { body: { items: [item()] } });
     const other = await body<{ items: unknown[] }>(
-      await call(db, 'GET', '/items', { clerkUserId: 'user_b' }),
+      await call(db, 'GET', '/items', { sessionAccountId: 'user_b' }),
     );
     expect(other.items).toEqual([]);
   });

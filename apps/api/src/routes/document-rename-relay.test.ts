@@ -31,8 +31,8 @@ function call(db: SqliteD1, method: string, path: string, body: unknown, token: 
     makeTestRouteContext(method, path, {
       env: db.env,
       owner: 'user_o',
-      clerkUserId: token ? null : 'user_o',
-      verifiedUserId: 'user_o',
+      sessionAccountId: token ? null : 'user_o',
+      verifiedAccountId: 'user_o',
       body,
       token: token ? { id: 'tok_1' } : null,
       waitUntil: (p) => void pending.push(p),

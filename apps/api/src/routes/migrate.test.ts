@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Flow 2 of /api/migrate (legacy unsigned guest -> signed guest) takes its
 // SOURCE from the unsigned X-Owner-Id header. These cases pin that the
-// header can't name an account (a harvestable Clerk id) and that, once
+// header can't name an account (a harvestable account id) and that, once
 // signature enforcement is armed, the source must prove possession too.
 
 const { migrateOwnerId, getParticipant } = vi.hoisted(() => ({
@@ -116,7 +116,7 @@ describe('POST /api/migrate flow 1 (sign-up claim)', () => {
       env: {} as Env,
       body: { guestOwnerId: 'user_victim' },
     });
-    ctx.clerkUserId = 'user_attacker';
+    ctx.sessionAccountId = 'user_attacker';
     const res = await handleMigrate(ctx);
     expect(res.status).toBe(403);
     expect(migrateOwnerId).not.toHaveBeenCalled();
@@ -127,7 +127,7 @@ describe('POST /api/migrate flow 1 (sign-up claim)', () => {
       env: {} as Env,
       body: { guestOwnerId: LEGACY },
     });
-    ctx.clerkUserId = 'user_me';
+    ctx.sessionAccountId = 'user_me';
     const res = await handleMigrate(ctx);
     expect(res.status).toBe(200);
     expect(migrateOwnerId).toHaveBeenCalledWith(expect.anything(), LEGACY, 'user_me');

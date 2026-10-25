@@ -72,7 +72,7 @@ describe('refuseGuestVoteOverCap', () => {
     const ctx = makeTestRouteContext('POST', '/api/documents/d1/items/i1/vote', {
       env: { DB: { batch } } as unknown as Env,
     });
-    ctx.verifiedUserId = 'user_1';
+    ctx.verifiedAccountId = 'user_1';
     expect(await refuseGuestVoteOverCap(ctx, 'd1', 'user_1')).toBeNull();
     expect(batch).not.toHaveBeenCalled();
   });

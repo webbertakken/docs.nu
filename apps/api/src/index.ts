@@ -241,7 +241,7 @@ async function routeApiRequest(
   // pacing under Cloudflare's DDoS threshold still can't spam
   // document / image creation through to D1 / R2 quota
   // exhaustion. Reads pass through untouched. When neither a
-  // Clerk token nor X-Owner-Id resolves the caller, fall back to
+  // session token nor X-Owner-Id resolves the caller, fall back to
   // a literal 'anonymous' key so one unauthenticated client still
   // can't burn the global quota. Telemetry ingest (/api/events)
   // is deliberately exempt: it's anonymous, high-frequency, and
@@ -253,7 +253,7 @@ async function routeApiRequest(
   // Read-only token enforcement (docs/specs/015-api/mcp-server.md §4.11): a token minted read-only may
   // only GET/HEAD. Reject every write it presents at this single choke point
   // — so no write route can be reached, present or future, with no per-route
-  // changes. Clerk sessions and full tokens are unaffected (tokenAuth is null
+  // changes. sessions and full tokens are unaffected (tokenAuth is null
   // or readOnly false). Guest header requests carry no tokenAuth either.
   // A token revoking itself escalates nothing, so any token may (docs/specs/015-api/blueprints/cli.md).
   const isSelfRevoke =
@@ -383,9 +383,9 @@ async function routeApiRequest(
     env,
     url,
     segments,
-    clerkUserId: sessionAccountId,
-    verifiedUserId: verifiedAccountId,
-    clerkEmail: accountEmail,
+    sessionAccountId,
+    verifiedAccountId,
+    accountEmail,
     sessionAuthTime: accountSession?.authTime ?? null,
     resolveOwner,
     token: tokenAuth ? { id: tokenAuth.tokenId, readOnly: tokenAuth.readOnly } : null,

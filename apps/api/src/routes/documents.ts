@@ -126,8 +126,8 @@ export async function handleDocuments(ctx: RouteContext): Promise<Response> {
       if (ctx.url.searchParams.get('include') === TEAM_RECENT_INCLUDE) {
         const [liveDocs, teamRecent] = await Promise.all([
           listDocumentsByOwner(env, owner),
-          ctx.verifiedUserId
-            ? listRecentTeamDocuments(env, ctx.verifiedUserId, TEAM_RECENT_LIMIT)
+          ctx.verifiedAccountId
+            ? listRecentTeamDocuments(env, ctx.verifiedAccountId, TEAM_RECENT_LIMIT)
             : [],
         ]);
         return json({ documents: liveDocs, teamRecent });
@@ -300,7 +300,7 @@ export async function handleDocuments(ctx: RouteContext): Promise<Response> {
       } else {
         const outcome = await resolvePlacement(
           requested,
-          { ownerId: owner, verifiedUserId: ctx.verifiedUserId },
+          { ownerId: owner, verifiedAccountId: ctx.verifiedAccountId },
           placementLookups(env),
           intent.intent,
         );

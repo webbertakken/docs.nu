@@ -41,7 +41,7 @@ async function mintTicket(
     makeTestRouteContext('POST', '/api/workbench/tickets', {
       env: db.env,
       owner: 'user_1',
-      verifiedUserId: 'user_1',
+      verifiedAccountId: 'user_1',
       token,
       body,
     }),
