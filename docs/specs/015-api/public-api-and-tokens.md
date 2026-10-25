@@ -1,5 +1,7 @@
 # Public API and API tokens
 
+> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](../014-identity/auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
+
 **Status: shipped.** Everything below is live on `main`: API tokens (§3),
 the `X-Owner-Id` hardening (§4, §4.1) and the input validation (§5). One part
 is an operator switch rather than code: the guest signature requirement of §4

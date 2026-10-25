@@ -1,5 +1,7 @@
 # CLI
 
+> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](../014-identity/auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
+
 **Status: built; publishing as `@livedoc/cli`.** Its first release on npm is 0.4.0 (`0.0.0` holds the placeholder that created the package); the version line continues from the 0.3.0 it was forked at. Every command below signs in through the
 browser, a device code or a token kept in the system's keychain, and is counted on the dashboard. The help centre
 article is `/help/developers/cli/` (Developers). Ahead: the update check.

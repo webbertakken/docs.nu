@@ -1,48 +1,114 @@
 # Auth + guest access
 
+**Status: specified, not built.** Sign-in is **better-auth**, run inside LiveDoc's own api worker with its identity
+data in LiveDoc's own D1. It replaces Clerk, which the code still carries until the change lands; docs.nu runs
+guest-only meanwhile (no Clerk keys, `authEnabled: false`), so no account moves from Clerk. How it is built:
+[the blueprint](blueprints/auth-and-guest-access.md).
+
 ## Principle
 
-**The canvas always works without signing in.** A first-time visitor can land on `/new`, create a document, build something real, and only later be asked to sign up. This is intentional — friction-free engagement is the acquisition strategy.
+**The canvas always works without signing in.** A first-time visitor can land on `/new`, create a document, build
+something real, and only later be asked to sign up. Friction-free engagement is the acquisition strategy.
 
-We don't put auth in front of the core experience. We add auth where it _enables_ something the user wants (sharing, syncing, collaborating, paying).
+We don't put auth in front of the core experience. We add auth where it _enables_ something the user wants (sharing
+across devices, teams, tokens, collaborating under one name).
 
-## Three deployment modes
+## Who is who
 
-| Mode                 | Configuration                                                                                                                                   | Frontend                                                                                                   | API worker                                      |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Hybrid (production)  | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` set + `CLERK_JWKS_URL` set                                                                                  | ClerkProvider active. Guests + signed-in users coexist.                                                    | Verifies Bearer, falls through to `X-Owner-Id`. |
-| Guest-only           | Either env var unset (typical self-host without Clerk per [Open source + distribution](../002-project-scope/open-source-and-business-model.md)) | ClerkProvider becomes pass-through. Auth routes show "not enabled" notice. Editor unchanged.               | Falls through to `X-Owner-Id` on every request. |
-| Guest-only (partial) | Frontend has key, api JWKS unset                                                                                                                | ClerkProvider active. Users _can_ sign in, but the api verifies nothing and treats every request as guest. | `X-Owner-Id` only.                              |
+| Term                  | What it is                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **guest**             | A visitor without an account. Works fully, keyed to one browser.                                                                               |
+| **guest id**          | The guest's owner id: a UUID the server mints, with an HMAC **guest signature** only the browser it was minted for holds.                      |
+| **account**           | A person who signed in. One row in LiveDoc's own identity tables, however many sign-in methods it has.                                         |
+| **account id**        | The account's owner id: `acct_` and 24 base62 characters, never a UUID, so the two shapes never meet.                                          |
+| **sign-in method**    | A way to prove who you are: Google, an email code (and later others). Several can belong to one account.                                       |
+| **session**           | A signed-in browser. A cookie on `/api/auth/*`, and the short-lived **session token** the browser sends to the rest of the api.                |
+| **API token**         | An `lvd_` secret for scripts, the CLI and MCP clients, owned by an account ([Public API and API tokens](../015-api/public-api-and-tokens.md)). |
+| **workbench session** | An `lvw_` credential for one framed editor, minted from a token ([Workbench embeds](../013-workspace/workbench-embeds.md)).                    |
+| **owner id**          | Whichever of guest id or account id owns a row. Every owner-keyed column holds one ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).   |
 
-The first two are the supported modes. The third is a misconfiguration — useful for debugging, not for prod.
+## Deployment modes
 
-The `clerkEnabled` flag (`apps/live/lib/clerk-config.ts`) is the single source of truth on the frontend. Every Clerk-aware module reads it and picks one of two implementations at module load:
+| Mode       | Configuration                                                                | Frontend                                                                                                 | API worker                                                                        |
+| ---------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Sign-in on | `BETTER_AUTH_SECRET` set, and at least one sign-in method configured         | Sign-in pages, account menu, settings. Guests and accounts coexist.                                      | Serves `/api/auth/*`; verifies session tokens, falls through to the guest header. |
+| Guest-only | No `BETTER_AUTH_SECRET` (a self-host with no keys at all, and docs.nu today) | No sign-in anywhere; the auth pages say sign-in is off here, with "Continue as guest". Editor unchanged. | `/api/auth/*` answers `404`; every request is a guest.                            |
 
-- `ClerkProvider` becomes a pass-through `<>{children}</>`.
-- `useClerkApiBootstrap` returns a stable stub (`isSignedIn: false`, `authLoaded: true`, `clerkUserId: null`) without ever touching `useAuth`.
-- `AuthControls` renders nothing.
-- `/sign-in/`, `/get-started/`, `/sso-callback/` render an `AuthDisabledNotice` with a "Continue as guest" CTA.
+- **No keys at all is a supported host.** A self-host that sets nothing runs guest-only, exactly as it does today
+  ([Open source + distribution](../002-project-scope/open-source-and-business-model.md)).
+- **The secret alone is not sign-in.** A secret with no method configured stays guest-only and logs
+  `[auth] secret_without_methods` once per isolate, rather than offering a sign-in page nobody can finish.
+- **A method lights up when its keys are present:** Google with `GOOGLE_AUTH_CLIENT_ID` and `GOOGLE_AUTH_CLIENT_SECRET`;
+  email codes with a working email sender ([Email for sign-in](#email-for-sign-in)).
+- **The frontends ask; nothing is baked in.** The api's `GET /api/capabilities` reports `authEnabled` and the
+  `signInMethods` it offers (with the public Google client id when Google is on). There is no publishable key in a
+  build, so one static build serves a guest-only host and a signed-in one alike. A misconfigured "frontend has a key,
+  api has none" mode can no longer exist.
 
-Because `NEXT_PUBLIC_*` vars are baked at build time, the choice is a compile-time constant — no per-render cost and Clerk-only code paths can be tree-shaken out of guest-only builds.
+## Sign-in methods
 
-**One real Clerk provider per page.** The root layout's `ClerkProvider` is deferred: the app tree consumes `DeferredAuthContext`, and a lazily-loaded `ClerkBridge` mounts the real `@clerk/react` provider as an async chunk. The auth pages (`/sign-in`, `/get-started`, `/sso-callback`) instead wrap themselves in `StaticClerkProvider` (Clerk IS the page there) — so the bridge **stands down on those routes**. Mounting both threw `@clerk/react`'s "multiple ClerkProvider components" and crashed the page right after signing in (bitten by the MCP OAuth consent flow, which routes through `/sign-in`). While it stands down, the deferred provider **resets to the unsettled default**: nothing publishes there, and the email-code sign-in returns with a soft navigation that keeps the provider mounted, so the last published "settled guest" state would otherwise survive into the editor, let it skip the migration wait below, and 404 the open document until a refresh.
+Two methods ship first:
 
-## Hybrid identity
+- **Google.** "Continue with Google" on both auth pages. The account takes Google's verified email, name and picture.
+- **Email code.** Type an email, receive a 6-digit code valid for 5 minutes, type it. Three wrong tries spend the
+  code. The first sign-in with a new address creates the account with that address verified.
+- **Not in the first release:** passwords (they need hashing budget on the worker and a reset flow), magic links (a
+  second email method for the same job), Google One Tap, passkeys and two-factor. Each is a later addition to this list.
 
-The api worker accepts **two equivalent ways** of identifying the request owner, in this order of preference:
+### Email for sign-in
 
-1. **Clerk Bearer JWT** — `Authorization: Bearer <token>`. Verified against `env.CLERK_JWKS_URL` in `apps/api/src/auth/clerk.ts` (using `jose`'s `createRemoteJWKSet` + `jwtVerify`). The token's `sub` claim is the owner id.
-2. **Guest header** — `X-Owner-Id: <participant-id>`. The participant id is a `crypto.randomUUID()` minted on first visit and persisted in `localStorage` under `livediagram:v2:self-id`. Every other random value the editor rolls for a guest — the display name, the presence colour, an avatar's costume — goes through `apps/live/lib/random.ts`, which draws from `crypto.getRandomValues` rather than `Math.random`. None of it guards a secret, but a weak generator feeding values that read as identity is what static analysis flags, and the strong one is free in every runtime we target.
+An email code is only as good as its delivery, so sign-in email is not best-effort the way the lifecycle series is
+([Transactional & lifecycle email](transactional-email.md)):
 
-When both are present the Bearer wins. When verification fails (expired token, missing JWKS URL, etc.) the worker falls through to the guest header, never a 401 of its own, because the guest path must always serve. The fall-through is logged as `[auth] clerk_jwt_rejected reason=<jose code>` (never the token), and `exp` / `nbf` are checked with the same 5 seconds of clock skew Clerk's own backend SDK allows.
+- A code that could not be handed to the provider fails the request with `email_send_failed`, and the page says
+  "We couldn't send the code. Try again in a minute." rather than waiting for a code that will never come.
+- Sending goes through one email sender with two possible providers, Cloudflare Email Service (the
+  `EMAIL` Workers binding) when bound, else Resend (`RESEND_API_KEY`). With neither configured, email codes are off and
+  only the other methods show.
+- Codes are stored hashed, never in plain text.
 
-**An account id is never a guest credential.** The worker refuses a Clerk id (`user_…`) in `X-Owner-Id` with `401 account_id_not_a_guest_credential` ([Public API and API tokens](../015-api/public-api-and-tokens.md)). The editor holds the same rule from its side (`identityHeaders` in `apps/live/lib/api/core.ts`, shared with the unload beacon): a signed-in client whose `getToken()` resolves null asks once more with `{ skipCache: true }`, and if that is null too it throws `SessionTokenUnavailableError` instead of sending its account id as the guest header. `getToken()` does resolve null now and then on a live session; before the worker refused the shape that null went out as `X-Owner-Id: user_…` unnoticed, and afterwards it showed as "Couldn't save your changes. Check your connection." on a working network. The autosave reports both a 401 and a missing token as `unauthenticated` ([Per-tab storage](../006-document/per-tab-storage.md)).
+## Sessions
 
-The two paths coexist forever. A signed-in user can hand a share link to a guest who edits without auth.
+- **Where a session lives.** better-auth's session cookie (`__Secure-livedoc.session_token`: `HttpOnly`, `Secure`,
+  `SameSite=Lax`, host-only, `Path=/`) is set and read only by `/api/auth/*`. Host-only means `docs.nu`'s cookie never
+  reaches a preview host, and a preview's never reaches `docs.nu`.
+- **How the rest of the api knows the caller**. The browser
+  asks `/api/auth/token` for a **session token**, a 15-minute EdDSA JWT whose `sub` is the account id and which
+  carries the account's email and whether it is verified, and sends it as `Authorization: Bearer` where the
+  Clerk token rode. The api verifies it against its own keys, in-process, with no network call. A request that
+  carries no cookie cannot be forged from another site, so the api's own routes need no CSRF defence of their own.
+- **Lifetime.** A session lasts 30 days and slides forward at most once a day while used. Signing out ends it at once
+  everywhere the api reads it; an issued session token keeps working until its own 15 minutes run out.
+- **Seeing and ending sessions.** Settings > Account lists this account's signed-in browsers (browser and system,
+  from the user agent; last active), marks this one, and offers **Sign out** on each and **Sign out everywhere else**.
+- **Fresh enough for the dangerous things.** Deleting the account and removing a sign-in method need a session
+  verified within the last 10 minutes. An older one asks the person to verify again (an email code, or Google) first.
+
+## How the api knows who is calling
+
+One resolution at the top of every api request, in this order; the first credential present decides, and a
+credential that is present but wrong is refused, never read as a guest:
+
+1. **API token** (`Bearer lvd_…`): its owner account. Refused `401 invalid_token` when unknown, revoked or expired.
+2. **Workbench session** (`Bearer lvw_…`): its owner, confined to its document or workspace.
+3. **Session token** (any other `Bearer`): the account, when it verifies. A token that fails verification (expired,
+   wrong key, wrong issuer) falls through to the guest header, as a failed token always has, because the guest path must
+   always serve; it is logged as `[auth] session_token_rejected reason=<code>`, never the token.
+4. **Guest header** (`X-Owner-Id`, with `X-Owner-Sig`): the guest id.
+
+- **Only a session administers.** Account and team administration (team changes, minting and revoking tokens,
+  approving an MCP client or a CLI, deleting the account, the guest migration) needs credential 3. A token reaches the
+  same documents its owner does, but never mints another credential or changes a membership.
+- **An account id is never a guest credential.** An `acct_…` id in `X-Owner-Id` is refused
+  `401 account_id_not_a_guest_credential`. The editor holds the same rule from its side: a signed-in client that
+  cannot get a session token throws `SessionTokenUnavailableError` instead of sending its account id as the guest
+  header ([Per-tab storage](../006-document/per-tab-storage.md)).
+
+The two paths coexist forever. A signed-in person can hand a share link to a guest who edits without an account.
 
 ## Capability matrix
 
-| Capability                  | Guest                         | Authenticated                         |
+| Capability                  | Guest                         | Account                               |
 | --------------------------- | ----------------------------- | ------------------------------------- |
 | Editing the canvas          | ✓                             | ✓                                     |
 | Persistence                 | ✓ (per-browser, not per-user) | ✓ (per-account, syncs across devices) |
@@ -50,28 +116,35 @@ The two paths coexist forever. A signed-in user can hand a share link to a guest
 | Open a share link as editor | ✓                             | ✓                                     |
 | Mint a new share link       | ✓                             | ✓                                     |
 | Real-time presence          | ✓ on shared sessions          | ✓                                     |
-| Team workspaces             | —                             | ✓ (future)                            |
+| Teams                       | ✗                             | ✓                                     |
+| API tokens, CLI, MCP        | ✗                             | ✓                                     |
+| Google Drive mirror         | ✗                             | ✓                                     |
+| Publishing to Community     | ✗                             | ✓                                     |
 
 ## Auth surface
 
-Four routes inside `apps/live/`:
+Routes inside `apps/live/`:
 
-- **`/sign-in/`** — email-code, plus an optional Google OAuth button gated on `googleOAuthEnabled` (`apps/live/lib/clerk-config.ts`), which is `clerkEnabled && NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED === 'true'`. The button stays hidden unless that env var is set AND the Google SSO connection is enabled in the Clerk dashboard (dev tenants can use Clerk's shared Google credentials; prod needs its own Google Cloud OAuth client registered against Clerk's redirect URI, `https://clerk.<domain>/v1/oauth_callback`). On success (and for an already-signed-in visitor) it lands on the **Explorer** (`/explorer`) by default — a returning user wants to see their existing documents, not the new-document welcome flow — via `POST_AUTH_SIGNIN_DEFAULT` in `components/chrome/auth-shared.tsx`. A valid `?redirect_url` still wins (see below).
-- **`/get-started/`** — sign-up (first name + last name + email + 6-digit code), with the same flag-gated Google OAuth button. Same post-auth destination.
-- A Google sign-in brings the Google picture along as the user's own avatar ([Profile picture](profile-picture.md)).
-- **`?redirect_url=...`** — Clerk's protected-page bounce passes this query param to both routes, and BOTH the email-code AND OAuth paths honour it. Routes are clean now (no `/live` prefix — [Router app](../016-platform/router-app.md)), so a valid `redirect_url` is any **same-origin path**. Two helpers in `components/chrome/auth-shared.tsx` share the same validation (`isSafeInternalPath`): the path must start with a single `/` — NOT `//` or `/\` (the protocol-relative / backslash open-redirect tricks the old `/live`-prefix check guarded against implicitly) — and must not point back at `/sign-in` or `/get-started` (loop guard):
-  - `resolvePostAuthDestination(searchParams)` returns the safe path as-is for `router.push` (email-code path) — there's no basePath to strip any more.
-  - `resolveOAuthCompleteUrl(searchParams)` returns the same destination for Clerk's `authenticateWithRedirect({ redirectUrlComplete })` (OAuth path) — with clean routing there's no `/live` prefix to re-add, so it just mirrors `resolvePostAuthDestination`.
-    When `redirect_url` is missing, unsafe, or pointing at an auth route, each flow falls back to its own default: **sign-in → the Explorer** (`POST_AUTH_SIGNIN_DEFAULT`, `/explorer/recent`), **sign-up → the welcome / new-document flow** (`POST_AUTH_DEFAULT`, `/new`). The default is passed into the shared resolvers, so a valid protected-page bounce still returns a user sent to sign-in OR sign-up, via email-code OR OAuth, back where they came from.
-  - **Every in-app trigger builds the param, not just Clerk's bounce.** So a visitor who clicks any "Sign in" / "Create account" affordance returns to the page they were on after auth — not a generic default. The builder half lives beside the resolvers in `components/chrome/auth-shared.tsx`: `authHrefWithReturn(authPath, returnTo)` composes `?redirect_url=<encoded returnTo>` through the **same** `isSafeInternalPath` guard the resolver consumes with (an unsafe or auth-page `returnTo` is dropped, yielding a bare auth href — never a loop or open redirect), and the `useAuthReturnPath()` hook supplies the visitor's live location (path + query + `#t=<tab>` hash, so you land back on the exact tab). Every trigger — the header pill (`AuthControls`), the floating banner + its reasons modal (`SignInBanner` / `SignInReasonsModal`), the Explorer sidebar/pane + guest prompts (`ExplorerSidebar` / `ExplorerPane` / `SignInPrompt`), and the `/join` invite page — uses it. The two auth pages also forward an incoming `redirect_url` across their own sign-in↔sign-up cross-links and email-mismatch bounces, so switching auth mode never drops the destination.
-- **`/sso-callback/`** — Clerk's `AuthenticateWithRedirectCallback` for the OAuth round-trip. `redirectUrlComplete` only covers a round-trip Clerk finishes itself; one that ends on this page (a Google sign-in Clerk turns into a sign-up, or an extra step) navigates from here. So both auth pages start Google with `ssoCallbackUrl(searchParams)`, which carries a valid `redirect_url` onto the callback URL, and the callback forces that destination (`ssoCallbackDestination`, the same `isSafeInternalPath` guard) for sign-in and sign-up alike. With no safe value it falls back to the per-flow defaults (Explorer after sign-in, `/new` after sign-up). Without this, signing in mid MCP connect landed on the app and lost the consent session (issue #612).
-- **`/explorer/`**: standalone full-page Explorer (item #12). Open to both guests and signed-in users: the owner id resolves the same way every other surface in the live app does (Clerk userId when signed in, the `livediagram:v2:self-id` localStorage UUID otherwise), so a guest sees the documents + folders + Image Gallery their per-browser id owns. Reached from the AuthControls dropdown's "Explorer" menu item (the same label [Live app](../007-editor/live-app.md) uses for the mobile entry point). Signed-out visitors get the same "Sign in" CTA as everywhere else (AuthControls in the page header), the page itself doesn't gate. Guest data is per-browser by definition (no cross-device sync until they sign up and migrate).
+- **`/sign-in/`**: the methods `signInMethods` names, Google first. An email that has no account yet is not turned
+  away: the code creates the account, then asks for a name. On success (and for a visitor already signed in) it lands
+  on the **Explorer** (`POST_AUTH_SIGNIN_DEFAULT`, `/explorer/recent`), unless a safe `?redirect_url` says otherwise.
+- **`/get-started/`**: sign-up, the same methods with a name field first (one **name**, not first and last). Its
+  default destination is the welcome flow (`POST_AUTH_DEFAULT`, `/new`).
+- **Google's round trip** ends at better-auth's own callback (`/api/auth/callback/google`), which redirects to the
+  destination the page asked for. There is no separate callback page: the destination is passed as better-auth's
+  `callbackURL` (and `newUserCallbackURL` for a first sign-in), and a failed round trip comes back to the page it
+  started on with `?error=<code>`, shown as a sentence above the form.
+- **`?redirect_url=...`**: any **same-origin path** that is not itself an auth page. Every in-app trigger builds it
+  (`authHrefWithReturn` and `useAuthReturnPath` in `components/chrome/auth-shared.tsx`, through one
+  `isSafeInternalPath` guard), both auth pages forward it across their cross-links, and both methods honour it.
+  better-auth checks the same destination against its trusted origins, so an open redirect needs both guards to fail.
+- **`/explorer/`**: open to guests and accounts alike; the owner id resolves as everywhere else.
 
 The shared card chrome and inputs live in `apps/live/components/chrome/auth-shared.tsx` so the two pages don't drift.
 
 ### The look: Night Band
 
-Every account and connect page (`/sign-in`, `/get-started`, `/sso-callback`, the OAuth consent and device pages and
+Every account and connect page (`/sign-in`, `/get-started`, the OAuth consent and device pages and
 the workbench pairing page) stands on one frame, `AuthStage` (`apps/live/components/chrome/AuthStage.tsx`), modelled on
 the marketing site's "No Catch" night section:
 
@@ -110,63 +183,170 @@ the marketing site's "No Catch" night section:
 - **Interstitials** (the redirecting card, `/sso-callback`) use the same frame with no pitch, the card centred, so a
   hand-off between pages never flashes a different ground.
 
-Signed-in status surfaces in the editor header via `<AuthControls>` (initial bubble + Sign out menu). Signed-out users see a "Sign in" link in the same slot. Neither blocks the editor — they're purely informational.
+Signed-in status surfaces in the editor header via `<AuthControls>` (initial bubble + Sign out menu). Signed-out users see a "Sign in" link in the same slot. Neither blocks the editor: they're purely informational.
 
 ## Identity display name
 
-A signed-in user's participant `name` is driven by their Clerk profile (`firstName + lastName`, falling back to `fullName` then `username`). On every editor mount we seed the participant record with the current Clerk name, and re-`PUT` it whenever it has drifted from the persisted value — so renaming yourself in Clerk propagates to everything that reads the participant row on the next load.
+An account's participant `name` follows the account's **name** (Google's name, or the one typed at sign-up). On every
+editor mount the participant record is seeded with it, and re-`PUT` whenever it has drifted from the persisted value,
+so renaming yourself in Settings > Account reaches everything that reads the participant row on the next load.
 
 Two welcome-modal rules follow from that:
 
-- **Owner on their own document**: the identity-only welcome screen never opens. The user's identity is already settled by Clerk; prompting them to pick a display name on a document they own would be noise.
-- **Visitor on someone else's document (signed in)**: the welcome screen still opens (it carries the "you're joining X's document" context), but the "Your name" input is `readOnly` and the shuffle button hides. Visitors who _are_ signed in can't masquerade under a different display name on a host's document.
+- **Owner on their own document**: the identity-only welcome screen never opens. The name is already settled by the
+  account; asking for one on a document they own would be noise.
+- **Visitor on someone else's document (signed in)**: the welcome screen still opens (it carries the "you're joining
+  X's document" context), but the "Your name" input is `readOnly` and the shuffle button hides. A signed-in visitor
+  can't masquerade under a different display name on a host's document.
 
-Guests see the legacy behaviour in both cases — first-load identity prompt, fully editable name, shuffle button present.
+Guests keep the first-load identity prompt, a fully editable name and the shuffle button.
 
-The join prompt is **independent of share role**: both **edit-role and view-role** visitors get it. A viewer's display name is broadcast to everyone else (cursor label, the tab presence stack, comments), so they need a chance to set it before joining rather than appearing under a random default. The identity card only writes the visitor's **own** participant row (`PUT /api/participants/:id`, authorised on `owner === id`, not on document-edit rights), so confirming a name never hits a `403` even for a read-only viewer. The card's edit-only affordances (template grid, theme grid) don't render in identity mode, so there's nothing a viewer could trigger that they lack permission for.
+The join prompt is **independent of share role**: both **edit-role and view-role** visitors get it. A viewer's display
+name is broadcast to everyone else (cursor label, the tab presence stack, comments), so they need a chance to set it
+before joining rather than appearing under a random default. The identity card only writes the visitor's **own**
+participant row (`PUT /api/participants/:id`, authorised on `owner === id`, not on document-edit rights), so confirming
+a name never hits a `403` even for a read-only viewer.
 
-## Guest → account migration
+## Guest → account upgrade
 
-When a guest signs up, the documents they built as a guest **migrate into their account** rather than being lost. They've already invested effort — losing it on sign-up would be the opposite of friction-free.
+When a guest signs in, the documents they built as a guest **move into their account** rather than being lost.
 
-Mechanism (see also [API app — `POST /api/migrate`](../015-api/api.md)):
+Guests keep today's signed guest ids and their migration rather than becoming better-auth anonymous accounts, which
+would still leave the moving of data to us, mint a new account id on sign-in, delete the guest's row afterwards even
+when our move failed, write an account row for every visitor, and need a secret that a no-keys self-host does not
+have.
 
-1. Every page that talks to the api mounts `useClerkApiBootstrap`, which watches `isSignedIn + clerkUserId` from `useAuth`.
-2. The first time both are truthy AND `livediagram:v2:self-id` is still in `localStorage` AND the stored id differs from the Clerk userId, the page calls `POST /api/migrate { guestOwnerId: <localStorage id>, guestSignature: <localStorage signature> }` with the Clerk Bearer token.
-3. The worker (Clerk-only auth, no `X-Owner-Id` fallback for this endpoint) **verifies the guest id's HMAC signature** (possession proof — see "Signed guest ids" below) and then moves every guest-holdable row from the guest id to the Clerk userId: documents, folders, shared-with-you visits, favourites, preferences, custom themes, images, the participant row, the timeline and the Activity index. [Owner-keyed data](../015-api/api.md#owner-keyed-data) is the one list of those tables, with how each handles a row the account already has. Where both identities hold the same row, the account's copy wins, as the more recent and authoritative one; an image whose bytes the account already uploaded stays at the guest id so formerly-guest documents keep resolving it ([Image element + per-owner gallery](../009-elements/images.md)). Tables keyed on `document_id` follow their document for free.
-4. On success the page removes the localStorage key. The migration is idempotent — a retry with the same `guestOwnerId` simply moves zero rows.
-5. **Owner data waits for the migration.** Until the migration settles, `authLoaded` stays false, so no page reads or writes as the Clerk userId while the guest's rows still belong to the guest id. Otherwise the document that was open when the user signed in loads as the Clerk userId before it has moved, and the editor shows "document does not exist" instead of the document. The migration runs once per page load, however many components mount the hook. A failed migration settles too (the guest id stays in `localStorage`, so the next load retries), and a migration still pending after `GUEST_MIGRATION_WAIT_MS` (10 s) stops holding the page, so a hung request never blocks the editor. The pending state is an external store (`subscribeGuestMigration` in `apps/live/lib/guest-migration.ts`): settling notifies every mount, which is what releases `authLoaded`.
+1. Every page that talks to the api mounts the account bootstrap (`useAccountApiBootstrap`), which watches the
+   session.
+2. The first time a session is settled AND a guest id is still in `localStorage`, the page calls
+   `POST /api/migrate { guestOwnerId, guestSignature }` with the session token.
+3. The worker (session only, no guest-header fallback) **verifies the guest signature** and then moves every
+   guest-holdable row from the guest id to the account id. [Owner-keyed data](../015-api/api.md#owner-keyed-data) is
+   the one list of those tables and how each handles a row the account already has: where both hold the same row, the
+   account's copy wins.
+4. On success the page forgets the guest id. A retry with the same guest id moves zero rows.
+5. **Owner data waits for the migration.** Until it settles, `authLoaded` stays false, so no page reads or writes as
+   the account while the guest's rows still belong to the guest id. A failed migration settles too (the guest id
+   stays, so the next load retries), and one still pending after `GUEST_MIGRATION_WAIT_MS` (10 s) stops holding the
+   page.
 
-The participant row moves too, so a guest who picked a name and colour keeps them. A signed-in user's name then follows their Clerk profile on the next load when it carries one, and an account that already had a participant row keeps its own. Leaving the guest row behind would strand a name the user typed under an id nobody holds, out of reach of a later account deletion.
+The participant row moves too, so a guest who picked a name and colour keeps them until the account's name takes over
+on the next load; an account that already had a participant row keeps its own.
 
-### Signed guest ids (migrate possession proof)
+### Signed guest ids
 
-A guest's `X-Owner-Id` is a bearer value that **leaks**: it rides in document DTOs and realtime presence frames. Without a possession proof, `POST /api/migrate` trusted a body-supplied `guestOwnerId` outright, so anyone who merely _observed_ a victim's guest id could reassign all of that guest's documents / folders / images into their own account. To close this, guest ids are HMAC-signed:
+A guest id is a bearer value that **leaks**: it rides in document DTOs and realtime presence frames. So:
 
-- **Server-minted.** When `GUEST_ID_HMAC_SECRET` is set, the live app calls `POST /api/guest-id` during identity bootstrap; the worker **generates** the id and returns it with its HMAC signature (`auth/owner-signature.ts`). Because the server chooses the id, a caller can only ever hold a signature for an id the server handed _them_ — never for an id observed elsewhere. The signature is cached in `localStorage` under `livediagram:v2:self-sig` and is **never** returned in any DTO or presence frame; only the bare id is.
-- **Signed before the first owner-scoped call, on every entry path.** Every page a guest can arrive on first (`/` and `/new`, the Explorer, the editor, the team invite `/join`) resolves the guest's identity through the signed mint (`ensureSignedGuestIdentity`, shared as the `useSignedGuestId` hook) and makes no owner-scoped api call until it has. A local unsigned id is only the offline fallback. Once enforcement is armed, a path that skipped it refuses a first-time visitor: `/new` once minted a local unsigned id, and with enforcement armed on 2026-10-06 a new visitor from the landing page could not create a document until it was un-armed the same day.
-- **Verified on migrate.** `POST /api/migrate` requires a valid signature for the source guest id before reassigning ownership. Knowing the id is no longer enough.
-- **Defence in depth.** The owner's id is not returned to non-owner readers at all: `redactDocumentForReader` (`apps/api/src/redact-document.ts`) blanks it on **both** doors that hand out a document DTO — the share resolver (`GET /api/share/<code>`) and the document fetch (`GET /api/documents/<id>`). The second one mattered and was missed for a while: the share resolver was fixed as "the easiest observation vector" while the raw fetch kept returning the id intact to the same audience, because `canReadDocument` admits any valid share code, view or edit — a view-only visitor has to be able to open the document. One redaction guarding one of two doors is not defence in depth, so the rule now lives in one module with its own tests and both call sites use it. Blanking costs non-owners nothing: the client reads `ownerId` only to compute `isOwner` (correctly false for a blank) and `resolveOwnerBadge` already falls back to the owner's name + colour. The same function nulls the document's primary `shareCode` for non-owners: it is the document's oldest link of any role, so a view-link visitor who received it held an edit link. Visitors already hold the code they arrived with, and only the owner manages links.
-- **Optional (self-host).** When `GUEST_ID_HMAC_SECRET` is unset, signing is disabled and migrate keeps its legacy unsigned behaviour — fine for a single-user self-host. Production sets the secret (provisioned like `CLERK_JWKS_URL`, from the GitHub secret of the same name; staging takes its own value from `GUEST_ID_HMAC_SECRET_STAGING`, which must differ or a guest id minted on staging would be claimable on production).
+- **Server-minted.** `POST /api/guest-id` generates the id and returns it with its HMAC signature. Because the server
+  chooses the id, a caller only ever holds a signature for an id it was handed. The signature is kept in
+  `localStorage` and never appears in a DTO or a presence frame.
+- **One secret.** With sign-in on, the signing key is derived from `BETTER_AUTH_SECRET` (HKDF, purpose
+  `livedoc-guest-id`), so turning sign-in on is one secret, not two. `GUEST_ID_HMAC_SECRET` goes away.
+- **Always enforced with sign-in on.** Owner-scoped routes refuse a guest header without a valid signature, and
+  `/api/migrate` refuses a guest id without one. There is no grace window: docs.nu has no accounts to protect from a
+  cut-over, and the guests it has were never meant to be claimable. An unsigned guest id from before sign-in stays a guest: it can never move into an account.
+- **Guest-only hosts sign nothing.** With no secret there is no account to migrate into, so an unsigned guest id is
+  all a guest needs, as today.
+- **Defence in depth.** The owner's id is not returned to non-owner readers (`redactDocumentForReader`), on both doors
+  that hand out a document DTO.
 
-  **This is the switch that closes the hole, and for a long time nobody threw it.** The signing code shipped 2026-06-08 deliberately inert — "until the secret is configured in prod this is behaviourally a no-op" — and the secret was never set, so production ran the legacy unsigned migrate for months while the spec above described a protection that wasn't active. Worth stating plainly because the failure was invisible from the code: every file read as though the guard were on. If you are auditing this, **check the deployment, not the source** — `POST /api/guest-id` returning `"ownerSig": null` means signing is off, whatever this spec says. Note also that the secret alone is what protects `/api/migrate`; `GUEST_SIG_ENFORCE_AFTER` ([Public API and API tokens §4](../015-api/public-api-and-tokens.md)) is a separate, later switch covering the ordinary REST routes, and it can't do anything while the secret is missing.
+## Account linking
 
-- **Legacy upgrade.** A guest created before signing shipped has an unsigned id and so can't satisfy the check. On the next editor load the bootstrap mints a signed id and migrates the old data onto it via a guest→guest migrate (flow 2, authenticated by the old id as `X-Owner-Id` — the same bearer credential every guest request uses; if it fails the old id is kept so nothing is orphaned). **Residual:** this guest→guest step is only bearer-authenticated, so a legacy (pre-signing) id that an attacker already captured via presence could be claimed during the transition window. Once enforcement is armed, this step stays open only to an id whose participant row predates `GUEST_SIGNING_LIVE_AT` (production: 2026-09-25 12:00 UTC, when signing actually started), so a returning legacy guest still keeps their documents while an id minted signed cannot be moved without its signature. New guests are never exposed; the window shrinks to nothing as legacy ids age out, and both DTO leak paths are now closed (see "Defence in depth" above — one of them only recently, so don't read the earlier wording as meaning the leak was ever fully shut).
-- **A refused upgrade adopts the signed id.** The worker refuses (`403`) an unsigned upgrade from an id that is not pre-signing once enforcement is armed; that id's server data is unreachable already, so the browser adopts the signed id instead of keeping one it can never use. The usual source is a local id minted when the first mint never landed (offline, or a navigation that cut the request short). Offline documents carry no guest id, so none are lost. An upgrade that cannot reach the worker still keeps the old id and retries on the next load.
-- **An interrupted upgrade resumes; it never mints again.** The bootstrap records the pending upgrade (the old id, the minted id and its signature, under `livediagram:v2:pending-signed-id`) **before** it asks the worker to move the data, and adopts the new id only once the move has succeeded. A reload or a closed tab can land between the two: the worker has already moved the data while the browser still holds the old id. The next load finds the pending record and repeats the move for that same pair (a second move of already-moved data changes nothing), then adopts the recorded id. Minting a fresh id instead would strand the data under the one the browser never kept, and every later save of that document would answer 403. The record is cleared once adopted, and ignored when it no longer starts from the id this browser holds. The row the move writes for the new id is stamped with the time of the move, never the legacy date: a new id that inherited it would itself count as legacy and could be moved by anyone holding it, without its signature.
-- **One tab upgrades at a time.** Two tabs opened together on a legacy id would each mint a signed id and each move the data, and the tab whose identity lands in storage last could hold an id the data no longer sits under. The bootstrap therefore runs under the Web Lock `livediagram-guest-upgrade` (`apps/live/lib/guest-identity.ts`) and reads storage only once it holds the lock, so the second tab adopts the signed identity the first one wrote instead of minting its own. A browser without `navigator.locks` resolves unserialised, as before.
+- **Same email, different method: one account.** Google onto an email-code account (or the reverse) joins the
+  existing account when both sides have verified the address. Google verifies its addresses and an email code is
+  itself a verification, so in practice the second method simply appears in the account.
+- **Different email.** Settings > Account > Sign-in methods > **Connect Google** links a Google account whose address
+  differs. Signing in with that Google account afterwards opens this account.
+- **Removing a method.** Allowed while another remains, after a fresh verification ([Sessions](#sessions)); the last
+  one cannot be removed (delete the account instead).
+- **The account's email** is the address it was created with. Changing it sends a code to the new address and
+  switches only once that code is entered. Not in the first release: the email is shown read-only until then.
+
+## Account settings
+
+Settings > Account, signed in ([Account settings & email notifications](profile-and-email-notifications.md)):
+
+- **Name**: editable inline.
+- **Email**: shown; changed as in [Account linking](#account-linking).
+- **Profile picture**: [Profile picture](profile-picture.md).
+- **Sign-in methods**: Google (connected address, or **Connect Google**), Email code (the account's address).
+- **Sessions**: [Sessions](#sessions).
+- **Delete Account**: below.
 
 ## Deleting an account
 
-Settings > Account > Delete Account removes everything in three steps, in this order, and the order is the point:
+Settings > Account > Delete Account removes everything, in this order:
 
-1. **Confirm identity.** A strict step-up reverification (`confirmIdentity`, Clerk's modal when the session has
-   no recent verification). Cancelled or failed, the dialog says nothing was deleted and stops there.
-2. **Delete the server data** (`DELETE /api/account`, [API](../015-api/api.md)).
-3. **Delete the Clerk account** (`user.delete()`), which the confirmation in step 1 has already satisfied.
+1. **Confirm identity.** Type the account's email, then a fresh verification when the session is older than 10
+   minutes. Cancelled or failed, the dialog says nothing was deleted and stops there.
+2. **Delete the server data** (`DELETE /api/account`): every owner-keyed row, with the team hand-over and the Drive
+   grant revoked at Google ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).
+3. **Delete the identity**: the account, its sign-in methods and every session, in the same request, after the data.
+   The browser is signed out.
 
-Confirming last let a cancelled prompt leave an account with no data in it. Deleting at Clerk first would risk the
-opposite, rows nobody can reach once the account is gone, so the server data still goes before the account.
+The data goes before the identity so that no row outlives the only account able to reach it. Both now live in
+LiveDoc's own D1, so one request does both; a failure between the two leaves an account with no data that can simply
+be deleted again. The goodbye email goes to the address the account had.
+
+## Teams, tokens, the CLI and the MCP server
+
+- **Teams** stay LiveDoc's own ([Teams](../013-workspace/teams.md)), not better-auth's organisations. A pending email invite becomes a membership when its address equals the
+  account's email **and** that email is verified; the address is read from the verified session token, never a
+  header.
+- **API tokens** are unchanged: `lvd_` secrets, hashed, six months, per-account cap, owned by an account id, minted
+  only from a session ([Public API and API tokens](../015-api/public-api-and-tokens.md)).
+- **The MCP server** keeps its own OAuth 2.1 server and its `lvd_` tokens ([MCP server](../015-api/mcp-server.md)
+  §3); its consent page in `apps/live` now trusts the LiveDoc session instead of Clerk's.
+- **The CLI** keeps `livedoc auth login` on the MCP worker's OAuth server, which already offers loopback PKCE and the
+  device grant (`--device`); better-auth's device plugin would add a second OAuth server for the same job. Its device page in `apps/live`
+  likewise trusts the LiveDoc session ([CLI](../015-api/cli.md)).
+- **Workbench embeds** are unchanged: minted from a token, never from a session.
+- **The Google Drive mirror** stays its own Google grant, asked for when the mirror is turned on, separate from
+  signing in with Google: the Drive account may differ from the sign-in account, and signing in never asks for Drive
+  access ([Google Drive mirror](../022-drive-mirror/drive-mirror.md)).
+
+## Privacy
+
+- **What an account stores:** the name, the email and whether it is verified, the picture URL, the Google account's
+  subject id (for a Google sign-in), and per session its expiry and the user agent. Not the IP address: rate limits
+  read it from the request (`CF-Connecting-IP`) and count it in Cloudflare's rate limiter, which writes nothing to D1.
+- **No provider tokens kept.** Signing in with Google keeps no Google access or refresh token: sign-in needs only who
+  the person is. (The Drive mirror's grant is its own, stored encrypted as today.)
+- **No tracking by the auth library.** better-auth's own telemetry is off unless switched on, and LiveDoc switches it
+  off explicitly as well (`telemetry: { enabled: false }`). Sign-in and sign-up are counted by LiveDoc's own anonymous
+  events (`Session·SignedUp`, `Session·SignedIn`, [Telemetry](../017-telemetry/telemetry.md)), from the server's own
+  account and session creation, so every method counts once.
+- **Deleting the account deletes all of it**, sessions and sign-in methods included ([Deleting an account](#deleting-an-account)).
+- The [privacy policy](../../../apps/help/app/policies/privacy-policy/page.mdx) names LiveDoc itself, not Clerk, as
+  where account data is held, and the email provider as the processor that delivers codes.
+
+## Self-hosting
+
+| What the host sets                                 | What it gets               |
+| -------------------------------------------------- | -------------------------- |
+| Nothing                                            | Guest-only, as today       |
+| `BETTER_AUTH_SECRET` + Google client id and secret | Sign-in with Google        |
+| `BETTER_AUTH_SECRET` + an email sender             | Sign-in with an email code |
+| All of it                                          | Both                       |
+
+- No call to any SaaS is ever required: better-auth is a library inside the host's own worker, with the host's own
+  D1. Google and the email provider are reached only when the host configured them.
+- The secret is at least 32 random bytes (`openssl rand -base64 32`). It is rotated by adding a new version beside the
+  old (`BETTER_AUTH_SECRETS`), never by replacing it, which would sign everyone out and lose the session-token keys.
+
+## Previews
+
+A preview (`<branch>.preview.docs.nu`, [Preview deployments](../016-platform/preview-deployments.md)) runs as a fork
+would, with its own D1. It gets email codes, but sends no
+email: a code goes to the preview's **outbox** (`EMAIL_OUTBOX`), which the sign-in page links to, so anyone can try
+sign-in on a preview without a mailbox. That is safe only because a preview's D1 holds nothing but test data. Whatever it
+gets, a preview never shares a session, a cookie or a key with docs.nu: its secret is its own, its cookies are
+host-only, and docs.nu trusts no preview host as an origin.
+
+- Sign-in works on a deployment's canonical host only (`APP_BASE_URL`). The preview's workers.dev address still
+  serves guests, and its auth pages link to the canonical host.
+- Google cannot sign in on a preview without help: Google takes no wildcard redirect addresses or JavaScript
+  origins, so every `<branch>.preview.docs.nu` would need registering by hand.
 
 ## Guest documents start local
 
@@ -174,18 +354,22 @@ A guest's new document is **This Browser** by default ([Offline Mode](../006-doc
 
 **Why.** A guest cloud document is keyed to the browser's guest id in `localStorage`. Clearing site data loses that id, and with it every document under it: the server keeps the rows for good, but nobody can reach them again. Many first visits are someone trying the product out, so most of those rows are orphans the moment they are written. A document in This Browser is exactly as durable for a guest (the same clear wipes IndexedDB), costs the server nothing, and opens without a round trip ([Offline Mode → Instant open](../006-document/offline-mode.md#instant-open)).
 
-- **Only with sign-in enabled.** Local first applies in the hybrid mode, where a guest has an account to move to. A guest-only deployment ([Three deployment modes](#three-deployment-modes)) keeps livediagram as the default: there is no account to come to, so the server is the only place a document is kept beyond the browser, and the operator chose to run one.
+- **Only with sign-in enabled.** Local first applies in the hybrid mode, where a guest has an account to move to. A guest-only deployment ([Three deployment modes](#deployment-modes)) keeps livediagram as the default: there is no account to come to, so the server is the only place a document is kept beyond the browser, and the operator chose to run one.
 - **Signed-in people are unchanged.** Their default stays livediagram.
 - **Moving to the server is always the guest's own act**: Sync Document (from the Share dialog, which explains why first, [Offline Mode → Sharing a document in This Browser](../006-document/offline-mode.md#sharing-a-document-in-this-browser), or the Explorer), or the prompt after signing in (below). No guest document is uploaded silently.
 - **Nothing is purged.** Guest cloud documents already on the server stay where they are; this changes where new ones start, not what happens to old ones.
 
-### Who is a guest, before Clerk answers
+### Who is a guest, before the session answers
 
-Clerk loads deferred, so `/new` cannot wait for `useAuth` without making every create slower. It reads Clerk's own `__client_uat` cookie instead (`apps/live/lib/signed-in-hint.ts`): clerk-js writes it on the app's origin, readable from script, as `0` when signed out and the last sign-in time when signed in (checked against the dev instance on 2026-10-10: `__client_uat=0` plus a suffixed `__client_uat_<key>` twin, both `httpOnly=false`).
+The session is read with a request, so `/new` cannot wait for it without making every create slower. It reads a hint
+instead (`apps/live/lib/signed-in-hint.ts`): a `localStorage` flag the auth bridge writes `1` whenever a session
+settles signed in and `0` whenever it settles signed out or the person signs out.
 
-- **No `__client_uat*` cookie, or every one is `0`**: a guest. The create goes ahead at once, This Browser.
-- **Any non-zero value**: probably signed in. The create waits for auth to settle (as it always has) and then uses the settled answer.
-- The hint only decides a default. Every request still authenticates the real way, and a guest whose cookie misleads gets a document in This Browser, the safe direction.
+- **No flag, or `0`**: a guest. The create goes ahead at once, This Browser.
+- **`1`**: probably signed in. The create waits for the session (as it always has) and then uses the settled answer.
+- The hint only decides a default. Every request still authenticates the real way; a stale `1` (a session that
+  expired elsewhere) costs one wait, and a guest whose hint misleads gets a document in This Browser, the safe
+  direction.
 
 ### Moving documents in This Browser after signing in
 
@@ -199,7 +383,13 @@ Signing in never moves a document in This Browser by itself ([Offline Mode → A
 ## Implications for how we build
 
 - UI must never block the canvas behind a sign-in wall.
-- Features that genuinely need an account are surfaced as opt-in prompts ("Sign in to keep your documents"), never modal walls.
-- The single persistence boundary (`apps/live/lib/api-client.ts` against the api worker — see [11-api.md](../015-api/api.md)) is the same in guest and authenticated mode. Only the request headers differ: a `localStorage`-minted UUID in `X-Owner-Id` for guests, a Clerk JWT in `Authorization` for signed-in users. The api-client's module-level `setTokenProvider` is the single switch.
-- Public client code that uses Clerk uses only the **publishable key** (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`), never the secret key. See [06-secrets-policy.md](../002-project-scope/secrets-policy.md).
-- The api worker's degraded-mode behaviour matters: with `CLERK_JWKS_URL` unset (no `[vars]` value in `wrangler.toml`), every request silently falls through to the guest path. Useful for local dev and for environments where Clerk hasn't been provisioned yet — the editor stays usable.
+- Features that genuinely need an account are surfaced as opt-in prompts ("Sign in to keep your documents"), never
+  modal walls.
+- The single persistence boundary (`apps/live/lib/api-client.ts` against the api worker, [API](../015-api/api.md)) is
+  the same for guests and accounts. Only the request headers differ: the guest id and signature for a guest, a
+  session token for an account. The api-client's `setTokenProvider` is the single switch.
+- Nothing about sign-in is secret in a frontend: the browser holds no key, only its own session cookie and session
+  tokens ([Secrets policy](../002-project-scope/secrets-policy.md)).
+- The app and the api share an origin (the router stitches `/api/*` under the app's host), which is what lets the
+  session cookie stay host-only and `SameSite=Lax`. A host that splits them across sites is not supported for
+  sign-in; local development signs in through the router on port 3000.

@@ -1,5 +1,7 @@
 # Sign-in encouragement
 
+> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
+
 A dismissible bottom-of-screen banner that nudges unsigned (guest)
 visitors to sign in, plus a "Learn more" modal that lists the concrete
 benefits. It shows on the Explorer and, after a delay, inside the

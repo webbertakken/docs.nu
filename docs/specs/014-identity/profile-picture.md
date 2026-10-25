@@ -1,5 +1,7 @@
 # Profile picture
 
+> **Sign-in is changing.** Clerk is being replaced by better-auth in LiveDoc's own api worker ([Auth + guest access](auth-and-guest-access.md)). Until that lands, "Clerk" below describes the running code; read it as "the account session" for what is coming. This spec is folded back as each part ships.
+
 **Status: shipped.** A signed-in user's avatar shows their profile picture:
 a picture they uploaded, else their Google picture. They see it in their own
 chrome, and signed-in collaborators see it on presence avatars, cursors,
