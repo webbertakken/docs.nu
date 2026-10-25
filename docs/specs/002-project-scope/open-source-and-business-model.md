@@ -18,7 +18,7 @@ There are two ways people use LiveDoc:
 1. **Hosted at docs.nu.** Free for everyone, generously. Above a certain usage, a person can subscribe to a plan for
    more usage.
 2. **Self-hosted.** Clone the repo and run it on their own Cloudflare account (or anywhere the apps are runnable). Every
-   feature, no plan, no limit but their own, no license check, no SaaS dependency required (Clerk is optional, see
+   feature, no plan, no limit but their own, no license check, no SaaS dependency required (sign-in is optional and runs inside their own api worker, see
    [Auth + guest access](../014-identity/auth-and-guest-access.md)).
 
 Both paths get the same feature set.
@@ -48,11 +48,11 @@ Both paths get the same feature set.
 - **Plans are a hosted concern.** Billing and usage limits are optional, each gated on its own configuration; a
   self-hosted deployment without them runs with no limits and no billing code path in reach.
 - **Optional SaaS, not required SaaS.** The OSS core never calls home. Its SaaS integrations are all optional, each
-  gated on its own key: Clerk for auth ([Auth + guest access](../014-identity/auth-and-guest-access.md)), Resend for
-  email ([Transactional & lifecycle email (Resend)](../014-identity/transactional-email.md)), a model provider for the
-  AI assistant ([AI Assistance](../007-editor/ai-assistance.md)), and billing for plans. When
-  `CLERK_JWKS_URL` / `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` aren't set, the api worker and live frontend degrade to
-  pure-guest mode and the product is fully usable.
+  gated on its own key: Google for sign-in ([Auth + guest access](../014-identity/auth-and-guest-access.md)), Resend
+  for email ([Transactional & lifecycle email (Resend)](../014-identity/transactional-email.md)), a model provider for
+  the AI assistant ([AI Assistance](../007-editor/ai-assistance.md)), and billing for plans. Sign-in itself is
+  better-auth, a library inside the host's own api worker, never a service. When `BETTER_AUTH_SECRET` isn't set,
+  the api worker and live frontend run guest-only and the product is fully usable.
 - All design decisions assume the codebase is visible to the public, which constrains how we handle
   [secrets](secrets-policy.md).
 

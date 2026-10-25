@@ -98,7 +98,7 @@ pnpm --filter @livediagram/live test:e2e
 
 Without a dev stack, it boots its own (`scripts/e2e-stack.mjs`) over the existing `apps/live/out`, which it never rebuilds: run `pnpm --filter @livediagram/live build` first, or it exits naming the missing build.
 
-The signed-in specs (`apps/live/e2e/clerk-stub/`) need Clerk switched on, so they have their own build and run, on their own ports:
+The signed-in specs (`apps/live/e2e/clerk-stub/`) have their own build and run, on their own ports. They still stub the earlier sign-in provider (Clerk), which the app no longer carries; they are being ported to sign in for real through the api's email outbox, under a new folder and script name:
 
 ```sh
 pnpm --filter @livediagram/live build:clerk-stub

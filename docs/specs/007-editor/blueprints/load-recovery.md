@@ -55,8 +55,8 @@ design decision.
    failed load's diagnostics name its step). Before the timer: disarm, return false. After it: warn
    `DocumentLoad.Late`; a pending self-healing reload is cancelled (`healing: false`): the late load wins. Return
    true. The success tail calls `setLoadStep('done')`, then `if (watchdog.finish()) setLoadError(false)`.
-   Each bootstrap run takes a generation; a run superseded by a later one (auth settling twice: Clerk answering
-   after the guest timeout, then a guest migration) has every setter and its seed turned into no-ops.
+   Each bootstrap run takes a generation; a run superseded by a later one (auth settling twice: the session read
+   answering after the guest timeout, then a guest migration) has every setter and its seed turned into no-ops.
 5. The runner wraps `load()` in try/catch/finally: a throw → `Error·Client·DocumentLoad.<ErrorName>`,
    `setLoadError(true)`, `setLoadingDocument(false)`; `finally` → `finish()`.
 6. A password retry re-runs the bootstrap and arms a fresh watchdog.
