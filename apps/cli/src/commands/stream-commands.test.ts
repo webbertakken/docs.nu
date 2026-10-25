@@ -67,7 +67,7 @@ async function start(
   route: Route = host(),
   before?: (io: FakeIo) => Promise<void>,
 ) {
-  const io = fakeIo({ env: { LIVEDIAGRAM_TOKEN: TOKEN }, routes: [capabilities, route] });
+  const io = fakeIo({ env: { LIVEDOC_TOKEN: TOKEN }, routes: [capabilities, route] });
   await before?.(io);
   const exit = run(argv, io);
   for (let i = 0; i < 20 && io.sockets.length === 0; i++) await tick();
@@ -138,7 +138,7 @@ describe('wait --for change', () => {
     await behind.io.advance(WAIT_SETTLE_MS);
     expect(await behind.exit).toBe(0);
     expect(behind.io.out()).toBe(
-      `tab "Main" changed · rev 7→9 · diff: livediagram tab diff "${DOC}" --tab "Main" --since 7\n`,
+      `tab "Main" changed · rev 7→9 · diff: livedoc tab diff "${DOC}" --tab "Main" --since 7\n`,
     );
     const level = await start(['wait', DOC, '--for', 'change'], host({ rev: 9 }), seed(9));
     op(level.io, changed());
@@ -192,14 +192,12 @@ describe('wait endings', () => {
     io.sockets[1]!.open();
     op(io, commented());
     expect(await exit).toBe(0);
-    expect(io.err()).toContain(
-      `reconnected; what changed meanwhile: livediagram tab diff "${DOC}"`,
-    );
+    expect(io.err()).toContain(`reconnected; what changed meanwhile: livedoc tab diff "${DOC}"`);
   });
 
   it('exits as the api refused the ticket', async () => {
     const io = fakeIo({
-      env: { LIVEDIAGRAM_TOKEN: TOKEN },
+      env: { LIVEDOC_TOKEN: TOKEN },
       routes: [
         capabilities,
         (request, url) =>
@@ -267,7 +265,7 @@ describe('watch', () => {
     io.sockets[0]!.drop(DOCUMENT_TRASHED_CLOSE);
     expect(await exit).toBe(3);
     const refused = fakeIo({
-      env: { LIVEDIAGRAM_TOKEN: TOKEN },
+      env: { LIVEDOC_TOKEN: TOKEN },
       routes: [
         capabilities,
         (request, url) =>
@@ -287,8 +285,6 @@ describe('watch', () => {
     io.sockets[1]!.open();
     io.interrupt();
     expect(await exit).toBe(0);
-    expect(io.err()).toContain(
-      `reconnected; what changed meanwhile: livediagram tab diff "${DOC}"`,
-    );
+    expect(io.err()).toContain(`reconnected; what changed meanwhile: livedoc tab diff "${DOC}"`);
   });
 });

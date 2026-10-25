@@ -84,7 +84,7 @@ export async function watch(
       },
       onReconnected: () =>
         ctx.notice(
-          `reconnected; what changed meanwhile: livediagram tab diff ${JSON.stringify(input.doc)}`,
+          `reconnected; what changed meanwhile: livedoc tab diff ${JSON.stringify(input.doc)}`,
         ),
     });
     const stopInterrupt = io.onInterrupt(() => {

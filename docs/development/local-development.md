@@ -92,7 +92,7 @@ Run from the repo root:
 | `pnpm --filter @livediagram/live test:e2e:clerk-stub`                   | The signed-in specs (`apps/live/e2e/clerk-stub/`) against `.next/out-clerk-stub/`; run `pnpm --filter @livediagram/live build:clerk-stub` first. Boots its own stack on `:3015` / `:8788` / `:3016`.                                                                                                                                                                                  |
 | `pnpm --filter @livediagram/live test:e2e:armed`                        | The armed guest-signature specs (`apps/live/e2e/armed/`) with guest signature enforcement on, against the guest-mode `out/`. Boots its own stack on `:3017` / `:8789` / `:3018`.                                                                                                                                                                                                      |
 | `cd apps/live && bun scripts/ms-whiteboard-verify.mts <folder or .zip>` | Runs the [Microsoft Whiteboard import](../specs/020-import-export/whiteboard-import.md) over real board exports outside the repo and prints counts only (boards, replay stats, items per kind, report notes, timings, largest tab), never their content.                                                                                                                              |
-| `pnpm --filter @livediagram/cli build`                                  | Bundle the CLI into `apps/cli/dist/livediagram.mjs` (see [Running the CLI from source](#running-the-cli-from-source-optional)).                                                                                                                                                                                                                                                       |
+| `pnpm --filter @livedoc/cli build`                                      | Bundle the CLI into `apps/cli/dist/livedoc.mjs` (see [Running the CLI from source](#running-the-cli-from-source-optional)).                                                                                                                                                                                                                                                           |
 | `pnpm format`                                                           | Prettier write across the repo.                                                                                                                                                                                                                                                                                                                                                       |
 | `pnpm format:check`                                                     | Prettier check (this is what CI runs).                                                                                                                                                                                                                                                                                                                                                |
 | `pnpm deploy:check`                                                     | Dry-run the api, mcp and router wrangler configs and print the resolved bindings (CI runs it).                                                                                                                                                                                                                                                                                        |
@@ -144,13 +144,13 @@ The [CLI](../specs/015-api/cli.md) acts only with an API token, so it needs a ho
 above, sign in, and create a token in Settings › API Tokens. Then build the bundle and point it at the local api:
 
 ```bash
-pnpm --filter @livediagram/cli build
-export LIVEDIAGRAM_HOST=http://localhost:8787 LIVEDIAGRAM_TOKEN=lvd_...
-apps/cli/dist/livediagram.mjs document ls
+pnpm --filter @livedoc/cli build
+export LIVEDOC_HOST=http://localhost:8787 LIVEDOC_TOKEN=lvd_...
+apps/cli/dist/livedoc.mjs document ls
 ```
 
-`LIVEDIAGRAM_DEBUG=1` prints each decision and request as a `[cli]` line on stderr. The CLI keeps its files under
-`$XDG_CONFIG_HOME/livediagram` and `$XDG_CACHE_HOME/livediagram` (`~/.config` and `~/.cache` by default); point
+`LIVEDOC_DEBUG=1` prints each decision and request as a `[cli]` line on stderr. The CLI keeps its files under
+`$XDG_CONFIG_HOME/livedoc` and `$XDG_CACHE_HOME/livedoc` (`~/.config` and `~/.cache` by default); point
 both at a scratch directory to keep a test run apart from your own sign-in.
 
 ## Enabling AI assistance locally (optional)

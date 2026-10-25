@@ -43,7 +43,7 @@ export function addableKinds(): string[] {
 
 export function elementKindsText(): string {
   return [
-    'Element kinds: add <kind> makes one; livediagram schema <kind> shows its fields.',
+    'Element kinds: add <kind> makes one; livedoc schema <kind> shows its fields.',
     `  ${OTHER_KINDS.join(', ')}`,
     '  shapes:',
     ...wrapped([...SHAPE_KINDS], '    ', ', '),

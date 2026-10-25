@@ -72,7 +72,7 @@ export function resolveFolderRef(
       code: 'not_found',
       message: `no folder matches "${ref}"${nearest.length ? '; the nearest:' : ''}`,
       lines: folderLines(choices, nearest),
-      hint: 'livediagram folder ls',
+      hint: 'livedoc folder ls',
     });
   }
   const refs = shortestUniquePrefixes(choices.map((c) => c.id));

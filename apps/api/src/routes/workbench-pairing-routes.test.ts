@@ -162,7 +162,7 @@ describe('workbench pairing routes', () => {
         request: {
           origin: ORIGIN,
           name: 'Acme Editor',
-          tokenName: 'livediagram CLI',
+          tokenName: 'LiveDoc CLI',
           scope: 'document',
           expiresAt: NOW + WORKBENCH_PAIRING_TTL_MS,
           status: 'pending',

@@ -1,4 +1,4 @@
-// livediagram.toml (docs/specs/027-repositories/repository-link.md "The link file"; blueprint "The link file"):
+// livedoc.toml (docs/specs/027-repositories/repository-link.md "The link file"; blueprint "The link file"):
 // read with smol-toml (RL1), then checked key by key. Unknown keys are refused by name at every level the spec
 // names, so a typo never silently does nothing; `[hooks]` and `[[sources]]` are checked and left unread (RL2).
 
@@ -13,7 +13,7 @@ import { LINK_ID_MAX, MIRROR_DEFAULT_DIR, MIRROR_DEFAULT_LEVEL } from './constan
 export type MirrorLevel = (typeof MIRROR_LEVELS)[number];
 
 export type LinkFile = {
-  // The real path of livediagram.toml.
+  // The real path of livedoc.toml.
   path: string;
   // Its directory.
   root: string;
@@ -50,7 +50,7 @@ function syntaxError(err: TomlError, path: string): CliError {
     EXIT.usage,
     'link_syntax',
     `${path} line ${err.line}, column ${err.column}: ${reason}`,
-    'fix the line; livediagram.toml is TOML',
+    'fix the line; livedoc.toml is TOML',
   );
 }
 
@@ -71,12 +71,7 @@ function checkKeys(table: Table, name: string, path: string): void {
 }
 
 const wrongType = (path: string, key: string, type: string) =>
-  refuse(
-    EXIT.usage,
-    'wrong_type',
-    `${path}: ${key} must be ${type}`,
-    'livediagram link init --help',
-  );
+  refuse(EXIT.usage, 'wrong_type', `${path}: ${key} must be ${type}`, 'livedoc link init --help');
 
 // A table that may be absent: its keys checked, or an empty one.
 function tableAt(root: Table, name: string, path: string): Table {
@@ -100,7 +95,7 @@ function originOf(value: string, path: string): string {
     refuse(
       EXIT.rejected,
       'invalid_host',
-      `${path}: host must be an origin such as https://livediagram.app, not ${value}`,
+      `${path}: host must be an origin such as https://docs.nu, not ${value}`,
     );
   let url: URL;
   try {
@@ -126,7 +121,7 @@ function checkId(id: string, key: string, path: string): string {
       EXIT.rejected,
       'empty_id',
       `${path}: ${key} holds an empty or spaced id`,
-      'livediagram link ls',
+      'livedoc link ls',
     );
   return id;
 }
@@ -145,7 +140,7 @@ function coversOf(table: Table, path: string): LinkFile['covers'] {
       EXIT.rejected,
       'no_coverage',
       `${path}: [covers] needs a folder, documents, or both`,
-      'livediagram link init --folder <folder>',
+      'livedoc link init --folder <folder>',
     );
   if (folder !== null) checkId(folder, 'covers.folder', path);
   const seen = new Set<string>();
@@ -234,7 +229,7 @@ export function linkFileText(link: {
   level?: MirrorLevel;
 }): string {
   return [
-    `# This repository's diagrams live in livediagram; see ${link.host}/help/developers/repositories/`,
+    `# This repository's diagrams live in LiveDoc; see ${link.host}/help/developers/repositories/`,
     `host = ${tomlString(link.host)}`,
     '',
     '[covers]',

@@ -45,12 +45,12 @@ describe('parseConsentSession', () => {
   it('keeps the public client id, which tells the CLI apart', () => {
     expect(
       parseConsentSession({
-        clientName: 'livediagram CLI',
+        clientName: 'LiveDoc CLI',
         redirectHost: '127.0.0.1:5',
         clientId: 'livediagram-cli',
       }),
     ).toEqual({
-      clientName: 'livediagram CLI',
+      clientName: 'LiveDoc CLI',
       redirectHost: '127.0.0.1:5',
       clientId: 'livediagram-cli',
     });

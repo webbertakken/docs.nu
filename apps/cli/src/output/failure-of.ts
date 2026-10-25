@@ -10,7 +10,7 @@ import { EXIT, exitCodeForStatus } from './exit-codes';
 export const isNetworkFailure = (err: unknown): err is Error =>
   err instanceof Error && ['TypeError', 'TimeoutError', 'AbortError'].includes(err.name);
 
-export const ISSUES_URL = 'https://github.com/livediagram-app/livediagram.app/issues';
+export const ISSUES_URL = 'https://github.com/webbertakken/livedoc/issues';
 
 function addressFailure(err: AddressError): CliFailure {
   const { kind, candidates, message, hint } = err.failure;
@@ -50,8 +50,8 @@ function apiFailure(err: ApiError, host: string): CliFailure {
             : `refused: ${code}`,
         hint:
           err.status === 401
-            ? 'livediagram auth login --with-token, or set LIVEDIAGRAM_TOKEN'
-            : 'livediagram auth status',
+            ? 'livedoc auth login --with-token, or set LIVEDOC_TOKEN'
+            : 'livedoc auth status',
       };
     case EXIT.rateLimited:
       return {
@@ -91,6 +91,6 @@ export function failureOf(err: unknown, host: string): CliFailure {
     exit: EXIT.failure,
     code: 'internal',
     message: `internal error (${err instanceof Error ? err.name : typeof err})`,
-    hint: `run again with LIVEDIAGRAM_DEBUG=1 and report it at ${ISSUES_URL}`,
+    hint: `run again with LIVEDOC_DEBUG=1 and report it at ${ISSUES_URL}`,
   };
 }

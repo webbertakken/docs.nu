@@ -5,7 +5,7 @@ import { capabilities, fakeIo, NOW, TOKEN, type Route } from './testing/fake-io'
 import { CLI_VERSION } from './config/version';
 
 const DOC = 'aaaa1111-0000-4000-8000-000000000001';
-const CREDENTIALS = '/home/agent/.config/livediagram/credentials.json';
+const CREDENTIALS = '/home/agent/.config/livedoc/credentials.json';
 const current = {
   accountId: 'u1',
   accountName: 'Ada',
@@ -62,7 +62,7 @@ const tokens: Route = (request, url) => {
 };
 
 const signedIn = (more: Parameters<typeof fakeIo>[0] = {}) =>
-  fakeIo({ env: { LIVEDIAGRAM_TOKEN: TOKEN }, routes: [capabilities, library, tokens], ...more });
+  fakeIo({ env: { LIVEDOC_TOKEN: TOKEN }, routes: [capabilities, library, tokens], ...more });
 
 async function cli(argv: string[], io = signedIn()) {
   const code = await run(argv, io);
@@ -72,10 +72,10 @@ async function cli(argv: string[], io = signedIn()) {
 describe('run', () => {
   it('prints help at each level and the version, reaching no host', async () => {
     const io = fakeIo();
-    expect((await cli([], io)).out).toContain('Usage: livediagram <resource> <verb>');
-    expect((await cli(['tab'], fakeIo())).out).toContain('livediagram tab: ');
+    expect((await cli([], io)).out).toContain('Usage: livedoc <resource> <verb>');
+    expect((await cli(['tab'], fakeIo())).out).toContain('livedoc tab: ');
     expect((await cli(['tab', 'view', '--help'], fakeIo())).out).toContain(
-      'Usage: livediagram tab view <doc>',
+      'Usage: livedoc tab view <doc>',
     );
     expect(await cli(['--version'], fakeIo())).toMatchObject({ code: 0, out: `${CLI_VERSION}\n` });
     expect(io.requests).toEqual([]);
@@ -91,9 +91,7 @@ describe('run', () => {
     const request = io.requests.at(-1)!;
     expect(request.headers.get('Authorization')).toBe(`Bearer ${TOKEN}`);
     expect(request.headers.get('X-Livediagram-Client')).toBe('cli');
-    expect(request.headers.get('User-Agent')).toBe(
-      `livediagram-cli/${CLI_VERSION} node/24.0.0 linux`,
-    );
+    expect(request.headers.get('User-Agent')).toBe(`livedoc-cli/${CLI_VERSION} node/24.0.0 linux`);
   });
 
   it('exits 1 on a lint error finding, after printing the report', async () => {
@@ -118,9 +116,7 @@ describe('run', () => {
         ? Response.json({ document: { id: DOC, name: 'Auth flow' } })
         : undefined;
     const io = signedIn({ routes: [capabilities, share, library, tokens] });
-    expect(
-      (await cli(['tab', 'ls', 'https://livediagram.app/document/shared?s=abc'], io)).code,
-    ).toBe(0);
+    expect((await cli(['tab', 'ls', 'https://docs.nu/document/shared?s=abc'], io)).code).toBe(0);
     expect(io.requests.at(-1)!.headers.get('X-Share-Code')).toBe('abc');
     expect(io.requests[1]!.headers.get('X-Share-Code')).toBeNull();
   });
@@ -131,13 +127,13 @@ describe('run', () => {
     expect(missing).toMatchObject({
       code: 3,
       out: '',
-      err: 'error: no document matches "nope"\nhint: livediagram document ls\n',
+      err: 'error: no document matches "nope"\nhint: livedoc document ls\n',
     });
     const json = await cli(['tab', 'ls', 'nope', '--json']);
     expect(JSON.parse(json.err)).toEqual({
       error: 'not_found',
       message: 'no document matches "nope"',
-      hint: 'livediagram document ls',
+      hint: 'livedoc document ls',
     });
   });
 
@@ -145,10 +141,10 @@ describe('run', () => {
     const none = await cli(['document', 'ls'], fakeIo({ routes: [capabilities] }));
     expect(none).toMatchObject({
       code: 4,
-      err: expect.stringContaining('not signed in to https://livediagram.app'),
+      err: expect.stringContaining('not signed in to https://docs.nu'),
     });
     const guestOnly = fakeIo({
-      env: { LIVEDIAGRAM_TOKEN: TOKEN },
+      env: { LIVEDOC_TOKEN: TOKEN },
       routes: [() => Response.json({ aiEnabled: false })],
     });
     expect(await cli(['document', 'ls'], guestOnly)).toMatchObject({
@@ -159,7 +155,7 @@ describe('run', () => {
 
   it('names the real host when it cannot be reached', async () => {
     const io = fakeIo({
-      env: { LIVEDIAGRAM_HOST: 'https://diagrams.example' },
+      env: { LIVEDOC_HOST: 'https://diagrams.example' },
       routes: [
         () => {
           throw new TypeError('fetch failed');
@@ -178,28 +174,24 @@ describe('run', () => {
         ? Response.json({ aiEnabled: false, authEnabled: true, cli: { minVersion: '99.0.0' } })
         : undefined;
     const routes = [floor, library, tokens];
-    const io = fakeIo({ env: { LIVEDIAGRAM_TOKEN: TOKEN }, routes });
+    const io = fakeIo({ env: { LIVEDOC_TOKEN: TOKEN }, routes });
     expect((await cli(['api', 'POST', '/documents'], io)).code).toBe(1);
-    expect(io.err()).toContain('accepts writes from livediagram 99.0.0 or later');
+    expect(io.err()).toContain('accepts writes from livedoc 99.0.0 or later');
     expect(
-      (
-        await cli(
-          ['api', 'GET', '/documents'],
-          fakeIo({ env: { LIVEDIAGRAM_TOKEN: TOKEN }, routes }),
-        )
-      ).code,
+      (await cli(['api', 'GET', '/documents'], fakeIo({ env: { LIVEDOC_TOKEN: TOKEN }, routes })))
+        .code,
     ).toBe(0);
     expect(
-      (await cli(['document', 'ls'], fakeIo({ env: { LIVEDIAGRAM_TOKEN: TOKEN }, routes }))).code,
+      (await cli(['document', 'ls'], fakeIo({ env: { LIVEDOC_TOKEN: TOKEN }, routes }))).code,
     ).toBe(0);
   });
 
-  it('prints the debug lines under LIVEDIAGRAM_DEBUG=1 only', async () => {
-    const io = signedIn({ env: { LIVEDIAGRAM_TOKEN: TOKEN, LIVEDIAGRAM_DEBUG: '1' } });
+  it('prints the debug lines under LIVEDOC_DEBUG=1 only', async () => {
+    const io = signedIn({ env: { LIVEDOC_TOKEN: TOKEN, LIVEDOC_DEBUG: '1' } });
     await cli(['tab', 'ls', 'Auth flow'], io);
     expect(io.err().split('\n').filter(Boolean)).toEqual([
       '[cli] command tab.ls',
-      '[cli] profile default host https://livediagram.app source default',
+      '[cli] profile default host https://docs.nu source default',
       '[cli] capabilities miss',
       '[cli] credential env',
       '[cli] request GET /api/documents 200 0',
@@ -209,30 +201,29 @@ describe('run', () => {
       '[cli] exit 0',
       '[cli] telemetry skipped env',
     ]);
-    const failing = signedIn({ env: { LIVEDIAGRAM_TOKEN: TOKEN, LIVEDIAGRAM_DEBUG: '1' } });
+    const failing = signedIn({ env: { LIVEDOC_TOKEN: TOKEN, LIVEDOC_DEBUG: '1' } });
     await cli(['tab', 'ls', 'nope'], failing);
     expect(failing.err()).toContain('[cli] exit 3 not_found');
   });
 });
 
 describe('a self-hosted profile', () => {
-  it('never contacts livediagram.app across a session of commands', async () => {
+  it('never contacts docs.nu across a session of commands', async () => {
     const SELF = 'https://diagrams.example';
-    const config = '/home/agent/.config/livediagram/config.toml';
+    const config = '/home/agent/.config/livedoc/config.toml';
     const selfHost: Route = (request, url) => {
       if (url.origin !== SELF) return undefined;
       const path = url.pathname;
       if (path === '/api/capabilities')
         return Response.json({ aiEnabled: false, apiBase: `${SELF}/api`, authEnabled: true });
       return (
-        library(request, new URL(`https://livediagram.app${path}${url.search}`)) ??
-        tokens(request, url)
+        library(request, new URL(`https://docs.nu${path}${url.search}`)) ?? tokens(request, url)
       );
     };
     const files = {
       [config]: 'default_profile = "self"\n[profiles.self]\nhost = "https://diagrams.example"',
     };
-    const io = fakeIo({ env: { LIVEDIAGRAM_TOKEN: TOKEN }, routes: [selfHost], files });
+    const io = fakeIo({ env: { LIVEDOC_TOKEN: TOKEN }, routes: [selfHost], files });
     for (const argv of [
       ['document', 'ls'],
       ['tab', 'ls', 'Auth flow'],
@@ -247,22 +238,20 @@ describe('a self-hosted profile', () => {
 
 describe('the local verbs', () => {
   it('print the guides and the skill without a host', async () => {
-    expect((await cli(['guide'], fakeIo())).out).toContain('Guides: livediagram guide <topic>');
+    expect((await cli(['guide'], fakeIo())).out).toContain('Guides: livedoc guide <topic>');
     expect((await cli(['guide', 'edit'], fakeIo())).out).toContain('Edit a tab');
     expect((await cli(['skill', 'print'], fakeIo())).out).toBe(renderSkill());
   });
 
-  it('install the skill, overwriting only a livediagram skill', async () => {
+  it('install the skill, overwriting only a livedoc skill', async () => {
     const io = fakeIo();
     expect(await cli(['skill', 'install', '--to', '~/.claude/skills'], io)).toMatchObject({
       code: 0,
-      out: '/home/agent/.claude/skills/livediagram/SKILL.md\n',
+      out: '/home/agent/.claude/skills/livedoc/SKILL.md\n',
     });
-    expect(io.fileMap.get('/home/agent/.claude/skills/livediagram/SKILL.md')?.data).toBe(
-      renderSkill(),
-    );
+    expect(io.fileMap.get('/home/agent/.claude/skills/livedoc/SKILL.md')?.data).toBe(renderSkill());
     expect((await cli(['skill', 'install', '--to', '~/.claude/skills'], io)).code).toBe(0);
-    const other = fakeIo({ files: { './skills/livediagram/SKILL.md': '---\nname: other\n---\n' } });
+    const other = fakeIo({ files: { './skills/livedoc/SKILL.md': '---\nname: other\n---\n' } });
     expect(await cli(['skill', 'install', '--to', './skills'], other)).toMatchObject({
       code: 1,
       err: expect.stringContaining('holds another skill'),
@@ -316,7 +305,7 @@ const storedAs = (token: string, tokenId: string) =>
     version: 1,
     profiles: {
       default: {
-        host: 'https://livediagram.app',
+        host: 'https://docs.nu',
         token,
         tokenId,
         accountName: null,
@@ -382,7 +371,7 @@ describe('auth', () => {
     });
     expect(await cli(['auth', 'login', '--with-token'], io)).toMatchObject({
       code: 0,
-      out: 'signed in to https://livediagram.app as Ada\n',
+      out: 'signed in to https://docs.nu as Ada\n',
     });
     expect(JSON.parse(io.fileMap.get(CREDENTIALS)!.data)).toHaveProperty(
       'profiles.default',
@@ -435,7 +424,7 @@ describe('auth', () => {
           fakeIo({ routes: [capabilities, nameless], stdin: TOKEN }),
         )
       ).out,
-    ).toBe('signed in to https://livediagram.app as u1\n');
+    ).toBe('signed in to https://docs.nu as u1\n');
   });
 
   it('refuses browser sign-in on a host without one, and a token from a terminal or that is not a token', async () => {
@@ -487,7 +476,7 @@ describe('auth', () => {
       ['auth', 'status'],
       signedIn({ routes: [capabilities, soon(NOW + 3 * 86_400_000)] }),
     );
-    expect(near.err).toBe('this token expires in 3 days: livediagram auth login to renew\n');
+    expect(near.err).toBe('this token expires in 3 days: livedoc auth login to renew\n');
     expect(near.out).toContain('account  u1');
     expect(near.out).toContain('token    t1');
     expect(
@@ -502,7 +491,7 @@ describe('auth', () => {
     });
     expect(await cli(['auth', 'logout'], io)).toMatchObject({
       code: 0,
-      out: 'signed out of https://livediagram.app\n',
+      out: 'signed out of https://docs.nu\n',
     });
     expect(JSON.parse(io.fileMap.get(CREDENTIALS)!.data)).toHaveProperty('profiles', {});
     expect((await cli(['auth', 'logout'])).code).toBe(2);
@@ -537,7 +526,7 @@ describe('graph lint', () => {
     expect(await run(['graph', 'lint', '-', '--compare', 'direction'], io)).toBe(0);
     expect(io.out()).toContain('variant');
     expect(io.requests).toEqual([]);
-    const debug = fakeIo({ env: { LIVEDIAGRAM_DEBUG: '1' }, files: { '/work/g.json': graph } });
+    const debug = fakeIo({ env: { LIVEDOC_DEBUG: '1' }, files: { '/work/g.json': graph } });
     await run(['graph', 'lint', 'g.json'], debug);
     expect(debug.out()).not.toContain('[lint]');
     expect(debug.err()).toMatch(/\[cli\] \[lint\] run \{/);

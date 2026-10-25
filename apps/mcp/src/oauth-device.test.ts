@@ -119,7 +119,7 @@ describe('the device page', () => {
     const s = await start();
     const typed = s.user_code.toLowerCase().replace('-', ' ');
     const found = await app.request(`/oauth/device/session/${encodeURIComponent(typed)}`, {}, env);
-    expect(await found.json()).toEqual({ clientName: 'livediagram CLI' });
+    expect(await found.json()).toEqual({ clientName: 'LiveDoc CLI' });
     expect((await app.request('/oauth/device/session/BBBB-BBBB', {}, env)).status).toBe(404);
     expect((await app.request('/oauth/device/session/nope', {}, env)).status).toBe(404);
   });

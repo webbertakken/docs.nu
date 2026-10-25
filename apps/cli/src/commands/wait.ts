@@ -22,7 +22,7 @@ export const trashedError = () =>
     exit: EXIT.notFound,
     code: 'trashed',
     message: 'the document was moved to the Trash',
-    hint: 'livediagram document restore <doc>',
+    hint: 'livedoc document restore <doc>',
   });
 
 const quoted = (text: string) => JSON.stringify(text);
@@ -61,7 +61,7 @@ async function changeLines(
   const head = `tab ${quoted(name)} changed · rev `;
   if (read === undefined || read === now) return [`${head}${now}`];
   return [
-    `${head}${read}→${now} · diff: livediagram tab diff ${quoted(input.doc)} --tab ${quoted(name)} --since ${read}`,
+    `${head}${read}→${now} · diff: livedoc tab diff ${quoted(input.doc)} --tab ${quoted(name)} --since ${read}`,
   ];
 }
 
@@ -118,9 +118,7 @@ export async function waitFor(
         }
       },
       onReconnected: () =>
-        ctx.notice(
-          `reconnected; what changed meanwhile: livediagram tab diff ${quoted(input.doc)}`,
-        ),
+        ctx.notice(`reconnected; what changed meanwhile: livedoc tab diff ${quoted(input.doc)}`),
     });
     stream.ended.then(
       (end) => {

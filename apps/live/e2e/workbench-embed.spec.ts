@@ -117,7 +117,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   const selection = (await selectionOf('Play'))!;
   expect(selection.reference).toMatch(/^\[livediagram\] "Home screen" › tab "Wireframe" \(doc /);
   expect(selection.reference).toContain('"Play"');
-  expect(selection.reference).toContain(`read: livediagram tab view ${seeded.documentId}`);
+  expect(selection.reference).toContain(`read: livedoc tab view ${seeded.documentId}`);
 
   // Reveal outlines the element; the theme follows the workbench.
   await page.evaluate(() =>

@@ -33,12 +33,12 @@ is written as its own plain file, a [native file](native-files.md), which is a s
 
 ## The link file
 
-`livediagram.toml`, committed at the root of the directory it links (the repository root, or a package in a
+`livedoc.toml`, committed at the root of the directory it links (the repository root, or a package in a
 monorepo). It holds identifiers and settings, never a credential.
 
 ```toml
-# This repository's diagrams live in livediagram; see https://livediagram.app/help/developers/repositories/
-host = "https://livediagram.app"   # optional; a self-host names its own
+# This repository's diagrams live in LiveDoc; see https://docs.nu/help/developers/repositories/
+host = "https://docs.nu"   # optional; a self-host names its own
 
 [covers]
 folder = "fld_8k2m4q"              # a personal or team folder, its subfolders included
@@ -77,8 +77,8 @@ owns `[repository]`, [Branch binding](branch-binding.md) owns `[git] branch`, an
   may be absent, not both. A document moved out of the folder leaves the link's coverage; a listed document stays
   covered wherever it moves.
 - **Host.** Absent means the CLI's active profile's host. A link naming another host than the active profile is
-  refused with the profile to use; a self-host link never contacts livediagram.app.
-- **Several links.** A command acts on the nearest `livediagram.toml` at or above the working directory; `--all`
+  refused with the profile to use; a self-host link never contacts docs.nu.
+- **Several links.** A command acts on the nearest `livedoc.toml` at or above the working directory; `--all`
   acts on every link below it. Two links covering one document each keep their own snapshot.
 - **Unknown keys** are refused by name, so a typo never silently does nothing.
 
@@ -101,24 +101,24 @@ tab names and counts; at `files` the outlines are in the outline files.
 
 ### The mirror file
 
-`<folder path>/<slug>.livediagram.json`: the CLI's [pull file](../015-api/cli.md#local-files), so the editor's
+`<folder path>/<slug>.livedoc.json`: the CLI's [pull file](../015-api/cli.md#local-files), so the editor's
 "Import a copy" reads it, with these rules for a committed copy:
 
 - **One element per line**, in the tab's stored order, keys sorted. A change to one element is a one-line diff, and
   `rg "Play button"` lands on the element's line.
-- `livediagramSync` keeps the host, the [document branch](../006-document/document-branches.md) the file is a
+- `livedocSync` keeps the host, the [document branch](../006-document/document-branches.md) the file is a
   snapshot of (absent for main) and each tab's `rev`, `hash` and `settingsHash`. It holds **no time** (a pull at
   an unchanged revision writes the same bytes); when it was last synced lives in the local sync state.
 - The slug comes from the document's name at first mirror and then stays: the path is stable while the document is
   renamed or moved, and a sync names the files whose path would now differ (`sync --relocate` moves them, through
-  `git mv` inside a git work tree). A move never lands on a file livediagram did not write: a hand-written
+  `git mv` inside a git work tree). A move never lands on a file livedoc did not write: a hand-written
   `architecture.md` at the target is kept, the document stays where it is, and the sync refuses it naming that file.
 - Formatting is not meaning: a file reformatted by another tool parses alike, hashes alike (the hash is over
   canonical JSON), and is rewritten in the canonical form at its next change.
 
 ### The outline file
 
-`<slug>.livediagram.md` beside the mirror file, named after it so it never takes the name of a page's own `.md`
+`<slug>.livedoc.md` beside the mirror file, named after it so it never takes the name of a page's own `.md`
 file: generated, opening with a line that says so and links the document, then one
 section per tab holding its [outline view](../024-agents/document-views.md#the-outline-default) in a `text` fence.
 It is what an agent reads first, at a tenth of the JSON's tokens, and what a reviewer reads in a pull request.
@@ -132,15 +132,15 @@ the document now. A native file reads its revision and hash from the sync record
 | State        | Means                                                                                    | A sync                                       |
 | ------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------- |
 | `in-step`    | Local hashes match the recorded ones; the revisions are the document's                   | Nothing                                      |
-| `behind`     | Local unchanged; livediagram has newer revisions                                         | Writes the newer snapshot                    |
-| `ahead`      | Local changed; livediagram unchanged since the recorded revisions                        | Sends the local change ([Merging](#merging)) |
+| `behind`     | Local unchanged; LiveDoc has newer revisions                                             | Writes the newer snapshot                    |
+| `ahead`      | Local changed; LiveDoc unchanged since the recorded revisions                            | Sends the local change ([Merging](#merging)) |
 | `diverged`   | Both changed                                                                             | Merges, then sends ([Merging](#merging))     |
 | `new`        | Covered, never mirrored                                                                  | Writes it                                    |
-| `local-new`  | A file in `dir` holding a document envelope with no `livediagramSync`: written by hand   | Creates the document in the link's folder    |
+| `local-new`  | A file in `dir` holding a document envelope with no `livedocSync`: written by hand       | Creates the document in the link's folder    |
 | `gone`       | The api answers `410 document_trashed`, or the document is readable and outside coverage | Removes its files; git history keeps them    |
 | `unreadable` | The api answers `404` for the file's document: purged, or not this person's to open      | Nothing; reported once per sync              |
 
-- **Only an envelope without sync data is new.** A file whose `livediagramSync` names a document is never created
+- **Only an envelope without sync data is new.** A file whose `livedocSync` names a document is never created
   again, whatever the api answers, so a teammate without access, a purged document's file on an old branch or a
   file a merge brings back never makes a duplicate. The api answers a document someone may not open exactly as an
   absent one, so `unreadable` covers both and touches nothing.
@@ -148,7 +148,7 @@ the document now. A native file reads its revision and hash from the sync record
   an `unreadable` document stays until someone deletes it.
 - A document that cannot be read for a transient reason (offline, rate limited, a server failure) keeps its files
   untouched and is reported, never treated as `gone` or `unreadable`.
-- A file holding git's conflict markers is refused, naming `livediagram sync --resolve <file>`
+- A file holding git's conflict markers is refused, naming `livedoc sync --resolve <file>`
   ([Git](#git)); nothing else in the sync waits for it.
 - **A broken file holds its document back.** A conflicted or otherwise invalid file at a document's mirror path
   holds that document's write back: the document is reported, naming the file and its fix, and never written again
@@ -161,7 +161,7 @@ the document now. A native file reads its revision and hash from the sync record
   ones holds a local change nobody has sent; it is kept and refused, naming the file, never removed.
 
 Until the merge is built, `ahead` and `diverged` are refused per document, naming the file and the command that
-sends it (`livediagram push <file>`), and the rest of the sync proceeds. Until then too, `local-new` is reported
+sends it (`livedoc push <file>`), and the rest of the sync proceeds. Until then too, `local-new` is reported
 and never created, and a conflicted file's refusal names the manual fix (keep one side with
 `git checkout --ours <file>` or `--theirs`, then sync) in place of `sync --resolve`.
 
@@ -194,12 +194,12 @@ report and the changeset's summary.
 
 - **Fields** are an element's top-level fields; an arrow's ends, points and label are one field each. The
   [live fields](../024-agents/agent-changesets.md#what-a-changeset-is) (comments, answers, votes, ticks) are never
-  merged from a file: livediagram's always stand.
+  merged from a file: LiveDoc's always stand.
 - **No silent path.** A field both sides changed is a **lost local value**: the merge keeps it in the sync report and
-  as a comment on the element in livediagram, "Not applied from <path>: label was "Start game"", authored by the
+  as a comment on the element in LiveDoc, "Not applied from <path>: label was "Start game"", authored by the
   person syncing, so whoever looks at the diagram sees it and can resolve it. A restored element and a kept remote
   edit are reported likewise.
-- **Tab settings** (name, theme, background) follow livediagram; a local change to them is reported as not sent.
+- **Tab settings** (name, theme, background) follow LiveDoc; a local change to them is reported as not sent.
   A tab added in the file is created; a tab removed from the file is not deleted.
 - **The send** is one strict `replace` changeset per merged tab, based on the remote revision the merge read. When
   that revision moved meanwhile (`412 stale_tab`) the sync re-reads and re-merges, up to `SYNC_MERGE_ATTEMPTS`
@@ -209,7 +209,7 @@ report and the changeset's summary.
 
 | Command                                             | Does                                                                                                                                                                                    |
 | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `link init [--folder <f>] [--doc <d>]... [--level]` | Writes `livediagram.toml`; with no folder, a picker of the person's folders                                                                                                             |
+| `link init [--folder <f>] [--doc <d>]... [--level]` | Writes `livedoc.toml`; with no folder, a picker of the person's folders                                                                                                                 |
 | `link status [--branch <name>]`                     | Every covered document with its state and branch; exits 0 ([In CI](#in-ci) for `--fail-behind`)                                                                                         |
 | `link ls`                                           | The covered documents, as `document ls` prints them                                                                                                                                     |
 | `sync [--watch] [--relocate] [--dry-run] [--all]`   | One sync of the link; `--watch` keeps syncing until interrupted                                                                                                                         |
@@ -244,10 +244,10 @@ them. One rule holds for diagrams, pages and file documents alike: [Branch bindi
 
 ### The hooks
 
-- **Pre-commit** (and **pre-merge-commit**, which `git merge` runs instead) runs `livediagram sync --hook`: one sync,
+- **Pre-commit** (and **pre-merge-commit**, which `git merge` runs instead) runs `livedoc sync --hook`: one sync,
   then `git add` of exactly the files it wrote. A commit carries the diagrams as they were when it was made, and the
-  local changes it carries have reached livediagram.
-- **Pre-push** runs `livediagram sync --hook=pre-push`: it checks that each pushed git branch's snapshots are still
+  local changes it carries have reached LiveDoc.
+- **Pre-push** runs `livedoc sync --hook=pre-push`: it checks that each pushed git branch's snapshots are still
   current, and when they are not it makes one sync commit and stops the push once
   ([The hooks](branch-binding.md#the-hooks)).
 - **Partial staging is refused.** A mirror file whose staged content differs from the work tree, or a commit with
@@ -256,7 +256,7 @@ them. One rule holds for diagrams, pages and file documents alike: [Branch bindi
 - **Never in the way.** Past `SYNC_HOOK_BUDGET_MS`, offline, or signed out, the commit goes through with one
   stderr line naming the revisions its snapshots hold. `[hooks] block = true` fails the commit instead.
 - **The hook line** is guarded, so a teammate without the CLI commits as before:
-  `if command -v livediagram >/dev/null 2>&1; then livediagram sync --hook; fi`, and likewise for pre-push.
+  `if command -v livedoc >/dev/null 2>&1; then livedoc sync --hook; fi`, and likewise for pre-push.
   `link hooks install` appends each,
   never replacing a hook, to the tracked hook file where a hook manager keeps one (Husky's `.husky/pre-commit`,
   never its generated `.husky/_`; a `pre-commit` command in `lefthook.yml`), committed for everyone, and otherwise
@@ -264,28 +264,28 @@ them. One rule holds for diagrams, pages and file documents alike: [Branch bindi
 
 ### The merge driver
 
-`.gitattributes` (committed): `*.livediagram.json merge=livediagram`; the driver itself is registered per clone in
+`.gitattributes` (committed): `*.livedoc.json merge=livedoc`; the driver itself is registered per clone in
 `.git/config` by `link hooks install`. It merges two branches' copies of a mirror file **tab by tab**, telling
-livediagram's history from local changes by each copy's own record: a tab whose hash equals its recorded hash is a
+LiveDoc's history from local changes by each copy's own record: a tab whose hash equals its recorded hash is a
 **clean snapshot**, any other tab carries a **local change**.
 
-| Ours           | Theirs                          | Result                                                                                                                                                     |
-| -------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| clean snapshot | clean snapshot, the same branch | The higher revision's tab, verbatim                                                                                                                        |
-| clean snapshot | clean snapshot, another branch  | Merged element by element from git's base copy, as the branch merge would; marked a snapshot of both, so the next sync makes the same merge in livediagram |
-| local change   | clean snapshot                  | Ours, with its own recorded revision; the next sync merges it with livediagram                                                                             |
-| clean snapshot | local change                    | Theirs, likewise                                                                                                                                           |
-| local change   | local change                    | Ours; theirs is kept as a **pending proposal** in the local sync state and reported                                                                        |
+| Ours           | Theirs                          | Result                                                                                                                                                 |
+| -------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| clean snapshot | clean snapshot, the same branch | The higher revision's tab, verbatim                                                                                                                    |
+| clean snapshot | clean snapshot, another branch  | Merged element by element from git's base copy, as the branch merge would; marked a snapshot of both, so the next sync makes the same merge in LiveDoc |
+| local change   | clean snapshot                  | Ours, with its own recorded revision; the next sync merges it with LiveDoc                                                                             |
+| clean snapshot | local change                    | Theirs, likewise                                                                                                                                       |
+| local change   | local change                    | Ours; theirs is kept as a **pending proposal** in the local sync state and reported                                                                    |
 
 - The driver never merges two snapshots of one document branch element by element: two revisions of one branch are
   not two edits, and their difference is never sent back. Two branches' snapshots are two edits, and merge as the
   [branch merge](../006-document/document-branches.md#merging) does; the merge it writes is provisional, and the
-  next sync replaces it with livediagram's ([Merging in git](branch-binding.md#merging-in-git)).
-- It works offline and sends nothing. The next sync sends pending proposals first, each merged against livediagram
+  next sync replaces it with LiveDoc's ([Merging in git](branch-binding.md#merging-in-git)).
+- It works offline and sends nothing. The next sync sends pending proposals first, each merged against LiveDoc
   from its own base, so both branches' changes arrive.
 - A tab in only one copy is kept; the document envelope's other fields come from the copy with the higher revision.
 - **Without the driver** (a clone that never ran `link hooks install`), git merges the text and may leave conflict
-  markers. `livediagram sync --resolve <file>` reads the three versions from git's index (`:1:`, `:2:`, `:3:`),
+  markers. `livedoc sync --resolve <file>` reads the three versions from git's index (`:1:`, `:2:`, `:3:`),
   applies the driver's table and stages the result.
 
 ### In CI
@@ -301,7 +301,7 @@ A repository opts in and out at any moment, and neither touches a document or an
 - **Linking adopts what is there.** `link init` on a folder of existing files adopts them unchanged: the first commit
   after it adds only the link file and the sync records
   ([Wiki](../032-wikis/wiki.md#bringing-an-existing-wiki-in)).
-- **`livediagram unlink`** ends the link in one commit: it removes the link file, the sync records, the managed
+- **`livedoc unlink`** ends the link in one commit: it removes the link file, the sync records, the managed
   `.gitignore` section ([Committed files](committed-files.md#the-managed-section)) and the hook lines it installed in
   tracked hook files; this clone's own `.git/hooks` lines and merge driver registration go too. Every other file stays
   exactly as it is. Before it commits, it:
@@ -328,8 +328,8 @@ A repository opts in and out at any moment, and neither touches a document or an
 
 ## Local sync state
 
-Per link, never committed: inside a git work tree at `<git dir>/livediagram/<link id>/` (each worktree its own),
-elsewhere at `~/.cache/livediagram/links/<link id>/`. The link id is a hash of the link file's absolute path. It
+Per link, never committed: inside a git work tree at `<git dir>/livedoc/<link id>/` (each worktree its own),
+elsewhere at `~/.cache/livedoc/links/<link id>/`. The link id is a hash of the link file's absolute path. It
 holds the base snapshots (the latest `SYNC_BASES_KEPT` per tab), the pending proposals, the last
 `SYNC_REPORTS_KEPT` sync reports, when each tab was last synced, and the lock.
 
@@ -340,7 +340,7 @@ holds the base snapshots (the latest `SYNC_BASES_KEPT` per tab), the pending pro
   told so once per sync.
 - A view-level token syncs one way: snapshots are written, local changes are reported as not sent.
 - The mirror is as public as the repository: `link init` says so in one line when the repository has any git
-  remote. Document and folder ids in `livediagram.toml` grant nothing.
+  remote. Document and folder ids in `livedoc.toml` grant nothing.
 
 ## Limits
 

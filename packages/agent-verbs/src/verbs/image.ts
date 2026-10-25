@@ -65,7 +65,7 @@ export const imageLs = defineVerb({
   quiet: ({ images }) => images.map((i) => i.id),
   cli: {
     positionals: ['query'],
-    examples: ['livediagram image ls', 'livediagram image ls screenshot --limit 5'],
+    examples: ['livedoc image ls', 'livedoc image ls screenshot --limit 5'],
     prints: 'one image a line: id, pixels, size, name',
   },
 });

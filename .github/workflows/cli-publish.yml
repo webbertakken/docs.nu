@@ -1,12 +1,13 @@
 name: CLI publish
 
-# Publishes the CLI to npm as `@livediagram/cli` (command `livediagram`) with provenance (docs/specs/015-api/blueprints/cli.md CLI3), through npm
-# trusted publishing: npm trusts this workflow by its OIDC identity, so no npm token is stored anywhere. Runs when
-# apps/cli/package.json changes on main (a version bump) and by hand; a version already on npm is skipped, so a
-# change that keeps the version publishes nothing.
+# Publishes the CLI to npm as `@livedoc/cli` (command `livedoc`) with provenance (docs/specs/015-api/blueprints/cli.md
+# CLI3), through npm trusted publishing: npm trusts this workflow by its OIDC identity, so no npm token is stored
+# anywhere. Runs when apps/cli/package.json changes on main (a version bump) and by hand; a version already on npm is
+# skipped, so a change that keeps the version publishes nothing.
 #
-# Before the first run, on npmjs.com: create the `@livediagram/cli` package's trusted publisher for this repository and
-# this workflow file (Settings > Trusted publishing). Publishing cannot be undone.
+# The trusted publisher on npmjs.com names the repository webbertakken/livedoc and this workflow file,
+# cli-publish.yml, with npm publish allowed (docs/operations/docs-nu.md "npm"). Renaming this file breaks it.
+# Publishing cannot be undone.
 
 on:
   push:
@@ -23,7 +24,7 @@ concurrency:
 
 jobs:
   publish:
-    name: Publish livediagram
+    name: Publish livedoc
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -54,19 +55,19 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Test the CLI
-        run: pnpm --filter @livediagram/cli test
+        run: pnpm --filter @livedoc/cli test
 
       - name: Build the package
-        run: pnpm --filter @livediagram/cli build
+        run: pnpm --filter @livedoc/cli build
 
       - name: Is this version on npm already?
         id: published
         run: |
           version=$(node -p "require('./apps/cli/dist/package.json').version")
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          if npm view "@livediagram/cli@$version" version > /dev/null 2>&1; then
+          if npm view "@livedoc/cli@$version" version > /dev/null 2>&1; then
             echo "already=true" >> "$GITHUB_OUTPUT"
-            echo "@livediagram/cli $version is already on npm: nothing to publish"
+            echo "@livedoc/cli $version is already on npm: nothing to publish"
           else
             echo "already=false" >> "$GITHUB_OUTPUT"
           fi

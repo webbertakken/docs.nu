@@ -100,7 +100,7 @@ async function runOnline(
     throw new CliError({
       exit: EXIT.rejected,
       code: 'version',
-      message: `${profile.host} stores documents in format ${caps.documentFormat}; this livediagram reads format ${DOCUMENT_FORMAT}`,
+      message: `${profile.host} stores documents in format ${caps.documentFormat}; this livedoc reads format ${DOCUMENT_FORMAT}`,
       hint: UPGRADE_HINT,
     });
   }
@@ -114,7 +114,7 @@ async function runOnline(
       exit: EXIT.auth,
       code: 'auth',
       message: `not signed in to ${profile.host}`,
-      hint: 'livediagram auth login --with-token, or set LIVEDIAGRAM_TOKEN',
+      hint: 'livedoc auth login --with-token, or set LIVEDOC_TOKEN',
     });
   // `api` writes unless it only reads.
   const writes =
@@ -124,7 +124,7 @@ async function runOnline(
     throw new CliError({
       exit: EXIT.rejected,
       code: 'version',
-      message: `${profile.host} accepts writes from livediagram ${caps.minVersion} or later; this is ${CLI_VERSION}`,
+      message: `${profile.host} accepts writes from livedoc ${caps.minVersion} or later; this is ${CLI_VERSION}`,
       hint: UPGRADE_HINT,
     });
   }

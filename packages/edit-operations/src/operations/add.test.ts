@@ -106,7 +106,7 @@ describe('add with an element', () => {
     expect(rejection).toEqual({
       code: 'invalid_result',
       details: ['bad y: a finite number'],
-      hint: 'see the format: livediagram schema sticky',
+      hint: 'see the format: livedoc schema sticky',
     });
   });
 });

@@ -134,13 +134,13 @@ export async function seedDocumentAndToken(
   });
   if (created.status >= 300) throw new Error(`creating the document failed: ${created.status}`);
   const token = await apiJson<{ token: string }>(request, 'POST', '/tokens', person.jwt, {
-    name: 'livediagram CLI',
+    name: 'LiveDoc CLI',
   });
   if (token.status >= 300) throw new Error(`creating the token failed: ${token.status}`);
   return { documentId, tabId, token: token.body.token };
 }
 
-// `livediagram workbench open`: POST /api/workbench/tickets with the token.
+// `livedoc workbench open`: POST /api/workbench/tickets with the token.
 export function mintTicket(
   request: APIRequestContext,
   seeded: Seeded,
@@ -161,7 +161,7 @@ export function received(page: Page): Promise<{ type: string; [k: string]: unkno
   return page.evaluate(() => (window as unknown as { received: never[] }).received);
 }
 
-// `livediagram workbench open --workspace [--folder <f>]`: a workspace ticket, on Home or a folder.
+// `livedoc workbench open --workspace [--folder <f>]`: a workspace ticket, on Home or a folder.
 export function mintWorkspaceTicket(
   request: APIRequestContext,
   seeded: Seeded,
@@ -178,7 +178,7 @@ export function mintWorkspaceTicket(
   });
 }
 
-// A folder of the person's, at the top of My Documents, as `livediagram folder create` makes it.
+// A folder of the person's, at the top of My Documents, as `livedoc folder create` makes it.
 export async function createFolder(
   request: APIRequestContext,
   person: Person,

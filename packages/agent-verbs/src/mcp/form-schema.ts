@@ -26,7 +26,7 @@ import {
 import { PAGE_MOTIONS } from '@livediagram/page-background';
 import { FORM_CHANGES_MAX } from '../forms/form-calls';
 
-const url = z.string().describe('Link that opens the document in the livediagram editor.');
+const url = z.string().describe('Link that opens the document in the LiveDoc editor.');
 const documentId = z.string().describe('The document (from find_documents).');
 const tab = z
   .string()

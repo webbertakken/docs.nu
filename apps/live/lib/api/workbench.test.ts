@@ -150,7 +150,7 @@ describe('the pairing calls', () => {
     const request = {
       origin: 'https://127.0.0.1:5175',
       name: 'Acme Editor',
-      tokenName: 'livediagram CLI',
+      tokenName: 'LiveDoc CLI',
       expiresAt: 5,
       status: 'pending',
     };

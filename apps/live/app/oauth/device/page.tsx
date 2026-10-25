@@ -86,7 +86,7 @@ function Device() {
     const back = window.location.pathname + window.location.search;
     return (
       <OauthShell>
-        <h1 className={HEADING}>Sign in to connect the livediagram CLI</h1>
+        <h1 className={HEADING}>Sign in to connect the LiveDoc CLI</h1>
         <div className="mt-5 flex items-center gap-2">
           <a
             href={`/sign-in/?redirect_url=${encodeURIComponent(back)}`}

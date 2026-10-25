@@ -545,7 +545,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Is there a command-line tool?',
-        a: 'Yes. Install it from npm as @livediagram/cli (or run it with npx). It signs in through your browser and can read, edit, create, share and export documents from your terminal, which makes it handy for scripts and coding agents.',
+        a: 'Yes. Install it from npm as @livedoc/cli (or run it with npx). It signs in through your browser and can read, edit, create, share and export documents from your terminal, which makes it handy for scripts and coding agents.',
       },
       {
         q: 'Can I keep my diagrams next to my code?',

@@ -20,7 +20,7 @@ export const boardAdd = defineVerb({
     'Puts a Plan board on a tab, beside what it holds: a preset, or columns by name. A column named like one the document already has shares it.',
   behaviour: 'write',
   input: z.object({
-    doc: z.string().describe('A name, id prefix or livediagram URL'),
+    doc: z.string().describe('A name, id prefix or LiveDoc URL'),
     tab: z
       .string()
       .optional()
@@ -76,8 +76,8 @@ export const boardAdd = defineVerb({
   cli: {
     positionals: ['doc'],
     examples: [
-      'livediagram board add "Sprint 14" --preset sprint',
-      'livediagram board add 3f9c --columns "Ideas,Doing,Shipped" --title Roadmap --types project',
+      'livedoc board add "Sprint 14" --preset sprint',
+      'livedoc board add 3f9c --columns "Ideas,Doing,Shipped" --title Roadmap --types project',
     ],
     prints: '+ board "<title>": <column> · <column> ...',
   },
@@ -90,7 +90,7 @@ export const boardSet = defineVerb({
     "Changes a board's title, its columns (every column by name: names it has keep their cards) or the card types it takes.",
   behaviour: 'write',
   input: z.object({
-    doc: z.string().describe('A name, id prefix or livediagram URL'),
+    doc: z.string().describe('A name, id prefix or LiveDoc URL'),
     board: z.string().describe('The board, by title or element id'),
     title: z.string().optional().describe('A new title'),
     columns: z.string().optional().describe('Every column, comma separated, left to right'),
@@ -125,7 +125,7 @@ export const boardSet = defineVerb({
         status: result.code === 'board_unknown' ? 404 : 400,
         code: result.code,
         message: result.message,
-        hint: 'list the boards with: livediagram item ls <doc>',
+        hint: 'list the boards with: livedoc item ls <doc>',
       });
     return {
       elementId: result.elementId,
@@ -143,8 +143,8 @@ export const boardSet = defineVerb({
   cli: {
     positionals: ['doc', 'board'],
     examples: [
-      'livediagram board set "Sprint 14" Kanban --types Task,Bug',
-      'livediagram board set 3f9c Roadmap --columns "Now,Next,Later,Done" --title "Roadmap 2027"',
+      'livedoc board set "Sprint 14" Kanban --types Task,Bug',
+      'livedoc board set 3f9c Roadmap --columns "Now,Next,Later,Done" --title "Roadmap 2027"',
     ],
     prints: '~ board "<title>": <column> · <column> ... (takes <types>)',
   },

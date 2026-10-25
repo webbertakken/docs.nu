@@ -61,7 +61,7 @@ describe('selectionReference', () => {
     );
     const firstRef = itemOf('el-play').split(' ')[1];
     expect(read).toBe(
-      `read: livediagram tab view doc-3h9x2a --tab ${tabRef()} --view show --ref ${firstRef}`,
+      `read: livedoc tab view doc-3h9x2a --tab ${tabRef()} --view show --ref ${firstRef}`,
     );
     expect(ref.count).toBe(2);
     expect(ref.text.endsWith('\n')).toBe(false);
@@ -127,7 +127,7 @@ describe('selectionReference', () => {
     expect(lines[1]!.split(', ')).toHaveLength(20);
     expect(lines[1]).toMatch(
       new RegExp(
-        ` … and 3 more: livediagram tab view doc-3h9x2a --tab ${tabRef()} --view show --ref selected$`,
+        ` … and 3 more: livedoc tab view doc-3h9x2a --tab ${tabRef()} --view show --ref selected$`,
       ),
     );
     expect(ref.count).toBe(23);

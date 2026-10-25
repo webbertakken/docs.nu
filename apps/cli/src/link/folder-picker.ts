@@ -15,12 +15,12 @@ export const noFoldersError = (host: string) =>
     exit: EXIT.notFound,
     code: 'no_folders',
     message: `there are no folders in ${host} to link`,
-    hint: 'create a folder in livediagram, or link documents: livediagram link init --doc <doc>',
+    hint: 'create a folder in LiveDoc, or link documents: livedoc link init --doc <doc>',
   });
 
 export function folderNeededError(choices: readonly FolderChoice[], level?: string): CliError {
   const command = (id: string) =>
-    `livediagram link init --folder ${id}${level ? ` --level ${level}` : ''}`;
+    `livedoc link init --folder ${id}${level ? ` --level ${level}` : ''}`;
   const shown = choices.slice(0, PICKER_PAGE);
   const more = choices.length - shown.length;
   return new CliError({
@@ -30,7 +30,7 @@ export function folderNeededError(choices: readonly FolderChoice[], level?: stri
     lines: [
       ...shown.map((c) => `${command(c.id)}  # ${c.path} (${c.library})`),
       ...(more > 0
-        ? [`… ${more} more: livediagram link init --folder <name> takes a folder's name too`]
+        ? [`… ${more} more: livedoc link init --folder <name> takes a folder's name too`]
         : []),
     ],
     hint: command(shown[0]!.id),

@@ -34,7 +34,7 @@ const libraries: Libraries = {
   ],
 };
 const choices = folderChoices(libraries);
-const HOST = 'https://livediagram.app';
+const HOST = 'https://docs.nu';
 
 async function failureOf(run: () => Promise<unknown>): Promise<CliFailure> {
   try {
@@ -48,7 +48,7 @@ async function failureOf(run: () => Promise<unknown>): Promise<CliFailure> {
 
 describe('pickFolder', () => {
   const LIST = [
-    'Folders in https://livediagram.app',
+    'Folders in https://docs.nu',
     '   1  Art                personal',
     '   2  Minigames          personal',
     '   3  Minigames/Screens  personal',
@@ -135,10 +135,10 @@ describe('folderNeededError', () => {
       code: 'folder_needed',
       message: 'link init needs --folder or --doc when it is not run in a terminal',
       lines: [
-        'livediagram link init --folder f-art --level files  # Art (personal)',
-        'livediagram link init --folder f-games --level files  # Minigames (personal)',
+        'livedoc link init --folder f-art --level files  # Art (personal)',
+        'livedoc link init --folder f-games --level files  # Minigames (personal)',
       ],
-      hint: 'livediagram link init --folder f-art --level files',
+      hint: 'livedoc link init --folder f-art --level files',
     });
   });
 
@@ -152,7 +152,7 @@ describe('folderNeededError', () => {
     const { lines } = folderNeededError(many).failure;
     expect(lines).toHaveLength(PICKER_PAGE + 1);
     expect(lines!.at(-1)).toBe(
-      "… 2 more: livediagram link init --folder <name> takes a folder's name too",
+      "… 2 more: livedoc link init --folder <name> takes a folder's name too",
     );
   });
 });
@@ -162,8 +162,8 @@ describe('noFoldersError', () => {
     expect(noFoldersError(HOST).failure).toEqual({
       exit: 3,
       code: 'no_folders',
-      message: 'there are no folders in https://livediagram.app to link',
-      hint: 'create a folder in livediagram, or link documents: livediagram link init --doc <doc>',
+      message: 'there are no folders in https://docs.nu to link',
+      hint: 'create a folder in LiveDoc, or link documents: livedoc link init --doc <doc>',
     });
   });
 });

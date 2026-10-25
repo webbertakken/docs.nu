@@ -171,7 +171,7 @@ command-line client needs: a loopback redirect matched on scheme, host and path
 with any port (RFC 8252 §7.3), a pre-registered public client `livediagram-cli`
 whose name the consent screen can trust, and the device authorisation grant
 (RFC 8628) with a `/oauth/device` page in `apps/live` for machines without a
-browser. A token minted for the CLI is named "livediagram CLI".
+browser. A token minted for the CLI is named "LiveDoc CLI".
 
 ## 4. Tools
 

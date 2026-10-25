@@ -1,4 +1,4 @@
-// A livediagram host for the repository link's suites: libraries with folders and teams, documents whose tabs move
+// A LiveDoc host for the repository link's suites: libraries with folders and teams, documents whose tabs move
 // on, the overview as the api renders it, and documents that can be trashed, purged, or fail. Over `fakeIo`.
 
 import type { VerbContext } from '@livediagram/agent-verbs';
@@ -7,7 +7,7 @@ import { headerFactsOf, overviewView } from '@livediagram/document-views';
 import { transport } from '../transport';
 import { NOW, TOKEN, type FakeIo, type Route } from './fake-io';
 
-export const HOST = 'https://livediagram.app';
+export const HOST = 'https://docs.nu';
 
 export type HostTab = {
   id: string;

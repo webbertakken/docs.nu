@@ -17,7 +17,7 @@ export default function DevelopersPage() {
     <BrowsePage
       listing={{ appPath: '/developers/', articles: articles }}
       title="Developers"
-      lede="Drive livediagram from your own scripts and integrations. The same REST API the editor uses, callable with an API token, or from a terminal with the livediagram CLI."
+      lede="Drive livediagram from your own scripts and integrations. The same REST API the editor uses, callable with an API token, or from a terminal with the LiveDoc CLI."
     >
       {articles.map((article) => (
         <ArticleCard key={article.slug} article={article} />

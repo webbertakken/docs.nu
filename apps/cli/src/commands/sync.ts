@@ -26,7 +26,7 @@ export async function syncLinks(
       exit: EXIT.usage,
       code: 'usage',
       message: '--dry-run writes nothing, so there is nothing to watch',
-      hint: 'livediagram sync --dry-run',
+      hint: 'livedoc sync --dry-run',
     });
   const sync: VerbContext = { ...ctx, log: debugLog(io, 'sync') };
   const options = {

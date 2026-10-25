@@ -81,7 +81,7 @@ function refusalOf(err: unknown, target: WriteTarget, base: ChangesetBase | unde
   if (!(err instanceof ApiError)) return err;
   const body = bodyOf(err);
   const since = `since ${base ? `rev ${base.rev}` : 'your read'}${typeof body.rev === 'number' ? ` (now ${body.rev})` : ''}`;
-  const reread = `re-read: livediagram tab view ${JSON.stringify(target.doc)} --tab ${JSON.stringify(target.tabName)}`;
+  const reread = `re-read: livedoc tab view ${JSON.stringify(target.doc)} --tab ${JSON.stringify(target.tabName)}`;
   if (err.code === 'elements_held') {
     const held = (body.held ?? []) as HeldElement[];
     return new VerbRefusal({

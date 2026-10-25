@@ -13,7 +13,7 @@ const usage = (verb: Verb, message: string) =>
     exit: EXIT.usage,
     code: 'usage',
     message,
-    hint: `livediagram ${verb.id.replace('.', ' ')} --help`,
+    hint: `livedoc ${verb.id.replace('.', ' ')} --help`,
   });
 
 // node:util parseArgs names the offending flag in quotes ('-f, --file <value>' for a short one): one the verb does

@@ -642,7 +642,7 @@ export const articles: Article[] = [
   },
   {
     slug: 'cli',
-    title: 'The livediagram CLI',
+    title: 'The LiveDoc CLI',
     description:
       'Read, build, edit and discuss documents from a terminal: install, sign in, the commands, and self-hosting.',
     keywords:
@@ -654,9 +654,9 @@ export const articles: Article[] = [
     slug: 'repositories',
     title: 'Diagrams in Your Repository',
     description:
-      'Link a repository with livediagram.toml so agents find your diagrams, and keep snapshots in git.',
+      'Link a repository with livedoc.toml so agents find your diagrams, and keep snapshots in git.',
     keywords:
-      'repository repo git github link livediagram.toml sync mirror snapshot index monorepo codebase coding agent ripgrep search folder commit',
+      'repository repo git github link livedoc.toml sync mirror snapshot index monorepo codebase coding agent ripgrep search folder commit',
     category: 'Developers',
     categorySlug: 'developers',
   },

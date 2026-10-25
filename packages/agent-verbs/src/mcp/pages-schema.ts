@@ -24,7 +24,7 @@ const layoutIds = (kind: Exclude<PageKind, 'article'>) =>
     .layouts.map((l) => l.id)
     .join(', ');
 
-const url = z.string().describe('Link that opens the document in the livediagram editor.');
+const url = z.string().describe('Link that opens the document in the LiveDoc editor.');
 const documentId = z.string().describe('The document (from find_documents).');
 const tabId = z
   .string()

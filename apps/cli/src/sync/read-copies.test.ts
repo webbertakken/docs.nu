@@ -7,7 +7,7 @@ const copy = (rev: number, label = 'x'): ReadCopy => ({
   rev,
   tab: { id: 't', name: 'T', elements: [{ id: 'n1', label }] } as never,
 });
-const ROOT = '/home/agent/.cache/livediagram/copies';
+const ROOT = '/home/agent/.cache/livedoc/copies';
 
 describe('fileReadCopies', () => {
   it('keeps copies at 0600 under a hashed key, newest first for latest, and logs hits and misses', async () => {

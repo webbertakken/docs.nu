@@ -154,7 +154,7 @@ The words for diagrams living beside code ([Repositories](../027-repositories/RE
 
 | Term                    | Means                                                                                 | Never called                           |
 | ----------------------- | ------------------------------------------------------------------------------------- | -------------------------------------- |
-| **repository link**     | `livediagram.toml`: binds a directory to the documents it **covers**                  | project, workspace, scope              |
+| **repository link**     | `livedoc.toml`: binds a directory to the documents it **covers**                      | project, workspace, scope              |
 | **mirror level**        | How much of the covered documents a link writes: `none`, `index`, `files`             | sync mode                              |
 | **snapshot**            | A tab as a repository holds it, at a recorded revision                                | copy (that is Drive's), backup, cache  |
 | **sync**                | One pass of a link: read, merge, send, write                                          | refresh, update                        |

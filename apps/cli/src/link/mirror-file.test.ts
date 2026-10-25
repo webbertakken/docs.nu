@@ -40,12 +40,12 @@ const mirror = (): MirrorFile => ({
       { id: 'tab-2', name: 'Empty', elements: [], folder: 'Later' },
     ],
   },
-  livediagramSync: {
+  livedocSync: {
     tabs: {
       'tab-1': { settingsHash: 's1', rev: 17, hash: 'h1' },
       'tab-2': { rev: 2, hash: 'h2', settingsHash: 's2' },
     },
-    host: 'https://livediagram.app',
+    host: 'https://docs.nu',
   },
 });
 
@@ -73,8 +73,8 @@ const GOLDEN = `{
     ]
   },
   "kind": "livediagram.document",
-  "livediagramSync": {
-    "host": "https://livediagram.app",
+  "livedocSync": {
+    "host": "https://docs.nu",
     "tabs": {
       "tab-1": {
         "hash": "h1",
@@ -105,9 +105,9 @@ describe('mirrorFileText', () => {
     const pulled = parsePullFile(GOLDEN);
     expect(pulled).toMatchObject({
       ok: true,
-      file: { livediagramSync: { tabs: { 'tab-1': { rev: 17 } } } },
+      file: { livedocSync: { tabs: { 'tab-1': { rev: 17 } } } },
     });
-    expect(pulled.ok && 'pulledAt' in pulled.file.livediagramSync).toBe(false);
+    expect(pulled.ok && 'pulledAt' in pulled.file.livedocSync).toBe(false);
   });
 });
 
@@ -126,7 +126,7 @@ describe('a document with no tabs (E24)', () => {
     const empty: MirrorFile = {
       ...mirror(),
       document: { id: 'd', name: 'Empty', presentation: null, tabs: [] },
-      livediagramSync: { host: 'https://livediagram.app', tabs: {} },
+      livedocSync: { host: 'https://docs.nu', tabs: {} },
     };
     expect(mirrorFileText(empty)).toContain('"tabs": []');
     expect(mirrorFileText(empty)).toContain('"tabs": {}');
