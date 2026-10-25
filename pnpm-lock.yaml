@@ -44,6 +44,9 @@ importers:
       prettier:
         specifier: ^3.9.9
         version: 3.9.9
+      smol-toml:
+        specifier: ^1.9.1
+        version: 1.9.1
       turbo:
         specifier: ^2.11.7
         version: 2.11.7
