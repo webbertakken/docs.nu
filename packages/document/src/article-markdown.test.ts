@@ -87,3 +87,19 @@ describe('Markdown pasted into an article', () => {
     );
   });
 });
+
+describe('looksLikeMarkdown on hostile text', () => {
+  it('reads text full of brackets in linear time', () => {
+    const brackets = '['.repeat(200_000);
+    const parens = '[](' + '[(]('.repeat(100_000);
+    const started = performance.now();
+    expect(looksLikeMarkdown(brackets)).toBe(false);
+    expect(looksLikeMarkdown(parens)).toBe(false);
+    expect(performance.now() - started).toBeLessThan(100);
+  });
+
+  it('still sees a link, and not bracketed prose', () => {
+    expect(looksLikeMarkdown('see [the docs](https://x.y/z)')).toBe(true);
+    expect(looksLikeMarkdown('plain text [not a link]')).toBe(false);
+  });
+});
