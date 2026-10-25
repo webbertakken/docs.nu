@@ -12,8 +12,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const PICTURE = 'https://img.clerk.com/picture';
-const OTHER = 'https://img.clerk.com/other';
+const PICTURE = 'https://lh3.googleusercontent.com/a/picture';
+const OTHER = 'https://lh3.googleusercontent.com/a/other';
 
 function renderDisc(pictureUrl: string | null, size = 20) {
   const view = render(
@@ -63,7 +63,9 @@ describe('PictureDisc', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { img } = renderDisc(PICTURE);
     fireEvent.error(img()!);
-    expect(warn).toHaveBeenCalledWith('[profile-picture] load failed', { host: 'img.clerk.com' });
+    expect(warn).toHaveBeenCalledWith('[profile-picture] load failed', {
+      host: 'lh3.googleusercontent.com',
+    });
     expect(JSON.stringify(warn.mock.calls)).not.toContain('/picture');
   });
 
@@ -77,17 +79,14 @@ describe('PictureDisc', () => {
       </PictureDisc>,
     );
     expect(box().dataset.avatarState).toBe('loading');
-    expect(img()!.getAttribute('src')).toBe(`${OTHER}?width=96&height=96`);
+    expect(img()!.getAttribute('src')).toBe(`${OTHER}=s96-c`);
   });
 
-  it('asks Clerk for a size, never a crop, with a 2x source sized to the disc', () => {
+  it('asks Google for a square size, with a 2x source sized to the disc', () => {
     const { img } = renderDisc(PICTURE, 44);
-    expect(img()!.getAttribute('src')).toBe(`${PICTURE}?width=96&height=96`);
-    expect(img()!.getAttribute('srcset')).toBe(
-      `${PICTURE}?width=96&height=96 96w, ${PICTURE}?width=192&height=192 192w`,
-    );
+    expect(img()!.getAttribute('src')).toBe(`${PICTURE}=s96-c`);
+    expect(img()!.getAttribute('srcset')).toBe(`${PICTURE}=s96-c 96w, ${PICTURE}=s192-c 192w`);
     expect(img()!.getAttribute('sizes')).toBe('44px');
-    expect(img()!.getAttribute('src')).not.toContain('fit=');
   });
 
   it('renders the picture decoratively without a referrer', () => {

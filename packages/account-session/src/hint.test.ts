@@ -4,8 +4,11 @@ import {
   announceAccountChange,
   onAccountChange,
   readSignedInHint,
+  readSignInOffered,
+  SIGN_IN_OFFERED_KEY,
   SIGNED_IN_HINT_KEY,
   writeSignedInHint,
+  writeSignInOffered,
 } from './hint';
 
 function memoryStorage(): Storage {
@@ -67,20 +70,57 @@ describe('the signed-in hint', () => {
   });
 });
 
+describe('whether this host offered sign-in', () => {
+  it('is unknown, then what a page here last learned', () => {
+    const storage = memoryStorage();
+    expect(readSignInOffered(storage)).toBeNull();
+    writeSignInOffered(false, storage);
+    expect(storage.getItem(SIGN_IN_OFFERED_KEY)).toBe('0');
+    expect(readSignInOffered(storage)).toBe(false);
+    writeSignInOffered(true, storage);
+    expect(readSignInOffered(storage)).toBe(true);
+  });
+
+  it('survives a browser that refuses storage, and one without any', () => {
+    const refusing = {
+      getItem: () => {
+        throw new DOMException('denied', 'SecurityError');
+      },
+      setItem: () => {
+        throw new DOMException('full', 'QuotaExceededError');
+      },
+    } as unknown as Storage;
+    expect(readSignInOffered(refusing)).toBeNull();
+    expect(() => writeSignInOffered(true, refusing)).not.toThrow();
+    expect(readSignInOffered()).toBeNull();
+    expect(() => writeSignInOffered(true)).not.toThrow();
+  });
+});
+
 describe('the account channel between tabs', () => {
   it('nudges the other tabs, carrying nothing they must trust', async () => {
-    const listener = vi.fn();
-    const stop = onAccountChange(listener);
     const seen = new Promise<unknown>((resolve) => {
-      const spy = new BroadcastChannel(ACCOUNT_CHANNEL_NAME);
-      spy.onmessage = (event) => {
-        spy.close();
+      const otherTab = new BroadcastChannel(ACCOUNT_CHANNEL_NAME);
+      otherTab.onmessage = (event) => {
+        otherTab.close();
         resolve(event.data);
       };
     });
     announceAccountChange(true);
-    expect(await seen).toEqual({ signedIn: true });
-    await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
+    expect(await seen).toEqual({ signedIn: true, from: expect.any(String) });
+  });
+
+  it('hears another tab, never its own announcement', async () => {
+    const listener = vi.fn();
+    const stop = onAccountChange(listener);
+    announceAccountChange(false);
+    const otherTab = new BroadcastChannel(ACCOUNT_CHANNEL_NAME);
+    otherTab.postMessage({ signedIn: true, from: 'another-tab' });
+    otherTab.postMessage(null);
+    otherTab.close();
+    await vi.waitFor(() => expect(listener).toHaveBeenCalledTimes(2));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(listener).toHaveBeenCalledTimes(2);
     expect(listener).toHaveBeenCalledWith();
     stop();
   });
@@ -90,7 +130,9 @@ describe('the account channel between tabs', () => {
     onAccountChange(listener)();
     const other = vi.fn();
     const stopOther = onAccountChange(other);
-    announceAccountChange(false);
+    const otherTab = new BroadcastChannel(ACCOUNT_CHANNEL_NAME);
+    otherTab.postMessage({ signedIn: false, from: 'another-tab' });
+    otherTab.close();
     await vi.waitFor(() => expect(other).toHaveBeenCalledOnce());
     expect(listener).not.toHaveBeenCalled();
     stopOther();

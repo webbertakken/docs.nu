@@ -4,14 +4,13 @@
 // the key to every document a guest owns, and the per-browser keys are what past answers and likes are
 // matched against. apps/live's local-identity test fails if one of its identity keys is not listed here.
 
-/** The prefixes a repair considers at all. Anything else (the sign-in provider's own keys) is never touched. */
+/** The prefixes a repair considers at all. Anything else is never touched. */
 export const REPAIR_SCOPE_PREFIXES = ['livediagram:', 'livediagram-'] as const;
 
 /** The guest identity's keys (apps/live/lib/local-identity.ts, which a test holds to these names). */
 export const GUEST_IDENTITY_KEYS = {
   selfId: 'livediagram:v2:self-id',
   selfSig: 'livediagram:v2:self-sig',
-  pendingUpgrade: 'livediagram:v2:pending-signed-id',
   nameConfirmed: 'livediagram:v2:name-confirmed',
 } as const;
 

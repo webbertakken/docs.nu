@@ -12,6 +12,9 @@ export {
   announceAccountChange,
   onAccountChange,
   readSignedInHint,
+  readSignInOffered,
+  SIGN_IN_OFFERED_KEY,
   SIGNED_IN_HINT_KEY,
   writeSignedInHint,
+  writeSignInOffered,
 } from './hint';
