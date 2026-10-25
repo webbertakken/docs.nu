@@ -1,6 +1,5 @@
 import { expect, test } from '../fixtures';
-import { agentSubmits, arrange, CANVAS, open, storedIds, WEBBER } from './agent-session';
-import { freshUserId, installClerkStub } from './clerk-stub';
+import { agentSubmits, arrange, CANVAS, open, storedIds } from './agent-session';
 
 // Agent changesets end to end (docs/specs/024-agents/agent-changesets.md; livediagram #343): a
 // person has their own, unshared document open; their agent changes it with an API token. Before
@@ -35,9 +34,7 @@ test("an agent's changeset reaches the open editor, survives its save, and the t
   pageErrors,
 }) => {
   test.setTimeout(90_000);
-  const userId = freshUserId('webber');
-  await installClerkStub(page, { ...WEBBER, id: userId });
-  const s = await arrange(page, baseURL!, userId);
+  const s = await arrange(page.context(), baseURL!);
   await open(page, s);
 
   // The agent writes; the person sees it arrive, outlined, with a toast naming them.
@@ -87,9 +84,7 @@ test('an element the person has selected is held from the agent', async ({
   pageErrors,
 }) => {
   test.setTimeout(60_000);
-  const userId = freshUserId('webber');
-  await installClerkStub(page, { ...WEBBER, id: userId });
-  const s = await arrange(page, baseURL!, userId);
+  const s = await arrange(page.context(), baseURL!);
   // A second session of someone else would hold it; the owner's own selection never does, so the
   // person here opens the document as an edit-link visitor.
   const share = await page.request.post(`/api/documents/${s.id}/share`, {

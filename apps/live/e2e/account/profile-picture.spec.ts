@@ -1,32 +1,29 @@
-import type { Locator, Page, Route } from '@playwright/test';
+import type { BrowserContext, Locator, Page, Route } from '@playwright/test';
 import { test, expect, expectNoPageErrors } from '../fixtures';
 import {
-  clerkTargetPicture,
-  freshUserId,
-  installClerkStub,
+  GOOGLE_PICTURES,
+  googlePicture,
+  googleTargetPicture,
   STUB_PICTURE_SVG,
   TARGET_RIM,
-  type StubUser,
-} from './clerk-stub';
+} from './pictures';
+import { signIn, type Account } from './sign-in';
 
-// The account avatar end to end (docs/specs/014-identity/profile-picture.md), against the
-// Clerk-enabled export with a stubbed signed-in user: the Google picture in the header trigger
-// and the Settings identity card, the initial without one, the initial again when it fails,
-// and the avatar's box unmoved through every state.
+// The account avatar end to end (docs/specs/014-identity/profile-picture.md), signed in for real: the
+// account's Google picture (better-auth's `user.image`) in the header trigger and the Settings identity card,
+// the initial without one, the initial again when it fails, and the avatar's box unmoved through every state.
 
 test.use({ colorScheme: 'dark' });
 
-const PICTURES = 'https://img.clerk.com/stub/**';
-const GOOGLE_PICTURE = 'https://img.clerk.com/stub/google';
+const PICTURES = GOOGLE_PICTURES;
+const GOOGLE_PICTURE = googlePicture('webber');
 
-const WEBBER: StubUser = {
-  firstName: 'Webber',
-  lastName: 'Takken',
-  email: 'webber@example.com',
-  hasImage: true,
-  imageUrl: 'https://img.clerk.com/stub/copied-at-sign-up',
-  externalAccounts: [{ provider: 'google', imageUrl: GOOGLE_PICTURE }],
-};
+// Webber, signed in to `context`, with his Google picture unless `picture` is false.
+async function webber(context: BrowserContext, baseURL: string, picture = true): Promise<Account> {
+  const account = await signIn(context, { baseURL, name: 'Webber Takken' });
+  if (picture) await account.update({ image: GOOGLE_PICTURE });
+  return account;
+}
 
 const trigger = (page: Page) => page.getByRole('button', { name: 'Account menu' });
 const avatarIn = (host: Locator) => host.locator('[data-avatar-state]');
@@ -64,11 +61,13 @@ function holdPictures(page: Page) {
 
 test('draws the Google picture in the header and the identity card, without moving', async ({
   page,
+  context,
+  baseURL,
   pageErrors,
 }) => {
   const pictures = holdPictures(page);
   await pictures.ready;
-  await installClerkStub(page, WEBBER);
+  await webber(context, baseURL!);
   await page.goto('/explorer/timeline', { waitUntil: 'domcontentloaded' });
 
   const avatar = avatarIn(trigger(page));
@@ -82,9 +81,9 @@ test('draws the Google picture in the header and the identity card, without movi
   expect(await avatar.boundingBox()).toEqual(loadingAvatarBox);
   expect(loadingAvatarBox).toMatchObject({ width: 20, height: 20 });
 
-  // The Google account's picture, cropped to 96px, fetched with no referrer.
-  // Size only, never a crop (docs/specs/014-identity/profile-picture.md §2).
-  expect(pictures.urls[0]).toBe(`${GOOGLE_PICTURE}?width=96&height=96`);
+  // The Google account's picture at 96px, square and centred as Google frames it, fetched with no referrer
+  // (docs/specs/014-identity/profile-picture.md §2).
+  expect(pictures.urls[0]).toBe(GOOGLE_PICTURE);
   expect(pictures.referers.every((r) => r === undefined)).toBe(true);
 
   await trigger(page).click();
@@ -101,11 +100,13 @@ test('draws the Google picture in the header and the identity card, without movi
 
 test('keeps the initial when there is no picture, and asks for none', async ({
   page,
+  context,
+  baseURL,
   pageErrors,
 }) => {
   const pictures = holdPictures(page);
   await pictures.ready;
-  await installClerkStub(page, { ...WEBBER, hasImage: false, externalAccounts: [] });
+  await webber(context, baseURL!, false);
   await page.goto('/explorer/timeline', { waitUntil: 'domcontentloaded' });
 
   const avatar = avatarIn(trigger(page));
@@ -119,6 +120,8 @@ test('keeps the initial when there is no picture, and asks for none', async ({
 
 test('falls back to the initial when the picture fails, without moving', async ({
   page,
+  context,
+  baseURL,
   pageErrors,
 }) => {
   const warnings: string[] = [];
@@ -127,7 +130,7 @@ test('falls back to the initial when the picture fails, without moving', async (
   });
   const pictures = holdPictures(page);
   await pictures.ready;
-  await installClerkStub(page, WEBBER);
+  await webber(context, baseURL!);
   await page.goto('/explorer/timeline', { waitUntil: 'domcontentloaded' });
 
   const avatar = avatarIn(trigger(page));
@@ -144,10 +147,14 @@ test('falls back to the initial when the picture fails, without moving', async (
 });
 
 // Framing (docs/specs/014-identity/profile-picture.md §2): the disc shows the whole picture, as
-// Google frames it. Against a stub that answers like Clerk, a `fit=crop` request would come back
-// as a band the disc crops again, and the edge of the disc would show the green ring, not the rim.
-test('frames the picture as its source does, crisp at 2x', async ({ browser, pageErrors }) => {
-  const context = await browser.newContext({ deviceScaleFactor: 2, colorScheme: 'dark' });
+// Google frames it (`=s<px>-c`, square and centred). A disc that cropped it again would show the green
+// ring at its edge, not the rim.
+test('frames the picture as its source does, crisp at 2x', async ({
+  browser,
+  baseURL,
+  pageErrors,
+}) => {
+  const context = await browser.newContext({ baseURL, deviceScaleFactor: 2, colorScheme: 'dark' });
   const page = await context.newPage();
   page.on('pageerror', (e) => pageErrors.push(e.message));
   const requested: string[] = [];
@@ -156,10 +163,10 @@ test('frames the picture as its source does, crisp at 2x', async ({ browser, pag
     return route.fulfill({
       status: 200,
       contentType: 'image/svg+xml',
-      body: clerkTargetPicture(route.request().url()),
+      body: googleTargetPicture(route.request().url()),
     });
   });
-  await installClerkStub(page, WEBBER);
+  await webber(context, baseURL!);
   await page.goto('/explorer/timeline');
   await trigger(page).click();
   await page.getByRole('menuitem', { name: 'Account' }).click();
@@ -167,10 +174,10 @@ test('frames the picture as its source does, crisp at 2x', async ({ browser, pag
   await expect(card).toHaveAttribute('data-avatar-state', 'picture');
   await expect.poll(async () => await card.boundingBox()).toMatchObject({ width: 44, height: 44 });
 
-  // At 2x the 44px disc needs 88 device pixels: the browser takes the 96px source, never a crop.
-  expect(requested.every((u) => !u.includes('fit='))).toBe(true);
+  // At 2x the 44px disc needs 88 device pixels: the browser takes the 96px source, square as Google frames it.
+  expect(requested.every((u) => /=s(96|192)-c$/.test(u))).toBe(true);
   const img = card.locator('img');
-  expect(await img.evaluate((el: HTMLImageElement) => el.currentSrc)).toContain('width=96');
+  expect(await img.evaluate((el: HTMLImageElement) => el.currentSrc)).toMatch(/=s96-c$/);
 
   // The rim sits in the outer fifth of the picture; 4 CSS px inside the disc's left edge, on its
   // horizontal centre line, is well inside it when the framing is right.
@@ -197,18 +204,19 @@ test('frames the picture as its source does, crisp at 2x', async ({ browser, pag
 // picture is published; off clears it for everyone else, while our own chrome keeps showing it.
 test('the switch publishes and withdraws the picture, and never hides it from us', async ({
   page,
+  context,
+  baseURL,
   pageErrors,
 }) => {
   const published: unknown[] = [];
-  const id = freshUserId('switch');
-  await page.route(`**/api/participants/${id}/picture`, async (route) => {
+  await page.route('**/api/participants/*/picture', async (route) => {
     published.push(route.request().postDataJSON());
     await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
   });
   await page.route(PICTURES, (route) =>
     route.fulfill({ status: 200, contentType: 'image/svg+xml', body: STUB_PICTURE_SVG }),
   );
-  await installClerkStub(page, { ...WEBBER, id });
+  await webber(context, baseURL!);
   await page.goto('/explorer/timeline');
   await expect.poll(() => published).toEqual([{ pictureUrl: GOOGLE_PICTURE }]);
 

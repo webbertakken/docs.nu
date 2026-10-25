@@ -6,32 +6,54 @@ import { defineConfig, devices } from '@playwright/test';
 // (reuseExistingServer below).
 const isCI = !!process.env.CI;
 const CI_WORKERS = 4;
-// The signed-in specs (e2e/clerk-stub/, docs/specs/014-identity/blueprints/profile-picture.md) need
-// the Clerk-enabled export (`pnpm build:clerk-stub`). They run as their own invocation
-// (`pnpm test:e2e:clerk-stub`) on their own ports, so a guest stack already up on :3002 is never
-// mistaken for it.
-const clerkStub = process.env.E2E_CLERK_STUB === '1';
-const STUB_PORTS = { live: '3015', api: '8788', marketing: '3016' };
-// The armed specs (e2e/armed/, docs/specs/003-system-architecture/e2e-smoke.md "Armed guest
-// signatures") need guest signature enforcement on, so they run as their own invocation
-// (`pnpm test:e2e:armed`) on their own ports, against the guest-mode export.
+
+// The runs that need a stack of their own, each selected by its script and booted on its own ports, so a
+// guest stack already up on :3002 (or another run's) is never mistaken for it. Every one serves the same
+// `out/` export: sign-in is the api's answer at runtime, so a signed-in run differs only in its stack.
+type OwnStack = {
+  name: string;
+  ports: { live: string; api: string; marketing: string };
+  // Sign-in on, email codes in the outbox (E2E_SIGN_IN, e2e-smoke.md "Signed-in specs").
+  signIn: boolean;
+};
+const OWN_STACKS: Record<string, OwnStack> = {
+  // `pnpm test:e2e:account`: the signed-in specs in e2e/account/ (docs/specs/014-identity/).
+  account: {
+    name: 'account',
+    ports: { live: '3015', api: '8788', marketing: '3016' },
+    signIn: true,
+  },
+  // `pnpm test:e2e:armed`: the entry paths of a first-time guest under enforced guest signatures
+  // (e2e-smoke.md "Armed guest signatures"), on a guest-only stack.
+  armed: { name: 'armed', ports: { live: '3017', api: '8789', marketing: '3018' }, signIn: false },
+  // `pnpm test:e2e:workbench`: the workbench embed (docs/specs/013-workspace/blueprints/workbench-embeds.md
+  // "Testing"), whose pairing page and CLI calls need an account.
+  workbench: {
+    name: 'workbench',
+    ports: { live: '3021', api: '8791', marketing: '3022' },
+    signIn: true,
+  },
+  // `pnpm test:e2e:drive`: the Google Drive mirror against the fake Google
+  // (docs/specs/022-drive-mirror/blueprints/drive-mirror.md "Testing"), which needs an account.
+  drive: { name: 'drive', ports: { live: '3023', api: '8792', marketing: '3024' }, signIn: true },
+};
+const account = process.env.E2E_ACCOUNT === '1';
 const armed = process.env.E2E_GUEST_SIG_ENFORCE === '1';
-const ARMED_PORTS = { live: '3017', api: '8789', marketing: '3018' };
-// The workbench embed e2e (docs/specs/013-workspace/blueprints/workbench-embeds.md "Testing") needs the
-// NEXT_PUBLIC_E2E_AUTH export and the stack acting as Clerk, so it runs as its own invocation
-// (`pnpm test:e2e:workbench`) on its own ports.
 const workbench = process.env.E2E_WORKBENCH === '1';
-const WORKBENCH_PORTS = { live: '3021', api: '8791', marketing: '3022' };
+const drive = process.env.E2E_DRIVE === '1';
+const ownStack = account
+  ? OWN_STACKS.account
+  : armed
+    ? OWN_STACKS.armed
+    : workbench
+      ? OWN_STACKS.workbench
+      : drive
+        ? OWN_STACKS.drive
+        : null;
 const BASE_URL =
   process.env.E2E_BASE_URL ??
-  (clerkStub
-    ? `http://localhost:${STUB_PORTS.live}`
-    : armed
-      ? `http://localhost:${ARMED_PORTS.live}`
-      : workbench
-        ? `http://localhost:${WORKBENCH_PORTS.live}`
-        : 'http://localhost:3002');
-const runName = clerkStub ? '-clerk-stub' : armed ? '-armed' : workbench ? '-workbench' : '';
+  (ownStack ? `http://localhost:${ownStack.ports.live}` : 'http://localhost:3002');
+const runName = ownStack ? `-${ownStack.name}` : '';
 
 export default defineConfig({
   testDir: './e2e',
@@ -73,10 +95,10 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      // The Drive, signed-in and sites suites need their own builds and stacks; see below.
+      // The Drive, signed-in, workbench and sites suites need their own stacks or builds; see below.
       testIgnore: [
         /drive-(mirror|shots)\.spec\.ts/,
-        /clerk-stub\//,
+        /account\//,
         /armed\//,
         /perf\//,
         /optical-audit-sites\.spec\.ts/,
@@ -91,21 +113,20 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: /optical-audit-sites\.spec\.ts/,
     },
-    // Opt-in (pnpm --filter @livediagram/live test:e2e:drive): the Google Drive
-    // mirror against the fake Google, signed in through the test-only auth
-    // bridge (docs/specs/022-drive-mirror/blueprints/drive-mirror.md, "Testing").
-    // Kept out of CI's default run: it needs a build with NEXT_PUBLIC_E2E_AUTH.
-    ...(process.env.E2E_DRIVE === '1'
+    // Opt-in (pnpm --filter @livediagram/live test:e2e:drive): the Google Drive mirror against the fake
+    // Google, signed in for real (docs/specs/022-drive-mirror/blueprints/drive-mirror.md, "Testing"). Kept
+    // out of CI's default run: it needs a build that carries the e2e Google client id.
+    ...(drive
       ? [
           {
             name: 'drive',
             use: { ...devices['Desktop Chrome'], colorScheme: 'dark' as const },
             testMatch: /drive-mirror\.spec\.ts/,
           },
-          // Every Drive state as a screenshot, light and dark (drive-shots.spec.ts).
+          // Every Drive state as a screenshot, light and dark (drive-shots.spec.ts sets each theme).
           {
             name: 'drive-shots',
-            use: { ...devices['Desktop Chrome'] },
+            use: { ...devices['Desktop Chrome'], colorScheme: 'dark' as const },
             testMatch: /drive-shots\.spec\.ts/,
           },
         ]
@@ -119,12 +140,12 @@ export default defineConfig({
           },
         ]
       : []),
-    ...(clerkStub
+    ...(account
       ? [
           {
-            name: 'clerk-stub',
-            use: { ...devices['Desktop Chrome'] },
-            testMatch: /clerk-stub\/.*\.spec\.ts/,
+            name: 'account',
+            use: { ...devices['Desktop Chrome'], colorScheme: 'dark' as const },
+            testMatch: /account\/.*\.spec\.ts/,
           },
         ]
       : []),
@@ -132,7 +153,7 @@ export default defineConfig({
       ? [
           {
             name: 'armed',
-            use: { ...devices['Desktop Chrome'] },
+            use: { ...devices['Desktop Chrome'], colorScheme: 'dark' as const },
             testMatch: /armed\/.*\.spec\.ts/,
           },
         ]
@@ -175,28 +196,13 @@ export default defineConfig({
     timeout: 180_000,
     stdout: 'pipe',
     stderr: 'pipe',
-    env: clerkStub
+    env: ownStack
       ? {
-          E2E_LIVE_OUT: '.next/out-clerk-stub',
-          E2E_LIVE_PORT: STUB_PORTS.live,
-          E2E_API_PORT: STUB_PORTS.api,
-          E2E_MARKETING_PORT: STUB_PORTS.marketing,
-          // The stack stands in for Clerk: it mints the stub's session tokens and the api verifies them.
-          E2E_CLERK_JWKS: '1',
+          E2E_LIVE_PORT: ownStack.ports.live,
+          E2E_API_PORT: ownStack.ports.api,
+          E2E_MARKETING_PORT: ownStack.ports.marketing,
+          ...(ownStack.signIn ? { E2E_SIGN_IN: '1' } : {}),
         }
-      : armed
-        ? {
-            E2E_LIVE_PORT: ARMED_PORTS.live,
-            E2E_API_PORT: ARMED_PORTS.api,
-            E2E_MARKETING_PORT: ARMED_PORTS.marketing,
-            E2E_GUEST_SIG_ENFORCE: '1',
-          }
-        : workbench
-          ? {
-              E2E_LIVE_PORT: WORKBENCH_PORTS.live,
-              E2E_API_PORT: WORKBENCH_PORTS.api,
-              E2E_MARKETING_PORT: WORKBENCH_PORTS.marketing,
-            }
-          : {},
+      : {},
   },
 });

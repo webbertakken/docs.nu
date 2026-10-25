@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test';
 import { test, expect, expectNoPageErrors } from '../fixtures';
-import { freshUserId, installClerkStub, type StubUser } from './clerk-stub';
+import { signIn, type Account } from './sign-in';
 
-// The Explorer sidebar on a deployment with sign-in (docs/specs/013-workspace/explorer-structure.md),
-// against the Clerk-enabled export: a signed-in member sees each team as a root folder and New Team
+// The Explorer sidebar on a deployment with sign-in (docs/specs/013-workspace/explorer-structure.md):
+// a signed-in member sees each team as a root folder and New Team
 // last; a signed-out visitor sees the sign-in nudge in New Team's place.
 
 test.use({ colorScheme: 'dark', viewport: { width: 1280, height: 800 } });
@@ -15,23 +15,10 @@ const rowNames = (page: Page, group: string) =>
     .locator(':scope > [role="treeitem"]')
     .evaluateAll((els) => els.map((el) => el.getAttribute('data-tree-label')));
 
-function member(id: string): StubUser {
-  return {
-    id,
-    firstName: 'Webber',
-    lastName: 'Takken',
-    email: `${id}@example.com`,
-    hasImage: false,
-    imageUrl: '',
-    externalAccounts: [],
-  };
-}
-
-// Calls the api as the member, with a session token the e2e stack mints.
-async function asMember(page: Page, userId: string, path: string, data: unknown) {
-  const token = await (await page.request.get(`/e2e/token?sub=${userId}`)).text();
+// Calls the api as the member, with their session token.
+async function asMember(page: Page, member: Account, path: string, data: unknown) {
   const res = await page.request.post(`/api${path}`, {
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    headers: { ...(await member.apiHeaders()), 'Content-Type': 'application/json' },
     data,
   });
   expect(res.ok(), `${path} failed: ${res.status()}`).toBe(true);
@@ -39,18 +26,18 @@ async function asMember(page: Page, userId: string, path: string, data: unknown)
 
 test('a signed-in member sees teams as root folders and New Team last', async ({
   page,
+  baseURL,
   pageErrors,
 }) => {
-  const userId = freshUserId('sidebar');
+  const member = await signIn(page.context(), { baseURL: baseURL!, name: 'Webber Takken' });
   const team = crypto.randomUUID();
-  await asMember(page, userId, '/teams', { id: team, name: 'Design guild' });
-  await asMember(page, userId, '/teams', { id: crypto.randomUUID(), name: 'Platform' });
-  await asMember(page, userId, '/folders', {
+  await asMember(page, member, '/teams', { id: team, name: 'Design guild' });
+  await asMember(page, member, '/teams', { id: crypto.randomUUID(), name: 'Platform' });
+  await asMember(page, member, '/folders', {
     id: crypto.randomUUID(),
     name: 'Roadmaps',
     teamId: team,
   });
-  await installClerkStub(page, member(userId));
   await page.goto('/explorer/home');
   await expect(nav(page).getByRole('treeitem', { name: 'Design guild' })).toBeVisible({
     timeout: 30_000,
@@ -79,7 +66,7 @@ test('a signed-out visitor sees the sign-in nudge instead of New Team', async ({
   page,
   pageErrors,
 }) => {
-  await installClerkStub(page, null);
+  // Nobody signed in, on a host that offers sign-in.
   await page.goto('/explorer/home');
   await expect(nav(page).getByRole('treeitem', { name: /^Home/ })).toBeVisible({
     timeout: 30_000,

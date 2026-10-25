@@ -6,15 +6,14 @@ import {
   received,
   seedDocumentAndToken,
   serveFakeWorkbench,
-  signIn,
   ticketOf,
   type FakeWorkbench,
 } from './workbench-support';
 
 // The workbench embed end to end (docs/specs/013-workspace/blueprints/workbench-embeds.md, "Testing"):
 // a fake workbench on http://127.0.0.1:<port> frames the live app on http://localhost:<port>. Opt-in
-// (E2E_WORKBENCH=1, `pnpm test:e2e:workbench`): it needs the NEXT_PUBLIC_E2E_AUTH build and the stack
-// acting as Clerk for the signed-in pairing page.
+// (E2E_WORKBENCH=1, `pnpm test:e2e:workbench`): it needs the signed-in stack for the pairing page and
+// the api calls the CLI makes.
 
 let workbench: FakeWorkbench;
 let elsewhere: FakeWorkbench;
@@ -36,8 +35,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   baseURL,
 }) => {
   test.setTimeout(120_000);
-  const person = await newPerson(request, 'Webber');
-  await signIn(context, person, new URL(baseURL!).origin);
+  const person = await newPerson(context, baseURL!, 'Webber');
   const seeded = await seedDocumentAndToken(request, person);
 
   // Unpaired: the mint asks for a pairing, and the person allows it in their own browser.
@@ -185,8 +183,7 @@ test('a page of another origin framing the URL mounts nothing', async ({
   baseURL,
 }) => {
   test.setTimeout(60_000);
-  const person = await newPerson(request, 'Webber');
-  await signIn(context, person, new URL(baseURL!).origin);
+  const person = await newPerson(context, baseURL!, 'Webber');
   const seeded = await seedDocumentAndToken(request, person);
   const unpaired = await mintTicket(request, seeded, workbench.origin);
   await page.goto(unpaired.body.pairingUrl!);

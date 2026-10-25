@@ -1,12 +1,14 @@
 import type { Server } from 'node:http';
+import type { Browser, BrowserContext, Page } from '@playwright/test';
 import type { FakeGoogle } from '@livediagram/fake-google';
 import { DRIVE_FILE_MIME } from '@livediagram/api-schema';
 import { enableDebugLogs, test, expect, expectNoPageErrors } from './fixtures';
-import { routeGoogle, startFakeGoogle, TestIdentity } from './drive-support';
+import { signIn as signInAccount, type Account } from './account/sign-in';
+import { routeGoogle, startFakeGoogle } from './drive-support';
 
 // The Google Drive mirror end to end (docs/specs/022-drive-mirror/drive-mirror.md):
-// the real build and api worker, a signed-in session from the test's own
-// JWKS, and the fake Google standing in for accounts.google.com and the Drive
+// the real build and api worker, accounts signed in for real on the signed-in
+// stack, and the fake Google standing in for accounts.google.com and the Drive
 // API. Opt-in: `pnpm --filter @livediagram/live test:e2e:drive`.
 
 test.describe.configure({ mode: 'serial' });
@@ -17,56 +19,54 @@ const USER = `user_e2e_drive_${RUN}`;
 const FOLDER = `e2e-folder-${RUN}`;
 const PLAN = `e2e-plan-${RUN}`;
 const NOTES = `e2e-notes-${RUN}`;
-const EMAIL = 'drive-e2e@example.com';
 const apiBase = '/api';
 // The e2e runs on a loopback host, which names the root like staging
 // (docs/specs/022-drive-mirror/drive-mirror.md, "The root folder's name").
 const ROOT_NAME = 'livediagram (staging)';
 const SHOTS = process.env.E2E_DRIVE_SHOTS ?? '/tmp/livediagram-drive-e2e';
 
-let identity: TestIdentity;
-let jwks: Server;
 let google: { fake: FakeGoogle; server: Server };
-let token: string;
+// One LiveDoc account per fake Google user, signed in once in a browser context of its own (held open for its
+// session token) and entered into each test's context: a test that signs the same user in again is the same account.
+const accounts = new Map<string, Promise<Account>>();
+const holders: BrowserContext[] = [];
 
 test.beforeAll(async () => {
-  identity = new TestIdentity();
-  jwks = await identity.serve();
   google = await startFakeGoogle();
-  token = identity.token(USER, EMAIL);
 });
 
 test.afterAll(async () => {
-  await new Promise((r) => jwks.close(r));
+  await Promise.all(holders.map((context) => context.close()));
   await new Promise((r) => google.server.close(r));
 });
 
-async function api(
-  page: import('@playwright/test').Page,
-  method: string,
-  path: string,
-  data?: unknown,
-  bearer = token,
-) {
+function accountOf(browser: Browser, user: string): Promise<Account> {
+  let account = accounts.get(user);
+  if (!account) {
+    const { baseURL } = test.info().project.use;
+    account = browser.newContext({ baseURL }).then((context) => {
+      holders.push(context);
+      return signInAccount(context, { baseURL: baseURL!, name: 'Drive' });
+    });
+    accounts.set(user, account);
+  }
+  return account;
+}
+
+async function api(page: Page, method: string, path: string, data?: unknown, user = USER) {
+  const account = await accountOf(page.context().browser()!, user);
   const res = await page.request.fetch(`${apiBase}${path}`, {
     method,
-    headers: { Authorization: `Bearer ${bearer}`, 'Content-Type': 'application/json' },
+    headers: { ...(await account.apiHeaders()), 'Content-Type': 'application/json' },
     ...(data ? { data } : {}),
   });
   expect(res.ok(), `${method} ${path} ${res.status()}`).toBe(true);
   return res.status() === 204 ? null : ((await res.json()) as Record<string, unknown>);
 }
 
-async function signIn(page: import('@playwright/test').Page, user = USER) {
-  await page.addInitScript(
-    (session: string) => localStorage.setItem('livediagram:e2e:session', session),
-    JSON.stringify({
-      token: user === USER ? token : identity.token(user, EMAIL),
-      userId: user,
-      email: EMAIL,
-      firstName: 'Drive',
-    }),
-  );
+// Signs the page's context in as `user`'s account, and answers its Google traffic as that Google user.
+async function signIn(page: Page, user = USER) {
+  await (await accountOf(page.context().browser()!, user)).enter(page.context());
   await routeGoogle(page, google.fake, user);
 }
 
@@ -593,7 +593,7 @@ test('a connection made in one tab starts syncing at once while another tab runs
       name: 'Tabs plan',
       tabs: [{ id: `e2e-tab-tabs-${RUN}`, name: 'Tab 1', elements: [] }],
     },
-    identity.token(user, EMAIL),
+    user,
   );
   await page.goto('/explorer/recent');
   const panel = await openCloudSync(page);

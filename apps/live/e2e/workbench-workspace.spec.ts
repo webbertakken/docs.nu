@@ -8,7 +8,6 @@ import {
   received,
   seedDocumentAndToken,
   serveFakeWorkbench,
-  signIn,
   type FakeWorkbench,
 } from './workbench-support';
 
@@ -39,8 +38,7 @@ test('a workspace frame is its own approval, browses the Explorer, and opens doc
   baseURL,
 }) => {
   test.setTimeout(150_000);
-  const person = await newPerson(request, 'Webber');
-  await signIn(context, person, new URL(baseURL!).origin);
+  const person = await newPerson(context, baseURL!, 'Webber');
   const seeded = await seedDocumentAndToken(request, person);
   const folderId = await createFolder(request, person, 'Minigames');
 
@@ -175,8 +173,7 @@ test('a workspace ticket on a folder starts the frame there', async ({
   baseURL,
 }) => {
   test.setTimeout(90_000);
-  const person = await newPerson(request, 'Webber');
-  await signIn(context, person, new URL(baseURL!).origin);
+  const person = await newPerson(context, baseURL!, 'Webber');
   const seeded = await seedDocumentAndToken(request, person);
   const folderId = await createFolder(request, person, 'Minigames');
   const unpaired = await mintWorkspaceTicket(request, seeded, workbench.origin, folderId);

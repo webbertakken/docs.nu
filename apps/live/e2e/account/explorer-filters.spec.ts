@@ -1,43 +1,30 @@
 import type { Page } from '@playwright/test';
 import { test, expect, expectNoPageErrors } from '../fixtures';
-import { freshUserId, installClerkStub, type StubUser } from './clerk-stub';
+import { signIn, type Account } from './sign-in';
 
-// The Explorer's filters for a signed-in member (docs/specs/013-workspace/explorer-filters.md),
-// against the Clerk-enabled export: a team's root lists its documents directly, the team's lens
+// The Explorer's filters for a signed-in member (docs/specs/013-workspace/explorer-filters.md):
+// a team's root lists its documents directly, the team's lens
 // reaches its subfolders, and the Space chip names teams by name, never by id.
 
 test.use({ colorScheme: 'dark', viewport: { width: 1280, height: 800 } });
 
-function member(id: string): StubUser {
-  return {
-    id,
-    firstName: 'Webber',
-    lastName: 'Takken',
-    email: `${id}@example.com`,
-    hasImage: false,
-    imageUrl: '',
-    externalAccounts: [],
-  };
-}
-
-// Calls the api as the member, with a session token the e2e stack mints.
-async function asMember(page: Page, userId: string, path: string, data: unknown) {
-  const token = await (await page.request.get(`/e2e/token?sub=${userId}`)).text();
+// Calls the api as the member, with their session token.
+async function asMember(page: Page, member: Account, path: string, data: unknown) {
   const res = await page.request.post(`/api${path}`, {
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    headers: { ...(await member.apiHeaders()), 'Content-Type': 'application/json' },
     data,
   });
   expect(res.ok(), `${path} failed: ${res.status()}`).toBe(true);
 }
 
-async function seedTeam(page: Page, userId: string) {
+async function seedTeam(page: Page, member: Account) {
   const team = crypto.randomUUID();
   const folder = crypto.randomUUID();
   const tabs = () => [{ id: crypto.randomUUID(), name: 'Tab 1', elements: [] }];
-  await asMember(page, userId, '/teams', { id: team, name: 'Design guild' });
-  await asMember(page, userId, '/folders', { id: folder, name: 'Roadmaps', teamId: team });
+  await asMember(page, member, '/teams', { id: team, name: 'Design guild' });
+  await asMember(page, member, '/folders', { id: folder, name: 'Roadmaps', teamId: team });
   const doc = (name: string, extra: Record<string, unknown>) =>
-    asMember(page, userId, '/documents', {
+    asMember(page, member, '/documents', {
       id: crypto.randomUUID(),
       name,
       tabs: tabs(),
@@ -57,11 +44,11 @@ const docLink = (page: Page, name: string) =>
 
 test('a team root lists its documents, and its lens reaches its folders', async ({
   page,
+  baseURL,
   pageErrors,
 }) => {
-  const userId = freshUserId('filters');
-  const { team } = await seedTeam(page, userId);
-  await installClerkStub(page, member(userId));
+  const member = await signIn(page.context(), { baseURL: baseURL!, name: 'Webber Takken' });
+  const { team } = await seedTeam(page, member);
   await page.goto(`/explorer/team?id=${team}`);
   await expect(docLink(page, 'Team charter')).toBeVisible({ timeout: 30_000 });
   // No Unsorted bucket at the team's root; the folder sits beside the document.
@@ -85,11 +72,11 @@ test('a team root lists its documents, and its lens reaches its folders', async 
 
 test('Search results names a team in the Space chip, its pill by name', async ({
   page,
+  baseURL,
   pageErrors,
 }) => {
-  const userId = freshUserId('filters');
-  const { team } = await seedTeam(page, userId);
-  await installClerkStub(page, member(userId));
+  const member = await signIn(page.context(), { baseURL: baseURL!, name: 'Webber Takken' });
+  const { team } = await seedTeam(page, member);
   await page.goto('/explorer/search');
   await expect(docLink(page, 'My own notes')).toBeVisible({ timeout: 30_000 });
   await expect(docLink(page, 'Team charter')).toBeVisible({ timeout: 30_000 });
