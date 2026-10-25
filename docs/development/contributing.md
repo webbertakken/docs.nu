@@ -56,7 +56,7 @@ Drop an entry once an upstream release makes it redundant.
 ### Every pull request gets a preview
 
 Every push to a pull request from this repository deploys a complete copy of the
-platform with its own database, on workers.dev, and a comment on the pull request links it
+platform with its own database, at `https://<branch>.preview.docs.nu`, and the pull request's description names it at the bottom
 ([Preview deployments](../specs/016-platform/preview-deployments.md)). Any D1 migration in it
 has run against a real remote database before the merge. Merging does not deploy: production
 is deployed by hand.
