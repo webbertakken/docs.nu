@@ -11,9 +11,9 @@ const account = (cloudProviders: 'googleDrive'[]) =>
   )!;
 
 describe('Cloud Sync in Settings', () => {
-  it('lists Google Drive in its own section, between Your Data and Danger Zone', () => {
+  it('lists Google Drive in its own section, between Your Data and Danger Zone, after Signing In', () => {
     const sections = account(['googleDrive']).rows.map((r) => r.section);
-    expect([...new Set(sections)]).toEqual(['You', 'Your Data', 'Cloud Sync', 'Danger Zone']);
+    expect([...new Set(sections)]).toEqual(['You', 'Signing In', 'Your Data', 'Cloud Sync', 'Danger Zone']);
     expect(account(['googleDrive']).rows.find((r) => r.section === 'Cloud Sync')).toMatchObject({
       kind: 'cloudSync',
       key: 'cloudSync-googleDrive',

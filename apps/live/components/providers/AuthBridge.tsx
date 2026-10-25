@@ -131,6 +131,10 @@ export function AuthBridge({ children }: { children: ReactNode }) {
         pictureUrl: resolveProfilePicture(user),
       },
       getToken: tokens.getToken,
+      refreshSession: async () => {
+        await read();
+        announceAccountChange(true);
+      },
       signOut: async (opts) => {
         if (!(await endSession({ apiBase: API_BASE }))) console.warn('[auth] sign_out_failed');
         await forget();
@@ -148,7 +152,7 @@ export function AuthBridge({ children }: { children: ReactNode }) {
         return outcome;
       },
     };
-  }, [session, sessionEnded, endHere, tokens]);
+  }, [session, sessionEnded, endHere, tokens, read]);
 
   return (
     <DeferredAuthContext.Provider value={workbenchRoute ? DEFERRED_AUTH_PENDING : state}>

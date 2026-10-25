@@ -80,7 +80,9 @@ export function identityOptions(
       modelName: MODEL_NAMES.session,
       expiresIn: SESSION_EXPIRES_IN_S,
       updateAge: SESSION_UPDATE_AGE_S,
-      freshAge: FRESH_SESSION_AGE_S,
+      // better-auth's own freshness check stays off: it would refuse listing sessions too. LiveDoc gates the
+      // dangerous routes itself, on FRESH_SESSION_AGE_S (routes/auth.ts, routes/account.ts).
+      freshAge: 0,
     },
     account: {
       modelName: MODEL_NAMES.account,
@@ -99,7 +101,8 @@ export function identityOptions(
             clientId: googleClientId,
             clientSecret: env.GOOGLE_AUTH_CLIENT_SECRET!.trim(),
             prompt: 'select_account' as const,
-            scope: ['openid', 'email', 'profile'],
+            // better-auth's default scopes are openid, email and profile: who the person is, nothing more.
+            // Naming them again would send each twice.
           },
         }
       : {},

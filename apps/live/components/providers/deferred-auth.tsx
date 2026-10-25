@@ -34,6 +34,8 @@ export type DeferredAuthState = {
   getToken: (opts?: { skipCache?: boolean }) => Promise<string | null>;
   // Ends the session here and in every tab, then goes to `redirectUrl` when given.
   signOut: (opts?: { redirectUrl?: string }) => Promise<void>;
+  // Reads the session again (after the account's name changed) and tells the other tabs. Absent when signed out.
+  refreshSession?: () => Promise<void>;
   // Deletes the account, its data first (`DELETE /api/account`). Null when signed out.
   deleteAccount: (() => Promise<DeleteAccountOutcome>) | null;
   // True once a session this page held ended somewhere else (signed out in another browser or tab, expired, revoked),
