@@ -318,9 +318,9 @@ See [Architecture](docs/development/architecture.md#tech-stack).
 
 ## Deployment
 
-See [Deployment](docs/specs/016-platform/deployment.md) and [Staging environment](docs/specs/016-platform/staging-environment.md).
+See [Deployment](docs/specs/016-platform/deployment.md) and [docs.nu deployment](docs/operations/docs-nu.md).
 
-- When you touch a worker's bindings, add the same change to its `[env.staging]` block; `pnpm staging:check` verifies it.
+- When you touch a worker's bindings, `pnpm deploy:check` dry-runs the api, mcp and router configs and prints the bindings they resolve to.
 
 ## Guidelines
 
