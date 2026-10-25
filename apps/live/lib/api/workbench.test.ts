@@ -67,7 +67,7 @@ afterEach(() => {
 
 describe('apiRedeemWorkbenchTicket', () => {
   it('posts the ticket with no credential and answers the session', async () => {
-    registerTokenProvider(async () => 'clerk-jwt');
+    registerTokenProvider(async () => 'session-token');
     answer = reply(201, SESSION);
 
     const outcome = await apiRedeemWorkbenchTicket('t'.repeat(22));
@@ -143,7 +143,7 @@ describe('apiEndWorkbenchSession', () => {
 
 describe('the pairing calls', () => {
   beforeEach(() => {
-    registerTokenProvider(async () => 'clerk-jwt');
+    registerTokenProvider(async () => 'session-token');
   });
 
   it('reads a pairing request as the signed-in person', async () => {
@@ -158,7 +158,7 @@ describe('the pairing calls', () => {
 
     expect(await apiReadPairingRequest('user_1', 'c'.repeat(22))).toEqual(request);
     expect(seen[0]!.url).toMatch(new RegExp(`/workbench/pairing-requests/${'c'.repeat(22)}$`));
-    expect(seen[0]!.headers.get('Authorization')).toBe('Bearer clerk-jwt');
+    expect(seen[0]!.headers.get('Authorization')).toBe('Bearer session-token');
   });
 
   it('reads an unknown request as null', async () => {

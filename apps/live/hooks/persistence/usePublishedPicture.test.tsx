@@ -5,7 +5,7 @@ import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const auth = vi.hoisted(() => ({
-  state: { isSignedIn: true, user: { pictureUrl: 'https://img.clerk.com/me' } },
+  state: { isSignedIn: true, user: { pictureUrl: 'https://lh3.googleusercontent.com/a/me' } },
 }));
 vi.mock('@/components/providers/deferred-auth', () => ({ useDeferredAuth: () => auth.state }));
 const api = vi.hoisted(() => ({ apiSetProfilePicture: vi.fn(async () => 200) }));
@@ -22,18 +22,22 @@ beforeEach(() => {
   localStorage.clear();
   resetPublishedPictureCache();
   api.apiSetProfilePicture.mockClear();
-  auth.state = { isSignedIn: true, user: { pictureUrl: 'https://img.clerk.com/me' } };
+  auth.state = { isSignedIn: true, user: { pictureUrl: 'https://lh3.googleusercontent.com/a/me' } };
 });
 afterEach(cleanup);
 
 describe('publishedPicture', () => {
   it('shows the picture by default, and never for a guest or with the switch off', () => {
     expect(SHOW_PROFILE_PICTURE_DEFAULT).toBe(true);
-    expect(publishedPicture(true, 'https://img.clerk.com/me', {})).toBe('https://img.clerk.com/me');
+    expect(publishedPicture(true, 'https://lh3.googleusercontent.com/a/me', {})).toBe(
+      'https://lh3.googleusercontent.com/a/me',
+    );
     expect(
-      publishedPicture(true, 'https://img.clerk.com/me', { showProfilePicture: false }),
+      publishedPicture(true, 'https://lh3.googleusercontent.com/a/me', {
+        showProfilePicture: false,
+      }),
     ).toBeNull();
-    expect(publishedPicture(false, 'https://img.clerk.com/me', {})).toBeNull();
+    expect(publishedPicture(false, 'https://lh3.googleusercontent.com/a/me', {})).toBeNull();
     expect(publishedPicture(true, null, {})).toBeNull();
   });
 });
@@ -42,7 +46,10 @@ describe('usePublishPicture', () => {
   it('writes the picture once, and clears it when the switch goes off', async () => {
     const { rerender } = renderHook(() => usePublishPicture('user_me'));
     await waitFor(() =>
-      expect(api.apiSetProfilePicture).toHaveBeenCalledWith('user_me', 'https://img.clerk.com/me'),
+      expect(api.apiSetProfilePicture).toHaveBeenCalledWith(
+        'user_me',
+        'https://lh3.googleusercontent.com/a/me',
+      ),
     );
     rerender();
     expect(api.apiSetProfilePicture).toHaveBeenCalledTimes(1);

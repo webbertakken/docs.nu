@@ -69,13 +69,13 @@ export function useCommentPicturesLoader(
   // The code a share-link reader arrived with: their read access rides on it.
   shareCode: string | null,
 ): void {
-  const { isSignedIn, userId } = useDeferredAuth();
+  const { isSignedIn, accountId } = useDeferredAuth();
   const unasked = commentIdsOf(elements).filter((id) => !asked.has(id));
   const key = unasked.join(',');
   useEffect(() => {
-    if (!isSignedIn || !userId || !documentId || !tabId || key === '') return;
-    void load(documentId, tabId, key.split(','), userId, shareCode);
-  }, [isSignedIn, userId, documentId, tabId, key, shareCode]);
+    if (!isSignedIn || !accountId || !documentId || !tabId || key === '') return;
+    void load(documentId, tabId, key.split(','), accountId, shareCode);
+  }, [isSignedIn, accountId, documentId, tabId, key, shareCode]);
 }
 
 /**
@@ -83,7 +83,7 @@ export function useCommentPicturesLoader(
  * api reported for that comment, else null. Always null for an anonymous reader.
  */
 export function useCommentAuthorPicture(commentId: string, authorId: string | undefined) {
-  const { isSignedIn, userId, user } = useDeferredAuth();
+  const { isSignedIn, accountId, user } = useDeferredAuth();
   // The snapshot IS the value: read the map anywhere else and the React Compiler, which treats
   // module state as constant, memoizes the first answer for good.
   const reported = useSyncExternalStore(
@@ -92,6 +92,6 @@ export function useCommentAuthorPicture(commentId: string, authorId: string | un
     () => null,
   );
   if (!isSignedIn) return null;
-  if (authorId && authorId === userId) return user?.pictureUrl ?? null;
+  if (authorId && authorId === accountId) return user?.pictureUrl ?? null;
   return reported;
 }

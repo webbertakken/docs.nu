@@ -1,33 +1,25 @@
 'use client';
 
-// Account-deletion confirmation modal. Triggered from the
-// AuthControls dropdown's "Delete account" item. The user types
-// their primary email to confirm — a typo-resistant gate that's
-// harder to miss-click than a single "Are you sure?" button.
+// Account-deletion confirmation modal (docs/specs/014-identity/auth-and-guest-access.md "Deleting an account").
+// The person types their email to confirm: a typo-resistant gate that's harder to miss-click than a single "Are you
+// sure?" button. Then one request (`DELETE /api/account`) removes the data first and the identity after it, and
+// signs the browser out.
 //
-// Delete sequence:
-//
-//   1. POST DELETE /api/account — wipes the caller's documents +
-//      folders + participant row on the backend. Returns the change
-//      counts on success.
-//   2. Clerk's `user.delete()` — drops the Clerk account itself.
-//   3. Sign out + redirect to /live/ — by the time the page reloads
-//      the editor lands as a fresh guest.
-//
-// Backend-first because a backend failure leaves the user signed in
-// with data they can recover from; Clerk-first would leave orphan
-// rows behind that the user could no longer reach.
+// A session verified more than ten minutes ago is refused until the person verifies again: a code to the account's
+// email, typed here, signs this browser in afresh, and the deletion runs once more. Cancelled or failed, nothing was
+// deleted, and the dialog says so.
 
 import { Button, useEscape, useFocusTrap, Portal } from '@livediagram/ui';
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
 import { useEffect, useRef, useState } from 'react';
-import { apiDeleteAccount } from '@/lib/api-client';
 import { track } from '@/lib/telemetry';
 import { useModalGuard } from '@/hooks/ui/useModalGuard';
-import { messageOf } from '@/components/chrome/auth-shared';
+import { EmailCodeStep } from '@/components/chrome/EmailCodeStep';
+import { reverifyWithCode, sendReverifyCode } from '@/lib/reverify';
 import { DialogFooter } from '@/components/dialogs/DialogFooter';
 
-type Phase = 'idle' | 'submitting' | 'error';
+// `verify`: the api asked for a fresh verification; a code went to the account's email.
+type Phase = 'idle' | 'submitting' | 'verify' | 'error';
 
 export function DeleteAccountDialog({
   open,
@@ -41,16 +33,14 @@ export function DeleteAccountDialog({
   // Silence the canvas shortcut/paste listeners behind the modal
   // (see lib/modal-guard).
   useModalGuard(open);
-  const { user, deleteAccount, confirmIdentity } = useDeferredAuth();
+  const { user, deleteAccount } = useDeferredAuth();
   const expectedEmail = user?.email ?? '';
-  // `deleteAccount` wraps Clerk's `user.delete()` in the reverification
-  // flow (step-up auth modal, built inside ClerkBridge where the Clerk
-  // context lives) — destructive actions require fresh verification
-  // even for already-signed-in users.
 
   const [typed, setTyped] = useState('');
   const [phase, setPhase] = useState<Phase>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [codeSentAt, setCodeSentAt] = useState(0);
+  const [verifying, setVerifying] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open);
@@ -65,6 +55,7 @@ export function DeleteAccountDialog({
       setTyped('');
       setPhase('idle');
       setErrorMsg('');
+      setVerifying(false);
     }
   }
   useEffect(() => {
@@ -78,54 +69,62 @@ export function DeleteAccountDialog({
   // Escape closes, same convention as other modals (ShareDialog).
   // Disabled mid-submit so the user can't cancel a request that's
   // already in flight.
-  useEscape(onClose, { enabled: open && phase !== 'submitting' });
+  useEscape(onClose, { enabled: open && phase !== 'submitting' && !verifying });
 
   if (!open) return null;
 
   const emailsMatch =
     expectedEmail.length > 0 && typed.trim().toLowerCase() === expectedEmail.toLowerCase();
 
-  const handleDelete = async () => {
-    if (!emailsMatch || phase === 'submitting' || !user || !deleteAccount) return;
+  const runDelete = async () => {
+    if (!deleteAccount) return;
     setPhase('submitting');
     setErrorMsg('');
-    // Step-up auth first (docs/specs/014-identity/auth-and-guest-access.md "Deleting an account"): Clerk asks for it
-    // before deleting the account, and asked AFTER the server data had gone, a cancelled prompt left an account
-    // with nothing in it. Confirmed here, nothing is deleted until the person has passed it.
-    if (confirmIdentity && !(await confirmIdentity())) {
-      setPhase('error');
-      setErrorMsg('Identity not confirmed, so nothing was deleted. Try again when you are ready.');
+    const outcome = await deleteAccount();
+    if (outcome === 'deleted') {
+      // Anonymous, no identifier: the account-lifecycle counter for the dashboard's Account Activity stack
+      // (docs/specs/017-telemetry/telemetry.md). Fired before the sign-out, so it still reaches the wire.
+      track('Session', 'Deleted', 'Account');
+      await onDeleted();
       return;
     }
-    const result = await apiDeleteAccount();
-    if (!result) {
-      setPhase('error');
-      setErrorMsg('Could not delete server-side data. Try again.');
+    if (outcome === 'not-fresh') {
+      const failed = await sendReverifyCode(expectedEmail);
+      if (failed) {
+        setPhase('error');
+        setErrorMsg(`${failed} Nothing was deleted.`);
+        return;
+      }
+      setCodeSentAt(Date.now());
+      setPhase('verify');
       return;
     }
-    // Anonymous, no identifier: the account-lifecycle counter for the
-    // dashboard's Account Activity stack (docs/specs/017-telemetry/telemetry.md). Fired now, after the server data is
-    // gone but before sign-out, so the opt-out itself still reaches the wire.
-    track('Session', 'Deleted', 'Account');
-    try {
-      await deleteAccount();
-    } catch (err) {
-      // Backend data is already gone, so surface Clerk's actual
-      // error rather than swallowing it. With the reverification
-      // wrapper this should usually only fire for harder problems
-      // (self-deletion disabled on the Clerk instance, stale
-      // token, network blip). If it says self-deletion is disabled,
-      // the toggle lives at Clerk Dashboard → User & Authentication
-      // → Personal information → Delete account.
-      setPhase('error');
-      const detail = messageOf(err, 'Clerk delete failed');
-      setErrorMsg(
-        `Backend data was deleted, but removing the Clerk account failed: ${detail}. ` +
-          'If this says self-deletion is disabled, enable it in your Clerk dashboard → User & Authentication → Personal information → Delete account.',
-      );
+    setPhase('error');
+    setErrorMsg("We couldn't delete your account. Try again.");
+  };
+
+  const handleDelete = () => {
+    if (!emailsMatch || phase === 'submitting' || !user || !deleteAccount) return;
+    void runDelete();
+  };
+
+  const handleCode = async (otp: string) => {
+    setVerifying(true);
+    setErrorMsg('');
+    const failed = await reverifyWithCode(expectedEmail, otp);
+    setVerifying(false);
+    if (failed) {
+      setErrorMsg(`${failed} Nothing was deleted.`);
       return;
     }
-    await onDeleted();
+    await runDelete();
+  };
+
+  const resendCode = async () => {
+    setErrorMsg('');
+    const failed = await sendReverifyCode(expectedEmail);
+    if (failed) setErrorMsg(failed);
+    else setCodeSentAt(Date.now());
   };
 
   return (
@@ -151,49 +150,81 @@ export function DeleteAccountDialog({
             </h2>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               This permanently removes your documents (including any in the Trash), folders, and
-              participant record from the livediagram server, then deletes your account. This cannot
-              be undone.
+              participant record from the server, then deletes your account and signs you out. This
+              cannot be undone.
             </p>
           </div>
 
-          <div className="px-6 py-5">
-            <label
-              htmlFor="delete-confirm-email"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Type{' '}
-              <strong className="font-semibold text-slate-900 dark:text-slate-100">
-                {expectedEmail || 'your email address'}
-              </strong>{' '}
-              to confirm
-            </label>
-            <input
-              ref={inputRef}
-              id="delete-confirm-email"
-              type="email"
-              autoComplete="off"
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              disabled={phase === 'submitting'}
-              className="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-rose-500/20"
-              placeholder="you@example.com"
-            />
+          {phase === 'verify' ? (
+            <div className="px-6 py-5">
+              <p className="mb-3 text-sm text-slate-700 dark:text-slate-300">
+                You signed in a while ago, so confirm it's you before anything is deleted.
+              </p>
+              <EmailCodeStep
+                key={codeSentAt}
+                email={expectedEmail}
+                sentAt={codeSentAt}
+                busy={verifying}
+                submitLabel="Verify and delete"
+                outboxHref={null}
+                errorId={errorMsg ? 'delete-account-error' : undefined}
+                onSubmit={(otp) => void handleCode(otp)}
+                onResend={() => void resendCode()}
+              />
+              {errorMsg ? (
+                <div
+                  id="delete-account-error"
+                  role="alert"
+                  className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
+                >
+                  {errorMsg}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="px-6 py-5">
+              <label
+                htmlFor="delete-confirm-email"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
+                Type{' '}
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
+                  {expectedEmail || 'your email address'}
+                </strong>{' '}
+                to confirm
+              </label>
+              <input
+                ref={inputRef}
+                id="delete-confirm-email"
+                type="email"
+                autoComplete="off"
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                disabled={phase === 'submitting'}
+                className="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-rose-500/20"
+                placeholder="you@example.com"
+              />
 
-            {phase === 'error' && errorMsg ? (
-              <div className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
-                {errorMsg}
-              </div>
-            ) : null}
-          </div>
+              {phase === 'error' && errorMsg ? (
+                <div className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+                  {errorMsg}
+                </div>
+              ) : null}
+            </div>
+          )}
 
           <DialogFooter>
-            <Button variant="secondary" onClick={onClose} disabled={phase === 'submitting'}>
+            <Button
+              variant="secondary"
+              onClick={onClose}
+              disabled={phase === 'submitting' || verifying}
+            >
               Cancel
             </Button>
             <Button
               variant="primary"
-              onClick={() => void handleDelete()}
-              disabled={!emailsMatch || phase === 'submitting'}
+              onClick={handleDelete}
+              disabled={!emailsMatch || phase === 'submitting' || phase === 'verify'}
               className="shadow-sm"
             >
               {phase === 'submitting' ? 'Deleting…' : 'Delete Account'}

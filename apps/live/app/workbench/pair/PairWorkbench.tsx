@@ -14,9 +14,9 @@ import {
   apiReadPairingRequest,
   type PairingAnswerOutcome,
 } from '@/lib/api-client';
-import { sessionsEnabled } from '@/lib/clerk-config';
+import { useSignInAvailable } from '@/lib/auth-config';
 import { track } from '@/lib/telemetry';
-import { useClerkApiBootstrap } from '@/hooks/persistence/useClerkApiBootstrap';
+import { useAccountApiBootstrap } from '@/hooks/persistence/useAccountApiBootstrap';
 import { OAUTH_PRIMARY, OauthShell } from '../../oauth/oauth-shell';
 import { AUTH_TITLE } from '@/components/chrome/AuthStage';
 
@@ -112,15 +112,16 @@ const command = <code className={MONO}>{PAIR_COMMAND}</code>;
 
 export function PairWorkbench() {
   const params = useSearchParams();
-  const { authLoaded, isSignedIn, clerkUserId } = useClerkApiBootstrap();
+  const { authLoaded, isSignedIn, accountId } = useAccountApiBootstrap();
+  const signInAvailable = useSignInAvailable();
   const raw = params.get('code') ?? '';
   const code = WORKBENCH_HANDLE_PATTERN.test(raw) ? raw : null;
-  const ownerId = authLoaded && isSignedIn && clerkUserId ? clerkUserId : null;
+  const ownerId = authLoaded && isSignedIn && accountId ? accountId : null;
   const [step, setStep] = useState<Step | null>(null);
 
   // The page's one read, once auth has settled on a signed-in person.
   useEffect(() => {
-    if (!sessionsEnabled || !ownerId || !code) return;
+    if (!signInAvailable || !ownerId || !code) return;
     let live = true;
     apiReadPairingRequest(ownerId, code)
       .then((request) => {
@@ -133,9 +134,11 @@ export function PairWorkbench() {
     return () => {
       live = false;
     };
-  }, [ownerId, code]);
+  }, [signInAvailable, ownerId, code]);
 
-  if (!sessionsEnabled)
+  // The session read settles whether this host offers sign-in, so it is known once auth has loaded.
+  if (!authLoaded) return <Loading />;
+  if (!signInAvailable)
     return (
       <Message
         state="off"
@@ -143,7 +146,6 @@ export function PairWorkbench() {
         body="This deployment doesn’t have accounts enabled, so there’s nothing to pair."
       />
     );
-  if (!authLoaded) return <Loading />;
   if (!ownerId) {
     // Client only: useSearchParams bails this page out of the static prerender.
     const back = window.location.pathname + window.location.search;

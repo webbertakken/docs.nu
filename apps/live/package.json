@@ -26,9 +26,9 @@
     "test:e2e:workbench": "NEXT_PUBLIC_E2E_AUTH=1 next build && E2E_WORKBENCH=1 playwright test --project=workbench"
   },
   "dependencies": {
-    "@clerk/react": "^6.17.8",
     "@huggingface/transformers": "^3.8.1",
     "@jsquash/webp": "1.5.0",
+    "@livediagram/account-session": "workspace:*",
     "@livediagram/api-schema": "workspace:*",
     "@livediagram/document": "workspace:*",
     "@livediagram/document-views": "workspace:*",
@@ -49,6 +49,7 @@
     "@tensorflow/tfjs-backend-webgpu": "4.22.0",
     "@tensorflow/tfjs-core": "4.22.0",
     "@tensorflow/tfjs-layers": "4.22.0",
+    "better-auth": "1.7.13",
     "gifenc": "1.0.3",
     "next": "^16.4.1",
     "polygon-clipping": "0.15.7",

@@ -7,9 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // turn and names any that stayed; Not Now is remembered until the count grows.
 
 const { auth, store, convert, track } = vi.hoisted(() => {
-  const auth: { authLoaded: boolean; clerkUserId: string | null } = {
+  const auth: { authLoaded: boolean; accountId: string | null } = {
     authLoaded: true,
-    clerkUserId: 'user_1',
+    accountId: 'user_1',
   };
   return {
     auth,
@@ -18,7 +18,9 @@ const { auth, store, convert, track } = vi.hoisted(() => {
     track: vi.fn(),
   };
 });
-vi.mock('@/hooks/persistence/useClerkApiBootstrap', () => ({ useClerkApiBootstrap: () => auth }));
+vi.mock('@/hooks/persistence/useAccountApiBootstrap', () => ({
+  useAccountApiBootstrap: () => auth,
+}));
 vi.mock('@/lib/offline/offline-store', () => store);
 vi.mock('@/lib/offline/offline-convert', () => convert);
 vi.mock('@/lib/telemetry', () => ({ track }));
@@ -33,7 +35,7 @@ const reload = vi.fn();
 
 beforeEach(() => {
   auth.authLoaded = true;
-  auth.clerkUserId = 'user_1';
+  auth.accountId = 'user_1';
   store.offlineListDocuments.mockResolvedValue(DOCS);
   store.offlineIdCount.mockResolvedValue(DOCS.length);
   convert.saveOfflineToCloud.mockResolvedValue('x');
@@ -65,9 +67,9 @@ describe('LocalMovePrompt', () => {
   });
 
   it('stays away for a guest, before auth settles, when disabled, or with nothing local', async () => {
-    auth.clerkUserId = null;
+    auth.accountId = null;
     await show();
-    auth.clerkUserId = 'user_1';
+    auth.accountId = 'user_1';
     auth.authLoaded = false;
     await show();
     auth.authLoaded = true;

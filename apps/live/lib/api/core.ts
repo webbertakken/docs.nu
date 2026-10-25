@@ -54,7 +54,7 @@ import {
 //
 // All requests carry an `X-Owner-Id` header set to the current
 // participant's id — the API uses it as the document-owner filter and
-// for create-time `owner_id` — unless a Clerk token provider is wired
+// for create-time `owner_id` — unless a session token provider is wired
 // up (see below), in which case a Bearer token replaces it.
 // Where the api lives (lib/api/base.ts).
 export { API_BASE };
@@ -196,8 +196,8 @@ export type SharedDocumentResolution =
 //
 // Module-level state (rather than threading a tokenProvider through
 // 22 function signatures) because livediagram ships only as a static
-// export — single browser tab, single-threaded, single Clerk session
-// per page load. useClerkApiBootstrap wires it up once in a layout effect
+// export — single browser tab, single-threaded, single session
+// per page load. useAccountApiBootstrap wires it up once in a layout effect
 // (`setTokenProvider((opts) => getToken(opts))`) and clears on unmount.
 // Tests reset between cases via the same setter.
 //
@@ -209,7 +209,7 @@ export type SharedDocumentResolution =
 //
 // `body: true` adds `Content-Type: application/json` for write
 // requests; GETs / DELETEs omit it.
-// `skipCache` mirrors Clerk's `getToken({ skipCache })`: mint a fresh token
+// `skipCache` mirrors the token provider's `getToken({ skipCache })`: mint a fresh token
 // rather than return the cached one.
 type TokenProvider = (opts?: { skipCache?: boolean }) => Promise<string | null>;
 
@@ -217,14 +217,14 @@ let currentTokenProvider: TokenProvider | null = null;
 
 // The most recent token the provider returned, kept for the ONE caller
 // that can't await: the `beforeunload` save beacon (flushDocumentSavesBeacon).
-// The provider is async (Clerk may refresh over the network), so during
+// The provider is async (the token may be fetched over the network), so during
 // page teardown it's unusable — but the editor autosaves every ~600ms
 // while editing, so this cache is at most seconds old exactly when the
 // beacon needs it. Cleared with the provider on sign-out/unmount so a
 // signed-out tab can't flush with a dead identity.
 let lastKnownToken: string | null = null;
 
-// Every mounted useClerkApiBootstrap registers the same provider; the
+// Every mounted useAccountApiBootstrap registers the same provider; the
 // newest registration is the one in force, and it stays in force until the
 // LAST registration goes. A single slot cleared on unmount let one component
 // leaving (a Settings row, a dialog) take the Bearer away from the page
@@ -309,7 +309,7 @@ export function writeCachedSharePassword(shareCode: string, password: string | n
 // audit logs). Internal callers still get the same return type, so
 // the export is additive.
 // Thrown instead of sending a request that is certain to be refused: a
-// signed-in client (its owner id is a Clerk account id) that has no session
+// signed-in client (its owner id is an account id) that has no session
 // token to prove it. The worker rejects an account id in the guest header
 // (401 account_id_not_a_guest_credential), so sending it only turns an auth
 // problem into what looks like a network one.
@@ -351,8 +351,8 @@ function withTokenTimeout(p: Promise<string | null>): Promise<string | null> {
   return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
 }
 
-// Clerk's getToken() can resolve null for a moment on a live session, so a
-// null gets one fresh attempt that bypasses Clerk's token cache. Each attempt
+// The session token getter can resolve null for a moment on a live session, so a
+// null gets one fresh attempt that bypasses the held token. Each attempt
 // is bounded by SESSION_TOKEN_TIMEOUT_MS.
 async function resolveToken(): Promise<string | null> {
   const provider = currentTokenProvider;
