@@ -14,7 +14,7 @@ Five messages, two kinds:
 **Lifecycle (onboarding) — signed-in users only:**
 
 1. **Welcome** — sent the first time we see an authenticated user. Tips on
-   building a first diagram (shapes, arrows, templates).
+   building a first document (shapes, arrows, templates).
 2. **Week 1** — ~7 days after the welcome. Tips on the Explorer (folders,
    search, recents, sharing from the grid).
 3. **Week 2** — ~14 days after the welcome. Introduces Teams (shared documents,
@@ -167,11 +167,11 @@ address update (§4), resets the count to zero.
   **Branding.** Every builder renders through one shell, so every email looks
   the same: a brand-gradient band across the top of the card (sky-400 to
   blue-700, flat `#0ea5e9` where a client drops gradients), the logo mark beside
-  the "live"/"diagram" wordmark in the header, a brand-50 page behind the card,
-  and a footer under the card with the lockup again, the tagline ("Diagram,
-  draw and make pages together, live. Free and open source.") and a link to the
+  the "Live"/"Doc" wordmark in the header, a brand-50 page behind the card,
+  and a footer under the card with the lockup again, the tagline ("Documents
+  of every kind, together, in real time. Free and open source.") and a link to the
   site. Both lockups link to `APP_BASE_URL`. The mark is a transparent 64px PNG
-  (`/email/livediagram-mark-64.png`, shown at 28px in the header and 22px in
+  (`/email/livedoc-mark-64.png`, shown at 28px in the header and 22px in
   the footer) served by the marketing app and written by `pnpm icons:brand`,
   because Gmail and Outlook drop SVG and most clients block `data:` images.
   Its `alt` is empty, since the wordmark beside it names the product when

@@ -28,7 +28,7 @@ The detail in `full` is under a pixel wide at header size, so `compact` drops it
 The mark has a light and a dark palette. Dark is brighter in its mid stops and darker at its deepest stop, so the cube
 holds its edges on a dark surface. The mark follows the page's scheme wherever it is drawn live. Favicons follow the
 browser's `prefers-color-scheme`. Static rasters (PNG icons, the Apple icon, social cards) are drawn on white and use
-the light palette. The one exception is the email mark (`apps/marketing/public/email/livediagram-mark-64.png`), a
+the light palette. The one exception is the email mark (`apps/marketing/public/email/livedoc-mark-64.png`), a
 transparent light-palette PNG so it sits cleanly on the tinted page behind each email ([Transactional email](../014-identity/transactional-email.md)).
 
 ## Theme accent
