@@ -145,7 +145,7 @@ const CARDS: { kind: Format; title: string; description: string }[] = [
   {
     kind: 'file',
     title: 'JSON',
-    description: 'A livediagram file. Copy it or save a .json to import back with full fidelity.',
+    description: 'A LiveDoc file. Copy it or save a .json to import back with full fidelity.',
   },
   {
     kind: 'mermaid',
@@ -212,7 +212,7 @@ const TEXT_PANELS: Record<
 > = {
   file: {
     blurb:
-      "This tab as a livediagram JSON export. Edit it here to copy a variant; your edits don't change the tab.",
+      "This tab as a LiveDoc JSON export. Edit it here to copy a variant; your edits don't change the tab.",
     downloadLabel: 'Download .json',
     ext: 'livediagram-tab.json',
     mime: 'application/json',

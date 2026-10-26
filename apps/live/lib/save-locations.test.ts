@@ -10,11 +10,11 @@ describe('save locations', () => {
     expect(defaultSaveLocationFor({ signedIn: false, signInOffered: true })).toBe('browser');
   });
 
-  it('starts a signed-in person on livediagram', () => {
+  it('starts a signed-in person on LiveDoc', () => {
     expect(defaultSaveLocationFor({ signedIn: true, signInOffered: true })).toBe('livediagram');
   });
 
-  it('starts everyone on livediagram on a deployment without sign-in', () => {
+  it('starts everyone on LiveDoc on a deployment without sign-in', () => {
     expect(defaultSaveLocationFor({ signedIn: false, signInOffered: false })).toBe('livediagram');
   });
 

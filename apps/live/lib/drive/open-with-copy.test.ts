@@ -14,7 +14,7 @@ import { fileOf, HOST, makeEngine, OWNER, world } from './test-support';
 
 // "Open with" on a copy of a mirrored file (docs/specs/022-drive-mirror/drive-mirror.md,
 // "Copies made in Drive"; blueprint "Open with"). The copy is made in Drive's own UI, so
-// the app only sees it once the user opens it with livediagram.
+// the app only sees it once the user opens it with LiveDoc.
 
 const COPY_CONTENT = documentToEnvelopeText(
   { id: 'd1', name: 'Plan', presentation: null },
@@ -110,7 +110,7 @@ describe('Open with on a copy of a mirrored file', () => {
     });
   });
 
-  it('still opens the original when the original is opened with livediagram', async () => {
+  it('still opens the original when the original is opened with LiveDoc', async () => {
     const w = await mirrored();
     w.copy();
     expect(await resolveOpenWith(w.deps, w.openWith(w.original().id))).toEqual({
@@ -137,7 +137,7 @@ describe('Open with on a copy of a mirrored file', () => {
     expect(w.ld.document(newId)!.folderId).toBe('f1');
   });
 
-  it('puts it at the root with the unseen-folder notice when its folder is one livediagram cannot see', async () => {
+  it('puts it at the root with the unseen-folder notice when its folder is one LiveDoc cannot see', async () => {
     const w = await mirrored();
     const copyId = w.copy();
     const hidden = w.google.userCreateFolder(OWNER, 'Private');

@@ -17,9 +17,9 @@ const COMPETITORS = new Intl.ListFormat('en-GB', { type: 'conjunction' }).format
 );
 
 export const metadata = pageMetadata({
-  title: 'How livediagram compares · alternatives',
+  title: 'How LiveDoc compares · alternatives',
   description:
-    'Honest, side-by-side comparisons of livediagram with Miro, FigJam, Lucidchart, draw.io, Google Slides and more, including where each is the better pick.',
+    'Honest, side-by-side comparisons of LiveDoc with Miro, FigJam, Lucidchart, draw.io, Google Slides and more, including where each is the better pick.',
   path: '/alternatives',
   modifiedTime: ALTERNATIVES_LAST_UPDATED,
 });
@@ -35,15 +35,15 @@ export const metadata = pageMetadata({
 const ITEM_LIST_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'How livediagram compares',
-  description: `Side-by-side comparisons of livediagram against ${COMPETITORS}.`,
+  name: 'How LiveDoc compares',
+  description: `Side-by-side comparisons of LiveDoc against ${COMPETITORS}.`,
   itemListOrder: 'https://schema.org/ItemListOrderAscending',
   numberOfItems: ALTERNATIVES.length,
   itemListElement: ALTERNATIVES.map((alt, i) => ({
     '@type': 'ListItem',
     position: i + 1,
     url: `${SITE_URL}/alternatives/${alt.slug}`,
-    name: `livediagram vs ${alt.name}`,
+    name: `LiveDoc vs ${alt.name}`,
   })),
 };
 
@@ -57,8 +57,8 @@ export default function AlternativesIndexPage() {
       <main className="pb-20 sm:pb-24">
         <PageHero
           eyebrow="Product Comparison"
-          title="How livediagram compares"
-          lede="Thinking about another tool? Here is an honest, side-by-side look at how livediagram compares, including where each one is the better pick."
+          title="How LiveDoc compares"
+          lede="Thinking about another tool? Here is an honest, side-by-side look at how LiveDoc compares, including where each one is the better pick."
         />
         <div className="mx-auto mt-14 grid max-w-6xl gap-5 px-6 sm:grid-cols-2 lg:grid-cols-3">
           {ALTERNATIVES.map((alt) => (

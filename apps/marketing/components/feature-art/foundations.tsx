@@ -1,4 +1,4 @@
-// Feature illustrations for livediagram's open edges: the REST API from your own scripts, an AI
+// Feature illustrations for LiveDoc's open edges: the REST API from your own scripts, an AI
 // tool building a diagram over MCP, and export that is a faithful picture of the canvas. Same
 // vocabulary as ./features (panel chrome with a light and a dark half, the Default canvas, the
 // fa-b-* loops); under reduced motion each shows its finished state.
@@ -108,7 +108,7 @@ function Sparkle({ x, y, r = 4 }: { x: number; y: number; r?: number }) {
   );
 }
 
-/** MCP: you ask your AI tool for a diagram; it calls livediagram and the diagram appears. */
+/** MCP: you ask your AI tool for a diagram; it calls LiveDoc and the diagram appears. */
 export function McpArt() {
   return (
     <Frame>
@@ -190,7 +190,7 @@ export function McpArt() {
           <rect className={SUBTLE} x="20" y="78" width="64" height="3" rx="1.5" opacity="0.4" />
         </g>
 
-        {/* What lands in livediagram. */}
+        {/* What lands in LiveDoc. */}
         <MiniWindow x={176} y={8} w={112} h={80} title="Login flow">
           <g className="fa-b-late">
             <Node x={190} y={30} w={36} h={16} label="Sign in" r={8} />

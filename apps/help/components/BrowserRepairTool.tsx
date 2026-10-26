@@ -19,7 +19,7 @@ import { track } from '@/lib/telemetry';
 async function buildReport(): Promise<string> {
   const checks = await runBrowserChecks();
   return [
-    'livediagram diagnostics (help centre)',
+    'LiveDoc diagnostics (help centre)',
     `Time: ${new Date().toISOString()}`,
     ...formatBrowserIdentity(readBrowserIdentity()),
     ...formatBrowserChecks(checks),

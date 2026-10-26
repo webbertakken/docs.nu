@@ -31,7 +31,7 @@ import { runInTool } from './tool-scope';
 export type ToolBehaviour = McpToolVerb['behaviour'];
 
 // `openWorldHint: false` throughout: every tool acts on the caller's own
-// livediagram library through our api, a closed and known domain rather than
+// LiveDoc library through our api, a closed and known domain rather than
 // an open-ended external world like a web search.
 //
 // `destructiveHint` is omitted on `read` on purpose. MCP ignores it when

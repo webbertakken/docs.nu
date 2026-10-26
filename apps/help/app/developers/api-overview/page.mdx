@@ -2,26 +2,26 @@ import { ArticleLayout } from '@/components/ArticleLayout';
 import { helpMetadata } from '@/lib/seo';
 
 export const metadata = helpMetadata({
-  title: 'The livediagram API',
+  title: 'The LiveDoc API',
   description:
-    'Call the livediagram REST API from your own scripts and integrations: the base URL, how to authenticate with an API token, and where the full reference is.',
+    'Call the LiveDoc REST API from your own scripts and integrations: the base URL, how to authenticate with an API token, and where the full reference is.',
   path: '/help/developers/api-overview/',
 });
 
 <ArticleLayout
-  title="The livediagram API"
+  title="The LiveDoc API"
   description="The same REST API the editor uses, callable from your own scripts with an API token."
   categoryTitle="Developers"
   categorySlug="developers"
 >
 
-Everything the livediagram editor does, it does by calling a REST API. That API is open to you too: with an [API token](/help/account-and-data/api-tokens/) your own scripts and integrations can read, create, and update documents, tabs, folders, images, themes and more, exactly as the app does. Account administration (teams, tokens, deleting the account) stays with the signed-in app.
+Everything the LiveDoc editor does, it does by calling a REST API. That API is open to you too: with an [API token](/help/account-and-data/api-tokens/) your own scripts and integrations can read, create, and update documents, tabs, folders, images, themes and more, exactly as the app does. Account administration (teams, tokens, deleting the account) stays with the signed-in app.
 
 If you want to connect an AI assistant rather than write code, you usually want the [MCP server](/help/account-and-data/connect-ai-mcp/) instead. It wraps this API in tools Claude and other MCP clients can call directly. To work from a terminal or a coding agent without writing requests yourself, use [the LiveDoc CLI](/help/developers/cli/).
 
 ## The base URL
 
-The API lives under `/api` on your livediagram host. On the hosted service that is:
+The API lives under `/api` on your LiveDoc host. On the hosted service that is:
 
 ```
 https://docs.nu/api

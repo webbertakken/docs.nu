@@ -10,7 +10,7 @@ uploads, `fields` and `q`) and the OAuth token and revoke endpoints
 - `new FakeGoogle()` then `fake.handle(request)` answers any Google request;
   pass `fake.fetch` wherever code takes a `fetch`.
 - The `user*` methods act as the person in the Drive UI (rename, move, bin,
-  restore, delete forever, create a folder livediagram cannot see, edit
+  restore, delete forever, create a folder LiveDoc cannot see, edit
   contents); `fail` injects 401 / 403 / 404 / 429 / 5xx.
 - `@livediagram/fake-google/server` serves it over HTTP for the e2e stack.
 

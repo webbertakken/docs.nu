@@ -22,7 +22,7 @@ const NOTES = `e2e-notes-${RUN}`;
 const apiBase = '/api';
 // The e2e runs on a loopback host, which names the root like staging
 // (docs/specs/022-drive-mirror/drive-mirror.md, "The root folder's name").
-const ROOT_NAME = 'livediagram (staging)';
+const ROOT_NAME = 'LiveDoc (staging)';
 const SHOTS = process.env.E2E_DRIVE_SHOTS ?? '/tmp/livediagram-drive-e2e';
 
 let google: { fake: FakeGoogle; server: Server };
@@ -339,14 +339,14 @@ test('connect, first mirror, then changes in Drive come back', async ({ page, pa
   await expect(pillOf(panel)).toHaveText(/^Last synced /, { timeout: 15_000 });
   expect(await boxes()).toEqual(synced);
 
-  // A rename made in Drive reaches livediagram on the next pass.
+  // A rename made in Drive reaches LiveDoc on the next pass.
   google.fake.userRename(fileNamed('Meeting notes.livediagram')!.id, 'Standup notes.livediagram');
-  // Into a folder livediagram cannot see: the root of My Documents, and a notice.
+  // Into a folder LiveDoc cannot see: the root of My Documents, and a notice.
   const hidden = google.fake.userCreateFolder(USER, 'Clients', fileNamed(ROOT_NAME)!.id);
   google.fake.userMove(fileNamed('Quarterly plan.livediagram')!.id, hidden);
   await syncNow(page);
   await expect(problemOf(panel)).toContainText(
-    "Quarterly plan: Moved to a Drive folder livediagram can't see.",
+    "Quarterly plan: Moved to a Drive folder LiveDoc can't see.",
   );
   await expect(pillOf(panel)).toHaveText('Needs attention');
   await expectStable(panel);
@@ -366,7 +366,7 @@ test('connect, first mirror, then changes in Drive come back', async ({ page, pa
     ).document.folderId,
   ).toBeNull();
 
-  // Show the folder to livediagram (the Picker picks it): adopted, and the
+  // Show the folder to LiveDoc (the Picker picks it): adopted, and the
   // document moves into the new folder in My Documents.
   google.fake.grantAccess(USER, hidden);
   await page.evaluate(

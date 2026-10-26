@@ -36,7 +36,7 @@ export function selectionReference(input: SelectionReferenceInput): SelectionRef
   const model = buildViewModel(tab, { rev, tabIds });
   const tabRef = model.tabRefOf(tab.id);
   const header =
-    `[livediagram] ${jsonString(documentName)} › tab ${jsonString(tab.name)} ` +
+    `[LiveDoc] ${jsonString(documentName)} › tab ${jsonString(tab.name)} ` +
     `(doc ${documentId}, tab ${tabRef}, rev ${rev})`;
   const wanted = new Set(selectedIds);
   // The tab's element order (WB20), so the text never depends on the order of clicks.

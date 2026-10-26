@@ -5,9 +5,9 @@ import { loadLicencesManifest } from '@/lib/licences-manifest';
 import { pageMetadata, SiteHeader } from '@livediagram/ui';
 
 export const metadata = pageMetadata({
-  title: 'Open-source licences · livediagram',
+  title: 'Open-source licences · LiveDoc',
   description:
-    'The open-source projects livediagram ships, with their licences and notices, generated from what each app actually bundles.',
+    'The open-source projects LiveDoc ships, with their licences and notices, generated from what each app actually bundles.',
   path: '/licences',
 });
 

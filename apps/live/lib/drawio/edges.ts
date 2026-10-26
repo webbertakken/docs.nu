@@ -1,4 +1,4 @@
-// A draw.io edge as a livediagram arrow
+// A draw.io edge as a LiveDoc arrow
 // (docs/specs/020-import-export/blueprints/drawio-import.md step 12): ends
 // pinned to the anchor nearest where draw.io attached them, the route and its
 // waypoints, the heads, the stroke, and one label from the edge and its
@@ -38,7 +38,7 @@ const DRAWIO_ANGLED_EDGE_STYLES = new Set([
 
 type Marker = { shape: ArrowheadShape; exact: boolean };
 
-/** draw.io marker names to livediagram heads; `exact: false` is approximated. */
+/** draw.io marker names to LiveDoc heads; `exact: false` is approximated. */
 const DRAWIO_MARKERS: Record<string, Marker> = {
   classic: { shape: 'triangle', exact: true },
   classicThin: { shape: 'triangle', exact: true },

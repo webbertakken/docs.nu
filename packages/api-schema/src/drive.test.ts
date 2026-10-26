@@ -46,7 +46,7 @@ describe('id validators', () => {
     expect(isDriveFileId('x'.repeat(201))).toBe(false);
   });
 
-  it('accepts livediagram ids (uuid and short ids)', () => {
+  it('accepts LiveDoc ids (uuid and short ids)', () => {
     expect(isLivediagramId('0f5ca4af-9a8a-4a60-be5e-1179e5555880')).toBe(true);
     expect(isLivediagramId('abc_123')).toBe(true);
     expect(isLivediagramId('../etc')).toBe(false);
@@ -65,22 +65,22 @@ describe('driveRootName (docs/specs/022-drive-mirror/drive-mirror.md, "The root 
     ['docs.nu', 'livediagram'],
     ['www.docs.nu', 'livediagram'],
     ['WWW.Docs.NU', 'livediagram'],
-    ['staging.livediagram.app', 'livediagram (staging)'],
-    ['Staging.LIVEDIAGRAM.app', 'livediagram (staging)'],
-    ['localhost', 'livediagram (staging)'],
-    ['localhost:4000', 'livediagram (staging)'],
-    ['LOCALHOST:4002', 'livediagram (staging)'],
-    ['127.0.0.1', 'livediagram (staging)'],
-    ['127.0.0.1:3771', 'livediagram (staging)'],
-    ['[::1]', 'livediagram (staging)'],
-    ['[::1]:4000', 'livediagram (staging)'],
-    ['::1', 'livediagram (staging)'],
-    ['documents.example.org', 'livediagram (self-hosted)'],
-    ['documents.example.org:8443', 'livediagram (self-hosted)'],
-    ['192.168.1.20:4000', 'livediagram (self-hosted)'],
-    ['[2001:db8::1]:4000', 'livediagram (self-hosted)'],
-    ['docs.nu.evil.example', 'livediagram (self-hosted)'],
-    ['staging.livediagram.app.example', 'livediagram (self-hosted)'],
+    ['staging.livediagram.app', 'LiveDoc (staging)'],
+    ['Staging.LIVEDIAGRAM.app', 'LiveDoc (staging)'],
+    ['localhost', 'LiveDoc (staging)'],
+    ['localhost:4000', 'LiveDoc (staging)'],
+    ['LOCALHOST:4002', 'LiveDoc (staging)'],
+    ['127.0.0.1', 'LiveDoc (staging)'],
+    ['127.0.0.1:3771', 'LiveDoc (staging)'],
+    ['[::1]', 'LiveDoc (staging)'],
+    ['[::1]:4000', 'LiveDoc (staging)'],
+    ['::1', 'LiveDoc (staging)'],
+    ['documents.example.org', 'LiveDoc (self-hosted)'],
+    ['documents.example.org:8443', 'LiveDoc (self-hosted)'],
+    ['192.168.1.20:4000', 'LiveDoc (self-hosted)'],
+    ['[2001:db8::1]:4000', 'LiveDoc (self-hosted)'],
+    ['docs.nu.evil.example', 'LiveDoc (self-hosted)'],
+    ['staging.livediagram.app.example', 'LiveDoc (self-hosted)'],
   ])('%s → %s', (host, name) => {
     expect(driveRootName(host)).toBe(name);
   });

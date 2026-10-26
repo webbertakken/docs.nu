@@ -24,7 +24,7 @@ import { registerTool } from './tool-annotations';
 import { errorResult, requireToken, textResult } from './tool-helpers';
 
 export const IMAGES_UNAVAILABLE =
-  'Images are not available on this livediagram server (it has no image storage).';
+  'Images are not available on this LiveDoc server (it has no image storage).';
 
 // The contact sheet's grid: four pictures a row, each fitted into its cell above a caption.
 const SHEET_COLUMNS = 4;

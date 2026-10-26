@@ -65,7 +65,7 @@ type TabBarProps = {
   // (docs/specs/007-editor/power-user-mode.md#quick-appearance-switch).
   powerUser?: boolean;
   // A workbench frame (docs/specs/013-workspace/blueprints/workbench-embeds.md, WB34): its Open in
-  // livediagram link at the bar's right end, and no Appearance control (the workbench sets the scheme).
+  // LiveDoc link at the bar's right end, and no Appearance control (the workbench sets the scheme).
   workbenchLink?: (labelled: boolean) => ReactNode;
   tabs: Tab[];
   activeId: string;

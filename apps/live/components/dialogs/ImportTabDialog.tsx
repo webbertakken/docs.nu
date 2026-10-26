@@ -52,7 +52,7 @@ const FORMATS: {
     key: 'json',
     title: 'JSON',
     description:
-      'A livediagram tab (a .json export). Restores its elements exactly. Paste it or pick a file.',
+      'A LiveDoc tab (a .json export). Restores its elements exactly. Paste it or pick a file.',
     placeholder: '{\n  "schemaVersion": 1,\n  "kind": "livediagram.tab",\n  "tab": { … }\n}',
   },
   {

@@ -20,10 +20,10 @@ Drive traffic goes from each person's browser straight to Google. Your api Worke
 ### Create the Google Cloud Project
 
 <Step n={1}>In the Google Cloud console, create a project for your deployment and enable the **Google Drive API**.</Step>
-<Step n={2}>Configure the OAuth consent screen. It needs only two scopes, `drive.file` (the files livediagram creates or is shown) and `drive.install` (the **Open with** entry in Drive). Both are non-sensitive, so Google asks for no verification or security assessment.</Step>
-<Step n={3}>Create an OAuth client of type **Web application**. Add `https://<your-host>` as an authorised JavaScript origin and `https://<your-host>/drive/connected` as an authorised redirect URI. If your site redirects one host to another (as docs.nu sends its bare domain to `www`), register both hosts.</Step>
+<Step n={2}>Configure the OAuth consent screen. It needs only two scopes, `drive.file` (the files LiveDoc creates or is shown) and `drive.install` (the **Open with** entry in Drive). Both are non-sensitive, so Google asks for no verification or security assessment.</Step>
+<Step n={3}>Create an OAuth client of type **Web application**. Add `https://<your-host>` as an authorised JavaScript origin and `https://<your-host>/drive/connected` as an authorised redirect URI. If your site redirects one host to another (as docs.nu sends `www` to its bare domain), register both hosts.</Step>
 <Step n={4}>For **Open with** in Drive, configure the Drive API's Drive UI integration: Open URL `https://<your-host>/drive/open`, default MIME type `application/vnd.livediagram+json`, default extension `livediagram`.</Step>
-<Step n={5}>Optionally, create a browser API key for the Google Picker, restricted by HTTP referrer to your host. It lets people show livediagram a folder they made in Drive themselves; without it the mirror works and that one step is not offered.</Step>
+<Step n={5}>Optionally, create a browser API key for the Google Picker, restricted by HTTP referrer to your host. It lets people show LiveDoc a folder they made in Drive themselves; without it the mirror works and that one step is not offered.</Step>
 
 ### Set the Variables
 
@@ -42,7 +42,7 @@ pnpm --filter @livediagram/api exec wrangler secret put GOOGLE_CLIENT_SECRET
 pnpm --filter @livediagram/api exec wrangler secret put DRIVE_TOKEN_KEY   # openssl rand -base64 32
 ```
 
-Once all of this is in place, signed-in people find the mirror in **Settings**, under **Account**, then **Cloud Sync**. The folder it creates in each person's Drive is named **livediagram (self-hosted)**, so someone who also uses docs.nu never gets two folders with the same name.
+Once all of this is in place, signed-in people find the mirror in **Settings**, under **Account**, then **Cloud Sync**. The folder it creates in each person's Drive is named **LiveDoc (self-hosted)**, so someone who also uses docs.nu never gets two folders with the same name.
 
 ### Browser-Only Mode
 

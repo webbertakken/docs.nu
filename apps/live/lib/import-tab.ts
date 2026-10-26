@@ -74,7 +74,7 @@ export function parseImportedTab(text: string): ImportResult {
   if (env.kind !== 'livediagram.tab') {
     return {
       ok: false,
-      error: "This file isn't a livediagram tab export (missing kind field).",
+      error: "This file isn't a LiveDoc tab export (missing kind field).",
     };
   }
   if (typeof env.schemaVersion !== 'number') {

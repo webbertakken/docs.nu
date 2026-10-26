@@ -1,5 +1,5 @@
 // Test support for the Drive mirror engine (docs/specs/022-drive-mirror/blueprints/drive-mirror.md,
-// "Testing"): an in-memory livediagram behind LivediagramPort that keeps the
+// "Testing"): an in-memory LiveDoc behind LivediagramPort that keeps the
 // api's own rules (the Trash, folder deletion moving contents up, mirror rows
 // removed with their document or folder, the lease), and a harness wiring
 // engines to it and to the fake Google. Not a `.test.ts` file; tests import it.
@@ -99,7 +99,7 @@ export class FakeLivediagram {
     this.clock = clock;
   }
 
-  // ---- the person using livediagram --------------------------------------
+  // ---- the person using LiveDoc --------------------------------------
   createDocument(id: string, name: string, folderId: string | null = null): void {
     const t = this.clock.now;
     this.documents.set(id, {
@@ -341,7 +341,7 @@ export function makeEngine(opts: {
   return { engine, statuses, events };
 }
 
-// A connected user with a clock, timers, the fake Google and livediagram.
+// A connected user with a clock, timers, the fake Google and LiveDoc.
 export function world() {
   const clock = new Clock();
   const timers = new ManualTimers(clock);

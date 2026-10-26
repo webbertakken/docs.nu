@@ -19,6 +19,9 @@ const SECTION_COPY: Record<LicencesSection['side'], { title: string; intro: stri
   },
 };
 
+// The project LiveDoc was forked from (docs/specs/002-project-scope/livediagram-upstream.md).
+const UPSTREAM_REPO_URL = 'https://github.com/livediagram-app/livediagram.app';
+
 export function LicencesView({ manifest }: { manifest: LicencesManifest }) {
   return (
     <>
@@ -26,9 +29,19 @@ export function LicencesView({ manifest }: { manifest: LicencesManifest }) {
         Open-source licences
       </h1>
       <p className="mt-3 text-lg text-slate-600 dark:text-slate-300">
-        livediagram is MIT licensed and built on the work of many open-source projects. These are
-        the ones our apps ship, generated from what each app actually bundles every time the site is
+        LiveDoc is MIT licensed and built on the work of many open-source projects. These are the
+        ones our apps ship, generated from what each app actually bundles every time the site is
         built.
+      </p>
+      <p className="mt-3 text-slate-600 dark:text-slate-300">
+        LiveDoc began as a fork of{' '}
+        <a
+          href={UPSTREAM_REPO_URL}
+          className="text-brand-700 underline hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
+        >
+          livediagram
+        </a>
+        , which is MIT licensed too. Its copyright notice is kept in the repository&rsquo;s licence.
       </p>
       {manifest.sections.map((section) => (
         <Section key={section.side} section={section} manifest={manifest} />

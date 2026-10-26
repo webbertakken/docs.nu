@@ -52,7 +52,7 @@ describe('parseWorkbenchMessage', () => {
         tabId: 't1',
         rev: 41,
         count: 0,
-        reference: '[livediagram] "Home screen"',
+        reference: '[LiveDoc] "Home screen"',
       },
     ],
     ['to-workbench', { type: 'livediagram:renew', v: 1 }],

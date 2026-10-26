@@ -69,7 +69,7 @@ const SHAPES: Record<string, Row> = {
   'mxgraph.android.phone2': exact('phone'),
   'mxgraph.ios7.misc.iphone': exact('phone'),
   'mxgraph.mockup.containers.browserWindow': exact('browser'),
-  // Approximated: a draw.io shape livediagram draws differently.
+  // Approximated: a draw.io shape LiveDoc draws differently.
   doubleEllipse: near('circle'),
   orEllipse: near('circle'),
   sumEllipse: near('circle'),

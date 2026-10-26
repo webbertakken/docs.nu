@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 // docs/specs/006-document/save-locations.md "The default depends on who is creating": /new stores a guest's
-// document on This Browser, a signed-in person's on livediagram, and never makes a signed-in person's
+// document on This Browser, a signed-in person's on LiveDoc, and never makes a signed-in person's
 // create This Browser because the session read had not answered yet.
 
 import { renderHook } from '@testing-library/react';
@@ -29,7 +29,7 @@ describe('useNewDocumentLocation', () => {
   });
 
   describe('resolveSaveLocation', () => {
-    it('keeps a signed-in person on livediagram', async () => {
+    it('keeps a signed-in person on LiveDoc', async () => {
       const { result } = render({ authLoaded: true, accountId: 'acct_1' });
       await expect(result.current.resolveSaveLocation(false, vi.fn())).resolves.toBe('livediagram');
     });
@@ -60,12 +60,12 @@ describe('useNewDocumentLocation', () => {
       await expect(hook.result.current.resolveSaveLocation(false, settle)).resolves.toBe('browser');
     });
 
-    it('keeps a folder or team link on livediagram', async () => {
+    it('keeps a folder or team link on LiveDoc', async () => {
       const { result } = render({ authLoaded: false, accountId: null });
       await expect(result.current.resolveSaveLocation(true, vi.fn())).resolves.toBe('livediagram');
     });
 
-    it('keeps everyone on livediagram without sign-in', async () => {
+    it('keeps everyone on LiveDoc without sign-in', async () => {
       host.offered = false;
       const { result } = render({ authLoaded: false, accountId: null });
       await expect(result.current.resolveSaveLocation(false, vi.fn())).resolves.toBe('livediagram');

@@ -107,7 +107,7 @@ describe('resolveOpenWith', () => {
     });
   });
 
-  it('refuses a file that is not a livediagram file, or cannot be read', async () => {
+  it('refuses a file that is not a LiveDoc file, or cannot be read', async () => {
     const s = setup();
     const notOurs = await resolveOpenWith(
       s.deps,

@@ -70,7 +70,7 @@ test.describe('new version prompt', () => {
     await openWhiteboard(page);
     await serveNewerFormat(page);
     await drawStroke(page);
-    await expect(prompt(page)).toContainText('A new version of livediagram is ready.');
+    await expect(prompt(page)).toContainText('A new version of LiveDoc is ready.');
     await page.screenshot({ path: test.info().outputPath('offered.png') });
     // It never takes focus; the keyboard reaches it.
     const reload = prompt(page).getByRole('button', { name: 'Reload' });

@@ -47,7 +47,7 @@ function loadLines(p: LoadProgress, now: Date): string[] {
 export function formatDiagnostics(input: DiagnosticsInput): string {
   const share = new URLSearchParams(input.location.search).has('s');
   return [
-    'livediagram diagnostics',
+    'LiveDoc diagnostics',
     `Time: ${input.now.toISOString()}`,
     `Page: ${input.location.pathname}${share ? ' (share link: yes)' : ''}`,
     `Build: ${input.buildId ?? 'unknown'}`,

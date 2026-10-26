@@ -31,7 +31,7 @@ async function signingKey(secret: string): Promise<CryptoKey | null> {
       name: 'HKDF',
       hash: 'SHA-256',
       salt: new Uint8Array(0),
-      info: enc.encode('livediagram drive state'),
+      info: enc.encode('LiveDoc drive state'),
     },
     base,
     { name: 'HMAC', hash: 'SHA-256', length: 256 },

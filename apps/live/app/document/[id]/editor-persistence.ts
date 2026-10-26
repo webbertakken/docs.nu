@@ -47,7 +47,7 @@ export function useEditorPersistence({ toast }: { toast: ReturnType<typeof useTo
   // tabs open can spot the right one. Falls back to the bare brand
   // until hydration lands the real name.
   useEffect(() => {
-    document.title = documentName ? `${documentName} | livediagram` : 'livediagram';
+    document.title = documentName ? `${documentName} | LiveDoc` : 'LiveDoc';
   }, [documentName]);
 
   // Every document in the local store. Used by the Explorer to render its

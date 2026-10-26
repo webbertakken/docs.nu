@@ -10,13 +10,13 @@ import { lucideGlyph } from '@livediagram/ui';
 const STEPS = [
   {
     icon: lucideGlyph(lucideClipboardPaste, 20),
-    title: 'Add livediagram',
+    title: 'Add LiveDoc',
     body: 'Paste the address into your AI tool, or click once in Cursor and VS Code.',
   },
   {
     icon: lucideGlyph(lucideCircleCheck, 20),
     title: 'Approve',
-    body: 'A livediagram page opens. Sign in or create a free account, check where access goes, and choose Connect.',
+    body: 'A LiveDoc page opens. Sign in or create a free account, check where access goes, and choose Connect.',
   },
   {
     icon: lucideGlyph(lucideWandSparkles, 20),

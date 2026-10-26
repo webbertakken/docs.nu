@@ -14,7 +14,7 @@ export type DriveMirrorContextValue = {
   // Whether `mode` is settled (auth and the capabilities answer are in).
   resolved: boolean;
   status: DriveMirrorStatus;
-  // Whether "Show this folder to livediagram" can be offered (a Picker key).
+  // Whether "Show this folder to LiveDoc" can be offered (a Picker key).
   canAdopt: boolean;
   // Connect pressed and the page not yet gone to Google; and why the last
   // attempt could not start, if it could not.

@@ -2,7 +2,7 @@
 // it. Pure.
 import { tabKindOf, type Tab } from '@livediagram/document';
 
-// The Export dialog's format keys ('file' is the livediagram .json).
+// The Export dialog's format keys ('file' is the LiveDoc .json).
 export type ExportFormatKey =
   | 'markdown'
   | 'csv'

@@ -7,7 +7,7 @@ export type SaveLocationId = 'livediagram' | 'browser';
 // Where a new document goes when nobody picked (docs/specs/006-document/save-locations.md "The default
 // depends on who is creating"): a guest starts This Browser, so a visitor trying things out never
 // leaves an orphan on the server; a signed-in person, or anyone on a deployment without sign-in,
-// starts on livediagram.
+// starts on LiveDoc.
 export function defaultSaveLocationFor(who: {
   signedIn: boolean;
   signInOffered: boolean;

@@ -800,7 +800,7 @@ export const EXPORT_AND_IMPORT: MetricStack = {
   stack: true,
   title: 'Export & Import',
   blurb:
-    'Diagrams leaving livediagram as files and text, and tabs and drawings coming in from other tools.',
+    'Diagrams leaving LiveDoc as files and text, and tabs and drawings coming in from other tools.',
   members: [EXPORTS, EXPORT_OPTIONS, TAB_IMPORTS, PASTES_FROM_EXCALIDRAW],
   seeAlso: { section: 'editing', label: 'See Each Export Format in Features › Editing' },
 };

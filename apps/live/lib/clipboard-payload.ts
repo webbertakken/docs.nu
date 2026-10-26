@@ -161,7 +161,7 @@ export function takeSheetSeeds(text: string | null | undefined): void {
 /**
  * The elements in a clipboard string, or null when it isn't ours.
  *
- * Null covers every "this is not a livediagram payload" case — ordinary copied
+ * Null covers every "this is not a LiveDoc payload" case — ordinary copied
  * text, another app's JSON, a truncated payload, a newer schema — because the
  * caller's response to all of them is the same: leave the paste alone and fall
  * back to the in-app buffer. Never throws: this runs on every Cmd+V, against a

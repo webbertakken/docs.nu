@@ -155,8 +155,7 @@ export const MCP_TOOL_METRICS: readonly Metric[] = [
 export const MCP_TOOL_CALLS: MetricStack = {
   stack: true,
   title: 'MCP Tool Calls',
-  blurb:
-    'AI assistants calling the livediagram MCP server, by tool. Only calls that succeeded count.',
+  blurb: 'AI assistants calling the LiveDoc MCP server, by tool. Only calls that succeeded count.',
   members: [...MCP_TOOL_METRICS],
 };
 
@@ -212,7 +211,7 @@ export const DRIVE_OPEN_WITH = chart(
   'Drive',
   'Opened',
   'Opened From Drive',
-  'A file opened with livediagram from Google Drive: opened, offered as a copy, or unreadable.',
+  'A file opened with LiveDoc from Google Drive: opened, offered as a copy, or unreadable.',
 );
 
 // Agent changesets (docs/specs/024-agents/agent-changesets.md "Observability and telemetry"):

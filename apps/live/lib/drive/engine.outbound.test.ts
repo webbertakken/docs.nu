@@ -7,7 +7,7 @@ import { DriveTokenError } from './token-source';
 
 // Every row of the spec's Outbound table, end to end through the engine, the
 // REST client and the fake Google (docs/specs/022-drive-mirror/drive-mirror.md,
-// "Outbound: livediagram to Drive").
+// "Outbound: LiveDoc to Drive").
 
 async function connected() {
   const w = world();
@@ -16,7 +16,7 @@ async function connected() {
 }
 
 describe('first mirror', () => {
-  it('creates the livediagram root, the folder tree, then every document oldest first', async () => {
+  it('creates the LiveDoc root, the folder tree, then every document oldest first', async () => {
     const w = await connected();
     w.ld.createFolderAs('f1', 'Work');
     w.ld.createFolderAs('f2', 'Plans', 'f1');
@@ -28,7 +28,7 @@ describe('first mirror', () => {
     const root = w.google.get(w.ld.connection!.rootFolderId!)!;
     // The test host is neither docs.nu nor staging nor loopback.
     expect(root).toMatchObject({
-      name: 'livediagram (self-hosted)',
+      name: 'LiveDoc (self-hosted)',
       appProperties: { ldRoot: HOST },
     });
     const f1 = fileOf(w.google, w.ld, 'folder', 'f1')!;
@@ -170,7 +170,7 @@ describe('outbound rows', () => {
     await w.engine.syncNow();
     const oldId = w.ld.item('document', 'd1')!.driveFileId;
     w.google.userDeleteForever(oldId);
-    // Drive's delete is read as `removed` while livediagram still has it in
+    // Drive's delete is read as `removed` while LiveDoc still has it in
     // the Trash, which purges it; restore before the next read instead.
     await w.ld.port().restoreDocument('d1');
     await w.engine.flush();
@@ -271,7 +271,7 @@ describe('outbound rows', () => {
     await p.createFolder('brief', 'Brief', null);
     await w.engine.syncNow();
     const file = fileOf(w.google, w.ld, 'folder', 'brief')!.id;
-    // Deleted in livediagram before any pass read the Drive change its own create made.
+    // Deleted in LiveDoc before any pass read the Drive change its own create made.
     await p.deleteFolder('brief');
     await w.engine.syncNow();
     await w.engine.syncNow();
@@ -279,7 +279,7 @@ describe('outbound rows', () => {
     expect(w.google.get(file)!.trashed).toBe(true);
   });
 
-  it('re-creates a file deleted outside livediagram when it next writes (404)', async () => {
+  it('re-creates a file deleted outside LiveDoc when it next writes (404)', async () => {
     const w = await mirrored();
     const oldId = w.ld.item('document', 'd1')!.driveFileId;
     w.google.loseAccess(OWNER, oldId);

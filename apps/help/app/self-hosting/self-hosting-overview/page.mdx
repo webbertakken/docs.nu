@@ -5,26 +5,26 @@ import { StackOverview } from '@/components/illustrations/self-hosting';
 export const metadata = helpMetadata({
   title: 'Self-Hosting Overview',
   description:
-    'Why and how you can run your own copy of livediagram. It is MIT-licensed and runs entirely on Cloudflare.',
+    'Why and how you can run your own copy of LiveDoc. It is MIT-licensed and runs entirely on Cloudflare.',
   path: '/help/self-hosting/self-hosting-overview/',
 });
 
-<ArticleLayout title="Self-Hosting Overview" description="Run your own copy of livediagram on your own infrastructure, with the same feature set as the hosted version." categoryTitle="Self-Hosting" categorySlug="self-hosting">
+<ArticleLayout title="Self-Hosting Overview" description="Run your own copy of LiveDoc on your own infrastructure, with the same feature set as the hosted version." categoryTitle="Self-Hosting" categorySlug="self-hosting">
 
-livediagram is built to be self-hosted, not just used at docs.nu. Because the whole project is open source, you can clone the repository and run it on your own Cloudflare account. You get every feature in the codebase, no subscription, no licence check, and no required outside services. This page covers why you might do that and what you are signing up for.
+LiveDoc is built to be self-hosted, not just used at docs.nu. Because the whole project is open source, you can clone the repository and run it on your own Cloudflare account. You get every feature in the codebase, no subscription, no licence check, and no required outside services. This page covers why you might do that and what you are signing up for.
 
 ## Why self-host
 
-There are two equally supported ways to use livediagram, and both have the same feature set.
+There are two equally supported ways to use LiveDoc, and both have the same feature set.
 
-- **Hosted by livediagram** at docs.nu, free for everyone, a convenience and a public home for the project.
+- **Hosted by LiveDoc** at docs.nu, free for everyone, a convenience and a public home for the project.
 - **Self-hosted**, where you deploy and run it yourself.
 
 You might self-host to keep document data on infrastructure you control, to meet an internal policy, to fork and customise the editor, or simply to run a private instance for your team. Since it is **MIT-licensed**, you are free to modify, embed, or build on it, commercially or not.
 
 ## What it runs on
 
-livediagram runs entirely on Cloudflare. The frontends are static (built with Next.js in export mode, so there is no server-side rendering and no Node runtime to operate), and all server-side logic lives in Cloudflare Workers.
+LiveDoc runs entirely on Cloudflare. The frontends are static (built with Next.js in export mode, so there is no server-side rendering and no Node runtime to operate), and all server-side logic lives in Cloudflare Workers.
 
 - **Cloudflare Workers** serve the apps and host the API.
 - **Cloudflare D1** is the database where documents live, reached only through the API Worker.
@@ -47,7 +47,7 @@ A self-hosted instance's servers make no required calls to any outside service. 
 - **No license gating.** Nothing phones home to unlock features.
 
 <Tip>
-  Ready to deploy? See [deploying livediagram](/help/self-hosting/deploying-livediagram/) for the
+  Ready to deploy? See [deploying LiveDoc](/help/self-hosting/deploying-livedoc/) for the
   shape of the apps, then [configuration and optional auth](/help/self-hosting/configuration/) for
   the settings you can turn on.
 </Tip>

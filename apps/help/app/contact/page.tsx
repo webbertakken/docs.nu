@@ -6,7 +6,7 @@ import { ExternalLinkIcon } from '@/lib/chrome-icons';
 
 export const metadata: Metadata = helpMetadata({
   title: 'Contact',
-  description: 'Get in touch with the livediagram team, report a bug, or request a feature.',
+  description: 'Get in touch with the LiveDoc team, report a bug, or request a feature.',
   path: '/help/contact/',
 });
 
@@ -51,8 +51,8 @@ export default function ContactPage() {
               Report a Bug or Request a Feature
             </h2>
             <p className="mb-4 leading-relaxed text-slate-600 dark:text-slate-300">
-              livediagram is open source. Open an issue on GitHub to report a bug, suggest an idea,
-              or follow along with development.
+              LiveDoc is open source. Open an issue on GitHub to report a bug, suggest an idea, or
+              follow along with development.
             </p>
             <a
               href={`${REPO_URL}/issues`}

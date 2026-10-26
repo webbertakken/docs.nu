@@ -53,7 +53,7 @@ describe('parseImportedTab — rejections (never throws)', () => {
   it('rejects an object without the magic kind field', () => {
     const result = parse({ schemaVersion: 1, tab: validTab });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error).toMatch(/isn't a livediagram tab export/);
+    if (!result.ok) expect(result.error).toMatch(/isn't a LiveDoc tab export/);
   });
 
   it('rejects a wrong kind value', () => {

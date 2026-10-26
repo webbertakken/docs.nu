@@ -1,7 +1,7 @@
 import { expect, test } from '../fixtures';
 import { agentSubmits, arrange, CANVAS, open, storedIds } from './agent-session';
 
-// Agent changesets end to end (docs/specs/024-agents/agent-changesets.md; livediagram #343): a
+// Agent changesets end to end (docs/specs/024-agents/agent-changesets.md; LiveDoc #343): a
 // person has their own, unshared document open; their agent changes it with an API token. Before
 // changesets the change never reached the editor and the person's next autosave erased it. Now it
 // arrives live, outlined in their colour, with a toast; it survives their save; Ctrl+Z leaves it;

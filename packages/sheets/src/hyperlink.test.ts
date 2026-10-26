@@ -40,8 +40,8 @@ describe('Workbook.hyperlinkOf', () => {
   };
 
   it('reads the target of a HYPERLINK formula, while the value stays the label', () => {
-    const b = book({ A1: '=HYPERLINK("https://docs.nu", "livediagram")' });
-    expect(b.v('A1')).toBe('livediagram');
+    const b = book({ A1: '=HYPERLINK("https://docs.nu", "LiveDoc")' });
+    expect(b.v('A1')).toBe('LiveDoc');
     expect(at(b, 'A1')).toBe('https://docs.nu/');
   });
 
@@ -70,10 +70,10 @@ describe('Workbook.hyperlinkOf', () => {
 
 describe('the render model', () => {
   it('carries a HYPERLINK cell as a link, underlined, and no other', () => {
-    const b = book({ A1: '=HYPERLINK("https://docs.nu", "livediagram")', A2: 'plain' });
+    const b = book({ A1: '=HYPERLINK("https://docs.nu", "LiveDoc")', A2: 'plain' });
     const model = renderWindow(b.wb, b.sheets[0]!.id, { width: 600, height: 200 }, 'en-GB')!;
     const cell = (text: string) => model.cells.find((x) => x.text === text)!;
-    expect(cell('livediagram')).toMatchObject({
+    expect(cell('LiveDoc')).toMatchObject({
       link: 'https://docs.nu/',
       underline: true,
     });

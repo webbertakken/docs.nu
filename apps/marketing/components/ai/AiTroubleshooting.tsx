@@ -14,7 +14,7 @@ const ISSUES = [
     a: 'The token it held may have expired (they last six months) or been revoked. Remove the connection in your tool and add it again.',
   },
   {
-    q: 'I run my own livediagram',
+    q: 'I run my own LiveDoc',
     a: 'Use your own MCP host in place of mcp.docs.nu, still ending in /mcp. The MCP server is optional and needs accounts set up on your deployment.',
   },
 ];

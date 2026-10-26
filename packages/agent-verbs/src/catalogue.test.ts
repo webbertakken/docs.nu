@@ -161,7 +161,7 @@ describe('the guides and the skill', () => {
 
   it('teach reading a selection reference from a workbench', () => {
     const text = GUIDE_TOPICS.workbench.text;
-    expect(text).toContain('[livediagram] "Home screen" › tab "Wireframe"');
+    expect(text).toContain('[LiveDoc] "Home screen" › tab "Wireframe"');
     for (const command of [
       'livedoc tab view',
       'livedoc tab render',
@@ -174,10 +174,10 @@ describe('the guides and the skill', () => {
     expect(text).toContain('--view show --ref selected');
   });
 
-  it('send an agent to the workbench guide when a message carries [livediagram]', () => {
-    expect(SKILL_DESCRIPTION).toContain('[livediagram]');
+  it('send an agent to the workbench guide when a message carries [LiveDoc]', () => {
+    expect(SKILL_DESCRIPTION).toContain('[LiveDoc]');
     expect(renderSkill()).toContain(
-      'A message carrying a `[livediagram]` line is a selection reference from a workbench: read `livedoc guide workbench` first.',
+      'A message carrying a `[LiveDoc]` line is a selection reference from a workbench: read `livedoc guide workbench` first.',
     );
   });
 

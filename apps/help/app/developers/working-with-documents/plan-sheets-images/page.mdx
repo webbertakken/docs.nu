@@ -5,7 +5,7 @@ import { helpMetadata } from '@/lib/seo';
 export const metadata = helpMetadata({
   title: 'Plan Items, Sheets and Images',
   description:
-    'livediagram API examples for Plan items and card types, Sheet cells, image uploads, pages and articles, SVG renders, copies and themes.',
+    'LiveDoc API examples for Plan items and card types, Sheet cells, image uploads, pages and articles, SVG renders, copies and themes.',
   path: '/help/developers/working-with-documents/plan-sheets-images/',
 });
 
@@ -163,11 +163,11 @@ It answers with the write as it landed, the sheet's new `rev` and the stored sta
 
 <Tip>
   Formulas are stored with their references by row and column id, which is awkward to write by hand.
-  To write formulas, or anything by A1, use `livediagram sheet set "Budget" Costs B2 1200 =B2*12` or
+  To write formulas, or anything by A1, use `LiveDoc sheet set "Budget" Costs B2 1200 =B2*12` or
   the MCP server's `change_sheet`, which work out the ids for you.
 </Tip>
 
-A Sheet shows on a tab in Plan through a Sheet element, as a board does; any other tab refuses either (`tab_not_plan` from `add_sheet` and `add_board`, `invalid_value` from a changeset), so start one with `add_tab` and the `blank-spreadsheet` or `kanban` template. `livediagram sheet add` (or the MCP server's `add_sheet`) makes the sheet and places its element in one go. Over REST, `POST /documents/$DOC/sheets` with `{ "tabId": "…", "title": "Costs" }` makes the sheet (titles are unique on a tab), and a changeset adds its element: `{ "op": "add", "element": { "type": "shape", "shape": "plan-sheet", "x": 0, "y": 0, "width": 960, "height": 560, "planSheet": { "sheetId": "…" } } }`. See [Sheets](/help/canvas/plan-mode/sheets/) for what people see.
+A Sheet shows on a tab in Plan through a Sheet element, as a board does; any other tab refuses either (`tab_not_plan` from `add_sheet` and `add_board`, `invalid_value` from a changeset), so start one with `add_tab` and the `blank-spreadsheet` or `kanban` template. `LiveDoc sheet add` (or the MCP server's `add_sheet`) makes the sheet and places its element in one go. Over REST, `POST /documents/$DOC/sheets` with `{ "tabId": "…", "title": "Costs" }` makes the sheet (titles are unique on a tab), and a changeset adds its element: `{ "op": "add", "element": { "type": "shape", "shape": "plan-sheet", "x": 0, "y": 0, "width": 960, "height": 560, "planSheet": { "sheetId": "…" } } }`. See [Sheets](/help/canvas/plan-mode/sheets/) for what people see.
 
 ## Images
 

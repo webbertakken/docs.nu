@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/ui/useToast';
 import { syncFailureMessage } from '@/lib/offline/offline-convert';
 import { Spinner } from '@/components/palette/template-picker-icons';
 
-// The offer to move a document in This Browser onto livediagram (docs/specs/006-document/offline-mode.md "Sharing a
+// The offer to move a document in This Browser onto LiveDoc (docs/specs/006-document/offline-mode.md "Sharing a
 // document in This Browser"), drawn inside a dialog: the document Share dialog's gate and Share Form's
 // (docs/specs/030-forms/forms.md "Publishing and the form link"). It says the document is offline and offers Sync
 // Document; the sync converts the open document in place, and the dialog around it swaps this prompt for what it was
@@ -19,7 +19,7 @@ export function SyncDocumentPrompt({
 }: {
   onSyncToCloud: () => Promise<void>;
   ready?: boolean;
-  // Why this dialog needs the document on livediagram.
+  // Why this dialog needs the document on LiveDoc.
   message: ReactNode;
   // Told while the sync runs, so the dialog can hold its own buttons.
   onBusyChange?: (busy: boolean) => void;
@@ -38,7 +38,7 @@ export function SyncDocumentPrompt({
       await onSyncToCloud();
       // The document is a cloud document now: the dialog shows what it was opened for in place of this prompt.
       // The spinner stays until it does, so the button never flashes back.
-      toast.success('Synced. Your document is on livediagram now.');
+      toast.success('Synced. Your document is on LiveDoc now.');
     } catch (e) {
       setBusy(false);
       toast.error(syncFailureMessage(e));

@@ -40,7 +40,7 @@ describe('selectionReference', () => {
     const { text } = selectionReference(input([]));
 
     expect(text.split('\n')[0]).toBe(
-      `[livediagram] "Home screen" › tab "Wireframe" (doc doc-3h9x2a, tab ${tabRef()}, rev 41)`,
+      `[LiveDoc] "Home screen" › tab "Wireframe" (doc doc-3h9x2a, tab ${tabRef()}, rev 41)`,
     );
   });
 
@@ -136,6 +136,6 @@ describe('selectionReference', () => {
   it('quotes the document and tab names as JSON', () => {
     const ref = selectionReference({ ...input([]), documentName: 'A "quoted" name' });
 
-    expect(ref.text).toMatch(/^\[livediagram\] "A \\"quoted\\" name" › tab "Wireframe"/);
+    expect(ref.text).toMatch(/^\[LiveDoc\] "A \\"quoted\\" name" › tab "Wireframe"/);
   });
 });

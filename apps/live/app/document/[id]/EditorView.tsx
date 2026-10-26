@@ -588,7 +588,7 @@ export function EditorView() {
                                       />
                                     ) : null}
                                     {workbench ? (
-                                      // The workbench's Reconnect line; its Open in livediagram sits in the tab bar.
+                                      // The workbench's Reconnect line; its Open in LiveDoc sits in the tab bar.
                                       <WorkbenchReconnectLine
                                         workbenchName={workbench.workbenchName}
                                         ended={workbench.ended}

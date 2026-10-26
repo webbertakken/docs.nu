@@ -3,9 +3,9 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { CONTACT_FORM_URL, pageMetadata, REPO_URL } from '@livediagram/ui';
 
-const STATUS_TITLE = 'Status · livediagram';
+const STATUS_TITLE = 'Status · LiveDoc';
 const STATUS_DESCRIPTION =
-  'Operational status of the livediagram services: editor, API, realtime room, marketing site, telemetry dashboard, help centre, Community, and database.';
+  'Operational status of the LiveDoc services: editor, API, realtime room, marketing site, telemetry dashboard, help centre, Community, and database.';
 
 export const metadata = pageMetadata({
   title: STATUS_TITLE,
@@ -95,7 +95,7 @@ export default function StatusPage() {
           Service status
         </h1>
         <p className="mt-3 text-lg text-slate-600 dark:text-slate-300">
-          The pieces livediagram runs on, and how they&rsquo;re doing.
+          The pieces LiveDoc runs on, and how they&rsquo;re doing.
         </p>
 
         <div className="mt-8 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">

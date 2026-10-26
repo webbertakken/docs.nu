@@ -2,7 +2,7 @@
 //
 // Every event is written inline on the write path that caused it.
 // There are no scanners and no scan cron: unlike the system this shape
-// was borrowed from, livediagram has no entities whose state drifts
+// was borrowed from, LiveDoc has no entities whose state drifts
 // silently behind the API, so a "rescan for what I missed" pass would
 // find nothing. The only non-inline writers are the daily crons that
 // already compute the future-dated expiry warnings.
