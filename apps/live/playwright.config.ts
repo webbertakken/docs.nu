@@ -12,7 +12,8 @@ const CI_WORKERS = 4;
 // `out/` export: sign-in is the api's answer at runtime, so a signed-in run differs only in its stack.
 type OwnStack = {
   name: string;
-  ports: { live: string; api: string; marketing: string };
+  // `google`: the port the fake Google listens on, which turns sign-in with Google on (E2E_GOOGLE_PORT).
+  ports: { live: string; api: string; marketing: string; google?: string };
   // Sign-in on, email codes in the outbox (E2E_SIGN_IN, e2e-smoke.md "Signed-in specs").
   signIn: boolean;
 };
@@ -20,7 +21,7 @@ const OWN_STACKS: Record<string, OwnStack> = {
   // `pnpm test:e2e:account`: the signed-in specs in e2e/account/ (docs/specs/014-identity/).
   account: {
     name: 'account',
-    ports: { live: '3015', api: '8788', marketing: '3016' },
+    ports: { live: '3015', api: '8788', marketing: '3016', google: '8797' },
     signIn: true,
   },
   // `pnpm test:e2e:armed`: the entry paths of a first-time guest under enforced guest signatures
@@ -202,6 +203,7 @@ export default defineConfig({
           E2E_API_PORT: ownStack.ports.api,
           E2E_MARKETING_PORT: ownStack.ports.marketing,
           ...(ownStack.signIn ? { E2E_SIGN_IN: '1' } : {}),
+          ...(ownStack.ports.google ? { E2E_GOOGLE_PORT: ownStack.ports.google } : {}),
         }
       : {},
   },

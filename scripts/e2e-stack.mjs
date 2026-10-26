@@ -139,6 +139,11 @@ const SIGN_IN = process.env.E2E_SIGN_IN === '1';
 //                    secret blank (a guest-only host that signs nothing). `=1` also selects the armed
 //                    project and its own ports (playwright.config.ts).
 const GUEST_SIG_ENFORCE = process.env.E2E_GUEST_SIG_ENFORCE !== '0';
+//   E2E_GOOGLE_PORT  with E2E_SIGN_IN=1, sign-in with Google on too, as docs.nu offers it: the api worker
+//                    exchanges Google's codes with the fake Google the account specs serve on this port
+//                    (e2e/account/google-sign-in.spec.ts). Test values only.
+const GOOGLE_PORT = process.env.E2E_GOOGLE_PORT;
+const GOOGLE_SIGN_IN = SIGN_IN && Boolean(GOOGLE_PORT);
 if (SIGN_IN && !GUEST_SIG_ENFORCE) {
   console.warn('[e2e] E2E_SIGN_IN=1 needs the sign-in secret: guest signatures stay enforced');
 }
@@ -155,8 +160,11 @@ const IDENTITY_VARS = {
   EMAIL_OUTBOX: SIGN_IN ? '1' : '',
   APP_BASE_URL: SIGN_IN ? `http://localhost:${LIVE_PORT}` : '',
   RESEND_API_KEY: '',
-  GOOGLE_AUTH_CLIENT_ID: '',
-  GOOGLE_AUTH_CLIENT_SECRET: '',
+  GOOGLE_AUTH_CLIENT_ID: GOOGLE_SIGN_IN
+    ? '123456789012-sign-in-e2e.apps.googleusercontent.com'
+    : '',
+  GOOGLE_AUTH_CLIENT_SECRET: GOOGLE_SIGN_IN ? 'e2e-sign-in-secret' : '',
+  ...(GOOGLE_SIGN_IN ? { GOOGLE_OAUTH_BASE_URL: `http://127.0.0.1:${GOOGLE_PORT}` } : {}),
 };
 // Each browser context is its own client, as each visitor is behind Cloudflare: the api keys its
 // sign-in rate limits on CF-Connecting-IP, and every request here comes from one loopback address,

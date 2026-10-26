@@ -9,6 +9,7 @@
 // Every setting better-auth would otherwise take from NODE_ENV (the secret guard, Secure cookies, its rate limiter)
 // is set explicitly: a deployed Worker has no NODE_ENV.
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
+import { routeGoogleTokenCallsToFake } from './fake-google-route';
 import { emailOTP } from 'better-auth/plugins/email-otp';
 import { jwt } from 'better-auth/plugins/jwt';
 import { generateAccountId } from './account-id';
@@ -172,5 +173,6 @@ export function createIdentity(
   const config = identityConfigOf(env);
   reportIdentityConfig(config);
   if (!config.enabled) return null;
+  routeGoogleTokenCallsToFake(env);
   return betterAuth(identityOptions(env, executionCtx, codeSend));
 }

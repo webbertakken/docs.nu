@@ -199,6 +199,15 @@ address, since parallel tests share the stack's one D1 and it outlives a run, so
 one document as real verified people to the api and the realtime room. Sign-up, sign-out, deleting the account and a
 guest's documents moving in on sign-in go through the pages themselves, as a person does.
 
+The account stack offers Google too, as docs.nu does: `E2E_GOOGLE_PORT` (`:8797`) gives the api worker test Google
+keys and `GOOGLE_OAUTH_BASE_URL` on that port, where `e2e/account/google-sign-in.spec.ts` serves the fake Google
+(`packages/fake-google`). better-auth names Google's token endpoint outright, so the worker sends calls for
+`https://oauth2.googleapis.com` to that loopback origin (`apps/api/src/auth/fake-google-route.ts`, honoured only for
+http on loopback). The browser's trip to Google's consent screen is answered by the spec, which agrees at once and
+sends the code back to better-auth's callback. State, PKCE, the code exchange, the account made or linked and the
+session cookie are all real. The fake's code exchange answers an unsigned OpenID `id_token`, as better-auth reads
+Google's server-to-server answer without verifying it.
+
 `pnpm --filter @livediagram/live test:e2e:account` sets `E2E_ACCOUNT=1`, which adds the `account` project (dark mode)
 and boots that stack on its own ports (live `:3015`, api `:8788`, marketing `:3016`), so a guest stack already up on
 `:4002` is never reused for it. The workbench (`test:e2e:workbench`, `:3021`) and Drive (`test:e2e:drive`, `:3023`)

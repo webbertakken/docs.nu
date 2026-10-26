@@ -2,7 +2,10 @@
 // talks to (docs/specs/022-drive-mirror/blueprints/drive-mirror.md), so every
 // test proves the mirror without real Google credentials.
 //
-//   - OAuth: POST /token (authorization_code, refresh_token) and POST /revoke.
+//   - OAuth: POST /token (authorization_code, refresh_token) and POST /revoke. The code exchange also answers an
+//     OpenID id_token naming the person, so sign-in with Google runs against it too
+//     (docs/specs/003-system-architecture/e2e-smoke.md "Signed-in specs"). It is unsigned: better-auth reads a token from
+//     Google's own token endpoint without verifying it, as Google's server-to-server answer needs no signature.
 //   - Drive v3: about (the user's permissionId), changes (startPageToken, list), files (list, get, alt=media,
 //     create, update, delete), uploads (multipart, resumable).
 //   - `fields` is honoured; `q` supports what the mirror sends.
@@ -60,6 +63,38 @@ function driveError(status: number, reason: string, message = reason): Response 
   return jsonResponse(status, {
     error: { code: status, message, errors: [{ domain: 'global', reason, message }] },
   });
+}
+
+// The OpenID claims Google's token endpoint answers for `user` (an email address): a stable subject, the address
+// verified, and a name made from its local part ("ada.reed@…" is "Ada Reed").
+export function idTokenClaims(
+  user: string,
+  clientId: string,
+  nowMs: number,
+): Record<string, unknown> {
+  const local = user.split('@')[0] ?? user;
+  const name = local
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((word) => word[0]!.toUpperCase() + word.slice(1))
+    .join(' ');
+  const iat = Math.floor(nowMs / 1000);
+  return {
+    iss: 'https://accounts.google.com',
+    aud: clientId,
+    sub: `fake-${[...user].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7)}`,
+    email: user,
+    email_verified: true,
+    name,
+    given_name: name.split(' ')[0],
+    iat,
+    exp: iat + ACCESS_TOKEN_TTL_S,
+  };
+}
+
+function idTokenFor(user: string, clientId: string, nowMs: number): string {
+  const part = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');
+  return `${part({ alg: 'none', typ: 'JWT' })}.${part(idTokenClaims(user, clientId, nowMs))}.`;
 }
 
 export class FakeGoogle {
@@ -312,6 +347,7 @@ export class FakeGoogle {
         scope:
           'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.install',
         ...(this.omitRefreshToken ? {} : { refresh_token: grant.refreshToken }),
+        id_token: idTokenFor(user, form.get('client_id') ?? '', this.now()),
       });
     }
     if (grantType === 'refresh_token') {
