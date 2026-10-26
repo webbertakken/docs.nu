@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // The deprecated /api/diagrams alias through the real worker entry point
 // (docs/specs/015-api/public-api-and-tokens.md, "Deprecated diagram routes").
-vi.mock('./auth/clerk', () => ({ getClerkIdentity: async () => null }));
+vi.mock('./auth/session-token', () => ({ getAccountSession: async () => null }));
 const { resolveApiTokenMock } = vi.hoisted(() => ({ resolveApiTokenMock: vi.fn() }));
 vi.mock('./db', () => ({
   resolveApiToken: resolveApiTokenMock,
@@ -14,9 +14,7 @@ import worker from './index';
 import { signOwnerId } from './auth/owner-signature';
 import type { Env } from './types';
 
-const SECRET = 'test-hmac-secret';
-const env = () =>
-  ({ GUEST_ID_HMAC_SECRET: SECRET, GUEST_SIG_ENFORCE_AFTER: '1' }) as unknown as Env;
+const env = () => ({ BETTER_AUTH_SECRET: 's'.repeat(40) }) as unknown as Env;
 const get = (path: string, headers: Record<string, string> = {}) =>
   new Request(`https://api.test${path}`, { method: 'GET', headers });
 
@@ -24,7 +22,7 @@ describe('the deprecated /api/diagrams alias', () => {
   beforeEach(() => resolveApiTokenMock.mockResolvedValue(null));
 
   it('serves the documents route in the old shape, marked deprecated', async () => {
-    const sig = (await signOwnerId(SECRET, 'guest-1'))!;
+    const sig = (await signOwnerId(env(), 'guest-1'))!;
     const headers = { 'X-Owner-Id': 'guest-1', 'X-Owner-Sig': sig };
     const current = await worker.fetch(get('/api/documents', headers), env());
     const legacy = await worker.fetch(get('/api/diagrams', headers), env());

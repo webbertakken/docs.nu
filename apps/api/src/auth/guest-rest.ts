@@ -1,42 +1,21 @@
-// Guest REST signature gate (docs/specs/015-api/public-api-and-tokens.md §4).
+// Guest REST signature gate (docs/specs/015-api/public-api-and-tokens.md §4; docs/specs/014-identity/auth-and-guest-access.md
+// "Signed guest ids").
 //
 // The guest `X-Owner-Id` header is a bearer value that leaks to collaborators
-// (presence frames, comment authors), and the REST path trusted it with no
-// proof — so a harvested id (a guest UUID, OR a signed-up user's Clerk `sub`
-// presented via the header fallback) could be used to act as that owner. The
-// fix: on owner-scoped routes, a presented `X-Owner-Id` must carry a valid
-// HMAC signature (`X-Owner-Sig`, verified against `GUEST_ID_HMAC_SECRET` via
+// (presence frames, comment authors), so on its own it proves nothing: a
+// harvested id would let anyone act as that guest. On owner-scoped routes a
+// presented `X-Owner-Id` must therefore carry a valid HMAC signature
+// (`X-Owner-Sig`, verified with the guest signing key via
 // auth/owner-signature.ts). The legitimate guest holds its signature; a
 // harvester does not.
-//
-// Rollout is gated so legacy unsigned guests aren't locked out (docs/specs/015-api/public-api-and-tokens.md §4
-// "Compatibility"): enforcement is OFF until the operator sets an explicit
-// cutoff, giving active guests time to self-heal to a signed id first.
+import type { Env } from '../types';
+import { guestKeySecret } from './guest-key';
 
-type SigEnv = { GUEST_ID_HMAC_SECRET?: string; GUEST_SIG_ENFORCE_AFTER?: string };
-
-// Whether the signature is required yet. OFF when there's no secret (self-host
-// opt-out, like the rest of the guest-signing model) OR no cutoff is set, OR
-// the cutoff is still in the future (the grace window). The operator sets
-// GUEST_SIG_ENFORCE_AFTER (epoch ms) to a past time to turn it on.
-export function guestSignatureEnforced(env: SigEnv, now: number): boolean {
-  if (!env.GUEST_ID_HMAC_SECRET) return false;
-  if (!env.GUEST_SIG_ENFORCE_AFTER) return false;
-  const cutoff = Number(env.GUEST_SIG_ENFORCE_AFTER);
-  return Number.isFinite(cutoff) && now >= cutoff;
-}
-
-// Whether `participantCreatedAt` predates this deployment's signing, so the id
-// can only be a legacy unsigned one. Server-stamped on first write and never
-// updated, so a client cannot backdate it. False when GUEST_SIGNING_LIVE_AT is
-// unset or unreadable: no exception unless the operator states the date.
-export function isLegacyGuestEra(
-  env: { GUEST_SIGNING_LIVE_AT?: string },
-  participantCreatedAt: number | null,
-): boolean {
-  const liveAt = Number(env.GUEST_SIGNING_LIVE_AT);
-  if (!env.GUEST_SIGNING_LIVE_AT || !Number.isFinite(liveAt)) return false;
-  return participantCreatedAt !== null && participantCreatedAt < liveAt;
+// Whether a guest must prove its id: whenever the host has a guest signing key,
+// which is whenever sign-in is on. There is no grace window. A guest-only host
+// has no key, signs nothing and requires nothing.
+export function guestSignatureEnforced(env: Env): boolean {
+  return guestKeySecret(env) !== null;
 }
 
 // Resource segments whose access is keyed on the resolved owner id, so a
@@ -44,7 +23,7 @@ export function isLegacyGuestEra(
 // is on. Public / auth-bootstrap routes are deliberately excluded: `guest-id`
 // (mints the id), `share` (share-code gated), `migrate` (verifies its own
 // signature), `events` / `telemetry` / `capabilities` / `unfurl` (no owner),
-// and the Clerk-only `account` / `teams` / `tokens`.
+// and the session-only `account` / `teams` / `tokens`.
 export const OWNER_SCOPED_SEGMENTS = new Set([
   'documents',
   'folders',

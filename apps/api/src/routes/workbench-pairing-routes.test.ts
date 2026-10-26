@@ -8,7 +8,7 @@ import { NOW, ORIGIN, pairToken, rows, workbenchDb } from './workbench-test-fixt
 
 type Caller =
   | { kind: 'token'; tokenId: string; owner?: string }
-  | { kind: 'clerk'; userId: string }
+  | { kind: 'session'; userId: string }
   | { kind: 'none' };
 
 function call(
@@ -23,11 +23,11 @@ function call(
     caller.kind === 'token'
       ? {
           owner: caller.owner ?? 'user_1',
-          verifiedUserId: caller.owner ?? 'user_1',
+          verifiedAccountId: caller.owner ?? 'user_1',
           token: { id: caller.tokenId },
         }
-      : caller.kind === 'clerk'
-        ? { owner: caller.userId, clerkUserId: caller.userId }
+      : caller.kind === 'session'
+        ? { owner: caller.userId, sessionAccountId: caller.userId }
         : {};
   return handleWorkbench(
     makeTestRouteContext(method, `/api/workbench/${path}`, {
@@ -39,7 +39,7 @@ function call(
 }
 
 const TOKEN: Caller = { kind: 'token', tokenId: 'tok1' };
-const OWNER: Caller = { kind: 'clerk', userId: 'user_1' };
+const OWNER: Caller = { kind: 'session', userId: 'user_1' };
 
 async function ask(db: SqliteD1, name?: string) {
   const res = await call(db, 'POST', 'pairing-requests', TOKEN, { origin: ORIGIN, name });
@@ -114,7 +114,7 @@ describe('workbench pairing routes', () => {
       const db = await workbenchDb();
       const limit = vi.fn(async () => ({ success: false }));
 
-      const clerk = await call(db, 'POST', 'pairing-requests', OWNER, { origin: ORIGIN });
+      const session = await call(db, 'POST', 'pairing-requests', OWNER, { origin: ORIGIN });
       const origin = await call(db, 'POST', 'pairing-requests', TOKEN, { origin: '*' });
       const limited = await call(
         db,
@@ -138,9 +138,9 @@ describe('workbench pairing routes', () => {
       );
       const noOrigin = await call(db, 'POST', 'pairing-requests', TOKEN, {});
 
-      expect([clerk.status, origin.status, limited.status]).toEqual([403, 400, 429]);
+      expect([session.status, origin.status, limited.status]).toEqual([403, 400, 429]);
       expect([notJson.status, noOrigin.status]).toEqual([400, 400]);
-      expect(await clerk.json()).toEqual({ error: 'token_required' });
+      expect(await session.json()).toEqual({ error: 'token_required' });
       expect(await origin.json()).toEqual({ error: 'invalid_origin' });
     });
   });
@@ -152,7 +152,7 @@ describe('workbench pairing routes', () => {
 
       const mine = await call(db, 'GET', `pairing-requests/${code}`, OWNER);
       const theirs = await call(db, 'GET', `pairing-requests/${code}`, {
-        kind: 'clerk',
+        kind: 'session',
         userId: 'user_2',
       });
       const token = await call(db, 'GET', `pairing-requests/${code}`, TOKEN);
@@ -230,7 +230,7 @@ describe('workbench pairing routes', () => {
 
       const token = await call(db, 'POST', `pairing-requests/${code}/approve`, TOKEN);
       const other = await call(db, 'POST', `pairing-requests/${code}/approve`, {
-        kind: 'clerk',
+        kind: 'session',
         userId: 'user_2',
       });
 
@@ -249,10 +249,10 @@ describe('workbench pairing routes', () => {
         tokenId: 'tok2',
         owner: 'user_2',
       });
-      const clerk = await call(db, 'GET', `pairing-requests/${code}/status`, OWNER);
+      const session = await call(db, 'GET', `pairing-requests/${code}/status`, OWNER);
 
       expect(other.status).toBe(404);
-      expect(clerk.status).toBe(403);
+      expect(session.status).toBe(403);
     });
   });
 
@@ -283,7 +283,10 @@ describe('workbench pairing routes', () => {
       const db = await workbenchDb();
       pairToken(db);
 
-      const other = await call(db, 'DELETE', 'pairings/pair1', { kind: 'clerk', userId: 'user_2' });
+      const other = await call(db, 'DELETE', 'pairings/pair1', {
+        kind: 'session',
+        userId: 'user_2',
+      });
       const mine = await call(db, 'DELETE', 'pairings/pair1', OWNER);
       const gone = await call(db, 'DELETE', 'pairings/pair1', OWNER);
 

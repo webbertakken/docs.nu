@@ -129,11 +129,11 @@ Set in the repo under **Settings → Secrets and variables → Actions**:
 
 **Optional**, each synced into `wrangler secret put` by the deploy workflow and skipped when unset, so a fork that sets none still deploys:
 
-| Secret                 | Synced to       | See                                                                                      |
-| ---------------------- | --------------- | ---------------------------------------------------------------------------------------- |
-| `CLERK_JWKS_URL`       | api             | [04](../014-identity/auth-and-guest-access.md)                                           |
-| `GUEST_ID_HMAC_SECRET` | api             | [04](../014-identity/auth-and-guest-access.md)                                           |
-| `INTERNAL_EVENTS_KEY`  | api **and** mcp | [22](../017-telemetry/telemetry.md) — one GitHub secret drives both, so they can't drift |
+| Secret                      | Synced to       | See                                                                                                        |
+| --------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`        | api             | [04](../014-identity/auth-and-guest-access.md): turns sign-in on, and derives the guest-id signing key     |
+| `GOOGLE_AUTH_CLIENT_SECRET` | api             | [04](../014-identity/auth-and-guest-access.md): Google sign-in, beside `GOOGLE_AUTH_CLIENT_ID` in `[vars]` |
+| `INTERNAL_EVENTS_KEY`       | api **and** mcp | [22](../017-telemetry/telemetry.md) — one GitHub secret drives both, so they can't drift                   |
 
 Syncing on every deploy means these rotate by editing the GitHub secret rather than by running `wrangler` against production. [Secrets policy](../002-project-scope/secrets-policy.md) holds the full worker-secret table.
 

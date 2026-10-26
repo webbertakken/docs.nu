@@ -19,9 +19,10 @@ export function emailEnabled(env: Env): boolean {
 }
 
 // Public origin for links in emails. Trailing slashes stripped so callers can
-// always template `${appBaseUrl(env)}/path`.
+// always template `${appBaseUrl(env)}/path`. A blank APP_BASE_URL is unset, as sign-in reads it
+// (auth/identity-config.ts): `--var APP_BASE_URL:` must not turn every link relative.
 export function appBaseUrl(env: Env): string {
-  const base = env.APP_BASE_URL ?? DEFAULT_BASE_URL;
+  const base = env.APP_BASE_URL?.trim() || DEFAULT_BASE_URL;
   // A reverse scan rather than /\/+$/. That pattern is unanchored, so on a
   // value that does not end in a slash the engine retries from every offset,
   // which is quadratic in the length. This one only ever sees a configured env

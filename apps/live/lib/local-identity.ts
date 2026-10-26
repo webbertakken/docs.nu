@@ -1,7 +1,7 @@
 // Single source of truth for the browser-local identity state that
 // guests rely on (docs/specs/014-identity/auth-and-guest-access.md). The key strings used to be inlined at
 // every read/write site across editor-page, the new-document page and
-// the Clerk bootstrap hook — renaming the namespace or evolving the
+// the account bootstrap hook — renaming the namespace or evolving the
 // schema needed a grep + sweep across several files. Centralising
 // them here means a v3 migration is a one-line edit and the intent
 // of each piece of state is documented once.
@@ -28,24 +28,19 @@ const NS = 'livediagram:v2:';
 const KEYS = {
   // Per-browser guest participant id (`crypto.randomUUID()`),
   // carried to the api worker as `X-Owner-Id` until/unless the
-  // user signs in with Clerk. See docs/specs/014-identity/auth-and-guest-access.md — "Hybrid identity".
+  // person signs in. See docs/specs/014-identity/auth-and-guest-access.md "How the api knows who is calling".
   selfId: `${NS}self-id`,
   // HMAC signature of the guest id, minted by the api worker at
   // POST /api/guest-id (auth/owner-signature.ts). Replayed in the
   // /api/migrate body so the worker can prove the caller actually owns
   // the guest data it's claiming — observing the bare id is not enough.
-  // Absent for legacy guests created before signing shipped, or when the
-  // worker has no GUEST_ID_HMAC_SECRET configured. See docs/specs/014-identity/auth-and-guest-access.md.
+  // Absent on a host that signs nothing (no sign-in configured), or while a
+  // first mint has not reached the worker. See docs/specs/014-identity/auth-and-guest-access.md "Signed guest ids".
   selfSig: `${NS}self-sig`,
-  // An upgrade to a signed id that has been asked for but not yet adopted: {from, to, sig}.
-  // Written before the worker moves the data, cleared once the new id is kept, so a reload
-  // in between resumes the same upgrade instead of minting another id
-  // (docs/specs/014-identity/auth-and-guest-access.md, "An interrupted upgrade resumes").
-  pendingUpgrade: `${NS}pending-signed-id`,
   // Boolean flag — '1' once the user has confirmed their display
   // name via the welcome modal at least once. Used to suppress the
   // identity prompt on subsequent document opens. Only meaningful
-  // for guests; signed-in users derive their name from Clerk.
+  // for guests; an account's name comes from the account.
   nameConfirmed: `${NS}name-confirmed`,
   // UTC day string (YYYY-MM-DD) of this browser's most recent app
   // open. Gates the once-per-day 'Participant'/'Returned' telemetry
@@ -100,26 +95,6 @@ export function clearGuestSelfId(): void {
   removeLocalStorageSafe(KEYS.selfId);
   removeLocalStorageSafe(KEYS.selfSig);
   notifyGuestId();
-}
-
-type PendingGuestUpgrade = { from: string; to: string; sig: string };
-
-export function getPendingGuestUpgrade(): PendingGuestUpgrade | null {
-  const raw = readLocalStorageSafe(KEYS.pendingUpgrade);
-  if (!raw) return null;
-  try {
-    const v = JSON.parse(raw) as Partial<PendingGuestUpgrade>;
-    return typeof v.from === 'string' && typeof v.to === 'string' && typeof v.sig === 'string'
-      ? { from: v.from, to: v.to, sig: v.sig }
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-export function setPendingGuestUpgrade(pending: PendingGuestUpgrade | null): void {
-  if (pending) writeLocalStorageSafe(KEYS.pendingUpgrade, JSON.stringify(pending));
-  else removeLocalStorageSafe(KEYS.pendingUpgrade);
 }
 
 export function getGuestSelfSig(): string | null {

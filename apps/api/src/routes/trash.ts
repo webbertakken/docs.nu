@@ -29,7 +29,9 @@ export async function handleTrash(ctx: RouteContext): Promise<Response> {
 
   if (segments.length === 2) {
     if (request.method === 'GET') {
-      return json({ trash: await listTrash(env, { owner, verifiedUserId: ctx.verifiedUserId }) });
+      return json({
+        trash: await listTrash(env, { owner, verifiedAccountId: ctx.verifiedAccountId }),
+      });
     }
     if (request.method === 'DELETE') {
       const teamId = url.searchParams.get('team');
@@ -66,7 +68,7 @@ export async function handleTrash(ctx: RouteContext): Promise<Response> {
 // A team Trash belongs to the team's joined members, checked against the
 // server-verified account id only (docs/specs/013-workspace/team-shared-documents.md).
 async function joined(ctx: RouteContext, teamId: string): Promise<boolean> {
-  if (!ctx.verifiedUserId) return false;
-  const membership = await getMembership(ctx.env, teamId, ctx.verifiedUserId);
+  if (!ctx.verifiedAccountId) return false;
+  const membership = await getMembership(ctx.env, teamId, ctx.verifiedAccountId);
   return membership?.status === 'joined';
 }

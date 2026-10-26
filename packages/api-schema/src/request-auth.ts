@@ -45,7 +45,6 @@ export const ACCOUNT_ID_PREFIX = 'acct_';
 // therefore a replay of a harvested id (team member lists expose them), and the api worker refuses it outright
 // (apps/api/src/index.ts). The editor applies the same rule from the other side: a signed-in client with no
 // session token never sends its account id as the guest header (apps/live/lib/api/core.ts `identityHeaders`).
-// `user_` is Clerk's shape, refused until Clerk leaves the code.
 export function isAccountIdShape(ownerId: string): boolean {
-  return ownerId.startsWith(ACCOUNT_ID_PREFIX) || ownerId.startsWith('user_');
+  return ownerId.startsWith(ACCOUNT_ID_PREFIX);
 }

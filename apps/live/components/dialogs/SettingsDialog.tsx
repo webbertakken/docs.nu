@@ -15,7 +15,7 @@ import {
   searchSettings,
 } from '@/components/dialogs/settings/settings-search';
 import { useCapabilities } from '@/hooks/persistence/useCapabilities';
-import { useClerkApiBootstrap } from '@/hooks/persistence/useClerkApiBootstrap';
+import { useAccountApiBootstrap } from '@/hooks/persistence/useAccountApiBootstrap';
 import { useIsMobileViewport } from '@/hooks/ui/useIsMobileViewport';
 import { markTourPending, requestTourRelaunch } from '@/lib/tour-pending';
 import { PLAN_TOUR_TRACKS, planTrackSeen, requestPlanTourRelaunch } from '@/lib/plan-tour';
@@ -38,7 +38,7 @@ import type { UserPreferences } from '@/lib/user-preferences';
 import { isPowerUserMode } from '@/lib/power-user-mode';
 import { useDriveMirror } from '@/components/drive/drive-mirror-context';
 import type { CloudSyncProviderId } from '@/lib/cloud-sync/providers';
-import { clerkEnabled } from '@/lib/clerk-config';
+import { useSignInAvailable } from '@/lib/auth-config';
 import { usePlacementDefaults } from '@/hooks/persistence/usePlacementDefaults';
 import { useWorkbenchSession } from '@/components/providers/workbench-session-context';
 
@@ -83,12 +83,13 @@ export function SettingsDialog({
   initialSectionId = null,
   ownerId = null,
 }: SettingsDialogProps) {
+  const signInAvailable = useSignInAvailable();
   const isMobile = useIsMobileViewport();
   // Email rows need Resend configured AND a signed-in account: a guest has
   // no address, so those switches could never apply (docs/specs/014-identity/transactional-email.md).
   const { emailEnabled } = useCapabilities();
-  const { clerkUserId, isSignedIn } = useClerkApiBootstrap();
-  const signedIn = Boolean(isSignedIn && clerkUserId);
+  const { accountId, isSignedIn } = useAccountApiBootstrap();
+  const signedIn = Boolean(isSignedIn && accountId);
   // A workbench's Settings reach nothing beyond its one document (docs/specs/013-workspace/
   // blueprints/workbench-embeds.md, Surface table).
   const workbench = useWorkbenchSession() !== null;
@@ -96,8 +97,8 @@ export function SettingsDialog({
   const defaultsOwner = usePlacementDefaults(workbench ? null : ownerId).ownerId;
   const readerId = ownerId ?? defaultsOwner;
   const owner = useMemo(
-    () => (readerId ? { ownerId: readerId, clerkUserId: clerkUserId ?? null } : null),
-    [readerId, clerkUserId],
+    () => (readerId ? { ownerId: readerId, accountId: accountId ?? null } : null),
+    [readerId, accountId],
   );
   // Power-user-only rows appear the moment the mode's own row switches on
   // (docs/specs/007-editor/power-user-mode.md), so this reads the live settings, not a snapshot.
@@ -115,13 +116,22 @@ export function SettingsDialog({
       visibleCategories(aiCapable === true, {
         emailEnabled,
         signedIn,
-        authEnabled: clerkEnabled,
+        authEnabled: signInAvailable,
         powerUserMode,
         preferences: settings,
         cloudProviders,
         workbench,
       }),
-    [aiCapable, emailEnabled, signedIn, powerUserMode, settings, cloudProviders, workbench],
+    [
+      aiCapable,
+      emailEnabled,
+      signedIn,
+      signInAvailable,
+      powerUserMode,
+      settings,
+      cloudProviders,
+      workbench,
+    ],
   );
 
   // The category the reader chose; null is the phone's root list. Desktop

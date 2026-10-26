@@ -204,7 +204,12 @@ export async function probeDispatch(
         const res = await worker.fetch(
           new Request(`https://probe.test/api/${path.join('/')}`, {
             method,
-            headers: { 'X-Owner-Id': 'probe-owner', 'Content-Type': 'application/json' },
+            // A session bearer, so the caller's test can sign the probe in (it mocks the verifier).
+            headers: {
+              Authorization: 'Bearer probe-session',
+              'X-Owner-Id': 'probe-owner',
+              'Content-Type': 'application/json',
+            },
           }),
           env,
           executionCtx,

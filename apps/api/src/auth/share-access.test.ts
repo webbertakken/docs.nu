@@ -18,6 +18,9 @@ vi.mock('../db', () => ({
 import {
   clearVerifiedSharePasswords,
   isPersonalOwner,
+  SHARE_GRANT_PREFIX,
+  shareGrantFor,
+  shareGrantOf,
   shareLinkForDocument,
   sharePasswordOk,
   sharePasswordStatus,
@@ -70,6 +73,38 @@ describe('shareLinkForDocument', () => {
     expect(await shareLinkForDocument(ENV, null, 'd1')).toBeNull();
     expect(await shareLinkForDocument(ENV, '', 'd1')).toBeNull();
     expect(getShareLinkMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('share grants', () => {
+  it('are made from the stored value, never reveal the password, and differ per document', async () => {
+    const stored = await hashSharePassword('hunter2', FAST);
+    const grant = await shareGrantFor('d1', stored);
+    expect(grant.startsWith(SHARE_GRANT_PREFIX)).toBe(true);
+    expect(grant.slice(SHARE_GRANT_PREFIX.length)).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(grant).not.toContain('hunter2');
+    expect(await shareGrantFor('d1', stored)).toBe(grant);
+    expect(await shareGrantFor('d2', stored)).not.toBe(grant);
+  });
+
+  it('open the document where the password would, and stop when the password changes', async () => {
+    const stored = await hashSharePassword('hunter2', FAST);
+    getSharePasswordMock.mockResolvedValue(stored);
+    const grant = (await shareGrantOf(ENV, 'd1'))!;
+    const limiter = { limit: vi.fn(async () => ({ success: true })) };
+    const env = { SHARE_RATE_LIMITER: limiter } as unknown as Env;
+    expect(await sharePasswordStatus(env, 'd1', attempt(grant))).toBe('ok');
+    expect(limiter.limit).not.toHaveBeenCalled();
+    expect(await sharePasswordStatus(env, 'd2', attempt(grant))).toBe('invalid');
+    getSharePasswordMock.mockResolvedValue(await hashSharePassword('hunter3', FAST));
+    expect(await sharePasswordStatus(env, 'd1', attempt(grant))).toBe('invalid');
+    expect(await sharePasswordStatus(env, 'd1', attempt(SHARE_GRANT_PREFIX + 'forged'))).toBe(
+      'invalid',
+    );
+  });
+
+  it('are none for a document without a password', async () => {
+    expect(await shareGrantOf(ENV, 'd1')).toBeNull();
   });
 });
 

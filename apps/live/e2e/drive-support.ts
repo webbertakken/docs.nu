@@ -1,58 +1,14 @@
 // Support for the Google Drive mirror e2e (docs/specs/022-drive-mirror/blueprints/drive-mirror.md,
-// "Testing"): a throwaway RSA key and JWKS the api worker verifies sessions
-// against (CLERK_JWKS_URL, set by scripts/e2e-stack.mjs under E2E_DRIVE=1),
-// the fake Google served over HTTP for the worker's OAuth calls, and the
-// browser's Google traffic routed into the same fake.
+// "Testing"): the fake Google served over HTTP for the worker's OAuth calls, and the browser's Google
+// traffic routed into the same fake. Accounts sign in for real (account/sign-in.ts).
 
-import { generateKeyPairSync, randomUUID, sign, type KeyObject } from 'node:crypto';
-import { createServer, type Server } from 'node:http';
+import type { Server } from 'node:http';
 import type { Page, Route } from '@playwright/test';
 import { FakeGoogle } from '@livediagram/fake-google';
 import { serveFakeGoogle } from '@livediagram/fake-google/server';
 
-// The same defaults scripts/e2e-stack.mjs gives the api worker.
-const JWKS_PORT = Number(process.env.E2E_DRIVE_JWKS_PORT ?? 8795);
+// The same default scripts/e2e-stack.mjs gives the api worker.
 const GOOGLE_PORT = Number(process.env.E2E_DRIVE_GOOGLE_PORT ?? 8796);
-const KID = 'e2e-drive';
-
-const b64url = (data: Buffer | string) => Buffer.from(data).toString('base64url');
-
-export class TestIdentity {
-  private readonly privateKey: KeyObject;
-  readonly jwk: Record<string, unknown>;
-
-  constructor() {
-    const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
-    this.privateKey = privateKey;
-    this.jwk = { ...publicKey.export({ format: 'jwk' }), kid: KID, alg: 'RS256', use: 'sig' };
-  }
-
-  // A session JWT shaped like Clerk's: RS256, `sub`, `sid`, an hour to live.
-  token(userId: string, email: string): string {
-    const now = Math.floor(Date.now() / 1000);
-    const header = b64url(JSON.stringify({ alg: 'RS256', kid: KID, typ: 'JWT' }));
-    const payload = b64url(
-      JSON.stringify({
-        sub: userId,
-        sid: `sess_${randomUUID()}`,
-        email,
-        iat: now,
-        nbf: now - 5,
-        exp: now + 3600,
-      }),
-    );
-    const signature = sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), this.privateKey);
-    return `${header}.${payload}.${b64url(signature)}`;
-  }
-
-  serve(): Promise<Server> {
-    const server = createServer((_req, res) => {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ keys: [this.jwk] }));
-    });
-    return new Promise((resolve) => server.listen(JWKS_PORT, '127.0.0.1', () => resolve(server)));
-  }
-}
 
 export async function startFakeGoogle(): Promise<{ fake: FakeGoogle; server: Server }> {
   const fake = new FakeGoogle();

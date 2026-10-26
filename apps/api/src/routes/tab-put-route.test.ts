@@ -33,8 +33,8 @@ function call(
     makeTestRouteContext(method, path, {
       env: db.env,
       owner: OWNER,
-      clerkUserId: opts.token ? null : OWNER,
-      verifiedUserId: OWNER,
+      sessionAccountId: opts.token ? null : OWNER,
+      verifiedAccountId: OWNER,
       body: opts.body,
       headers: opts.headers,
       token: opts.token ? { id: 'tok_1' } : null,
@@ -153,8 +153,8 @@ describe('the tab PUT', () => {
       makeTestRouteContext('PUT', '/api/documents/D/tabs/t1', {
         env: db.env,
         owner: OWNER,
-        clerkUserId: null,
-        verifiedUserId: OWNER,
+        sessionAccountId: null,
+        verifiedAccountId: OWNER,
         token: null,
         workbench: { sessionId: 's', ownerId: OWNER, documentId: 'D' } as never,
         body: { id: 't1', name: 'Board', elements: [box('a'), box('b')] },
@@ -286,8 +286,8 @@ describe("someone else's tab id", () => {
         makeTestRouteContext(method, path, {
           env: db.env,
           owner: 'user_attacker',
-          clerkUserId: 'user_attacker',
-          verifiedUserId: 'user_attacker',
+          sessionAccountId: 'user_attacker',
+          verifiedAccountId: 'user_attacker',
           body,
         }),
       );

@@ -20,6 +20,10 @@ describe('appBaseUrl', () => {
     expect(appBaseUrl({ APP_BASE_URL: 'https://example.com/' } as unknown as Env)).toBe(
       'https://example.com',
     ));
+  it('treats a blank APP_BASE_URL as unset, as sign-in does', () => {
+    expect(appBaseUrl({ APP_BASE_URL: '' } as unknown as Env)).toBe('https://docs.nu');
+    expect(appBaseUrl({ APP_BASE_URL: '  ' } as unknown as Env)).toBe('https://docs.nu');
+  });
 });
 
 describe('sendEmail', () => {

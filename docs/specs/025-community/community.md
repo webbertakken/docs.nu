@@ -115,7 +115,7 @@ type) and on the worker (authoritative).
 ## The Community app
 
 `apps/community` is a static export (`basePath: '/community'`) like Help and Telemetry. It talks to the api at
-`/api/community/*` from the browser. Browsing needs no sign-in: the app loads Clerk only for My Shares (below). Pages:
+`/api/community/*` from the browser. Browsing needs no sign-in: the app reads the session only for My Shares (below). Pages:
 
 ### Gallery (`/community/`)
 
@@ -292,12 +292,13 @@ A signed-in author can narrow the gallery to their own posts, to review them and
 - Above the grid, **Your Shares** totals all their posts, likes and copies, whatever the search narrows to.
 - Signed out, it says **Sign in to see your shares.** with a Sign In button that returns to the same view; with
   nothing shared yet, **You haven't shared anything yet.** with Share Your Own.
-- If sign-in has not loaded after 10 seconds (a blocked script, a network failure), it says **We couldn't load the
-  Community.** with **Try Again**, which reloads the page. A build without sign-in given `is:mine` says **My Shares
+- If the session read has not answered after 10 seconds (`SESSION_LOAD_TIMEOUT_MS`, a network failure), it says **We couldn't load the
+  Community.** with **Try Again**, which reloads the page. A host without sign-in given `is:mine` says **My Shares
   needs an account.**
-- The rest of the Community needs no identity, so the Community app loads Clerk only once My Shares is on, and a
-  build without a Clerk key does not offer it. The api answers `GET /api/community/mine` (Clerk session
-  required, never cached); the public list ignores `is:mine`.
+- The rest of the Community needs no identity, so the Community app reads the session (`apps/community/lib/session.ts`,
+  the same plain-`fetch` layer the editor uses, `@livediagram/account-session`) only once My Shares is on. My Shares
+  is offered unless this browser last learned that the host has no sign-in (`livediagram:v2:sign-in-offered`). The
+  api answers `GET /api/community/mine` (session token required, never cached); the public list ignores `is:mine`.
 - Turning it on is tracked as `Community·Selected·Mine`.
 
 ## Featured on the home page
@@ -382,8 +383,8 @@ While it is off:
 Community works with zero external services: D1 holds posts, the snapshot cache renders images, the app is static
 behind a small worker script that binds to the api for search-engine metadata and the sitemap (an optional binding: left
 out, the pages are served exactly as built). A self-host can leave it as is; nothing is published until someone publishes. Publishing and My Shares need sign-in, so
-a build without a Clerk key offers neither; the Community app reads the same `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` as
-the editor.
+a host without it offers neither; the Community app asks the api at runtime, as the editor does, with no key in its
+build.
 
 ## Out of scope
 

@@ -19,6 +19,5 @@ export {
   GUEST_ID_PREFIX_LENGTH,
   formatBrowserIdentity,
   readBrowserIdentity,
-  signedInFromCookie,
   type BrowserIdentity,
 } from './identity';

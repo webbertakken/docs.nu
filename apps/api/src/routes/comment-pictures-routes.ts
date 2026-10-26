@@ -31,7 +31,7 @@ export async function handleCommentPicturesRoute(ctx: RouteContext): Promise<Res
   const existing = await getDocument(env, id);
   if (!existing) return missingDocument(ctx, id);
   if (!(await gateRead(ctx, id, existing.ownerId, existing.teamId, tabId))) return forbidden();
-  if (!ctx.verifiedUserId) return json({ pictures: {} });
+  if (!ctx.verifiedAccountId) return json({ pictures: {} });
   const tab = await getTab(env, id, tabId);
   return json({ pictures: tab ? await commentPictures(env, tab.elements) : {} });
 }

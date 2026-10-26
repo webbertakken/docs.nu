@@ -22,7 +22,7 @@ import {
 export const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  // `Authorization` carries the Clerk Bearer token (Stage 2 hybrid
+  // `Authorization` carries the session token (Stage 2 hybrid
   // auth, docs/specs/014-identity/auth-and-guest-access.md, docs/specs/015-api/api.md). Without it in the allow-list every
   // signed-in cross-origin request fails the preflight and surfaces
   // to JS as "Failed to fetch", which was hiding behind DELETE
@@ -149,10 +149,10 @@ export function rateLimited(): Response {
   return json({ error: 'rate_limited' }, { status: 429 });
 }
 
-// Clerk-only surfaces (teams, docs/specs/013-workspace/teams.md). Unlike missingAuth() below —
+// session-only surfaces (teams, docs/specs/013-workspace/teams.md). Unlike missingAuth() below —
 // which names both identity sources because either is acceptable —
 // this is for endpoints where the guest X-Owner-Id path is
-// structurally insufficient (membership is keyed by Clerk user id +
+// structurally insufficient (membership is keyed by account id +
 // verified email), so the only fix is signing in. 401 rather than 400
 // so the client can branch to its "sign in to use teams" surface.
 export function signInRequired(): Response {
@@ -177,15 +177,13 @@ export function conflict(reason: string): Response {
 // auth (docs/specs/014-identity/auth-and-guest-access.md):
 //
 //   1. Pure-guest path with no `X-Owner-Id` header sent.
-//   2. A Bearer token was sent but verification failed silently
-//      (expired, invalid signature, JWKS unreachable, etc.):
-//      `getClerkIdentity` returns null on any error so the guest path
-//      still serves.
+//   2. A session token was sent but did not verify (expired, wrong key,
+//      wrong issuer, etc.): `getAccountSession` returns null on any
+//      failure so the guest path still serves.
 //
-// Pre-Clerk this used to be a flat "missing X-Owner-Id" message,
-// which now misdirects signed-in users debugging an auth failure to
-// look at the wrong header. The new message names both legitimate
-// identity sources so the caller can tell which one they're missing.
+// The message names both legitimate identity sources, so a signed-in
+// caller debugging an auth failure is not sent to look at the guest
+// header alone.
 export function missingAuth(): Response {
-  return badRequest('authentication required: send a valid Clerk Bearer token or X-Owner-Id');
+  return badRequest('authentication required: send a valid session token or X-Owner-Id');
 }

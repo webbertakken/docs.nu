@@ -14,14 +14,18 @@ vi.mock('../db', () => db);
 import type { RouteContext } from './context';
 import { handleOauthExchange } from './oauth';
 
-// Clerk-session context: signed in as 'user_1' unless overridden.
+// Session context: signed in as 'user_1' unless overridden.
 const makeCtx = (
   method: string,
   path: string,
-  opts: { clerkUserId?: string | null; body?: unknown } = {},
+  opts: { sessionAccountId?: string | null; body?: unknown } = {},
 ): RouteContext => {
-  const clerkUserId = opts.clerkUserId === undefined ? 'user_1' : opts.clerkUserId;
-  return makeTestRouteContext(method, path, { body: opts.body, clerkUserId, owner: clerkUserId });
+  const sessionAccountId = opts.sessionAccountId === undefined ? 'user_1' : opts.sessionAccountId;
+  return makeTestRouteContext(method, path, {
+    body: opts.body,
+    sessionAccountId,
+    owner: sessionAccountId,
+  });
 };
 
 beforeEach(() => {
@@ -30,9 +34,9 @@ beforeEach(() => {
 });
 
 describe('handleOauthExchange — signed-in gate', () => {
-  it('403s a guest (no Clerk identity), minting nothing', async () => {
+  it('403s a guest (no account), minting nothing', async () => {
     const res = await handleOauthExchange(
-      makeCtx('POST', '/api/oauth/exchange', { clerkUserId: null, body: {} }),
+      makeCtx('POST', '/api/oauth/exchange', { sessionAccountId: null, body: {} }),
     );
     expect(res.status).toBe(403);
     expect(db.mintApiToken).not.toHaveBeenCalled();

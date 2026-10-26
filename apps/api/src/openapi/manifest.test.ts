@@ -249,6 +249,23 @@ describe('buildOpenApiDocument', () => {
     expect(doc.components.schemas.Error).toBeDefined();
   });
 
+  it('names the bearer a LiveDoc session token or an API token, and maps each auth kind to it', () => {
+    const doc = buildOpenApiDocument() as {
+      components: { securitySchemes: Record<string, { description: string }> };
+      paths: Record<string, Record<string, { security: Record<string, string[]>[] }>>;
+    };
+    expect(doc.components.securitySchemes.Bearer!.description).toMatch(
+      /^A LiveDoc session token or an API token \(`lvd_…`\)\./,
+    );
+    const securityOf = (auth: string) => {
+      const route = ROUTE_MANIFEST.find((r) => r.auth === auth)!;
+      return doc.paths[route.path]![route.method.toLowerCase()]!.security;
+    };
+    expect(securityOf('session')).toEqual([{ Bearer: [] }]);
+    expect(securityOf('guest-or-session')).toEqual([{ Bearer: [] }, { GuestId: [] }]);
+    expect(securityOf('public')).toEqual([]);
+  });
+
   it('advertises the SVG endpoints (snapshots and the tab render) as image/svg+xml, the rest as JSON', () => {
     const doc = buildOpenApiDocument() as {
       paths: Record<string, Record<string, { responses: Record<string, { content?: object }> }>>;

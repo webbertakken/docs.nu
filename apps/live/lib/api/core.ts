@@ -20,7 +20,11 @@ import {
 } from '@livediagram/api-schema';
 import { noteServerBuild, noteServerDocumentFormat } from '../server-release';
 import { stampTabKind, type Tab } from '@livediagram/document';
-import { readLocalStorageSafe, writeLocalStorageSafe } from '../local-storage-safe';
+import {
+  readLocalStorageSafe,
+  removeLocalStorageSafe,
+  writeLocalStorageSafe,
+} from '../local-storage-safe';
 import { getGuestSelfSig } from '../local-identity';
 import { notifyApiWrite } from './write-signal';
 import { API_BASE } from './base';
@@ -54,7 +58,7 @@ import {
 //
 // All requests carry an `X-Owner-Id` header set to the current
 // participant's id — the API uses it as the document-owner filter and
-// for create-time `owner_id` — unless a Clerk token provider is wired
+// for create-time `owner_id` — unless a session token provider is wired
 // up (see below), in which case a Bearer token replaces it.
 // Where the api lives (lib/api/base.ts).
 export { API_BASE };
@@ -182,11 +186,13 @@ export type SharedDocumentResolution =
       role: ShareRole;
       tabId: string | null;
       community: CommunityShareInfo | null;
+      // The grant for a password-protected document, kept instead of the password; null without one.
+      shareGrant?: string | null;
     }
   | { passwordRequired: true; invalid: boolean };
 
 // Hybrid identity (docs/specs/014-identity/auth-and-guest-access.md, docs/specs/015-api/api.md). When a token provider has been
-// registered via `setTokenProvider` and resolves to a non-null Clerk
+// registered via `setTokenProvider` and resolves to a non-null
 // session token, every request goes out with
 // `Authorization: Bearer <jwt>` and NO `X-Owner-Id` — the api worker
 // verifies the token, derives the owner from the `sub` claim, and
@@ -196,8 +202,8 @@ export type SharedDocumentResolution =
 //
 // Module-level state (rather than threading a tokenProvider through
 // 22 function signatures) because livediagram ships only as a static
-// export — single browser tab, single-threaded, single Clerk session
-// per page load. useClerkApiBootstrap wires it up once in a layout effect
+// export — single browser tab, single-threaded, single session
+// per page load. useAccountApiBootstrap wires it up once in a layout effect
 // (`setTokenProvider((opts) => getToken(opts))`) and clears on unmount.
 // Tests reset between cases via the same setter.
 //
@@ -209,7 +215,7 @@ export type SharedDocumentResolution =
 //
 // `body: true` adds `Content-Type: application/json` for write
 // requests; GETs / DELETEs omit it.
-// `skipCache` mirrors Clerk's `getToken({ skipCache })`: mint a fresh token
+// `skipCache` mirrors the token provider's `getToken({ skipCache })`: mint a fresh token
 // rather than return the cached one.
 type TokenProvider = (opts?: { skipCache?: boolean }) => Promise<string | null>;
 
@@ -217,14 +223,14 @@ let currentTokenProvider: TokenProvider | null = null;
 
 // The most recent token the provider returned, kept for the ONE caller
 // that can't await: the `beforeunload` save beacon (flushDocumentSavesBeacon).
-// The provider is async (Clerk may refresh over the network), so during
+// The provider is async (the token may be fetched over the network), so during
 // page teardown it's unusable — but the editor autosaves every ~600ms
 // while editing, so this cache is at most seconds old exactly when the
 // beacon needs it. Cleared with the provider on sign-out/unmount so a
 // signed-out tab can't flush with a dead identity.
 let lastKnownToken: string | null = null;
 
-// Every mounted useClerkApiBootstrap registers the same provider; the
+// Every mounted useAccountApiBootstrap registers the same provider; the
 // newest registration is the one in force, and it stays in force until the
 // LAST registration goes. A single slot cleared on unmount let one component
 // leaving (a Settings row, a dialog) take the Bearer away from the page
@@ -276,29 +282,24 @@ export function getSessionSharePassword(): string | null {
   return sessionSharePassword;
 }
 
-// localStorage cache so a returning visitor on a protected document
-// doesn't have to retype the password every load. Keyed by share code
-// rather than document id because the document id only resolves AFTER
-// the gate is passed; the share code is what the URL carries on
-// arrival. Entry lifetime is bounded by the share code's validity:
-//   - Code revoked: apiLoadShared returns null, no cache read happens
-//     on later loads anyway (the bootstrap surfaces NotFound first).
-//   - Password rotated: the cached value comes back from the server
-//     as passwordRequired { invalid: true }, the bootstrap clears the
-//     entry, and the gate prompts the visitor afresh.
-// Threat model (docs/specs/013-workspace/share-password.md) is anti-URL-guessing, not cryptographic
-// protection of user data; storing plain text mirrors what the api
-// worker already does in D1. The owner cleartext-reads it on the
-// Share dialog anyway.
-const SHARE_PASSWORD_CACHE_PREFIX = 'livediagram:share-password:';
-export function readCachedSharePassword(shareCode: string): string | null {
-  const raw = readLocalStorageSafe(`${SHARE_PASSWORD_CACHE_PREFIX}${shareCode}`);
-  return raw && raw.length > 0 ? raw : null;
+// The share grant cache (docs/specs/013-workspace/share-password.md "Password cache"): a returning visitor on a
+// protected document is not asked for the password again. What is kept is the server's grant for the document,
+// never the password: the grant opens this document through its links and nothing else, and reveals nothing a
+// person might reuse elsewhere. Keyed by share code, which the URL carries on arrival (the document id only
+// resolves after the gate). A grant the server refuses (the password changed or went) is cleared by the bootstrap.
+const SHARE_GRANT_CACHE_PREFIX = 'livedoc:share-grant:';
+const SHARE_GRANT_SHAPE = /^spg_[A-Za-z0-9_-]{43}$/;
+// Where browsers kept the password itself before grants: removed on sight, so no copy outlives the change.
+const LEGACY_SHARE_PASSWORD_PREFIX = 'livediagram:share-password:';
+export function readCachedShareGrant(shareCode: string): string | null {
+  removeLocalStorageSafe(`${LEGACY_SHARE_PASSWORD_PREFIX}${shareCode}`);
+  const raw = readLocalStorageSafe(`${SHARE_GRANT_CACHE_PREFIX}${shareCode}`);
+  return raw && SHARE_GRANT_SHAPE.test(raw) ? raw : null;
 }
-export function writeCachedSharePassword(shareCode: string, password: string | null): void {
-  const key = `${SHARE_PASSWORD_CACHE_PREFIX}${shareCode}`;
-  if (password && password.length > 0) writeLocalStorageSafe(key, password);
-  else writeLocalStorageSafe(key, '');
+export function writeCachedShareGrant(shareCode: string, grant: string | null): void {
+  const key = `${SHARE_GRANT_CACHE_PREFIX}${shareCode}`;
+  if (grant && SHARE_GRANT_SHAPE.test(grant)) writeLocalStorageSafe(key, grant);
+  else removeLocalStorageSafe(key);
 }
 
 // Exported for direct testing of the hybrid identity gate (docs/specs/014-identity/auth-and-guest-access.md):
@@ -309,7 +310,7 @@ export function writeCachedSharePassword(shareCode: string, password: string | n
 // audit logs). Internal callers still get the same return type, so
 // the export is additive.
 // Thrown instead of sending a request that is certain to be refused: a
-// signed-in client (its owner id is a Clerk account id) that has no session
+// signed-in client (its owner id is an account id) that has no session
 // token to prove it. The worker rejects an account id in the guest header
 // (401 account_id_not_a_guest_credential), so sending it only turns an auth
 // problem into what looks like a network one.
@@ -351,8 +352,8 @@ function withTokenTimeout(p: Promise<string | null>): Promise<string | null> {
   return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
 }
 
-// Clerk's getToken() can resolve null for a moment on a live session, so a
-// null gets one fresh attempt that bypasses Clerk's token cache. Each attempt
+// The session token getter can resolve null for a moment on a live session, so a
+// null gets one fresh attempt that bypasses the held token. Each attempt
 // is bounded by SESSION_TOKEN_TIMEOUT_MS.
 async function resolveToken(): Promise<string | null> {
   const provider = currentTokenProvider;

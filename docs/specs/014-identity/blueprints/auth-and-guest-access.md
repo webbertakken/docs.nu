@@ -8,45 +8,51 @@ a throwaway worker under wrangler 4.148 with a local D1. Everything else about L
 
 ## Files
 
-| File                                                                           | Role                                                                                                                      |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api/package.json`                                                        | `better-auth` pinned exactly (`1.7.13`, D21): minors ship breaking changes                                                |
-| `apps/api/wrangler.toml`                                                       | `compatibility_flags = ["nodejs_compat"]`; rate limiters `AUTH_RATE_LIMITER` (`7013`), `AUTH_EMAIL_RATE_LIMITER` (`7014`) |
-| `apps/api/migrations/0100_identity.sql`                                        | The identity tables (generated, never hand-written)                                                                       |
-| `apps/api/migrations/0102_drop_auth_sightings.sql` (planned)                   | Drops `auth_sessions`, `auth_accounts` (replaced by hooks)                                                                |
-| `apps/api/scripts/identity-schema.mts`                                         | Replays every migration into `node:sqlite`, asks better-auth for the diff, writes the next `NNNN_identity_*.sql`          |
-| `apps/api/src/auth/identity-config.ts`                                         | Pure: `identityConfigOf(env)` → `{ enabled, methods, googleClientId }`                                                    |
-| `apps/api/src/auth/identity.ts`                                                | `createIdentity(env, ctx)`: the better-auth instance for one request, or null when off                                    |
-| `apps/api/src/auth/identity-hooks.ts`                                          | `databaseHooks`: account id, telemetry, welcome email, IP blanking                                                        |
-| `apps/api/src/auth/session-token.ts`                                           | Replaces `clerk.ts`: `getAccountSession(env, request)` verifies a session token in-process                                |
-| `apps/api/src/auth/account-id.ts`                                              | `generateAccountId()`                                                                                                     |
-| `apps/api/src/auth/guest-key.ts` (planned)                                     | `guestSigningKey(env)`: HKDF from `BETTER_AUTH_SECRET`, or null                                                           |
-| `apps/api/src/auth/owner-signature.ts`                                         | Signs and verifies with `guestSigningKey`, not `GUEST_ID_HMAC_SECRET`                                                     |
-| `apps/api/src/auth/guest-rest.ts`                                              | `guestSignatureEnforced(env)` = sign-in on; `isLegacyGuestEra` removed                                                    |
-| `apps/api/src/routes/auth.ts`                                                  | `/api/auth/*`: 404 when off, rate limits, freshness gate, then `identity.handler(request)`                                |
-| `apps/api/src/routes/account.ts`, `db/account.ts`                              | `DELETE /api/account`: freshness, data, then `deleteIdentity`                                                             |
-| `apps/api/src/routes/migrate.ts`                                               | Flow 1 only (guest → account); flow 2 removed                                                                             |
-| `apps/api/src/routes/capabilities.ts`                                          | `authEnabled`, `signInMethods`, `googleClientId`                                                                          |
-| `apps/api/src/routes/context.ts`, `src/index.ts`                               | `sessionAccountId`, `verifiedAccountId`, `accountEmail` replace `clerkUserId`, `verifiedUserId`, `clerkEmail`             |
-| `apps/api/src/email/transport.ts`                                              | The email port: the outbox (`EMAIL_OUTBOX=1`), the Cloudflare `EMAIL` binding, or Resend, first configured wins           |
-| `apps/api/src/email/client.ts`                                                 | `sendEmail` (best-effort) and `sendEmailNow` (answers the outcome, for sign-in codes) over the port                       |
-| `apps/api/src/routes/preview-outbox.ts`                                        | `GET /api/preview/outbox?to=`: the newest kept message, outbox hosts only                                                 |
-| `apps/api/src/db/identity.ts`                                                  | `deleteIdentity`, `accountExists`, the expiry and outbox sweeps                                                           |
-| `apps/api/migrations/0101_email_outbox.sql`                                    | The outbox table                                                                                                          |
-| `packages/api-schema/src/request-auth.ts`                                      | `ACCOUNT_ID_PREFIX`, `isAccountIdShape` replace `isClerkIdShape`                                                          |
-| `packages/api-schema/src/index.ts`                                             | `Capabilities.signInMethods`, `Capabilities.googleClientId`; `SignInMethod`                                               |
-| `packages/account-session/` (new)                                              | Browser: `readSession`, `createTokenProvider`, `signOut`, the signed-in hint. Used by `apps/live` and `apps/community`    |
-| `apps/live/lib/auth-config.ts` (planned)                                       | Replaces `clerk-config.ts`: capabilities-driven, no build-time key                                                        |
-| `apps/live/lib/auth-client.ts` (planned)                                       | `createAuthClient` with `emailOTPClient`; imported only by auth pages and Settings (lazy chunk)                           |
-| `apps/live/components/providers/AuthBridge.tsx` (planned)                      | Replaces `ClerkBridge`, `ClerkProvider`, `StaticClerkProvider`: publishes `DeferredAuthState` from `account-session`      |
-| `apps/live/components/providers/deferred-auth.tsx`                             | Unchanged contract; `deleteAccount` and `confirmIdentity` reimplemented                                                   |
-| `apps/live/hooks/persistence/useAccountApiBootstrap.ts` (planned)              | Renamed from `useClerkApiBootstrap`; `accountId` replaces `clerkUserId`                                                   |
-| `apps/live/app/sign-in/page.tsx`, `apps/live/app/get-started/page.tsx`         | Rebuilt on `auth-client`; same `AuthStage` frame                                                                          |
-| `apps/live/app/sso-callback/`                                                  | Deleted (better-auth's callback redirects straight to the destination)                                                    |
-| `apps/live/components/dialogs/settings/SettingsAccount*`                       | Name, sign-in methods, sessions, delete                                                                                   |
-| `apps/live/lib/signed-in-hint.ts`                                              | Reads the `account-session` hint instead of `__client_uat`                                                                |
-| `apps/community/lib/session.ts`                                                | `account-session` instead of `ClerkSession.tsx` (deleted)                                                                 |
-| `apps/live/e2e/clerk-stub/**`, `scripts/build-clerk-stub.mjs`, `E2EAuthBridge` | Deleted; e2e signs in for real through the outbox                                                                         |
+| File                                                                                 | Role                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api/package.json`                                                              | `better-auth` pinned exactly (`1.7.13`, D21): minors ship breaking changes                                                                                                                      |
+| `apps/api/wrangler.toml`                                                             | `compatibility_flags = ["nodejs_compat"]`; rate limiters `AUTH_RATE_LIMITER` (`7013`), `AUTH_EMAIL_RATE_LIMITER` (`7014`)                                                                       |
+| `apps/api/migrations/0100_identity.sql`                                              | The identity tables (generated, never hand-written)                                                                                                                                             |
+| `apps/api/migrations/0101_email_outbox.sql`                                          | The outbox table                                                                                                                                                                                |
+| `apps/api/migrations/0102_drop_auth_sightings.sql`                                   | Drops `auth_sessions`, `auth_accounts` (sign-ins are counted by the hooks)                                                                                                                      |
+| `apps/api/scripts/identity-schema.mts`                                               | Replays every migration into `node:sqlite`, asks better-auth for the diff, writes the next `NNNN_identity_*.sql`                                                                                |
+| `apps/api/src/auth/identity-config.ts`                                               | Pure: `identityConfigOf(env)` → `{ enabled, methods, googleClientId }`; `versionedSecrets`, `MIN_SECRET_LENGTH`                                                                                 |
+| `apps/api/src/auth/identity.ts`                                                      | `createIdentity(env, ctx)`: the better-auth instance for one request, or null when off                                                                                                          |
+| `apps/api/src/auth/identity-hooks.ts`                                                | `databaseHooks`: account id, telemetry, welcome email, IP blanking                                                                                                                              |
+| `apps/api/src/auth/session-token.ts`                                                 | `getAccountSession(env, token)` verifies a session token in-process                                                                                                                             |
+| `apps/api/src/auth/account-id.ts`                                                    | `generateAccountId()`                                                                                                                                                                           |
+| `apps/api/src/auth/account-gate.ts`                                                  | Administration routes refuse a session token whose account row is gone (`401 account_not_found`)                                                                                                |
+| `apps/api/src/auth/guest-key.ts`                                                     | `guestSigningKey(env)`: HKDF from the oldest usable sign-in secret, or null                                                                                                                     |
+| `apps/api/src/auth/owner-signature.ts`                                               | Signs and verifies guest ids with `guestSigningKey`                                                                                                                                             |
+| `apps/api/src/auth/guest-rest.ts`                                                    | `guestSignatureEnforced(env)`: true whenever the guest key exists                                                                                                                               |
+| `apps/api/src/routes/auth.ts`                                                        | `/api/auth/*`: 404 when off, rate limits, freshness gate, then `identity.handler(request)`                                                                                                      |
+| `apps/api/src/routes/account.ts`, `db/account.ts`                                    | `DELETE /api/account`: freshness, data, then `deleteIdentity`                                                                                                                                   |
+| `apps/api/src/routes/migrate.ts`                                                     | Guest → account migration, session only, signature always required                                                                                                                              |
+| `apps/api/src/routes/capabilities.ts`                                                | `authEnabled`, `signInMethods`, `googleClientId`, `emailOutbox`                                                                                                                                 |
+| `apps/api/src/routes/context.ts`, `src/index.ts`                                     | `sessionAccountId`, `verifiedAccountId`, `accountEmail`; the credential resolution                                                                                                              |
+| `apps/api/src/email/transport.ts`                                                    | The email port: the outbox (`EMAIL_OUTBOX=1`), the Cloudflare `EMAIL` binding, or Resend, first configured wins                                                                                 |
+| `apps/api/src/email/client.ts`                                                       | `sendEmail` (best-effort) and `sendEmailNow` (answers the outcome, for sign-in codes) over the port                                                                                             |
+| `apps/api/src/routes/preview-outbox.ts`                                              | `GET /api/preview/outbox?to=`: the newest kept message, outbox hosts only                                                                                                                       |
+| `apps/api/src/db/identity.ts`                                                        | `deleteIdentity`, `accountExists`, the expiry and outbox sweeps                                                                                                                                 |
+| `packages/api-schema/src/request-auth.ts`                                            | `ACCOUNT_ID_PREFIX`, `isAccountIdShape` (`acct_` only)                                                                                                                                          |
+| `packages/api-schema/src/index.ts`                                                   | `Capabilities.signInMethods`, `googleClientId`, `emailOutbox`; `SignInMethod`                                                                                                                   |
+| `packages/api-schema/src/profile-picture.ts`                                         | `PROFILE_PICTURE_HOST` (`lh3.googleusercontent.com`), `isProfilePictureUrl`                                                                                                                     |
+| `packages/account-session/`                                                          | Browser, plain `fetch`: `readSession`, `createTokenProvider`, `signOut`, the signed-in hint, the sign-in-offered memory, the tab nudge. Used by `apps/live`, `apps/community` and `packages/ui` |
+| `packages/ui/src/HeaderPrimaryCta.tsx`, `packages/ui/src/browser-repair/identity.ts` | Read the signed-in hint (public sites, the Repair report)                                                                                                                                       |
+| `packages/ui/src/profile-picture.ts`                                                 | `pictureSrc`: Google's `=s<px>-c` size option                                                                                                                                                   |
+| `apps/live/lib/auth-config.ts`                                                       | Runtime sign-in availability: `useSignInAvailable`, `useSignInMode`, `useAuthConfig`, `signInOfferedHere`                                                                                       |
+| `apps/live/lib/auth-client.ts`                                                       | `createAuthClient` with `emailOTPClient`; imported by the auth pages, and lazily by `lib/reverify.ts`                                                                                           |
+| `apps/live/lib/auth-errors.ts`                                                       | The one sentence each auth failure shows (`authErrorCopy`, `googleReturnError`)                                                                                                                 |
+| `apps/live/lib/reverify.ts`                                                          | Verifying again with a code before deleting the account                                                                                                                                         |
+| `apps/live/components/providers/AuthBridge.tsx`                                      | Reads the session on every page and publishes `DeferredAuthState`; stands down on the workbench route                                                                                           |
+| `apps/live/components/providers/deferred-auth.tsx`                                   | The contract: `accountId`, `user`, `getToken`, `signOut`, `deleteAccount`                                                                                                                       |
+| `apps/live/hooks/persistence/useAccountApiBootstrap.ts`                              | Token provider registration and the guest migration; `accountId`, `accountDisplayName`                                                                                                          |
+| `apps/live/components/chrome/AuthFlow.tsx`, `EmailCodeStep.tsx`, `auth-shared.tsx`   | Both auth pages' flow, the code step, the card and the `redirect_url` guards                                                                                                                    |
+| `apps/live/app/sign-in/page.tsx`, `apps/live/app/get-started/page.tsx`               | `AuthFlow` in its two openings; same `AuthStage` frame                                                                                                                                          |
+| `apps/live/components/dialogs/DeleteAccountDialog.tsx`                               | Typed email, then delete; a stale session verifies again with a code first                                                                                                                      |
+| `apps/live/lib/signed-in-hint.ts`, `lib/account-avatar.ts`                           | The hint for `/new`; the picture and the initial                                                                                                                                                |
+| `apps/community/lib/session.ts`                                                      | My Shares reads the session through `account-session` when chosen                                                                                                                               |
+| `packages/source-ast/src/clerk-free.test.ts`                                         | The repo check that the earlier provider is named nowhere in the code                                                                                                                           |
 
 ## Domain and naming
 
@@ -67,9 +73,10 @@ a throwaway worker under wrangler 4.148 with a local D1. Everything else about L
 | identity             | `createIdentity`, the better-auth instance                                  | auth (as a variable name)                  |
 | `AI_REQUIRE_ACCOUNT` | replaces `AI_REQUIRE_CLERK`                                                 | `AI_REQUIRE_CLERK`                         |
 
-Every `Clerk` identifier, env var, comment and copy string is gone from `apps/` and `packages/` when this ships; a
-repo check (`clerk-free.test.ts` in `packages/source-ast`) fails on any case-insensitive `clerk` outside `docs/`,
-`CHANGELOG` files and the licences manifest's history.
+No identifier, env var, comment, copy string or path names the earlier sign-in provider (Clerk) in `apps/`,
+`packages/`, `.github/` or `scripts/`: `packages/source-ast/src/clerk-free.test.ts` fails on any case-insensitive
+mention in a tracked file's path or text there, except CHANGELOG files, `*.generated.*` files and the api's migrations
+`0000` to `0099` (applied history, never edited).
 
 ## Behaviour and state
 
@@ -148,7 +155,7 @@ They live in the same `DB` as everything else (D22): deletion can then remove da
 team invite claim and the owner-keyed list stay one database. Existing `auth_sessions` / `auth_accounts` (telemetry
 sightings, migration 0047) are dropped; nothing else is named `identity_*` today.
 
-### Credential resolution (in `src/index.ts`, replacing the Clerk block)
+### Credential resolution (in `src/index.ts`)
 
 ```text
 bearer = bearerTokenOf(Authorization)
@@ -162,8 +169,7 @@ accountEmail       = accountSession?.emailVerified ? accountSession.email : null
 resolveOwner()     = verifiedAccountId ?? X-Owner-Id ?? null
 ```
 
-Order changes from today's (Clerk JWT first): token prefixes are checked first because they are cheap string tests and
-a session token never starts with either.
+Token prefixes are checked first because they are cheap string tests and a session token never starts with either.
 
 `getAccountSession(env, token)`:
 
@@ -180,7 +186,7 @@ a session token never starts with either.
 
 `isFresh(session) = now - authTime <= FRESH_SESSION_AGE_S`. Checked by `DELETE /api/account` (from the session
 token's `auth_time`) and, in `routes/auth.ts`, before `POST /api/auth/unlink-account` and `/link-social` (from
-`getSession`'s `session.createdAt`). Stale answers `403 session_not_fresh`; the browser runs the re-verify step and
+`getSession`'s `session.createdAt`). Stale answers `403 SESSION_NOT_FRESH`; the browser runs the re-verify step and
 retries once.
 
 ### Sign-in states (browser)
@@ -193,11 +199,24 @@ signed-in ──sign-out / 401 on get-session──▶ guest (hint 0)           
 any ──get-session network failure──▶ guest-offline (authLoaded true, isSignedIn false, retried on `online`)
 ```
 
-- The bridge reads `GET /api/auth/get-session` once on load for every visitor, guests included (D25).
-- `authLoaded` is true in `guest`, `signed-in`, `guest-offline`; false in `unsettled` and `migrating`.
-- The workbench route keeps holding `DEFERRED_AUTH_PENDING` until its own session resolves, as today.
-- Two tabs (D24): the hint and a `BroadcastChannel('livedoc-account')` message `{ signedIn }` make the other tab re-read the
-  session; no tab trusts the message itself.
+- `AuthBridge` reads `GET /api/auth/get-session` once on load for every visitor, guests included (D25). The read also
+  settles whether the host offers sign-in: `404` is `off`, any answer is `on`, a network failure leaves it
+  `unknown` (`publishSignInAvailability` in `lib/auth-config.ts`).
+- Each settled read writes the signed-in hint (`livediagram:v2:signed-in`: `1` signed in, `0` signed out or `off`);
+  `guest-offline` writes nothing. Each settled mode writes `livediagram:v2:sign-in-offered` (`1` / `0`), which
+  `signInOfferedHere()` reads while the live answer is unknown.
+- `authLoaded` is true in `guest`, `signed-in`, `guest-offline`; false in `unsettled` and `migrating`. The bootstrap
+  settles a guest after 5 s if the read has not answered.
+- The workbench route (`/embed/workbench`) never reads the browser session and holds `DEFERRED_AUTH_PENDING`;
+  `WorkbenchAuthBridge` publishes the workbench session to the editor beneath.
+- Two tabs (D24): `announceAccountChange` posts `{ signedIn, from }` on `BroadcastChannel('livedoc-account')` after a
+  sign-in, sign-out or deletion; every other tab re-reads the session (a tab ignores its own `from`); no tab trusts the
+  message itself. Where `BroadcastChannel` is missing, the hint's `storage` event stands in.
+- Signing in from an auth page ends with a full page load of the destination, so every page starts from a fresh read.
+- Published state (`deferred-auth.tsx`): `authLoaded`, `isSignedIn`, `accountId`, `user` (`id`, `name`, `email`,
+  `createdAt`, `pictureUrl`), `getToken`, `signOut({ redirectUrl? })` (ends the session at the api, forgets the token,
+  the hint and the recent diagrams, nudges the other tabs), `deleteAccount()` (answers `deleted`, `not-fresh` or
+  `failed`). A read that answers the same session keeps the published object, so nothing re-renders.
 
 ### Token provider
 
@@ -208,17 +227,26 @@ clears, the bridge moves to `guest`. `getLastKnownToken()` stays for the unload 
 
 ### Guest migration
 
-As today's flow 1, with `sessionAccountId` in place of `clerkUserId`, `isAccountIdShape` in place of
-`isClerkIdShape`, and the signature always required when identity is on. Flow 2 (unsigned guest → signed guest),
-`GUEST_SIGNING_LIVE_AT`, `GUEST_SIG_ENFORCE_AFTER`, `pending-signed-id` and the Web Lock `guest-upgrade` go.
+`POST /api/migrate { guestOwnerId, guestSignature }` with a session token (`sessionAccountId`): refused for an
+account-shaped source (`isAccountIdShape`) and for a missing or wrong signature; idempotent. There is no
+unsigned-to-signed guest upgrade: a browser holding an unsigned guest id on a host that signs is handed a fresh signed
+id (`[guest-identity] unsigned_id_replaced`), and the unsigned id's server rows stay unreachable.
 
 ### Deletion
 
-`DELETE /api/account`: `sessionAccountId` required (`401` otherwise); fresh (`403 session_not_fresh`); then
+`DELETE /api/account`: `sessionAccountId` required (`401` otherwise); fresh (`403 SESSION_NOT_FRESH`); then
 `deleteAccount(env, id)` (unchanged owner-keyed sweep); then `deleteIdentity(env, id, email)`:
 `DELETE FROM identity_users WHERE id = ?` (cascades sessions and accounts) and
 `DELETE FROM identity_verifications WHERE identifier LIKE ?` for the address's pending codes, in one `batch`. Then the
-goodbye email in `waitUntil`. The response clears the session cookie (`Set-Cookie` with `Max-Age=0`).
+goodbye email (`accountDeletedEmail`) in `waitUntil`, best-effort, to the address `deleteIdentity` read from the account
+row before deleting it (none when there was no account, so a repeat delete sends nothing). The response clears the session cookie (`Set-Cookie` with `Max-Age=0`).
+
+In the browser (`DeleteAccountDialog`): the typed email must match; `deleteAccount()` fetches a fresh session token
+(`skipCache`) and calls `apiDeleteAccount()`. On `not-fresh` the dialog sends a sign-in code to the account's email
+(`lib/reverify.ts`, the same `emailOTP` sign-in, which works for a Google-only account too because its email is
+verified), takes the code in `EmailCodeStep` ("Verify and delete"), signs in afresh and deletes once more. A code that
+cannot be sent or is refused says so and that nothing was deleted. On `deleted` the bridge forgets the token, the
+hint and the recent diagrams, nudges the other tabs, and the dialog signs out to `/`.
 
 ### Telemetry and lifecycle hooks
 
@@ -234,16 +262,16 @@ goodbye email in `waitUntil`. The response clears the session cookie (`Set-Cooki
 | Method + path                                                                                                                                                     | Who                       | Answer                                                                                | Refusals                                                                                        |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `GET /api/capabilities`                                                                                                                                           | anyone                    | adds `authEnabled`, `signInMethods: SignInMethod[]`, `googleClientId: string \| null` |                                                                                                 |
-| `* /api/auth/*`                                                                                                                                                   | better-auth's own         | better-auth's documented bodies                                                       | `404` when off; `429 rate_limited`; `403 session_not_fresh`; `403 INVALID_ORIGIN` (better-auth) |
-| `POST /api/auth/email-otp/send-verification-otp`                                                                                                                  | anyone                    | `{ success: true }`                                                                   | `400 invalid_email`; `429`; `502 email_send_failed`                                             |
+| `* /api/auth/*`                                                                                                                                                   | better-auth's own         | better-auth's documented bodies                                                       | `404` when off; `429 RATE_LIMITED`; `403 SESSION_NOT_FRESH`; `403 INVALID_ORIGIN` (better-auth) |
+| `POST /api/auth/email-otp/send-verification-otp`                                                                                                                  | anyone                    | `{ success: true }`                                                                   | `400 INVALID_EMAIL`; `429`; `502 EMAIL_SEND_FAILED`                                             |
 | `POST /api/auth/sign-in/email-otp`                                                                                                                                | anyone                    | sets the session cookie; `{ user, token }`                                            | `400 INVALID_OTP`, `TOO_MANY_ATTEMPTS`, `OTP_EXPIRED`                                           |
 | `POST /api/auth/sign-in/social`                                                                                                                                   | anyone                    | `{ url }` to Google                                                                   | `400` unknown provider                                                                          |
 | `GET /api/auth/callback/google`                                                                                                                                   | Google                    | `302` to `callbackURL`, or to the start page `?error=<code>`                          |                                                                                                 |
 | `GET /api/auth/get-session`                                                                                                                                       | browser                   | `{ session, user } \| null`                                                           |                                                                                                 |
 | `GET /api/auth/token`                                                                                                                                             | browser with cookie       | `{ token }`                                                                           | `401`                                                                                           |
 | `GET /api/auth/jwks`                                                                                                                                              | anyone                    | the public keys                                                                       |                                                                                                 |
-| `GET /api/auth/list-sessions`, `POST /revoke-session`, `/revoke-other-sessions`, `/sign-out`, `/update-user`, `/link-social`, `/unlink-account`, `/list-accounts` | session                   | better-auth's                                                                         | as better-auth; link and unlink also `403 session_not_fresh`                                    |
-| `DELETE /api/account`                                                                                                                                             | session token             | `{ deleted }`, cookie cleared                                                         | `401 unauthenticated`, `403 session_not_fresh`                                                  |
+| `GET /api/auth/list-sessions`, `POST /revoke-session`, `/revoke-other-sessions`, `/sign-out`, `/update-user`, `/link-social`, `/unlink-account`, `/list-accounts` | session                   | better-auth's                                                                         | as better-auth; link and unlink also `403 SESSION_NOT_FRESH`                                    |
+| `DELETE /api/account`                                                                                                                                             | session token             | `{ deleted }`, cookie cleared                                                         | `401 unauthenticated`, `403 SESSION_NOT_FRESH`                                                  |
 | `POST /api/migrate`                                                                                                                                               | session token             | `{ migrated }`                                                                        | `400 guestOwnerId is required`, `403` bad signature or account-shaped id                        |
 | `GET /api/preview/outbox?to=`                                                                                                                                     | anyone, outbox hosts only | `{ subject, text, createdAt }` of the newest message to that address                  | `404` unless `EMAIL_OUTBOX=1`                                                                   |
 
@@ -280,19 +308,28 @@ goodbye email in `waitUntil`. The response clears the session cookie (`Set-Cooki
 
 | Case                                                                                                                      | Handling                                                                                                                                                                                                                                        |
 | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Email provider down or refusing                                                                                           | `502 email_send_failed`; copy "We couldn't send the code. Try again in a minute."; log `[auth] code_send_failed provider=<p> status=<s>`                                                                                                        |
-| Two code requests at once for one address (better-auth #11181)                                                            | The second rotates the first; the page always shows "Use the newest code"                                                                                                                                                                       |
-| Wrong code three times                                                                                                    | Code spent; copy "That code has been used up. Send a new one."                                                                                                                                                                                  |
+| Email provider down or refusing                                                                                           | `502 EMAIL_SEND_FAILED`; copy "We couldn't send the code. Try again in a minute."; log `[auth] code_send_failed provider=<p> status=<s>`                                                                                                        |
+| Too many attempts (either limiter)                                                                                        | `429 RATE_LIMITED`; copy "Too many attempts. Wait a minute and try again."                                                                                                                                                                      |
+| Two code requests at once for one address (better-auth #11181)                                                            | The second rotates the first; the code step always says "Use the newest code if you asked for more than one."                                                                                                                                   |
+| Wrong code                                                                                                                | `INVALID_OTP`; copy "That code isn't right. Check it, or use the newest code we sent."                                                                                                                                                          |
+| Wrong code three times                                                                                                    | `TOO_MANY_ATTEMPTS`, code spent; copy "That code has been used up. Send a new one."                                                                                                                                                             |
+| Code older than 5 minutes                                                                                                 | `OTP_EXPIRED`; copy "That code has expired. Send a new one."                                                                                                                                                                                    |
+| Not an email address                                                                                                      | `INVALID_EMAIL`; copy "Enter a valid email address."                                                                                                                                                                                            |
 | Google returns `access_denied` (person cancelled)                                                                         | Back on the start page, no error banner                                                                                                                                                                                                         |
-| Google email unverified (rare Workspace)                                                                                  | `account_not_linked` when an account has the address; copy names email code as the way in                                                                                                                                                       |
+| Google email unverified (rare Workspace)                                                                                  | `account_not_linked` when an account has the address; copy "That Google account isn't verified for this email. Sign in with an email code instead."                                                                                             |
+| Any other failure, or one with no code                                                                                    | Copy "Something went wrong. Try again."; a failed fetch: "We couldn't reach the server. Check your connection and try again." The server's own wording is never shown                                                                           |
 | D1 write fails mid sign-up (D1 has no transactions; better-auth writes user, then session or Google account, in sequence) | Nothing to repair: an email-code user is found by address on the next try (email codes write no `identity_accounts` row at all), and a Google user missing its account row is linked again on the next Google sign-in, its email being verified |
-| `/api/auth/token` 401 while the page thinks it is signed in                                                               | Bridge to `guest`, hint `0`, the "You've been signed out" toast; owner data reloads as guest                                                                                                                                                    |
-| Migration fails                                                                                                           | Today's handling (settles, retries next load, 10 s cap)                                                                                                                                                                                         |
-| Sign-in reached through the preview's workers.dev host                                                                    | better-auth `403 INVALID_ORIGIN`; the auth page says "Sign in at <canonical host>" with a link                                                                                                                                                  |
+| `/api/auth/token` 401 while the page thinks it is signed in                                                               | Bridge to `guest`, hint `0`, `sessionEnded`; the warning toast "You've been signed out. Sign in again to keep working in your account." (`SessionEndedNotice`, also after a sign-out in another tab); owner data reloads as guest               |
+| Sign-out cannot reach the api                                                                                             | The browser forgets the session anyway and logs `[auth] sign_out_failed`; the next read shows whether the cookie still lives                                                                                                                    |
+| Session read fails (offline, 5xx)                                                                                         | `guest-offline`: settled as a guest, nothing written, read again on `online`                                                                                                                                                                    |
+| Migration fails                                                                                                           | Settles, retries next load, 10 s cap                                                                                                                                                                                                            |
+| Sign-in reached through the preview's workers.dev host                                                                    | better-auth `403 INVALID_ORIGIN`; copy "Sign-in works only at this site's main address. Open it there and try again."                                                                                                                           |
 | `APP_BASE_URL` unset with identity on                                                                                     | `enabled` false, log `[auth] base_url_missing`                                                                                                                                                                                                  |
 | Secret changed without `BETTER_AUTH_SECRETS`                                                                              | Every session invalid; JWT keys undecryptable: `/api/auth/token` 500 logged `[auth] jwks_undecryptable`; documented, never silent                                                                                                               |
-| Deleted account's token still within 15 minutes                                                                           | `getAccountSession` verifies, but every owner-keyed row is gone and the account row is gone: `requireAccount` checks `identity_users` for administration routes and answers `401`                                                               |
-| Account id in `X-Owner-Id`                                                                                                | `401 account_id_not_a_guest_credential` (unchanged rule, new shape)                                                                                                                                                                             |
+| Deleted account's token still within 15 minutes                                                                           | `getAccountSession` verifies, but the account row is gone: `auth/account-gate.ts` answers `401 account_not_found` on every administration segment, logged `[auth] account_not_found route=<seg>`                                                |
+| Delete with a session older than 10 minutes                                                                               | `403 SESSION_NOT_FRESH`; the dialog verifies again with a code and retries once                                                                                                                                                                 |
+| Account id in `X-Owner-Id`                                                                                                | `401 account_id_not_a_guest_credential`                                                                                                                                                                                                         |
+| Unsigned guest id on a host that signs                                                                                    | Owner-scoped routes refuse it (`401 signature_required`); the browser takes a fresh signed id; the old id's rows stay unreachable                                                                                                               |
 
 ## Security and trust
 
@@ -313,8 +350,14 @@ goodbye email in `waitUntil`. The response clears the session cookie (`Set-Cooki
   client id through `/api/capabilities`.
 - **Not relying on `NODE_ENV`:** better-auth guards its default secret and enables its own limiter only when
   `NODE_ENV === 'production'`, which a deployed worker does not set. Every one of those is set explicitly above.
-- **Guest signing key:** `HKDF(SHA-256, BETTER_AUTH_SECRET, salt 'livedoc', info 'livedoc-guest-id')`, so the
-  session secret and the guest key never sign the same bytes.
+- **Guest signing key:** `HKDF(SHA-256, secret, salt 'livedoc', info 'livedoc-guest-id')`, so the session secret and
+  the guest key never sign the same bytes. The secret is the oldest usable one (`guestKeySecret`): `BETTER_AUTH_SECRET`,
+  else the lowest version in `BETTER_AUTH_SECRETS`, so a rotation never re-keys guests; retiring that secret does. A
+  host with a secret but no sign-in method is guest-only yet still signs and enforces guest ids.
+- **Browser:** the session cookie is host-only and read only by `/api/auth/*`; the browser calls it same-origin
+  (`credentials: 'same-origin'`), so a page served from another origin than its api reads as signed out. No sign-in
+  script from any other origin loads: the Trusted Types script origins name only Google's Drive libraries, and no
+  `blob:` worker is allowed.
 
 ## Performance and limits
 
@@ -325,20 +368,35 @@ goodbye email in `waitUntil`. The response clears the session cookie (`Set-Cooki
   `JWKS_CACHE_MS` per isolate, one indexed D1 read. No D1 read per request for identity.
 - **Instance:** 2 to 3 ms per `/api/auth/*` request (per-request build, D11).
 - **Browser:** no auth library on the landing page or the editor's first load. The bridge is `account-session`
-  (plain `fetch`, about 2 KiB); `auth-client` loads only on the auth pages and Settings > Account.
+  (plain `fetch`, about 2 KiB); `auth-client` loads only on the auth pages and, lazily, when deleting the account asks for a code.
 - **D1 writes:** sign-in writes 2 to 4 rows; a session slides once a day; the token endpoint writes nothing.
 
 ## Presentation and UX
 
-- `/sign-in`, `/get-started`: the `AuthStage` frame unchanged. Card contents, in order: heading ("Sign in" /
-  "Create your account"), Google button ("Continue with Google") when on, a divider "or" when both, the email field
-  ("Email"), button "Send code" (busy "Sending…"), then the code step: "We sent a code to <email>", six-digit field
-  (`autocomplete="one-time-code"`, `inputmode="numeric"`), "Sign in" button, links "Use a different email" and
-  "Send a new code" (disabled for 30 s, counting down).
-- `/get-started` adds "Your name" above the email; a Google sign-up asks nothing more.
-- An email-code sign-up through `/sign-in` asks "What should we call you?" after the code, once.
-- Errors sit above the form in `role="alert"` text, one sentence each (copy in [Errors](#errors-and-edge-cases)).
-- Guest-only host: the card says "Sign-in isn't turned on for this site." with **Continue as guest**.
+- `/sign-in`, `/get-started`: the `AuthStage` frame (one flow, `AuthFlow`). Card contents, in order: heading
+  ("Welcome back" / "Create your account", the spec's Night Band titles) with its line under it ("Sign in to keep your
+  documents with you on every device." / "Free, and everything you made as a guest comes with you."), Google button
+  ("Continue with Google", busy "Redirecting…") when on, a divider "or" when both, on `/get-started` "Your name", the
+  email field ("Email"), button "Send code" (busy "Sending…"), and the cross-link footer ("New to LiveDoc? Create an
+  account" / "Already have an account? Sign in").
+- The code step (`EmailCodeStep`), heading "Check your email": "We sent a code to <email>. Use the newest code if you
+  asked for more than one.", one field labelled "6-digit code" (`autocomplete="one-time-code"`,
+  `inputmode="numeric"`; digits only, a pasted code with spaces or words lands as its six digits, the sixth digit
+  submits), "Sign in" button (busy "Signing in…"), links "Use a different email" and "Send a new code" (disabled for
+  `CODE_RESEND_COOLDOWN_S`, reading "Send a new code (Ns)").
+- On an outbox host (`emailOutbox` in the capabilities) the code step adds a link "This preview sends no email: see the
+  code" to `/api/preview/outbox?to=<email>`, opening in a new tab.
+- An account with no name yet (an email-code sign-up through `/sign-in`) is asked "What should we call you?" after the
+  code: "Your name", "Continue" (busy "Saving…") and "Not now". A Google sign-up asks nothing more.
+- Errors sit above the form in `role="alert"` text, one sentence each (copy in [Errors](#errors-and-edge-cases),
+  `lib/auth-errors.ts`); a Google round trip that comes back with `?error=access_denied` shows nothing.
+- Guest-only host: heading "Sign-in is off here", "Sign-in isn't turned on for this site. Everything works without an
+  account." and **Continue as guest** (to `/new`).
+- While the capabilities are unknown, the email form shows and Google's place is held, so a late answer never moves
+  the form.
+- Already signed in on arrival: the "Redirecting…" card, then the destination.
+- Deleting the account: the dialog's copy is in [Deletion](#deletion); its verify step reads "You signed in a while ago,
+  so confirm it's you before anything is deleted."
 - Settings > Account: sections Name, Email, Sign-in methods, Sessions, Delete Account (copy in the
   [Account settings](../profile-and-email-notifications.md) spec when it is folded back).
 - Empty states: a sessions list always holds this browser; sign-in methods always hold one.
@@ -362,84 +420,99 @@ goodbye email in `waitUntil`. The response clears the session cookie (`Set-Cooki
 
 ## Observability
 
-| Fingerprint                                                                                       | When                                         |
-| ------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `[auth] secret_without_methods`, `secret_too_short`, `google_half_configured`, `base_url_missing` | once per isolate at config                   |
-| `[auth] session_token_rejected reason=<code>`                                                     | a bearer that is not a valid session token   |
-| `[auth] rate_limited route=<path> limiter=<name>`                                                 | a 429 from either limiter                    |
-| `[auth] code_send_failed provider=<p> status=<s>`                                                 | the sender refused                           |
-| `[auth] code_sent provider=<p>`                                                                   | a code accepted by the provider (no address) |
-| `[auth] signed_up method=<m>` / `signed_in method=<m>`                                            | the hooks (no ids)                           |
-| `[auth] session_not_fresh route=<path>`                                                           | freshness refusal                            |
-| `[auth] hook_failed hook=<name>`                                                                  | a hook threw                                 |
-| `[auth] account_deleted`                                                                          | identity rows removed                        |
-| `[auth] jwks_reloaded reason=<kid_miss\|ttl>`                                                     | the local JWKS cache refilled                |
-| `[migrate] moved rows=<n>` / `refused reason=<r>`                                                 | guest migration                              |
+| Fingerprint                                                                                       | When                                                              |
+| ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `[auth] secret_without_methods`, `secret_too_short`, `google_half_configured`, `base_url_missing` | once per isolate at config                                        |
+| `[auth] session_token_rejected reason=<code>`                                                     | a bearer that is not a valid session token                        |
+| `[auth] rate_limited route=<path> limiter=<name>`                                                 | a 429 from either limiter                                         |
+| `[auth] code_send_failed provider=<p> status=<s>`                                                 | the sender refused                                                |
+| `[auth] code_sent provider=<p>`                                                                   | a code accepted by the provider (no address)                      |
+| `[auth] signed_up method=<m>` / `signed_in method=<m>`                                            | the hooks (no ids)                                                |
+| `[auth] session_not_fresh route=<path>`                                                           | freshness refusal                                                 |
+| `[auth] hook_failed hook=<name>`                                                                  | a hook threw                                                      |
+| `[auth] account_deleted`                                                                          | identity rows removed                                             |
+| `[auth] account_not_found route=<seg>`                                                            | an administration call from a deleted account's token             |
+| `[auth] guest_signature_refused route=<seg>`                                                      | a guest header without a valid signature on an owner-scoped route |
+| `[auth] jwks_reloaded reason=<kid_miss\|ttl>`                                                     | the local JWKS cache refilled                                     |
+| `[migrate] moved rows=<n>` / `refused reason=<no_session\|no_guest_id\|account_id\|signature>`    | guest migration                                                   |
+| `[auth] session_read status=<s>` (browser, debug)                                                 | each session read the bridge settles                              |
+| `[auth] session_ended source=token` (browser, debug)                                              | the token endpoint answered 401                                   |
+| `[auth] sign_out_failed` (browser)                                                                | sign-out could not reach the api                                  |
+| `[account] delete_failed status=<n>` / `reason=network` (browser)                                 | deleting the account failed                                       |
+| `[guest-identity] unsigned_id_replaced` (browser)                                                 | an unsigned guest id replaced by a signed one                     |
+| `[community] session_read_failed` (browser)                                                       | My Shares could not read the session                              |
 
 Never logged: tokens, codes, emails, names, IPs.
 
 ## Testing
 
-| Spec rule                                                                              | Test                                                            |
-| -------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Modes from configuration                                                               | `auth/identity-config.test.ts` (every row of the table)         |
-| No keys: `/api/auth/*` 404, capabilities off                                           | `routes/auth.test.ts`                                           |
-| Credential order, refusals, fall-through                                               | `index.auth.test.ts`                                            |
-| Session token verify (good, expired, wrong iss/aud/alg, kid rotation, non-account sub) | `auth/session-token.test.ts` (keys minted in the test)          |
-| Account id shape; refused as guest header                                              | `request-auth.test.ts`, `index.auth.test.ts`                    |
-| Guest signing key derived, enforced with sign-in on                                    | `auth/guest-key.test.ts` (planned), `auth/guest-rest.test.ts`   |
-| Migration (signature, account-shaped source, idempotent)                               | `routes/migrate.test.ts`                                        |
-| Freshness on delete, unlink, link                                                      | `routes/account.test.ts` (planned), `routes/auth.test.ts`       |
-| Deletion removes data then identity                                                    | `db/account.test.ts` (seeded identity rows)                     |
-| Code send failure surfaces                                                             | `email/sender.test.ts` (planned), `routes/auth.test.ts`         |
-| Hooks: SignedUp once, SignedIn not on sign-up                                          | `auth/identity-hooks.test.ts`                                   |
-| No IP stored                                                                           | `auth/identity-hooks.test.ts`                                   |
-| Telemetry off                                                                          | `auth/identity.test.ts` asserts `telemetry.enabled === false`   |
-| Schema in step with better-auth                                                        | `identity-schema.test.ts`                                       |
-| Bridge states, token provider caching                                                  | `packages/account-session/src/*.test.ts`, `AuthBridge.test.tsx` |
-| Safe redirects on every path                                                           | `auth-shared.test.ts`                                           |
-| End to end: email-code sign-up, guest migration, sign-out, delete                      | `apps/live/e2e/auth/*.spec.ts` through the outbox, dark mode    |
-| No Clerk left                                                                          | `clerk-free.test.ts`                                            |
+| Spec rule                                                                              | Test                                                                                                                          |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Modes from configuration                                                               | `auth/identity-config.test.ts` (every row of the table)                                                                       |
+| No keys: `/api/auth/*` 404, capabilities off                                           | `routes/auth.test.ts`, `index.auth.test.ts`                                                                                   |
+| Capabilities name the methods and the outbox                                           | `routes/capabilities.test.ts`, `index.auth.test.ts`                                                                           |
+| Credential order, refusals, fall-through                                               | `index.auth.test.ts`                                                                                                          |
+| Session token verify (good, expired, wrong iss/aud/alg, kid rotation, non-account sub) | `auth/session-token.test.ts` (keys minted in the test)                                                                        |
+| Account id shape; refused as guest header                                              | `request-auth.test.ts`, `index.auth.test.ts`                                                                                  |
+| Guest signing key derived, kept across a rotation, enforced whenever it exists         | `auth/guest-key.test.ts`, `auth/guest-rest.test.ts`, `auth/owner-signature.test.ts`                                           |
+| Migration (signature, account-shaped source, idempotent, end to end)                   | `routes/migrate.test.ts`, `index.auth.test.ts`                                                                                |
+| Freshness on delete, unlink, link                                                      | `index.auth.test.ts`, `routes/auth.test.ts`                                                                                   |
+| Deleted account refused on administration                                              | `auth/account-gate.test.ts`                                                                                                   |
+| Deletion removes data then identity, then says goodbye once                            | `db/account.test.ts` (seeded identity rows), `index.auth.test.ts`                                                             |
+| Code send failure surfaces                                                             | `email/transport.test.ts`, `routes/auth.test.ts`                                                                              |
+| Hooks: SignedUp once, SignedIn not on sign-up; no IP stored                            | `auth/identity-hooks.test.ts`                                                                                                 |
+| Telemetry off                                                                          | `auth/identity.test.ts` asserts `telemetry.enabled === false`                                                                 |
+| Schema in step with better-auth                                                        | `identity-schema.test.ts`                                                                                                     |
+| Session read, token provider caching, hint, tab nudge                                  | `packages/account-session/src/*.test.ts` (100 % coverage)                                                                     |
+| Bridge states, sign-out, deletion, workbench stand-down                                | `apps/live/components/providers/AuthBridge.test.tsx`, `WorkbenchAuthBridge.test.tsx`                                          |
+| Sign-in availability at runtime                                                        | `apps/live/lib/auth-config.test.tsx`                                                                                          |
+| Where `/new` saves before the session answers                                          | `apps/live/app/new/useNewDocumentLocation.test.tsx`, `lib/signed-in-hint.test.ts`                                             |
+| One sentence per failure                                                               | `apps/live/lib/auth-errors.test.ts`                                                                                           |
+| Delete with re-verification                                                            | `apps/live/components/dialogs/DeleteAccountDialog.test.tsx`, `lib/reverify.test.ts`                                           |
+| Safe redirects on every path                                                           | `auth-shared.test.ts`                                                                                                         |
+| My Shares session                                                                      | `apps/community/components/auth-and-gate.test.tsx`, `apps/community/components/gallery/GalleryView.test.tsx`                  |
+| End to end: email-code sign-up, guest migration, sign-out, delete                      | `apps/live/e2e/account/` `sign-up`, `guest-documents`, `sign-out`, `delete-account` `.spec.ts`, through the outbox, dark mode |
+| No earlier provider left                                                               | `packages/source-ast/src/clerk-free.test.ts`                                                                                  |
 
-Google's round trip is covered by `fake-google` (`packages/fake-google`) serving the OAuth endpoints the provider
-calls, pointed to by `GOOGLE_OAUTH_BASE_URL` as the Drive e2e already does.
+Google's round trip has no automated test yet: `fake-google` (`packages/fake-google`) serving the OAuth endpoints the
+provider calls is the intended stand-in.
 
 ## Constants and configuration
 
-| Name                               | Value                         | Provenance                          | Safe range    |
-| ---------------------------------- | ----------------------------- | ----------------------------------- | ------------- |
-| `SESSION_EXPIRES_IN_S`             | 2,592,000 (30 d)              | D15                                 | 1 d to 90 d   |
-| `SESSION_UPDATE_AGE_S`             | 86,400                        | better-auth default                 | 1 h to 7 d    |
-| `FRESH_SESSION_AGE_S`              | 600                           | spec "10 minutes"                   | 300 to 3,600  |
-| `SESSION_TOKEN_TTL_S`              | 900                           | better-auth `jwt` default           | 300 to 3,600  |
-| `SESSION_TOKEN_REFRESH_MARGIN_S`   | 60                            | D16                                 | 10 to 300     |
-| `SESSION_TOKEN_SKEW_S`             | 5                             | today's Clerk tolerance             | 0 to 30       |
-| `JWKS_CACHE_MS`                    | 300,000                       | D17                                 | 60 s to 1 h   |
-| `JWKS_ROTATION_S`                  | 7,776,000 (90 d)              | D18                                 | 30 d to 365 d |
-| `JWKS_GRACE_S`                     | 2,592,000 (30 d)              | better-auth default                 | ≥ token TTL   |
-| `EMAIL_CODE_LENGTH`                | 6                             | spec                                | 6 to 8        |
-| `EMAIL_CODE_TTL_S`                 | 300                           | spec                                | 120 to 900    |
-| `EMAIL_CODE_ATTEMPTS`              | 3                             | spec                                | 3 to 5        |
-| `CODE_RESEND_COOLDOWN_S`           | 30                            | D19                                 | 15 to 60      |
-| `AUTH_RATE_LIMIT`                  | 20 / 60 s per IP              | D12                                 | 10 to 60      |
-| `AUTH_EMAIL_RATE_LIMIT`            | 3 / 60 s per address          | D12                                 | 1 to 5        |
-| `SIGN_UP_SESSION_WINDOW_MS`        | 60,000                        | D20                                 | 10 s to 5 min |
-| `GUEST_MIGRATION_WAIT_MS`          | 10,000                        | existing                            | unchanged     |
-| `ACCOUNT_ID_PREFIX`, random length | `acct_`, 24 base62 (143 bits) | D10                                 | ≥ 22 chars    |
-| `MIN_SECRET_LENGTH`                | 32                            | better-auth's own warning threshold | ≥ 32          |
+| Name                                  | Value                         | Provenance                          | Safe range    |
+| ------------------------------------- | ----------------------------- | ----------------------------------- | ------------- |
+| `SESSION_EXPIRES_IN_S`                | 2,592,000 (30 d)              | D15                                 | 1 d to 90 d   |
+| `SESSION_UPDATE_AGE_S`                | 86,400                        | better-auth default                 | 1 h to 7 d    |
+| `FRESH_SESSION_AGE_S`                 | 600                           | spec "10 minutes"                   | 300 to 3,600  |
+| `SESSION_TOKEN_TTL_S`                 | 900                           | better-auth `jwt` default           | 300 to 3,600  |
+| `SESSION_TOKEN_REFRESH_MARGIN_S`      | 60                            | D16                                 | 10 to 300     |
+| `SESSION_TOKEN_SKEW_S`                | 5                             | today's Clerk tolerance             | 0 to 30       |
+| `JWKS_CACHE_MS`                       | 300,000                       | D17                                 | 60 s to 1 h   |
+| `JWKS_ROTATION_S`                     | 7,776,000 (90 d)              | D18                                 | 30 d to 365 d |
+| `JWKS_GRACE_S`                        | 2,592,000 (30 d)              | better-auth default                 | ≥ token TTL   |
+| `EMAIL_CODE_LENGTH`                   | 6                             | spec                                | 6 to 8        |
+| `EMAIL_CODE_TTL_S`                    | 300                           | spec                                | 120 to 900    |
+| `EMAIL_CODE_ATTEMPTS`                 | 3                             | spec                                | 3 to 5        |
+| `CODE_RESEND_COOLDOWN_S`              | 30                            | D19                                 | 15 to 60      |
+| `AUTH_RATE_LIMIT`                     | 20 / 60 s per IP              | D12                                 | 10 to 60      |
+| `AUTH_EMAIL_RATE_LIMIT`               | 3 / 60 s per address          | D12                                 | 1 to 5        |
+| `SIGN_UP_SESSION_WINDOW_MS`           | 60,000                        | D20                                 | 10 s to 5 min |
+| `GUEST_MIGRATION_WAIT_MS`             | 10,000                        | existing                            | unchanged     |
+| `ACCOUNT_ID_PREFIX`, random length    | `acct_`, 24 base62 (143 bits) | D10                                 | ≥ 22 chars    |
+| `MIN_SECRET_LENGTH`                   | 32                            | better-auth's own warning threshold | ≥ 32          |
+| `SESSION_LOAD_TIMEOUT_MS` (Community) | 10,000                        | existing My Shares wait             | 5 s to 30 s   |
 
-| Env                                                | Kind             | Where                                                                                   |
-| -------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------- |
-| `BETTER_AUTH_SECRET` / `BETTER_AUTH_SECRETS`       | secret           | `wrangler secret put`; GitHub secret synced by deploy                                   |
-| `GOOGLE_AUTH_CLIENT_ID`                            | var              | `hosted-vars.json` (docs.nu's own client)                                               |
-| `GOOGLE_AUTH_CLIENT_SECRET`                        | secret           | `wrangler secret put`                                                                   |
-| `APP_BASE_URL`                                     | var              | existing; also the issuer                                                               |
-| `EMAIL` (`send_email` binding) or `RESEND_API_KEY` | binding / secret | either                                                                                  |
-| `EMAIL_OUTBOX`                                     | var              | `1` on previews (`scripts/preview.mjs`) and in the local e2e stack; never on production |
+| Env                                                | Kind             | Where                                                                                                                                                  |
+| -------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `BETTER_AUTH_SECRET` / `BETTER_AUTH_SECRETS`       | secret           | `wrangler secret put`; deploy syncs `BETTER_AUTH_SECRET` (and `GOOGLE_AUTH_CLIENT_SECRET`) from GitHub secrets when set; `BETTER_AUTH_SECRETS` by hand |
+| `GOOGLE_AUTH_CLIENT_ID`                            | var              | `hosted-vars.json` (docs.nu's own client)                                                                                                              |
+| `GOOGLE_AUTH_CLIENT_SECRET`                        | secret           | `wrangler secret put`, or the deploy sync above                                                                                                        |
+| `APP_BASE_URL`                                     | var              | existing; also the issuer                                                                                                                              |
+| `EMAIL` (`send_email` binding) or `RESEND_API_KEY` | binding / secret | either                                                                                                                                                 |
+| `EMAIL_OUTBOX`                                     | var              | `1` on previews (`scripts/preview.mjs`) and in the local e2e stack; never on production                                                                |
 
-Removed: `CLERK_JWKS_URL`, `CLERK_ISSUER`, `CLERK_AUDIENCE`, `GUEST_ID_HMAC_SECRET`, `GUEST_SIG_ENFORCE_AFTER`,
-`GUEST_SIGNING_LIVE_AT`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED`, `NEXT_PUBLIC_E2E_AUTH`,
-`AI_REQUIRE_CLERK` (renamed).
+No frontend build reads a sign-in variable: one static build serves every host. `AI_REQUIRE_ACCOUNT` (api var) limits
+AI to signed-in callers. Guest signing has no variable of its own (it derives from `BETTER_AUTH_SECRET`).
 
 ## Assets and external resources
 
@@ -452,4 +525,4 @@ Removed: `CLERK_JWKS_URL`, `CLERK_ISSUER`, `CLERK_AUDIENCE`, `GUEST_ID_HMAC_SECR
 
 ## Defaults ledger
 
-D10 to D22, D24 and D25 in [DEFAULTS.md](DEFAULTS.md), rows `auth-and-guest-access`.
+D10 to D22 and D24 to D30 in [DEFAULTS.md](DEFAULTS.md), rows `auth-and-guest-access`.

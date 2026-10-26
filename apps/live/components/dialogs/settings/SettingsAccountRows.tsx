@@ -13,7 +13,7 @@ import type { SettingsDeleteAccountRowSpec, SettingsIdentityRowSpec } from './se
 // (docs/specs/014-identity/profile-and-email-notifications.md) when that page was retired: everything it held now lives in
 // Settings, so a second account home was a second place to look.
 //
-// Lazy: the confirmation modal pulls in Clerk's reverification surface and
+// Lazy: the confirmation modal pulls in the re-verification code step and
 // almost nobody deletes, so it only loads on first click.
 const DeleteAccountDialog = dynamic(
   () => import('@/components/dialogs/DeleteAccountDialog').then((m) => m.DeleteAccountDialog),
@@ -23,12 +23,12 @@ const DeleteAccountDialog = dynamic(
 // The identity card's avatar diameter.
 const IDENTITY_AVATAR_PX = 44;
 
-// Identity, read from Clerk. Never written here: names and emails are managed
-// in Clerk itself, so this is a card, not a form.
+// Identity, read from the session. Never written here: this is a card, not a form
+// (the account's name and email are shown as the account holds them).
 export function SettingsIdentityRow({ row }: { row: SettingsIdentityRowSpec }) {
   const { authLoaded, isSignedIn, user } = useDeferredAuth();
   const signedIn = Boolean(authLoaded && isSignedIn && user);
-  const name = user?.fullName ?? user?.username ?? user?.email ?? 'Your account';
+  const name = user?.name ?? user?.email ?? 'Your account';
   const joined = user?.createdAt
     ? user.createdAt.toLocaleDateString(undefined, {
         year: 'numeric',
@@ -77,7 +77,7 @@ export function SettingsIdentityRow({ row }: { row: SettingsIdentityRowSpec }) {
 const GUEST_IDENTITY = 'Your documents live in this browser. Sign in to keep them across devices.';
 
 // Delete account. Signed-in only, and not because of the UI: the api's
-// DELETE /api/account is Clerk-only by design (docs/specs/014-identity/profile-and-email-notifications.md), since the whole
+// DELETE /api/account is account-only by design (docs/specs/014-identity/profile-and-email-notifications.md), since the whole
 // point is wiping data bound to a VERIFIED identity. A guest's owner id is an
 // unverified header, so honouring it would let anyone wipe anyone's documents.
 // The row still renders for guests, saying why, rather than vanishing, so the
@@ -88,7 +88,7 @@ export const DELETE_ACCOUNT_GUEST =
   'Available once you sign in: a guest browser has no verified account to delete.';
 
 export function SettingsDeleteAccountRow({ row }: { row: SettingsDeleteAccountRowSpec }) {
-  const { authLoaded, isSignedIn, user, signOut } = useDeferredAuth();
+  const { authLoaded, isSignedIn, user } = useDeferredAuth();
   const signedIn = Boolean(authLoaded && isSignedIn && user);
   const [open, setOpen] = useState(false);
 
@@ -118,10 +118,10 @@ export function SettingsDeleteAccountRow({ row }: { row: SettingsDeleteAccountRo
         <DeleteAccountDialog
           open={open}
           onClose={() => setOpen(false)}
-          onDeleted={async () => {
-            // Backend + Clerk delete already completed inside the dialog;
-            // sign out to clear client state and land on marketing.
-            await signOut({ redirectUrl: '/' });
+          onDeleted={() => {
+            // The account and its session are gone and this browser has forgotten them (AuthBridge's
+            // deleteAccount): land on marketing with a fresh load.
+            window.location.assign('/');
           }}
         />
       ) : null}

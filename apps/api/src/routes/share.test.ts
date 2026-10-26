@@ -95,9 +95,9 @@ function imageCtx(code: string, tab?: string): RouteContext {
     env: FAKE_ENV,
     url,
     segments: url.pathname.replace(/^\//, '').split('/'),
-    clerkUserId: null,
-    verifiedUserId: null,
-    clerkEmail: null,
+    sessionAccountId: null,
+    verifiedAccountId: null,
+    accountEmail: null,
     resolveOwner: () => null,
   };
 }
@@ -381,7 +381,7 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
       code?: string;
       visitor?: string | null;
       password?: string;
-      // The visitor proved their id (a Clerk session or token), not just sent X-Owner-Id.
+      // The visitor proved their id (a session or token), not just sent X-Owner-Id.
       signedIn?: boolean;
     } = {},
   ): {
@@ -398,9 +398,9 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
         env: FAKE_ENV,
         url,
         segments: url.pathname.replace(/^\//, '').split('/'),
-        clerkUserId: opts.signedIn ? (opts.visitor ?? null) : null,
-        verifiedUserId: opts.signedIn ? (opts.visitor ?? null) : null,
-        clerkEmail: null,
+        sessionAccountId: opts.signedIn ? (opts.visitor ?? null) : null,
+        verifiedAccountId: opts.signedIn ? (opts.visitor ?? null) : null,
+        accountEmail: null,
         resolveOwner: () => opts.visitor ?? null,
         waitUntil: (p: Promise<unknown>) => {
           dispatched.push(p);
@@ -446,6 +446,22 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
     const res = await handleShare(ctx);
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ role: 'view', document: { id: 'd1' } });
+  });
+
+  it('hands a visitor past the password a grant to keep instead, which then opens the link', async () => {
+    getShareLinkMock.mockResolvedValue({ ...shareLink('d1'), role: 'view' });
+    getSharePasswordMock.mockResolvedValue('hunter2');
+    const first = await handleShare(resolveCtx({ password: 'hunter2' }).ctx);
+    const { shareGrant } = (await first.json()) as { shareGrant: string };
+    expect(shareGrant).toMatch(/^spg_[A-Za-z0-9_-]{43}$/);
+    const again = await handleShare(resolveCtx({ password: shareGrant }).ctx);
+    expect(again.status).toBe(200);
+  });
+
+  it('hands no grant for a document without a password', async () => {
+    getShareLinkMock.mockResolvedValue({ ...shareLink('d1'), role: 'view' });
+    const res = await handleShare(resolveCtx().ctx);
+    expect(await res.json()).toMatchObject({ shareGrant: null });
   });
 
   it('blanks the owner id for everyone but the owner', async () => {
@@ -670,9 +686,9 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
         env: FAKE_ENV,
         url,
         segments: url.pathname.replace(/^\//, '').split('/'),
-        clerkUserId: null,
-        verifiedUserId: null,
-        clerkEmail: null,
+        sessionAccountId: null,
+        verifiedAccountId: null,
+        accountEmail: null,
         resolveOwner: () => null,
       });
       expect(res.status, `${method} ${path}`).toBe(404);

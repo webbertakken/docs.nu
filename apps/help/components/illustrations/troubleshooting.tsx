@@ -51,14 +51,13 @@ export function StuckCanvas() {
 }
 
 /** The sign-in code step in an error state: the error above the form, the
- *  six code boxes, Verify, and the Resend code / Back row. */
+ *  one six-digit field, Sign in, and the Use a different email / Send a new code row. */
 export function SignInError() {
-  const digits = ['1', '2', '4', '9', '0', '7'];
   return (
     <Scene w={420} h={250} bg="plain">
       <Panel x={98} y={10} w={224} h={230}>
         <Label x={210} y={32} anchor="middle" size={14} weight={700} tone="strong">
-          livediagram
+          Check your email
         </Label>
         {/* The error, above the form */}
         <rect
@@ -78,36 +77,32 @@ export function SignInError() {
           weight={600}
           className="fill-rose-600 dark:fill-rose-300"
         >
-          Incorrect code
+          That code isn't right
         </Label>
         <Label x={210} y={86} anchor="middle" size={10} tone="muted">
-          We sent a verification code to
+          We sent a code to
         </Label>
         <Label x={210} y={100} anchor="middle" size={10} weight={600} tone="body">
-          you@example.com. Enter it below.
+          you@example.com
         </Label>
-        {digits.map((d, i) => (
-          <g key={i}>
-            <rect
-              x={120 + i * 31}
-              y={112}
-              width={25}
-              height={30}
-              rx={6}
-              className="fill-white stroke-slate-300"
-              strokeWidth={1.5}
-            />
-            <Label x={132.5 + i * 31} y={128} anchor="middle" size={12} weight={600} tone="strong">
-              {d}
-            </Label>
-          </g>
-        ))}
-        <Button x={114} y={156} w={192} h={28} label="Verify" variant="primary" />
-        <Label x={160} y={210} anchor="middle" size={10} weight={600} tone="muted">
-          Resend code
+        <rect
+          x={114}
+          y={112}
+          width={192}
+          height={30}
+          rx={6}
+          className="fill-white stroke-slate-300"
+          strokeWidth={1.5}
+        />
+        <Label x={210} y={128} anchor="middle" size={12} weight={600} tone="strong">
+          1 2 4 9 0 7
         </Label>
-        <Label x={262} y={210} anchor="middle" size={10} weight={600} tone="muted">
-          Back
+        <Button x={114} y={156} w={192} h={28} label="Sign in" variant="primary" />
+        <Label x={160} y={210} anchor="middle" size={9} weight={600} tone="muted">
+          Use a different email
+        </Label>
+        <Label x={264} y={210} anchor="middle" size={9} weight={600} tone="muted">
+          Send a new code
         </Label>
       </Panel>
     </Scene>

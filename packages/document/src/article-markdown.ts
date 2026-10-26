@@ -11,9 +11,11 @@ import {
   type ArticleRun,
 } from './article-flow';
 
-// Something that only Markdown writes: a heading, a list, a quote, a fence, a rule, emphasis or a link.
+// Something that only Markdown writes: a heading, a list, a quote, a fence, a rule, emphasis or a link. A link's text
+// and address stop at the next bracket or parenthesis, so a failed try never rescans the rest of the text: pasted text
+// full of brackets is read in linear time, not quadratic (CodeQL js/polynomial-redos).
 const MARKDOWN_SIGNAL =
-  /^(#{1,6}\s|\s*([-*+]|\d+[.)])\s|>\s|```|(-{3,}|\*{3,}|_{3,})\s*$)|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\)|`[^`]+`/m;
+  /^(#{1,6}\s|\s*([-*+]|\d+[.)])\s|>\s|```|(-{3,}|\*{3,}|_{3,})\s*$)|\*\*[^*]+\*\*|\[[^[\]]+\]\([^()[\]]+\)|`[^`]+`/m;
 
 export function looksLikeMarkdown(text: string): boolean {
   return MARKDOWN_SIGNAL.test(text);

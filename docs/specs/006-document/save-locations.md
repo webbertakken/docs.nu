@@ -28,16 +28,19 @@ anything on the canvas. A document in This Browser still says what it is on the 
 
 Why a guest starts local: [Auth + guest access → Guest documents start local](../014-identity/auth-and-guest-access.md#guest-documents-start-local).
 
-- One function answers it: `defaultSaveLocationFor({ signedIn, clerkEnabled })` in
+- One function answers it: `defaultSaveLocationFor({ signedIn, signInOffered })` in
   `apps/live/lib/save-locations.ts`. Every create from `/new` asks it at commit, through
   `resolveSaveLocation` in `useNewDocumentLocation` (`apps/live/app/new/useNewDocumentLocation.ts`): a mode chosen
   in the wizard, its **Create** and **Skip**, and the wizard-less links (`/new?template=`, `/new?blank=1`).
 - A `/new?folder=` / `?team=` context names a server place, so it is
   livediagram whoever is creating.
-- Before Clerk has answered, `signedIn` is the `__client_uat` hint
-  ([Who is a guest, before the session answers](../014-identity/auth-and-guest-access.md#who-is-a-guest-before-the-session-answers)).
+- Before the session read has answered, `signedIn` is the signed-in hint (`livediagram:v2:signed-in`,
+  [Who is a guest, before the session answers](../014-identity/auth-and-guest-access.md#who-is-a-guest-before-the-session-answers)).
   A browser that looks signed in waits for the settled answer before creating, so a signed-in person is never handed
   a document in This Browser; a guest never waits.
+- `signInOffered` is the live answer once the page has one (`signInOfferedHere` in `apps/live/lib/auth-config.ts`),
+  else the one this browser last saw (`livediagram:v2:sign-in-offered`); only a browser that has never asked waits
+  for it.
 - There is no per-person override: no setting chooses the store. Where a document is **filed** on livediagram is the
   person's to set, in Settings > Documents > Default Folders ([Default folders](../013-workspace/default-folders.md)).
   A preference that once did both, "Always save new documents in <place> and skip this step" (`skipLocationStep`),
@@ -93,8 +96,8 @@ team cards: the same dashed inline-name tile as New Folder (one
 name and the team is created (`POST /api/teams`, [Teams](../013-workspace/teams.md)), joins the
 overview, and the browser enters it with its root selected, because the
 point of making a team here is to file this document in it. **Signed-in
-only**: teams are Clerk-only, so the host (the Explorer's
-move dialog) passes the create handler only when there is a Clerk user, and
+only**: teams are account-only, so the host (the Explorer's
+move dialog) passes the create handler only when there is a signed-in account, and
 a guest never sees a tile that would lead to a 401. Folder moves pass no
 handler either, since a folder can't move into a team.
 So the bar never appears and disappears under the rows as you move about,

@@ -231,7 +231,7 @@ WHERE id = ? RETURNING items_rev, items_next_key`, then the row write guarded by
 
 ## Interfaces and contracts: REST
 
-All under `/documents/:id/items`, auth `guest-or-clerk`, token-usable, registered in `openapi/manifest.ts`
+All under `/documents/:id/items`, auth `guest-or-session`, token-usable, registered in `openapi/manifest.ts`
 (tag `Items`), DTOs in `packages/api-schema/src/items.ts` (`ItemsResponse { items, rev }`, `ItemResponse { item, rev }`).
 
 | Method | Path                  | Gate | Body                                                         | Answers             |

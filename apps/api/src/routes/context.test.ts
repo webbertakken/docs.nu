@@ -35,9 +35,9 @@ function makeCtx(
     env: {} as Env,
     url,
     segments: url.pathname.replace(/^\//, '').split('/'),
-    clerkUserId: null,
-    verifiedUserId: null,
-    clerkEmail: null,
+    sessionAccountId: null,
+    verifiedAccountId: null,
+    accountEmail: null,
     resolveOwner: () => owner,
   };
 }
@@ -99,14 +99,14 @@ describe('requireOwnedDocument', () => {
     expect(out).toBe(liveDoc);
   });
 
-  // A TEAM document's owner id is a Clerk id every teammate can read off
+  // A TEAM document's owner id is an account id every teammate can read off
   // `GET /api/teams/<id>` (`members[].userId`), so the hybrid X-Owner-Id path
   // must not prove ownership of one — otherwise a removed member who kept the
   // id reaches the owner-only surfaces this guard fronts: the share password
   // in the clear, minting an edit-role link, clearing the password.
   it('403s a TEAM document when the owner id arrives only as the guest header', async () => {
     db.getDocument.mockResolvedValue({ id: 'd1', ownerId: 'user_owner', teamId: 'team-1' });
-    // resolveOwner() returns the header value; verifiedUserId stays null.
+    // resolveOwner() returns the header value; verifiedAccountId stays null.
     const out = await requireOwnedDocument(makeCtx({ owner: 'user_owner' }), 'd1');
     expect(out).toBeInstanceOf(Response);
     expect((out as Response).status).toBe(403);
@@ -116,7 +116,7 @@ describe('requireOwnedDocument', () => {
     const liveDoc = { id: 'd1', ownerId: 'user_owner', teamId: 'team-1' };
     db.getDocument.mockResolvedValue(liveDoc);
     db.getMembership.mockResolvedValue({ status: 'joined' });
-    const ctx = { ...makeCtx({ owner: 'user_owner' }), verifiedUserId: 'user_owner' };
+    const ctx = { ...makeCtx({ owner: 'user_owner' }), verifiedAccountId: 'user_owner' };
     expect(await requireOwnedDocument(ctx, 'd1')).toBe(liveDoc);
   });
 
@@ -125,13 +125,13 @@ describe('requireOwnedDocument', () => {
     // not keep the share-link, password and delete routes open to them.
     db.getDocument.mockResolvedValue({ id: 'd1', ownerId: 'user_owner', teamId: 'team-1' });
     db.getMembership.mockResolvedValue(null);
-    const ctx = { ...makeCtx({ owner: 'user_owner' }), verifiedUserId: 'user_owner' };
+    const ctx = { ...makeCtx({ owner: 'user_owner' }), verifiedAccountId: 'user_owner' };
     expect(((await requireOwnedDocument(ctx, 'd1')) as Response).status).toBe(403);
   });
 
   it('403s a TEAM document for a verified caller who is not its owner', async () => {
     db.getDocument.mockResolvedValue({ id: 'd1', ownerId: 'user_owner', teamId: 'team-1' });
-    const ctx = { ...makeCtx({ owner: 'user_other' }), verifiedUserId: 'user_other' };
+    const ctx = { ...makeCtx({ owner: 'user_other' }), verifiedAccountId: 'user_other' };
     expect(((await requireOwnedDocument(ctx, 'd1')) as Response).status).toBe(403);
   });
 
@@ -151,7 +151,7 @@ describe('ownsDocument', () => {
     const team = { ownerId: 'user_owner', teamId: 'team-1' };
     expect(await ownsDocument(makeCtx({ owner: 'user_owner' }), team)).toBe(false);
     expect(
-      await ownsDocument({ ...makeCtx({ owner: null }), verifiedUserId: 'user_owner' }, team),
+      await ownsDocument({ ...makeCtx({ owner: null }), verifiedAccountId: 'user_owner' }, team),
     ).toBe(true);
   });
 
@@ -159,7 +159,7 @@ describe('ownsDocument', () => {
     db.getMembership.mockResolvedValue(null);
     const team = { ownerId: 'user_owner', teamId: 'team-1' };
     expect(
-      await ownsDocument({ ...makeCtx({ owner: null }), verifiedUserId: 'user_owner' }, team),
+      await ownsDocument({ ...makeCtx({ owner: null }), verifiedAccountId: 'user_owner' }, team),
     ).toBe(false);
   });
 

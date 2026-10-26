@@ -3,6 +3,7 @@ import { identityConfigOf } from '../auth/identity-config';
 import { aiConfigured } from '../ai-provider';
 import { communityEnabled } from '../community-enabled';
 import { emailEnabled } from '../email/client';
+import { emailTransportKind } from '../email/transport';
 import { driveMode } from '../drive/config';
 import { json, methodNotAllowed, notFound } from '../responses';
 import type { RouteContext } from './context';
@@ -26,10 +27,13 @@ function cliCapabilities({ env, url }: RouteContext) {
   return {
     apiBase: `${url.origin}/api`,
     // Sign-in (docs/specs/014-identity/auth-and-guest-access.md "Deployment modes"): on with better-auth's
-    // secret and a method, or with Clerk until it leaves the code.
-    authEnabled: identity.enabled || Boolean(env.CLERK_JWKS_URL),
+    // secret and a method.
+    authEnabled: identity.enabled,
     signInMethods: identity.methods,
     googleClientId: identity.googleClientId,
+    // Codes land in the outbox, not a mailbox (previews and the e2e stack): the code step links to it
+    // (docs/specs/014-identity/auth-and-guest-access.md "Previews").
+    emailOutbox: emailTransportKind(env) === 'outbox',
     ...(issuer ? { oauthIssuer: issuer } : {}),
     documentFormat: DOCUMENT_FORMAT,
     ...(minVersion && VERSION.test(minVersion) ? { cli: { minVersion } } : {}),
@@ -52,7 +56,7 @@ export function handleCapabilities(ctx: RouteContext): Response {
     // resolve from the same keys, so one flag answers for both.
     // Reports whether a provider is CONFIGURED, and deliberately says nothing
     // about whether THIS caller may use the endpoint. That asymmetry matters if
-    // `AI_REQUIRE_CLERK` is ever turned on: the editor shows the AI panel on
+    // `AI_REQUIRE_ACCOUNT` is ever turned on: the editor shows the AI panel on
     // `aiEnabled` alone (useEditorState -> EditorCanvasHost), so a guest would
     // get a panel that 401s on first use rather than no panel. Whoever flips
     // that flag has to make this line auth-aware in the same change — which is

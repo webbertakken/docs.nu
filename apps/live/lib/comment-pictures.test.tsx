@@ -8,9 +8,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const auth = vi.hoisted(() => {
   const state: {
     isSignedIn: boolean;
-    userId: string | null;
+    accountId: string | null;
     user: { pictureUrl: string | null } | null;
-  } = { isSignedIn: true, userId: 'user_bob', user: { pictureUrl: 'https://img.clerk.com/bob' } };
+  } = {
+    isSignedIn: true,
+    accountId: 'acct_bob',
+    user: { pictureUrl: 'https://lh3.googleusercontent.com/a/bob' },
+  };
   return { state };
 });
 vi.mock('@/components/providers/deferred-auth', () => ({ useDeferredAuth: () => auth.state }));
@@ -41,8 +45,8 @@ beforeEach(() => {
   fetchMock.mockReset();
   auth.state = {
     isSignedIn: true,
-    userId: 'user_bob',
-    user: { pictureUrl: 'https://img.clerk.com/bob' },
+    accountId: 'acct_bob',
+    user: { pictureUrl: 'https://lh3.googleusercontent.com/a/bob' },
   };
 });
 afterEach(cleanup);
@@ -52,7 +56,7 @@ describe('comment pictures', () => {
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
-          pictures: { c1: 'https://img.clerk.com/ann', c2: 'https://evil.example/x' },
+          pictures: { c1: 'https://lh3.googleusercontent.com/a/ann', c2: 'https://evil.example/x' },
         }),
       ),
     );
@@ -61,7 +65,7 @@ describe('comment pictures', () => {
     );
     const c1 = renderHook(() => useCommentAuthorPicture('c1', undefined));
     const c2 = renderHook(() => useCommentAuthorPicture('c2', undefined));
-    await waitFor(() => expect(c1.result.current).toBe('https://img.clerk.com/ann'));
+    await waitFor(() => expect(c1.result.current).toBe('https://lh3.googleusercontent.com/a/ann'));
     expect(c2.result.current).toBeNull();
     rerender();
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -80,7 +84,7 @@ describe('comment pictures', () => {
   });
 
   it('never asks for an anonymous reader, and shows them nothing', () => {
-    auth.state = { isSignedIn: false, userId: null, user: null };
+    auth.state = { isSignedIn: false, accountId: null, user: null };
     renderHook(() => useCommentPicturesLoader('d1', 't1', thread('c1'), 'CODE'));
     const c1 = renderHook(() => useCommentAuthorPicture('c1', undefined));
     expect(fetchMock).not.toHaveBeenCalled();
@@ -88,7 +92,7 @@ describe('comment pictures', () => {
   });
 
   it('shows our own picture on our own comments', () => {
-    const mine = renderHook(() => useCommentAuthorPicture('c9', 'user_bob'));
-    expect(mine.result.current).toBe('https://img.clerk.com/bob');
+    const mine = renderHook(() => useCommentAuthorPicture('c9', 'acct_bob'));
+    expect(mine.result.current).toBe('https://lh3.googleusercontent.com/a/bob');
   });
 });

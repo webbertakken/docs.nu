@@ -1,29 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { guestSignatureEnforced, isLegacyGuestEra, OWNER_SCOPED_SEGMENTS } from './guest-rest';
+import type { Env } from '../types';
+import { guestSignatureEnforced, OWNER_SCOPED_SEGMENTS } from './guest-rest';
 
 describe('guestSignatureEnforced', () => {
-  const NOW = 1_000_000;
-  it('is off without a secret (self-host opt-out)', () => {
-    expect(guestSignatureEnforced({ GUEST_SIG_ENFORCE_AFTER: '0' }, NOW)).toBe(false);
+  it('is off on a guest-only host, which signs nothing', () => {
+    expect(guestSignatureEnforced({} as Env)).toBe(false);
   });
-  it('is off when no cutoff is configured (grace by default)', () => {
-    expect(guestSignatureEnforced({ GUEST_ID_HMAC_SECRET: 's' }, NOW)).toBe(false);
+  it('is off for a secret too short to sign with', () => {
+    expect(guestSignatureEnforced({ BETTER_AUTH_SECRET: 'short' } as Env)).toBe(false);
   });
-  it('is off before the cutoff (grace window)', () => {
-    expect(
-      guestSignatureEnforced(
-        { GUEST_ID_HMAC_SECRET: 's', GUEST_SIG_ENFORCE_AFTER: String(NOW + 1) },
-        NOW,
-      ),
-    ).toBe(false);
-  });
-  it('is on at/after the cutoff with a secret set', () => {
-    expect(
-      guestSignatureEnforced(
-        { GUEST_ID_HMAC_SECRET: 's', GUEST_SIG_ENFORCE_AFTER: String(NOW) },
-        NOW,
-      ),
-    ).toBe(true);
+  it('is on whenever the host has a sign-in secret, with no cutoff', () => {
+    expect(guestSignatureEnforced({ BETTER_AUTH_SECRET: 's'.repeat(32) } as Env)).toBe(true);
+    expect(guestSignatureEnforced({ BETTER_AUTH_SECRETS: `1:${'s'.repeat(32)}` } as Env)).toBe(
+      true,
+    );
   });
 });
 
@@ -43,7 +33,7 @@ describe('OWNER_SCOPED_SEGMENTS', () => {
     ])
       expect(OWNER_SCOPED_SEGMENTS.has(s)).toBe(true);
   });
-  it('excludes public / auth-bootstrap / Clerk-only routes', () => {
+  it('excludes public / auth-bootstrap / session-only routes', () => {
     for (const s of [
       'guest-id',
       'share',
@@ -55,19 +45,5 @@ describe('OWNER_SCOPED_SEGMENTS', () => {
       'account',
     ])
       expect(OWNER_SCOPED_SEGMENTS.has(s)).toBe(false);
-  });
-});
-
-describe('isLegacyGuestEra', () => {
-  const env = { GUEST_SIGNING_LIVE_AT: '1000' };
-  it('is true only for a participant created before signing went live', () => {
-    expect(isLegacyGuestEra(env, 999)).toBe(true);
-    expect(isLegacyGuestEra(env, 1000)).toBe(false);
-    expect(isLegacyGuestEra(env, null)).toBe(false);
-  });
-  it('grants nothing when the date is unset or unreadable', () => {
-    expect(isLegacyGuestEra({}, 1)).toBe(false);
-    expect(isLegacyGuestEra({ GUEST_SIGNING_LIVE_AT: '' }, 1)).toBe(false);
-    expect(isLegacyGuestEra({ GUEST_SIGNING_LIVE_AT: 'soon' }, 1)).toBe(false);
   });
 });

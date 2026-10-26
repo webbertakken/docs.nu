@@ -70,7 +70,7 @@ export function helloPresence(
     presence.key = c.key.slice(0, MAX_PARTICIPANT_KEY_LEN);
   }
   // The profile picture (docs/specs/014-identity/profile-picture.md §6): kept only from a session a
-  // verified account holds, and only when it is a Clerk image URL. Not clamped but refused whole:
+  // verified account holds, and only when it is on the picture host. Not clamped but refused whole:
   // a cut URL is a broken image.
   if (c.picture !== undefined && c.picture !== '') {
     if (!session.account) console.info('[profile-picture] rejected', 'not_account');

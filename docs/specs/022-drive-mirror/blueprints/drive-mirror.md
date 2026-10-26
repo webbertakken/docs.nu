@@ -61,7 +61,6 @@ Scope, by file:
 | `apps/live/components/drive/DriveConnected.tsx`                 | `/drive/connected`: redeems the code once, returns to the page                          |
 | `apps/live/components/drive/DriveOpen.tsx`                      | `/drive/open`: sign-in, Allow access, open, Import a copy, errors                       |
 | `apps/live/components/chrome/LandingCard.tsx`                   | The centred landing card `/join` and the Drive routes share                             |
-| `apps/live/components/providers/E2EAuthBridge.tsx`              | Test builds only: a signed-in session from a test-minted JWT                            |
 | `apps/live/e2e/drive-mirror.spec.ts`                            | The opt-in browser e2e against the fake Google                                          |
 | `apps/live/e2e/drive-shots.spec.ts`                             | Every Drive state screenshotted, light and dark (`test:e2e:drive-shots`)                |
 | `apps/live/e2e/drive-support.ts`                                | Test JWKS, the fake Google over HTTP, routed Google traffic                             |
@@ -358,8 +357,8 @@ type DriveAccessToken = { accessToken: string; expiresAt: number };
 
 ### Routes (`routes/drive.ts`)
 
-Every route: `503 drive_not_configured` when `driveMode` is `off`; `401 sign_in_required` without `ctx.clerkUserId`
-(guest header and API token both refused); owner is `ctx.clerkUserId`. Each logs `drive: <route> <outcome>`.
+Every route: `503 drive_not_configured` when `driveMode` is `off`; `401 sign_in_required` without `ctx.sessionAccountId`
+(guest header and API token both refused); owner is `ctx.sessionAccountId`. Each logs `drive: <route> <outcome>`.
 
 | Method   | Path                         | Body                                                | Success                      | Rejections                                                                                                                                         |
 | -------- | ---------------------------- | --------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -596,19 +595,18 @@ beyond D1's own; a connection is re-creatable by reconnecting. `DELETE /api/driv
 
 ## Security and trust
 
-- Trust boundary: only `ctx.clerkUserId` reaches Drive rows; every statement is `WHERE owner_id = ?`.
+- Trust boundary: only `ctx.sessionAccountId` reaches Drive rows; every statement is `WHERE owner_id = ?`.
 - The refresh token never leaves the worker; AES-GCM with a random 12-byte IV, AAD the owner id, so a row copied to
   another owner fails to open.
 - `state` binds user, redirect URI and 10 minutes; a code minted for one user cannot be redeemed by another.
 - Access tokens reach the browser only for the caller's own grant, which is what the browser would hold anyway.
 - Writes ride the existing `WRITE_RATE_LIMITER`. `POST /drive/token` also has its own `DRIVE_TOKEN_RATE_LIMITER`
-  (10 per 60 s per Clerk user id, namespace `1007`, production and `[env.staging]`), checked before Google is
+  (10 per 60 s per account id, namespace `1007`, production and `[env.staging]`), checked before Google is
   called; absent binding allows (self-host).
 - The browser never deletes a Drive file it did not create: tombstones name only files an item recorded.
 - `/drive/open` treats `state` as untrusted JSON; ids are validated before any request; an unknown file is an error.
 - No Google data is used for anything but the mirror (Limited Use); no Drive content reaches the server.
-- The e2e session bridge exists only in a build with `NEXT_PUBLIC_E2E_AUTH=1`; the worker trusts nothing new, it
-  verifies that JWT against `CLERK_JWKS_URL` like any other.
+- The e2e signs in for real (an email code from the stack's outbox); the worker trusts nothing new.
 - Every session mount registers the api Bearer (`registerTokenProvider`), so the root-level Drive provider and a
   page never clear each other's credential on unmount.
 
@@ -811,7 +809,7 @@ Events: `elected`, `pass-start`, `pass-end`, `token`, `root-created`, `root-foun
 | Reconnect by another Google account         | `routes/drive.test.ts` (`reconnecting with another Google account`)     |
 | Account switch confirm, cancel, expiry      | `routes/drive.test.ts` (`account switch`)                               |
 | Account switch dialog                       | `apps/live/components/drive/DriveAccountSwitchDialog.test.tsx`          |
-| Clerk-only, 503 when off                    | `routes/drive.test.ts`                                                  |
+| Session-only, 503 when off                  | `routes/drive.test.ts`                                                  |
 | Rows removed with document, folder, account | `db/drive-removal.test.ts`, `account-owner-columns.test.ts`             |
 | OpenAPI parity                              | `openapi/route-parity.test.ts`                                          |
 | Envelope                                    | `packages/document/src/document-envelope.test.ts`                       |
@@ -828,13 +826,14 @@ Events: `elected`, `pass-start`, `pass-end`, `token`, `root-created`, `root-foun
 | Connection, items, lease statements         | `apps/api/src/db/drive.test.ts`                                         |
 | Disconnect and account deletion revoke      | `apps/api/src/drive/disconnect.test.ts`                                 |
 | OAuth calls, mode resolution, capabilities  | `google-oauth.test.ts`, `config.test.ts`, `routes/capabilities.test.ts` |
-| Bearer survives a second session mount      | `apps/live/hooks/persistence/useClerkApiBootstrap.test.tsx`             |
+| Bearer survives a second session mount      | `apps/live/hooks/persistence/useAccountApiBootstrap.test.tsx`           |
 | Telemetry vocabulary                        | `apps/live/lib/telemetry-coverage.test.ts`, `apps/telemetry` tests      |
 
 The browser e2e is opt-in (`pnpm --filter @livediagram/live test:e2e:drive`), kept out of CI's default run to spare
-its minutes: it rebuilds the live app with `NEXT_PUBLIC_E2E_AUTH=1`, which swaps Clerk for `E2EAuthBridge` (a
-session JWT the test mints against its own JWKS, verified by the worker exactly as Clerk's), and boots the stack
-with `E2E_DRIVE=1`. A real build never sets the flag, so the bridge is compiled out.
+its minutes: it rebuilds the live app with the e2e Google client id and Picker key, and boots the stack with
+`E2E_DRIVE=1` and sign-in on (`E2E_SIGN_IN=1`), on its own ports. Each test account signs in for real through
+`e2e/account/sign-in.ts` (an email code from the stack's outbox), once per fake Google user, and its session is entered
+into each test's browser context.
 
 ## Constants and configuration
 

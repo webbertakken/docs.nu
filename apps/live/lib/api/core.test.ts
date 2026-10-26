@@ -68,8 +68,8 @@ describe('apiHeaders (hybrid identity gate, docs/specs/014-identity/auth-and-gue
     expect(h['Authorization']).toBeUndefined();
   });
 
-  // Clerk's getToken() can resolve null for a moment on a live session. A
-  // null used to fall back to `X-Owner-Id: <Clerk id>`, which the worker
+  // The session token getter can resolve null for a moment on a live session. A
+  // null used to fall back to `X-Owner-Id: <account id>`, which the worker
   // refuses (401 account_id_not_a_guest_credential), surfacing as "Couldn't
   // save your changes. Check your connection." on a perfectly good network.
   it('asks for a fresh token, bypassing the cache, when the provider resolves null', async () => {
@@ -77,7 +77,7 @@ describe('apiHeaders (hybrid identity gate, docs/specs/014-identity/auth-and-gue
       Promise.resolve(opts?.skipCache ? 'jwt-fresh' : null),
     );
     setTokenProvider(provider);
-    const h = H(await apiHeaders('user_abc'));
+    const h = H(await apiHeaders('acct_abc'));
     expect(provider).toHaveBeenNthCalledWith(2, { skipCache: true });
     expect(h['Authorization']).toBe('Bearer jwt-fresh');
     expect(h['X-Owner-Id']).toBeUndefined();
@@ -87,17 +87,17 @@ describe('apiHeaders (hybrid identity gate, docs/specs/014-identity/auth-and-gue
   it('does not re-ask when the first token resolves', async () => {
     const provider = vi.fn(() => Promise.resolve('jwt-xyz'));
     setTokenProvider(provider);
-    await apiHeaders('user_abc');
+    await apiHeaders('acct_abc');
     expect(provider).toHaveBeenCalledTimes(1);
   });
 
   it('refuses to send an account id as the guest header when no token comes back', async () => {
     setTokenProvider(() => Promise.resolve(null));
-    await expect(apiHeaders('user_abc')).rejects.toBeInstanceOf(SessionTokenUnavailableError);
+    await expect(apiHeaders('acct_abc')).rejects.toBeInstanceOf(SessionTokenUnavailableError);
   });
 
   it('refuses an account id with no provider registered at all', async () => {
-    await expect(apiHeaders('user_abc')).rejects.toBeInstanceOf(SessionTokenUnavailableError);
+    await expect(apiHeaders('acct_abc')).rejects.toBeInstanceOf(SessionTokenUnavailableError);
   });
 
   it('adds Content-Type only for body requests, and the share code when given', async () => {
@@ -126,7 +126,7 @@ describe('session token limit', () => {
     const warnings: string[] = [];
     setApiWarningReporter((t) => warnings.push(t));
     setTokenProvider(() => new Promise<string | null>(() => {}));
-    const headers = apiHeaders('user_abc').catch((e: unknown) => e);
+    const headers = apiHeaders('acct_abc').catch((e: unknown) => e);
     // Two attempts, each bounded.
     await vi.advanceTimersByTimeAsync(SESSION_TOKEN_TIMEOUT_MS * 2);
     expect(await headers).toBeInstanceOf(SessionTokenUnavailableError);
@@ -138,7 +138,7 @@ describe('session token limit', () => {
     setTokenProvider((opts) =>
       opts?.skipCache ? Promise.resolve('jwt-fresh') : new Promise<string | null>(() => {}),
     );
-    const headers = apiHeaders('user_abc');
+    const headers = apiHeaders('acct_abc');
     await vi.advanceTimersByTimeAsync(SESSION_TOKEN_TIMEOUT_MS);
     expect(H(await headers)['Authorization']).toBe('Bearer jwt-fresh');
   });
@@ -148,7 +148,7 @@ describe('session token limit', () => {
 // the unload beacon (sync, cached token).
 describe('identityHeaders', () => {
   it('sends only the Bearer when a token is held', () => {
-    expect(identityHeaders('user_abc', 'jwt')).toEqual({ Authorization: 'Bearer jwt' });
+    expect(identityHeaders('acct_abc', 'jwt')).toEqual({ Authorization: 'Bearer jwt' });
   });
 
   it('sends the guest id and its signature without a token', () => {
@@ -160,7 +160,7 @@ describe('identityHeaders', () => {
   });
 
   it('throws rather than present an account id as a guest credential', () => {
-    expect(() => identityHeaders('user_abc', null)).toThrow(SessionTokenUnavailableError);
+    expect(() => identityHeaders('acct_abc', null)).toThrow(SessionTokenUnavailableError);
   });
 });
 
@@ -376,7 +376,7 @@ describe('apiFetch under a workbench session', () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    setWorkbenchConfinement({ scope: 'document', documentId: 'doc-1', ownerId: 'user_1' });
+    setWorkbenchConfinement({ scope: 'document', documentId: 'doc-1', ownerId: 'acct_1' });
 
     await expect(
       apiFetch(`${API_BASE}/folders`, {

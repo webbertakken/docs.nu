@@ -8,7 +8,7 @@ import type { Env } from '../types';
 //   1. AI_ALLOWED_ORIGINS: when set, the worker must reject any request
 //      whose Origin header isn't in the comma-separated allow-list with
 //      403 origin_not_allowed BEFORE reaching OpenAI.
-//   2. AI_REQUIRE_CLERK: when "true", the worker must reject the
+//   2. AI_REQUIRE_ACCOUNT: when "true", the worker must reject the
 //      X-Owner-Id guest path with 401 sign_in_required.
 //
 // Both gates have safe defaults (unset = old open behaviour) so the OSS
@@ -40,7 +40,7 @@ afterEach(() => {
 function makeCtx(opts: {
   env: Partial<Env>;
   origin?: string | null;
-  clerkUserId?: string | null;
+  sessionAccountId?: string | null;
   body?: string;
 }): RouteContext {
   const headers = new Headers();
@@ -57,10 +57,10 @@ function makeCtx(opts: {
     env: { OPENAI_API_KEY: 'test-key', ...opts.env } as Env,
     url: new URL(request.url),
     segments: ['api', 'ai'],
-    clerkUserId: opts.clerkUserId ?? null,
-    verifiedUserId: opts.clerkUserId ?? null,
-    clerkEmail: null,
-    resolveOwner: () => opts.clerkUserId ?? 'owner-anon',
+    sessionAccountId: opts.sessionAccountId ?? null,
+    verifiedAccountId: opts.sessionAccountId ?? null,
+    accountEmail: null,
+    resolveOwner: () => opts.sessionAccountId ?? 'owner-anon',
   };
 }
 
@@ -100,38 +100,38 @@ describe('handleAi origin allow-list (AI_ALLOWED_ORIGINS)', () => {
   });
 });
 
-describe('handleAi Clerk-only gate (AI_REQUIRE_CLERK)', () => {
-  it('allows guest path (clerkUserId null) when AI_REQUIRE_CLERK is unset', async () => {
-    const ctx = makeCtx({ env: {}, clerkUserId: null });
+describe('handleAi session-only gate (AI_REQUIRE_ACCOUNT)', () => {
+  it('allows guest path (sessionAccountId null) when AI_REQUIRE_ACCOUNT is unset', async () => {
+    const ctx = makeCtx({ env: {}, sessionAccountId: null });
     const res = await handleAi(ctx);
     expect(res.status).not.toBe(401);
   });
 
-  it('rejects guest path with 401 sign_in_required when AI_REQUIRE_CLERK="true"', async () => {
+  it('rejects guest path with 401 sign_in_required when AI_REQUIRE_ACCOUNT="true"', async () => {
     const ctx = makeCtx({
-      env: { AI_REQUIRE_CLERK: 'true' },
-      clerkUserId: null,
+      env: { AI_REQUIRE_ACCOUNT: 'true' },
+      sessionAccountId: null,
     });
     const res = await handleAi(ctx);
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'sign_in_required' });
   });
 
-  it('allows Clerk-authenticated path when AI_REQUIRE_CLERK="true"', async () => {
+  it('allows signed-in path when AI_REQUIRE_ACCOUNT="true"', async () => {
     const ctx = makeCtx({
-      env: { AI_REQUIRE_CLERK: 'true' },
-      clerkUserId: 'user_abc',
+      env: { AI_REQUIRE_ACCOUNT: 'true' },
+      sessionAccountId: 'user_abc',
     });
     const res = await handleAi(ctx);
     expect(res.status).not.toBe(401);
   });
 
-  it('leaves guest path open when AI_REQUIRE_CLERK is any value other than literal "true"', async () => {
+  it('leaves guest path open when AI_REQUIRE_ACCOUNT is any value other than literal "true"', async () => {
     // Explicit pin: only the string "true" enables the gate. A typo
     // like "yes" or "1" must NOT silently lock guests out.
     const ctx = makeCtx({
-      env: { AI_REQUIRE_CLERK: 'yes' },
-      clerkUserId: null,
+      env: { AI_REQUIRE_ACCOUNT: 'yes' },
+      sessionAccountId: null,
     });
     const res = await handleAi(ctx);
     expect(res.status).not.toBe(401);

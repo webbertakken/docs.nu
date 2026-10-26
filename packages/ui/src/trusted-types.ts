@@ -1,6 +1,5 @@
 // Trusted Types (docs/specs/016-platform/trusted-types.md): the enforced header, our three policies, and the rule
 // the `default` policy applies to script URLs. Nothing else of ours creates a policy.
-import { clerkPublishableKeyOrNull } from './clerk-key';
 
 import { INERT_PARSE_POLICY, MARKUP_POLICY } from './trusted-types-csp';
 
@@ -45,15 +44,14 @@ export function parseInert(source: string, type: DOMParserSupportedType): Docume
 
 /**
  * Whether a script URL may load: this app's own build, under its asset prefix (`/_next/` for marketing, `/live/_next/`,
- * `/help/_next/` and so on) on the page's origin, one on a named third-party origin, or (for a worker alone) one of
- * the page's own blob: URLs. Self-contained, because the boot script inlines its source.
+ * `/help/_next/` and so on) on the page's origin, or one on a named third-party origin. Never a blob:, data: or javascript: URL.
+ * Self-contained, because the boot script inlines its source.
  */
 export function isAllowedScriptUrl(
   url: string,
   pageOrigin: string,
   assetPrefix: string,
   origins: readonly string[],
-  sink?: string,
 ): boolean {
   let parsed: URL;
   try {
@@ -61,21 +59,11 @@ export function isAllowedScriptUrl(
   } catch {
     return false;
   }
-  // A worker may start from the page's own blob: URL (Clerk's session timers): only script already running on this
-  // origin can mint one, and a worker has no DOM. No other sink takes a blob: URL.
-  if (parsed.protocol === 'blob:')
-    return sink === 'Worker constructor' && parsed.origin === pageOrigin;
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
   if (parsed.origin === pageOrigin && parsed.pathname.indexOf(assetPrefix + '/_next/') === 0)
     return true;
   return origins.indexOf(parsed.origin) >= 0;
 }
-
-/**
- * Where Clerk's bot protection loads Cloudflare Turnstile from (`/turnstile/v0/api.js`) when the instance asks for a
- * CAPTCHA on sign-up; refused, sign-up stops at "The CAPTCHA failed to load".
- */
-const CLERK_CAPTCHA_ORIGIN = 'https://challenges.cloudflare.com';
 
 /**
  * Google's browser libraries for the Drive mirror (docs/specs/022-drive-mirror/drive-mirror.md): Identity Services
@@ -84,30 +72,9 @@ const CLERK_CAPTCHA_ORIGIN = 'https://challenges.cloudflare.com';
  */
 const GOOGLE_SCRIPT_ORIGINS = ['https://accounts.google.com', 'https://apis.google.com'];
 
-/**
- * The Clerk frontend API's origin, read from the publishable key (`pk_<env>_<base64 of "<host>$">`), and the origin
- * of the CAPTCHA its sign-up loads; none without a key. Then Google's two script origins, for a build that offers the
- * Drive mirror (a Google client id), and only then.
- */
-export function trustedScriptOrigins(env: {
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?: string;
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID?: string;
-}): string[] {
-  const google = env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? GOOGLE_SCRIPT_ORIGINS : [];
-  return [...clerkScriptOrigins(env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY), ...google];
-}
-
-function clerkScriptOrigins(publishableKey: string | undefined): string[] {
-  // The key's shape is clerkPublishableKeyOrNull's; its body names the frontend API's host.
-  const key = clerkPublishableKeyOrNull(publishableKey);
-  const match = key ? /^pk_(?:test|live)_([A-Za-z0-9+/=]+)$/.exec(key) : null;
-  if (!match) return [];
-  try {
-    const host = atob(match[1]!).replace(/\$$/, '');
-    return /^[a-z0-9.-]+$/i.test(host) ? [`https://${host}`, CLERK_CAPTCHA_ORIGIN] : [];
-  } catch {
-    return [];
-  }
+/** Google's two script origins, for a build that offers the Drive mirror (a Google client id), and only then. */
+export function trustedScriptOrigins(env: { NEXT_PUBLIC_GOOGLE_CLIENT_ID?: string }): string[] {
+  return env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? [...GOOGLE_SCRIPT_ORIGINS] : [];
 }
 
 /**
@@ -133,7 +100,7 @@ export function trustedTypesBootScript(assetPrefix: string, origins: readonly st
     `var PREFIX=${inlineJson(assetPrefix)};var ORIGINS=${inlineJson(origins)};` +
     `var allowed=${isAllowedScriptUrl.toString()};` +
     "if(window.trustedTypes&&window.trustedTypes.createPolicy){window.trustedTypes.createPolicy('default',{" +
-    'createScriptURL:function(url,type,sink){if(allowed(String(url),location.origin,PREFIX,ORIGINS,sink))return String(url);' +
+    'createScriptURL:function(url,type,sink){if(allowed(String(url),location.origin,PREFIX,ORIGINS))return String(url);' +
     "console.error('[trusted-types] script-url-refused '+url);return null;}," +
     // React DOM parses an empty script to make a <script> element on a client render; inert, the one HTML let through.
     // Written <\\/script> so the HTML parser never sees a closing tag inside this inline script.

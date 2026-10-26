@@ -20,8 +20,8 @@ livediagram is built to need as little of your data as possible, and the whole c
 - **Images you upload.** Images placed in a document are kept in Cloudflare object storage and served back through the same API. Before a JPEG is stored, identifying metadata such as GPS location and camera details is stripped from it, so it never reaches anyone you share the document with.
 - **A browser id.** If you use livediagram without an account, we keep a random identifier in your browser's local storage to link documents to your browser. It is not tied to your name or email.
 - **Your display name and colour.** The name and cursor colour collaborators see are stored on our server against your browser id or account.
-- **Account details, if you sign in.** Sign-in is handled by our authentication provider, Clerk. If you create an account we receive your email address, and, if you choose Google sign-in, basic profile details from Google. We use these to identify your account and to send you the account and onboarding emails described under **Emails we send** below.
-- **Your profile picture's address, if you sign in.** Your profile picture is a picture you uploaded to your account, or your Google picture. We store only its web address (hosted by Clerk), never the image, so we can show it to the people you collaborate with who are signed in: on your presence avatar, your cursor, your comments and your team's member list. People who open your share links without signing in always see your initials. Turn it off in **Settings > Account > Show My Profile Picture**; it is removed when you delete your account.
+- **Account details, if you sign in.** We run sign-in ourselves and keep your account in our own database: your name, your email address and whether it is verified, and, if you choose Google sign-in, your Google account's id and basic profile details from Google (never access to your Google account). For each signed-in browser we keep when the session ends and the browser and system it runs on; not your IP address. We use these to identify your account and to send you the account and onboarding emails described under **Emails we send** below.
+- **Your profile picture's address, if you sign in.** Your profile picture is your Google picture, if you sign in with Google. We store only its web address (hosted by Google), never the image, so we can show it to the people you collaborate with who are signed in: on your presence avatar, your cursor, your comments and your team's member list. People who open your share links without signing in always see your initials. Turn it off in **Settings > Account > Show My Profile Picture**; it is removed when you delete your account.
 - **API tokens, if you create them.** If you create an [API token](/help/account-and-data/api-tokens/) to call the API from your own scripts, we store a one-way hash of it (never the token itself), its name, and a last-used timestamp, so the token can be verified and you can see when it was last active. Tokens are a signed-in-only feature, expire after six months, and are deleted when you delete your account.
 - **Connecting an AI tool, if you do.** If you connect an AI tool via our [MCP server](/help/account-and-data/connect-ai-mcp/), we store the app's registration (its name and redirect address, kept for 30 days), short-lived authorization sessions and codes that expire within minutes, and, for an hour, a count of registrations from your IP address to stop abuse. The connection itself is an API token, covered above, and you can revoke it any time.
 - **Google Drive, if you connect it.** If you [mirror your documents to Google Drive](/help/account-and-data/google-drive/), we store an encrypted refresh token from Google, the id of the Google account you connected, the ids of the files and folders livediagram created in your Drive, and the state livediagram last wrote to them. See **Google user data** below.
@@ -68,7 +68,7 @@ We collect this ourselves, store it in our own database, and use no third-party 
 
 ## Cookies and local storage
 
-We use local storage to keep your browser id, your preferences (also saved to our database so they follow you), and, in the Community, the random key your likes and reports are stored against. Clerk's sign-in script loads in the editor for every visitor and sets cookies to remember whether you are signed in, and to keep you signed in. We do not use advertising or tracking cookies.
+We use local storage to keep your browser id, your preferences (also saved to our database so they follow you), and, in the Community, the random key your likes and reports are stored against. When you sign in, we set one cookie that keeps you signed in on this site; it is never sent to any other site, and no sign-in script from anyone else loads. We do not use advertising or tracking cookies.
 
 ## Emails we send
 
@@ -85,9 +85,8 @@ You can turn off every notification, tip and milestone email in **Settings**, un
 We rely on a small number of providers to run the service:
 
 - **Cloudflare**, for hosting, database storage, and image storage.
-- **Clerk**, for authentication (its script loads for every visitor; it holds account data only if you sign in).
-- **Google**, for the Google Drive mirror (only if you connect it); your browser talks to Google directly.
-- **Resend**, for delivering the emails described above (to account holders, and to addresses a teammate invites).
+- **Google**, for signing in with Google and for the Google Drive mirror (only if you choose them); your browser talks to Google directly.
+- **Resend**, for delivering sign-in codes and the emails described above (to account holders, and to addresses a teammate invites).
 - **OpenAI**, for the AI assistant, and **Google** (Gemini), for reading sticky notes from a photo (only when you use them; see **AI features** above).
 
 These providers process data on our behalf so that we can run the service.
@@ -106,7 +105,7 @@ Anything you put in a document you share becomes visible to people who have the 
 
 You can delete any document you own at any time. A deleted document waits in the [Trash](/help/account-and-data/trash/) for 30 days, so you can restore it, and is then removed for good; you can also delete it permanently from the Trash sooner. Comments, answers, ideas and votes that passed through a live collaboration session are also kept in that session's own storage on Cloudflare, and that copy is removed with the document. A document left empty and untouched for 30 days moves to the Trash on its own.
 
-You can delete your account, and the data associated with it, yourself: open **Settings**, then **Account**, then **Delete Account**. This removes your documents (the Trash and their collaboration-session copies included), folders, images, themes, preferences and API tokens straight away, revokes the Google Drive connection, and deletes your account at Clerk. Documents in a team's shared library pass to another member of that team rather than being deleted. See [Deleting Your Data](/help/account-and-data/deleting-your-data/).
+You can delete your account, and the data associated with it, yourself: open **Settings**, then **Account**, then **Delete Account**. This removes your documents (the Trash and their collaboration-session copies included), folders, images, themes, preferences and API tokens straight away, revokes the Google Drive connection, and then deletes your account, its sign-in methods and every signed-in session. Documents in a team's shared library pass to another member of that team rather than being deleted. See [Deleting Your Data](/help/account-and-data/deleting-your-data/).
 
 Other things are kept only as long as they are useful: anonymous product events for 60 days, Timeline activity for a year, changes made by connected AI tools for 30 days (so they can be undone), and an uploaded image that no document uses is removed once it is more than 30 days old. A guest's documents have no account to delete: remove them from the Explorer, or ask us.
 

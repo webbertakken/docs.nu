@@ -20,9 +20,9 @@ const { api, identity, seed } = vi.hoisted(() => ({
 vi.mock('@/lib/api-client', () => ({
   ...api,
   getSessionSharePassword: () => null,
-  readCachedSharePassword: () => null,
+  readCachedShareGrant: () => null,
   setSessionSharePassword: () => {},
-  writeCachedSharePassword: () => {},
+  writeCachedShareGrant: () => {},
 }));
 vi.mock('@/lib/local-identity', () => identity);
 vi.mock('@/lib/guest-identity', () => ({
@@ -60,8 +60,8 @@ function render(passwordRetry = 0) {
       authLoaded: true,
       passwordRetry,
       hydrated: false,
-      clerkUserId: null,
-      clerkDisplayName: null,
+      accountId: null,
+      accountDisplayName: null,
       embed: false,
       workbench: null,
       activeId: 't1',
@@ -148,7 +148,7 @@ describe('useIdentityBootstrap recovery', () => {
     expect(s.setLoadingDocument).toHaveBeenCalledWith(false);
   });
 
-  // Clerk answering after the guest timeout settles auth twice: the second run wins, the first's late answer is
+  // the session read answering after the guest timeout settles auth twice: the second run wins, the first's late answer is
   // dropped rather than overwriting it.
   it('drops the writes of a load superseded by a later run', async () => {
     seed.mockClear();
@@ -162,8 +162,8 @@ describe('useIdentityBootstrap recovery', () => {
       authLoaded,
       passwordRetry: 0,
       hydrated: false,
-      clerkUserId: null,
-      clerkDisplayName: null,
+      accountId: null,
+      accountDisplayName: null,
       embed: false,
       workbench: null,
       activeId: 't1',

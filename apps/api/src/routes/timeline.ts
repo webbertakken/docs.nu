@@ -11,7 +11,7 @@
 // write is the dismissal, which takes a card (or a stack of them) off
 // the caller's own feed and nobody else's.
 //
-// Hybrid identity like the rest of the api (docs/specs/014-identity/auth-and-guest-access.md): the Clerk userId
+// Hybrid identity like the rest of the api (docs/specs/014-identity/auth-and-guest-access.md): the account id
 // when signed in, X-Owner-Id otherwise. Guests get a Timeline too — a
 // thinner one, since team and token events never reach them — and it
 // migrates to their account on sign-up (docs/specs/013-workspace/timeline.md §9).
@@ -226,9 +226,9 @@ async function canReadScope(
   if (scope.scopeType === 'team') {
     // Joined members only — an `invited` row grants no access to the
     // team's content (docs/specs/013-workspace/teams.md), and its feed is content. Teams are
-    // Clerk-only, so a guest never passes this.
-    if (!ctx.verifiedUserId) return false;
-    const membership = await getMembership(ctx.env, scope.scopeId, ctx.verifiedUserId);
+    // session-only, so a guest never passes this.
+    if (!ctx.verifiedAccountId) return false;
+    const membership = await getMembership(ctx.env, scope.scopeId, ctx.verifiedAccountId);
     return membership?.status === 'joined';
   }
   return false;

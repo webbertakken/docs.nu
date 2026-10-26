@@ -1,40 +1,42 @@
 import { describe, expect, it } from 'vitest';
+import type { Env } from '../types';
 import { signOwnerId, verifyOwnerId } from './owner-signature';
 
-const SECRET = 'test-secret-key';
+const SIGN_IN = { BETTER_AUTH_SECRET: 's'.repeat(40) } as Env;
+const OTHER = { BETTER_AUTH_SECRET: 't'.repeat(40) } as Env;
+const GUEST_ONLY = {} as Env;
 
 describe('owner-signature', () => {
   it('signs an id and verifies its own signature', async () => {
     const id = 'guest-abc';
-    const sig = await signOwnerId(SECRET, id);
+    const sig = await signOwnerId(SIGN_IN, id);
     expect(sig).toBeTruthy();
-    expect(await verifyOwnerId(SECRET, id, sig)).toBe(true);
+    expect(await verifyOwnerId(SIGN_IN, id, sig)).toBe(true);
   });
 
-  it('is deterministic for the same id + secret', async () => {
-    expect(await signOwnerId(SECRET, 'x')).toBe(await signOwnerId(SECRET, 'x'));
+  it('is deterministic for the same id and key', async () => {
+    expect(await signOwnerId(SIGN_IN, 'x')).toBe(await signOwnerId(SIGN_IN, 'x'));
   });
 
   it("rejects another id's signature", async () => {
-    const sigForA = await signOwnerId(SECRET, 'id-A');
-    expect(await verifyOwnerId(SECRET, 'id-B', sigForA)).toBe(false);
+    const sigForA = await signOwnerId(SIGN_IN, 'id-A');
+    expect(await verifyOwnerId(SIGN_IN, 'id-B', sigForA)).toBe(false);
   });
 
   it('rejects a signature minted under a different secret', async () => {
-    const sig = await signOwnerId('other-secret', 'id');
-    expect(await verifyOwnerId(SECRET, 'id', sig)).toBe(false);
+    const sig = await signOwnerId(OTHER, 'id');
+    expect(await verifyOwnerId(SIGN_IN, 'id', sig)).toBe(false);
   });
 
-  it('rejects a missing / empty signature when a secret is set', async () => {
-    expect(await verifyOwnerId(SECRET, 'id', null)).toBe(false);
-    expect(await verifyOwnerId(SECRET, 'id', undefined)).toBe(false);
-    expect(await verifyOwnerId(SECRET, 'id', '')).toBe(false);
+  it('rejects a missing or empty signature', async () => {
+    expect(await verifyOwnerId(SIGN_IN, 'id', null)).toBe(false);
+    expect(await verifyOwnerId(SIGN_IN, 'id', undefined)).toBe(false);
+    expect(await verifyOwnerId(SIGN_IN, 'id', '')).toBe(false);
   });
 
-  it('disables signing when no secret is configured (self-host)', async () => {
-    expect(await signOwnerId(undefined, 'id')).toBeNull();
-    // Verification is a no-op (true) so callers that gate on the secret
-    // keep their legacy unsigned behaviour.
-    expect(await verifyOwnerId(undefined, 'id', null)).toBe(true);
+  it('signs nothing on a guest-only host, and verifies nothing there', async () => {
+    expect(await signOwnerId(GUEST_ONLY, 'id')).toBeNull();
+    const sig = await signOwnerId(SIGN_IN, 'id');
+    expect(await verifyOwnerId(GUEST_ONLY, 'id', sig)).toBe(false);
   });
 });

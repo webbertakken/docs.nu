@@ -146,7 +146,7 @@ function emailSwitch(
 // `preferences` (the live values) lets a nested row follow its parent switch
 // for the same reason: a setting for a panel that is off has nothing to act on.
 // `authEnabled` is whether this deployment offers sign-in at all
-// (`clerkEnabled`): API tokens are Clerk-only, so on a no-auth self-host they
+// (`useSignInAvailable`): API tokens are account-only, so on a no-auth self-host they
 // are absent end to end rather than a sign-in prompt with nowhere to go
 // (docs/specs/015-api/public-api-and-tokens.md#37-self-hosting).
 type SettingsRowContext = {
@@ -294,7 +294,7 @@ export type SettingsShortcutsRowSpec = RowBase & { kind: 'shortcuts' };
 // window. Read-only, so no read/write pair either.
 export type SettingsShortcutListRowSpec = RowBase & { kind: 'shortcutList' };
 
-// Account identity, read from Clerk, and account deletion. Neither is a
+// Account identity, read from the session, and account deletion. Neither is a
 // preference: they moved here from /explorer/profile (docs/specs/014-identity/profile-and-email-notifications.md) when that page
 // was retired, because everything else it held was already in this dialog.
 export type SettingsIdentityRowSpec = RowBase & { kind: 'identity' };

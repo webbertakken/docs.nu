@@ -117,7 +117,7 @@ SUM(length(format)), 0) ...)`. Each later statement runs only `WHERE EXISTS (...
 
 ## Interfaces and contracts: REST
 
-All under `/documents/:id/sheets`, auth `guest-or-clerk`, token-usable, registered in `openapi/manifest.ts` (tag
+All under `/documents/:id/sheets`, auth `guest-or-session`, token-usable, registered in `openapi/manifest.ts` (tag
 `Sheets`, added to `TAGS` in `openapi/document.ts`), DTOs in `packages/api-schema/src/sheets.ts`, words `sheets`
 and `writes` added to `API_ROUTE_WORDS`.
 

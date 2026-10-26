@@ -1,33 +1,24 @@
-// Resolve a guest identity that is SIGNED wherever possible, so the
-// sign-up migrate can later prove possession of the guest id rather than
-// merely knowing it (docs/specs/014-identity/auth-and-guest-access.md — guest ids leak via DTOs / presence, so
-// "knows the id" must not be enough to claim its data).
+// Resolve a guest identity that is SIGNED wherever the host signs, so the sign-in migrate can later prove possession
+// of the guest id rather than merely knowing it (docs/specs/014-identity/auth-and-guest-access.md "Signed guest ids":
+// guest ids leak via DTOs / presence, so "knows the id" must not be enough to claim its data).
 //
 // States handled:
 //   - Already signed ({id, sig} both stored): use it, no network.
-//   - Legacy unsigned id (or no id): mint a server-signed id. If the
-//     worker actually signs (GUEST_ID_HMAC_SECRET set) AND there was an
-//     existing id with data, migrate that data onto the new signed id
-//     first, then adopt it. If the migrate cannot reach the worker, keep the
-//     old id and retry next load rather than orphaning data; if the worker
-//     refuses it (403), adopt the signed id, since the old one is locked out.
-//   - Offline / mint fails / worker signing disabled: fall back to a
-//     local unsigned id — today's behaviour. The guest still works; they
-//     just can't prove possession until a later online bootstrap signs
-//     them: with enforcement off the migrate moves their data; with it on,
-//     the worker refuses and the browser adopts the signed id.
+//   - No id, or an unsigned one: ask the worker to mint a signed id. A host with sign-in signs it; adopt it. An
+//     unsigned id from before is replaced, not moved: the host refuses it on every owner-scoped route, and it can
+//     never move into an account.
+//   - A host that signs nothing (guest-only): an unsigned id is all a guest needs; keep the one there is.
+//   - Offline / the mint fails: keep any existing id, else mint a local unsigned one. The guest still works; a later
+//     online load signs it.
 
 import {
   ensureGuestSelfId,
   getGuestSelfId,
   getGuestSelfSig,
-  getPendingGuestUpgrade,
   reportParticipantCreated,
   setGuestIdentity,
-  setPendingGuestUpgrade,
 } from './local-identity';
-import { apiMintGuestId, apiUpgradeGuestId } from './api/self';
-import { debugLog } from '@/lib/debug-log';
+import { apiMintGuestId } from './api/self';
 
 type GuestIdentity = { id: string; sig: string | null };
 
@@ -38,53 +29,17 @@ let inflight: Promise<GuestIdentity> | null = null;
 
 export function ensureSignedGuestIdentity(): Promise<GuestIdentity> {
   if (!inflight) {
-    inflight = withGuestUpgradeLock(resolveSignedGuestIdentity).finally(() => {
+    inflight = resolveSignedGuestIdentity().finally(() => {
       inflight = null;
     });
   }
   return inflight;
 }
 
-// The `inflight` share above covers one tab only. Two tabs that open at once on a legacy unsigned
-// id would each mint a different signed id and each move the data: the second move takes it onto
-// its own id, the first tab's write to storage can land last, and the data is stranded under an id
-// whose signature this browser no longer holds. A Web Lock serialises the resolution across tabs;
-// `resolveSignedGuestIdentity` reads storage only once it holds the lock, so the second tab adopts
-// the signed identity the first one wrote. Browsers without `navigator.locks` keep the old
-// unserialised behaviour.
-export const GUEST_UPGRADE_LOCK_NAME = 'livediagram-guest-upgrade';
-
-function withGuestUpgradeLock<T>(run: () => Promise<T>): Promise<T> {
-  const locks = typeof navigator === 'undefined' ? undefined : navigator.locks;
-  if (!locks || typeof locks.request !== 'function') return run();
-  return locks.request(GUEST_UPGRADE_LOCK_NAME, run);
-}
-
 async function resolveSignedGuestIdentity(): Promise<GuestIdentity> {
-  // Read inside the lock: another tab may have finished an upgrade while this one waited.
   const existingId = getGuestSelfId();
   const existingSig = getGuestSelfSig();
   if (existingId && existingSig) return { id: existingId, sig: existingSig };
-
-  // An upgrade a reload interrupted: the worker may already hold the data under `to`. Repeat the
-  // move for the same pair (moving already-moved data changes nothing) and adopt it; minting a
-  // new id here would strand the data under one this browser never kept.
-  const pending = getPendingGuestUpgrade();
-  if (pending && pending.from === existingId) {
-    const resumed = await apiUpgradeGuestId(pending.from, pending.to, pending.sig);
-    if (resumed === 'failed') {
-      console.warn('[guest-identity] resuming the signed-id upgrade failed; retrying next load');
-      return { id: existingId, sig: existingSig };
-    }
-    if (resumed === 'refused') {
-      console.warn('[guest-identity] the worker refused the upgrade; adopting the signed id');
-    }
-    setGuestIdentity(pending.to, pending.sig);
-    setPendingGuestUpgrade(null);
-    debugLog('[guest-identity] resumed an interrupted signed-id upgrade');
-    return { id: pending.to, sig: pending.sig };
-  }
-  if (pending) setPendingGuestUpgrade(null);
   // No id at all → this browser has never had a participant: the
   // daily new-visitors signal (docs/specs/017-telemetry/telemetry.md). Emitted per adopted branch
   // below rather than up here so the offline fallback doesn't double
@@ -106,26 +61,9 @@ async function resolveSignedGuestIdentity(): Promise<GuestIdentity> {
     if (isNewVisitor) reportParticipantCreated();
     return { id, sig: null };
   }
-  // Worker returned a SIGNED id. Upgrade legacy data onto it if needed.
-  if (existingId && existingId !== minted.ownerId) {
-    // Recorded first: a reload after the worker moves the data but before the id below is kept
-    // resumes this same upgrade on the next load.
-    setPendingGuestUpgrade({ from: existingId, to: minted.ownerId, sig: minted.ownerSig });
-    const upgraded = await apiUpgradeGuestId(existingId, minted.ownerId, minted.ownerSig);
-    if (upgraded === 'failed') {
-      // Couldn't reach the worker: keep using the old (unsigned) id so
-      // nothing is orphaned; a later load retries the upgrade.
-      return { id: existingId, sig: existingSig };
-    }
-    if (upgraded === 'refused') {
-      // A refusal is final: the old id's server data is unreachable under enforcement already, and
-      // keeping the id would lock this browser out. Offline documents carry no guest id, so none
-      // are lost. Typically an id minted locally when the first mint never landed.
-      console.warn('[guest-identity] the worker refused the upgrade; adopting the signed id');
-    }
-  }
+  // Worker returned a SIGNED id: this host signs guests, so an unsigned id is no use here any more.
+  if (existingId) console.warn('[guest-identity] unsigned_id_replaced');
   setGuestIdentity(minted.ownerId, minted.ownerSig);
-  setPendingGuestUpgrade(null);
   if (isNewVisitor) reportParticipantCreated();
   return { id: minted.ownerId, sig: minted.ownerSig };
 }

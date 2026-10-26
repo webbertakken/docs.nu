@@ -1,20 +1,15 @@
 'use client';
 
-// Pieces shared between the sign-in (`/sign-in/`) and sign-up
-// (`/get-started/`) pages. Without this, both pages held identical
-// copies of the 6-digit code input, the Google glyph SVG, the
-// "Redirecting…" interstitial, and the Clerk error-message parser —
-// roughly 100 lines of literal copy-paste. AGENTS.md's reuse rule is
-// non-negotiable; both auth pages stay in sync as Clerk's API evolves.
+// Pieces shared between the sign-in (`/sign-in/`) and sign-up (`/get-started/`) pages and every surface that sends
+// someone there: the card on the Night Band frame, the interstitial, the guest-only notice, the email field, the
+// Google button and divider, and the `redirect_url` guards. Both pages run one flow (AuthFlow.tsx); the code step is
+// EmailCodeStep.tsx.
 //
-// Lives in `components/` (not `packages/`) because the styling is
-// app-specific (livediagram brand colours, livediagram Brand wordmark);
-// no other workspace consumes it yet. If marketing later grows its
-// own auth surface this can be promoted to `packages/ui`.
+// Lives in `components/` (not `packages/`) because the styling is app-specific; no other workspace consumes it.
 
-import { Button, buttonClassName, TextInput, ButtonContent } from '@livediagram/ui';
+import { buttonClassName, TextInput, ButtonContent } from '@livediagram/ui';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState, type MutableRefObject, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { sameOriginPath } from '@/lib/same-origin-path';
 import { AUTH_TITLE, AuthStage } from './AuthStage';
 import { AccountPitch } from './auth-pitches';
@@ -39,10 +34,13 @@ export function AuthCard({
   footer,
   guestHref,
   pitch = true,
+  errorId,
 }: {
   title: string;
   subtitle?: string;
   error: string;
+  // The error's id, so a field can be described by it and focus can move to it.
+  errorId?: string;
   // Good news (a code was resent): a status, never the error box; an error wins over it.
   notice?: string;
   children: ReactNode;
@@ -64,7 +62,9 @@ export function AuthCard({
 
       {error ? (
         <div
+          id={errorId}
           role="alert"
+          tabIndex={-1}
           className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
         >
           {error}
@@ -88,8 +88,8 @@ export function AuthCard({
 }
 
 // ---------------------------------------------------------------------
-// Interstitial — shown while Clerk is redirecting an already-signed-in
-// user, and as the Suspense fallback for both pages. Same frame, no
+// Interstitial — shown while an already-signed-in visitor is sent on,
+// and as the Suspense fallback for both pages. Same frame, no
 // pitch, so a hand-off never flashes a different ground.
 // ---------------------------------------------------------------------
 
@@ -102,180 +102,25 @@ export function RedirectingCard() {
 }
 
 // ---------------------------------------------------------------------
-// Notice shown on the auth routes when Clerk isn't configured for the
-// deployment (self-host path, no NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY).
-// The editor still works — only sign-up / sign-in are off — so the
-// CTA points back to the editor's welcome flow.
+// Notice shown on the auth routes on a host without sign-in (docs/specs/014-identity/auth-and-guest-access.md
+// "Deployment modes": a self-host with no keys). The editor still works, so the one action is to carry on as a guest.
 // ---------------------------------------------------------------------
 
 export function AuthDisabledNotice() {
   return (
-    <AuthCard
-      title="Sign-in is off here"
-      subtitle="Sign-in isn't enabled on this deployment"
-      error=""
-      pitch={false}
-    >
+    <AuthCard title="Sign-in is off here" error="" pitch={false}>
       <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-        This livediagram instance is running in <strong>guest-only</strong> mode: the canvas works
-        without an account. To enable sign-in, set{' '}
-        <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs dark:bg-slate-900 dark:text-slate-200">
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-        </code>{' '}
-        at build time and redeploy.
+        Sign-in isn't turned on for this site. Everything works without an account.
       </p>
       <div className="mt-6 flex justify-center">
-        <a href="/" className={buttonClassName({ size: 'md', className: 'shadow-sm' })}>
+        <a
+          href={POST_AUTH_DEFAULT}
+          className={buttonClassName({ size: 'md', className: 'shadow-sm' })}
+        >
           <ButtonContent>Continue as guest</ButtonContent>
         </a>
       </div>
     </AuthCard>
-  );
-}
-
-// ---------------------------------------------------------------------
-// 6-digit code input — used by both the sign-in `first factor` and
-// sign-up `email_address` verification flows. Auto-advances on type,
-// back-deletes on backspace into an empty cell, and pastes a full
-// code in one shot. Caller owns the digit state + refs so it can
-// reset / refocus between submissions.
-// ---------------------------------------------------------------------
-
-function CodeInputRow({
-  codeDigits,
-  setCodeDigits,
-  inputRefs,
-  onComplete,
-}: {
-  codeDigits: string[];
-  setCodeDigits: (digits: string[]) => void;
-  inputRefs: MutableRefObject<(HTMLInputElement | null)[]>;
-  onComplete: (fullCode: string) => void;
-}) {
-  return (
-    <div className="flex justify-center gap-2" role="group" aria-label="Verification code">
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <input
-          key={i}
-          ref={(el) => {
-            inputRefs.current[i] = el;
-          }}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          autoComplete={i === 0 ? 'one-time-code' : 'off'}
-          value={codeDigits[i]}
-          className="h-13 w-11 rounded-lg border border-slate-200 bg-white text-center text-xl font-semibold text-slate-900 transition focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-brand-400 dark:focus:ring-brand-500/30"
-          onChange={(e) => {
-            const v = e.target.value.replace(/\D/g, '').slice(-1);
-            const next = [...codeDigits];
-            next[i] = v;
-            setCodeDigits(next);
-            if (v && i < 5) inputRefs.current[i + 1]?.focus();
-            if (next.join('').length === 6) onComplete(next.join(''));
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Backspace' && !codeDigits[i] && i > 0) {
-              inputRefs.current[i - 1]?.focus();
-            }
-          }}
-          onPaste={(e) => {
-            e.preventDefault();
-            const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-            const next = ['', '', '', '', '', ''];
-            for (let j = 0; j < pasted.length; j++) next[j] = pasted[j]!;
-            setCodeDigits(next);
-            inputRefs.current[Math.min(pasted.length, 5)]?.focus();
-            if (pasted.length === 6) onComplete(next.join(''));
-          }}
-          aria-label={`Digit ${i + 1}`}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------
-// The email-code verification step
-// ---------------------------------------------------------------------
-
-// Phase two of both flows: the code has been sent, and the user types
-// it in. Sign-in and sign-up had literally the same form here — the
-// "we sent a code to <email>" line, the CodeInputRow, the Verify
-// button and its 6-digit gate, and the Resend / Back row.
-//
-// Only two things ever differed, and both are passed in. `ready` is
-// the page's Clerk object (`clerkSignIn` / `clerkSignUp`), which the
-// auto-submit checks before firing so a completed code cannot submit
-// against an SDK that has not loaded. `onBack` differs because the two
-// pages return to different places: sign-in drops the code step, while
-// sign-up steps its phase counter back.
-export function EmailCodeStep({
-  email,
-  codeDigits,
-  setCodeDigits,
-  inputRefs,
-  loading,
-  ready,
-  onSubmit,
-  onResend,
-  onBack,
-}: {
-  email: string;
-  codeDigits: string[];
-  setCodeDigits: (digits: string[]) => void;
-  inputRefs: MutableRefObject<(HTMLInputElement | null)[]>;
-  loading: boolean;
-  // Truthy once the page's Clerk object is available.
-  ready: unknown;
-  // Takes the code directly on auto-submit, since the sixth keystroke
-  // fires before the state holding it has been committed.
-  onSubmit: (e: React.FormEvent, code?: string) => void;
-  onResend: () => void;
-  onBack: () => void;
-}) {
-  return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <p className="text-sm text-slate-600 dark:text-slate-400">
-        We sent a verification code to{' '}
-        <strong className="text-slate-900 dark:text-slate-100">{email}</strong>. Enter it below.
-      </p>
-      <CodeInputRow
-        codeDigits={codeDigits}
-        setCodeDigits={setCodeDigits}
-        inputRefs={inputRefs}
-        onComplete={(full) => {
-          if (!loading && ready) {
-            onSubmit({ preventDefault: () => {} } as React.FormEvent, full);
-          }
-        }}
-      />
-      <Button
-        type="submit"
-        size="md"
-        disabled={loading || codeDigits.join('').length !== 6}
-        className="w-full shadow-sm"
-      >
-        {loading ? 'Verifying…' : 'Verify'}
-      </Button>
-      <div className="flex justify-between text-sm">
-        <button
-          type="button"
-          onClick={onResend}
-          disabled={loading}
-          className="text-slate-600 hover:text-slate-900 disabled:opacity-50 dark:text-slate-400 dark:hover:text-slate-100"
-        >
-          Resend code
-        </button>
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-        >
-          Back
-        </button>
-      </div>
-    </form>
   );
 }
 
@@ -395,34 +240,9 @@ export function OrDivider() {
 }
 
 // ---------------------------------------------------------------------
-// Clerk error shape parser. Clerk's API throws errors with shape
-// `{ errors: [{ message: string }, ...] }`. This unwraps the array
-// into a single comma-joined string, falling through to standard
-// Error message handling, then to a caller-supplied fallback.
-// ---------------------------------------------------------------------
-
-export function messageOf(err: unknown, fallback: string): string {
-  if (err && typeof err === 'object' && 'errors' in err) {
-    // Clerk's `longMessage` is the sentence written for people ("Enter a valid email address."); `message` is
-    // its terse form ("is invalid"), so it is only the fallback.
-    const list = (err as { errors: Array<{ message?: string; longMessage?: string }> }).errors;
-    if (Array.isArray(list)) {
-      const joined = list
-        .map((e) => e.longMessage || e.message)
-        .filter(Boolean)
-        .join(', ');
-      // An empty list still failed: say so rather than show no error at all.
-      return joined || fallback;
-    }
-  }
-  if (err instanceof Error) return err.message;
-  return fallback;
-}
-
-// ---------------------------------------------------------------------
 // Post-auth destination resolution
 //
-// Both sign-in and sign-up accept Clerk's protected-page bounce as
+// Both sign-in and sign-up accept a protected page's bounce as
 // `?redirect_url=/<path>`. After verification the user should land back
 // where they came from. Routes are now clean (no `/live` prefix — the
 // router selects the live app by route, docs/specs/016-platform/router-app.md), so destinations are
@@ -480,42 +300,6 @@ export function guestReturnHref(searchParams: { get: (key: string) => string | n
   return isSafeInternalPath(redirect) && !SIGNED_IN_ONLY.test(redirect)
     ? redirect
     : POST_AUTH_DEFAULT;
-}
-
-// OAuth form: Clerk's authenticateWithRedirect navigates the browser
-// directly. With clean routing the completion URL is the SAME path as
-// the router.push form (there's no basePath to add any more), so this
-// just composes on top of resolvePostAuthDestination — the two helpers
-// can't drift.
-export function resolveOAuthCompleteUrl(
-  searchParams: { get: (key: string) => string | null },
-  defaultDest: string = POST_AUTH_DEFAULT,
-): string {
-  return resolvePostAuthDestination(searchParams, defaultDest);
-}
-
-// The OAuth round-trip's callback URL, carrying a valid `?redirect_url` on.
-// `redirectUrlComplete` only covers a round-trip Clerk finishes on its own;
-// one that ends on /sso-callback (a Google sign-in Clerk turns into a
-// sign-up, an extra step) navigates from that page instead, so the
-// destination has to travel there too or the user lands on a default and
-// loses where they were going (an MCP consent, issue #612).
-const SSO_CALLBACK_PATH = '/sso-callback';
-export function ssoCallbackUrl(searchParams: { get: (key: string) => string | null }): string {
-  const redirect = searchParams.get('redirect_url');
-  return isSafeInternalPath(redirect)
-    ? `${SSO_CALLBACK_PATH}?redirect_url=${encodeURIComponent(redirect)}`
-    : SSO_CALLBACK_PATH;
-}
-
-// Where /sso-callback sends a finished round-trip: the carried
-// `?redirect_url` when it is safe, else nothing, leaving the callback's own
-// per-flow defaults (Explorer after sign-in, /new after sign-up) in charge.
-export function ssoCallbackDestination(searchParams: {
-  get: (key: string) => string | null;
-}): string | undefined {
-  const redirect = searchParams.get('redirect_url');
-  return isSafeInternalPath(redirect) ? redirect : undefined;
 }
 
 // ---------------------------------------------------------------------

@@ -17,7 +17,6 @@
 // live port. SIGINT/SIGTERM tears the whole tree down.
 
 import { spawn } from 'node:child_process';
-import { generateKeyPairSync, randomUUID, sign } from 'node:crypto';
 import http from 'node:http';
 import net from 'node:net';
 import {
@@ -53,9 +52,9 @@ import {
 import { TRUSTED_TYPES_CSP } from '../packages/ui/src/trusted-types-csp.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-// E2E_LIVE_OUT serves another export of the live app, e.g. the Clerk-enabled `.next/out-clerk-stub`
-// the signed-in specs run against (apps/live/scripts/build-clerk-stub.mjs).
-const OUT_DIR = path.join(ROOT, 'apps', 'live', process.env.E2E_LIVE_OUT ?? 'out');
+// One export serves every run, guest-only and signed-in alike: sign-in is the api's answer at runtime
+// (docs/specs/014-identity/auth-and-guest-access.md "Deployment modes"), never a build switch.
+const OUT_DIR = path.join(ROOT, 'apps', 'live', 'out');
 // The builds a simulated deploy (POST /__e2e/deploy) made: copies whose chunk files carry new
 // names, as a real deploy's do. Deploy n is served from deployDirs[n - 1].
 const deployDirs = [];
@@ -116,82 +115,55 @@ const LIVE_ONLY = process.env.E2E_LIVE_ONLY === '1';
 const NO_AI = process.env.E2E_NO_AI === '1';
 const AI_BUDGET_SPENT = process.env.E2E_AI_BUDGET_SPENT === '1';
 //   E2E_DRIVE=1      the Google Drive mirror e2e (docs/specs/022-drive-mirror/blueprints/
-//                    drive-mirror.md, "Testing"): the api worker verifies JWTs
-//                    against the JWKS the test serves (E2E_DRIVE_JWKS_PORT) and
-//                    talks OAuth to the fake Google the test serves
-//                    (E2E_DRIVE_GOOGLE_PORT). Test values only; the live build
-//                    must carry NEXT_PUBLIC_E2E_AUTH=1.
+//                    drive-mirror.md, "Testing"): the api worker talks OAuth to the fake Google
+//                    the test serves (E2E_DRIVE_GOOGLE_PORT). Test values only. Drive needs an
+//                    account, so the run also sets E2E_SIGN_IN=1 (playwright.config.ts).
 const DRIVE = process.env.E2E_DRIVE === '1';
-const DRIVE_JWKS_PORT = Number(process.env.E2E_DRIVE_JWKS_PORT ?? 8795);
 const DRIVE_GOOGLE_PORT = Number(process.env.E2E_DRIVE_GOOGLE_PORT ?? 8796);
 const DRIVE_E2E_VARS = {
-  CLERK_JWKS_URL: `http://127.0.0.1:${DRIVE_JWKS_PORT}/jwks.json`,
   GOOGLE_CLIENT_ID: '123456789012-e2e.apps.googleusercontent.com',
   GOOGLE_CLIENT_SECRET: 'e2e-client-secret',
   DRIVE_TOKEN_KEY: Buffer.alloc(32, 7).toString('base64'),
   GOOGLE_OAUTH_BASE_URL: `http://127.0.0.1:${DRIVE_GOOGLE_PORT}`,
 };
-//   E2E_CLERK_JWKS=1  act as Clerk for the signed-in specs (docs/specs/003-system-architecture/
-//                    e2e-smoke.md): a key made at boot, its JWKS on /e2e/jwks.json for the api
-//                    worker to verify against, and /e2e/token?sub=<id> minting a session token
-//                    for any test account. Test-only: nothing outside this stack trusts the key.
-//   E2E_WORKBENCH=1  the workbench embed e2e (docs/specs/013-workspace/blueprints/workbench-embeds.md,
-//                    "Testing"): the stack acts as Clerk as under E2E_CLERK_JWKS, for the signed-in
-//                    pairing page and the api calls the CLI makes, and the api builds its workbench
-//                    and pairing URLs on this live origin (APP_BASE_URL). The live build must carry
-//                    NEXT_PUBLIC_E2E_AUTH=1, as under E2E_DRIVE.
-const WORKBENCH = process.env.E2E_WORKBENCH === '1';
-const CLERK_JWKS = process.env.E2E_CLERK_JWKS === '1' || WORKBENCH;
-//   E2E_GUEST_SIG_ENFORCE  guest signature enforcement, as production runs once armed
-//                    (docs/specs/003-system-architecture/e2e-smoke.md "Armed guest signatures").
-//                    On unless set to 0: every spec seeds through signed guests. `=1` also selects
-//                    the armed project and its own ports (playwright.config.ts).
+//   E2E_SIGN_IN=1    sign-in on, as docs.nu runs it (docs/specs/014-identity/auth-and-guest-access.md
+//                    "Deployment modes"), for the account, Drive and workbench runs: email codes are
+//                    the one method and land in the outbox (EMAIL_OUTBOX, GET /api/preview/outbox),
+//                    and the live origin is sign-in's base URL (APP_BASE_URL), so better-auth's
+//                    Origin check and its cookies match the pages the specs open.
+const SIGN_IN = process.env.E2E_SIGN_IN === '1';
+//   E2E_GUEST_SIG_ENFORCE  guest signatures, as production runs them (docs/specs/003-system-
+//                    architecture/e2e-smoke.md "Armed guest signatures"): a usable sign-in secret
+//                    signs every guest id and makes owner-scoped routes require the signature, so
+//                    every spec seeds through signed guests. On unless set to 0, which leaves the
+//                    secret blank (a guest-only host that signs nothing). `=1` also selects the armed
+//                    project and its own ports (playwright.config.ts).
 const GUEST_SIG_ENFORCE = process.env.E2E_GUEST_SIG_ENFORCE !== '0';
-const clerkKey = CLERK_JWKS ? generateKeyPairSync('rsa', { modulusLength: 2048 }) : null;
-const CLERK_KID = 'e2e-clerk-stub';
-
-const b64url = (buf) => Buffer.from(buf).toString('base64url');
-
-// An RS256 session token shaped like Clerk's: sub, sid, iat / nbf / exp.
-function mintClerkToken(sub, email) {
-  const now = Math.floor(Date.now() / 1000);
-  const header = b64url(JSON.stringify({ alg: 'RS256', kid: CLERK_KID, typ: 'JWT' }));
-  const payload = b64url(
-    JSON.stringify({
-      sub,
-      sid: `sess_${sub}`,
-      iat: now,
-      nbf: now - 5,
-      exp: now + 3600,
-      ...(email ? { email } : {}),
-    }),
-  );
-  const signature = sign('sha256', Buffer.from(`${header}.${payload}`), clerkKey.privateKey);
-  return `${header}.${payload}.${b64url(signature)}`;
+if (SIGN_IN && !GUEST_SIG_ENFORCE) {
+  console.warn('[e2e] E2E_SIGN_IN=1 needs the sign-in secret: guest signatures stay enforced');
 }
-
-// Answers the two Clerk stand-in routes, or returns false for anything else.
-function serveClerkStandIn(pathname, url, res) {
-  if (!CLERK_JWKS) return false;
-  if (pathname === '/e2e/jwks.json') {
-    const jwk = clerkKey.publicKey.export({ format: 'jwk' });
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ keys: [{ ...jwk, kid: CLERK_KID, alg: 'RS256', use: 'sig' }] }));
-    return true;
-  }
-  if (pathname === '/e2e/token') {
-    const sub = url.searchParams.get('sub') ?? '';
-    if (!/^user_[A-Za-z0-9]+$/.test(sub)) {
-      res.writeHead(400, { 'Content-Type': 'text/plain' });
-      res.end('sub must look like user_<id>');
-      return true;
-    }
-    res.writeHead(200, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' });
-    res.end(mintClerkToken(sub, url.searchParams.get('email') ?? undefined));
-    return true;
-  }
-  return false;
-}
+// A test-only secret (40 characters, over better-auth's 32): it signs this stack's sessions and,
+// through its derived guest key, its guest ids. Nothing outside the stack trusts it.
+const E2E_AUTH_SECRET = 'e2e-only-better-auth-secret-0123456789ab';
+// The vars that decide whether sign-in is on, each stated explicitly so a developer's
+// apps/api/.dev.vars never changes the answer: on a guest stack sign-in on would start guest
+// documents in This Browser and break the guest specs. APP_BASE_URL stays blank there because
+// `wrangler dev` simulates the EMAIL binding, which alone is a sign-in method once a base URL exists.
+const IDENTITY_VARS = {
+  BETTER_AUTH_SECRET: SIGN_IN || GUEST_SIG_ENFORCE ? E2E_AUTH_SECRET : '',
+  BETTER_AUTH_SECRETS: '',
+  EMAIL_OUTBOX: SIGN_IN ? '1' : '',
+  APP_BASE_URL: SIGN_IN ? `http://localhost:${LIVE_PORT}` : '',
+  RESEND_API_KEY: '',
+  GOOGLE_AUTH_CLIENT_ID: '',
+  GOOGLE_AUTH_CLIENT_SECRET: '',
+};
+// Each browser context is its own client, as each visitor is behind Cloudflare: the api keys its
+// sign-in rate limits on CF-Connecting-IP, and every request here comes from one loopback address,
+// so without this the whole suite would share one bucket of 20 sign-in POSTs a minute. A context
+// names its address in this cookie (e2e/account/sign-in.ts); the proxy forwards it as the header.
+const CLIENT_ADDRESS_COOKIE = 'e2e-client-address';
+const IPV4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
 
 const children = [];
 function run(cmd, args, opts = {}) {
@@ -218,58 +190,6 @@ function waitForExit(child) {
     child.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`exit ${code}`))));
     child.on('error', reject);
   });
-}
-
-// A legacy guest (docs/specs/015-api/public-api-and-tokens.md §6): an unsigned id whose participant
-// row predates GUEST_SIGNING_LIVE_AT, owning one folder, written straight into the stack's local
-// D1. With signatures enforced the api cannot make one (an unsigned id writes nothing), and only
-// such a guest still runs the one-time upgrade onto a signed id, which e2e/guest-upgrade.spec.ts
-// exercises. Ids are server-made UUIDs, so the statement carries no outside input.
-async function seedLegacyGuest() {
-  const ownerId = randomUUID();
-  const folderId = randomUUID();
-  const sql =
-    `INSERT INTO participants (id, name, color, created_at) VALUES ('${ownerId}', 'Legacy guest', '#336699', 1);` +
-    `INSERT INTO folders (id, owner_id, name, created_at, updated_at) VALUES ('${folderId}', '${ownerId}', 'Legacy folder', 1, 1);`;
-  await waitForExit(
-    spawn(
-      'pnpm',
-      [
-        '--filter',
-        '@livediagram/api',
-        'exec',
-        'wrangler',
-        'd1',
-        'execute',
-        'DB',
-        '--local',
-        '--command',
-        sql,
-      ],
-      { cwd: ROOT, stdio: 'ignore' },
-    ),
-  );
-  return { ownerId, folderId, folderName: 'Legacy folder' };
-}
-
-// One seed at a time, each retried briefly: parallel workers asking at once would run several
-// `wrangler d1 execute` processes against the one local database file, and SQLite refuses the
-// writers that lose the lock.
-let legacySeedQueue = Promise.resolve();
-function queueLegacyGuestSeed() {
-  const attempt = async () => {
-    for (let tries = 1; ; tries += 1) {
-      try {
-        return await seedLegacyGuest();
-      } catch (err) {
-        if (tries >= 3) throw err;
-        await new Promise((r) => setTimeout(r, 250 * tries));
-      }
-    }
-  };
-  const next = legacySeedQueue.then(attempt, attempt);
-  legacySeedQueue = next.catch(() => {});
-  return next;
 }
 
 async function waitForPort(port, label, timeoutMs = 60_000) {
@@ -447,9 +367,26 @@ function resolveIn(dir, p) {
   return null;
 }
 
+// The client address a request's browser context named (CLIENT_ADDRESS_COOKIE), as Cloudflare's
+// CF-Connecting-IP; nothing when it named none or the request already carries the header.
+function clientAddressHeader(req) {
+  if (req.headers['cf-connecting-ip']) return {};
+  const address = cookiesOf(req).get(CLIENT_ADDRESS_COOKIE);
+  return address && IPV4.test(address) ? { 'cf-connecting-ip': address } : {};
+}
+
+// Every header passes both ways untouched, as the router passes them: `Cookie` and `Origin` reach
+// better-auth (its session and its Origin check), and its `Set-Cookie` lands the session cookie on
+// the live origin the pages run on.
 function proxyApi(req, res) {
   const proxyReq = http.request(
-    { host: '127.0.0.1', port: API_PORT, method: req.method, path: req.url, headers: req.headers },
+    {
+      host: '127.0.0.1',
+      port: API_PORT,
+      method: req.method,
+      path: req.url,
+      headers: { ...req.headers, ...clientAddressHeader(req) },
+    },
     (proxyRes) => {
       res.writeHead(proxyRes.statusCode ?? 502, proxyRes.headers);
       proxyRes.pipe(res);
@@ -523,27 +460,12 @@ function startLiveServer() {
       });
       return;
     }
-    if (serveClerkStandIn(pathname, new URL(req.url, 'http://localhost'), res)) return;
     if (pathname === '/__e2e/assets-out-of-cache' && req.method === 'POST') {
       res.writeHead(204, {
         'Cache-Control': 'no-store',
         'Set-Cookie': `${OUT_OF_CACHE_COOKIE}=1; Path=/; SameSite=Lax`,
       });
       res.end();
-      return;
-    }
-    if (pathname === '/__e2e/legacy-guest' && req.method === 'POST') {
-      queueLegacyGuestSeed().then(
-        (body) => {
-          res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-          res.end(JSON.stringify(body));
-        },
-        (err) => {
-          console.error('[e2e] seeding a legacy guest failed', err);
-          res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-          res.end('seeding a legacy guest failed');
-        },
-      );
       return;
     }
     if (pathname === '/__e2e/deploy' && req.method === 'POST') {
@@ -630,7 +552,9 @@ async function main() {
   await waitForExit(
     run('pnpm', ['--filter', '@livediagram/api', 'run', 'db:migrate:local'], { cwd: ROOT }),
   );
-  console.log('[e2e] starting api worker…');
+  console.log(
+    `[e2e] starting api worker (sign-in ${SIGN_IN ? 'on, codes in the outbox' : 'off'}, guest signatures ${IDENTITY_VARS.BETTER_AUTH_SECRET ? 'enforced' : 'off'})…`,
+  );
   run(
     'pnpm',
     [
@@ -648,27 +572,8 @@ async function main() {
       '--var',
       'AI_ALLOWED_ORIGINS:',
       ...(DRIVE ? Object.entries(DRIVE_E2E_VARS).flatMap(([k, v]) => ['--var', `${k}:${v}`]) : []),
-      // Guest ids are signed as in production (docs/specs/014-identity/auth-and-guest-access.md), so
-      // the signed-id upgrade a fresh guest goes through runs here too. A test-only secret.
-      '--var',
-      'GUEST_ID_HMAC_SECRET:e2e-guest-signing-secret',
-      // Enforced by default (E2E_GUEST_SIG_ENFORCE above), as production runs once armed
-      // (docs/specs/015-api/public-api-and-tokens.md §4): every entry path must mint a signed id
-      // before its first api call, and the specs seed through signed ids (fixtures.ts
-      // mintSignedGuest / ownerHeaders / pageOwnerHeaders). Explicit, because production's
-      // [vars] value can be blank while it is not armed.
-      '--var',
-      `GUEST_SIG_ENFORCE_AFTER:${GUEST_SIG_ENFORCE ? '1' : ''}`,
-      // Only a participant row older than this counts as a legacy guest: the one
-      // /__e2e/legacy-guest writes (created_at 1), never one the app makes during a run.
-      '--var',
-      'GUEST_SIGNING_LIVE_AT:1000',
-      // Verify session tokens against the stack's own key (E2E_CLERK_JWKS above), never a real
-      // Clerk instance a developer's .dev.vars may name.
-      ...(CLERK_JWKS
-        ? ['--var', `CLERK_JWKS_URL:http://127.0.0.1:${LIVE_PORT}/e2e/jwks.json`]
-        : []),
-      ...(WORKBENCH ? ['--var', `APP_BASE_URL:http://localhost:${LIVE_PORT}`] : []),
+      // Sign-in and guest signatures (IDENTITY_VARS above), as production decides them.
+      ...Object.entries(IDENTITY_VARS).flatMap(([k, v]) => ['--var', `${k}:${v}`]),
     ],
     {
       cwd: ROOT,

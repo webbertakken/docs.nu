@@ -17,10 +17,10 @@ Signing in to livediagram is entirely optional. The canvas works without an acco
 
 There are two routes:
 
-- **Sign up** at `/get-started`. Enter your first name, last name and email, then confirm with the 6-digit code we email you.
-- **Sign in** at `/sign-in` (the **Sign in** link at the top right of the editor and the Explorer) if you already have an account. Enter your email, choose **Continue with email**, and type the 6-digit code.
+- **Sign up** at `/get-started`. Enter your name and email, choose **Send code**, then type the 6-digit code we email you.
+- **Sign in** at `/sign-in` (the **Sign in** link at the top right of the editor and the Explorer) if you already have an account. Enter your email, choose **Send code**, and type the 6-digit code.
 
-Where Google sign-in is enabled, as it is on livediagram.app, both pages also offer **Continue with Google** above the email field. If you try to sign in with an email that has no account yet, you are taken to sign-up with that email already filled in.
+Where Google sign-in is enabled, both pages also offer **Continue with Google** above the email field. Signing in with an email that has no account yet creates one: after the code, you are asked what we should call you. Google and an email code for the same address open the same account.
 
 Accounts are free, with no paid tier and nothing to upgrade. After signing in from the sign-in page you land on the [Explorer](/explorer) to see your documents; after signing up you land on the new-document flow to start building. If you used the **Sign in** link in the editor or the Explorer, you go back to where you were instead.
 
@@ -31,21 +31,21 @@ Accounts are free, with no paid tier and nothing to upgrade. After signing in fr
   <SignInCard />
 </Figure>
 
-Once you are signed in, your picture (or initial) and first name replace the **Sign in** link. Click it for the account menu: **Account** opens the Account category of Settings, where your name, email, profile picture switch, [Google Drive](/help/account-and-data/google-drive/) connection, [Trash](/help/account-and-data/trash/) and **Delete Account** live, and **Sign out** signs you out and returns you to the home page. Settings shows the name and email your account was created with; it does not edit them.
+Once you are signed in, your picture (or initial) and first name replace the **Sign in** link. Click it for the account menu: **Account** opens the Account category of Settings, where your name, email, profile picture switch, [Google Drive](/help/account-and-data/google-drive/) connection, [Trash](/help/account-and-data/trash/) and **Delete Account** live, and **Sign out** signs you out and returns you to the home page. Settings shows the name and email your account was created with.
 
 ## Your profile picture
 
-When you sign in with Google, your Google profile picture becomes your avatar. If your account already has a picture of its own, that one is used instead (livediagram itself has no upload). If you have no picture, or it cannot load, you see your initial.
+When you sign in with Google, your Google profile picture becomes your avatar (livediagram itself has no upload). If you have no picture, or it cannot load, you see your initial.
 
 **Who sees it.** You always see your picture: on the account button at the top right and on your card in **Settings > Account**. People you collaborate with who are signed in see it too: on your presence avatar, your cursor, your comments and your team's member list. People who open your share links without signing in always see your initials.
 
 **Turning it off.** Switch off **Settings > Account > Show My Profile Picture** and everyone else sees your initials again, including in documents that are open right now. You still see your own picture.
 
-**Keeping it current.** If you change your picture at Google, livediagram shows the new one after your next sign-in with Google: Google only shares your picture when you sign in. livediagram keeps only the picture's web address, never the image itself.
+**Which picture.** Your avatar is the Google picture your account had when it was created with Google. A picture you change at Google later does not reach livediagram, and an account that started with an email code shows your initial. livediagram keeps only the picture's web address, never the image itself.
 
 ## When sign-in is not available
 
-Sign-in is an optional capability of livediagram. On self-hosted instances where accounts have not been configured, the sign-in pages say "Sign-in isn't enabled on this deployment" and offer **Continue as guest**, and the editor works exactly as before. If sign-in is failing on the hosted site, see [Cannot Sign In](/help/troubleshooting/cannot-sign-in/).
+Sign-in is an optional capability of livediagram. On self-hosted instances where accounts have not been configured, the sign-in pages say "Sign-in isn't turned on for this site" and offer **Continue as guest**, and the editor works exactly as before. If sign-in is failing on the hosted site, see [Cannot Sign In](/help/troubleshooting/cannot-sign-in/).
 
 ## Your guest documents come with you
 

@@ -1,18 +1,18 @@
 // Support for the workbench embed e2e (docs/specs/013-workspace/blueprints/workbench-embeds.md,
-// "Testing"): the fake workbench served from its own loopback origin, the signed-in person the e2e
-// stack mints (E2E_WORKBENCH=1 makes it act as Clerk), and the api calls the CLI would make.
+// "Testing"): the fake workbench served from its own loopback origin, the person signed in for real on the
+// signed-in stack (account/sign-in.ts), and the api calls the CLI would make.
 
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
+import { signIn } from './account/sign-in';
 
 const FAKE_WORKBENCH_HTML = readFileSync(
   new URL('./fixtures/fake-workbench.html', import.meta.url),
   'utf8',
 );
-const E2E_SESSION_KEY = 'livediagram:e2e:session';
 
 export type FakeWorkbench = {
   origin: string;
@@ -45,31 +45,15 @@ export async function serveFakeWorkbench(): Promise<FakeWorkbench> {
 
 export type Person = { userId: string; jwt: string; name: string };
 
-// A signed-in person: a session token the stack mints and the api verifies.
-export async function newPerson(request: APIRequestContext, name: string): Promise<Person> {
-  const userId = `user_wb${randomUUID().replaceAll('-', '')}`;
-  const res = await request.get(`/e2e/token?sub=${userId}`);
-  if (!res.ok()) throw new Error(`minting a session token failed: ${res.status()}`);
-  return { userId, jwt: await res.text(), name };
-}
-
-// Signs the person in on the live origin through the test-only auth bridge (E2EAuthBridge).
-export async function signIn(context: BrowserContext, person: Person, liveOrigin: string) {
-  await context.addInitScript(
-    ([key, origin, session]) => {
-      if (location.origin === origin) localStorage.setItem(key, session);
-    },
-    [
-      E2E_SESSION_KEY,
-      liveOrigin,
-      JSON.stringify({
-        token: person.jwt,
-        userId: person.userId,
-        email: `${person.userId}@example.test`,
-        firstName: person.name,
-      }),
-    ] as const,
-  );
+// A person signed in to `context` (every page it opens on the live origin is theirs), with a session token for the
+// api calls the CLI would make as them.
+export async function newPerson(
+  context: BrowserContext,
+  baseURL: string,
+  name: string,
+): Promise<Person> {
+  const account = await signIn(context, { baseURL, name });
+  return { userId: account.id, jwt: await account.sessionToken(), name };
 }
 
 async function call(

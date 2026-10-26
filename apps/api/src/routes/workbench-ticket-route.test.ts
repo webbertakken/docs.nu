@@ -30,7 +30,7 @@ function mint(db: SqliteD1, opts: Opts = {}) {
     makeTestRouteContext('POST', '/api/workbench/tickets', {
       env: opts.env ?? db.env,
       owner: opts.owner === undefined ? 'user_1' : opts.owner,
-      verifiedUserId: 'user_1',
+      verifiedAccountId: 'user_1',
       token,
       body:
         opts.rawBody === undefined
@@ -132,7 +132,7 @@ describe('POST /api/workbench/tickets', () => {
     expect(rows(db, 'SELECT * FROM workbench_tickets')).toEqual([]);
   });
 
-  it('requires a token: a Clerk session or a guest is refused', async () => {
+  it('requires a token: a session or a guest is refused', async () => {
     const db = await workbenchDb();
     pairToken(db);
 

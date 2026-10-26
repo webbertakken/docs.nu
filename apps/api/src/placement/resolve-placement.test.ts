@@ -7,8 +7,8 @@ import { judgeDefaultFolder } from './default-folder';
 // Placement on create (docs/specs/013-workspace/folders.md "Placement on create",
 // blueprint docs/specs/013-workspace/blueprints/document-placement.md).
 
-const guest = { ownerId: 'guest-uuid', verifiedUserId: null };
-const alice = { ownerId: 'user_alice', verifiedUserId: 'user_alice' };
+const guest = { ownerId: 'guest-uuid', verifiedAccountId: null };
+const alice = { ownerId: 'user_alice', verifiedAccountId: 'user_alice' };
 
 function lookups(over: Partial<PlacementLookups> = {}): PlacementLookups {
   return {

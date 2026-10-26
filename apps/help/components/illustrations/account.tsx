@@ -133,7 +133,7 @@ export function SignInCard() {
         <Label x={124} y={172} size={10} tone="muted">
           you@example.com
         </Label>
-        <Button x={114} y={194} w={192} h={28} label="Continue with email" variant="primary" />
+        <Button x={114} y={194} w={192} h={28} label="Send code" variant="primary" />
       </Panel>
     </Scene>
   );

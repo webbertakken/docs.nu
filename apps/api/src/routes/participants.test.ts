@@ -28,15 +28,15 @@ const makeCtx = (
   opts: {
     owner?: string | null;
     body?: unknown;
-    clerkUserId?: string | null;
-    verifiedUserId?: string | null;
+    sessionAccountId?: string | null;
+    verifiedAccountId?: string | null;
   } = {},
 ): RouteContext =>
   makeTestRouteContext(method, path, {
     body: opts.body,
     owner: opts.owner === undefined ? 'owner-1' : opts.owner,
-    clerkUserId: opts.clerkUserId ?? null,
-    ...(opts.verifiedUserId !== undefined ? { verifiedUserId: opts.verifiedUserId } : {}),
+    sessionAccountId: opts.sessionAccountId ?? null,
+    ...(opts.verifiedAccountId !== undefined ? { verifiedAccountId: opts.verifiedAccountId } : {}),
   });
 
 beforeEach(() => {
@@ -134,7 +134,8 @@ describe('handleParticipants', () => {
 
 // The published profile picture (docs/specs/014-identity/profile-picture.md §6).
 describe('participant pictures', () => {
-  const PICTURE = 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
+  const PICTURE =
+    'https://lh3.googleusercontent.com/eyJ0eXBlIjoicHJveHkifQ?width=96&height=96&fit=crop';
   const row = { id: 'user_ann', name: 'Ann', color: '#fff', createdAt: 0, pictureUrl: PICTURE };
 
   it('GET hides the picture from a caller who is not signed in', async () => {
@@ -149,17 +150,17 @@ describe('participant pictures', () => {
   it('GET shows the picture to a signed-in caller', async () => {
     db.getParticipant.mockResolvedValue(row);
     const res = await handleParticipants(
-      makeCtx('GET', '/api/participants/user_ann', { clerkUserId: 'user_bob' }),
+      makeCtx('GET', '/api/participants/user_ann', { sessionAccountId: 'user_bob' }),
     );
     const body = (await res.json()) as { participant: { pictureUrl: string | null } };
     expect(body.participant.pictureUrl).toBe(PICTURE);
   });
 
-  it('PUT picture sets it for the participant own Clerk session', async () => {
+  it('PUT picture sets it for the participant own session', async () => {
     db.setParticipantPicture.mockResolvedValue(true);
     const res = await handleParticipants(
       makeCtx('PUT', '/api/participants/user_ann/picture', {
-        clerkUserId: 'user_ann',
+        sessionAccountId: 'user_ann',
         body: { pictureUrl: PICTURE },
       }),
     );
@@ -171,7 +172,7 @@ describe('participant pictures', () => {
     db.setParticipantPicture.mockResolvedValue(true);
     const res = await handleParticipants(
       makeCtx('PUT', '/api/participants/user_ann/picture', {
-        clerkUserId: 'user_ann',
+        sessionAccountId: 'user_ann',
         body: { pictureUrl: null },
       }),
     );
@@ -185,7 +186,7 @@ describe('participant pictures', () => {
     const put = (pictureUrl: string | null) =>
       handleParticipants(
         makeCtx('PUT', '/api/participants/user_ann/picture', {
-          clerkUserId: 'user_ann',
+          sessionAccountId: 'user_ann',
           body: { pictureUrl },
         }),
       );
@@ -203,14 +204,14 @@ describe('participant pictures', () => {
     expect(guest.status).toBe(401);
     const token = await handleParticipants(
       makeCtx('PUT', '/api/participants/user_ann/picture', {
-        verifiedUserId: 'user_ann',
+        verifiedAccountId: 'user_ann',
         body: { pictureUrl: PICTURE },
       }),
     );
     expect(token.status).toBe(401);
     const other = await handleParticipants(
       makeCtx('PUT', '/api/participants/user_ann/picture', {
-        clerkUserId: 'user_eve',
+        sessionAccountId: 'user_eve',
         body: { pictureUrl: PICTURE },
       }),
     );
@@ -219,12 +220,16 @@ describe('participant pictures', () => {
     expect(info).toHaveBeenCalledWith('[profile-picture] rejected', 'not_account');
   });
 
-  it('PUT picture refuses a URL that is not on Clerk image host', async () => {
+  it('PUT picture refuses a URL that is not on the picture host', async () => {
     vi.spyOn(console, 'info').mockImplementation(() => {});
-    for (const pictureUrl of ['https://evil.example/x.png', 'http://img.clerk.com/x', 42]) {
+    for (const pictureUrl of [
+      'https://evil.example/x.png',
+      'http://lh3.googleusercontent.com/x',
+      42,
+    ]) {
       const res = await handleParticipants(
         makeCtx('PUT', '/api/participants/user_ann/picture', {
-          clerkUserId: 'user_ann',
+          sessionAccountId: 'user_ann',
           body: { pictureUrl },
         }),
       );
@@ -237,7 +242,7 @@ describe('participant pictures', () => {
     db.setParticipantPicture.mockResolvedValue(false);
     const res = await handleParticipants(
       makeCtx('PUT', '/api/participants/user_ann/picture', {
-        clerkUserId: 'user_ann',
+        sessionAccountId: 'user_ann',
         body: { pictureUrl: PICTURE },
       }),
     );

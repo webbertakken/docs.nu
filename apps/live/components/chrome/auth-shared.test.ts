@@ -4,11 +4,7 @@ import {
   guestReturnHref,
   POST_AUTH_DEFAULT,
   POST_AUTH_SIGNIN_DEFAULT,
-  messageOf,
-  resolveOAuthCompleteUrl,
   resolvePostAuthDestination,
-  ssoCallbackDestination,
-  ssoCallbackUrl,
 } from '@/components/chrome/auth-shared';
 
 // resolvePostAuthDestination decides where the sign-in and sign-up
@@ -84,22 +80,6 @@ describe('resolvePostAuthDestination', () => {
   });
 });
 
-// OAuth-flavoured form: with clean routing there's no basePath to add,
-// so it returns the SAME destination as the router.push form.
-describe('resolveOAuthCompleteUrl', () => {
-  it('mirrors resolvePostAuthDestination (no /live prefix to add)', () => {
-    expect(resolveOAuthCompleteUrl(params(''))).toBe(POST_AUTH_DEFAULT);
-    expect(resolveOAuthCompleteUrl(params('redirect_url=https://evil.example'))).toBe(
-      POST_AUTH_DEFAULT,
-    );
-    expect(resolveOAuthCompleteUrl(params('redirect_url=/sign-in'))).toBe(POST_AUTH_DEFAULT);
-    expect(resolveOAuthCompleteUrl(params('redirect_url=/document/abc'))).toBe('/document/abc');
-    expect(resolveOAuthCompleteUrl(params('redirect_url=/explorer/recent'))).toBe(
-      '/explorer/recent',
-    );
-  });
-});
-
 // authHrefWithReturn is the OTHER half of the round-trip: every Sign in
 // / Create account trigger builds its href with it, so the user returns
 // where they started. It MUST apply the same safety rules the resolver
@@ -142,70 +122,10 @@ describe('authHrefWithReturn', () => {
   });
 });
 
-// messageOf is the user-visible failure path for sign-in and
-// sign-up: every Clerk error in the two pages funnels through it
-// before reaching the inline `<p>` that explains why the form
-// didn't work. The three branches (Clerk array shape, native
-// Error, fallback string) each map to a different surface, and a
-// regression that drops to the fallback for a real Clerk error
-// would hide a useful "wrong code" / "rate limit" / "already
-// signed up" message behind a generic catch-all.
-describe('messageOf', () => {
-  it('joins a Clerk-shape errors array with ", " separators', () => {
-    const err = {
-      errors: [{ message: 'Email address is required' }, { message: 'Password is too short' }],
-    };
-    expect(messageOf(err, 'fallback')).toBe('Email address is required, Password is too short');
-  });
-
-  it('returns a single Clerk message unchanged (no leading separator)', () => {
-    const err = { errors: [{ message: 'Incorrect verification code' }] };
-    expect(messageOf(err, 'fallback')).toBe('Incorrect verification code');
-  });
-
-  it('falls back when Clerk returns an empty errors array, so a failure never shows no message', () => {
-    expect(messageOf({ errors: [] }, 'fallback')).toBe('fallback');
-  });
-
-  it("prefers Clerk's longMessage, written for people, over its terse message", () => {
-    const err = {
-      errors: [{ message: 'is invalid', longMessage: 'Enter a valid email address.' }],
-    };
-    expect(messageOf(err, 'fallback')).toBe('Enter a valid email address.');
-  });
-
-  it('falls through to the next branch when `errors` is not an array', () => {
-    // A non-Clerk object with a coincidentally-named `errors` field
-    // that isn't an array. Drops to the Error / fallback path
-    // instead of treating the bad shape as Clerk's.
-    expect(messageOf({ errors: 'oops' }, 'fallback')).toBe('fallback');
-    expect(messageOf({ errors: null }, 'fallback')).toBe('fallback');
-  });
-
-  it('returns err.message for a native Error', () => {
-    expect(messageOf(new Error('network down'), 'fallback')).toBe('network down');
-  });
-
-  it('returns err.message for a subclass of Error (TypeError)', () => {
-    expect(messageOf(new TypeError('bad arg'), 'fallback')).toBe('bad arg');
-  });
-
-  it('returns the fallback for null / undefined / primitives', () => {
-    expect(messageOf(null, 'fallback')).toBe('fallback');
-    expect(messageOf(undefined, 'fallback')).toBe('fallback');
-    expect(messageOf('a string thrown directly', 'fallback')).toBe('fallback');
-    expect(messageOf(42, 'fallback')).toBe('fallback');
-  });
-
-  it('returns the fallback for a plain object with no recognised shape', () => {
-    expect(messageOf({ unrelated: true }, 'fallback')).toBe('fallback');
-  });
-});
-
 describe('sign-in default (POST_AUTH_SIGNIN_DEFAULT)', () => {
   it('sends a verified sign-in with no redirect_url to the Explorer', () => {
     expect(resolvePostAuthDestination(params(''), POST_AUTH_SIGNIN_DEFAULT)).toBe('/explorer');
-    expect(resolveOAuthCompleteUrl(params(''), POST_AUTH_SIGNIN_DEFAULT)).toBe('/explorer');
+    expect(resolvePostAuthDestination(params(''), POST_AUTH_SIGNIN_DEFAULT)).toBe('/explorer');
   });
 
   it('still lets a valid redirect_url win over the sign-in default', () => {
@@ -215,7 +135,7 @@ describe('sign-in default (POST_AUTH_SIGNIN_DEFAULT)', () => {
       resolvePostAuthDestination(params('redirect_url=/document/abc'), POST_AUTH_SIGNIN_DEFAULT),
     ).toBe('/document/abc');
     expect(
-      resolveOAuthCompleteUrl(params('redirect_url=/document/abc'), POST_AUTH_SIGNIN_DEFAULT),
+      resolvePostAuthDestination(params('redirect_url=/document/abc'), POST_AUTH_SIGNIN_DEFAULT),
     ).toBe('/document/abc');
   });
 
@@ -233,34 +153,7 @@ describe('sign-in default (POST_AUTH_SIGNIN_DEFAULT)', () => {
 
   it('leaves the sign-up flow (no default arg) on the welcome flow (/new)', () => {
     expect(resolvePostAuthDestination(params(''))).toBe(POST_AUTH_DEFAULT);
-    expect(resolveOAuthCompleteUrl(params(''))).toBe(POST_AUTH_DEFAULT);
-  });
-});
-
-// The OAuth callback leg (issue #612): a Google round-trip that ends on
-// /sso-callback used to land on a default, dropping an MCP consent mid-connect.
-// The destination now rides on the callback URL, through the same guard.
-describe('ssoCallbackUrl / ssoCallbackDestination', () => {
-  const consent = '/oauth/consent/?session=abc123&client=Claude&to=claude.ai';
-
-  it('carries a safe return path onto the callback and reads it back intact', () => {
-    const url = ssoCallbackUrl(params(`redirect_url=${encodeURIComponent(consent)}`));
-    expect(url).toBe(`/sso-callback?redirect_url=${encodeURIComponent(consent)}`);
-    const back = new URL(url, 'https://livediagram.app').searchParams;
-    expect(ssoCallbackDestination(back)).toBe(consent);
-  });
-
-  it('is the bare callback, and no destination, when there is nothing safe to carry', () => {
-    for (const qs of [
-      '',
-      'redirect_url=https://evil.example',
-      'redirect_url=//evil.example',
-      'redirect_url=/sign-in/',
-      'redirect_url=/get-started',
-    ]) {
-      expect(ssoCallbackUrl(params(qs))).toBe('/sso-callback');
-      expect(ssoCallbackDestination(params(qs))).toBeUndefined();
-    }
+    expect(resolvePostAuthDestination(params(''))).toBe(POST_AUTH_DEFAULT);
   });
 });
 

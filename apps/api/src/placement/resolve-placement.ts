@@ -36,8 +36,8 @@ export function parsePlacement(body: {
 }
 
 /** May this caller file into a team? Only a verified account that has joined it. */
-export function judgeTeam(verifiedUserId: string | null, joined: boolean): Judgement {
-  return verifiedUserId !== null && joined ? 'ok' : 'team_forbidden';
+export function judgeTeam(verifiedAccountId: string | null, joined: boolean): Judgement {
+  return verifiedAccountId !== null && joined ? 'ok' : 'team_forbidden';
 }
 
 /**
@@ -69,8 +69,8 @@ const explicitFolder: FolderStep = async ({ requested, caller, lookups }) => {
   // Visibility of a team folder outside the requested space needs the caller's membership of it.
   const elsewhereTeam = folder?.teamId && folder.teamId !== requested.teamId ? folder.teamId : null;
   const joinedFolderTeam =
-    elsewhereTeam !== null && caller.verifiedUserId !== null
-      ? await lookups.isJoinedMember(elsewhereTeam, caller.verifiedUserId)
+    elsewhereTeam !== null && caller.verifiedAccountId !== null
+      ? await lookups.isJoinedMember(elsewhereTeam, caller.verifiedAccountId)
       : false;
   const judgement = judgeFolder(folder, requested, caller, joinedFolderTeam);
   if (judgement !== 'ok') return { ok: false, rejection: judgement };
@@ -95,9 +95,9 @@ export async function resolvePlacement(
 ): Promise<PlacementOutcome> {
   if (requested.teamId !== null) {
     const joined =
-      caller.verifiedUserId !== null &&
-      (await lookups.isJoinedMember(requested.teamId, caller.verifiedUserId));
-    const judgement = judgeTeam(caller.verifiedUserId, joined);
+      caller.verifiedAccountId !== null &&
+      (await lookups.isJoinedMember(requested.teamId, caller.verifiedAccountId));
+    const judgement = judgeTeam(caller.verifiedAccountId, joined);
     if (judgement !== 'ok') return { ok: false, rejection: judgement };
   }
   const skipped: DefaultSkip[] = [];

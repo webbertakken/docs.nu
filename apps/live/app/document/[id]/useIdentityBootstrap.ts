@@ -14,10 +14,9 @@ import {
   apiListShareLinks,
   apiLoadDocument,
   apiLoadShared,
-  getSessionSharePassword,
-  readCachedSharePassword,
+  readCachedShareGrant,
   setSessionSharePassword,
-  writeCachedSharePassword,
+  writeCachedShareGrant,
   type ShareLink,
   type SharedWithItem,
   type ShareRole,
@@ -52,7 +51,7 @@ function guardRun<T extends object>(fns: T, live: () => boolean): T {
   });
 }
 
-// One-shot identity + document hydration (Clerk gate -> guest id ->
+// One-shot identity + document hydration (session gate -> guest id ->
 // participant -> document/share/password resolution -> tab seeding),
 // lifted out of editor-page.tsx verbatim. The most entangled effect in
 // the page: it reads/writes ~25 state slices, so the setters + the
@@ -63,8 +62,8 @@ export function useIdentityBootstrap(opts: {
   authLoaded: boolean;
   passwordRetry: number;
   hydrated: boolean;
-  clerkUserId: string | null | undefined;
-  clerkDisplayName: string | null | undefined;
+  accountId: string | null | undefined;
+  accountDisplayName: string | null | undefined;
   // The read-only embed view (docs/specs/013-workspace/embeds.md): its reads are not opens.
   embed: boolean;
   // The editor in a workbench (docs/specs/013-workspace/blueprints/workbench-embeds.md): the session
@@ -123,8 +122,8 @@ export function useIdentityBootstrap(opts: {
     authLoaded,
     passwordRetry,
     hydrated,
-    clerkUserId,
-    clerkDisplayName,
+    accountId,
+    accountDisplayName,
     embed,
     workbench,
     activeId,
@@ -148,13 +147,13 @@ export function useIdentityBootstrap(opts: {
   // participant and settleEarlyIdentity resolves who is reading once auth answers.
   const bootstrap = useEffectEvent((early = false) => {
     if (hydrated) return;
-    // Wait for Clerk to determine the auth state before bootstrapping.
-    // Otherwise a signed-in user lands here with `clerkUserId === null`
+    // Wait for the session read to determine the auth state before bootstrapping.
+    // Otherwise a signed-in user lands here with `accountId === null`
     // briefly, we mint a guest id, and the participant record + every
     // subsequent document load uses the wrong owner. With this gate
     // the effect re-runs once `authLoaded` flips true.
     if (!authLoaded && !early) return;
-    // A later run (auth settling twice: Clerk answering after the guest timeout, then a guest migration) supersedes
+    // A later run (auth settling twice: the session read answering after the guest timeout, then a guest migration) supersedes
     // this one: a superseded run's writes are dropped, so a stale guest-identity load never overwrites the newer one.
     const generation = ++runRef.current;
     const live = () => runRef.current === generation;
@@ -229,7 +228,7 @@ export function useIdentityBootstrap(opts: {
     // know whether this open is a guest or a signed-in user. Fire-and-
     // forget, gated to once per browser per UTC day inside the helper,
     // so it's safe to run on every editor mount.
-    if (!early) trackDailyReturn(!!clerkUserId);
+    if (!early) trackDailyReturn(!!accountId);
     // The watchdog (docs/specs/007-editor/load-recovery.md): a load that has not ended in time shows
     // the load-error screen (after one self-healing reload per tab), and a load that lands after it
     // replaces that screen with the editor.
@@ -353,8 +352,8 @@ export function useIdentityBootstrap(opts: {
       } else {
         // Two ways in (docs/specs/014-identity/auth-and-guest-access.md): see resolve-participant.ts.
         self = await resolveParticipant({
-          clerkUserId,
-          clerkDisplayName,
+          accountId,
+          accountDisplayName,
           onParticipantStep: () => setLoadStep('participant'),
         });
         // The document-write key (docs/specs/012-collaboration/participant-responses.md) is stamped onto the LOCAL
@@ -398,14 +397,12 @@ export function useIdentityBootstrap(opts: {
       // arrivals get full document data via the share-code endpoint and
       // are flagged `!isOwner` so the Share button hides.
       if (shareCodeParam) {
-        // Warm-cache the share password (docs/specs/013-workspace/share-password.md) before the first
-        // call so a returning visitor whose password didn't change
-        // gets straight to the canvas without the gate. The seed is
-        // a no-op when the cache is empty (apiHeaders sees null and
-        // skips the X-Share-Password header), and if the server
-        // rejects the cached value we'll clear the entry below.
-        const cachedPassword = readCachedSharePassword(shareCodeParam);
-        if (cachedPassword) setSessionSharePassword(cachedPassword);
+        // Seed the session with the cached share grant (docs/specs/013-workspace/share-password.md
+        // "Password cache") before the first call, so a returning visitor whose password didn't change gets
+        // straight to the canvas without the gate. It rides where the password would (X-Share-Password); a
+        // no-op when nothing is cached, and cleared below when the server refuses it.
+        const cachedGrant = readCachedShareGrant(shareCodeParam);
+        if (cachedGrant) setSessionSharePassword(cachedGrant);
         // Pass the visitor's owner id so the api worker can record
         // their visit into shared_with — without it the server can't
         // identify the visitor and the "Shared with you" list stays
@@ -453,8 +450,8 @@ export function useIdentityBootstrap(opts: {
           // on the next retry, and reset the session attempt too so
           // the gate's empty-input prompt isn't lying about what's
           // about to be sent.
-          if (cachedPassword) {
-            writeCachedSharePassword(shareCodeParam, null);
+          if (cachedGrant) {
+            writeCachedShareGrant(shareCodeParam, null);
             setSessionSharePassword(null);
           }
           setSharePasswordGate({ invalid: resolution.invalid });
@@ -462,11 +459,10 @@ export function useIdentityBootstrap(opts: {
           setNameConfirmed(hasConfirmedName());
           return;
         }
-        // Success path. Persist whatever password the session is
-        // currently using (cached seed OR fresh user input) so the
-        // next load skips the gate.
-        const accepted = getSessionSharePassword();
-        if (accepted) writeCachedSharePassword(shareCodeParam, accepted);
+        // Success path. Keep the document's grant, never the password just typed, so the next load skips the
+        // gate; and use the grant from here on, so the password leaves this page's memory too.
+        writeCachedShareGrant(shareCodeParam, resolution.shareGrant ?? null);
+        if (resolution.shareGrant) setSessionSharePassword(resolution.shareGrant);
         {
           const { document: fetched, role, tabId: scopeTabId, community } = resolution;
           const session = resolveDocumentSession({
@@ -510,7 +506,7 @@ export function useIdentityBootstrap(opts: {
           // already has a confirmed identity — never prompt. Visitors
           // (signed in or not) still see the welcome card so they get
           // the "you're joining X's document" context; the name input
-          // is locked downstream when they have a Clerk identity so
+          // is locked downstream when they have a account identity so
           // they can't pretend to be someone else.
           const isOwnerVisit = session.isOwner;
           if (!isOwnerVisit && !viaCommunity && !hasConfirmedName()) {
@@ -615,7 +611,7 @@ export function useIdentityBootstrap(opts: {
         // settled — skip the identity prompt entirely. Guests fall
         // back to the legacy localStorage gate so they still get the
         // one-time naming nudge.
-        if (!early && !clerkUserId && !hasConfirmedName()) {
+        if (!early && !accountId && !hasConfirmedName()) {
           setIdentityPromptOpen(true);
         }
         setDocumentId(id);
@@ -652,11 +648,11 @@ export function useIdentityBootstrap(opts: {
   // all in the background of a document already on screen.
   const settleEarlyIdentity = useEffectEvent(() => {
     void (async () => {
-      const self = await resolveParticipant({ clerkUserId, clerkDisplayName });
+      const self = await resolveParticipant({ accountId, accountDisplayName });
       opts.set.setSelfParticipant({ ...self, key: ensureCollabKey(), status: 'online' });
       lastPersistedSelfRef.current = { name: self.name, color: self.color };
-      trackDailyReturn(!!clerkUserId);
-      if (!clerkUserId && !hasConfirmedName()) opts.set.setIdentityPromptOpen(true);
+      trackDailyReturn(!!accountId);
+      if (!accountId && !hasConfirmedName()) opts.set.setIdentityPromptOpen(true);
       opts.set.setNameConfirmed(hasConfirmedName());
       opts.refreshDocumentList(self.id);
       opts.refreshSharedList(self.id);

@@ -21,9 +21,9 @@ const { api, guest, seed } = vi.hoisted(() => ({
 vi.mock('@/lib/api-client', () => ({
   ...api,
   getSessionSharePassword: () => null,
-  readCachedSharePassword: () => null,
+  readCachedShareGrant: () => null,
   setSessionSharePassword: () => {},
-  writeCachedSharePassword: () => {},
+  writeCachedShareGrant: () => {},
 }));
 vi.mock('@/lib/guest-identity', () => guest);
 vi.mock('@/lib/daily-return', () => ({ trackDailyReturn: () => {} }));
@@ -73,8 +73,8 @@ function run(workbench: WorkbenchDocumentSession) {
       authLoaded: true,
       passwordRetry: 0,
       hydrated: false,
-      clerkUserId: PERSON.id,
-      clerkDisplayName: PERSON.name,
+      accountId: PERSON.id,
+      accountDisplayName: PERSON.name,
       embed: false,
       workbench,
       activeId: 't1',

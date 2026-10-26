@@ -56,9 +56,22 @@ export function identityConfigOf(env: Env): IdentityConfig {
   };
 }
 
-// The secret that signs today: the first of BETTER_AUTH_SECRETS ("2:new,1:old") when set, else BETTER_AUTH_SECRET.
+export type VersionedSecret = { version: number; value: string };
+
+// BETTER_AUTH_SECRETS ("2:new,1:old") in the order given, better-auth's own reading: the first entry signs today,
+// the rest still decrypt. A value may itself hold a colon. Empty when the variable is unset.
+export function versionedSecrets(env: Env): VersionedSecret[] {
+  const rotated = env.BETTER_AUTH_SECRETS?.trim();
+  if (!rotated) return [];
+  return rotated.split(',').map((entry) => {
+    const [version, ...value] = entry.split(':');
+    return { version: Number(version), value: value.join(':').trim() };
+  });
+}
+
+// The secret that signs today: the first of BETTER_AUTH_SECRETS when set, else BETTER_AUTH_SECRET.
 export function currentSecret(env: Env): string | null {
-  const rotated = env.BETTER_AUTH_SECRETS?.split(',')[0]?.split(':').slice(1).join(':').trim();
+  const rotated = versionedSecrets(env)[0]?.value;
   if (rotated) return rotated;
   return env.BETTER_AUTH_SECRET?.trim() || null;
 }

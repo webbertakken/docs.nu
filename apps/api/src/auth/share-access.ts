@@ -6,15 +6,17 @@
 // between three copies. Kept apart from document-access.ts so the room route
 // can reuse the rules while its tests stub the whole-request gates.
 
+import { bytesToBase64Url } from '@livediagram/api-schema';
+import { timingSafeEqual } from './timing-safe';
 import { sha256Hex, type ShareLink } from '@livediagram/api-schema';
 import { getDocumentSharePassword, getShareLink, upgradeDocumentSharePassword } from '../db';
 import type { Env } from '../types';
 import { hashSharePassword, verifySharePassword } from './share-password-hash';
 
-// The personal-document owner rule. The hybrid `owner` id (Clerk sub OR the
+// The personal-document owner rule. The hybrid `owner` id (account id OR the
 // unsigned X-Owner-Id guest header, or the room's `?o=`) is trusted ONLY on a
 // personal document, where a guest id is an unguessable UUID. A TEAM document's
-// owner id is a Clerk id deliberately visible to every teammate, so a removed
+// owner id is an account id deliberately visible to every teammate, so a removed
 // member could present it; team access goes through verified membership.
 export function isPersonalOwner(
   owner: string | null,
@@ -41,6 +43,26 @@ export async function shareLinkForDocument(
 // The password a request carries (`X-Share-Password`, or the room's `p`), with
 // the caller's network (`clientRateKey`) whose guessing budget a check spends.
 export type SharePasswordAttempt = { value: string; rateKey: string };
+
+// A share grant (docs/specs/013-workspace/share-password.md "Password cache"): what a visitor's browser keeps
+// instead of the password once it got past the gate. Derived from the document id and the STORED password value
+// (a salted hash the server never hands out), so only the server can make one, it never reveals the password, and
+// changing or removing the password voids every grant at once. Accepted wherever the password is.
+export const SHARE_GRANT_PREFIX = 'spg_';
+
+export async function shareGrantFor(documentId: string, stored: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(`livedoc-share-grant:${documentId}:${stored}`),
+  );
+  return SHARE_GRANT_PREFIX + bytesToBase64Url(new Uint8Array(digest));
+}
+
+// The grant for a protected document, or null when it has no password.
+export async function shareGrantOf(env: Env, documentId: string): Promise<string | null> {
+  const stored = await getDocumentSharePassword(env, documentId);
+  return stored ? shareGrantFor(documentId, stored) : null;
+}
 
 // Correct (stored value, provided password) pairs, so a visitor who sends the
 // password on every request pays for one PBKDF2 derivation per isolate, not
@@ -90,6 +112,12 @@ export async function sharePasswordStatus(
   const stored = await getDocumentSharePassword(env, documentId);
   if (!stored) return 'ok';
   if (attempt === null) return 'missing';
+  // A grant is 256 bits the server derived: checked by equality, with no guess budget or derivation to spend.
+  if (attempt.value.startsWith(SHARE_GRANT_PREFIX)) {
+    return (await timingSafeEqual(attempt.value, await shareGrantFor(documentId, stored)))
+      ? 'ok'
+      : 'invalid';
+  }
   const now = Date.now();
   const key = await verifiedKey(stored, attempt.value);
   if (isVerified(key, now)) return 'ok';

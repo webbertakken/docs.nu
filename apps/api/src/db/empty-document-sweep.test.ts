@@ -147,9 +147,9 @@ describe('trashEmptyDocuments', () => {
     liveDoc(db.sql, 'team-empty', { savedAt: STALE, team: 'tm', owner: 'user_bob' });
 
     expect(await trashEmptyDocuments(db.env, NOW)).toBe(1);
-    expect(await listTrash(db.env, { owner: 'user_me', verifiedUserId: 'user_me' })).toMatchObject([
-      { id: 'team-empty', teamId: 'tm', reason: 'empty' },
-    ]);
+    expect(
+      await listTrash(db.env, { owner: 'user_me', verifiedAccountId: 'user_me' }),
+    ).toMatchObject([{ id: 'team-empty', teamId: 'tm', reason: 'empty' }]);
   });
 
   it('leaves a document already in the Trash with its first time and reason', async () => {
@@ -182,7 +182,7 @@ describe('the Trash reason', () => {
     await trashEmptyDocuments(db.env, NOW);
     await trashDocument(db.env, 'deleted', NOW + 1);
 
-    const rows = await listTrash(db.env, { owner: 'owner', verifiedUserId: null });
+    const rows = await listTrash(db.env, { owner: 'owner', verifiedAccountId: null });
     expect(rows.map((r) => [r.id, r.reason])).toEqual([
       ['deleted', 'deleted'],
       ['swept', 'empty'],

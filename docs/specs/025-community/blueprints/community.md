@@ -230,7 +230,7 @@ post is invisible in every public read whatever its state.
 
 Guards:
 
-- G1 publish: `ctx.clerkUserId` non-null and `ownsDocument` and `teamId === null`.
+- G1 publish: `ctx.sessionAccountId` non-null and equal to the document's `ownerId`, and `teamId === null`.
 - G2 publish: `getDocumentSharePassword` empty.
 - G3 publish (new post only): `firstTabElementCount > 0` (`apps/api/src/db/tabs.ts`: counted, not rendered); author
   has fewer than `COMMUNITY_POSTS_PER_AUTHOR`.
@@ -325,10 +325,11 @@ Community app (`apps/community`):
   `parseCommunityListQuery` (a word wins over the old parameter) and `listCommunityPosts` (each `#tag` an `EXISTS`);
   a legacy `?tag=`, `?category=` or `?sort=` folds into `q` in `readQueryState`. The search form sits on the
   toolbar layer (`--z-toolbar`): above the grid, below the sticky header and its menus.
-- My Shares: `is:mine` (`COMMUNITY_MINE_TOKEN`) in `q` switches `useGallery` to `fetchMine`, with the Clerk session
-  from `LazyClerkSession` (a `next/dynamic` import of `ClerkSession`, so Clerk loads only when My Shares is on);
-  `apps/community/lib/session.ts` holds the publishable key (`signInAvailable` false without one hides the toggle),
-  `SESSION_LOAD_TIMEOUT_MS` and `signInHref`. `MineSummary` shows the **Your Shares** totals above the grid. Waiting
+- My Shares: `is:mine` (`COMMUNITY_MINE_TOKEN`) in `q` switches `useGallery` to `fetchMine`, with a session token
+  from `loadCommunitySession` (`apps/community/lib/session.ts`, over `@livediagram/account-session`'s `readSession` and
+  `createTokenProvider`; the session is read only once My Shares is on, and a missing token fails the load).
+  `mineMayBeOffered` hides the toggle once this browser has learned the host has no sign-in
+  (`livediagram:v2:sign-in-offered`); the same module holds `SESSION_LOAD_TIMEOUT_MS` and `signInHref`. `MineSummary` shows the **Your Shares** totals above the grid. Waiting
   past `SESSION_LOAD_TIMEOUT_MS` for the session, `GalleryView` shows `GalleryError` with a reload.
 - Post page (`apps/community/components/post/`): `PostView` over `usePost`, `EmbedFrame` (`/embed?s=<code>`, lazy,
   titled, falling back to the card image after 15 s), `PostMeta`, `PostActions`, `ReportDialog` (on the shared `Dialog` shell from `@livediagram/ui`, a phone sheet below `sm`), `RelatedPosts`.
@@ -377,7 +378,7 @@ Community app (`apps/community`):
 
 - Trust boundary: the Community app is a public, unauthenticated surface. It never sends `X-Owner-Id`; the community
   key grants nothing but a like and a report.
-- Publishing requires a verified Clerk identity (G1), so every public post is tied to an account.
+- Publishing requires the owner's own session token (G1), so every public post is tied to an account.
 - No owner id leaves the worker in any Community DTO; authors are participant display identities only.
 - The community link is read-only (view role), cannot open the room, and cannot read comments.
 - Abuse: `COMMUNITY_RATE_LIMITER` per network (`communityNetwork`) for all `/api/community/*` writes (the

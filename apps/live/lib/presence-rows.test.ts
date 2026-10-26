@@ -360,13 +360,13 @@ describe('buildRemoteCursorRows pictures', () => {
         ['b', { tabId: 't', x: 3, y: 4 }],
       ]),
       new Map([
-        ['a', peer('a', 'https://img.clerk.com/a')],
+        ['a', peer('a', 'https://lh3.googleusercontent.com/a/a')],
         ['b', peer('b')],
       ]),
       'me',
       't',
     );
-    expect(rows.find((r) => r.id === 'a')?.picture).toBe('https://img.clerk.com/a');
+    expect(rows.find((r) => r.id === 'a')?.picture).toBe('https://lh3.googleusercontent.com/a/a');
     expect(rows.find((r) => r.id === 'b')).not.toHaveProperty('picture');
   });
 });

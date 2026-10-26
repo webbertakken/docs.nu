@@ -53,8 +53,8 @@ describe('isRepairClearable', () => {
     }
   });
 
-  it('never touches keys outside its scope, such as the sign-in provider', () => {
-    expect(isRepairClearable('__clerk_environment')).toBe(false);
+  it('never touches keys outside its scope, such as a library of its own', () => {
+    expect(isRepairClearable('__vendor_environment')).toBe(false);
     expect(isRepairClearable('theme')).toBe(false);
   });
 });
@@ -66,7 +66,7 @@ describe('repairBrowserStorage', () => {
     localStorage.setItem('livediagram:v2:self-id', 'guest');
     localStorage.setItem('livediagram:user-preferences:v2', '{}');
     localStorage.setItem('livediagram:panel-layout:v1', '{}');
-    localStorage.setItem('__clerk_x', '1');
+    localStorage.setItem('__vendor_x', '1');
     sessionStorage.setItem('livediagram:stale-chunk-reloads', '{}');
 
     const { cleared } = repairBrowserStorage({ localStorage, sessionStorage });
@@ -77,7 +77,7 @@ describe('repairBrowserStorage', () => {
       'livediagram:user-preferences:v2',
     ]);
     expect(localStorage.getItem('livediagram:v2:self-id')).toBe('guest');
-    expect(localStorage.getItem('__clerk_x')).toBe('1');
+    expect(localStorage.getItem('__vendor_x')).toBe('1');
     expect(sessionStorage.length).toBe(0);
   });
 

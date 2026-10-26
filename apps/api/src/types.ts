@@ -33,43 +33,10 @@ export type Env = {
   // NEXT_PUBLIC_BUILD_ID (docs/specs/016-platform/stale-builds.md). Unset (local dev, a self-host that
   // sets neither) leaves it off the server release signal.
   BUILD_ID?: string;
-  // Clerk JWKS URL: when set, the request handler verifies Bearer
-  // tokens against it via `src/auth/clerk.ts` and prefers the
-  // resulting userId over `X-Owner-Id`. When unset, the worker stays
-  // in pure-guest mode (X-Owner-Id only). See docs/specs/014-identity/auth-and-guest-access.md + docs/specs/015-api/api.md.
-  CLERK_JWKS_URL?: string;
   // The OAuth server the CLI signs in through (docs/specs/015-api/cli.md), an https origin.
   OAUTH_ISSUER?: string;
   // The oldest CLI the api accepts writes from, x.y.z; unset for no floor.
   CLI_MIN_VERSION?: string;
-  // Optional: when set, the Clerk JWT verifier also asserts the `iss`
-  // claim (docs/specs/014-identity/auth-and-guest-access.md) so a token from another instance sharing the JWKS
-  // host can't be replayed. Unset → issuer not asserted (back-compat).
-  CLERK_ISSUER?: string;
-  // Optional: when set, the Clerk JWT verifier also asserts the `aud`
-  // claim (docs/specs/014-identity/auth-and-guest-access.md) so a token minted for a different audience/app can't
-  // be replayed here. Unset → audience not asserted (back-compat).
-  CLERK_AUDIENCE?: string;
-  // HMAC secret for signing guest owner-ids (docs/specs/014-identity/auth-and-guest-access.md + auth/
-  // owner-signature.ts). When set, POST /api/guest-id mints a signed id
-  // and /api/migrate requires a valid signature before reassigning a
-  // guest's data to a Clerk account — closing the "observe a guest id,
-  // claim its data" hole. Unset → migrate keeps its legacy unsigned
-  // behaviour (OSS self-host that hasn't configured it).
-  GUEST_ID_HMAC_SECRET?: string;
-  // Guest REST signature enforcement cutoff (docs/specs/015-api/public-api-and-tokens.md §4), epoch ms. While
-  // unset (or in the future) the guest `X-Owner-Id` REST path keeps its
-  // legacy unsigned behaviour — the grace window that lets pre-signing guests
-  // self-heal to a signed id. Set to a past timestamp (once active guests have
-  // rotated) to require a valid `X-Owner-Sig` on owner-scoped routes. No-op
-  // without GUEST_ID_HMAC_SECRET.
-  GUEST_SIG_ENFORCE_AFTER?: string;
-  // When this deployment started signing guest ids, epoch ms (docs/specs/015-api/public-api-and-tokens.md §4).
-  // Once enforcement is armed, an id whose participant row is older than this
-  // is a legacy (pre-signing) guest and may still run the one-time upgrade onto
-  // a signed id unsigned; every newer id must prove possession. Unset = no
-  // legacy exception.
-  GUEST_SIGNING_LIVE_AT?: string;
   // R2 bucket holding image-element bytes (docs/specs/009-elements/images.md). Optional so
   // self-hosters who haven't provisioned R2 can still deploy the
   // api worker: when unbound, the image endpoints all return 503
@@ -98,7 +65,7 @@ export type Env = {
   UNFURL_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
   // Per-owner limiter for POST /api/drive/token (docs/specs/022-drive-mirror/drive-mirror.md,
   // "Tokens"): each call reaches Google's token endpoint, so it gets a far
-  // tighter bound than the general write limiter. Keyed on the Clerk user id.
+  // tighter bound than the general write limiter. Keyed on the account id.
   // Optional: absent (self-host) → "allow".
   DRIVE_TOKEN_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
   // Per-network limiter for Community likes and reports (docs/specs/025-community/blueprints/community.md §7),
@@ -205,12 +172,11 @@ export type Env = {
   // value would 403 every request the editor makes.
   AI_ALLOWED_ORIGINS?: string;
   // When the literal string "true", POST /api/ai requires a verified
-  // Clerk Bearer JWT and rejects the X-Owner-Id guest path with 401
+  // session token and rejects the X-Owner-Id guest path with 401
   // (docs/specs/007-editor/ai-assistance.md). Anything else (unset, "false", any other value) keeps
-  // the guest path open. Hosted livediagram.app sets this to "true";
-  // OSS self-hosters who run Clerk-less stay on the open path by
-  // default.
-  AI_REQUIRE_CLERK?: string;
+  // the guest path open. Self-hosters who run without sign-in stay on
+  // the open path by default.
+  AI_REQUIRE_ACCOUNT?: string;
   // Per-owner soft cap on the number of images one owner may keep
   // in the gallery (docs/specs/009-elements/images.md). Stored as a decimal string in
   // wrangler.toml [vars]; parsed via parseInt at request time.

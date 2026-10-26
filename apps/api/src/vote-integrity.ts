@@ -51,7 +51,7 @@ export async function refuseGuestVoteOverCap(
   documentId: string,
   owner: string,
 ): Promise<Response | null> {
-  if (ctx.verifiedUserId) return null;
+  if (ctx.verifiedAccountId) return null;
   const networkTag = await networkTagFor(documentId, clientRateKey(ctx.request));
   const personTag = await personTagFor(documentId, owner);
   if (await admitGuestVoter(ctx.env, documentId, networkTag, personTag)) return null;

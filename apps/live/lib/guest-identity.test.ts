@@ -2,15 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('./api/self', () => ({
   apiMintGuestId: vi.fn(),
-  apiUpgradeGuestId: vi.fn(),
 }));
 vi.mock('./telemetry', () => ({ track: vi.fn() }));
 
-import { apiMintGuestId, apiUpgradeGuestId } from './api/self';
+import { apiMintGuestId } from './api/self';
 import { ensureSignedGuestIdentity } from './guest-identity';
 
 const mockMint = vi.mocked(apiMintGuestId);
-const mockUpgrade = vi.mocked(apiUpgradeGuestId);
 
 const ID = 'livediagram:v2:self-id';
 const SIG = 'livediagram:v2:self-sig';
@@ -29,7 +27,6 @@ function fakeStorage(): Storage {
 
 beforeEach(() => {
   mockMint.mockReset();
-  mockUpgrade.mockReset();
   (globalThis as unknown as { window: unknown }).window = { localStorage: fakeStorage() };
 });
 afterEach(() => {
@@ -49,36 +46,16 @@ describe('ensureSignedGuestIdentity', () => {
     expect(await ensureSignedGuestIdentity()).toEqual({ id: 'new', sig: 'newsig' });
     expect(window.localStorage.getItem(ID)).toBe('new');
     expect(window.localStorage.getItem(SIG)).toBe('newsig');
-    expect(mockUpgrade).not.toHaveBeenCalled();
   });
 
-  it('upgrades a legacy unsigned id by migrating its data onto the signed id', async () => {
-    window.localStorage.setItem(ID, 'legacy');
+  it('replaces an unsigned id with a signed one on a host that signs, moving nothing', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    window.localStorage.setItem(ID, 'unsigned');
     mockMint.mockResolvedValue({ ownerId: 'signed', ownerSig: 'sig' });
-    mockUpgrade.mockResolvedValue('moved');
-    expect(await ensureSignedGuestIdentity()).toEqual({ id: 'signed', sig: 'sig' });
-    expect(mockUpgrade).toHaveBeenCalledWith('legacy', 'signed', 'sig');
-    expect(window.localStorage.getItem(ID)).toBe('signed');
-  });
-
-  it('keeps the legacy id (no data loss) when the upgrade cannot reach the worker', async () => {
-    window.localStorage.setItem(ID, 'legacy');
-    mockMint.mockResolvedValue({ ownerId: 'signed', ownerSig: 'sig' });
-    mockUpgrade.mockResolvedValue('failed');
-    expect(await ensureSignedGuestIdentity()).toEqual({ id: 'legacy', sig: null });
-    expect(window.localStorage.getItem(ID)).toBe('legacy');
-  });
-
-  // A refusal is definitive: under enforcement only a pre-signing id may upgrade unsigned, and any
-  // other unsigned id's server data is unreachable already. Keeping it would lock the browser out.
-  it('adopts the signed id when the worker refuses the upgrade', async () => {
-    window.localStorage.setItem(ID, 'unsigned-after-signing');
-    mockMint.mockResolvedValue({ ownerId: 'signed', ownerSig: 'sig' });
-    mockUpgrade.mockResolvedValue('refused');
     expect(await ensureSignedGuestIdentity()).toEqual({ id: 'signed', sig: 'sig' });
     expect(window.localStorage.getItem(ID)).toBe('signed');
     expect(window.localStorage.getItem(SIG)).toBe('sig');
-    expect(window.localStorage.getItem('livediagram:v2:pending-signed-id')).toBeNull();
+    expect(console.warn).toHaveBeenCalledWith('[guest-identity] unsigned_id_replaced');
   });
 
   it('falls back to the existing unsigned id when minting fails (offline)', async () => {
@@ -91,7 +68,6 @@ describe('ensureSignedGuestIdentity', () => {
     window.localStorage.setItem(ID, 'existing');
     mockMint.mockResolvedValue({ ownerId: 'fresh', ownerSig: null });
     expect(await ensureSignedGuestIdentity()).toEqual({ id: 'existing', sig: null });
-    expect(mockUpgrade).not.toHaveBeenCalled();
   });
 });
 
@@ -150,142 +126,5 @@ describe('Participant·Created counts once per browser', () => {
     window.localStorage.setItem(ID, 'existing');
     local.ensureGuestSelfId();
     expect(created()).toBe(0);
-  });
-});
-
-// A reload can land after the worker moved the data but before the browser kept the new id
-// (docs/specs/014-identity/auth-and-guest-access.md, "An interrupted upgrade resumes").
-describe('an interrupted guest id upgrade', () => {
-  const PENDING = 'livediagram:v2:pending-signed-id';
-
-  it('records the pending upgrade before asking the worker to move the data', async () => {
-    window.localStorage.setItem(ID, 'legacy');
-    mockMint.mockResolvedValue({ ownerId: 'signed', ownerSig: 'sig' });
-    let seenDuringMove: string | null = null;
-    mockUpgrade.mockImplementation(async () => {
-      seenDuringMove = window.localStorage.getItem(PENDING);
-      return 'moved';
-    });
-    await ensureSignedGuestIdentity();
-    expect(JSON.parse(seenDuringMove!)).toEqual({ from: 'legacy', to: 'signed', sig: 'sig' });
-    expect(window.localStorage.getItem(PENDING)).toBeNull();
-  });
-
-  it('resumes the recorded upgrade on the next load instead of minting another id', async () => {
-    window.localStorage.setItem(ID, 'legacy');
-    window.localStorage.setItem(
-      PENDING,
-      JSON.stringify({ from: 'legacy', to: 'signed', sig: 'sig' }),
-    );
-    mockUpgrade.mockResolvedValue('moved');
-    expect(await ensureSignedGuestIdentity()).toEqual({ id: 'signed', sig: 'sig' });
-    expect(mockMint).not.toHaveBeenCalled();
-    expect(mockUpgrade).toHaveBeenCalledWith('legacy', 'signed', 'sig');
-    expect(window.localStorage.getItem(ID)).toBe('signed');
-    expect(window.localStorage.getItem(SIG)).toBe('sig');
-    expect(window.localStorage.getItem(PENDING)).toBeNull();
-  });
-
-  it('keeps the record and the old id when the resumed move fails, still without minting', async () => {
-    window.localStorage.setItem(ID, 'legacy');
-    window.localStorage.setItem(
-      PENDING,
-      JSON.stringify({ from: 'legacy', to: 'signed', sig: 'sig' }),
-    );
-    mockUpgrade.mockResolvedValue('failed');
-    expect(await ensureSignedGuestIdentity()).toEqual({ id: 'legacy', sig: null });
-    expect(mockMint).not.toHaveBeenCalled();
-    expect(window.localStorage.getItem(PENDING)).not.toBeNull();
-  });
-
-  it('adopts the recorded signed id when the resumed move is refused', async () => {
-    window.localStorage.setItem(ID, 'legacy');
-    window.localStorage.setItem(
-      PENDING,
-      JSON.stringify({ from: 'legacy', to: 'signed', sig: 'sig' }),
-    );
-    mockUpgrade.mockResolvedValue('refused');
-    expect(await ensureSignedGuestIdentity()).toEqual({ id: 'signed', sig: 'sig' });
-    expect(mockMint).not.toHaveBeenCalled();
-    expect(window.localStorage.getItem(ID)).toBe('signed');
-    expect(window.localStorage.getItem(PENDING)).toBeNull();
-  });
-
-  it('ignores a record that does not start from the id this browser holds', async () => {
-    window.localStorage.setItem(ID, 'other');
-    window.localStorage.setItem(
-      PENDING,
-      JSON.stringify({ from: 'legacy', to: 'signed', sig: 'sig' }),
-    );
-    mockMint.mockResolvedValue({ ownerId: 'fresh', ownerSig: 'fsig' });
-    mockUpgrade.mockResolvedValue('moved');
-    expect(await ensureSignedGuestIdentity()).toEqual({ id: 'fresh', sig: 'fsig' });
-    expect(mockUpgrade).toHaveBeenCalledWith('other', 'fresh', 'fsig');
-    expect(window.localStorage.getItem(PENDING)).toBeNull();
-  });
-});
-
-// Two tabs opening at once on a legacy unsigned id: each loads its own copy of the module, so the
-// per-module `inflight` share cannot help; the Web Lock must serialise them across tabs.
-describe('the signed-id upgrade across tabs', () => {
-  function fakeLocks() {
-    let tail: Promise<unknown> = Promise.resolve();
-    const names: string[] = [];
-    return {
-      names,
-      request: (name: string, run: () => Promise<unknown>) => {
-        names.push(name);
-        const next = tail.then(run);
-        tail = next.catch(() => undefined);
-        return next;
-      },
-    };
-  }
-
-  async function loadTab() {
-    vi.resetModules();
-    return { guest: await import('./guest-identity') };
-  }
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it('lets the second tab adopt the identity the first one wrote, never minting again', async () => {
-    const locks = fakeLocks();
-    vi.stubGlobal('navigator', { locks });
-    window.localStorage.setItem(ID, 'legacy');
-    const tabA = await loadTab();
-    const tabB = await loadTab();
-    // The api mock is shared by both tabs: without the lock each would mint, A then B.
-    mockMint
-      .mockResolvedValueOnce({ ownerId: 'signed-a', ownerSig: 'sig-a' })
-      .mockResolvedValueOnce({ ownerId: 'signed-b', ownerSig: 'sig-b' });
-    mockUpgrade.mockResolvedValue('moved');
-
-    const [a, b] = await Promise.all([
-      tabA.guest.ensureSignedGuestIdentity(),
-      tabB.guest.ensureSignedGuestIdentity(),
-    ]);
-
-    expect(a).toEqual({ id: 'signed-a', sig: 'sig-a' });
-    expect(b).toEqual({ id: 'signed-a', sig: 'sig-a' });
-    expect(locks.names).toEqual([
-      tabA.guest.GUEST_UPGRADE_LOCK_NAME,
-      tabB.guest.GUEST_UPGRADE_LOCK_NAME,
-    ]);
-    expect(mockMint).toHaveBeenCalledTimes(1);
-    expect(mockUpgrade).toHaveBeenCalledTimes(1);
-    expect(window.localStorage.getItem(ID)).toBe('signed-a');
-    expect(window.localStorage.getItem(SIG)).toBe('sig-a');
-  });
-
-  it('still resolves without navigator.locks', async () => {
-    vi.stubGlobal('navigator', {});
-    window.localStorage.setItem(ID, 'legacy');
-    const tab = await loadTab();
-    mockMint.mockResolvedValue({ ownerId: 'signed', ownerSig: 'sig' });
-    mockUpgrade.mockResolvedValue('moved');
-    expect(await tab.guest.ensureSignedGuestIdentity()).toEqual({ id: 'signed', sig: 'sig' });
   });
 });

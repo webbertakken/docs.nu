@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { clerkEnabled } from '@/lib/clerk-config';
+import { useSignInAvailable } from '@/lib/auth-config';
 import { isMinimalChrome } from '@/lib/power-user-mode';
 import { useExplorer } from '../ExplorerContext';
 import { sidebarDivider, sidebarGroups } from './sidebar-structure';
@@ -19,13 +19,14 @@ import { explorerSurfaceFlags, useExplorerSurface } from '../explorer-surface';
 // drawer.
 export function ExplorerSidebar() {
   const { teamsEnabled, invites, offlineDocuments, selected, prefs } = useExplorer();
+  const signInAvailable = useSignInAvailable();
   const navRef = useRef<HTMLElement>(null);
   const keyboard = useTreeNavigation(navRef);
   const divider = sidebarDivider(isMinimalChrome(prefs));
   const surface = explorerSurfaceFlags(useExplorerSurface());
   const groups = sidebarGroups({
     signedIn: teamsEnabled,
-    signInAvailable: clerkEnabled,
+    signInAvailable,
     pendingInvites: invites.length,
     offlineDocuments: offlineDocuments.length,
     selected: selected.kind,

@@ -84,7 +84,7 @@ describe('confinementRefusal', () => {
 
     expect(confinementRefusal('/api/events', { method: 'POST' })).toBeNull();
     expect(
-      confinementRefusal('/api/documents', { headers: { Authorization: 'Bearer clerk-jwt' } }),
+      confinementRefusal('/api/documents', { headers: { Authorization: 'Bearer session-token' } }),
     ).toBeNull();
     expect(
       confinementRefusal('/api/documents', { headers: new Headers({ 'X-Owner-Id': 'g' }) }),

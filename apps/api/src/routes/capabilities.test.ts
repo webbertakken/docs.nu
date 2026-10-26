@@ -75,7 +75,9 @@ describe('the CLI fields (docs/specs/015-api/blueprints/cli.md "Capabilities")',
 
   it('reports sign-in, an https issuer as its origin, and a well-formed version floor', async () => {
     const caps = await capabilities({
-      CLERK_JWKS_URL: 'https://clerk/jwks',
+      BETTER_AUTH_SECRET: 's'.repeat(40),
+      APP_BASE_URL: 'https://docs.test',
+      EMAIL_OUTBOX: '1',
       OAUTH_ISSUER: 'https://mcp.livediagram.app/',
       CLI_MIN_VERSION: ' 1.2.3 ',
     });
@@ -86,6 +88,12 @@ describe('the CLI fields (docs/specs/015-api/blueprints/cli.md "Capabilities")',
     });
   });
 
+  it('reports sign-in off without a sign-in secret', async () => {
+    expect(
+      (await capabilities({ APP_BASE_URL: 'https://docs.test', EMAIL_OUTBOX: '1' })).authEnabled,
+    ).toBe(false);
+  });
+
   it('leaves out an issuer that is not https, or not a URL, and a malformed floor', async () => {
     for (const OAUTH_ISSUER of ['http://mcp.local', 'not a url']) {
       expect(await capabilities({ OAUTH_ISSUER, CLI_MIN_VERSION: '1.2' })).not.toHaveProperty(
@@ -93,5 +101,13 @@ describe('the CLI fields (docs/specs/015-api/blueprints/cli.md "Capabilities")',
       );
     }
     expect(await capabilities({ CLI_MIN_VERSION: 'v1' })).not.toHaveProperty('cli');
+  });
+});
+
+describe('emailOutbox (docs/specs/014-identity/auth-and-guest-access.md "Previews")', () => {
+  it('is on only where codes land in the outbox', async () => {
+    expect((await capabilities({})).emailOutbox).toBe(false);
+    expect((await capabilities({ EMAIL_OUTBOX: '0' })).emailOutbox).toBe(false);
+    expect((await capabilities({ EMAIL_OUTBOX: '1' })).emailOutbox).toBe(true);
   });
 });

@@ -89,7 +89,7 @@ export function InfographicLayoutPreview({
   // The carried pictures, fetched while the preview shows them (inline bytes paint as they are).
   const imageIds = els.flatMap((el) => (el.type === 'image' && el.imageId ? [el.imageId] : []));
   const imageSource = useImageSources(imageIds);
-  const markup = useMemo(() => {
+  const drawn = useMemo(() => {
     const labels = arrowLabelPass(els, { fontFamilyOf: (a) => arrowLabelFontStack(a, tabFont) });
     const opts = {
       resolveImageHref: (id: string) => (id.startsWith('data:') ? id : imageSource(id)),
@@ -99,18 +99,13 @@ export function InfographicLayoutPreview({
       surface,
       chartPalette,
     };
-    const drawn = [
+    return [
       ...els.filter(isBoxed).map((el) => svgBoxed(el, opts)),
       ...els.flatMap((el) =>
         el.type === 'arrow' ? [svgArrow(el, els, surface, tabFont, labels, 'lvd-layout-ko-')] : [],
       ),
     ].join('');
-    // A wireframe page's layout is cut to its screen, its system bars over it, as placed.
-    return device
-      ? `<defs><clipPath id="lvd-layout-screen"><path d="${device.screen}"/></clipPath></defs>` +
-          `<g clip-path="url(#lvd-layout-screen)">${drawn}</g>${device.over}`
-      : drawn;
-  }, [els, surface, chartPalette, tabFont, imageSource, device]);
+  }, [els, surface, chartPalette, tabFont, imageSource]);
   return (
     <div
       aria-hidden
@@ -145,9 +140,27 @@ export function InfographicLayoutPreview({
         width={rect.width}
         height={rect.height}
         viewBox={`${rect.x} ${rect.y} ${rect.width} ${rect.height}`}
-        // Our own renderer's output (every label is xmlEscaped inside it).
-        dangerouslySetInnerHTML={{ __html: trustedHtml(markup) }}
-      />
+      >
+        {device ? (
+          // A wireframe page's layout is cut to its screen, its system bars over it, as placed. Built as elements,
+          // so no markup is assembled here from the page's values.
+          <>
+            <defs>
+              <clipPath id="lvd-layout-screen">
+                <path d={device.screen} />
+              </clipPath>
+            </defs>
+            <g
+              clipPath="url(#lvd-layout-screen)"
+              // Our own renderer's output (every label is xmlEscaped inside it).
+              dangerouslySetInnerHTML={{ __html: trustedHtml(drawn) }}
+            />
+            <g dangerouslySetInnerHTML={{ __html: trustedHtml(device.over) }} />
+          </>
+        ) : (
+          <g dangerouslySetInnerHTML={{ __html: trustedHtml(drawn) }} />
+        )}
+      </svg>
     </div>
   );
 }

@@ -25,32 +25,33 @@ Required by the CI/CD pipeline (see [10-deployment.md](../016-platform/deploymen
 | `CF_API_TOKEN`  | Cloudflare API token scoped to the account that owns the workers. Required permissions: Workers Scripts:Edit, D1:Edit, Workers Routes:Edit, Account Settings:Read, User Details:Read. Full list in [10-deployment.md](../016-platform/deployment.md). |
 | `CF_ACCOUNT_ID` | Cloudflare account ID (not a secret per se, but kept in the same store).                                                                                                                                                                              |
 
-The deploy workflow also **syncs** two of the worker secrets below from GitHub repo secrets into `wrangler secret put` on every deploy, so they rotate by editing the GitHub secret: `CLERK_JWKS_URL` and `GUEST_ID_HMAC_SECRET`. Each sync step is guarded on the GitHub secret being non-empty, so a fork that sets neither still deploys.
+The deploy workflow also **syncs** three of the worker secrets below from GitHub repo secrets into `wrangler secret put` on every deploy, so they rotate by editing the GitHub secret: `BETTER_AUTH_SECRET`, `GOOGLE_AUTH_CLIENT_SECRET` and `INTERNAL_EVENTS_KEY`. Each sync step is guarded on the GitHub secret being non-empty, so a fork that sets none still deploys.
 
 ## Worker secrets in use today
 
 Provisioned with `wrangler secret put` (production) or `.dev.vars` (local dev, gitignored) — **never** `[vars]`, which is plain text in a public repo. Every one is optional: absent, its feature degrades rather than breaking, which is what keeps self-hosting viable (see [03](open-source-and-business-model.md)).
 
-| Secret                                                       | Worker          | Absent means                                                                                              |
-| ------------------------------------------------------------ | --------------- | --------------------------------------------------------------------------------------------------------- |
-| `CLERK_JWKS_URL`                                             | api             | Pure-guest mode: `X-Owner-Id` is trusted exclusively ([04](../014-identity/auth-and-guest-access.md))     |
-| `GUEST_ID_HMAC_SECRET`                                       | api             | Legacy unsigned guest ids; `/api/migrate` accepts any id ([04](../014-identity/auth-and-guest-access.md)) |
-| `GOOGLE_AI_STUDIO_API_KEY` / `OPENAI_API_KEY` / `AI_API_KEY` | api             | The AI surface hides entirely ([25](../007-editor/ai-assistance.md))                                      |
-| `RESEND_API_KEY`                                             | api             | All transactional + lifecycle email is inert ([64](../014-identity/transactional-email.md))               |
-| `INTERNAL_EVENTS_KEY`                                        | api **and** mcp | MCP telemetry falls back to the shared anonymous rate-limit bucket ([22](../017-telemetry/telemetry.md))  |
+| Secret                                                       | Worker          | Absent means                                                                                             |
+| ------------------------------------------------------------ | --------------- | -------------------------------------------------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`                                         | api             | Guest-only: no sign-in, and guest ids go unsigned ([04](../014-identity/auth-and-guest-access.md))       |
+| `GOOGLE_AUTH_CLIENT_SECRET`                                  | api             | No Google sign-in; email codes still work ([04](../014-identity/auth-and-guest-access.md))               |
+| `GOOGLE_AI_STUDIO_API_KEY` / `OPENAI_API_KEY` / `AI_API_KEY` | api             | The AI surface hides entirely ([25](../007-editor/ai-assistance.md))                                     |
+| `RESEND_API_KEY`                                             | api             | All transactional + lifecycle email is inert ([64](../014-identity/transactional-email.md))              |
+| `INTERNAL_EVENTS_KEY`                                        | api **and** mcp | MCP telemetry falls back to the shared anonymous rate-limit bucket ([22](../017-telemetry/telemetry.md)) |
 
-`INTERNAL_EVENTS_KEY` is the only one that must hold the **same value on two workers**. A mismatch is silent — the caller simply lands back in the throttled bucket — so verify with `wrangler secret list` on both rather than assuming. Generate it, and `GUEST_ID_HMAC_SECRET`, with `openssl rand -hex 32`.
+`INTERNAL_EVENTS_KEY` is the only one that must hold the **same value on two workers**. A mismatch is silent — the caller simply lands back in the throttled bucket — so verify with `wrangler secret list` on both rather than assuming. Generate it with `openssl rand -hex 32`, and `BETTER_AUTH_SECRET` with `openssl rand -base64 32`. The guest-id signing key is derived from `BETTER_AUTH_SECRET`, so it has no secret of its own; rotating the sign-in secret adds a new version beside the old (`BETTER_AUTH_SECRETS`) and keeps `BETTER_AUTH_SECRET` in place.
 
 Non-secret configuration (`TELEMETRY_ENABLED`, `AI_BASE_URL`, `AI_MODEL`, `AI_*`, `IMAGE_MAX_*`, `RESEND_FROM`, `APP_BASE_URL`, `CONSENT_BASE_URL`) lives in `[vars]` in the relevant `wrangler.toml`, in the open, documented alongside each entry there and in the per-app `.env.example`. What only livediagram.app runs with (`TELEMETRY_ENABLED`, the `IMAGE_MAX_*` caps) is equally public but lives in the hosted profile, `apps/api/hosted-vars.json`, so it is not every fork's default ([Deployment](../016-platform/deployment.md) "Hosted profile"). `COMMUNITY_ENABLED` is non-secret configuration too, but unset by default: it is only set to switch the Community off ([Community](../025-community/community.md#turning-the-community-off)), as a `[vars]` entry, a dashboard variable or a secret, and is documented in `apps/api/.env.example`.
 
-`CLERK_SECRET_KEY` is **not** used: the api verifies session JWTs against the public JWKS and makes no Clerk Admin API calls.
+Sign-in calls no identity SaaS: better-auth runs inside the api worker, keeps its identity data in the api's own D1, and verifies session tokens against its own keys in-process. `GOOGLE_AUTH_CLIENT_ID` is not a secret and lives in `[vars]` (or the hosted profile).
 
 ## What is "safe to publish" client-side
 
 Some keys are designed to be public; they go in `NEXT_PUBLIC_*` vars and end up in the bundle:
 
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — Clerk publishable key.
 - Public URLs (`NEXT_PUBLIC_API_BASE`, etc.).
+- The Google sign-in client id, which the browser reads from `GET /api/capabilities` at runtime; no build carries a
+  sign-in key.
 
 If a value's documentation calls it "public", "publishable", or "client", it's fine for client bundles.
 
@@ -69,8 +70,8 @@ Workers and server-only code read these from `env` bindings — not from `proces
 Each app or worker that needs env vars ships a `.env.example` documenting **which variables are required** with placeholder values:
 
 ```
-# Required for production builds
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+# Where the live app calls the API; unset is correct behind the router
+NEXT_PUBLIC_API_BASE=
 # (no secret keys here — those go in the Cloudflare dashboard)
 ```
 
@@ -78,7 +79,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 
 ## If a secret leaks
 
-1. **Rotate immediately** in the relevant provider (Clerk, Cloudflare, etc.).
+1. **Rotate immediately** in the relevant provider (Cloudflare, Google, Resend, etc.).
 2. Update the secret in the env-var store (`wrangler secret put`, Pages dashboard).
 3. Force-push and `git filter-repo` are **not** sufficient — rotation comes first because Git history is forever public.
 4. Open a tracking note in specs (or wherever incidents live, TBD) to document what leaked, when, and what was rotated.
