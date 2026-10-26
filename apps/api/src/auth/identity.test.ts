@@ -78,6 +78,17 @@ describe('identity', () => {
     expect(options.advanced?.useSecureCookies).toBe(true);
   });
 
+  it('lets Google go where an email code is a way back in, and keeps it on a host with Google alone', () => {
+    const google = {
+      GOOGLE_AUTH_CLIENT_ID: 'id.apps.googleusercontent.com',
+      GOOGLE_AUTH_CLIENT_SECRET: 'g',
+    };
+    const withEmail = identityOptions({ ...SIGN_IN_ENV, ...google } as Env);
+    expect(withEmail.account?.accountLinking?.allowUnlinkingAll).toBe(true);
+    const googleOnly = identityOptions({ ...SIGN_IN_ENV, ...google, EMAIL_OUTBOX: '' } as Env);
+    expect(googleOnly.account?.accountLinking?.allowUnlinkingAll).toBe(false);
+  });
+
   it('rotates secrets, offers Google when keyed, and mints account ids for users only', () => {
     const options = identityOptions({
       ...SIGN_IN_ENV,
@@ -98,9 +109,50 @@ describe('identity', () => {
     expect(generateId({ model: 'user' })).toMatch(/^acct_/);
     expect(generateId({ model: 'session' })).toMatch(/^[0-9A-Za-z]{32}$/);
     expect(
-      identityOptions({ ...SIGN_IN_ENV, APP_BASE_URL: 'http://localhost:3000' } as Env).advanced
+      identityOptions({ ...SIGN_IN_ENV, APP_BASE_URL: 'http://localhost:4000' } as Env).advanced
         ?.useSecureCookies,
     ).toBe(false);
+  });
+
+  it('sends Google sign-in to Google with this host as the way back, asking only who the person is', async () => {
+    const { env } = sqliteD1({
+      ...SIGN_IN_ENV,
+      GOOGLE_AUTH_CLIENT_ID: '123-abc.apps.googleusercontent.com',
+      GOOGLE_AUTH_CLIENT_SECRET: 'g-secret',
+    });
+    const res = await handleAuth(
+      post('/api/auth/sign-in/social', { provider: 'google', callbackURL: '/explorer/recent' }),
+      env,
+    );
+    expect(res.status).toBe(200);
+    const { url } = await res.json<{ url: string }>();
+    const google = new URL(url);
+    expect(google.origin).toBe('https://accounts.google.com');
+    expect(google.searchParams.get('client_id')).toBe('123-abc.apps.googleusercontent.com');
+    expect(google.searchParams.get('redirect_uri')).toBe(`${ORIGIN}/api/auth/callback/google`);
+    expect(google.searchParams.get('scope')?.split(' ').sort()).toEqual([
+      'email',
+      'openid',
+      'profile',
+    ]);
+    expect(google.searchParams.get('prompt')).toBe('select_account');
+    expect(google.searchParams.get('code_challenge_method')).toBe('S256');
+  });
+
+  it('refuses a Google round trip that would come back to another site', async () => {
+    const { env } = sqliteD1({
+      ...SIGN_IN_ENV,
+      GOOGLE_AUTH_CLIENT_ID: '123-abc.apps.googleusercontent.com',
+      GOOGLE_AUTH_CLIENT_SECRET: 'g-secret',
+    });
+    const res = await handleAuth(
+      post('/api/auth/sign-in/social', {
+        provider: 'google',
+        callbackURL: 'https://evil.example/x',
+      }),
+      env,
+    );
+    expect(res.status).toBe(403);
   });
 
   it('signs up with an email code, then proves the account to the api with a session token', async () => {

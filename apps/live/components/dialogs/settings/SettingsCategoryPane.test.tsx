@@ -12,6 +12,12 @@ vi.mock('@/hooks/ui/useIsMobileViewport', () => ({
 }));
 const track = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/telemetry', () => ({ track }));
+// The signed-in account rows read the account over the network; here they only need to render.
+vi.mock('@/lib/account-manage', () => ({
+  ACCOUNT_NAME_MAX: 100,
+  readGoogleAccount: async () => false,
+  readAccountSessions: async () => [],
+}));
 
 import { SETTINGS_CATEGORIES } from './settings-catalogue';
 import { SettingsCategoryPane } from './SettingsCategoryPane';

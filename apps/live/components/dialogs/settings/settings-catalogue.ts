@@ -299,6 +299,10 @@ export type SettingsShortcutListRowSpec = RowBase & { kind: 'shortcutList' };
 // was retired, because everything else it held was already in this dialog.
 export type SettingsIdentityRowSpec = RowBase & { kind: 'identity' };
 export type SettingsDeleteAccountRowSpec = RowBase & { kind: 'deleteAccount' };
+// The account's name, sign-in methods and sessions (docs/specs/014-identity/auth-and-guest-access.md "Account settings").
+export type SettingsAccountNameRowSpec = RowBase & { kind: 'accountName' };
+export type SettingsSignInMethodsRowSpec = RowBase & { kind: 'signInMethods' };
+export type SettingsSessionsRowSpec = RowBase & { kind: 'sessions' };
 
 // The Trash (docs/specs/013-workspace/trash.md): not a preference, a way in.
 // Here for everyone, guests and self-hosts without accounts included, because
@@ -338,6 +342,9 @@ export type SettingsRowSpec =
   | SettingsShortcutListRowSpec
   | SettingsIdentityRowSpec
   | SettingsDeleteAccountRowSpec
+  | SettingsAccountNameRowSpec
+  | SettingsSignInMethodsRowSpec
+  | SettingsSessionsRowSpec
   | SettingsTrashRowSpec
   | SettingsPresetSummaryRowSpec
   | SettingsCloudSyncRowSpec
@@ -1608,6 +1615,33 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         read: (p) => showProfilePictureEnabled(p),
         write: (p, v) => ({ ...p, showProfilePicture: v }),
         event: { category: 'UI', on: 'ShowProfilePictureOn', off: 'ShowProfilePictureOff' },
+      },
+      {
+        kind: 'accountName',
+        key: 'accountName',
+        section: 'You',
+        label: 'Name',
+        keywords: 'name rename display name account profile change',
+        description: 'How collaborators see you on cursors, comments and the Timeline.',
+        available: (ctx) => ctx.signedIn,
+      },
+      {
+        kind: 'signInMethods',
+        key: 'signInMethods',
+        section: 'Signing In',
+        label: 'Sign-in Methods',
+        keywords: 'sign in methods google email code connect link unlink remove login',
+        description: 'The ways into this account. Connect Google to sign in with it too.',
+        available: (ctx) => ctx.signedIn,
+      },
+      {
+        kind: 'sessions',
+        key: 'sessions',
+        section: 'Signing In',
+        label: 'Sessions',
+        keywords: 'sessions devices browsers signed in sign out everywhere log out security',
+        description: 'Every browser signed in to this account. Sign one out, or all but this one.',
+        available: (ctx) => ctx.signedIn,
       },
       {
         kind: 'trash',

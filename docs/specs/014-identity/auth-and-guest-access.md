@@ -50,6 +50,8 @@ across devices, teams, tokens, collaborating under one name).
 Two methods ship first:
 
 - **Google.** "Continue with Google" on both auth pages. The account takes Google's verified email, name and picture.
+  It is proven end to end against a fake Google on the signed-in e2e stack
+  ([Signed-in specs](../003-system-architecture/e2e-smoke.md#signed-in-specs)).
 - **Email code.** Type an email, receive a 6-digit code valid for 5 minutes, type it. Three wrong tries spend the
   code. The first sign-in with a new address creates the account with that address verified.
 - **Not in the first release:** passwords (they need hashing budget on the worker and a reset flow), magic links (a
@@ -274,7 +276,8 @@ Settings > Account, signed in ([Account settings & email notifications](profile-
 - **Name**: editable inline.
 - **Email**: shown; changed as in [Account linking](#account-linking).
 - **Profile picture**: [Profile picture](profile-picture.md).
-- **Sign-in methods**: Google (connected address, or **Connect Google**), Email code (the account's address).
+- **Sign-in methods**: Google (**Connect Google**, or connected with **Remove**, offered only where email codes are, so
+  the address stays a way in), Email code (the account's address, where the host sends codes).
 - **Sessions**: [Sessions](#sessions).
 - **Delete Account**: below.
 
@@ -402,4 +405,4 @@ Signing in never moves a document in This Browser by itself ([Offline Mode → A
   tokens ([Secrets policy](../002-project-scope/secrets-policy.md)).
 - The app and the api share an origin (the router stitches `/api/*` under the app's host), which is what lets the
   session cookie stay host-only and `SameSite=Lax`. A host that splits them across sites is not supported for
-  sign-in; local development signs in through the router on port 3000.
+  sign-in; local development signs in through the router on port 4000.

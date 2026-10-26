@@ -10,6 +10,11 @@ import { SettingsChoiceRow } from './SettingsChoiceRow';
 import { SettingsToggleGroupRow } from './SettingsToggleGroupRow';
 import { SettingsRow } from './SettingsRow';
 import { SettingsDeleteAccountRow, SettingsIdentityRow } from './SettingsAccountRows';
+import {
+  SettingsAccountNameRow,
+  SettingsSessionsRow,
+  SettingsSignInMethodsRow,
+} from './SettingsAccountManageRows';
 import { SettingsShortcutsRow } from './SettingsShortcutsRow';
 import { SettingsShortcutListRow } from './SettingsShortcutListRow';
 import { SettingsSliderRow } from './SettingsSliderRow';
@@ -262,6 +267,12 @@ export function SettingsCategoryPane({
         return <SettingsIdentityRow row={row} />;
       case 'deleteAccount':
         return <SettingsDeleteAccountRow row={row} />;
+      case 'accountName':
+        return <SettingsAccountNameRow row={row} />;
+      case 'signInMethods':
+        return <SettingsSignInMethodsRow row={row} />;
+      case 'sessions':
+        return <SettingsSessionsRow row={row} />;
       case 'trash':
         return <SettingsTrashRow row={row} />;
       case 'cloudSync':

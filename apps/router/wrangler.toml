@@ -36,7 +36,7 @@ service = "docs-nu-help"
 binding = "COMMUNITY"
 service = "docs-nu-community"
 
-# Local dev (`wrangler dev --env local --port 3000`, the workspace `dev`
+# Local dev (`wrangler dev --env local --port 4000`, the workspace `dev`
 # script): service bindings can't reach the local Next dev servers, so this
 # environment defines none and sets plain HTTP origins instead. The worker
 # falls back to proxying these when a binding is absent. See docs/specs/016-platform/router-app.md.
@@ -44,9 +44,9 @@ service = "docs-nu-community"
 # Tells the router it fronts `next dev`, whose chunks are not content-hashed, so their own
 # no-cache header passes through (docs/specs/016-platform/stale-builds.md "Caching rules").
 DEPLOY_ENV = "local"
-MARKETING_ORIGIN = "http://127.0.0.1:3001"
-LIVE_ORIGIN = "http://127.0.0.1:3002"
+MARKETING_ORIGIN = "http://127.0.0.1:4001"
+LIVE_ORIGIN = "http://127.0.0.1:4002"
 API_ORIGIN = "http://127.0.0.1:8787"
-TELEMETRY_ORIGIN = "http://127.0.0.1:3003"
-HELP_ORIGIN = "http://127.0.0.1:3004"
-COMMUNITY_ORIGIN = "http://127.0.0.1:3005"
+TELEMETRY_ORIGIN = "http://127.0.0.1:4003"
+HELP_ORIGIN = "http://127.0.0.1:4004"
+COMMUNITY_ORIGIN = "http://127.0.0.1:4005"

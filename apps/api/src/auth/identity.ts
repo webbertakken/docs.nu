@@ -9,6 +9,7 @@
 // Every setting better-auth would otherwise take from NODE_ENV (the secret guard, Secure cookies, its rate limiter)
 // is set explicitly: a deployed Worker has no NODE_ENV.
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
+import { routeGoogleTokenCallsToFake } from './fake-google-route';
 import { emailOTP } from 'better-auth/plugins/email-otp';
 import { jwt } from 'better-auth/plugins/jwt';
 import { generateAccountId } from './account-id';
@@ -63,7 +64,7 @@ export function identityOptions(
   executionCtx?: ExecutionContextLike,
   codeSend: CodeSend = { failed: false },
 ): BetterAuthOptions {
-  const { origin, secret, googleClientId } = identityConfigOf(env);
+  const { origin, secret, googleClientId, methods } = identityConfigOf(env);
   if (!origin || !secret) throw new Error('identityOptions: sign-in is off on this host');
   const rotated = versionedSecrets(env);
   return {
@@ -80,7 +81,9 @@ export function identityOptions(
       modelName: MODEL_NAMES.session,
       expiresIn: SESSION_EXPIRES_IN_S,
       updateAge: SESSION_UPDATE_AGE_S,
-      freshAge: FRESH_SESSION_AGE_S,
+      // better-auth's own freshness check stays off: it would refuse listing sessions too. LiveDoc gates the
+      // dangerous routes itself, on FRESH_SESSION_AGE_S (routes/auth.ts, routes/account.ts).
+      freshAge: 0,
     },
     account: {
       modelName: MODEL_NAMES.account,
@@ -90,6 +93,10 @@ export function identityOptions(
         allowDifferentEmails: false,
         requireLocalEmailVerified: true,
         updateUserInfoOnLink: false,
+        // An email code is no account row, so better-auth would count a linked Google as the last way in and refuse
+        // to remove it. Where email codes are offered the person can always sign in with their address, so Google
+        // may go; on a host with Google alone it stays.
+        allowUnlinkingAll: methods.includes('email-code'),
       },
     },
     verification: { modelName: MODEL_NAMES.verification },
@@ -99,7 +106,8 @@ export function identityOptions(
             clientId: googleClientId,
             clientSecret: env.GOOGLE_AUTH_CLIENT_SECRET!.trim(),
             prompt: 'select_account' as const,
-            scope: ['openid', 'email', 'profile'],
+            // better-auth's default scopes are openid, email and profile: who the person is, nothing more.
+            // Naming them again would send each twice.
           },
         }
       : {},
@@ -165,5 +173,6 @@ export function createIdentity(
   const config = identityConfigOf(env);
   reportIdentityConfig(config);
   if (!config.enabled) return null;
+  routeGoogleTokenCallsToFake(env);
   return betterAuth(identityOptions(env, executionCtx, codeSend));
 }

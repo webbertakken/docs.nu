@@ -114,7 +114,8 @@ One Google key without the other logs `[auth] google_half_configured`. The email
 - `telemetry: { enabled: false }` (better-auth's default is already off and needs a build-time endpoint; this makes it
   explicit).
 - `rateLimit: { enabled: false }`: LiveDoc's own Cloudflare limiters gate `/api/auth/*` before the handler (D12).
-- `session: { expiresIn: SESSION_EXPIRES_IN_S, updateAge: SESSION_UPDATE_AGE_S, freshAge: FRESH_SESSION_AGE_S }`;
+- `session: { expiresIn: SESSION_EXPIRES_IN_S, updateAge: SESSION_UPDATE_AGE_S, freshAge: 0 }` (better-auth's own check
+  would also refuse listing sessions; the freshness gates below are LiveDoc's, on `FRESH_SESSION_AGE_S`);
   cookie cache off (a revoked session must stop at once).
 - `account: { accountLinking: { enabled: true, allowDifferentEmails: false, requireLocalEmailVerified: true,
 updateUserInfoOnLink: false }, encryptOAuthTokens: true }`. Google's access and refresh tokens are not stored
@@ -397,8 +398,23 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 - Already signed in on arrival: the "Redirecting…" card, then the destination.
 - Deleting the account: the dialog's copy is in [Deletion](#deletion); its verify step reads "You signed in a while ago,
   so confirm it's you before anything is deleted."
-- Settings > Account: sections Name, Email, Sign-in methods, Sessions, Delete Account (copy in the
-  [Account settings](../profile-and-email-notifications.md) spec when it is folded back).
+- Settings > Account, signed in, under the identity card (`SettingsAccountManageRows.tsx` (planned)), each row only
+  when signed in:
+  - **Name** (`accountName`): a text field holding the account's name and a **Save** button, enabled once the
+    field differs and is not blank (at most 100 characters). Saving calls `update-user`, then the auth bridge
+    re-reads the session (`refreshSession`) and tells the other tabs. Status line: "Saved." or "Couldn't save your
+    name. Try again."
+  - **Sign-in methods** (`signInMethods`): one line per method. "Email code" with the account's address, always.
+    "Google" when the host offers Google: **Connected** with **Remove** when an `identity_accounts` row has
+    `providerId` google, else **Connect Google** (`link-social`, returning to Settings). Removing asks for a fresh
+    sign-in when `403 SESSION_NOT_FRESH`: "For your safety, sign in again first." with a **Sign In Again** link
+    (`/sign-in?redirect_url=<here>`).
+  - **Sessions** (`sessions`): every session of the account, newest activity first: "<Browser> on <System>" (from
+    the user agent, `describeUserAgent`; "Unknown browser" when it says nothing), "Last active <date>", "This
+    browser" on the current one. **Sign Out** on each other one (`revoke-session`) and **Sign Out Everywhere
+    Else** (`revoke-other-sessions`) when there is more than one.
+  - Loading: the rows show "Loading…" until the lists answer; a failed read says "Couldn't load this. Try again."
+    with a **Try Again** button.
 - Empty states: a sessions list always holds this browser; sign-in methods always hold one.
 - Loading: buttons go busy; the card never blanks.
 

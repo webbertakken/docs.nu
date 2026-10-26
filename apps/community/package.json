@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/next-dev.mjs --port 3005",
+    "dev": "node ../../scripts/next-dev.mjs --port 4005",
     "build": "next build",
     "lint": "oxlint",
     "test": "vitest run",
@@ -17,7 +17,7 @@
     "@livediagram/icons": "workspace:*",
     "@livediagram/telemetry-client": "workspace:*",
     "@livediagram/ui": "workspace:*",
-    "next": "^16.4.1",
+    "next": "^16.4.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

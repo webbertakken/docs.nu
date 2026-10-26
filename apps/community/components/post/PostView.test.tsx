@@ -91,6 +91,7 @@ describe('the post page', () => {
     expect(await screen.findByText('Related One')).toBeTruthy();
     expect(document.title).toBe('Payments Platform | livediagram Community');
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
+      // jsdom's own default address (vitest's), not a dev port: the canonical is built on window.location.
       'http://localhost:3000/community/post/?id=post1',
     );
     expect(h.telemetry.openedPost).toHaveBeenCalledTimes(1);

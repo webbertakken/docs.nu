@@ -12,7 +12,7 @@ One row per default applied where a spec is silent or qualitative.
 | C6  | community | Shape of the community key           | A UUID v4 from `crypto.randomUUID`, validated by pattern on the worker                                                             |
 | C7  | community | Rate for likes and reports           | 30 writes per 60 s per network, a dedicated limiter so it never competes with document writes                                      |
 | C8  | community | Order of More Like This              | Same category, most liked first, newest as the tie-break, the post itself excluded                                                 |
-| C9  | community | Port for local development           | 3005 (3002 live, 3003 telemetry, 3004 help)                                                                                        |
+| C9  | community | Port for local development           | 4005 (4002 live, 4003 telemetry, 4004 help)                                                                                        |
 | C10 | community | Anonymous posts before the option    | Migration 0069 adds `anonymous` with default 0: posts published before it keep their author's name; new posts default to anonymous |
 | C11 | community | How long search waits                | 300 ms after the last keystroke (`SEARCH_DEBOUNCE_MS`, `apps/community/lib/config.ts`); Enter filters at once                      |
 | C12 | community | How long My Shares waits for sign-in | 10 s (`SESSION_LOAD_TIMEOUT_MS`, `apps/community/lib/session.ts`), then the error state with Try Again (reload)                    |
