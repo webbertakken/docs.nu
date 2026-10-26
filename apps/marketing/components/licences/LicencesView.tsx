@@ -39,7 +39,7 @@ export function LicencesView({ manifest }: { manifest: LicencesManifest }) {
           href={UPSTREAM_REPO_URL}
           className="text-brand-700 underline hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
         >
-          livedoc
+          livediagram
         </a>
         , which is MIT licensed too. Its copyright notice is kept in the repository&rsquo;s licence.
       </p>

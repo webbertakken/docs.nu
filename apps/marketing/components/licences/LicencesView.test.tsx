@@ -47,12 +47,14 @@ const manifest: LicencesManifest = {
 const html = renderToStaticMarkup(<LicencesView manifest={manifest} />);
 
 describe('LicencesView', () => {
-  // docs/specs/002-project-scope/livediagram-upstream.md: LiveDoc began as a fork of livedoc, whose MIT
+  // docs/specs/002-project-scope/livediagram-upstream.md: LiveDoc began as a fork of livediagram, whose MIT
   // notice LiveDoc keeps; the licences page says where the code came from.
-  it('credits livedoc as the origin of the code, linked to its repository', () => {
+  it('credits livediagram as the origin of the code, linked to its repository', () => {
     expect(html).toContain('LiveDoc is MIT licensed');
     expect(html).toContain('began as a fork of');
-    expect(html).toContain('<a href="https://github.com/livediagram-app/livediagram.app"');
+    expect(html).toMatch(
+      /began as a fork of <a href="https:\/\/github\.com\/livediagram-app\/livediagram\.app"[^>]*>livediagram<\/a>/,
+    );
   });
 
   it('titles the page and names both sections with their counts', () => {
