@@ -38,7 +38,7 @@ const layoutOf = (elementId: string) => ({
 
 const fileOf = (tab: Partial<Tab>) =>
   JSON.stringify({
-    kind: 'livediagram.tab',
+    kind: 'livedoc.tab',
     schemaVersion: TAB_SCHEMA_VERSION,
     exportedAt: 0,
     tab: { id: 'src', name: 'Overview', elements: [], ...tab },

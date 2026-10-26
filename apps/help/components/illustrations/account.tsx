@@ -52,7 +52,7 @@ export function GuestIdentity() {
         GUEST ID
       </Label>
       <Label x={82} y={98} size={11} weight={600} tone="accent">
-        livediagram:v2:self-id
+        livedoc:v2:self-id
       </Label>
       {/* The documents it owns */}
       <Label x={70} y={128} size={10} weight={700} tone="muted">

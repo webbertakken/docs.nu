@@ -123,7 +123,7 @@ describe('Open with on a copy of a mirrored file', () => {
     const w = await mirrored();
     const copyId = w.copy();
     w.openWith(copyId);
-    w.google.userRename(copyId, 'Copy of Plan 2.livediagram');
+    w.google.userRename(copyId, 'Copy of Plan 2.livedoc');
     await w.engine.syncNow();
     expect(w.google.get(copyId)!.appProperties.ldDocumentId).toBe('d1');
     expect(w.ld.item('document', 'd1')!.driveFileId).toBe(w.original().id);
@@ -159,7 +159,7 @@ describe('Open with on a copy of a mirrored file', () => {
     const w = await mirrored();
     const theirs = w.google.otherUserFile({
       owner: 'someone-else',
-      name: 'Their copy.livediagram',
+      name: 'Their copy.livedoc',
       mimeType: DRIVE_FILE_MIME,
       content: COPY_CONTENT,
       appProperties: { ldDocumentId: 'd1', ldOrigin: HOST },

@@ -230,7 +230,7 @@ of those gets a 404 and the row falls back to its icon.
 The browse views (Recent / My Documents / folders / Search results / This Browser)
 have a **List / Card / Details** toggle in the header's actions, left of Help and
 Create, which always sit further right (device-local preference,
-`livediagram:explorer-view`). **Card is the default**:
+`livedoc:explorer-view`). **Card is the default**:
 a diagram is a picture, and a wall of names in one typeface makes you read
 every line to find the one you would have recognised on sight. Somebody who
 prefers the density of rows knows where the toggle is; somebody opening the
@@ -283,7 +283,7 @@ rather than rasterising at its intrinsic size and upscaling.
 
 The same toggle is on the **team library** ([Team shared documents](../013-workspace/team-shared-documents.md)) — its shared
 documents + folders reuse the same `CardView`, sharing the
-`livediagram:explorer-view` preference so a card-view user gets cards
+`livedoc:explorer-view` preference so a card-view user gets cards
 there too. Team cards hide the visibility badge (every card is a team
 document, so a per-card badge is noise — the team list omits it as well).
 

@@ -26,7 +26,7 @@ const item = {
 };
 const fileOf = (items?: unknown[]) =>
   JSON.stringify({
-    kind: 'livediagram.tab',
+    kind: 'livedoc.tab',
     schemaVersion: TAB_SCHEMA_VERSION,
     exportedAt: 0,
     tab: { id: 'src', name: 'Plan', elements: [] },

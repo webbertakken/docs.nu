@@ -233,7 +233,7 @@ describe('keys', () => {
   it('names a kind and a storage key', () => {
     expect(styleKindOf(shape('a', 'diamond'))).toBe('shape:diamond');
     expect(styleKindOf(arrow('a'))).toBe('arrow');
-    expect(styleMemoryKey('d1')).toBe('livediagram:v2:style-memory:d1');
+    expect(styleMemoryKey('d1')).toBe('livedoc:v2:style-memory:d1');
   });
 });
 

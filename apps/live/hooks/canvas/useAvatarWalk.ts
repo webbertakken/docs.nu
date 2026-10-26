@@ -88,7 +88,7 @@ export function useAvatarWalk({
   active,
   config,
   status = null,
-  onToggleGender,
+  onToggleFigure,
   elements,
   mainRef,
   wrapperRef,
@@ -109,9 +109,9 @@ export function useAvatarWalk({
   config: AvatarConfig;
   // How the person is (docs/specs/008-canvas/avatar-mode.md "Status"): rides every snapshot.
   status?: AvatarStatus | null;
-  // Right-clicking the character flips male / female — the costume state lives
+  // Right-clicking the character flips the figure — the costume state lives
   // in useAvatarConfig (it persists), so the flip is delegated to it.
-  onToggleGender: () => void;
+  onToggleFigure: () => void;
   elements: Element[];
   mainRef: React.RefObject<HTMLElement | null> | React.ForwardedRef<HTMLElement>;
   wrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -411,14 +411,14 @@ export function useAvatarWalk({
     waveStartRef.current = performance.now();
   };
 
-  // Right-click ON the character toggles male / female (docs/specs/008-canvas/avatar-mode.md). Returns
+  // Right-click ON the character toggles the figure (docs/specs/008-canvas/avatar-mode.md). Returns
   // true when the press actually landed on the figure, so the caller knows
   // whether the right-click was consumed. The hit box follows the Size choice.
   const toggleLookAt = (point: AvatarPoint): boolean => {
     const feet = posRef.current;
     if (!feet || !hitTestAvatar(feet, point, liftRef.current, avatarScale(config.size)))
       return false;
-    onToggleGender();
+    onToggleFigure();
     return true;
   };
 

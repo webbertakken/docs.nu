@@ -7,7 +7,7 @@ import {
   type WireframeDeviceId,
 } from '@livediagram/document';
 
-const KEY = 'livediagram:v2:wireframe-device';
+const KEY = 'livedoc:v2:wireframe-device';
 
 export function lastWireframeDevice(): WireframeDeviceId {
   try {

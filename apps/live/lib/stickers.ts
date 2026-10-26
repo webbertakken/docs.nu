@@ -19,7 +19,7 @@ import { getLoadedStickerCatalog, getStickerLoaded } from '@/lib/icon-registry';
 // Its OWN mime, not the icon one: an icon dropped on a shape folds into that
 // shape's label, and a sticker must never do that — it lands as a sticker
 // wherever you let go.
-export const STICKER_DND_MIME = 'application/x-livediagram-sticker';
+export const STICKER_DND_MIME = 'application/x-livedoc-sticker';
 
 type StickerCategory = {
   id: string;

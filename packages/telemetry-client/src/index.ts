@@ -48,7 +48,7 @@ const MAX_BUFFER = 25;
 // DTO would belong) isn't a dependency of apps/help, and telemetry is the
 // only field of it the help centre reads. If preferences ever need sharing
 // beyond the opt-out, this constant should move with them.
-export const USER_PREFERENCES_STORAGE_KEY = 'livediagram:user-preferences:v1';
+export const USER_PREFERENCES_STORAGE_KEY = 'livedoc:user-preferences:v1';
 
 /**
  * The docs/specs/007-editor/user-preferences.md opt-out rule applied to the raw stored preferences JSON:

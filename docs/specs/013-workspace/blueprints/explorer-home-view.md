@@ -368,7 +368,7 @@ w-[58%] h-40 rotate-[7deg]`, front `left-[20%] top-20 w-[62%] h-44` with a sky s
   (`PANEL_SURFACE rounded-[20px] p-5` round the Explorer's own Import From). The hero, on `heroFirstRun`: static pills
   (`PILL`, no link), the welcome greeting and lead, `WelcomeSearch` in the hero field's look (`HERO_FIELD_LOOK`),
   `HeroTemplateFan` (`next/dynamic`) in the sheets' places. The remembered answer lives in `localStorage`
-  (`livediagram:v2:home-has-documents`: `{ ownerId, has }`), written once the lists load.
+  (`livedoc:v2:home-has-documents`: `{ ownerId, has }`), written once the lists load.
 - Body: one column, `flex flex-col gap-10` (40 px between sections); each section a `section` wrapper
   (`data-home-section="jump-back-in"` / `"what-happened"`).
 - Heading row (`SECTION_HEADER`): `flex items-baseline justify-between gap-4`, 16 px above the section's body, no

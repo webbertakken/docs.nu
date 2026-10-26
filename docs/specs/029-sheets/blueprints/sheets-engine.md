@@ -422,7 +422,7 @@ columns) is never refused.
 ## Clipboard, CSV, fill, sort, filter, find
 
 - `SheetClip = { rows: number; cols: number; cells: (Cell | null)[][]; from?: { sheetId; r; c }; cut?: true }`,
-  serialised to the clipboard as `web application/x-livediagram-sheet+json` where supported, with `text/plain`
+  serialised to the clipboard as `web application/x-livedoc-sheet+json` where supported, with `text/plain`
   (TSV of displayed values) and `text/html` (a `<table>` with inline `font-weight`, `font-style`, `color`,
   `background-color`, `text-align`). `readPastedHtml(html)` tokenises `<table>/<tr>/<td|th>` with `colspan`/
   `rowspan` and the same inline styles plus `<b>/<i>/<u>/<s>`, without a DOM (a small tag scanner; entities via a

@@ -152,8 +152,8 @@ export function pairAfterActivation(
 
 // The persisted shape: which tabs a document was split on and on which side, and the width people chose
 // (one fraction for every document, because it is about their screen, not the document).
-const PAIR_KEY_PREFIX = 'livediagram:v2:split-view-pair:';
-const FRACTION_KEY = 'livediagram:v2:split-view-fraction';
+const PAIR_KEY_PREFIX = 'livedoc:v2:split-view-pair:';
+const FRACTION_KEY = 'livedoc:v2:split-view-fraction';
 
 export function readStoredPair(documentId: string): SplitPair | null {
   const raw = safeJson(readLocalStorageSafe(PAIR_KEY_PREFIX + documentId) ?? 'null');

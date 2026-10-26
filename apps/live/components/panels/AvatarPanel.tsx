@@ -5,7 +5,7 @@
 // leaves its corner stack rather than sitting there. Same width as the
 // Palette it stacks under.
 //
-// Four choices: Gender, Clothing, Hair, Size. Deliberately NOT colour — the
+// Four choices: Figure, Clothing, Hair, Size. Deliberately NOT colour — the
 // shirt takes the participant's presence colour so a character always matches
 // its owner's cursor and name chip, which is what makes a room of walkers
 // legible. Every pick writes through to per-browser storage (see
@@ -21,7 +21,7 @@ import { AVATAR_STATUSES, avatarStatusColour, type AvatarStatus } from '@/lib/av
 import { useState } from 'react';
 import {
   AVATAR_CLOTHING,
-  AVATAR_GENDERS,
+  AVATAR_FIGURES,
   AVATAR_HAIR,
   AVATAR_SIZES,
   type AvatarConfig,
@@ -50,7 +50,7 @@ const STATUS_OPTIONS: readonly { id: AvatarStatus | 'none'; label: string }[] = 
   ...AVATAR_STATUSES.map(({ id, label }) => ({ id, label })),
 ];
 
-type Row = 'gender' | 'clothing' | 'hair' | 'size' | 'status' | 'behaviour' | 'reactions';
+type Row = 'figure' | 'clothing' | 'hair' | 'size' | 'status' | 'behaviour' | 'reactions';
 
 // A disclosure holding one-shot ACTIONS rather than a setting's options, so
 // it looks like the ToolOptionRows above it without pretending one of its
@@ -201,12 +201,12 @@ export function AvatarPanel({
             </div>
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
               <ToolOptionRow
-                label="Gender"
-                options={AVATAR_GENDERS}
-                value={config.gender}
-                open={openRow === 'gender'}
-                onToggle={() => toggle('gender')}
-                onPick={(id) => onChange('gender', id)}
+                label="Figure"
+                options={AVATAR_FIGURES}
+                value={config.figure}
+                open={openRow === 'figure'}
+                onToggle={() => toggle('figure')}
+                onPick={(id) => onChange('figure', id)}
               />
               <ToolOptionRow
                 label="Clothing"

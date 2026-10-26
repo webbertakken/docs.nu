@@ -51,8 +51,8 @@ export type DriveLease = { acquired: boolean; holder: string | null; expiresAt: 
 
 export type DriveAccessToken = { accessToken: string; expiresAt: number };
 
-export const DRIVE_FILE_MIME = 'application/vnd.livediagram+json';
-export const DRIVE_FILE_EXTENSION = '.livediagram';
+export const DRIVE_FILE_MIME = 'application/vnd.livedoc+json';
+export const DRIVE_FILE_EXTENSION = '.livedoc';
 export const DRIVE_FOLDER_MIME = 'application/vnd.google-apps.folder';
 export const DRIVE_SCOPES = [
   'https://www.googleapis.com/auth/drive.file',
@@ -85,7 +85,7 @@ export function driveFileName(name: string): string {
   return `${name}${DRIVE_FILE_EXTENSION}`;
 }
 
-const EXTENSION_RE = /\.livediagram$/i;
+const EXTENSION_RE = /\.livedoc$/i;
 
 // The LiveDoc name a Drive file name stands for: the extension dropped,
 // trimmed, and cut to `max`. Null when nothing is left, so an empty rename in
@@ -116,8 +116,8 @@ export function isDriveLeaseHolder(value: unknown): value is string {
 }
 
 const PRODUCTION_HOSTS = new Set(['docs.nu', 'www.docs.nu']);
-// Staging, and local development, which uses the staging Google client.
-const STAGING_HOSTS = new Set(['staging.livediagram.app', 'localhost', '127.0.0.1', '::1']);
+// Local development, on loopback.
+const DEVELOPMENT_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 
 // A host as `location.host` gives it, lower-cased, without its port:
 // `[::1]:4000` → `::1`, `localhost:4000` → `localhost`.
@@ -135,7 +135,7 @@ function hostName(host: string): string {
 // Drive. Given at creation only; a root the user renamed keeps its name.
 export function driveRootName(host: string): string {
   const name = hostName(host);
-  if (PRODUCTION_HOSTS.has(name)) return 'livediagram';
-  if (STAGING_HOSTS.has(name)) return 'LiveDoc (staging)';
+  if (PRODUCTION_HOSTS.has(name)) return 'LiveDoc';
+  if (DEVELOPMENT_HOSTS.has(name)) return 'LiveDoc (development)';
   return 'LiveDoc (self-hosted)';
 }

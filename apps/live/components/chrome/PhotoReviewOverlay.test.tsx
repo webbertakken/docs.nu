@@ -350,13 +350,13 @@ describe('before the photograph itself has painted', () => {
 // labelled photographs — so the work the author does here for real can be
 // handed back as a file instead of being done twice.
 describe('labelling a wall from the review', () => {
-  const armed = () => localStorage.setItem('livediagram:truth', '1');
+  const armed = () => localStorage.setItem('livedoc:truth', '1');
   afterEach(() => localStorage.clear());
 
   it('offers nothing to a normal author: this is a calibration tool', () => {
     // The suite runs on localhost, where labelling lives, so say plainly that
     // this browser is not one: the export is off wherever it is turned off.
-    localStorage.setItem('livediagram:truth', '0');
+    localStorage.setItem('livedoc:truth', '0');
     render(
       <PhotoReviewOverlay
         review={review({ detection: found([sticky(0)]), photoName: 'wall.jpg' })}

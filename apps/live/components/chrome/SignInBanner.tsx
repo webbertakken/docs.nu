@@ -31,7 +31,7 @@ const SignInReasonsModal = dynamic(
 // Per-device dismissal key, shared by every surface that mounts the
 // banner (Explorer + editor, docs/specs/014-identity/sign-in-encouragement.md) so dismissing it in one place
 // hides it in both.
-export const SIGNIN_BANNER_DISMISS_KEY = 'livediagram:signin-banner-dismissed:v1';
+export const SIGNIN_BANNER_DISMISS_KEY = 'livedoc:signin-banner-dismissed:v1';
 
 // Positioning of the fixed wrapper, swapped per host. The Explorer lifts
 // it above its 48px bottom bar (pb-16, like the editor's tab bar) and below

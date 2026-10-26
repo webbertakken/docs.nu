@@ -31,7 +31,7 @@ describe('useNewDocumentLocation', () => {
   describe('resolveSaveLocation', () => {
     it('keeps a signed-in person on LiveDoc', async () => {
       const { result } = render({ authLoaded: true, accountId: 'acct_1' });
-      await expect(result.current.resolveSaveLocation(false, vi.fn())).resolves.toBe('livediagram');
+      await expect(result.current.resolveSaveLocation(false, vi.fn())).resolves.toBe('livedoc');
     });
 
     it('answers a guest at once, without waiting for identity', async () => {
@@ -47,9 +47,7 @@ describe('useNewDocumentLocation', () => {
       const settle = vi.fn(async () => {
         hook.rerender({ authLoaded: true, accountId: 'acct_1' });
       });
-      await expect(hook.result.current.resolveSaveLocation(false, settle)).resolves.toBe(
-        'livediagram',
-      );
+      await expect(hook.result.current.resolveSaveLocation(false, settle)).resolves.toBe('livedoc');
       expect(settle).toHaveBeenCalledOnce();
     });
 
@@ -62,13 +60,13 @@ describe('useNewDocumentLocation', () => {
 
     it('keeps a folder or team link on LiveDoc', async () => {
       const { result } = render({ authLoaded: false, accountId: null });
-      await expect(result.current.resolveSaveLocation(true, vi.fn())).resolves.toBe('livediagram');
+      await expect(result.current.resolveSaveLocation(true, vi.fn())).resolves.toBe('livedoc');
     });
 
     it('keeps everyone on LiveDoc without sign-in', async () => {
       host.offered = false;
       const { result } = render({ authLoaded: false, accountId: null });
-      await expect(result.current.resolveSaveLocation(false, vi.fn())).resolves.toBe('livediagram');
+      await expect(result.current.resolveSaveLocation(false, vi.fn())).resolves.toBe('livedoc');
     });
 
     it('asks the host once, in a browser that never has, before deciding', async () => {
@@ -77,7 +75,7 @@ describe('useNewDocumentLocation', () => {
         host.offered = false;
       });
       const { result } = render({ authLoaded: false, accountId: null });
-      await expect(result.current.resolveSaveLocation(false, settle)).resolves.toBe('livediagram');
+      await expect(result.current.resolveSaveLocation(false, settle)).resolves.toBe('livedoc');
       expect(settle).toHaveBeenCalledOnce();
     });
   });

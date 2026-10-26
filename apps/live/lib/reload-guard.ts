@@ -7,7 +7,7 @@
 /** One reload per page within this window. */
 export const RELOAD_GUARD_WINDOW_MS = 60_000;
 /** The sessionStorage map of page to the time of its last guarded reload. */
-export const RELOAD_GUARD_KEY = 'livediagram:stale-chunk-reloads';
+export const RELOAD_GUARD_KEY = 'livedoc:stale-chunk-reloads';
 /** Set on window once the running app's chunk recovery is installed: the page guard then stands down. */
 export const APP_RECOVERY_FLAG = '__livediagramChunkRecovery';
 

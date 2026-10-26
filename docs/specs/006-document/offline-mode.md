@@ -44,7 +44,7 @@ have cloud documents and offline documents side by side.
   ids resolve locally vs to the API.
 - **Every tab of the browser agrees on the index.** Each tab mirrors it in memory
   (`apps/live/lib/offline/offline-ids.ts`), and every id registered or removed is told
-  to the other tabs on the `livediagram-offline` BroadcastChannel (`{ kind: 'add' |
+  to the other tabs on the `livedoc-offline` BroadcastChannel (`{ kind: 'add' |
 'remove', id }`), which apply it at once. Without it, a tab that missed a Take
   Offline kept saving that document to the server (where it no longer is), and a tab
   that missed a Sync Document or purge kept "saving" into a record that was gone.
@@ -64,7 +64,7 @@ have cloud documents and offline documents side by side.
 
 - **Store rename (version 2).** Offline documents were kept in the `diagrams` object store until
   the container became a document ([Document](document.md#renaming-from-diagram)). Opening
-  version 2 of `livediagram-offline` moves every record into `documents` inside the upgrade
+  version 2 of `livedoc-offline` moves every record into `documents` inside the upgrade
   transaction, then drops the old store, logging how many moved
   (`apps/live/lib/offline/legacy-offline-store.ts`). A tab still running the code from before the upgrade
   asks for version 1, which the browser refuses once another tab has opened version 2; its offline

@@ -37,7 +37,7 @@ export type { TechIconDef, TechProvider } from '@livediagram/icons';
 // element and is ignored by the shape drop-target (a coloured brand tile
 // beside a shape's text is meaningless, and the inline-icon renderer only
 // knows line-art prims). Value carried = the tech-icon id.
-export const TECH_ICON_DND_MIME = 'application/x-livediagram-tech-icon';
+export const TECH_ICON_DND_MIME = 'application/x-livedoc-tech-icon';
 
 // Provider display names for the palette filter + hover cards.
 export const TECH_PROVIDERS: { id: TechProvider; label: string }[] = [

@@ -255,7 +255,7 @@ export type SettingsSliderRowSpec = RowBase & {
 };
 
 // Appearance is the one row that is NOT a UserPreference: it is device-local
-// (`livediagram:v2:ui-mode`), because a pre-hydration script has to apply it
+// (`livedoc:v2:ui-mode`), because a pre-hydration script has to apply it
 // before first paint to avoid a theme flash (docs/specs/007-editor/live-app.md). It therefore carries
 // no read/write here and is rendered against its own store.
 export type SettingsAppearanceRowSpec = RowBase & { kind: 'appearance' };

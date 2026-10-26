@@ -15,9 +15,9 @@ describe('readBrowserIdentity', () => {
   it('reads the guest identity and keeps only the id prefix', () => {
     const id = readBrowserIdentity({
       localStorage: storage({
-        'livediagram:v2:self-id': GUEST,
-        'livediagram:v2:self-sig': 'sig',
-        'livediagram:v2:signed-in': '0',
+        'livedoc:v2:self-id': GUEST,
+        'livedoc:v2:self-sig': 'sig',
+        'livedoc:v2:signed-in': '0',
       }),
     });
     expect(id).toEqual({
@@ -28,7 +28,7 @@ describe('readBrowserIdentity', () => {
   });
 
   it('reads the signed-in hint', () => {
-    const id = readBrowserIdentity({ localStorage: storage({ 'livediagram:v2:signed-in': '1' }) });
+    const id = readBrowserIdentity({ localStorage: storage({ 'livedoc:v2:signed-in': '1' }) });
     expect(id.signedIn).toBe(true);
     expect(readBrowserIdentity({ localStorage: storage({}) }).signedIn).toBeNull();
   });

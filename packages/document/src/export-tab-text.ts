@@ -22,7 +22,7 @@ export const TAB_SCHEMA_VERSION = 2;
 
 export type ExportedTabEnvelope = {
   schemaVersion: number;
-  kind: 'livediagram.tab';
+  kind: 'livedoc.tab';
   exportedAt: number;
   tab: Tab;
   // The items the tab shows and the document's stored type catalogue (docs/specs/026-plan/items.md "Copies and
@@ -39,7 +39,7 @@ export function tabToJsonText(tab: Tab, plan?: TabPlanData): string {
   const items = plan ? tabExportItems(tab, plan.items) : [];
   const envelope: ExportedTabEnvelope = {
     schemaVersion: TAB_SCHEMA_VERSION,
-    kind: 'livediagram.tab',
+    kind: 'livedoc.tab',
     exportedAt: Date.now(),
     tab,
     ...(items.length ? { items } : {}),

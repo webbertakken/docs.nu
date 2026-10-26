@@ -30,7 +30,7 @@ import { sheetsForClipboard, stashSheetSeeds } from './sheet-seeds';
 // 2: freehand points are packed (docs/specs/006-document/stroke-points.md); an older editor
 // refuses a version 2 payload rather than pasting strokes it cannot draw.
 export const CLIPBOARD_SCHEMA_VERSION = 2;
-export const CLIPBOARD_KIND = 'livediagram.elements';
+export const CLIPBOARD_KIND = 'livedoc.elements';
 
 // A ceiling on what a paste will accept. The tab cap is 10,000 elements
 // (MAX_ELEMENTS_PER_TAB), but a clipboard payload is one user's selection, and

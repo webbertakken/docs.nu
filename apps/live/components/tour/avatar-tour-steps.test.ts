@@ -63,10 +63,10 @@ describe('the Avatar tour steps', () => {
     expect(avatarTourStepTelemetryType('avatar-button')).toBe('AvatarTourStepAvatarButton');
   });
 
-  it('teaches right-click to swap gender on a desktop, and not on a phone', () => {
+  it('teaches right-click to swap figure on a desktop, and not on a phone', () => {
     const character = (mobile: boolean) =>
       avatarTourSteps({ canSpeak: true, mobile }).find((s) => s.id === 'character')!.body;
-    expect(character(false)).toMatch(/Right-click your character to swap gender/);
+    expect(character(false)).toMatch(/Right-click your character to swap figure/);
     expect(character(true)).not.toMatch(/Right-click/);
   });
 });

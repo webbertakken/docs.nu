@@ -29,7 +29,7 @@ export type AvatarPresence = {
   x: number;
   y: number;
   facing: 'down' | 'up' | 'left' | 'right';
-  // The sender's costume (docs/specs/008-canvas/avatar-mode.md): gender / clothing / hair / size, each a
+  // The sender's costume (docs/specs/008-canvas/avatar-mode.md): figure / clothing / hair / size, each a
   // preset token from a closed set. Optional so a packet from an older client
   // still parses — the receiver falls back to the default character. Purely
   // cosmetic, and never an identity claim.

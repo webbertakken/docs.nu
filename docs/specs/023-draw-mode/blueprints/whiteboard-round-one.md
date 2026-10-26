@@ -847,7 +847,7 @@ by name so the px can be retuned) → Medium; an unknown `activePenId` or
 | `FreehandElement.strokeColor`        | element (a custom colour)                                                        | document     | yes      |
 | `penColour` (freehand, shape, arrow) | element (a named colour)                                                         | document     | yes      |
 | Custom colours                       | picked with + (`Tab.customColours`, `documentColours`)                           | document     | yes      |
-| `WhiteboardPrefs`                    | `localStorage` `livediagram:v2:whiteboard-pens`                                  | device-local | never    |
+| `WhiteboardPrefs`                    | `localStorage` `livedoc:v2:whiteboard-pens`                                      | device-local | never    |
 | pen seen                             | module memory                                                                    | session      | never    |
 
 A tab stored with `kind: 'whiteboard'` is migrated on read (`migrateWhiteboardKind`, the editor-modes
@@ -1025,31 +1025,31 @@ validated saves (`validate.ts` bounds `penWidth`). Colours written by a pen come
 
 ## Constants and configuration
 
-| Constant                        | Value                            | Provenance       | Safe range      |
-| ------------------------------- | -------------------------------- | ---------------- | --------------- |
-| `WHITEBOARD_BOARD.light / dark` | `#fbfaf7` / `#0d121a`            | spec values      | contrast >= 4.5 |
-| `WHITEBOARD_INK.light / dark`   | `#1c1917` / `#e2e8f0`            | spec values      | contrast >= 4.5 |
-| `WHITEBOARD_PEN_WIDTHS`         | 1, 1.5, 2.5 px                   | spec             | 1 to 100        |
-| `WHITEBOARD_ERASER_RADIUS_PX`   | stroke 10, partial 16            | D6               | 4 to 48         |
-| `PATH_ARC_SEGMENTS`             | 16 per arc                       | anchor outlines  | 8 to 64         |
-| `OUTLINE_REACH_FACTOR`          | 1.5 half diagonals               | speech bubble    | >= 1.4          |
-| Partial densify step            | `max(r / 2, 1)` canvas px        | D7               |                 |
-| Crossing bisection steps        | 12                               | D7               | 8 to 20         |
-| Recognition threshold           | 0.4                              | Shape Pen        |                 |
-| `RECOGNITION_CHIP_GAP_PX`       | 12 screen px                     | D25              | 8 to 24         |
-| Storage key                     | `livediagram:v2:whiteboard-pens` | spec             |                 |
-| `PEN_STREAMLINE`                | mouse 0.5, pen 0.2, touch 0.2    | Excalidraw       | 0 to 1          |
-| `PEN_THINNING`                  | 0.6                              | Excalidraw       | 0 to 1          |
-| `PEN_SMOOTHING`                 | 0.5                              | Excalidraw       | 0 to 1          |
-| `PEN_MID_PRESSURE`              | 0.5                              | Pointer Events   | 0 to 1          |
-| `PERFECT_FREEHAND_END_NOISE`    | 3                                | perfect-freehand | its value       |
-| `PEN_STOCK_CONTRAST`            | 6                                | D29              | 4.5 to 7        |
-| `PEN_MIN_CONTRAST`              | 3                                | WCAG 1.4.11      | 3               |
-| `YOUR_COLOURS_MAX`              | 12 (`lib/document-colours.ts`)   | colour-picker.md | fixed           |
-| `TAB_CUSTOM_COLOURS_MAX`        | 8                                | spec             | panel width     |
-| Custom picker start             | `#3b82f6`                        | mock             | any hex         |
-| perfect-freehand `size`         | `width / (2 · sin(π/4))`         | calibration      | derived         |
-| perfect-freehand `easing`       | `t => sin(t · π / 2)`            | Excalidraw       |                 |
+| Constant                        | Value                          | Provenance       | Safe range      |
+| ------------------------------- | ------------------------------ | ---------------- | --------------- |
+| `WHITEBOARD_BOARD.light / dark` | `#fbfaf7` / `#0d121a`          | spec values      | contrast >= 4.5 |
+| `WHITEBOARD_INK.light / dark`   | `#1c1917` / `#e2e8f0`          | spec values      | contrast >= 4.5 |
+| `WHITEBOARD_PEN_WIDTHS`         | 1, 1.5, 2.5 px                 | spec             | 1 to 100        |
+| `WHITEBOARD_ERASER_RADIUS_PX`   | stroke 10, partial 16          | D6               | 4 to 48         |
+| `PATH_ARC_SEGMENTS`             | 16 per arc                     | anchor outlines  | 8 to 64         |
+| `OUTLINE_REACH_FACTOR`          | 1.5 half diagonals             | speech bubble    | >= 1.4          |
+| Partial densify step            | `max(r / 2, 1)` canvas px      | D7               |                 |
+| Crossing bisection steps        | 12                             | D7               | 8 to 20         |
+| Recognition threshold           | 0.4                            | Shape Pen        |                 |
+| `RECOGNITION_CHIP_GAP_PX`       | 12 screen px                   | D25              | 8 to 24         |
+| Storage key                     | `livedoc:v2:whiteboard-pens`   | spec             |                 |
+| `PEN_STREAMLINE`                | mouse 0.5, pen 0.2, touch 0.2  | Excalidraw       | 0 to 1          |
+| `PEN_THINNING`                  | 0.6                            | Excalidraw       | 0 to 1          |
+| `PEN_SMOOTHING`                 | 0.5                            | Excalidraw       | 0 to 1          |
+| `PEN_MID_PRESSURE`              | 0.5                            | Pointer Events   | 0 to 1          |
+| `PERFECT_FREEHAND_END_NOISE`    | 3                              | perfect-freehand | its value       |
+| `PEN_STOCK_CONTRAST`            | 6                              | D29              | 4.5 to 7        |
+| `PEN_MIN_CONTRAST`              | 3                              | WCAG 1.4.11      | 3               |
+| `YOUR_COLOURS_MAX`              | 12 (`lib/document-colours.ts`) | colour-picker.md | fixed           |
+| `TAB_CUSTOM_COLOURS_MAX`        | 8                              | spec             | panel width     |
+| Custom picker start             | `#3b82f6`                      | mock             | any hex         |
+| perfect-freehand `size`         | `width / (2 · sin(π/4))`       | calibration      | derived         |
+| perfect-freehand `easing`       | `t => sin(t · π / 2)`          | Excalidraw       |                 |
 
 ## Defaults ledger
 

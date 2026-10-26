@@ -28,9 +28,9 @@ export function useNewDocumentLocation(opts: {
     hasPlacementParams: boolean,
     settle: () => Promise<unknown>,
   ): Promise<SaveLocationId> => {
-    if (hasPlacementParams) return 'livediagram';
+    if (hasPlacementParams) return 'livedoc';
     if (signInOfferedHere() === null) await settle();
-    if (!signInOfferedHere()) return 'livediagram';
+    if (!signInOfferedHere()) return 'livedoc';
     if (!latest.current.authLoaded && latest.current.signedInHint) await settle();
     const now = latest.current;
     const location = defaultSaveLocationFor({

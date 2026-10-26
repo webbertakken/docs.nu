@@ -29,12 +29,12 @@ describe('createDriveRestClient', () => {
   it('creates a folder and a file with appProperties, parents, md5 and a thumbnail', async () => {
     const { fake, client } = setup();
     const root = await client.createFolder({
-      name: 'livediagram',
+      name: 'LiveDoc',
       parentId: 'root',
       appProperties: { ldRoot: 'h' },
     });
     const file = await client.createFile({
-      name: 'A.livediagram',
+      name: 'A.livedoc',
       parentId: root.id,
       mimeType: DRIVE_FILE_MIME,
       content: '{"a":1}',
@@ -42,7 +42,7 @@ describe('createDriveRestClient', () => {
       appProperties: { ldDocumentId: 'd1' },
     });
     expect(file).toMatchObject({
-      name: 'A.livediagram',
+      name: 'A.livedoc',
       parents: [root.id],
       trashed: false,
       ownedByMe: true,

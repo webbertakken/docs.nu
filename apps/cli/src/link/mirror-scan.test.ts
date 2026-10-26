@@ -15,7 +15,7 @@ const link = parseLinkFile(
 );
 
 const mirrorOf = (id: string, host = HOST): MirrorFile => ({
-  kind: 'livediagram.document',
+  kind: 'livedoc.document',
   schemaVersion: 1,
   document: {
     id,

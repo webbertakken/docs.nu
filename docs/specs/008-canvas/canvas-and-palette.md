@@ -1585,7 +1585,7 @@ editor instance and nowhere else, which is not where "copy this and put it in
 that document" happens.
 
 **The payload** is a JSON envelope mirroring the tab export's — a
-`livediagram.elements` `kind` discriminator so we never try to paste another
+`livedoc.elements` `kind` discriminator so we never try to paste another
 app's JSON, and a numeric `schemaVersion` so a future break is refused rather
 than pasted as nonsense. Text, not a custom MIME type: `writeText` is the one
 clipboard write that works from a keydown handler in every browser we support.

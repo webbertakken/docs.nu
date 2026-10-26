@@ -66,7 +66,7 @@ const pillOf = (row: import('@playwright/test').Locator) =>
 // the row has no Sync now, so the test uses the app's tab channel.
 async function syncNow(page: import('@playwright/test').Page) {
   await page.evaluate(() => {
-    const channel = new BroadcastChannel('livediagram:drive-mirror');
+    const channel = new BroadcastChannel('livedoc:drive-mirror');
     channel.postMessage({ type: 'sync-now' });
     channel.close();
   });
@@ -129,10 +129,7 @@ for (const theme of THEMES) {
     async function setUp(page: Page) {
       await (await alexOn(page)).enter(page.context());
       await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
-      await page.addInitScript(
-        (mode) => localStorage.setItem('livediagram:v2:ui-mode', mode),
-        theme,
-      );
+      await page.addInitScript((mode) => localStorage.setItem('livedoc:v2:ui-mode', mode), theme);
       await routeGoogle(page, google.fake, USER);
     }
 
@@ -256,10 +253,7 @@ for (const theme of THEMES) {
         'explorer-follows-1-before',
         'The Explorer before a rename made in Google Drive',
       );
-      google.fake.userRename(
-        fileNamed('Meeting notes.livediagram')!.id,
-        'Standup notes.livediagram',
-      );
+      google.fake.userRename(fileNamed('Meeting notes.livedoc')!.id, 'Standup notes.livedoc');
       row = await openCloudSync(page);
       await syncNow(page);
       await expect(pillOf(row)).toHaveText(/^Last synced /);
@@ -277,9 +271,9 @@ for (const theme of THEMES) {
       const hidden = google.fake.userCreateFolder(
         USER,
         'Clients',
-        fileNamed('LiveDoc (staging)')!.id,
+        fileNamed('LiveDoc (development)')!.id,
       );
-      google.fake.userMove(fileNamed('Quarterly plan.livediagram')!.id, hidden);
+      google.fake.userMove(fileNamed('Quarterly plan.livedoc')!.id, hidden);
       row = await openCloudSync(page);
       await syncNow(page);
       await expect(problemOf(row)).toContainText("can't see");
@@ -293,10 +287,10 @@ for (const theme of THEMES) {
       // Open with.
       const theirs = google.fake.otherUserFile({
         owner: 'someone-else',
-        name: 'Team roadmap.livediagram',
+        name: 'Team roadmap.livedoc',
         mimeType: DRIVE_FILE_MIME,
         content: JSON.stringify({
-          kind: 'livediagram.document',
+          kind: 'livedoc.document',
           schemaVersion: 1,
           exportedAt: 1,
           document: {
@@ -318,7 +312,7 @@ for (const theme of THEMES) {
         'open-with-1-import-a-copy',
         'Open with on a file someone shared: Import a copy',
       );
-      const copy = google.fake.userCopy(fileNamed('Roadmap.livediagram')!.id);
+      const copy = google.fake.userCopy(fileNamed('Roadmap.livedoc')!.id);
       await page.goto(
         `/drive/open?state=${encodeURIComponent(google.fake.openWithState(USER, copy))}`,
       );
@@ -328,7 +322,7 @@ for (const theme of THEMES) {
         'open-with-2-import-as-new-document',
         'Open with on a copy made in Drive: Import as new document',
       );
-      const mine = fileNamed('Architecture.livediagram')!;
+      const mine = fileNamed('Architecture.livedoc')!;
       await page.goto(
         `/drive/open?state=${encodeURIComponent(google.fake.openWithState(USER, mine.id))}`,
       );

@@ -111,7 +111,7 @@ export function FormRespondPage() {
         {page.kind === 'ready' && page.data.state === 'open' ? (
           <FormFill
             form={page.data.form}
-            draftKey={`livediagram:form:${page.code}`}
+            draftKey={`livedoc:form:${page.code}`}
             footer={<FormFooter code={page.code} />}
             submit={async (state): Promise<SubmitOutcome> => {
               const r = await sendFormResponse(page.code, state);

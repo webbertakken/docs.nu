@@ -40,8 +40,8 @@ describe('the share grant cache', () => {
   });
 
   it('removes a password an earlier version kept in plain text', () => {
-    window.localStorage.setItem('livediagram:share-password:CODE1', 'otter');
+    window.localStorage.setItem('livedoc:share-password:CODE1', 'otter');
     expect(readCachedShareGrant('CODE1')).toBeNull();
-    expect(window.localStorage.getItem('livediagram:share-password:CODE1')).toBeNull();
+    expect(window.localStorage.getItem('livedoc:share-password:CODE1')).toBeNull();
   });
 });

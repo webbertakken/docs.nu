@@ -80,7 +80,7 @@ test.describe('stale builds', () => {
     // This destination was already reloaded for a moment ago.
     await page.evaluate(() =>
       sessionStorage.setItem(
-        'livediagram:stale-chunk-reloads',
+        'livedoc:stale-chunk-reloads',
         JSON.stringify({ '/explorer/trash': Date.now() }),
       ),
     );

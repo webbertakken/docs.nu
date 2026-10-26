@@ -3,7 +3,7 @@
 // Nothing here guards a secret: the callers roll a costume, a display name, a
 // presence colour, or the order templates appear in. `Math.random()` would be
 // perfectly adequate for all of it — but a weak PRNG feeding a value that later
-// looks like personal data (an avatar's gender, a participant's identity) is
+// looks like personal data (an avatar's figure, a participant's identity) is
 // exactly the shape static analysis flags, and arguing with three recurring
 // "insecure randomness" alerts costs more than using the strong generator that
 // every one of our runtimes already ships. `crypto.getRandomValues` is present

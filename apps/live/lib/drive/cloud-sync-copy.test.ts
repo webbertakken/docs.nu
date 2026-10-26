@@ -26,7 +26,7 @@ const status = (over: Partial<DriveMirrorStatus> = {}): DriveMirrorStatus => ({
   error: null,
   leaseHeldElsewhere: false,
   notices: [],
-  rootName: 'LiveDoc (staging)',
+  rootName: 'LiveDoc (development)',
   mirrored: {},
   failed: [],
   rootFolderId: null,
@@ -45,8 +45,8 @@ const NOTICE = { kind: 'document' as const, ldId: 'd', name: 'Plan', parentId: '
 
 describe('the description under the card, once connected', () => {
   it('says where the documents go', () => {
-    expect(driveConnectedText('LiveDoc (staging)')).toBe(
-      'Your documents are synced to “LiveDoc (staging)” in Google Drive.',
+    expect(driveConnectedText('LiveDoc (development)')).toBe(
+      'Your documents are synced to “LiveDoc (development)” in Google Drive.',
     );
     expect(driveConnectedText(null)).toBe('Your documents are synced to Google Drive.');
   });

@@ -42,7 +42,7 @@ function setup() {
   ) => {
     const id = google.otherUserFile({
       owner: over.owner ?? 'someone',
-      name: over.name ?? 'Shared plan.livediagram',
+      name: over.name ?? 'Shared plan.livedoc',
       mimeType: over.mimeType ?? DRIVE_FILE_MIME,
       content: over.content ?? envelope,
       appProperties: props,
@@ -113,7 +113,7 @@ describe('resolveOpenWith', () => {
       s.deps,
       s.file({}, { name: 'photo.png', mimeType: 'image/png' }),
     );
-    expect(notOurs).toEqual({ kind: 'error', reason: 'not-livediagram' });
+    expect(notOurs).toEqual({ kind: 'error', reason: 'not-livedoc' });
     expect(openWithTelemetryType(notOurs)).toBe('Error');
     expect(await resolveOpenWith(s.deps, { fileId: 'missing' })).toEqual({
       kind: 'error',

@@ -38,14 +38,10 @@ describe('a fresh response', () => {
 
   it('ignores cards no form made, and keeps the newest ids only', () => {
     markResponseOpened(card('x', {}));
-    expect(JSON.parse(localStorage.getItem('livediagram:form-responses-opened') ?? '[]')).toEqual(
-      [],
-    );
+    expect(JSON.parse(localStorage.getItem('livedoc:form-responses-opened') ?? '[]')).toEqual([]);
     for (let i = 0; i <= FRESH_OPENED_MAX; i += 1) markResponseOpened(card(`c${i}`));
     markResponseOpened(card('c1'));
-    const kept: unknown = JSON.parse(
-      localStorage.getItem('livediagram:form-responses-opened') ?? '[]',
-    );
+    const kept: unknown = JSON.parse(localStorage.getItem('livedoc:form-responses-opened') ?? '[]');
     expect(kept).toHaveLength(FRESH_OPENED_MAX);
     expect(kept).not.toContain('c0');
   });

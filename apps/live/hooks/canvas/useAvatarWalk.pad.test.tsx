@@ -33,7 +33,7 @@ function setup({
       useAvatarWalk({
         active,
         config: DEFAULT_AVATAR_CONFIG,
-        onToggleGender: vi.fn(),
+        onToggleFigure: vi.fn(),
         elements: els,
         mainRef: { current: main },
         wrapperRef: { current: wrapper },

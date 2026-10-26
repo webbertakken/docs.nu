@@ -44,7 +44,7 @@ function expectAA(report: ContrastReport, screen: string): void {
 
 async function signedIn(page: Page, baseURL: string, scheme: 'dark' | 'light'): Promise<void> {
   await signIn(page.context(), { baseURL, name: 'Webber Takken' });
-  await page.addInitScript((mode) => localStorage.setItem('livediagram:v2:ui-mode', mode), scheme);
+  await page.addInitScript((mode) => localStorage.setItem('livedoc:v2:ui-mode', mode), scheme);
 }
 
 const MCP = 'https://mcp.docs.nu';

@@ -282,7 +282,7 @@ When the cell has no label, the box is labelled with the stencil's readable name
 - `fillColor` to `fillColor`, `strokeColor` to `strokeColor`, `fontColor` to `textColor`. A hex colour
   is kept verbatim; `none` is `transparent` for a fill and `strokeWidth: 'none'` for a stroke;
   `light-dark(a, b)` takes the light value `a`. **`default`, or no colour at all, is left unset**, so
-  the element takes the tab's theme like anything drawn in livediagram: draw.io's white-and-black
+  the element takes the tab's theme like anything drawn in livedoc: draw.io's white-and-black
   defaults become the theme's defaults. The same goes for the page: draw.io's white page is its
   default paper and leaves the tab's background unset. This is an operator decision, not a loss:
   default colours and the white page follow the tab theme, and colours the author picked are kept.

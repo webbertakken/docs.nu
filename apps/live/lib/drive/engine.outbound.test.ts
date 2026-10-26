@@ -38,7 +38,7 @@ describe('first mirror', () => {
     expect(f2.appProperties).toEqual({ ldFolderId: 'f2', ldOrigin: HOST });
     const old = fileOf(w.google, w.ld, 'document', 'old')!;
     expect(old).toMatchObject({
-      name: 'Old one.livediagram',
+      name: 'Old one.livedoc',
       mimeType: DRIVE_FILE_MIME,
       parents: [f2.id],
       appProperties: { ldDocumentId: 'old', ldOrigin: HOST },
@@ -142,7 +142,7 @@ describe('outbound rows', () => {
     const w = await mirrored();
     await w.ld.port().renameDocument('d1', 'Roadmap');
     await w.engine.syncNow();
-    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('Roadmap.livediagram');
+    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('Roadmap.livedoc');
   });
 
   it('Document moved to another folder: file moved', async () => {
@@ -287,7 +287,7 @@ describe('outbound rows', () => {
     await w.engine.flush();
     const file = fileOf(w.google, w.ld, 'document', 'd1')!;
     expect(file.id).not.toBe(oldId);
-    expect(file.name).toBe('Again.livediagram');
+    expect(file.name).toBe('Again.livedoc');
   });
 });
 

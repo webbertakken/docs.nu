@@ -10,18 +10,18 @@ import {
 } from './drive';
 
 describe('driveFileName', () => {
-  it('appends the .livediagram extension', () => {
+  it('appends the .livedoc extension', () => {
     expect(driveFileName('Roadmap')).toBe(`Roadmap${DRIVE_FILE_EXTENSION}`);
   });
 });
 
 describe('stripDriveName', () => {
-  it('drops the .livediagram extension', () => {
-    expect(stripDriveName('Roadmap.livediagram')).toBe('Roadmap');
+  it('drops the .livedoc extension', () => {
+    expect(stripDriveName('Roadmap.livedoc')).toBe('Roadmap');
   });
 
   it('drops the extension case-insensitively and trims', () => {
-    expect(stripDriveName('  Plan.LIVEDIAGRAM ')).toBe('Plan');
+    expect(stripDriveName('  Plan.LIVEDOC ')).toBe('Plan');
   });
 
   it('keeps a name without the extension', () => {
@@ -29,12 +29,12 @@ describe('stripDriveName', () => {
   });
 
   it('answers null for a name that is empty once stripped', () => {
-    expect(stripDriveName('.livediagram')).toBeNull();
+    expect(stripDriveName('.livedoc')).toBeNull();
     expect(stripDriveName('   ')).toBeNull();
   });
 
   it('truncates to the given maximum', () => {
-    expect(stripDriveName('abcdef.livediagram', 3)).toBe('abc');
+    expect(stripDriveName('abcdef.livedoc', 3)).toBe('abc');
   });
 });
 
@@ -62,25 +62,23 @@ describe('id validators', () => {
 
 describe('driveRootName (docs/specs/022-drive-mirror/drive-mirror.md, "The root folder\'s name")', () => {
   it.each([
-    ['docs.nu', 'livediagram'],
-    ['www.docs.nu', 'livediagram'],
-    ['WWW.Docs.NU', 'livediagram'],
-    ['staging.livediagram.app', 'LiveDoc (staging)'],
-    ['Staging.LIVEDIAGRAM.app', 'LiveDoc (staging)'],
-    ['localhost', 'LiveDoc (staging)'],
-    ['localhost:4000', 'LiveDoc (staging)'],
-    ['LOCALHOST:4002', 'LiveDoc (staging)'],
-    ['127.0.0.1', 'LiveDoc (staging)'],
-    ['127.0.0.1:3771', 'LiveDoc (staging)'],
-    ['[::1]', 'LiveDoc (staging)'],
-    ['[::1]:4000', 'LiveDoc (staging)'],
-    ['::1', 'LiveDoc (staging)'],
+    ['docs.nu', 'LiveDoc'],
+    ['www.docs.nu', 'LiveDoc'],
+    ['WWW.Docs.NU', 'LiveDoc'],
+    ['localhost', 'LiveDoc (development)'],
+    ['localhost:4000', 'LiveDoc (development)'],
+    ['LOCALHOST:4002', 'LiveDoc (development)'],
+    ['127.0.0.1', 'LiveDoc (development)'],
+    ['127.0.0.1:3771', 'LiveDoc (development)'],
+    ['[::1]', 'LiveDoc (development)'],
+    ['[::1]:4000', 'LiveDoc (development)'],
+    ['::1', 'LiveDoc (development)'],
     ['documents.example.org', 'LiveDoc (self-hosted)'],
     ['documents.example.org:8443', 'LiveDoc (self-hosted)'],
     ['192.168.1.20:4000', 'LiveDoc (self-hosted)'],
     ['[2001:db8::1]:4000', 'LiveDoc (self-hosted)'],
     ['docs.nu.evil.example', 'LiveDoc (self-hosted)'],
-    ['staging.livediagram.app.example', 'LiveDoc (self-hosted)'],
+    ['rebrand.preview.docs.nu', 'LiveDoc (self-hosted)'],
   ])('%s → %s', (host, name) => {
     expect(driveRootName(host)).toBe(name);
   });

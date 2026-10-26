@@ -70,7 +70,7 @@ export function useWorkbenchMessages(opts: {
     if (text === lastSent.current) return;
     lastSent.current = text;
     port.send({
-      type: 'livediagram:selection',
+      type: 'livedoc:selection',
       v: 1,
       documentId,
       documentName: opts.documentName,
@@ -107,7 +107,7 @@ export function useWorkbenchMessages(opts: {
     if (!tab) return;
     if (frame) {
       if (sentReady.current)
-        port.send({ type: 'livediagram:tab', v: 1, tabId: tab.id, tabName: tab.name });
+        port.send({ type: 'livedoc:tab', v: 1, tabId: tab.id, tabName: tab.name });
       sentReady.current = true;
       frame.reportDocumentPlace({
         documentId,
@@ -119,7 +119,7 @@ export function useWorkbenchMessages(opts: {
     } else if (!sentReady.current) {
       sentReady.current = true;
       port.send({
-        type: 'livediagram:ready',
+        type: 'livedoc:ready',
         v: 1,
         documentId,
         documentName: opts.documentName,
@@ -128,7 +128,7 @@ export function useWorkbenchMessages(opts: {
         role: opts.sessionRole,
       });
     } else {
-      port.send({ type: 'livediagram:tab', v: 1, tabId: tab.id, tabName: tab.name });
+      port.send({ type: 'livedoc:tab', v: 1, tabId: tab.id, tabName: tab.name });
     }
     scheduleSelection(to);
   });
@@ -179,9 +179,8 @@ export function useWorkbenchMessages(opts: {
   useEffect(() => {
     if (!port) return;
     return port.subscribe((message) => {
-      if (message.type === 'livediagram:theme' && !frame)
-        setAppearanceOverride(message.colourScheme);
-      else if (message.type === 'livediagram:reveal') reveal(message.refs);
+      if (message.type === 'livedoc:theme' && !frame) setAppearanceOverride(message.colourScheme);
+      else if (message.type === 'livedoc:reveal') reveal(message.refs);
     });
   }, [port, frame]);
 }

@@ -23,7 +23,7 @@ gave nobody a reason to tell them apart or click.
 | A Community post's link while the post is not public                  | livediagram         | The editor's pitch | The brand card         |
 | Any other editor address (`/document/<id>`, the Explorer, ...)        | livediagram         | The editor's pitch | The brand card         |
 
-- **The share pitch** is `Open it in livediagram: diagrams, whiteboards and documents, made together.`
+- **The share pitch** is `Open it in livedoc: diagrams, whiteboards and documents, made together.`
 - **The editor's pitch** is the editor's own description, unchanged.
 - **The brand card** is the origin's shared Open Graph image (`/opengraph-image`, `/twitter-image`), the one the
   marketing site and the help centre use.

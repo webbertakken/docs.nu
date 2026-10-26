@@ -79,7 +79,7 @@ describe('getCommunityKey', () => {
 
   it('never reads the guest owner id', () => {
     const storage = memoryStorage();
-    storage.setItem('livediagram:v2:self-id', '11111111-1111-4111-8111-111111111111');
+    storage.setItem('livedoc:v2:self-id', '11111111-1111-4111-8111-111111111111');
     const getItem = vi.spyOn(storage, 'getItem');
     withWindow(storage);
     expect(getCommunityKey()).not.toBe('11111111-1111-4111-8111-111111111111');

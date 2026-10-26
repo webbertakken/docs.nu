@@ -1,4 +1,4 @@
-// The Avatar-mode character's customisation state (docs/specs/008-canvas/avatar-mode.md): gender,
+// The Avatar-mode character's customisation state (docs/specs/008-canvas/avatar-mode.md): figure,
 // clothing, hair, and size, loaded from and written back to per-browser
 // storage so the character you built is the one waiting next time you enter
 // the mode.
@@ -50,8 +50,8 @@ export function useAvatarConfig({ active }: { active: boolean }) {
       track(
         'UI',
         'Changed',
-        changed === 'gender'
-          ? 'AvatarGender'
+        changed === 'figure'
+          ? 'AvatarFigure'
           : changed === 'clothing'
             ? 'AvatarClothing'
             : changed === 'hair'
@@ -67,10 +67,10 @@ export function useAvatarConfig({ active }: { active: boolean }) {
     setConfig({ ...config, [field]: value }, field);
   };
 
-  // Right-clicking the character on the canvas flips the gender (docs/specs/008-canvas/avatar-mode.md) —
+  // Right-clicking the character on the canvas flips the figure (docs/specs/008-canvas/avatar-mode.md) —
   // the one customisation reachable without opening the panel.
-  const toggleGender = () => {
-    setField('gender', config.gender === 'male' ? 'female' : 'male');
+  const toggleFigure = () => {
+    setField('figure', config.figure === 'broad' ? 'slender' : 'broad');
   };
 
   // The panel's dice button: roll a new character, but KEEP the chosen size —
@@ -83,5 +83,5 @@ export function useAvatarConfig({ active }: { active: boolean }) {
     track('UI', 'Changed', 'AvatarRandomised');
   };
 
-  return { config, setField, toggleGender, randomise };
+  return { config, setField, toggleFigure, randomise };
 }

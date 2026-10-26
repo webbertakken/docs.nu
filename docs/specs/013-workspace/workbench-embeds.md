@@ -59,12 +59,12 @@ that acts as the person on one document only.
    identity; `documentId` null in the workspace scope, `folderId` null unless one was asked). A `documentId` other
    than the address's `d`, or a scope other than the address's page, is refused and the session revoked. The session is an opaque `lvw_`
    credential valid for `WORKBENCH_SESSION_TTL_MS`, held in the page's memory only, never in storage.
-4. **Bind to the workbench.** The page posts `livediagram:hello` to its parent with `targetOrigin` set to the
+4. **Bind to the workbench.** The page posts `livedoc:hello` to its parent with `targetOrigin` set to the
    ticket's origin, so a parent of any other origin never receives it, and mounts the editor only after the parent
-   answers `livediagram:hello-ack` from that origin within `WORKBENCH_HANDSHAKE_MS`. A page that is not framed, or
+   answers `livedoc:hello-ack` from that origin within `WORKBENCH_HANDSHAKE_MS`. A page that is not framed, or
    framed by another origin, mounts nothing, revokes the session, and says "This view opens only inside <origin>."
-5. **Renew.** Before the session expires the page posts `livediagram:renew`; the workbench mints a fresh ticket and
-   posts `livediagram:ticket`. Unrenewed, the session ends and the frame turns read-only with the line "Reconnect in
+5. **Renew.** Before the session expires the page posts `livedoc:renew`; the workbench mints a fresh ticket and
+   posts `livedoc:ticket`. Unrenewed, the session ends and the frame turns read-only with the line "Reconnect in
    <workbench> to keep editing."
 
 ## Pairing
@@ -139,7 +139,7 @@ The bullets above are the document scope. A **workspace** session is confined di
 
 The editor of the document, minus the app's surroundings: no app header, Explorer or account menu. The canvas, the
 tab bar, the palette, the toolbars and the panels stay, since a workbench embed is for drawing. An **Open in
-livediagram** button opens the document in a full tab. The colour scheme follows the workbench (`livediagram:theme`),
+livediagram** button opens the document in a full tab. The colour scheme follows the workbench (`livedoc:theme`),
 else the system. Presence shows the person as themselves; their agent shows as their status line
 ([Agent presence](../024-agents/agent-presence.md)).
 
@@ -159,33 +159,33 @@ started on a folder shows that folder; its empty state is the Explorer's own, wi
 `window.postMessage` between the page and its workbench, each `{ type, v: 1, ... }`, sent only to the bound origin
 and accepted only from it. Unknown types are ignored, and logged once each.
 
-| Type                    | From      | Carries                                                              |
-| ----------------------- | --------- | -------------------------------------------------------------------- |
-| `livediagram:hello`     | page      | Nothing; asks the workbench to answer                                |
-| `livediagram:hello-ack` | workbench | The workbench's name, shown in copy ("Reconnect in Acme Editor")     |
-| `livediagram:ready`     | page      | `documentId`, `documentName`, `tabId`, `tabName`, `role`             |
-| `livediagram:tab`       | page      | The tab now shown: `tabId`, `tabName`                                |
-| `livediagram:selection` | page      | The [selection reference](#the-selection-reference); empty when none |
-| `livediagram:renew`     | page      | Nothing; asks for a ticket                                           |
-| `livediagram:ticket`    | workbench | `ticket`                                                             |
-| `livediagram:reveal`    | workbench | `refs`: brings those elements into view and outlines them            |
-| `livediagram:theme`     | workbench | `colourScheme`: `light` or `dark`                                    |
-| `livediagram:ended`     | page      | `reason`: `expired`, `revoked`, `trashed`, `refused`                 |
-| `livediagram:place`     | page      | Workspace only: where the frame is, below                            |
-| `livediagram:open`      | workbench | Workspace only: `to`, below                                          |
+| Type                | From      | Carries                                                              |
+| ------------------- | --------- | -------------------------------------------------------------------- |
+| `livedoc:hello`     | page      | Nothing; asks the workbench to answer                                |
+| `livedoc:hello-ack` | workbench | The workbench's name, shown in copy ("Reconnect in Acme Editor")     |
+| `livedoc:ready`     | page      | `documentId`, `documentName`, `tabId`, `tabName`, `role`             |
+| `livedoc:tab`       | page      | The tab now shown: `tabId`, `tabName`                                |
+| `livedoc:selection` | page      | The [selection reference](#the-selection-reference); empty when none |
+| `livedoc:renew`     | page      | Nothing; asks for a ticket                                           |
+| `livedoc:ticket`    | workbench | `ticket`                                                             |
+| `livedoc:reveal`    | workbench | `refs`: brings those elements into view and outlines them            |
+| `livedoc:theme`     | workbench | `colourScheme`: `light` or `dark`                                    |
+| `livedoc:ended`     | page      | `reason`: `expired`, `revoked`, `trashed`, `refused`                 |
+| `livedoc:place`     | page      | Workspace only: where the frame is, below                            |
+| `livedoc:open`      | workbench | Workspace only: `to`, below                                          |
 
 In a workspace frame, `ready` carries `scope: 'workspace'` and no document; `tab`, `selection` and `reveal` speak of
 the document open in the frame, and do nothing while none is. `trashed` ends nothing there: the frame returns to the
 Explorer. Two messages exist only in that scope:
 
-- **`livediagram:place`** is sent on every move: `{ view, folderId, folderName, documentCount, documentId,
+- **`livedoc:place`** is sent on every move: `{ view, folderId, folderName, documentCount, documentId,
 documentName, tabId, tabName, role }`. `view` is the Explorer view's name (`home`, `folder`, `recent`, ...) or
   `document`; `documentCount` is the documents directly in the folder shown (null on other views), so a workbench can
   offer something of its own beside an empty folder. A document's fields are null outside `document`.
-- **`livediagram:open`** moves the frame: `to` is `{ view: 'home' }`, `{ folderId }` or `{ documentId, tabId? }`. A
+- **`livedoc:open`** moves the frame: `to` is `{ view: 'home' }`, `{ folderId }` or `{ documentId, tabId? }`. A
   place the person cannot reach shows the Explorer's own not-found, as a link would.
 
-A `livediagram:selection` is sent after the selection settles for `WORKBENCH_SELECTION_SETTLE_MS`, so a marquee drag
+A `livedoc:selection` is sent after the selection settles for `WORKBENCH_SELECTION_SETTLE_MS`, so a marquee drag
 is one message.
 
 ## The selection reference
@@ -225,7 +225,7 @@ What a workbench does to fit this contract (its own documentation holds the deta
 - **The selection.** While a diagram is in view, the place the person types to their agent names the document and
   what is selected ("Home screen · 3 selected", or "Home screen · whole tab"). Sending attaches the selection
   reference to the message as text, and the person can leave it off any one message.
-- **Reveal.** A ref the agent prints (`146b`) can post `livediagram:reveal` to the open diagram.
+- **Reveal.** A ref the agent prints (`146b`) can post `livedoc:reveal` to the open diagram.
 
 ## Limits
 

@@ -15,7 +15,7 @@ Derived from [Community](../community.md). Implementation detail only; design de
 | report         | `CommunityReportReason`, `COMMUNITY_REPORT_REASONS` (`{ id, label, type }[]`), `community_reports`    |
 | hidden         | `CommunityPostState = 'listed' \| 'hidden'`, column `hidden_by = 'reports'`                           |
 | community link | `share_links.purpose = 'community'` (`SharePurpose = 'share' \| 'community'`)                         |
-| community key  | header `X-Community-Key`, localStorage `livediagram:v2:community-key`                                 |
+| community key  | header `X-Community-Key`, localStorage `livedoc:v2:community-key`                                     |
 | sort           | `CommunitySort = 'new' \| 'loved' \| 'copied'`, `COMMUNITY_SORTS` (`{ id, label, type }[]`)           |
 | Edit Listing   | the same `PUT /api/documents/:id/community` as publishing; the editor names the act, the api does not |
 
@@ -329,7 +329,7 @@ Community app (`apps/community`):
   from `loadCommunitySession` (`apps/community/lib/session.ts`, over `@livediagram/account-session`'s `readSession` and
   `createTokenProvider`; the session is read only once My Shares is on, and a missing token fails the load).
   `mineMayBeOffered` hides the toggle once this browser has learned the host has no sign-in
-  (`livediagram:v2:sign-in-offered`); the same module holds `SESSION_LOAD_TIMEOUT_MS` and `signInHref`. `MineSummary` shows the **Your Shares** totals above the grid. Waiting
+  (`livedoc:v2:sign-in-offered`); the same module holds `SESSION_LOAD_TIMEOUT_MS` and `signInHref`. `MineSummary` shows the **Your Shares** totals above the grid. Waiting
   past `SESSION_LOAD_TIMEOUT_MS` for the session, `GalleryView` shows `GalleryError` with a reload.
 - Post page (`apps/community/components/post/`): `PostView` over `usePost`, `EmbedFrame` (`/embed?s=<code>`, lazy,
   titled, falling back to the card image after 15 s), `PostMeta`, `PostActions`, `ReportDialog` (on the shared `Dialog` shell from `@livediagram/ui`, a phone sheet below `sm`), `RelatedPosts`.

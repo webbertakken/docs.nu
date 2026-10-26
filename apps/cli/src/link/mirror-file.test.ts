@@ -7,7 +7,7 @@ import { hasConflictMarkers, mirrorFileText, type MirrorFile } from './mirror-fi
 // no time, every key sorted, one element per line.
 
 const mirror = (): MirrorFile => ({
-  kind: 'livediagram.document',
+  kind: 'livedoc.document',
   schemaVersion: 1,
   document: {
     id: 'doc-1',
@@ -72,7 +72,7 @@ const GOLDEN = `{
       }
     ]
   },
-  "kind": "livediagram.document",
+  "kind": "livedoc.document",
   "livedocSync": {
     "host": "https://docs.nu",
     "tabs": {

@@ -1,5 +1,5 @@
 // The pull file (docs/specs/015-api/blueprints/cli.md "The pull file", CLI27, CLI28): the editor's
-// `livediagram.document` envelope, so "Import a copy" reads it, plus `livedocSync`, which the envelope parser
+// `livedoc.document` envelope, so "Import a copy" reads it, plus `livedocSync`, which the envelope parser
 // ignores: the host it came from and each tab's revision and hashes. `hash` covers a tab's elements, which push sends;
 // `settingsHash` covers everything else, which push names as not pushed.
 

@@ -317,7 +317,7 @@ export const LANDING_SECTIONS: LandingSection[] = [
         group: 'Present & workshop',
         title: 'Walk a character across your canvas',
         description:
-          'Avatar mode drops a little pixel character onto the canvas. Click to walk it to whatever you are talking about, steer with the arrow keys, and press Space to hop and wave a flag. Dress it how you like (gender, clothing, hair and size, remembered in your browser), and the box it stands on gets a ring. The canvas is read-only while you walk, and on a shared document everyone sees everyone else walking about in their own colour.',
+          'Avatar mode drops a little pixel character onto the canvas. Click to walk it to whatever you are talking about, steer with the arrow keys, and press Space to hop and wave a flag. Dress it how you like (figure, clothing, hair and size, remembered in your browser), and the box it stands on gets a ring. The canvas is read-only while you walk, and on a shared document everyone sees everyone else walking about in their own colour.',
       },
       {
         art: <AvatarModeArt />,

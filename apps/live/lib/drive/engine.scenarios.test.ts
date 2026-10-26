@@ -27,14 +27,14 @@ describe('two devices', () => {
     w.clock.tick(MIN);
     await w.ld.port().renameDocument('d1', 'From B');
     await b.engine.syncNow();
-    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('Plan.livediagram');
+    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('Plan.livedoc');
     expect(b.statuses.at(-1)!.leaseHeldElsewhere).toBe(true);
     // A writes it.
     await a.engine.syncNow();
-    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('From B.livediagram');
+    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('From B.livedoc');
 
     // B still applies a change made in Drive.
-    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Drive.livediagram');
+    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Drive.livedoc');
     await b.engine.syncNow();
     expect(w.ld.document('d1')!.name).toBe('Drive');
 
@@ -44,7 +44,7 @@ describe('two devices', () => {
     w.clock.tick(MIN);
     await w.ld.port().renameDocument('d1', 'B again');
     await b.engine.syncNow();
-    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('B again.livediagram');
+    expect(fileOf(w.google, w.ld, 'document', 'd1')!.name).toBe('B again.livedoc');
     expect(b.statuses.at(-1)!.leaseHeldElsewhere).toBe(false);
   });
 });
@@ -63,7 +63,7 @@ describe('arrival catch-up', () => {
     w.clock.tick(3 * 60 * MIN);
     w.ld.edit('d1');
     w.ld.createDocument('d3', 'New');
-    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd2')!.id, 'Renamed.livediagram');
+    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd2')!.id, 'Renamed.livedoc');
     w.clock.tick(5 * MIN);
 
     const next = makeEngine(w);
@@ -112,7 +112,7 @@ describe('cadence', () => {
     const saved = () => w.ld.connection!.pageToken;
     const afterStart = saved();
 
-    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'X.livediagram');
+    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'X.livedoc');
     await engine.syncNow();
     expect(saved()).toBe(afterStart);
 
@@ -121,7 +121,7 @@ describe('cadence', () => {
     expect(saved()).not.toBe(afterStart);
 
     const t = saved();
-    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Y.livediagram');
+    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Y.livedoc');
     await engine.syncNow();
     expect(saved()).toBe(t);
     await engine.flush();
@@ -375,7 +375,7 @@ describe('the 2-minute gated pace (docs/specs/022-drive-mirror/drive-mirror.md, 
     const before = listCalls(w);
     await engine.syncNow();
     expect(listCalls(w)).toBe(before);
-    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Moved.livediagram');
+    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Moved.livedoc');
     await engine.syncNow();
     expect(listCalls(w)).toBe(before + 1);
     expect(w.ld.document('d1')!.name).toBe('Moved');
@@ -389,7 +389,7 @@ describe('the 2-minute gated pace (docs/specs/022-drive-mirror/drive-mirror.md, 
     // Invisible activity elsewhere in the user's Drive moves the token too.
     w.google.userCreateFolder(OWNER, 'Elsewhere');
     await engine.syncNow();
-    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Seen.livediagram');
+    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Seen.livedoc');
     await engine.syncNow();
     expect(w.ld.document('d1')!.name).toBe('Seen');
   });
@@ -451,7 +451,7 @@ describe('views follow (docs/specs/022-drive-mirror/drive-mirror.md, "Other view
     await engine.start();
     await engine.syncNow();
     expect(applied).toBe(0);
-    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Renamed.livediagram');
+    w.google.userRename(fileOf(w.google, w.ld, 'document', 'd1')!.id, 'Renamed.livedoc');
     await engine.syncNow();
     expect(applied).toBe(1);
   });

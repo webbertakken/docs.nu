@@ -74,7 +74,7 @@ describe('useContentsChrome', () => {
       docked.contentsSidebarEl as ReactElement<{ onMoveToSide: (side: 'right') => void }>
     ).props.onMoveToSide('right');
     expect(track).toHaveBeenCalledWith('UI', 'Changed', 'ContentsSideRight');
-    expect(localStorage.getItem('livediagram:contents-side:v1')).toBe('right');
+    expect(localStorage.getItem('livedoc:contents-side:v1')).toBe('right');
     expect(chrome().contentsSide).toBe('right');
     // Never in the synced preferences.
     expect(readUserPreferences()).not.toHaveProperty('contentsSide');

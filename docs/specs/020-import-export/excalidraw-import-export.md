@@ -120,7 +120,7 @@ exposes the custom type only to pages in the same browser engine, so:
   `text/plain`, and takes the first that passes `looksLikeExcalidraw`.
 - It runs after the image-file branch and before our own element payload in
   `useClipboard`'s paste handler (the two envelopes cannot be confused: ours is
-  `livediagram.elements`). Everything that already gates a canvas paste (a
+  `livedoc.elements`). Everything that already gates a canvas paste (a
   modal open, a text field focused, read-only, a label being edited) gates it
   too.
 - A recognised paste on a **whiteboard** tab lands with the whiteboard profile;

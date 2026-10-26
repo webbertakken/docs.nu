@@ -68,7 +68,7 @@ export async function trackedFile(
     class: 'tracked',
     path,
     file: {
-      kind: 'livediagram.document',
+      kind: 'livedoc.document',
       schemaVersion: 1,
       document: { id: doc.id, name: doc.name, presentation: null, tabs },
       livedocSync: { host: 'https://docs.nu', tabs: recorded },

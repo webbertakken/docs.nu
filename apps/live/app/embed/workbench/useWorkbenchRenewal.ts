@@ -59,7 +59,7 @@ export function useWorkbenchRenewal({
 
   useEffect(() => {
     if (!port || secret === null || expiresAt === null) return;
-    const ask = () => port.send({ type: 'livediagram:renew', v: 1 });
+    const ask = () => port.send({ type: 'livedoc:renew', v: 1 });
     let retry: ReturnType<typeof setInterval> | undefined;
     const lead = setTimeout(
       () => {
@@ -83,7 +83,7 @@ export function useWorkbenchRenewal({
   useEffect(() => {
     if (!port || !mounted) return;
     return port.subscribe((message) => {
-      if (message.type !== 'livediagram:ticket') return;
+      if (message.type !== 'livedoc:ticket') return;
       void renewWith(message.ticket, currentSession, dispatch);
     });
   }, [port, mounted, dispatch]);

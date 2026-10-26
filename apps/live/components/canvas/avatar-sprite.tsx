@@ -9,7 +9,7 @@
 //
 // Everything the Avatar Panel offers is a costume on ONE skeleton, so the walk
 // cycle, the hop, and the flag wave are shared across every combination:
-//   - gender   → shoulder width + a softer face
+//   - figure   → shoulder width + a softer face
 //   - clothing → eight outfits. Two rules travel with them rather than being
 //     re-checked per view: BARE_LEG_CLOTHING (dress / skirt) swaps trousers for
 //     bare legs, BARE_ARM_CLOTHING (vest) drops the sleeves.
@@ -345,7 +345,7 @@ function OutfitDetail({
 }
 
 // The front / back torso with sleeves. `swing` moves the arms in opposition
-// for the walk cycle; the female build narrows the shoulders by a pixel.
+// for the walk cycle; the slender figure narrows the shoulders by a pixel.
 // The arms. Normally two sleeves swinging in opposition with the walk; a
 // reaction (docs/specs/008-canvas/avatar-mode.md) can instead throw them straight out to the sides (jumping
 // jacks), raise both (cheer), or raise one and swing it (wave / dance). Only one
@@ -421,18 +421,18 @@ function Torso({
   shirt,
   shirtDark,
   clothing,
-  gender,
+  figure,
   pose,
 }: {
   swing: number;
   shirt: string;
   shirtDark: string;
   clothing: AvatarConfig['clothing'];
-  gender: AvatarConfig['gender'];
+  figure: AvatarConfig['figure'];
   // Active reaction pose, when one is playing.
   pose?: ReactionPose | null;
 }) {
-  const inset = gender === 'female' ? 1 : 0;
+  const inset = figure === 'slender' ? 1 : 0;
   // A vest leaves the arms bare, so the sleeve blocks take skin tones.
   const bareArms = BARE_ARM_CLOTHING.has(clothing);
   const sleeve = bareArms ? SKIN : shirt;
@@ -730,14 +730,14 @@ export function AvatarSprite({
               shirt={shirtBase}
               shirtDark={shirtDark}
               clothing={config.clothing}
-              gender={config.gender}
+              figure={config.figure}
               pose={pose}
             />
             {config.clothing === 'hoodie' ? <Hood shirtDark={shirtDark} /> : null}
             {facing === 'up' ? (
               <HeadBack hair={config.hair} />
             ) : (
-              <HeadFront gender={config.gender} hair={config.hair} />
+              <HeadFront figure={config.figure} hair={config.hair} />
             )}
             {headphones ? <Headphones profile={false} /> : null}
           </>

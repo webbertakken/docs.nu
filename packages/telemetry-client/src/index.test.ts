@@ -407,7 +407,7 @@ describe('telemetry opt-out contract', () => {
     // change for the editor AND the help centre in the same commit, or an
     // opt-out made in one stops being visible to the other.
     const { USER_PREFERENCES_STORAGE_KEY } = await import('./index');
-    expect(USER_PREFERENCES_STORAGE_KEY).toBe('livediagram:user-preferences:v1');
+    expect(USER_PREFERENCES_STORAGE_KEY).toBe('livedoc:user-preferences:v1');
   });
 
   it('is on by default and off only on an explicit false', async () => {
@@ -439,7 +439,7 @@ describe('telemetry opt-out contract', () => {
     expect(readTelemetryOptIn()).toBe(false);
     // A different key must not be mistaken for the preferences blob.
     delete store[USER_PREFERENCES_STORAGE_KEY];
-    store['livediagram:user-preferences:v2'] = '{"telemetryEnabled":false}';
+    store['livedoc:user-preferences:v2'] = '{"telemetryEnabled":false}';
     expect(readTelemetryOptIn()).toBe(true);
   });
 });

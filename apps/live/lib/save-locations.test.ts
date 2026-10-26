@@ -11,15 +11,15 @@ describe('save locations', () => {
   });
 
   it('starts a signed-in person on LiveDoc', () => {
-    expect(defaultSaveLocationFor({ signedIn: true, signInOffered: true })).toBe('livediagram');
+    expect(defaultSaveLocationFor({ signedIn: true, signInOffered: true })).toBe('livedoc');
   });
 
   it('starts everyone on LiveDoc on a deployment without sign-in', () => {
-    expect(defaultSaveLocationFor({ signedIn: false, signInOffered: false })).toBe('livediagram');
+    expect(defaultSaveLocationFor({ signedIn: false, signInOffered: false })).toBe('livedoc');
   });
 
   it('routes only This Browser to the offline store', () => {
     expect(isOfflineLocation('browser')).toBe(true);
-    expect(isOfflineLocation('livediagram')).toBe(false);
+    expect(isOfflineLocation('livedoc')).toBe(false);
   });
 });

@@ -508,10 +508,10 @@ dark:text-slate-400`, then `+N` at 10px semibold; after the count badge; in a tr
 
 ### Constants and configuration (surfaces)
 
-| Constant                      | Value                                  | Provenance  | Safe range |
-| ----------------------------- | -------------------------------------- | ----------- | ---------- |
-| `MARKER_MAX_ICONS`            | 2                                      | Spec marker | 1 to 3     |
-| `DEFAULT_FOLDER_NAMES_PREFIX` | `livediagram:v2:default-folder-names:` | `D113`      | Fixed      |
+| Constant                      | Value                              | Provenance  | Safe range |
+| ----------------------------- | ---------------------------------- | ----------- | ---------- |
+| `MARKER_MAX_ICONS`            | 2                                  | Spec marker | 1 to 3     |
+| `DEFAULT_FOLDER_NAMES_PREFIX` | `livedoc:v2:default-folder-names:` | `D113`      | Fixed      |
 
 ### Assets (surfaces)
 

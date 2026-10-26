@@ -6,8 +6,8 @@
 import type { DriveAccessToken, DriveItemKind } from '@livediagram/api-schema';
 import type { DriveMirrorStatus } from './engine';
 
-const LOCK_NAME = 'livediagram:drive-mirror';
-const CHANNEL_NAME = 'livediagram:drive-mirror';
+const LOCK_NAME = 'livedoc:drive-mirror';
+const CHANNEL_NAME = 'livedoc:drive-mirror';
 
 export type DriveTabMessage =
   | { type: 'status'; status: DriveMirrorStatus }

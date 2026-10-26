@@ -210,7 +210,7 @@ describe('buildRemoteAvatarRows', () => {
     x: 10,
     y: 20,
     facing: 'left',
-    config: { gender: 'female', clothing: 'dress', hair: 'long', size: 'regular' },
+    config: { figure: 'slender', clothing: 'dress', hair: 'long', size: 'regular' },
     walking: true,
     stepFrame: 1,
     lift: 0,

@@ -13,7 +13,7 @@ import { createListeners } from '@/lib/listeners';
 export const FRESH_RESPONSE_MS = 7 * 24 * 60 * 60 * 1000;
 // The most opened ids kept; past it the oldest go (they are older than a week by then on any busy board).
 export const FRESH_OPENED_MAX = 500;
-const KEY = 'livediagram:form-responses-opened';
+const KEY = 'livedoc:form-responses-opened';
 
 let opened: string[] | null = null;
 // The same ids as a set, so each card's check is one lookup however many were opened.

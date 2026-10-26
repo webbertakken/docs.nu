@@ -150,7 +150,7 @@ export function parseLaserConfig(raw: unknown): LaserConfig {
 
 // --- Storage ----------------------------------------------------------------
 
-const STORAGE_KEY = 'livediagram:v2:laser-config';
+const STORAGE_KEY = 'livedoc:v2:laser-config';
 
 export function loadLaserConfig(): LaserConfig {
   return parseLaserConfig(readLocalStorageSafe(STORAGE_KEY));

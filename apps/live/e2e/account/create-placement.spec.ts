@@ -13,8 +13,8 @@ const NEW_EDITOR = /\/document\/[0-9a-f-]{36}$/;
 // seeding call as Pat sends.
 async function signedIn(page: Page, baseURL: string) {
   await page.addInitScript(() => {
-    localStorage.setItem('livediagram:v2:name-confirmed', '1');
-    localStorage.setItem('livediagram:user-preferences:v1', JSON.stringify({ tourSeen: true }));
+    localStorage.setItem('livedoc:v2:name-confirmed', '1');
+    localStorage.setItem('livedoc:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
   const pat = await signIn(page.context(), { baseURL, name: 'Pat Lane' });
   return pat.apiHeaders();

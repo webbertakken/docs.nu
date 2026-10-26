@@ -203,8 +203,8 @@ any ──get-session network failure──▶ guest-offline (authLoaded true, i
 - `AuthBridge` reads `GET /api/auth/get-session` once on load for every visitor, guests included (D25). The read also
   settles whether the host offers sign-in: `404` is `off`, any answer is `on`, a network failure leaves it
   `unknown` (`publishSignInAvailability` in `lib/auth-config.ts`).
-- Each settled read writes the signed-in hint (`livediagram:v2:signed-in`: `1` signed in, `0` signed out or `off`);
-  `guest-offline` writes nothing. Each settled mode writes `livediagram:v2:sign-in-offered` (`1` / `0`), which
+- Each settled read writes the signed-in hint (`livedoc:v2:signed-in`: `1` signed in, `0` signed out or `off`);
+  `guest-offline` writes nothing. Each settled mode writes `livedoc:v2:sign-in-offered` (`1` / `0`), which
   `signInOfferedHere()` reads while the live answer is unknown.
 - `authLoaded` is true in `guest`, `signed-in`, `guest-offline`; false in `unsettled` and `migrating`. The bootstrap
   settles a guest after 5 s if the read has not answered.

@@ -7,7 +7,7 @@ import { buildSnapshot } from './snapshot';
 // Each row of the spec's Inbound table as a pure decision
 // (docs/specs/022-drive-mirror/drive-mirror.md, "Inbound: Drive to LiveDoc").
 
-const HOST = 'livediagram.test';
+const HOST = 'livedoc.test';
 const T = Date.parse('2026-09-28T12:00:00Z');
 
 function item(over: Partial<DriveItem> = {}): DriveItem {
@@ -15,7 +15,7 @@ function item(over: Partial<DriveItem> = {}): DriveItem {
     kind: 'document',
     ldId: 'd1',
     driveFileId: 'file-d1',
-    name: 'Plan.livediagram',
+    name: 'Plan.livedoc',
     ldName: 'Plan',
     parentId: 'root',
     trashed: false,
@@ -42,8 +42,8 @@ const folderItem = item({
 function file(over: Partial<DriveFile> = {}): DriveFile {
   return {
     id: 'file-d1',
-    name: 'Plan.livediagram',
-    mimeType: 'application/vnd.livediagram+json',
+    name: 'Plan.livedoc',
+    mimeType: 'application/vnd.livedoc+json',
     parents: ['root'],
     trashed: false,
     appProperties: { ldDocumentId: 'd1', ldOrigin: HOST },
@@ -101,30 +101,30 @@ describe('planInbound: documents', () => {
   });
 
   it('renames the document, dropping the extension', () => {
-    const d = planInbound(change(file({ name: 'Roadmap.livediagram' })), snap());
+    const d = planInbound(change(file({ name: 'Roadmap.livedoc' })), snap());
     expect(d).toMatchObject({
       kind: 'apply',
       effects: [{ kind: 'rename-document', id: 'd1', name: 'Roadmap' }],
       types: ['Rename'],
-      record: { name: 'Roadmap.livediagram', ldName: 'Roadmap' },
+      record: { name: 'Roadmap.livedoc', ldName: 'Roadmap' },
     });
   });
 
   it('keeps the old name when the Drive name is empty once stripped', () => {
-    const d = planInbound(change(file({ name: '.livediagram' })), snap());
+    const d = planInbound(change(file({ name: '.livedoc' })), snap());
     expect(d).toMatchObject({ kind: 'apply', effects: [] });
   });
 
   it('lets the later side win when both renamed', () => {
     // LiveDoc renamed to "Local" after Drive's change: LiveDoc wins.
     const localLater = planInbound(
-      change(file({ name: 'Drive.livediagram' })),
+      change(file({ name: 'Drive.livedoc' })),
       snap({ name: 'Local', savedAt: T + 1000 }),
     );
     expect(localLater).toMatchObject({ kind: 'apply', effects: [], record: { ldName: 'Drive' } });
     // Drive's rename is the later one: Drive wins.
     const driveLater = planInbound(
-      change(file({ name: 'Drive.livediagram' })),
+      change(file({ name: 'Drive.livedoc' })),
       snap({ name: 'Local', savedAt: T - 1000 }),
     );
     expect(driveLater).toMatchObject({ effects: [{ kind: 'rename-document', name: 'Drive' }] });
@@ -195,11 +195,11 @@ describe('planInbound: documents', () => {
   });
 
   it('records a change whose value LiveDoc already holds without applying it', () => {
-    const d = planInbound(change(file({ name: 'Plan2.livediagram' })), snap({ name: 'Plan2' }));
+    const d = planInbound(change(file({ name: 'Plan2.livedoc' })), snap({ name: 'Plan2' }));
     expect(d).toMatchObject({
       kind: 'apply',
       effects: [],
-      record: { name: 'Plan2.livediagram', ldName: 'Plan2' },
+      record: { name: 'Plan2.livedoc', ldName: 'Plan2' },
     });
   });
 });
@@ -304,7 +304,7 @@ describe('planInbound: unrecorded files', () => {
   it('leaves a copy of a mirrored document alone: another file carrying its id', () => {
     // docs/specs/022-drive-mirror/drive-mirror.md, "Copies made in Drive": never applied,
     // re-tagged or adopted.
-    const copy = file({ id: 'file-copy', name: 'Copy of Plan.livediagram', parents: ['file-f1'] });
+    const copy = file({ id: 'file-copy', name: 'Copy of Plan.livedoc', parents: ['file-f1'] });
     expect(planInbound(change(copy, { fileId: 'file-copy' }), snap())).toEqual({
       kind: 'ignore',
       reason: 'foreign-copy',
@@ -345,7 +345,7 @@ describe('planAdoption (a reconnect)', () => {
 
   it('adopts neither of two files claiming one document: a copy is never the original', () => {
     const { adopt, ambiguous } = planAdoption(
-      [file(), file({ id: 'file-copy', name: 'Copy of Plan.livediagram' })],
+      [file(), file({ id: 'file-copy', name: 'Copy of Plan.livedoc' })],
       snap({ items: [] }),
     );
     expect(adopt).toEqual([]);

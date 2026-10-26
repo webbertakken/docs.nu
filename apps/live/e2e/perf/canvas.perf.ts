@@ -93,9 +93,9 @@ async function openBoard(browser: Browser, owner: string, id: string, throttle: 
   const ctx = await browser.newContext({ viewport: VIEW, colorScheme: 'dark' });
   await ctx.addInitScript(
     ({ o, sig }) => {
-      localStorage.setItem('livediagram:v2:self-id', o);
-      if (sig) localStorage.setItem('livediagram:v2:self-sig', sig);
-      localStorage.setItem('livediagram:v2:name-confirmed', '1');
+      localStorage.setItem('livedoc:v2:self-id', o);
+      if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
+      localStorage.setItem('livedoc:v2:name-confirmed', '1');
       // The gesture rows read long tasks (`timed`); the open row reads long tasks and long animation
       // frames together, from the very start, since long tasks alone miss a frame that only renders.
       const w = window as unknown as {

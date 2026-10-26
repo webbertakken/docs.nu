@@ -94,7 +94,7 @@ cron runs it in `waitUntil` beside the other sweeps, its failure logged as
   whatever is stored, and never writes; the stored choice returns once the query stops matching.
   `ViewToggle` carries `phone:hidden`, the CSS twin of the same query, so it takes no room there
   and never flashes in before hydration.
-- `useDetailsSort` reads `livediagram:explorer-details-sort` (`"<column>:<asc|desc>"`); an unreadable
+- `useDetailsSort` reads `livedoc:explorer-details-sort` (`"<column>:<asc|desc>"`); an unreadable
   value is the default `updated:desc`. `toggle(column)` returns the column's natural direction
   (`DETAILS_COLUMNS[column].natural`) when it is not the current column, else the opposite one.
 - `sortDetailsEntries(folders, documents, sort, ctx)` returns folders then documents, each sorted by
@@ -258,14 +258,14 @@ CREATE TABLE tab_stats (
 
 ## Constants and configuration
 
-| Constant                       | Value                               | Provenance                                                    | Safe range     |
-| ------------------------------ | ----------------------------------- | ------------------------------------------------------------- | -------------- |
-| `PREVIEW_OPEN_DELAY_MS`        | 600                                 | Spec                                                          | 400-1000       |
-| `PREVIEW_WARMUP_MS`            | 500                                 | Spec, as the tooltip's                                        | 300-800        |
-| `TAB_STATS_BACKFILL_PAGE_ROWS` | 10                                  | `D147`: 10 bodies of at most `MAX_TAB_BYTES` stay under 20 MB | 1-20           |
-| `TAB_STATS_BACKFILL_MAX_ROWS`  | 5000                                | `D148`                                                        | 500-20000      |
-| `TAB_STATS_BACKFILL_BUDGET_MS` | 60 000                              | As the image-refs backfill                                    | 10 000-120 000 |
-| `DETAILS_SORT_STORAGE_KEY`     | `livediagram:explorer-details-sort` | Beside `livediagram:explorer-view`                            | n/a            |
+| Constant                       | Value                           | Provenance                                                    | Safe range     |
+| ------------------------------ | ------------------------------- | ------------------------------------------------------------- | -------------- |
+| `PREVIEW_OPEN_DELAY_MS`        | 600                             | Spec                                                          | 400-1000       |
+| `PREVIEW_WARMUP_MS`            | 500                             | Spec, as the tooltip's                                        | 300-800        |
+| `TAB_STATS_BACKFILL_PAGE_ROWS` | 10                              | `D147`: 10 bodies of at most `MAX_TAB_BYTES` stay under 20 MB | 1-20           |
+| `TAB_STATS_BACKFILL_MAX_ROWS`  | 5000                            | `D148`                                                        | 500-20000      |
+| `TAB_STATS_BACKFILL_BUDGET_MS` | 60 000                          | As the image-refs backfill                                    | 10 000-120 000 |
+| `DETAILS_SORT_STORAGE_KEY`     | `livedoc:explorer-details-sort` | Beside `livedoc:explorer-view`                                | n/a            |
 
 ## Defaults ledger
 

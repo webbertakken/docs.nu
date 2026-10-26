@@ -28,7 +28,7 @@ function item(over: Partial<DriveItem> = {}): DriveItem {
     kind: 'document',
     ldId: 'd1',
     driveFileId: 'f1',
-    name: 'One.livediagram',
+    name: 'One.livedoc',
     ldName: 'One',
     parentId: 'root',
     trashed: false,
@@ -145,7 +145,7 @@ describe('items', () => {
     ]);
     await putDriveItems(env, 'user_a', [
       item({
-        name: 'Two.livediagram',
+        name: 'Two.livedoc',
         ldName: 'Two',
         notice: 'unseen_folder',
         noticeParentId: 'x',
@@ -155,7 +155,7 @@ describe('items', () => {
     expect(items).toHaveLength(2);
     expect(items.find((i) => i.kind === 'document')).toEqual(
       item({
-        name: 'Two.livediagram',
+        name: 'Two.livedoc',
         ldName: 'Two',
         notice: 'unseen_folder',
         noticeParentId: 'x',

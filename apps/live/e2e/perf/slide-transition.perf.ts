@@ -90,11 +90,11 @@ async function openDeck(
   });
   await ctx.addInitScript(
     ({ o, sig, transition }) => {
-      localStorage.setItem('livediagram:v2:self-id', o);
-      if (sig) localStorage.setItem('livediagram:v2:self-sig', sig);
-      localStorage.setItem('livediagram:v2:name-confirmed', '1');
+      localStorage.setItem('livedoc:v2:self-id', o);
+      if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
+      localStorage.setItem('livedoc:v2:name-confirmed', '1');
       localStorage.setItem(
-        'livediagram:v2:presentation-config',
+        'livedoc:v2:presentation-config',
         JSON.stringify({ transition, speed: 'normal', hidePointer: false, advanceOnClick: false }),
       );
       const w = window as unknown as { __keys: number[]; __errors: string[] };
@@ -333,9 +333,9 @@ test('editing starts no view transitions', async ({ page, browser, baseURL }) =>
   const ctx = await browser.newContext({ viewport: VIEW, colorScheme: 'dark', baseURL });
   await ctx.addInitScript(
     ({ o, sig }) => {
-      localStorage.setItem('livediagram:v2:self-id', o);
-      if (sig) localStorage.setItem('livediagram:v2:self-sig', sig);
-      localStorage.setItem('livediagram:v2:name-confirmed', '1');
+      localStorage.setItem('livedoc:v2:self-id', o);
+      if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
+      localStorage.setItem('livedoc:v2:name-confirmed', '1');
       const w = window as unknown as { __vt: number };
       w.__vt = 0;
       const start = Document.prototype.startViewTransition;

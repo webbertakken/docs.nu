@@ -1,11 +1,15 @@
-import { describe, expect, it } from 'vitest';
+// @vitest-environment jsdom
+import { beforeEach, describe, expect, it } from 'vitest';
 import {
   AVATAR_CLOTHING,
+  AVATAR_FIGURES,
   AVATAR_HAIR,
   avatarScale,
   BARE_ARM_CLOTHING,
   BARE_LEG_CLOTHING,
   DEFAULT_AVATAR_CONFIG,
+  hasStoredAvatarConfig,
+  loadAvatarConfig,
   parseAvatarConfig,
   randomAvatarConfig,
   type AvatarConfig,
@@ -13,7 +17,7 @@ import {
 
 describe('parseAvatarConfig', () => {
   const full: AvatarConfig = {
-    gender: 'female',
+    figure: 'slender',
     clothing: 'hoodie',
     hair: 'ponytail',
     size: 'tall',
@@ -35,15 +39,15 @@ describe('parseAvatarConfig', () => {
     // character — only that one choice.
     const parsed = parseAvatarConfig({ ...full, clothing: 'spacesuit' });
     expect(parsed.clothing).toBe(DEFAULT_AVATAR_CONFIG.clothing);
-    expect(parsed.gender).toBe('female');
+    expect(parsed.figure).toBe('slender');
     expect(parsed.hair).toBe('ponytail');
     expect(parsed.size).toBe('tall');
   });
 
   it('defaults missing fields, so a config written by an older build still loads', () => {
-    expect(parseAvatarConfig({ gender: 'female' })).toEqual({
+    expect(parseAvatarConfig({ figure: 'slender' })).toEqual({
       ...DEFAULT_AVATAR_CONFIG,
-      gender: 'female',
+      figure: 'slender',
     });
   });
 });
@@ -80,7 +84,7 @@ describe('randomAvatarConfig', () => {
     const seen = new Set(
       Array.from({ length: 60 }, () => {
         const c = randomAvatarConfig();
-        return `${c.gender}/${c.clothing}/${c.hair}`;
+        return `${c.figure}/${c.clothing}/${c.hair}`;
       }),
     );
     expect(seen.size).toBeGreaterThan(5);
@@ -130,5 +134,64 @@ describe('the option catalogues', () => {
   it('marks the outfits that change the silhouette', () => {
     expect([...BARE_LEG_CLOTHING].sort()).toEqual(['dress', 'skirt']);
     expect([...BARE_ARM_CLOTHING].sort()).toEqual(['hawaiian', 'vest']);
+  });
+});
+
+describe('the figure choice', () => {
+  it('offers a broad and a slender figure, Broad by default', () => {
+    expect(AVATAR_FIGURES).toEqual([
+      { id: 'broad', label: 'Broad' },
+      { id: 'slender', label: 'Slender' },
+    ]);
+    expect(DEFAULT_AVATAR_CONFIG.figure).toBe('broad');
+  });
+});
+
+// docs/specs/008-canvas/avatar-mode.md "Persistence": a character saved before the figure choice existed is read
+// once, kept as a figure, and its old key removed, so the old field never stays on the device.
+describe('loadAvatarConfig: the character saved before the figure choice', () => {
+  const OLD_KEY = 'livediagram:v2:avatar-config';
+  const KEY = 'livedoc:v2:avatar-config';
+  const saved = (old: Record<string, string>) =>
+    window.localStorage.setItem(OLD_KEY, JSON.stringify(old));
+
+  beforeEach(() => window.localStorage.clear());
+
+  it.each([
+    ['female', 'slender'],
+    ['male', 'broad'],
+  ])('keeps a saved %s character as the %s figure', (old, figure) => {
+    saved({ gender: old, clothing: 'hoodie', hair: 'bun', size: 'tall' });
+    expect(loadAvatarConfig()).toEqual({ figure, clothing: 'hoodie', hair: 'bun', size: 'tall' });
+  });
+
+  it('moves it to the new key and removes the old one', () => {
+    saved({ gender: 'female', clothing: 'hoodie', hair: 'bun', size: 'tall' });
+    loadAvatarConfig();
+    expect(window.localStorage.getItem(OLD_KEY)).toBeNull();
+    expect(JSON.parse(window.localStorage.getItem(KEY)!)).toEqual({
+      figure: 'slender',
+      clothing: 'hoodie',
+      hair: 'bun',
+      size: 'tall',
+    });
+    expect(window.localStorage.getItem(KEY)).not.toContain('gender');
+  });
+
+  it('counts as a stored character, so the first use does not roll a new one', () => {
+    saved({ gender: 'male' });
+    expect(hasStoredAvatarConfig()).toBe(true);
+  });
+
+  it('prefers the current key and drops a stale old one', () => {
+    window.localStorage.setItem(KEY, JSON.stringify({ ...DEFAULT_AVATAR_CONFIG, hair: 'afro' }));
+    saved({ gender: 'female' });
+    expect(loadAvatarConfig()).toEqual({ ...DEFAULT_AVATAR_CONFIG, hair: 'afro' });
+    expect(window.localStorage.getItem(OLD_KEY)).toBeNull();
+  });
+
+  it('defaults the figure when the old value is unrecognised', () => {
+    saved({ gender: 'robot', hair: 'afro' });
+    expect(loadAvatarConfig()).toEqual({ ...DEFAULT_AVATAR_CONFIG, hair: 'afro' });
   });
 });

@@ -13,7 +13,7 @@ export interface SeenStore {
   clear(ownerId: string): void;
 }
 
-const keyFor = (ownerId: string) => `livediagram:v2:drive-seen:${ownerId}`;
+const keyFor = (ownerId: string) => `livedoc:v2:drive-seen:${ownerId}`;
 
 export function seenRowsOf(items: Iterable<DriveItem>): SeenRow[] {
   return [...items].map((i) => ({ kind: i.kind, ldId: i.ldId, driveFileId: i.driveFileId }));

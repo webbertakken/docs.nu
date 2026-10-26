@@ -139,20 +139,20 @@ function HairFront({ hair }: { hair: AvatarConfig['hair'] }) {
   );
 }
 
-// Facing the viewer: face, eyes, a mouth pixel. The female build gets a
+// Facing the viewer: face, eyes, a mouth pixel. The slender figure gets a
 // slightly softer jaw (one pixel narrower at the chin).
 export function HeadFront({
-  gender,
+  figure,
   hair,
 }: {
-  gender: AvatarConfig['gender'];
+  figure: AvatarConfig['figure'];
   hair: AvatarConfig['hair'];
 }) {
   return (
     <g>
       <rect x={4} y={1} width={8} height={8} fill={SKIN} />
       <rect x={10} y={1} width={2} height={8} fill={SKIN_DARK} />
-      {gender === 'female' ? <rect x={4} y={8} width={1} height={1} fill={SKIN_DARK} /> : null}
+      {figure === 'slender' ? <rect x={4} y={8} width={1} height={1} fill={SKIN_DARK} /> : null}
       <HairFront hair={hair} />
       <rect x={6} y={5} width={1} height={1} fill={EYE} />
       <rect x={9} y={5} width={1} height={1} fill={EYE} />

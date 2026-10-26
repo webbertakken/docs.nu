@@ -84,7 +84,7 @@ describe('TabPill opening-mode icon', () => {
   it("shows the tab's own mode, never one an earlier editor remembered in this browser", () => {
     const expected = render(<FlowchartIcon size={12} />).container.querySelector('svg')!.innerHTML;
     cleanup();
-    localStorage.setItem('livediagram:v2:editor-mode:pill-switched', 'draw');
+    localStorage.setItem('livedoc:v2:editor-mode:pill-switched', 'draw');
     render(
       <EditorModeProvider
         value={{ mode: 'diagram', setMode: vi.fn(), canSwitch: true, canEdit: true }}

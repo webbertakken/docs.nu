@@ -41,7 +41,7 @@ export const readDocumentOutput = {
         .array(z.record(z.string(), z.unknown()))
         .optional()
         .describe(
-          'The tab elements (format "json"), in the format of the livediagram://schema/elements resource.',
+          'The tab elements (format "json"), in the format of the livedoc://schema/elements resource.',
         ),
     })
     .describe('The tab that was read.'),

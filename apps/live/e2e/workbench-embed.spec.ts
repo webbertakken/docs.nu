@@ -68,8 +68,8 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   await expect(frame.getByText('Wireframe').first()).toBeVisible();
   await expect
     .poll(async () => (await received(page)).map((m) => m.type))
-    .toEqual(expect.arrayContaining(['livediagram:hello', 'livediagram:ready']));
-  const ready = (await received(page)).find((m) => m.type === 'livediagram:ready');
+    .toEqual(expect.arrayContaining(['livedoc:hello', 'livedoc:ready']));
+  const ready = (await received(page)).find((m) => m.type === 'livedoc:ready');
   expect(ready).toMatchObject({
     documentId: seeded.documentId,
     documentName: 'Home screen',
@@ -106,7 +106,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   const selectionOf = async (label: string) =>
     (await received(page)).find(
       (m) =>
-        m.type === 'livediagram:selection' &&
+        m.type === 'livedoc:selection' &&
         m.count === 1 &&
         String(m.reference).includes(`"${label}"`),
     );
@@ -120,7 +120,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   // Reveal outlines the element; the theme follows the workbench.
   await page.evaluate(() =>
     (window as unknown as { post: (m: unknown) => void }).post({
-      type: 'livediagram:reveal',
+      type: 'livedoc:reveal',
       v: 1,
       refs: ['el-play'],
     }),
@@ -131,7 +131,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
     await page.evaluate(
       (scheme) =>
         (window as unknown as { post: (m: unknown) => void }).post({
-          type: 'livediagram:theme',
+          type: 'livedoc:theme',
           v: 1,
           colourScheme: scheme,
         }),
@@ -145,7 +145,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   await page.evaluate(
     (ticket) =>
       (window as unknown as { post: (m: unknown) => void }).post({
-        type: 'livediagram:ticket',
+        type: 'livedoc:ticket',
         v: 1,
         ticket,
       }),
@@ -172,7 +172,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
     frame.getByRole('status').filter({ hasText: 'Reconnect in Fake Workbench to keep editing.' }),
   ).toBeVisible();
   await expect
-    .poll(async () => (await received(page)).find((m) => m.type === 'livediagram:ended'))
+    .poll(async () => (await received(page)).find((m) => m.type === 'livedoc:ended'))
     .toMatchObject({ reason: 'revoked' });
 });
 

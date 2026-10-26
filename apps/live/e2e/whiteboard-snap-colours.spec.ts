@@ -96,7 +96,7 @@ async function painted(page: Page, id: string): Promise<string[]> {
     });
 }
 
-const PREFS_KEY = 'livediagram:user-preferences:v1';
+const PREFS_KEY = 'livedoc:user-preferences:v1';
 const dock = (page: Page) => page.locator('[data-whiteboard-dock]');
 
 async function openSettings(page: Page) {
