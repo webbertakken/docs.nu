@@ -63,7 +63,7 @@ export function identityOptions(
   executionCtx?: ExecutionContextLike,
   codeSend: CodeSend = { failed: false },
 ): BetterAuthOptions {
-  const { origin, secret, googleClientId } = identityConfigOf(env);
+  const { origin, secret, googleClientId, methods } = identityConfigOf(env);
   if (!origin || !secret) throw new Error('identityOptions: sign-in is off on this host');
   const rotated = versionedSecrets(env);
   return {
@@ -92,6 +92,10 @@ export function identityOptions(
         allowDifferentEmails: false,
         requireLocalEmailVerified: true,
         updateUserInfoOnLink: false,
+        // An email code is no account row, so better-auth would count a linked Google as the last way in and refuse
+        // to remove it. Where email codes are offered the person can always sign in with their address, so Google
+        // may go; on a host with Google alone it stays.
+        allowUnlinkingAll: methods.includes('email-code'),
       },
     },
     verification: { modelName: MODEL_NAMES.verification },

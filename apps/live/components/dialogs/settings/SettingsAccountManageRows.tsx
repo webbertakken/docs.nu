@@ -115,6 +115,8 @@ export function SettingsSignInMethodsRow({ row }: { row: SettingsSignInMethodsRo
   const { methods } = useAuthConfig();
   const returnTo = useAuthReturnPath();
   const googleOffered = methods.includes('google');
+  // Google may only go while the email code is a way back in (allowUnlinkingAll on the api).
+  const emailOffered = methods.includes('email-code');
   const [google, setGoogle] = useState<GoogleMethod>({ state: 'loading' });
   const [status, setStatus] = useState<'not_fresh' | 'failed' | null>(null);
 
@@ -143,11 +145,13 @@ export function SettingsSignInMethodsRow({ row }: { row: SettingsSignInMethodsRo
   return (
     <SettingsRowShell row={row}>
       <ul className="mt-2 space-y-2 text-sm text-slate-700 dark:text-slate-200">
-        <li className="flex items-center justify-between gap-3">
-          <span>
-            Email code <span className="text-slate-500 dark:text-slate-400">· {user?.email}</span>
-          </span>
-        </li>
+        {emailOffered ? (
+          <li className="flex items-center justify-between gap-3">
+            <span>
+              Email code <span className="text-slate-500 dark:text-slate-400">· {user?.email}</span>
+            </span>
+          </li>
+        ) : null}
         {googleOffered ? (
           <li className="flex items-center justify-between gap-3">
             <span>
@@ -163,13 +167,15 @@ export function SettingsSignInMethodsRow({ row }: { row: SettingsSignInMethodsRo
                 Try Again
               </button>
             ) : google.state === 'linked' ? (
-              <button
-                type="button"
-                className={SETTINGS_ROW_BUTTON}
-                onClick={() => void remove(google.accountId)}
-              >
-                Remove
-              </button>
+              emailOffered ? (
+                <button
+                  type="button"
+                  className={SETTINGS_ROW_BUTTON}
+                  onClick={() => void remove(google.accountId)}
+                >
+                  Remove
+                </button>
+              ) : null
             ) : (
               <button
                 type="button"

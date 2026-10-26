@@ -121,6 +121,15 @@ describe('SettingsSignInMethodsRow', () => {
     await screen.findByText("That didn't work. Try again.");
   });
 
+  it('offers no Remove, and no email line, on a host with Google alone', async () => {
+    config.methods = ['google'];
+    manage.readGoogleAccount.mockResolvedValue('acc_google');
+    render(<SettingsSignInMethodsRow row={row()} />);
+    await screen.findByText('· Connected');
+    expect(screen.queryByRole('button', { name: 'Remove' })).toBeNull();
+    expect(screen.queryByText(/Email code/)).toBeNull();
+  });
+
   it('shows no Google line where the host offers no Google', () => {
     config.methods = ['email-code'];
     render(<SettingsSignInMethodsRow row={row()} />);

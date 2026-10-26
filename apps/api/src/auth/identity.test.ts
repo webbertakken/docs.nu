@@ -78,6 +78,17 @@ describe('identity', () => {
     expect(options.advanced?.useSecureCookies).toBe(true);
   });
 
+  it('lets Google go where an email code is a way back in, and keeps it on a host with Google alone', () => {
+    const google = {
+      GOOGLE_AUTH_CLIENT_ID: 'id.apps.googleusercontent.com',
+      GOOGLE_AUTH_CLIENT_SECRET: 'g',
+    };
+    const withEmail = identityOptions({ ...SIGN_IN_ENV, ...google } as Env);
+    expect(withEmail.account?.accountLinking?.allowUnlinkingAll).toBe(true);
+    const googleOnly = identityOptions({ ...SIGN_IN_ENV, ...google, EMAIL_OUTBOX: '' } as Env);
+    expect(googleOnly.account?.accountLinking?.allowUnlinkingAll).toBe(false);
+  });
+
   it('rotates secrets, offers Google when keyed, and mints account ids for users only', () => {
     const options = identityOptions({
       ...SIGN_IN_ENV,
@@ -119,7 +130,11 @@ describe('identity', () => {
     expect(google.origin).toBe('https://accounts.google.com');
     expect(google.searchParams.get('client_id')).toBe('123-abc.apps.googleusercontent.com');
     expect(google.searchParams.get('redirect_uri')).toBe(`${ORIGIN}/api/auth/callback/google`);
-    expect(google.searchParams.get('scope')?.split(' ').sort()).toEqual(['email', 'openid', 'profile']);
+    expect(google.searchParams.get('scope')?.split(' ').sort()).toEqual([
+      'email',
+      'openid',
+      'profile',
+    ]);
     expect(google.searchParams.get('prompt')).toBe('select_account');
     expect(google.searchParams.get('code_challenge_method')).toBe('S256');
   });
@@ -131,7 +146,10 @@ describe('identity', () => {
       GOOGLE_AUTH_CLIENT_SECRET: 'g-secret',
     });
     const res = await handleAuth(
-      post('/api/auth/sign-in/social', { provider: 'google', callbackURL: 'https://evil.example/x' }),
+      post('/api/auth/sign-in/social', {
+        provider: 'google',
+        callbackURL: 'https://evil.example/x',
+      }),
       env,
     );
     expect(res.status).toBe(403);
