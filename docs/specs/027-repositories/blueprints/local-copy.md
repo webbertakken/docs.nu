@@ -15,37 +15,37 @@ leaves to later outcomes is under [Not in this slice](#not-in-this-slice).
 
 Scope, by file. "(planned)" marks a file that does not exist yet; "new" a symbol added to an existing file.
 
-| File                                                                      | Role                                                                                                                                                  |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/text-merge/` (planned, `@livediagram/text-merge`)               | Pure: `mergeText`, `editsBetween`, `editDistance`, `nearestBase`, `similarity`. Shared by the CLI now and `sync --resolve` and the branch merge later |
-| `apps/cli/src/link/link-file.ts`                                          | `LinkFile.git` (new: `binding`, `branch`, `commit`), `LinkFile.mirror.ignore` (new); `[git]` and `ignore` parsed and validated                        |
-| `apps/cli/src/link/binding.ts` (planned)                                  | `LinkBinding`, `bindingOf(io, link)`: `local-copy` (with why) or `branches`                                                                           |
-| `apps/cli/src/link/native/records.ts` (planned)                           | `RECORDS_DIR`, `SyncRecord`, `recordPathOf`, `recordText`, `readRecords`, `writeRecord`, `removeRecord`                                               |
-| `apps/cli/src/link/native/native-paths.ts` (planned)                      | `nativePathOf`, `splitFileName`, `nameProblem`, `foldKey`, `siblingCollisions`                                                                        |
-| `apps/cli/src/link/native/ignore-rules.ts` (planned)                      | `IgnoreRules`, `ignoreRulesOf(io, link, binding)`, `ignoredBecause(rules, entry)`                                                                     |
-| `apps/cli/src/link/native/native-scan.ts` (planned)                       | `NativeEntry`, `scanNativeTree(io, link, rules)`: every file under `dir`, hashed, classified                                                          |
-| `apps/cli/src/link/native/native-state.ts` (planned)                      | `NativeFacts`, `nativeStateOf` (pure)                                                                                                                 |
-| `apps/cli/src/link/native/moves.ts` (planned)                             | `findMoves` (pure): missing recorded files paired with unrecorded ones                                                                                |
-| `apps/cli/src/link/native/native-plan.ts` (planned)                       | `planNative` (pure): records, scan, coverage and remote facts to `NativeAction[]`, the folder-missing guard                                           |
-| `apps/cli/src/link/native/bases.ts` (planned)                             | `keepBase`, `baseCandidates`, `pruneBases`: the kept bases in the local sync state                                                                    |
-| `apps/cli/src/link/native/fold-page.ts` (planned)                         | `foldPage`: nearest base, merge, `patch`, the `stale_tab` loop, lost local values, the write back                                                     |
-| `apps/cli/src/link/native/file-document.ts` (planned)                     | `foldFileDocument`, `takeSide`: replace, write, conflict, `--take`, set-aside                                                                         |
-| `apps/cli/src/link/native/adopt.ts` (planned)                             | `adoptFile`, the adoption journal, folder creation, pacing                                                                                            |
-| `apps/cli/src/link/native/native-acts.ts` (planned)                       | `actNative`: each `NativeAction` against the tree, the api, the records and the local sync state                                                      |
-| `apps/cli/src/link/native/pacer.ts` (planned)                             | `Pacer`: the token-read and write budgets per minute                                                                                                  |
-| `apps/cli/src/link/watch-claim.ts` (planned)                              | `claimWatch`: one `sync --watch` per link per machine                                                                                                 |
-| `apps/cli/src/link/sync-run.ts`                                           | `runSyncPass` calls `planNative` and `actNative` at `files` for pages and file documents; mirror files as before                                      |
-| `apps/cli/src/link/sync-watch.ts`                                         | `onLocal` takes every non-ignored path under `dir`; transient documents due again; the watch claim                                                    |
-| `apps/cli/src/link/remote.ts`                                             | `RemoteFact` carries each tab's `kind`, `hash` and, for a file tab, `extension` and `executable`                                                      |
-| `apps/cli/src/link/recorded-state.ts`                                     | `RecordedDocument` gains `savedAt`, `folderId` (LC9)                                                                                                  |
-| `apps/cli/src/link/local-state.ts`                                        | `bases/`, `set-aside/`, `adoptions.json`, `watch` in the state directory                                                                              |
-| `apps/cli/src/link/sync-lines.ts`                                         | The native action lines, final copy ([Output lines](#output-lines-stdout))                                                                            |
-| `apps/cli/src/link/constants.ts`                                          | The constants under [Constants and configuration](#constants-and-configuration)                                                                       |
-| `apps/cli/src/commands/sync.ts`, `packages/agent-verbs/src/verbs/link.ts` | `sync --take file\|livedoc <path>`                                                                                                                    |
-| `apps/cli/src/io.ts`, `node-io.ts`, `testing/fake-io.ts`                  | `CliFiles.readBytes`, `stat`; `CliFiles.write` and `writeBytes` take a `mode` and write their temporary as a dotfile (LC14)                           |
-| `apps/cli/src/testing/link-host.ts`                                       | The fake host gains markdown and file tabs, `patch`, margin notes, blob replace and create-with-id                                                    |
-| `apps/telemetry/app/cli-commands.ts`                                      | `CLI_COMMANDS` row `SyncTake`                                                                                                                         |
-| `apps/help/app/developers/repositories/page.mdx`                          | A "Local copy" section: the global wiki example, `[git] binding`, `sync --watch` under a process manager                                              |
+| File                                                                               | Role                                                                                                                                                  |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/text-merge/` (planned, `@livediagram/text-merge`)                        | Pure: `mergeText`, `editsBetween`, `editDistance`, `nearestBase`, `similarity`. Shared by the CLI now and `sync --resolve` and the branch merge later |
+| `apps/cli/src/link/link-file.ts`                                                   | `LinkFile.git` (new: `binding`, `branch`, `commit`), `LinkFile.mirror.ignore` (new); `[git]` and `ignore` parsed and validated                        |
+| `apps/cli/src/link/binding.ts` (planned)                                           | `LinkBinding`, `bindingOf(io, link)`: `local-copy` (with why) or `branches`                                                                           |
+| `apps/cli/src/link/native/records.ts` (planned)                                    | `RECORDS_DIR`, `SyncRecord`, `recordPathOf`, `recordText`, `readRecords`, `writeRecord`, `removeRecord`                                               |
+| `apps/cli/src/link/native/native-paths.ts` (planned)                               | `nativePathOf`, `splitFileName`, `nameProblem`, `foldKey`, `siblingCollisions`                                                                        |
+| `apps/cli/src/link/native/ignore-rules.ts` (planned)                               | `IgnoreRules`, `ignoreRulesOf(io, link, binding)`, `ignoredBecause(rules, entry)`                                                                     |
+| `apps/cli/src/link/native/native-scan.ts` (planned)                                | `NativeEntry`, `scanNativeTree(io, link, rules)`: every file under `dir`, hashed, classified                                                          |
+| `apps/cli/src/link/native/native-state.ts` (planned)                               | `NativeFacts`, `nativeStateOf` (pure)                                                                                                                 |
+| `apps/cli/src/link/native/moves.ts` (planned)                                      | `findMoves` (pure): missing recorded files paired with unrecorded ones                                                                                |
+| `apps/cli/src/link/native/native-plan.ts` (planned)                                | `planNative` (pure): records, scan, coverage and remote facts to `NativeAction[]`, the folder-missing guard                                           |
+| `apps/cli/src/link/native/bases.ts` (planned)                                      | `keepBase`, `baseCandidates`, `pruneBases`: the kept bases in the local sync state                                                                    |
+| `apps/cli/src/link/native/fold-page.ts` (planned)                                  | `foldPage`: nearest base, merge, `patch`, the `stale_tab` loop, lost local values, the write back                                                     |
+| `apps/cli/src/link/native/file-document.ts` (planned)                              | `foldFileDocument`, `takeSide`: replace, write, conflict, `--take`, set-aside                                                                         |
+| `apps/cli/src/link/native/adopt.ts` (planned)                                      | `adoptFile`, the adoption journal, folder creation, pacing                                                                                            |
+| `apps/cli/src/link/native/native-acts.ts` (planned)                                | `actNative`: each `NativeAction` against the tree, the api, the records and the local sync state                                                      |
+| `apps/cli/src/link/native/pacer.ts` (planned)                                      | `Pacer`: the token-read and write budgets per minute                                                                                                  |
+| `apps/cli/src/link/watch-claim.ts` (planned)                                       | `claimWatch`: one `sync --watch` per link per machine                                                                                                 |
+| `apps/cli/src/link/sync-run.ts`                                                    | `runSyncPass` calls `planNative` and `actNative` at `files` for pages and file documents; mirror files as before                                      |
+| `apps/cli/src/link/sync-watch.ts`                                                  | `onLocal` takes every non-ignored path under `dir`; transient documents due again; the watch claim                                                    |
+| `apps/cli/src/link/remote.ts`                                                      | `RemoteFact` carries each tab's `kind`, `hash` and, for a file tab, `extension` and `executable`                                                      |
+| `apps/cli/src/link/recorded-state.ts`                                              | `RecordedDocument` gains `savedAt`, `folderId` (LC9)                                                                                                  |
+| `apps/cli/src/link/local-state.ts`                                                 | `bases/`, `set-aside/`, `adoptions.json`, `watch` in the state directory                                                                              |
+| `apps/cli/src/link/sync-lines.ts`                                                  | The native action lines, final copy ([Output lines](#output-lines-stdout))                                                                            |
+| `apps/cli/src/link/constants.ts`                                                   | The constants under [Constants and configuration](#constants-and-configuration)                                                                       |
+| `apps/cli/src/commands/sync.ts`, `packages/agent-verbs/src/verbs/link.ts`          | `sync --take file\|livedoc <path>`                                                                                                                    |
+| `apps/cli/src/io.ts`, `apps/cli/src/node-io.ts`, `apps/cli/src/testing/fake-io.ts` | `CliFiles.readBytes`, `stat`; `CliFiles.write` and `writeBytes` take a `mode` and write their temporary as a dotfile (LC14)                           |
+| `apps/cli/src/testing/link-host.ts`                                                | The fake host gains markdown and file tabs, `patch`, margin notes, blob replace and create-with-id                                                    |
+| `apps/telemetry/app/cli-commands.ts`                                               | `CLI_COMMANDS` row `SyncTake`                                                                                                                         |
+| `apps/help/app/developers/repositories/page.mdx`                                   | A "Local copy" section: the global wiki example, `[git] binding`, `sync --watch` under a process manager                                              |
 
 ## Domain and naming
 
@@ -224,7 +224,7 @@ A missing file with no pair is `deleted`. An unrecorded entry with no pair is `l
 1. **Read.** The remote text at `d.rev` (C2). Not UTF-8 on disk (`TextDecoder('utf-8', { fatal: true })` throws):
    held, reason `not-utf8`, nothing sent.
 2. **Candidates** (`baseCandidates`): the kept bases of the tab, the CLI's read copies of the tab
-   (`READ_COPY_REVS_PER_TAB`, `sync/read-copies.ts`), and the remote text when `d.rev = r.rev`. Never the remote
+   (`READ_COPY_REVS_PER_TAB`, `apps/cli/src/sync/read-copies.ts`), and the remote text when `d.rev = r.rev`. Never the remote
    text at a newer revision (spec).
 3. **Nearest.** `nearestBase(fileText, candidates)`: least `editDistance`, a tie to the higher revision;
    `[sync] nearest-base <doc> <rev>`. No candidate: baseless (below).
@@ -486,7 +486,7 @@ Vitest on the fake io and the fake host; each row a spec rule.
 
 **End to end, for real** (the plan's proof): the local stack (api worker, live app, sign-in on), the CLI built
 (`apps/cli/dist/livedoc.mjs`), a copy of the global wiki at `/tmp/livedoc-local-copies-wiki`: adopt it, then a
-Playwright spec (`apps/live/e2e/local-copy.spec.ts`, dark mode) types in a page and waits for the file, edits the
+Playwright spec (`apps/live/e2e/local-copy.spec.ts` (planned), dark mode) types in a page and waits for the file, edits the
 file and waits for the page, renames and deletes on each side, and stops the watch, edits both sides, restarts and
 asserts the merge.
 
