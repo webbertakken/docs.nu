@@ -72,7 +72,8 @@ export function idTokenClaims(
   clientId: string,
   nowMs: number,
 ): Record<string, unknown> {
-  const local = user.split('@')[0] ?? user;
+  // A `+tag` is the address's, not the person's: "ada.reed+2@…" is still "Ada Reed".
+  const local = (user.split('@')[0] ?? user).split('+')[0]!;
   const name = local
     .split(/[._-]+/)
     .filter(Boolean)

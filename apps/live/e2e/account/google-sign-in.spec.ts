@@ -49,7 +49,7 @@ test('a new person signs in with Google and lands signed in, Google connected', 
   pageErrors,
 }) => {
   await giveOwnClientAddress(context, new URL(baseURL!).origin);
-  const email = `gwen.ashby-${Date.now()}@example.com`;
+  const email = `gwen.ashby+${Date.now()}@example.com`;
   await consentAs(page, email);
 
   await page.goto('/sign-in/?redirect_url=%2Fexplorer%2Frecent');

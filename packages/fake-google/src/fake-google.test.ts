@@ -483,15 +483,15 @@ describe('a root the user moves and renames', () => {
 
 describe('idTokenClaims', () => {
   it('names the person from their address, with a stable subject', () => {
-    const claims = idTokenClaims('ada.reed@example.com', 'client', 1_000_000);
+    const claims = idTokenClaims('ada.reed+work@example.com', 'client', 1_000_000);
     expect(claims).toMatchObject({
-      email: 'ada.reed@example.com',
+      email: 'ada.reed+work@example.com',
       name: 'Ada Reed',
       given_name: 'Ada',
       iat: 1000,
       exp: 1000 + 3600,
     });
-    expect(idTokenClaims('ada.reed@example.com', 'other', 0).sub).toBe(claims.sub);
+    expect(idTokenClaims('ada.reed+work@example.com', 'other', 0).sub).toBe(claims.sub);
     expect(idTokenClaims('bo@example.com', 'client', 0).sub).not.toBe(claims.sub);
   });
 });
