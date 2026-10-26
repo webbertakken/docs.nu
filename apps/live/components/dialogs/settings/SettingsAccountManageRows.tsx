@@ -3,7 +3,7 @@
 // Settings > Account, signed in (docs/specs/014-identity/auth-and-guest-access.md "Account settings"; blueprint
 // "Presentation and UX"): the account's name, its sign-in methods and its sessions. Each row only renders signed
 // in (the catalogue's `available`), and reads the account through lib/account-manage.ts.
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextInput } from '@livediagram/ui';
 import { authHrefWithReturn, useAuthReturnPath } from '@/components/chrome/auth-shared';
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
@@ -97,27 +97,46 @@ function SignInAgain() {
   );
 }
 
+// The Google sign-in method as this account holds it: being read, unreadable, not linked, or linked under an id.
+type GoogleMethod =
+  | { state: 'loading' }
+  | { state: 'unreadable' }
+  | { state: 'none' }
+  | { state: 'linked'; accountId: string };
+
+async function readGoogleMethod(): Promise<GoogleMethod> {
+  const read = await readGoogleAccount();
+  if (read === null) return { state: 'unreadable' };
+  return read === false ? { state: 'none' } : { state: 'linked', accountId: read };
+}
+
 export function SettingsSignInMethodsRow({ row }: { row: SettingsSignInMethodsRowSpec }) {
   const { user } = useDeferredAuth();
   const { methods } = useAuthConfig();
   const returnTo = useAuthReturnPath();
   const googleOffered = methods.includes('google');
-  // The linked Google method's id, false for none, null when unreadable.
-  const [google, setGoogle] = useState<string | false | null | 'loading'>('loading');
+  const [google, setGoogle] = useState<GoogleMethod>({ state: 'loading' });
   const [status, setStatus] = useState<'not_fresh' | 'failed' | null>(null);
 
-  const load = useCallback(async () => {
-    setGoogle('loading');
-    setGoogle(await readGoogleAccount());
-  }, []);
   useEffect(() => {
-    if (googleOffered) void load();
-  }, [googleOffered, load]);
+    if (!googleOffered) return;
+    let current = true;
+    void readGoogleMethod().then((read) => {
+      if (current) setGoogle(read);
+    });
+    return () => {
+      current = false;
+    };
+  }, [googleOffered]);
+  const retry = async () => {
+    setGoogle({ state: 'loading' });
+    setGoogle(await readGoogleMethod());
+  };
 
   const remove = async (accountId: string) => {
     setStatus(null);
     const outcome = await removeGoogle(accountId);
-    if (outcome === 'done') setGoogle(false);
+    if (outcome === 'done') setGoogle({ state: 'none' });
     else setStatus(outcome);
   };
 
@@ -133,21 +152,21 @@ export function SettingsSignInMethodsRow({ row }: { row: SettingsSignInMethodsRo
           <li className="flex items-center justify-between gap-3">
             <span>
               Google
-              {typeof google === 'string' ? (
+              {google.state === 'linked' ? (
                 <span className="text-slate-500 dark:text-slate-400"> · Connected</span>
               ) : null}
             </span>
-            {google === 'loading' ? (
+            {google.state === 'loading' ? (
               <span className="text-xs text-slate-500 dark:text-slate-400">Loading…</span>
-            ) : google === null ? (
-              <button type="button" className={SETTINGS_ROW_BUTTON} onClick={() => void load()}>
+            ) : google.state === 'unreadable' ? (
+              <button type="button" className={SETTINGS_ROW_BUTTON} onClick={() => void retry()}>
                 Try Again
               </button>
-            ) : typeof google === 'string' ? (
+            ) : google.state === 'linked' ? (
               <button
                 type="button"
                 className={SETTINGS_ROW_BUTTON}
-                onClick={() => void remove(google)}
+                onClick={() => void remove(google.accountId)}
               >
                 Remove
               </button>
@@ -167,7 +186,7 @@ export function SettingsSignInMethodsRow({ row }: { row: SettingsSignInMethodsRo
           </li>
         ) : null}
       </ul>
-      {google === null ? <p className={STATUS}>{LOAD_FAILED}</p> : null}
+      {google.state === 'unreadable' ? <p className={STATUS}>{LOAD_FAILED}</p> : null}
       {status ? (
         <p role="status" className={STATUS}>
           {status === 'not_fresh' ? <SignInAgain /> : ACTION_FAILED}
@@ -181,13 +200,19 @@ export function SettingsSessionsRow({ row }: { row: SettingsSessionsRowSpec }) {
   const [sessions, setSessions] = useState<AccountSessionRow[] | null | 'loading'>('loading');
   const [failed, setFailed] = useState(false);
 
-  const load = useCallback(async () => {
+  useEffect(() => {
+    let current = true;
+    void readAccountSessions().then((read) => {
+      if (current) setSessions(read);
+    });
+    return () => {
+      current = false;
+    };
+  }, []);
+  const load = async () => {
     setSessions('loading');
     setSessions(await readAccountSessions());
-  }, []);
-  useEffect(() => {
-    void load();
-  }, [load]);
+  };
 
   const act = async (work: Promise<boolean>) => {
     setFailed(false);

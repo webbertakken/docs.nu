@@ -77,7 +77,7 @@ describe('SettingsAccountNameRow', () => {
     render(<SettingsAccountNameRow row={row()} />);
     const input = screen.getByLabelText('Your name');
     fireEvent.change(input, { target: { value: '   ' } });
-    expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveProperty('disabled', true);
     fireEvent.change(input, { target: { value: 'Grace' } });
     fireEvent.submit(input.closest('form')!);
     await screen.findByText(NAME_FAILED);
