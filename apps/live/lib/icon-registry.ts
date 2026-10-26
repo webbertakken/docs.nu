@@ -85,7 +85,7 @@ export function ensureIconCatalogs(): Promise<void> {
         listeners.notify();
       })
       .catch((err) => {
-        console.error('livediagram: failed to load the icon catalogues', err);
+        console.error('LiveDoc: failed to load the icon catalogues', err);
         loadPromise = null;
       });
   }

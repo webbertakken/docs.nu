@@ -2648,7 +2648,7 @@ export const BY_ACTION: Readonly<Record<string, string>> = {
   'Drive|Created':
     'A newly connected mirror finished copying every document in My Documents into Google Drive for the first time.',
   'Drive|Applied':
-    'A change someone made in Google Drive reached livediagram: a rename, a move (or a move into a folder LiveDoc cannot see), a bin, a restore, or a permanent delete.',
+    'A change someone made in Google Drive reached LiveDoc: a rename, a move (or a move into a folder LiveDoc cannot see), a bin, a restore, or a permanent delete.',
   'Drive|Opened':
     'Someone opened a LiveDoc file from Google Drive with Open with. The type is what happened: it opened, a copy was offered, or it could not be read.',
   'Folder|Changed':

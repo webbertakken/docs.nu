@@ -8,7 +8,7 @@ import { useCopiedFlash } from './useCopiedFlash';
 // this rail is shareable from any app that renders the shared SiteHeader.
 
 /** The line we want people to pass along; the URL is the shared site origin. */
-const SHARE_TEXT = `livediagram: ${SITE_PITCH}. No sign-up needed.`;
+const SHARE_TEXT = `LiveDoc: ${SITE_PITCH}. No sign-up needed.`;
 
 // The card each rail sits on, flush against the right edge of the page.
 const RAIL_CARD =

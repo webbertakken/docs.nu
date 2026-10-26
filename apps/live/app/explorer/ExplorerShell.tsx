@@ -297,7 +297,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
           github={surface.appLinks}
           appearance={surface.appearance}
         />
-        {/* A workspace frame's Open in livediagram: this view in a full tab. */}
+        {/* A workspace frame's Open in LiveDoc: this view in a full tab. */}
         {surface.appHeader ? null : (
           <WorkbenchOpenLink
             href={explorerPathFor(selected)}

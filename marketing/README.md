@@ -1,6 +1,6 @@
 # Marketing assets
 
-Text and media assets for promoting livediagram: directory listings, launch
+Text and media assets for promoting LiveDoc: directory listings, launch
 posts, social copy, screenshots, and logos. This folder is for outbound
 material only. The product source of truth stays in [`docs/specs/`](../docs/specs/), and
 developer docs stay in [`docs/`](../docs/).

@@ -10,7 +10,7 @@ import { FAQ_CATEGORIES, faqAnswerText } from '@/lib/faq-content';
 
 const FAQ_TITLE = 'FAQ · LiveDoc';
 const FAQ_DESCRIPTION =
-  'Answers to common questions about livediagram: getting started, collaboration, sharing, AI and MCP, import and export, privacy, and self-hosting.';
+  'Answers to common questions about LiveDoc: getting started, collaboration, sharing, AI and MCP, import and export, privacy, and self-hosting.';
 
 export const metadata = pageMetadata({
   title: FAQ_TITLE,

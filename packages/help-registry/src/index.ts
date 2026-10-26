@@ -68,7 +68,7 @@ export const categories: Category[] = [
     slug: 'about',
     title: 'About LiveDoc',
     description:
-      'Get to know livediagram: what it is, who it helps, and the ideas behind a free, open canvas.',
+      'Get to know LiveDoc: what it is, who it helps, and the ideas behind a free, open canvas.',
     articleCount: 4,
   },
   {
