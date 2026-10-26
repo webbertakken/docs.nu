@@ -2,7 +2,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { useReducer } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { WorkbenchDocumentSessionResponse } from '@livediagram/api-schema';
+import type { WorkbenchDocumentSessionResponse } from '@livedoc/api-schema';
 import type { WorkbenchPort } from '@/lib/workbench/workbench-port';
 import { useWorkbenchSession } from '@/components/providers/workbench-session-context';
 import { workbenchTransition, type WorkbenchPhase } from './workbench-machine';
@@ -54,6 +54,11 @@ vi.mock('next/dynamic', () => ({
     };
   },
 }));
+// The page warms the chunk it will need in an effect, fire and forget. The real modules are the whole editor:
+// on a loaded machine their import was still running when the file's environment tore down, so the warm-up
+// gets stand-ins that resolve at once (the fakes above are what renders).
+vi.mock('./WorkspaceFrame', () => ({ WorkspaceFrame: () => null }));
+vi.mock('../../document/[id]/editor-page', () => ({ default: () => null }));
 vi.mock('@/components/chrome/LoadErrorCard', () => ({
   LoadErrorCard: ({ embed }: { embed: boolean }) => <p>load error {String(embed)}</p>,
 }));
