@@ -15,7 +15,7 @@ const ISSUES = [
   },
   {
     q: 'I run my own livediagram',
-    a: 'Use your own MCP host in place of mcp.livediagram.app, still ending in /mcp. The MCP server is optional and needs accounts set up on your deployment.',
+    a: 'Use your own MCP host in place of mcp.docs.nu, still ending in /mcp. The MCP server is optional and needs accounts set up on your deployment.',
   },
 ];
 

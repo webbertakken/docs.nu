@@ -24,17 +24,17 @@ If you want to connect an AI assistant rather than write code, you usually want 
 The API lives under `/api` on your livediagram host. On the hosted service that is:
 
 ```
-https://livediagram.app/api
+https://docs.nu/api
 ```
 
-On a self-hosted instance it is `/api` on your own domain. Every path in these docs is relative to that base, so `GET /documents` means `GET https://livediagram.app/api/documents`.
+On a self-hosted instance it is `/api` on your own domain. Every path in these docs is relative to that base, so `GET /documents` means `GET https://docs.nu/api/documents`.
 
 ## Authenticating in one line
 
 Send an API token as a bearer header on each request:
 
 ```bash
-curl https://livediagram.app/api/documents \
+curl https://docs.nu/api/documents \
   -H "Authorization: Bearer lvd_your_token_here"
 ```
 
@@ -60,7 +60,7 @@ The token-callable surface mirrors the app:
 The complete, machine-readable description of every endpoint, request shape, and response shape is published as an **OpenAPI 3.1** document, with no authentication required:
 
 ```bash
-curl https://livediagram.app/api/openapi.json
+curl https://docs.nu/api/openapi.json
 ```
 
 Point Postman, an OpenAPI viewer, or a client generator at that URL to explore the whole surface or scaffold a client. Endpoints an external token can use are tagged `x-token-usable`.

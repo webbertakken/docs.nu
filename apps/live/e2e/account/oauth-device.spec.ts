@@ -8,7 +8,7 @@ import { signIn } from './sign-in';
 
 test.use({ colorScheme: 'dark', viewport: { width: 1280, height: 800 } });
 
-const MCP = 'https://mcp.livediagram.app';
+const MCP = 'https://mcp.docs.nu';
 
 test('a signed-in person connects the CLI with the code their terminal shows', async ({
   page,

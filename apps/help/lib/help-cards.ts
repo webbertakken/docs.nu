@@ -8,7 +8,7 @@ import { HELP_URL } from './site';
 // title instead of the generic brand card. Pages outside the registry (the home, the features index)
 // keep the brand card.
 
-// Beside the livediagram.app pill, so the brand is not said twice.
+// Beside the docs.nu pill, so the brand is not said twice.
 export const HELP_CARD_FOOTER = 'Help Centre';
 
 // `canvas/themes`: the route, without the `/help/` prefix or slashes, a card is keyed by.
@@ -55,7 +55,7 @@ export function helpCardImage(path: string): { url: string; alt: string } | unde
   const route = cardRoute(path);
   const card = HELP_CARDS.get(route);
   if (!card) return undefined;
-  return { url: `${HELP_URL}/og/${route}.png`, alt: `${card.title}, livediagram Help Centre` };
+  return { url: `${HELP_URL}/og/${route}.png`, alt: `${card.title}, LiveDoc Help Centre` };
 }
 
 // The catch-all params app/og/[...card]/route.tsx is built for: `canvas/themes` → ['canvas', 'themes.png'].

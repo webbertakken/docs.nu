@@ -97,27 +97,27 @@ describe('errorResult', () => {
 
 describe('deepLink', () => {
   it('points at the document route on the production host', () => {
-    expect(deepLink({}, 'abc-123')).toBe('https://livediagram.app/document/abc-123');
+    expect(deepLink({}, 'abc-123')).toBe('https://docs.nu/document/abc-123');
   });
 
   it("points at this server's own app on staging or a self-host", () => {
-    const staging = { CONSENT_BASE_URL: 'https://staging.livediagram.app' };
-    expect(deepLink(staging, 'abc')).toBe('https://staging.livediagram.app/document/abc');
-    expect(shareUrl(staging, 'AB')).toBe('https://staging.livediagram.app/document/shared?s=AB');
+    const preview = { CONSENT_BASE_URL: 'https://rebrand.preview.docs.nu' };
+    expect(deepLink(preview, 'abc')).toBe('https://rebrand.preview.docs.nu/document/abc');
+    expect(shareUrl(preview, 'AB')).toBe('https://rebrand.preview.docs.nu/document/shared?s=AB');
   });
 });
 
 describe('shareUrl', () => {
   it('points at the shared route with the code as a query param', () => {
-    expect(shareUrl({}, 'AB12CD')).toBe('https://livediagram.app/document/shared?s=AB12CD');
+    expect(shareUrl({}, 'AB12CD')).toBe('https://docs.nu/document/shared?s=AB12CD');
   });
 
   it('escapes the code rather than pasting it into the query raw', () => {
     // Share codes are minted server-side, so this is defence rather than a
     // live bug — but the value lands in a URL a model may hand to a user, and
     // an unescaped `&` would silently truncate the code.
-    expect(shareUrl({}, 'a&b=c')).toBe('https://livediagram.app/document/shared?s=a%26b%3Dc');
-    expect(shareUrl({}, 'a b')).toBe('https://livediagram.app/document/shared?s=a%20b');
+    expect(shareUrl({}, 'a&b=c')).toBe('https://docs.nu/document/shared?s=a%26b%3Dc');
+    expect(shareUrl({}, 'a b')).toBe('https://docs.nu/document/shared?s=a%20b');
   });
 });
 

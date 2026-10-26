@@ -37,7 +37,7 @@ function poster(k: Kit): Element[] {
       'One line that makes people stop and look twice.',
       { textSize: 'lg' },
     ),
-    k.text(x, H - u * 6, w, u * 6, 'livediagram.app · 2026', { textBold: true }),
+    k.text(x, H - u * 6, w, u * 6, 'docs.nu · 2026', { textBold: true }),
   ];
   if (k.wide) {
     const imgW = W * 0.55;

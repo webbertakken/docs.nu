@@ -58,14 +58,14 @@ describe('help social cards', () => {
 
   it("links a page's own card in its metadata, and the brand card elsewhere", () => {
     expect(helpCardImage('/help/canvas/themes/')?.url).toBe(
-      'https://livediagram.app/help/og/canvas/themes.png',
+      'https://docs.nu/help/og/canvas/themes.png',
     );
     expect(helpCardImage('/help/')).toBeUndefined();
     const md = helpMetadata({ title: 'Themes', description: 'd', path: '/help/canvas/themes/' });
     expect(md.twitter).toMatchObject({
-      images: ['https://livediagram.app/help/og/canvas/themes.png'],
+      images: ['https://docs.nu/help/og/canvas/themes.png'],
     });
     const home = helpMetadata({ title: 'Help', description: 'd', path: '/help/' });
-    expect(home.twitter).toMatchObject({ images: ['https://livediagram.app/twitter-image'] });
+    expect(home.twitter).toMatchObject({ images: ['https://docs.nu/twitter-image'] });
   });
 });

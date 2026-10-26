@@ -245,7 +245,7 @@ export const ALTERNATIVES: Alternative[] = [
       {
         heading: 'Free means free, not a free tier',
         paragraphs: [
-          "Miro's free tier is real, but it's the top of a pricing funnel: board limits and gated features exist to move teams onto paid seats. livediagram has no paid tier and no plan to introduce one. The hosted version at livediagram.app is free, every user gets every feature, and there is nothing to upgrade to.",
+          "Miro's free tier is real, but it's the top of a pricing funnel: board limits and gated features exist to move teams onto paid seats. livediagram has no paid tier and no plan to introduce one. The hosted version at docs.nu is free, every user gets every feature, and there is nothing to upgrade to.",
           "That's sustainable because the whole codebase is MIT-licensed and public. If you'd rather not depend on the hosted service at all, you can deploy the same code to your own Cloudflare account: the editor, the API, and the realtime collaboration all self-host, with no license keys and no phone-home checks.",
         ],
       },
@@ -260,14 +260,14 @@ export const ALTERNATIVES: Alternative[] = [
         heading: 'Connected to the rest of your workflow',
         paragraphs: [
           'Diagrams rarely live alone. livediagram imports Mermaid (flowcharts, state and ER diagrams, the diagram-as-code format that lives in READMEs and AI output), Markdown outlines, Excalidraw scenes, draw.io files and Microsoft Whiteboard boards, and exports PNG, SVG, PDF, Mermaid, Markdown, Excalidraw or a portable JSON file. Any share link embeds as a live-updating iframe in a wiki or doc: an editor link embeds an editable canvas, and a participant or view-only link a read-only one.',
-          'For programmatic use there is a free REST API with personal tokens and an MCP server at mcp.livediagram.app that lets AI assistants read and edit your documents directly; their edits arrive live, outlined, and undoable as one unit. None of it sits behind a plan.',
+          'For programmatic use there is a free REST API with personal tokens and an MCP server at mcp.docs.nu that lets AI assistants read and edit your documents directly; their edits arrive live, outlined, and undoable as one unit. None of it sits behind a plan.',
         ],
       },
     ],
     faqs: [
       {
         q: 'Is livediagram really free?',
-        a: 'Yes. The hosted version at livediagram.app is free with every feature included, and there is no paid tier or plan to add one. The code is MIT-licensed, so you can also self-host the whole product on your own Cloudflare account.',
+        a: 'Yes. The hosted version at docs.nu is free with every feature included, and there is no paid tier or plan to add one. The code is MIT-licensed, so you can also self-host the whole product on your own Cloudflare account.',
       },
       {
         q: 'Do my teammates need an account to edit with me?',
@@ -609,7 +609,7 @@ export const ALTERNATIVES: Alternative[] = [
     faqs: [
       {
         q: 'Is livediagram free like draw.io?',
-        a: 'Yes. Both are free, and both are open source. livediagram is MIT-licensed with a free hosted version at livediagram.app, no paid tier, and the option to self-host on your own Cloudflare account.',
+        a: 'Yes. Both are free, and both are open source. livediagram is MIT-licensed with a free hosted version at docs.nu, no paid tier, and the option to self-host on your own Cloudflare account.',
       },
       {
         q: 'Can I import my .drawio files?',

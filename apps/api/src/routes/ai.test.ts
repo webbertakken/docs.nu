@@ -73,7 +73,7 @@ describe('handleAi origin allow-list (AI_ALLOWED_ORIGINS)', () => {
 
   it('rejects with 403 origin_not_allowed when Origin is missing', async () => {
     const ctx = makeCtx({
-      env: { AI_ALLOWED_ORIGINS: 'https://livediagram.app' },
+      env: { AI_ALLOWED_ORIGINS: 'https://docs.nu' },
       origin: null,
     });
     const res = await handleAi(ctx);
@@ -83,7 +83,7 @@ describe('handleAi origin allow-list (AI_ALLOWED_ORIGINS)', () => {
 
   it('rejects with 403 origin_not_allowed when Origin is not in the list', async () => {
     const ctx = makeCtx({
-      env: { AI_ALLOWED_ORIGINS: 'https://livediagram.app' },
+      env: { AI_ALLOWED_ORIGINS: 'https://docs.nu' },
       origin: 'https://evil.example',
     });
     const res = await handleAi(ctx);
@@ -92,7 +92,7 @@ describe('handleAi origin allow-list (AI_ALLOWED_ORIGINS)', () => {
 
   it('accepts when Origin matches one of multiple comma-separated entries (whitespace tolerant)', async () => {
     const ctx = makeCtx({
-      env: { AI_ALLOWED_ORIGINS: 'https://livediagram.app , http://localhost:4002' },
+      env: { AI_ALLOWED_ORIGINS: 'https://docs.nu , http://localhost:4002' },
       origin: 'http://localhost:4002',
     });
     const res = await handleAi(ctx);

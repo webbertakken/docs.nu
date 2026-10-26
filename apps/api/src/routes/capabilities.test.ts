@@ -78,12 +78,12 @@ describe('the CLI fields (docs/specs/015-api/blueprints/cli.md "Capabilities")',
       BETTER_AUTH_SECRET: 's'.repeat(40),
       APP_BASE_URL: 'https://docs.test',
       EMAIL_OUTBOX: '1',
-      OAUTH_ISSUER: 'https://mcp.livediagram.app/',
+      OAUTH_ISSUER: 'https://mcp.docs.nu/',
       CLI_MIN_VERSION: ' 1.2.3 ',
     });
     expect(caps).toMatchObject({
       authEnabled: true,
-      oauthIssuer: 'https://mcp.livediagram.app',
+      oauthIssuer: 'https://mcp.docs.nu',
       cli: { minVersion: '1.2.3' },
     });
   });

@@ -13,7 +13,7 @@ import { breadcrumbJsonLd } from '@livediagram/ui/seo';
 import { SITE_URL } from '@livediagram/ui/site';
 
 // The same title suffix the page sets for itself once the post loads (components/post/PostView.tsx).
-const POST_TITLE_SUFFIX = ' | livediagram Community';
+const POST_TITLE_SUFFIX = ' | LiveDoc Community';
 // A search result shows about 160 characters; the marketing site and the help centre hold theirs to it.
 export const META_DESCRIPTION_MAX = 160;
 
@@ -32,7 +32,7 @@ export type PostHead = {
 export function metaDescription(post: Pick<CommunityPost, 'description' | 'title'>): string {
   const text = post.description.replace(/\s+/g, ' ').trim();
   if (text === '')
-    return `${post.title}, shared to the livediagram Community. Open it, explore it, and make your own copy.`.slice(
+    return `${post.title}, shared to the LiveDoc Community. Open it, explore it, and make your own copy.`.slice(
       0,
       META_DESCRIPTION_MAX,
     );
@@ -65,7 +65,7 @@ export function postHead(post: CommunityPost): PostHead {
           dateModified: new Date(post.updatedAt).toISOString(),
           // An anonymous post names nobody, in the markup as on the page.
           ...(post.anonymous ? {} : { author: { '@type': 'Person', name: post.author.name } }),
-          isPartOf: { '@type': 'CollectionPage', name: 'livediagram Community', url: community },
+          isPartOf: { '@type': 'CollectionPage', name: 'LiveDoc Community', url: community },
         },
         breadcrumbJsonLd([
           { name: 'Community', url: community },

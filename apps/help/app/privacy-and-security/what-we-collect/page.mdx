@@ -12,7 +12,7 @@ export const metadata = helpMetadata({
 
 <ArticleLayout title="What We Collect" description="Anonymous, first-party product events, published on a public dashboard, with a one-click opt-out." categoryTitle="Privacy and Security" categorySlug="privacy-and-security" subArticles={getSubArticles("what-we-collect")}>
 
-livediagram measures which features get used so the project knows what works, and it does this without creepy tracking. The analytics are anonymous and first-party, and a deployment only collects them if its operator turns them on: livediagram.app does, a self-hosted copy does not unless its operator chooses to. You can switch off what your browser sends at any time. There are no third-party trackers, no ad pixels, and nothing is ever sold or shared beyond a dashboard anyone can read.
+livediagram measures which features get used so the project knows what works, and it does this without creepy tracking. The analytics are anonymous and first-party, and a deployment only collects them if its operator turns them on: docs.nu does, a self-hosted copy does not unless its operator chooses to. You can switch off what your browser sends at any time. There are no third-party trackers, no ad pixels, and nothing is ever sold or shared beyond a dashboard anyone can read.
 
 ## What an event looks like
 
@@ -30,7 +30,7 @@ The same rules apply to error tracking. When something breaks, the event records
 
 ## Page views
 
-Every page on livediagram.app (the landing pages, the help centre, the Community, the Explorer, the editor and the telemetry dashboard) also counts a view when you open it. The event is the same three fields, with the page's address as the type, reduced in your browser before it is sent to just _which page_ it was:
+Every page on docs.nu (the landing pages, the help centre, the Community, the Explorer, the editor and the telemetry dashboard) also counts a view when you open it. The event is the same three fields, with the page's address as the type, reduced in your browser before it is sent to just _which page_ it was:
 
 - **No query string or link fragment.** Anything after a `?` or `#`, which is where invite and share codes live, is dropped.
 - **No ids.** Every document is counted as the same page, `/document`. Any other part of the address that looks like an id is cut off the same way.

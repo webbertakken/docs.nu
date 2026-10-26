@@ -153,9 +153,10 @@ describe('metricsOf', () => {
 describe('documentIdsIn', () => {
   it('reads ids from documentId fields and document links', () => {
     const other = '11111111-2222-3333-4444-555555555555';
-    expect(
-      documentIdsIn(`"documentId": "${DOC}" https://livediagram.app/document/${other}`),
-    ).toEqual([DOC, other]);
+    expect(documentIdsIn(`"documentId": "${DOC}" https://docs.nu/document/${other}`)).toEqual([
+      DOC,
+      other,
+    ]);
     expect(documentIdsIn(`"tabId":"${DOC}"`)).toEqual([]);
   });
 });

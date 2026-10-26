@@ -29,7 +29,7 @@ const blocked = (): Storage => {
 };
 
 describe('isRepairClearable', () => {
-  it('clears livediagram settings and caches', () => {
+  it('clears LiveDoc settings and caches', () => {
     for (const k of [
       'livediagram:user-preferences:v2',
       'livediagram:recent-diagrams:v1',

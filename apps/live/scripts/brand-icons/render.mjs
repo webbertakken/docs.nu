@@ -47,10 +47,10 @@ for (const app of ['marketing', 'live', 'help', 'telemetry', 'community']) {
 }
 for (const scheme of ['light', 'dark']) {
   write(
-    `marketing/media/logo/livediagram-mark-${scheme}.svg`,
+    `marketing/media/logo/livedoc-mark-${scheme}.svg`,
     `${brandMarkSvg({ variant: 'full', scheme })}\n`,
   );
-  write(`marketing/media/logo/livediagram-logo-${scheme}.svg`, `${brandLogoSvg(scheme)}\n`);
+  write(`marketing/media/logo/livedoc-logo-${scheme}.svg`, `${brandLogoSvg(scheme)}\n`);
 }
 
 // Below 48px the compact drawing; from 48px the full one (the spec's split).
@@ -75,18 +75,18 @@ const shoot = async (size, background, path) => {
   console.log(`brand-icons: ${size}x${size} -> ${path}`);
 };
 for (const size of [16, 32, 64, 128, 256, 512]) {
-  await shoot(size, null, `marketing/media/icons/livediagram-icon-transparent-${size}.png`);
+  await shoot(size, null, `marketing/media/icons/livedoc-icon-transparent-${size}.png`);
 }
 for (const size of [256, 512, 1024]) {
-  await shoot(size, '#ffffff', `marketing/media/icons/livediagram-icon-${size}.png`);
+  await shoot(size, '#ffffff', `marketing/media/icons/livedoc-icon-${size}.png`);
 }
 for (const size of [256, 512]) {
-  await shoot(size, '#ffffff', `apps/marketing/public/livediagram-icon-${size}.png`);
+  await shoot(size, '#ffffff', `apps/marketing/public/livedoc-icon-${size}.png`);
 }
 // The apps that serve their own icon under a basePath pair app/icon.svg with this PNG (Next emits both links).
 for (const app of ['help', 'community']) {
   copyFileSync(
-    `${root}apps/marketing/public/livediagram-icon-256.png`,
+    `${root}apps/marketing/public/livedoc-icon-256.png`,
     `${root}apps/${app}/app/icon.png`,
   );
   console.log(`brand-icons: apps/${app}/app/icon.png`);
@@ -95,7 +95,7 @@ for (const app of ['help', 'community']) {
 // transparent copy is served at a path no other asset will ever claim.
 mkdirSync(`${root}apps/marketing/public/email`, { recursive: true });
 copyFileSync(
-  `${root}marketing/media/icons/livediagram-icon-transparent-64.png`,
+  `${root}marketing/media/icons/livedoc-icon-transparent-64.png`,
   `${root}apps/marketing/public/email/livedoc-mark-64.png`,
 );
 console.log('brand-icons: apps/marketing/public/email/livedoc-mark-64.png');

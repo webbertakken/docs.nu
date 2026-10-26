@@ -122,7 +122,7 @@ export function SiteFooter() {
           <p>
             {/* The build's year, inlined at build (@livediagram/next-config), never the clock: the prerender and
                 the browser render the same text whatever the date. */}
-            <span>{`© ${buildYear() ? `${buildYear()} ` : ''}livediagram. MIT licensed.`}</span>
+            <span>{`© ${buildYear() ? `${buildYear()} ` : ''}LiveDoc. MIT licensed.`}</span>
           </p>
           <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
             <span className="inline-flex items-center gap-1.5">

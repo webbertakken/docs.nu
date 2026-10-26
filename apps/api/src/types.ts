@@ -164,12 +164,9 @@ export type Env = {
   // header exactly matches one of the entries (trimmed for
   // whitespace). Unset = no check, matching the historical
   // behaviour so self-host upgrades don't break. Hosted
-  // livediagram.app sets this in apps/api/wrangler.toml [vars] (NOT the
-  // dashboard, which a deploy wipes) to BOTH
-  // "https://www.livediagram.app" and "https://livediagram.app" — `www`
-  // first because the apex 301s to it, so `www` is what a browser sends.
-  // This comment previously named the apex alone, which as an actual
-  // value would 403 every request the editor makes.
+  // docs.nu sets this in apps/api/wrangler.toml [vars] (NOT the
+  // dashboard, which a deploy wipes) to the apex "https://docs.nu"
+  // alone: www.docs.nu 301s to the apex, so the apex is what a browser sends.
   AI_ALLOWED_ORIGINS?: string;
   // When the literal string "true", POST /api/ai requires a verified
   // session token and rejects the X-Owner-Id guest path with 401
@@ -182,12 +179,12 @@ export type Env = {
   // wrangler.toml [vars]; parsed via parseInt at request time.
   // Unset or non-positive = no limit (the OSS self-host default
   // where the operator runs their own storage budget). Hosted
-  // livediagram.app sets this to "100".
+  // docs.nu sets this to "100".
   IMAGE_MAX_PER_OWNER?: string;
   // Per-owner soft cap on the total bytes one owner may keep in
   // the gallery (docs/specs/009-elements/images.md). Stored as a decimal byte count in
   // wrangler.toml [vars]; parsed via parseInt at request time.
-  // Unset or non-positive = no limit. Hosted livediagram.app sets
+  // Unset or non-positive = no limit. Hosted docs.nu sets
   // this to "104857600" (100 MB).
   IMAGE_MAX_BYTES_PER_OWNER?: string;
   // Google Drive mirror (docs/specs/022-drive-mirror/drive-mirror.md, "Self-hosting").

@@ -151,7 +151,7 @@ detailed GitHub / Product Hunt write-up.
 > #### Free, open, and yours
 >
 > livediagram is MIT-licensed and publicly viewable. The hosted version at
-> livediagram.app is free for everyone, with no paid tier and no plan to
+> docs.nu is free for everyone, with no paid tier and no plan to
 > introduce one. If you ship it, every user gets it. You can self-host the
 > entire stack on your own Cloudflare account; the open-source core never calls
 > home and never gates features behind a license check.

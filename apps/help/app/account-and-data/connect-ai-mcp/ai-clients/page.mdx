@@ -20,7 +20,7 @@ You need a livediagram account: connecting an AI tool is a signed-in-only featur
 livediagram's MCP server lives at:
 
 ```text
-https://mcp.livediagram.app/mcp
+https://mcp.docs.nu/mcp
 ```
 
 It is a remote MCP server over HTTP (what some tools call "Streamable HTTP"), so there is nothing to install or run on your computer. Wherever a tool asks for a connector, a remote MCP server or a server URL, this is the address to give it.
@@ -59,7 +59,7 @@ Claude Desktop uses the same connectors as Claude on the web: a connector you ad
 Add the server from your terminal:
 
 ```bash
-claude mcp add --transport http livediagram https://mcp.livediagram.app/mcp
+claude mcp add --transport http livediagram https://mcp.docs.nu/mcp
 ```
 
 Then, in a Claude Code session, run `/mcp`, choose `livediagram`, and authenticate: your browser opens the livediagram approval page. Add `--scope user` to the `claude mcp add` command to make livediagram available in every project rather than only the current one.
@@ -67,7 +67,7 @@ Then, in a Claude Code session, run `/mcp`, choose `livediagram`, and authentica
 If you'd rather use an API token than sign in through the browser, pass it as a header instead:
 
 ```bash
-claude mcp add --transport http livediagram https://mcp.livediagram.app/mcp \
+claude mcp add --transport http livediagram https://mcp.docs.nu/mcp \
   --header "Authorization: Bearer lvd_..."
 ```
 
@@ -81,7 +81,7 @@ Add livediagram to Cursor's MCP configuration: `~/.cursor/mcp.json` for every pr
 {
   "mcpServers": {
     "livediagram": {
-      "url": "https://mcp.livediagram.app/mcp"
+      "url": "https://mcp.docs.nu/mcp"
     }
   }
 }
@@ -122,7 +122,7 @@ A token you create in Settings always has full read and write access, so there i
 
 ## Self-Hosted livediagram
 
-On your own deployment, use your own MCP host in place of `mcp.livediagram.app`, still ending in `/mcp`: for example `https://mcp.example.com/mcp`. The approval page and the tokens come from your own deployment. The MCP server is optional and needs accounts (sign-in) configured, so if your administrator hasn't set it up there is nothing to connect to; see [Configuration and Optional Auth](/help/self-hosting/configuration/).
+On your own deployment, use your own MCP host in place of `mcp.docs.nu`, still ending in `/mcp`: for example `https://mcp.example.com/mcp`. The approval page and the tokens come from your own deployment. The MCP server is optional and needs accounts (sign-in) configured, so if your administrator hasn't set it up there is nothing to connect to; see [Configuration and Optional Auth](/help/self-hosting/configuration/).
 
 ## If It Doesn't Connect
 

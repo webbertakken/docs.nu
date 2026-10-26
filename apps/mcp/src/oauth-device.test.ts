@@ -237,7 +237,7 @@ describe('polling', () => {
 });
 
 describe('malformed requests', () => {
-  it('answers each with its refusal, and a host without a consent base links livediagram.app', async () => {
+  it('answers each with its refusal, and a host without a consent base links docs.nu', async () => {
     const bad = { method: 'POST', body: '{', headers: { 'Content-Type': 'application/json' } };
     expect((await app.request('/oauth/device/complete', bad, env)).status).toBe(400);
     expect((await app.request('/oauth/device/deny', bad, env)).status).toBe(400);
@@ -255,6 +255,6 @@ describe('malformed requests', () => {
       ).json(),
     ).toEqual({ error: 'invalid_client' });
     delete env.CONSENT_BASE_URL;
-    expect((await start()).verification_uri).toBe('https://livediagram.app/oauth/device');
+    expect((await start()).verification_uri).toBe('https://docs.nu/oauth/device');
   });
 });

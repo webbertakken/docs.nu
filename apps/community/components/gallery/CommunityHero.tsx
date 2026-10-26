@@ -10,7 +10,7 @@ export function CommunityHero() {
       <div className="max-w-2xl">
         <p className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-400">
           <SparklesIcon size={14} aria-hidden />
-          Made With livediagram
+          Made With LiveDoc
         </p>
         <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
           Community

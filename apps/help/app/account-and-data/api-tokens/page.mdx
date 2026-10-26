@@ -40,11 +40,11 @@ The token's secret is shown **once**, right after you create it. Copy it then wi
 
 ## Using a token
 
-Send the token as a **bearer header** to the API, which lives under `/api` on your livediagram host (`https://livediagram.app/api` on the hosted service):
+Send the token as a **bearer header** to the API, which lives under `/api` on your livediagram host (`https://docs.nu/api` on the hosted service):
 
 ```bash
 # List your documents
-curl https://livediagram.app/api/documents \
+curl https://docs.nu/api/documents \
   -H "Authorization: Bearer lvd_your_token_here"
 ```
 

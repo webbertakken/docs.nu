@@ -16,8 +16,6 @@ describe('form paths', () => {
     expect(isFormPath('/form')).toBe(true);
     expect(isFormPath(`/form/${CODE}`)).toBe(true);
     expect(isFormPath('/formal')).toBe(false);
-    expect(formUrlFor('https://livediagram.app', CODE)).toBe(
-      `https://livediagram.app/form/${CODE}`,
-    );
+    expect(formUrlFor('https://docs.nu', CODE)).toBe(`https://docs.nu/form/${CODE}`);
   });
 });

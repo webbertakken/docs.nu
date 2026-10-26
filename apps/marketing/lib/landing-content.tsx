@@ -752,7 +752,7 @@ export const LANDING_SECTIONS: LandingSection[] = [
         group: 'AI & your tools',
         title: 'Build diagrams with AI',
         description:
-          'Hook livediagram up to Claude or any MCP client at mcp.livediagram.app and let it find, read, create, edit, and share your documents for you. Point it at a system and ask for the diagram; it lands in your account. Signed in, and it runs on the same revocable token (read-only if you prefer), so you can disconnect any time.',
+          'Hook livediagram up to Claude or any MCP client at mcp.docs.nu and let it find, read, create, edit, and share your documents for you. Point it at a system and ask for the diagram; it lands in your account. Signed in, and it runs on the same revocable token (read-only if you prefer), so you can disconnect any time.',
       },
       {
         art: <AiAssistArt />,

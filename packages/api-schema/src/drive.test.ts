@@ -62,9 +62,9 @@ describe('id validators', () => {
 
 describe('driveRootName (docs/specs/022-drive-mirror/drive-mirror.md, "The root folder\'s name")', () => {
   it.each([
-    ['livediagram.app', 'livediagram'],
-    ['www.livediagram.app', 'livediagram'],
-    ['WWW.LiveDiagram.App', 'livediagram'],
+    ['docs.nu', 'livediagram'],
+    ['www.docs.nu', 'livediagram'],
+    ['WWW.Docs.NU', 'livediagram'],
     ['staging.livediagram.app', 'livediagram (staging)'],
     ['Staging.LIVEDIAGRAM.app', 'livediagram (staging)'],
     ['localhost', 'livediagram (staging)'],
@@ -79,7 +79,7 @@ describe('driveRootName (docs/specs/022-drive-mirror/drive-mirror.md, "The root 
     ['documents.example.org:8443', 'livediagram (self-hosted)'],
     ['192.168.1.20:4000', 'livediagram (self-hosted)'],
     ['[2001:db8::1]:4000', 'livediagram (self-hosted)'],
-    ['livediagram.app.evil.example', 'livediagram (self-hosted)'],
+    ['docs.nu.evil.example', 'livediagram (self-hosted)'],
     ['staging.livediagram.app.example', 'livediagram (self-hosted)'],
   ])('%s → %s', (host, name) => {
     expect(driveRootName(host)).toBe(name);

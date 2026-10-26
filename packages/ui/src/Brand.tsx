@@ -20,11 +20,11 @@ type BrandProps = {
   href?: string;
   size?: BrandSize;
   className?: string;
-  // Override colour for the "live" half of the wordmark and the logo mark.
+  // Override colour for the "Live" half of the wordmark and the logo mark.
   // Used by the editor header to tint the logo with the active tab's theme
   // accent; when unset, the brand palette and brand-600 / sky-400 show.
   accentColor?: string;
-  // Extra classes for the wordmark span ("live" + "diagram"). The editor
+  // Extra classes for the wordmark span ("Live" + "Doc"). The editor
   // passes `hidden sm:inline` here so the wordmark drops off the mobile
   // header (the logo mark stays for orientation). Marketing surfaces leave
   // this unset so the wordmark always shows.
@@ -118,11 +118,11 @@ export function Brand({
               : { transition: COLOUR_TRANSITION }
           }
         >
-          live
+          Live
         </span>
-        diagram
+        Doc
         <span ref={shimmer} aria-hidden="true" className={SHIMMER_CLASS} style={SHIMMER_STYLE}>
-          <span>live</span>diagram
+          <span>Live</span>Doc
         </span>
       </span>
     </>
@@ -134,7 +134,7 @@ export function Brand({
       // mark alone has no text. The name is the wordmark's own text, so a visible one still matches it.
       <a
         href={href}
-        aria-label="livediagram"
+        aria-label="LiveDoc"
         className={classes}
         onClick={scrollTopIfHere}
         {...spinHandlers}

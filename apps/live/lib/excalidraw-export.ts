@@ -379,7 +379,7 @@ export function tabToExcalidrawText(tab: Tab, plan?: TabPlanData): string {
     {
       type: 'excalidraw',
       version: 2,
-      source: 'https://livediagram.app',
+      source: 'https://docs.nu',
       elements: out,
       appState: {
         gridSize: null,

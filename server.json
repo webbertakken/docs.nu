@@ -12,7 +12,7 @@
   },
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/livediagram-app/livediagram.app/main/marketing/media/icons/livediagram-icon-512.png",
+      "src": "https://raw.githubusercontent.com/livediagram-app/livediagram.app/main/marketing/media/icons/livedoc-icon-512.png",
       "mimeType": "image/png",
       "sizes": ["512x512"]
     }

@@ -36,7 +36,7 @@ const FLUSH_DELAY_MS = 10_000;
 const MAX_BUFFER = 25;
 
 // Where the editor keeps its per-user preferences (docs/specs/007-editor/user-preferences.md). The help
-// centre shares the livediagram.app origin, so an opt-out made in the
+// centre shares the docs.nu origin, so an opt-out made in the
 // editor has to be visible here — which means both apps read this exact
 // string, and a copy in each is a silent privacy bug waiting to happen:
 // version the key in the editor (`:v2`, an ordinary schema migration) and

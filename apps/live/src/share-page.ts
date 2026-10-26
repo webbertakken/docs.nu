@@ -1,5 +1,5 @@
 // The share page's head (docs/specs/013-workspace/share-link-previews.md). `/document/shared?s=<code>` is the same
-// static shell as every document, so a link preview, whose crawler never runs the page's script, saw "livediagram"
+// static shell as every document, so a link preview, whose crawler never runs the page's script, saw "LiveDoc"
 // over an empty box. For a link whose preview may name its document, the api answers its name, and the shell's head
 // is rewritten to carry it and the share card before it is sent.
 //
@@ -48,7 +48,7 @@ export function shareHead(name: string, code: string, origin: string): ShareHead
     title,
     description: SHARE_PITCH,
     image: `${origin}/api${shareCardImagePath(code)}`,
-    imageAlt: `${title}, drawn in livediagram`,
+    imageAlt: `${title}, drawn in LiveDoc`,
   };
 }
 

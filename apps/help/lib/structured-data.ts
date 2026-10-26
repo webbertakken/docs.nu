@@ -45,7 +45,7 @@ export function webSiteJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'livediagram Help',
+    name: 'LiveDoc Help',
     url: `${HELP}/`,
     publisher: PUBLISHER,
     inLanguage: 'en-GB',
@@ -68,7 +68,7 @@ export function collectionJsonLd(input: {
     description: input.description,
     url,
     inLanguage: 'en-GB',
-    isPartOf: { '@type': 'WebSite', name: 'livediagram Help', url: `${HELP}/` },
+    isPartOf: { '@type': 'WebSite', name: 'LiveDoc Help', url: `${HELP}/` },
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: input.items.map((item, i) => ({
