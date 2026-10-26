@@ -362,8 +362,8 @@ A guest's new document is **This Browser** by default ([Offline Mode](../006-doc
 
 **Why.** A guest cloud document is keyed to the browser's guest id in `localStorage`. Clearing site data loses that id, and with it every document under it: the server keeps the rows for good, but nobody can reach them again. Many first visits are someone trying the product out, so most of those rows are orphans the moment they are written. A document in This Browser is exactly as durable for a guest (the same clear wipes IndexedDB), costs the server nothing, and opens without a round trip ([Offline Mode → Instant open](../006-document/offline-mode.md#instant-open)).
 
-- **Only with sign-in enabled.** Local first applies in the hybrid mode, where a guest has an account to move to. A guest-only deployment ([Three deployment modes](#deployment-modes)) keeps livediagram as the default: there is no account to come to, so the server is the only place a document is kept beyond the browser, and the operator chose to run one.
-- **Signed-in people are unchanged.** Their default stays livediagram.
+- **Only with sign-in enabled.** Local first applies in the hybrid mode, where a guest has an account to move to. A guest-only deployment ([Three deployment modes](#deployment-modes)) keeps LiveDoc as the default: there is no account to come to, so the server is the only place a document is kept beyond the browser, and the operator chose to run one.
+- **Signed-in people are unchanged.** Their default stays LiveDoc.
 - **Moving to the server is always the guest's own act**: Sync Document (from the Share dialog, which explains why first, [Offline Mode → Sharing a document in This Browser](../006-document/offline-mode.md#sharing-a-document-in-this-browser), or the Explorer), or the prompt after signing in (below). No guest document is uploaded silently.
 - **Nothing is purged.** Guest cloud documents already on the server stay where they are; this changes where new ones start, not what happens to old ones.
 
@@ -376,7 +376,7 @@ settles signed in and `0` whenever it settles signed out or the person signs out
 - **No flag, or `0`**: a guest. The create goes ahead at once, This Browser.
 - **`1`**: probably signed in. The create waits for the session (as it always has) and then uses the settled answer.
 - **Whether the host offers sign-in at all** is the same kind of hint: the last answer this browser saw
-  (`livedoc:v2:sign-in-offered`). A host without sign-in keeps everyone on livediagram at once; only a browser
+  (`livedoc:v2:sign-in-offered`). A host without sign-in keeps everyone on LiveDoc at once; only a browser
   that has never asked waits for the session read before its first create.
 - Starting a Google sign-in writes `1` before leaving for Google, so the page the round trip lands on never hands the
   new account a document in This Browser; a round trip that fails is the safe direction.

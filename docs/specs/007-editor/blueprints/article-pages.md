@@ -65,7 +65,7 @@ design decision. The page model, the row, page kinds and page actions are
 | Project Brief template   | `packages/templates/src/article-template.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 "Article" in code, specs and the interface for the kind of page and its run of pages; "document"
-stays the livediagram file. "Writing" is the article's text as laid out; "flow" is the id that ties
+stays the LiveDoc file. "Writing" is the article's text as laid out; "flow" is the id that ties
 an article's pages to its `ArticleFlow`. The size limits keep a `MAX_ARTICLE_*` prefix from the earlier
 Document mode experiment; read it as "article". Headings keep with the next line and are never split
 (`break-after` / `break-inside: avoid`), a zone is never split (`break-inside: avoid`), a page break

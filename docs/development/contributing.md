@@ -145,12 +145,12 @@ A few hard rules from [`AGENTS.md`](../../AGENTS.md) that constrain PRs:
 
 ## Reporting issues
 
-Open a [GitHub issue](https://github.com/livediagram-app/livediagram.app/issues). For bugs include:
+Open a [GitHub issue](https://github.com/webbertakken/livedoc/issues). For bugs include:
 
 - What you expected vs what happened.
 - The browser / OS if visible UI is involved.
 - A document id, share code, or repro steps if applicable.
-- Whether you're on the hosted livediagram.app or a self-host.
+- Whether you're on the hosted docs.nu or a self-host.
 
 For feature requests, link to (or propose) a spec entry. A new feature without a spec is hard to review meaningfully; one with a spec is straightforward.
 

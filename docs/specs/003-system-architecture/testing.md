@@ -1,6 +1,6 @@
 # Testing
 
-How livediagram is tested below the browser: unit tests, and hook and component tests in jsdom. The goal is a fast, consistent, zero-config-per-file test setup that runs the same locally and in CI.
+How LiveDoc is tested below the browser: unit tests, and hook and component tests in jsdom. The goal is a fast, consistent, zero-config-per-file test setup that runs the same locally and in CI.
 
 The whole editor in a real browser, against the production build and the api worker, is the separate Playwright suite in [End-to-end tests](e2e-smoke.md); it is a per-PR merge gate of its own.
 
@@ -194,7 +194,7 @@ setup. The E2E suite sizes its shards the same way ([End-to-end tests](e2e-smoke
 ### Coverage report
 
 Tests and each Editor unit tests job upload their `lcov` reports to
-[Codecov](https://app.codecov.io/gh/livediagram-app/livediagram.app), which merges the four uploads
+[Codecov](https://app.codecov.io/gh/webbertakken/livedoc), which merges the four uploads
 of a commit into one report (`codecov.yml`). It informs; it never gates: its statuses are
 informational, and the enforced bar stays the thresholds above. The upload authenticates with
 GitHub's OIDC token (`id-token: write`), so no Codecov secret exists; a pull request from a fork

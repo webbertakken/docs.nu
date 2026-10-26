@@ -153,7 +153,7 @@ A changeset answers with what it did, one line per element, the same text for a 
 + arrow  verify→n4 (style of a3)
 » n4 n5 n6 n7 n8  +0,+100 (make room)
 f2  +verify
-rev 41→42 · cs_8k2m4q7d1x · lint clean · revert: livediagram changeset revert 3f9c2a71-… cs_8k2m4q7d1x
+rev 41→42 · cs_8k2m4q7d1x · lint clean · revert: livedoc changeset revert 3f9c2a71-… cs_8k2m4q7d1x
 ```
 
 `+` added, `~` changed (before→after), `-` removed, `»` moved without being named, a container ref followed by its

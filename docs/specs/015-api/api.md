@@ -521,8 +521,8 @@ A new owner-keyed table adds a row here, a statement to each function, and a see
 
 Before the first deploy:
 
-1. `pnpm --filter @livedoc/api exec wrangler d1 create livediagram`
-2. Copy the printed `database_id` into the `[[d1_databases]]` block in `apps/api/wrangler.toml`. The block is already there with its binding name (`DB`) — only the id changes. What is committed is livediagram.app's own database id, so a self-hoster is replacing a real value rather than filling in a blank.
+1. `pnpm --filter @livedoc/api exec wrangler d1 create livedoc`
+2. Copy the printed `database_id` into the `[[d1_databases]]` block in `apps/api/wrangler.toml`. The block is already there with its binding name (`DB`) — only the id changes. What is committed is docs.nu's own database id, so a self-hoster is replacing a real value rather than filling in a blank.
 3. `pnpm --filter @livedoc/api run db:migrate:remote` to apply migrations.
 
 After that, GitHub Actions handles deploys via `deploy.yml` (`deploy-api` step). The router's service binding to `docs-nu-api` means the API must deploy before the router.

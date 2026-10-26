@@ -7,7 +7,7 @@ Derived from [Trusted Types](../trusted-types.md).
 | Term               | Identifier                                         | Meaning                                                                                                                    |
 | ------------------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | The header value   | `TRUSTED_TYPES_CSP`                                | `require-trusted-types-for 'script'; trusted-types livedoc-markup livedoc-inert-parse nextjs ProseMirrorClipboard default` |
-| Markup policy      | `MARKUP_POLICY` (`'livedoc-markup'`)               | Makes `TrustedHTML` from livediagram's own builders' markup                                                                |
+| Markup policy      | `MARKUP_POLICY` (`'livedoc-markup'`)               | Makes `TrustedHTML` from LiveDoc's own builders' markup                                                                    |
 | Inert-parse policy | `INERT_PARSE_POLICY` (`'livedoc-inert-parse'`)     | Lets `DOMParser` read a file a person opened                                                                               |
 | Default policy     | `'default'`                                        | The browser's fallback for a plain string at a sink                                                                        |
 | Boot script        | `trustedTypesBootScript(assetPrefix, origins)`     | Inline, first in each layout's `<head>`: the default policy and the violation log                                          |

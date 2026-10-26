@@ -1,6 +1,6 @@
 # Iconography
 
-Every icon livediagram draws follows one grammar, so a glyph looks the same weight in the toolbar, a menu, the help centre and on the canvas.
+Every icon LiveDoc draws follows one grammar, so a glyph looks the same weight in the toolbar, a menu, the help centre and on the canvas.
 
 ## Vocabulary
 

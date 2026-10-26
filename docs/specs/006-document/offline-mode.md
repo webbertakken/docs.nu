@@ -22,9 +22,9 @@ Nobody is asked when creating a document; the default decides:
 
 - The **New Document** wizard ([Dedicated route for new-document creation](../007-editor/new-document-route.md#one-step-wizard))
   asks only for a mode and creates the document in the default location for who is creating
-  ([Save Locations](save-locations.md)): **This Browser** for a guest, **livediagram** for a signed-in person.
+  ([Save Locations](save-locations.md)): **This Browser** for a guest, **LiveDoc** for a signed-in person.
   Either moves later: **Take Offline** moves a cloud document into This Browser, **Sync Document** puts one in This Browser on
-  livediagram.
+  LiveDoc.
 - The links that create without the wizard (`/new?template=`, `/new?blank=1`,
   [Dedicated route for new-document creation → Start Blank](../007-editor/new-document-route.md#start-blank-skip-the-wizard))
   take the same default, so a guest following a template from the landing page
@@ -240,13 +240,13 @@ signed-in person alike:
 
 - **The gate.** Share on a document in This Browser opens the Share dialog on its
   offline gate (`ShareOfflineGate`): **This Document Is in This Browser**, "It is saved only
-  in this browser, so there is nothing to share yet. Sync it to livediagram to
+  in this browser, so there is nothing to share yet. Sync it to LiveDoc to
   share it: share links, real-time collaboration and the live image all need it
   on our servers. You can take it offline again any time.", with **Sync Document**
   and Cancel.
 - **Sync Document** syncs the open document **in place** (below): the button shows
   **Syncing…** with a spinner, then a toast confirms "Synced. Your document is on
-  livediagram now." and the same dialog shows the share options. No reload, no
+  LiveDoc now." and the same dialog shows the share options. No reload, no
   second press of Share. A guest's upload is owned by the guest id like any guest
   cloud document.
 - The button waits for the reader to be known (an early open runs under the

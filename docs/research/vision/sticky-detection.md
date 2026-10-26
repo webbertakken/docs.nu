@@ -392,7 +392,7 @@ the count and is a loss. So the sweep scores against hand-labelled notes when
 they exist:
 
 - Photographs and labels live **outside this repo**, in the private
-  `livediagram-app/vision-model-truths` repository (`event-storming/photos`
+  `livedoc-app/vision-model-truths` repository (`event-storming/photos`
   and `event-storming/labels`) — they describe somebody's real workshop wall,
   this repo is public, and hours of hand-labelling must not live on one disk.
   The tools find a checkout at `$VISION_TRUTHS_DIR`, or cloned beside this

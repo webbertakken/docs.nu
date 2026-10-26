@@ -680,7 +680,7 @@ allowed values:
 
 - `view` in the door's names: `overview` on the document; `outline`, `graph`, `layout`, `comments`, `show`, `find`,
   `lint` on the tab once the lint is built. `diff` is `unknown_view` with the message "diff is computed by the CLI:
-  livediagram tab diff"; until then `lint` is `unknown_view` with "the lint view arrives with the diagram lint".
+  livedoc tab diff"; until then `lint` is `unknown_view` with "the lint view arrives with the diagram lint".
 - `budget`: an integer in `[1, VIEW_BUDGET_MAX]`.
 - `only`, `ref`: resolved by `resolveRef`; `only` (outline and layout only) naming an arrow is `invalid_value`
   (`VW41`). The header still counts the whole tab.

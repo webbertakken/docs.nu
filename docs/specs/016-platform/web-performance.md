@@ -1,6 +1,6 @@
 # Web performance
 
-What every site on livediagram.app loads up front, and the rules that keep it lean. The canvas's own
+What every site on docs.nu loads up front, and the rules that keep it lean. The canvas's own
 hot paths (drag, pan, zoom on large boards) are a separate subject:
 [Canvas performance](../008-canvas/canvas-performance.md).
 

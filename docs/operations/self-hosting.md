@@ -1,6 +1,6 @@
 # Self-hosting
 
-livediagram is designed to be self-hostable end-to-end. The whole stack runs on Cloudflare Workers, so a self-hoster needs a Cloudflare account and not much else.
+LiveDoc is designed to be self-hostable end-to-end. The whole stack runs on Cloudflare Workers, so a self-hoster needs a Cloudflare account and not much else.
 
 This guide is the practical path: provision Cloudflare resources, configure secrets, deploy. For the why-behind-the-shape, read [Deployment](../specs/016-platform/deployment.md) (deployment) and [Secrets policy](../specs/002-project-scope/secrets-policy.md) (secrets).
 
@@ -27,7 +27,7 @@ What you do NOT need:
 2. **Create a D1 database**:
 
    ```sh
-   pnpm exec wrangler d1 create livediagram
+   pnpm exec wrangler d1 create livedoc
    ```
 
    Copy the `database_id` from the output into `apps/api/wrangler.toml` under the `[[d1_databases]]` block (it already has the binding name `DB`; you only need to update the id).
@@ -127,8 +127,8 @@ See [Auth + guest access](../specs/014-identity/auth-and-guest-access.md) for th
 After the one-time Cloudflare setup:
 
 ```sh
-git clone https://github.com/livediagram-app/livediagram.app livediagram
-cd livediagram
+git clone https://github.com/webbertakken/livedoc livedoc
+cd livedoc
 pnpm install
 pnpm build           # static export for marketing + live + telemetry + help + community,
                      # plus the generated /licences page (no network needed)
@@ -199,7 +199,7 @@ tool does the thinking. See [MCP server](../specs/015-api/mcp-server.md).
 
 ## Telemetry: off by default for self-hosters
 
-The api worker's telemetry ingest (`/api/events`) is off unless you set `TELEMETRY_ENABLED = "true"` under `[vars]` in `apps/api/wrangler.toml`. OSS forks ingest nothing by default: the committed config leaves it unset, and the deploy workflow only adds it (with the rest of the hosted profile in `apps/api/hosted-vars.json`) when it runs in livediagram.app's own repository ([Deployment](../specs/016-platform/deployment.md) "Hosted profile"). If you DO turn it on, the public `/telemetry` dashboard renders aggregate counts from your own D1; there's no third-party analytics involved. See [Telemetry + public transparency dashboard](../specs/017-telemetry/telemetry.md).
+The api worker's telemetry ingest (`/api/events`) is off unless you set `TELEMETRY_ENABLED = "true"` under `[vars]` in `apps/api/wrangler.toml`. OSS forks ingest nothing by default: the committed config leaves it unset, and the deploy workflow only adds it (with the rest of the hosted profile in `apps/api/hosted-vars.json`) when it runs in docs.nu's own repository ([Deployment](../specs/016-platform/deployment.md) "Hosted profile"). If you DO turn it on, the public `/telemetry` dashboard renders aggregate counts from your own D1; there's no third-party analytics involved. See [Telemetry + public transparency dashboard](../specs/017-telemetry/telemetry.md).
 
 Turning telemetry on end-to-end takes BOTH the server gate above AND a build-time gate on the frontends. The api flag is the authoritative gate (ingest + summary refuse to serve without it), but every emitting frontend (the editor, the help centre, the Community, and the page-view counters on marketing and the dashboard, [Page view telemetry](../specs/017-telemetry/page-view-telemetry.md)) also reads `NEXT_PUBLIC_TELEMETRY_ENABLED` at build time and skips emission entirely when it isn't `"true"`. So a fork that only flips the api flag will see "ingest on" but no events flow. To turn it fully on, set `NEXT_PUBLIC_TELEMETRY_ENABLED=true` in your CI build env (or each frontend's `.env.production`) alongside the api flag. The `/telemetry` dashboard's data has no client-side gate of its own: it just reads `/api/telemetry/summary`, and the api worker returns an empty `enabled: false` payload until you flip `TELEMETRY_ENABLED` (the build flag only governs its own page-view count). Per-user opt-out via the Settings dialog ([User preferences](../specs/007-editor/user-preferences.md)) still overrides every app's emission when off, since they share one origin and one preferences key.
 
@@ -237,10 +237,10 @@ reader prefers Google, each falling back to whichever key exists, and
   `gemini-2.5-flash-lite` rather than the assistant's model — it reads
   handwriting better AND costs less (docs/research/vision/handwriting-readers.md). On a
   single provider, setting `AI_MODEL` moves the reader too unless you set this.
-- `AI_ALLOWED_ORIGINS`: comma-separated `Origin` allow-list for `POST /api/ai` (e.g. `https://your-host,http://localhost:4002`). Unset = no origin check. Matched verbatim, case-sensitive. `apps/api/wrangler.toml` commits livediagram.app's origins here, so a fork sets its own or deletes the line, or every AI request answers 403.
+- `AI_ALLOWED_ORIGINS`: comma-separated `Origin` allow-list for `POST /api/ai` (e.g. `https://your-host,http://localhost:4002`). Unset = no origin check. Matched verbatim, case-sensitive. `apps/api/wrangler.toml` commits docs.nu's origins here, so a fork sets its own or deletes the line, or every AI request answers 403.
 - `AI_REQUIRE_ACCOUNT`: set to `"true"` to reject the guest (`X-Owner-Id`) path on `/api/ai` only, requiring a signed-in session. Unset = guests can use AI (so a fork without sign-in still works).
 
-The last two are the spend-DoS defence: on a public deployment they stop a third-party site from minting fresh owner ids to drain your model budget. The hosted livediagram.app sets `AI_ALLOWED_ORIGINS` and deliberately leaves `AI_REQUIRE_ACCOUNT` unset so guests keep AI; a private fork or one without sign-in can leave both unset. Two further defences live alongside them: the `AI_RATE_LIMITER` binding (declared in `apps/api/wrangler.toml` as a Cloudflare rate-limit binding, 20 requests / 60 s per IP) caps how fast one client can drive the endpoint; absent binding falls through to "allow" so a self-host without the paid Cloudflare feature still works. AI is also per-user opt-in via the Settings dialog even once the key is present.
+The last two are the spend-DoS defence: on a public deployment they stop a third-party site from minting fresh owner ids to drain your model budget. The hosted docs.nu sets `AI_ALLOWED_ORIGINS` and deliberately leaves `AI_REQUIRE_ACCOUNT` unset so guests keep AI; a private fork or one without sign-in can leave both unset. Two further defences live alongside them: the `AI_RATE_LIMITER` binding (declared in `apps/api/wrangler.toml` as a Cloudflare rate-limit binding, 20 requests / 60 s per IP) caps how fast one client can drive the endpoint; absent binding falls through to "allow" so a self-host without the paid Cloudflare feature still works. AI is also per-user opt-in via the Settings dialog even once the key is present.
 
 ## Email (optional: Cloudflare Email Service or Resend)
 
@@ -282,7 +282,7 @@ with the others, and a form link is served by the live worker (`/form/<code>`) a
 
 A workbench is a developer tool that frames the editor signed in, beside an agent ([Workbench embeds](../specs/013-workspace/workbench-embeds.md)). It needs API tokens, so it exists only where sign-in is on; without sign-in the routes answer as for any caller without a token and nothing breaks.
 
-- `APP_BASE_URL` (api `[vars]`): set it to your deployment's public origin. Besides the links in emails, it builds the workbench frame URLs (`/embed/workbench`, and `/embed/workbench/explorer` for the whole workspace) and the pairing URL (`/workbench/pair`) the CLI prints. Use the origin that serves the app without redirecting (for example `https://www.example.com` when the apex redirects to `www`): a workbench checks the frame's messages against the origin of that URL, and a redirect changes it. Left at its default, those links point at livediagram.app.
+- `APP_BASE_URL` (api `[vars]`): set it to your deployment's public origin. Besides the links in emails, it builds the workbench frame URLs (`/embed/workbench`, and `/embed/workbench/explorer` for the whole workspace) and the pairing URL (`/workbench/pair`) the CLI prints. Use the origin that serves the app without redirecting (for example `https://www.example.com` when the apex redirects to `www`): a workbench checks the frame's messages against the origin of that URL, and a redirect changes it. Left at its default, those links point at docs.nu.
 - `WORKBENCH_TICKET_RATE_LIMITER` (optional binding, declared in `apps/api/wrangler.toml`): caps ticket mints and pairing requests per token. Without the binding every request is allowed.
 - Migration `0077_workbench.sql` creates the four workbench tables; it runs with the others.
 
@@ -295,7 +295,7 @@ Plan-mode Sheets ([Sheet store](../specs/029-sheets/sheet-store.md)) need no set
 Signed-in users can mirror My Documents to their own Google Drive ([Google Drive mirror](../specs/022-drive-mirror/drive-mirror.md)). It is **off until you set a Google OAuth client id**; with none, Settings has no Cloud Sync section and every `/api/drive` route answers `503 drive_not_configured`. The Drive traffic goes from each user's browser straight to Google; your worker only brokers tokens and stores a few small rows in D1.
 
 1. In Google Cloud, create a project, enable the **Google Drive API**, and create an OAuth client of type **Web application**. Add `https://<your-host>/drive/connected` as an authorised redirect URI and `https://<your-host>` as a JavaScript origin. The consent screen needs only the non-sensitive scopes `drive.file` and `drive.install`, so no verification or security assessment is required.
-2. For **Open with**, configure the Drive API's **Drive UI integration**: Open URL `https://<your-host>/drive/open`, default MIME type `application/vnd.livedoc+json`, default extension `livediagram`.
+2. For **Open with**, configure the Drive API's **Drive UI integration**: Open URL `https://<your-host>/drive/open`, default MIME type `application/vnd.livedoc+json`, default extension `livedoc`.
 3. Set the client id on the api worker as a `[vars]` entry `GOOGLE_CLIENT_ID`, and build the live app with the same value as `NEXT_PUBLIC_GOOGLE_CLIENT_ID`.
 4. For syncing without a click every hour, also set two worker secrets (without them the browser holds hour-long tokens and asks the user to **Resume sync**):
 
@@ -304,15 +304,15 @@ pnpm --filter @livedoc/api exec wrangler secret put GOOGLE_CLIENT_SECRET
 pnpm --filter @livedoc/api exec wrangler secret put DRIVE_TOKEN_KEY   # openssl rand -base64 32
 ```
 
-5. Optional: `NEXT_PUBLIC_GOOGLE_API_KEY`, a browser API key (restricted by HTTP referrer) for the Google Picker, which lets users show livediagram a folder they made in Drive. Without it the mirror works and that one step is not offered.
+5. Optional: `NEXT_PUBLIC_GOOGLE_API_KEY`, a browser API key (restricted by HTTP referrer) for the Google Picker, which lets users show LiveDoc a folder they made in Drive. Without it the mirror works and that one step is not offered.
 
-**More than one environment** (a staging beside production): give each its **own Google Cloud project**. A project has one Drive UI integration Open URL, so a shared project could only ever open files on one host; `drive.file` access is per project, so files stay apart; and consent screens and test users stay apart. Each environment then has its own client id (worker var and live build, the same value within an environment), client secret, `DRIVE_TOKEN_KEY` and Picker key. livediagram.app does exactly this: its client ids sit per environment in `apps/api/hosted-vars.json` (`environments.production` / `environments.staging`, empty until set, which keeps the mirror off there), its Picker keys are the `NEXT_PUBLIC_GOOGLE_API_KEY` and `NEXT_PUBLIC_GOOGLE_API_KEY_STAGING` GitHub secrets, and every deploy checks that the worker and the live build carry the same client id.
+**More than one environment** (a staging beside production): give each its **own Google Cloud project**. A project has one Drive UI integration Open URL, so a shared project could only ever open files on one host; `drive.file` access is per project, so files stay apart; and consent screens and test users stay apart. Each environment then has its own client id (worker var and live build, the same value within an environment), client secret, `DRIVE_TOKEN_KEY` and Picker key. docs.nu does exactly this: its client ids sit per environment in `apps/api/hosted-vars.json` (`environments.production` / `environments.staging`, empty until set, which keeps the mirror off there), its Picker keys are the `NEXT_PUBLIC_GOOGLE_API_KEY` and `NEXT_PUBLIC_GOOGLE_API_KEY_STAGING` GitHub secrets, and every deploy checks that the worker and the live build carry the same client id.
 
-If your site redirects one host to another (livediagram.app sends the apex to `www`), register both as JavaScript origins with `/drive/connected` redirect URIs: the consent flow uses whichever host the app actually runs on.
+If your site redirects one host to another (docs.nu sends `www` to the apex), register both as JavaScript origins with `/drive/connected` redirect URIs: the consent flow uses whichever host the app actually runs on.
 
-The mirror's root folder in each user's Drive is named **`livediagram (self-hosted)`** on your deployment (livediagram.app's own is `livediagram`, its staging and local development `livediagram (staging)`), so a user of both never gets two folders of the same name. There is no setting: the name comes from the host, is given only when the folder is created, and users may rename or move it freely.
+The mirror's root folder in each user's Drive is named **`livedoc (self-hosted)`** on your deployment (docs.nu's own is `livedoc`, its staging and local development `livedoc (staging)`), so a user of both never gets two folders of the same name. There is no setting: the name comes from the host, is given only when the folder is created, and users may rename or move it freely.
 
-`DRIVE_TOKEN_KEY` seals the stored refresh tokens; changing it turns every connection into **Needs reconnecting**. Files a different deployment's Google project created are foreign to yours and import as copies. Your privacy policy must describe the Google user data you handle; livediagram.app's is in the help centre under Policies.
+`DRIVE_TOKEN_KEY` seals the stored refresh tokens; changing it turns every connection into **Needs reconnecting**. Files a different deployment's Google project created are foreign to yours and import as copies. Your privacy policy must describe the Google user data you handle; docs.nu's is in the help centre under Policies.
 
 ## Per-owner image gallery caps
 
@@ -321,7 +321,7 @@ The api worker honours two optional `[vars]` that cap how much one owner can kee
 - `IMAGE_MAX_PER_OWNER`: maximum image rows per owner (decimal string).
 - `IMAGE_MAX_BYTES_PER_OWNER`: maximum summed `byte_size` per owner (decimal byte count).
 
-Both default to "no limit" when unset, blank, `0`, or non-numeric, which is the OSS self-host default where the operator runs their own R2 budget. To cap, declare them under `[vars]` in `apps/api/wrangler.toml`, not in the Cloudflare dashboard: every `wrangler deploy` replaces the worker's plain vars with the ones it declares, so a dashboard-only cap is silently gone after the next deploy. The hosted livediagram.app sets them to `100` and `104857600` (100 MB) through its hosted profile, which a fork's deploy does not apply. The worker also honours an early `X-Image-Sha256` dedupe check sent by the live editor: if the header matches an existing row at `(owner, sha256)` the upload short-circuits before the body parse, the cap check, or the R2 write, so re-uploading bytes the user already has costs almost nothing.
+Both default to "no limit" when unset, blank, `0`, or non-numeric, which is the OSS self-host default where the operator runs their own R2 budget. To cap, declare them under `[vars]` in `apps/api/wrangler.toml`, not in the Cloudflare dashboard: every `wrangler deploy` replaces the worker's plain vars with the ones it declares, so a dashboard-only cap is silently gone after the next deploy. The hosted docs.nu sets them to `100` and `104857600` (100 MB) through its hosted profile, which a fork's deploy does not apply. The worker also honours an early `X-Image-Sha256` dedupe check sent by the live editor: if the header matches an existing row at `(owner, sha256)` the upload short-circuits before the body parse, the cap check, or the R2 write, so re-uploading bytes the user already has costs almost nothing.
 
 ## Custom domain
 

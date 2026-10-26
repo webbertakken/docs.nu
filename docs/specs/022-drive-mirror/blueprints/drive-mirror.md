@@ -81,23 +81,23 @@ Scope, by file:
 | Connection     | `drive_connections` row, `DriveConnection`        | One user's grant and mirror state                                               |
 | Mode           | `DriveMode`: `off` \| `browser` \| `broker`       | How the deployment gets Google access tokens                                    |
 | Status         | `DriveConnectionStatus`                           | `connected` \| `needs_reconnect`                                                |
-| Item           | `drive_items` row, `DriveItem`                    | One mirrored document or folder and the Drive state livediagram last wrote      |
+| Item           | `drive_items` row, `DriveItem`                    | One mirrored document or folder and the Drive state LiveDoc last wrote          |
 | Item kind      | `DriveItemKind`: `document` \| `folder`           |                                                                                 |
 | Root           | `root_folder_id`                                  | The mirror's root folder, named `driveRootName(host)`; the root of My Documents |
 | Document file  | `.livedoc` file                                   | A document's mirror                                                             |
 | Envelope       | `DocumentEnvelope`, `livedoc.document`            | The file's contents                                                             |
 | Drive state    | `fileState(file)`                                 | `{ name, parentId, trashed, md5, headRevisionId }` of one Drive file            |
-| Echo           | `planInbound` answering `echo`                    | A change whose Drive state equals the item's: livediagram's own write           |
+| Echo           | `planInbound` answering `echo`                    | A change whose Drive state equals the item's: LiveDoc's own write               |
 | Foreign change | the differing attributes in `planInbound`         | The attributes of a change that differ from the item                            |
 | Pass           | `DriveMirrorEngine.pass(kind)`                    | One run: token, snapshot, inbound, outbound                                     |
-| Inbound        | `planInbound`                                     | Drive to livediagram                                                            |
-| Outbound       | `planOutbound`                                    | livediagram to Drive                                                            |
+| Inbound        | `planInbound`                                     | Drive to LiveDoc                                                                |
+| Outbound       | `planOutbound`                                    | LiveDoc to Drive                                                                |
 | Lease          | `lease_holder`, `lease_expires_at`                | Which device may write outbound                                                 |
 | Device id      | `livedoc:v2:drive-device`                         | A per-browser random id, the lease holder                                       |
 | Elected tab    | Web Lock `livedoc:drive-mirror`                   | The one tab per browser that runs the engine                                    |
 | Tombstone      | `SeenRow` in a `SeenStore`                        | A row this browser saw that has since disappeared                               |
-| Notice         | `notice = 'unseen_folder'`                        | The item was moved in Drive to a folder livediagram cannot see                  |
-| Adoption       | `adoptFolder`                                     | Showing an unseen folder to livediagram with the Picker                         |
+| Notice         | `notice = 'unseen_folder'`                        | The item was moved in Drive to a folder LiveDoc cannot see                      |
+| Adoption       | `adoptFolder`                                     | Showing an unseen folder to LiveDoc with the Picker                             |
 | Foreign file   | `resolveOpenWith` = `import` (`foreign`, `no-id`) | A `.livedoc` file from another deployment, or with no `ldDocumentId`            |
 | Account        | `google_account_id`                               | The Drive `permissionId` of the Google account the connection syncs with        |
 | Account switch | `pending_*` columns, `pendingAccountSwitch`       | A consent by another account, waiting for the owner to confirm or cancel        |
@@ -150,7 +150,7 @@ by the **Resume sync** click; any state to `disconnected` by **Disconnect**.
    Then **adopt**: list every file with `appProperties has { key='ldOrigin' and value='<host>' }` and record an item
    for each whose `ldDocumentId` / `ldFolderId` names a personal document, trashed document or folder with no item yet,
    using the file's current Drive state (the `adopt` decisions of `planInbound`), then re-read the snapshot. Two
-   files claiming the same document (an original and a copy the user opened with livediagram) are both left
+   files claiming the same document (an original and a copy the user opened with LiveDoc) are both left
    unadopted (logged `adopt-ambiguous`); the next write makes a fresh file. On an
    `arrival` pass a recorded root is checked once (`files.get`): a 404 makes it null again; a binned root stays the
    root.
@@ -211,7 +211,7 @@ stops the pass on a rate-limit error. `expectedParent(folderId)` is the folder's
    deleted folder's parent, so `expectedParent` names that folder's Drive folder, or the root).
 
 Every write asks Google for `DRIVE_FILE_FIELDS` and records the returned state with `PUT /api/drive/items`
-(`ldName` the livediagram name written; `mirroredSavedAt` the `savedAt` of the content uploaded). Writes are
+(`ldName` the LiveDoc name written; `mirroredSavedAt` the `savedAt` of the content uploaded). Writes are
 batched: the engine flushes recorded items every `DRIVE_ITEMS_PUT_BATCH` rows and at the end of the pass.
 A **404** on an update re-creates the item in its expected place (a create op) and records the new file id.
 
@@ -221,34 +221,34 @@ Changes are coalesced to **one per file, the latest** (each entry carries the fi
 last entry's `time` dates it), then sorted **folders first**, then files, each in `time` order. `planInbound(change, snapshot, items)`
 returns one `InboundDecision`:
 
-| Situation                                                                              | Decision                                                                      |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| No item for `fileId`, file lacks `ldOrigin === host`                                   | `ignore` (not ours, or the root)                                              |
-| No item, `ldFolderId` names a folder deleted here whose tombstone is pending           | `ignore` (`deleted-here`): the tombstone bins it                              |
-| No item, `ldFolderId` names no folder, file not trashed                                | `recreate-folder` (same id, parent by Drive parent)                           |
-| No item, `ldDocumentId` names a document whose item holds another file                 | `ignore` (`foreign-copy`, logged `inbound-foreign-copy`)                      |
-| No item, `ldFolderId` names a known folder                                             | `adopt` (record the item, then re-plan)                                       |
-| No item, `ldDocumentId` names a known document                                         | `ignore` (`unrecorded-document`); adopted only by the reconnect listing       |
-| `removed`, document item, document in the personal Trash                               | `purge`                                                                       |
-| `removed`, document item, document live                                                | `forget-file` (item dropped; outbound re-creates)                             |
-| `removed`, document item, document outside My Documents                                | `forget-file`                                                                 |
-| `removed`, folder item                                                                 | `forget-file` (outbound re-creates it while the folder lives)                 |
-| No foreign field                                                                       | `echo`                                                                        |
-| Folder item, `trashed` became true                                                     | `bin-folder`                                                                  |
-| Document item, `trashed` became true, document live                                    | `trash`                                                                       |
-| Document item, `trashed` became false, document in the personal Trash                  | `restore` then placement by Drive parent                                      |
-| Name changed, livediagram name unchanged since sync (`name === ldName`) or Drive later | `rename` to `stripDriveName(file.name)`; empty keeps the old                  |
-| Parent changed, livediagram parent unchanged or Drive later, parent a mirrored folder  | `move` to that folder                                                         |
-| Parent changed, same, parent the root                                                  | `move` to the root of My Documents                                            |
-| Parent changed, same, parent unknown or none                                           | `move` to the root of My Documents (document) or top level (folder), `notice` |
-| Only `md5` / `headRevisionId` changed                                                  | `rewrite` (item `mirroredSavedAt` set to 0)                                   |
-| The value livediagram already holds                                                    | recorded only                                                                 |
+| Situation                                                                          | Decision                                                                      |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| No item for `fileId`, file lacks `ldOrigin === host`                               | `ignore` (not ours, or the root)                                              |
+| No item, `ldFolderId` names a folder deleted here whose tombstone is pending       | `ignore` (`deleted-here`): the tombstone bins it                              |
+| No item, `ldFolderId` names no folder, file not trashed                            | `recreate-folder` (same id, parent by Drive parent)                           |
+| No item, `ldDocumentId` names a document whose item holds another file             | `ignore` (`foreign-copy`, logged `inbound-foreign-copy`)                      |
+| No item, `ldFolderId` names a known folder                                         | `adopt` (record the item, then re-plan)                                       |
+| No item, `ldDocumentId` names a known document                                     | `ignore` (`unrecorded-document`); adopted only by the reconnect listing       |
+| `removed`, document item, document in the personal Trash                           | `purge`                                                                       |
+| `removed`, document item, document live                                            | `forget-file` (item dropped; outbound re-creates)                             |
+| `removed`, document item, document outside My Documents                            | `forget-file`                                                                 |
+| `removed`, folder item                                                             | `forget-file` (outbound re-creates it while the folder lives)                 |
+| No foreign field                                                                   | `echo`                                                                        |
+| Folder item, `trashed` became true                                                 | `bin-folder`                                                                  |
+| Document item, `trashed` became true, document live                                | `trash`                                                                       |
+| Document item, `trashed` became false, document in the personal Trash              | `restore` then placement by Drive parent                                      |
+| Name changed, LiveDoc name unchanged since sync (`name === ldName`) or Drive later | `rename` to `stripDriveName(file.name)`; empty keeps the old                  |
+| Parent changed, LiveDoc parent unchanged or Drive later, parent a mirrored folder  | `move` to that folder                                                         |
+| Parent changed, same, parent the root                                              | `move` to the root of My Documents                                            |
+| Parent changed, same, parent unknown or none                                       | `move` to the root of My Documents (document) or top level (folder), `notice` |
+| Only `md5` / `headRevisionId` changed                                              | `rewrite` (item `mirroredSavedAt` set to 0)                                   |
+| The value LiveDoc already holds                                                    | recorded only                                                                 |
 
 "Drive later" is `Date.parse(change.time) > ldChangedAt`, `ldChangedAt` being the document's `savedAt` or the
 folder's `updatedAt`. A decision may carry several effects (a restore that also moves). After applying, the item
 is always recorded with the file's Drive state, so a lost conflict is corrected by the next outbound pass.
 
-`bin-folder`: every live personal document in the folder's livediagram subtree goes to the Trash (`DELETE
+`bin-folder`: every live personal document in the folder's LiveDoc subtree goes to the Trash (`DELETE
 /api/documents/:id`), then the subtree's folders are deleted deepest first (`DELETE /api/folders/:id`, which drops
 their items in its batch). `recreate-folder` re-creates the folder with its old id (`POST /api/folders`), records
 its item, then lists the folder's children (`files.list q="'<id>' in parents"`) and plans each as a change, so the
@@ -301,7 +301,7 @@ with `remapTabLinks`, the deck carried). A `copy` import also runs `importAsNewD
 
 1. `port.getConnection()` for the root, `port.listItems()` and `port.listPersonalFolders()` for the placement:
    `placeCopy(parentId)` is `{ folderId: null, unseen: false }` for the root, the folder a live recorded folder item
-   names, else `{ folderId: null, unseen: true }` (a folder livediagram cannot see).
+   names, else `{ folderId: null, unseen: true }` (a folder LiveDoc cannot see).
 2. `port.importDocumentCopy(envelope, { id: crypto.randomUUID(), name, folderId })`, `name` the copy's
    `stripDriveName(file.name)` or the envelope's name.
 3. `claimCopy` (**pending the operator's confirmation**; one function, the only place the rule lives), only when the
@@ -376,7 +376,7 @@ Every route: `503 drive_not_configured` when `driveMode` is `off`; `401 sign_in_
 | `POST`   | `/drive/lease`               | `{ holder }`                                        | `200 DriveLease`             | `400 invalid_request`, `404 drive_not_connected`                                                                                                   |
 | `DELETE` | `/drive/lease?holder=`       |                                                     | `204`                        | `400 invalid_request`                                                                                                                              |
 
-Validation: ids and file ids 1..`DRIVE_ID_MAX` characters of `[A-Za-z0-9_-]` (Drive ids) or the livediagram id
+Validation: ids and file ids 1..`DRIVE_ID_MAX` characters of `[A-Za-z0-9_-]` (Drive ids) or the LiveDoc id
 charset `[A-Za-z0-9_-]`; names 1..`DRIVE_NAME_MAX`; `holder` a 1..64 character `[A-Za-z0-9-]` string;
 `redirectUri` an absolute URL whose path is `/drive/connected`, scheme `https`, or `http` on `localhost` /
 `127.0.0.1`. `PUT /drive/connection` creates the row only in `browser` mode.
@@ -386,7 +386,7 @@ charset `[A-Za-z0-9_-]`; names 1..`DRIVE_NAME_MAX`; `holder` a 1..64 character `
 `state = base64url(JSON { sub, redirectUri, exp, nonce }) + '.' + base64url(HMAC-SHA256(key, payload))`, `exp` =
 now + `DRIVE_STATE_TTL_MS`, `nonce` 16 random bytes. `verifyDriveState(key, state, sub, now)` returns the
 `redirectUri` or null (bad shape, bad signature, other `sub`, expired). The HMAC key is derived from
-`DRIVE_TOKEN_KEY` with HKDF-SHA256 (`info = 'livediagram drive state'`), so the sealing key is never used to sign.
+`DRIVE_TOKEN_KEY` with HKDF-SHA256 (`info = 'livedoc drive state'`), so the sealing key is never used to sign.
 
 ### Google OAuth (`drive/google-oauth.ts`)
 
@@ -583,7 +583,7 @@ beyond D1's own; a connection is re-creatable by reconnecting. `DELETE /api/driv
 | Content over 5 MB                                       | Resumable upload                                                                                |
 | Thumbnail render fails                                  | Upload without thumbnail, logged                                                                |
 | Two devices                                             | Lease; the other still runs inbound                                                             |
-| A change for an item whose value livediagram holds      | Recorded only                                                                                   |
+| A change for an item whose value LiveDoc holds          | Recorded only                                                                                   |
 | Folder move would cycle (`409 cycle`)                   | Recorded; outbound restores Drive's parent                                                      |
 | Name over `MAX_NAME_LEN` from Drive                     | Truncated to `MAX_NAME_LEN`                                                                     |
 | `PUT /drive/items` unique conflict on file id           | `409 drive_item_conflict`; the engine drops the stale row holding that file id and retries once |
@@ -623,7 +623,7 @@ beyond D1's own; a connection is re-creatable by reconnecting. `DELETE /api/driv
 ### Views follow
 
 `ApiWriteSignal` (`lib/api/write-signal.ts`) gains `drive?: true`. The elected tab's engine calls
-`onInboundApplied` after a pass whose inbound changed livediagram; `DriveMirrorProvider` raises
+`onInboundApplied` after a pass whose inbound changed LiveDoc; `DriveMirrorProvider` raises
 `notifyApiWrite({ drive: true })` there and posts `{ type: 'drive-applied' }` on the tab channel, and every other tab
 raises the same signal on receipt. The provider's own write relay ignores `drive` signals (they are not edits).
 `useAfterDriveChange(onChange)` (`hooks/persistence/useAfterDriveChange.ts`) is `useAfterApiWrite` with a
@@ -648,11 +648,11 @@ one as `driveLog('inbound-not-ours', { fileId, hadAppProperties })`, so a copy t
 `driveRootName(host)` (`packages/api-schema/src/drive.ts`), `host` as `window.location.host`: lower-cased, the port
 dropped (`[::1]:4000` → `::1`, `localhost:4000` → `localhost`):
 
-| Host (after normalising)                                   | Name                        |
-| ---------------------------------------------------------- | --------------------------- |
-| `livediagram.app`, `www.livediagram.app`                   | `livediagram`               |
-| `staging.livediagram.app`, `localhost`, `127.0.0.1`, `::1` | `livediagram (staging)`     |
-| anything else                                              | `livediagram (self-hosted)` |
+| Host (after normalising)                 | Name                    |
+| ---------------------------------------- | ----------------------- |
+| `docs.nu`, `www.docs.nu`                 | `LiveDoc`               |
+| `localhost`, `127.0.0.1`, `::1`          | `LiveDoc (development)` |
+| anything else (a preview or a self-host) | `LiveDoc (self-hosted)` |
 
 ## Presentation and UX
 
@@ -672,21 +672,21 @@ keywords: 'drive google sync backup mirror cloud', description, helpArticle: 'go
 `{ phase, status, problem }`, `view` = `{ now, syncingLong, checking }`; `problem` =
 `{ text, action: 'reconnect' | 'resume' | 'showFolder' | null, failed? }` or `null`:
 
-| Phase           | State                     | Status (`warn` in bold)                      | Button                    | Problem line                                                               |
-| --------------- | ------------------------- | -------------------------------------------- | ------------------------- | -------------------------------------------------------------------------- |
-| `not-connected` | `starting`                | Checking…                                    | **Connect**               | none                                                                       |
-| `not-connected` | `disconnected`            | Not connected / Connecting…                  | **Connect** / Connecting… | none                                                                       |
-| `not-connected` | connect failed            | Not connected                                | **Connect**               | `DRIVE_CONNECT_FAILED` (`failed`, `role="alert"`)                          |
-| `not-connected` | cancelled at Google       | Not connected                                | **Connect**               | `DRIVE_CONNECT_CANCELLED`                                                  |
-| `connected`     | `idle`                    | Last synced {relativeSince} / Not synced yet | **Disconnect**            | none                                                                       |
-| `connected`     | `syncing` ≥ 600 ms        | Syncing…                                     | **Disconnect**            | none                                                                       |
-| `connected`     | a check the row asked for | Checking…                                    | **Disconnect**            | none                                                                       |
-| `connected`     | first mirror              | Copying {done} of {total}…                   | **Disconnect**            | none                                                                       |
-| `connected`     | `offline` / `failed`      | **Offline**                                  | **Disconnect**            | `DRIVE_OFFLINE`                                                            |
-| `connected`     | notices                   | **Needs attention**                          | **Disconnect**            | "{name}: Moved to a Drive folder livediagram can't see." + **Show folder** |
-| `attention`     | `needs_reconnect`         | **Needs reconnecting** / Connecting…         | **Disconnect**            | `DRIVE_NEEDS_RECONNECT` + **Reconnect** / Connecting…                      |
-| `attention`     | `needs_resume`            | **Paused**                                   | **Disconnect**            | `DRIVE_NEEDS_RESUME` + **Resume**                                          |
-| `attention`     | reconnect failed to start | **Needs reconnecting**                       | **Disconnect**            | `DRIVE_CONNECT_FAILED` (`failed`) + **Reconnect**                          |
+| Phase           | State                     | Status (`warn` in bold)                      | Button                    | Problem line                                                           |
+| --------------- | ------------------------- | -------------------------------------------- | ------------------------- | ---------------------------------------------------------------------- |
+| `not-connected` | `starting`                | Checking…                                    | **Connect**               | none                                                                   |
+| `not-connected` | `disconnected`            | Not connected / Connecting…                  | **Connect** / Connecting… | none                                                                   |
+| `not-connected` | connect failed            | Not connected                                | **Connect**               | `DRIVE_CONNECT_FAILED` (`failed`, `role="alert"`)                      |
+| `not-connected` | cancelled at Google       | Not connected                                | **Connect**               | `DRIVE_CONNECT_CANCELLED`                                              |
+| `connected`     | `idle`                    | Last synced {relativeSince} / Not synced yet | **Disconnect**            | none                                                                   |
+| `connected`     | `syncing` ≥ 600 ms        | Syncing…                                     | **Disconnect**            | none                                                                   |
+| `connected`     | a check the row asked for | Checking…                                    | **Disconnect**            | none                                                                   |
+| `connected`     | first mirror              | Copying {done} of {total}…                   | **Disconnect**            | none                                                                   |
+| `connected`     | `offline` / `failed`      | **Offline**                                  | **Disconnect**            | `DRIVE_OFFLINE`                                                        |
+| `connected`     | notices                   | **Needs attention**                          | **Disconnect**            | "{name}: Moved to a Drive folder LiveDoc can't see." + **Show folder** |
+| `attention`     | `needs_reconnect`         | **Needs reconnecting** / Connecting…         | **Disconnect**            | `DRIVE_NEEDS_RECONNECT` + **Reconnect** / Connecting…                  |
+| `attention`     | `needs_resume`            | **Paused**                                   | **Disconnect**            | `DRIVE_NEEDS_RESUME` + **Resume**                                      |
+| `attention`     | reconnect failed to start | **Needs reconnecting**                       | **Disconnect**            | `DRIVE_CONNECT_FAILED` (`failed`) + **Reconnect**                      |
 
 The card is one row: the label left; right, `[data-drive-actions]` holding the status (`[data-drive-status]`, a
 grid of every wording of the phase with only the current visible: `driveStatusOptions(status, phase)`, the times at
@@ -760,15 +760,15 @@ arrival, or renamed (an inbound change for the root's file id), `null` until kno
 view (`block: 'start'`, smooth unless reduced motion) and takes focus (`preventScroll`). The editor's
 `openSettingsOn(categoryId, sectionId?)` and the Explorer's `?settings=<category>&section=<id>` deep link set it.
 
-Disconnect confirms: "Disconnect Google Drive? Your files stay in Drive; livediagram stops updating them."
+Disconnect confirms: "Disconnect Google Drive? Your files stay in Drive; LiveDoc stops updating them."
 
 Banner (`needs_reconnect` / `needs_resume`), bottom-left, dismissible for the session: "Google Drive sync is paused."
 with **Reconnect** / **Resume sync**. `/drive/connected`: "Connecting Google Drive…", then back to the page the user
 started from; on `error=access_denied`: "Google Drive wasn't connected." with **Back**. `/drive/open`: "Opening from
-Google Drive…"; import: "This document isn't in your livediagram." **Import a copy**; a copy of a mirrored file:
+Google Drive…"; import: "This document isn't in your LiveDoc." **Import a copy**; a copy of a mirrored file:
 "This is a copy made in Google Drive. Import it as a new document to open it here; the original stays as it is."
 **Import as new document**; error: "This file can't be
-opened in livediagram." with **Go to Explorer**.
+opened in LiveDoc." with **Go to Explorer**.
 
 ### Account switch dialog
 
@@ -837,41 +837,41 @@ into each test's browser context.
 
 ## Constants and configuration
 
-| Constant                                   | Value                                                                 | Where                    | Provenance / safe range                                     |
-| ------------------------------------------ | --------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------------- |
-| `DRIVE_POLL_INTERVAL_MS`                   | 2 min                                                                 | `lib/drive/cadence.ts`   | Operator decision (was the research's 20); 1..20 min, gated |
-| `DRIVE_POLL_INTERVAL_MAX_MS`               | 60 min                                                                | cadence                  | Research back-off cap                                       |
-| `DRIVE_FOCUS_POLL_MIN_GAP_MS`              | 30 s                                                                  | cadence                  | D21; 10 s..5 min                                            |
-| `DRIVE_CHANGES_PAGE_SIZE`                  | 1000                                                                  | cadence                  | Google maximum                                              |
-| `DRIVE_WRITE_IDLE_MS`                      | 60 s                                                                  | cadence                  | Research; 10 s..5 min                                       |
-| `DRIVE_WRITE_MIN_INTERVAL_MS`              | 5 min                                                                 | cadence                  | Research; 1..30 min                                         |
-| `DRIVE_WRITE_MIN_INTERVAL_MAX_MS`          | 30 min                                                                | cadence                  | Research back-off cap                                       |
-| `DRIVE_BACKOFF_CALM_MS`                    | 60 min                                                                | cadence                  | Research                                                    |
-| `DRIVE_BACKOFF_MAX_LEVEL`                  | 5                                                                     | cadence                  | 2^5 x 2 min > the 60-minute cap                             |
-| `DRIVE_PAGE_TOKEN_PERSIST_MIN_INTERVAL_MS` | 10 min                                                                | cadence                  | Research                                                    |
-| `DRIVE_TOKEN_RENEW_BEFORE_MS`              | 5 min                                                                 | cadence                  | D4; 1..10 min of a 60-minute token                          |
-| `DRIVE_TOKEN_RATE_LIMITER`                 | 10 per 60 s                                                           | `apps/api/wrangler.toml` | Lead review; about one token an hour is healthy; 5..30      |
-| `DRIVE_LEASE_MS`                           | 15 min                                                                | api-schema `drive.ts`    | Spec; 5..30 min                                             |
-| `DRIVE_LEASE_RENEW_BEFORE_MS`              | 5 min                                                                 | api-schema               | Spec                                                        |
-| `DRIVE_STATE_TTL_MS`                       | 10 min                                                                | api-schema               | Spec                                                        |
-| `DRIVE_ACCOUNT_SWITCH_TTL_MS`              | 30 min                                                                | api-schema               | Spec; time to read and answer the dialog; 10..60 min        |
-| `DRIVE_ITEMS_PUT_MAX`                      | 100                                                                   | api-schema               | One D1 batch; D1 allows 1000 statements                     |
-| `DRIVE_ITEMS_PUT_BATCH`                    | 25                                                                    | cadence                  | D5                                                          |
-| `DRIVE_MULTIPART_MAX_BYTES`                | 5 MiB                                                                 | cadence                  | Google multipart limit                                      |
-| `DRIVE_THUMBNAIL_WIDTH_PX`                 | 1600                                                                  | cadence                  | Google's recommendation; min 220                            |
-| `DRIVE_THUMBNAIL_MAX_BYTES`                | 2 MB                                                                  | cadence                  | Google limit                                                |
-| `DRIVE_FILE_MIME`                          | `application/vnd.livedoc+json`                                        | api-schema               | Spec                                                        |
-| `DRIVE_FILE_EXTENSION`                     | `.livedoc`                                                            | api-schema               | Spec                                                        |
-| `driveRootName(host)`                      | `livediagram` / `livediagram (staging)` / `livediagram (self-hosted)` | api-schema               | Spec, "The root folder's name"                              |
-| `DRIVE_SCOPES`                             | `drive.file drive.install`                                            | api-schema               | Spec                                                        |
+| Constant                                   | Value                                                     | Where                    | Provenance / safe range                                     |
+| ------------------------------------------ | --------------------------------------------------------- | ------------------------ | ----------------------------------------------------------- |
+| `DRIVE_POLL_INTERVAL_MS`                   | 2 min                                                     | `lib/drive/cadence.ts`   | Operator decision (was the research's 20); 1..20 min, gated |
+| `DRIVE_POLL_INTERVAL_MAX_MS`               | 60 min                                                    | cadence                  | Research back-off cap                                       |
+| `DRIVE_FOCUS_POLL_MIN_GAP_MS`              | 30 s                                                      | cadence                  | D21; 10 s..5 min                                            |
+| `DRIVE_CHANGES_PAGE_SIZE`                  | 1000                                                      | cadence                  | Google maximum                                              |
+| `DRIVE_WRITE_IDLE_MS`                      | 60 s                                                      | cadence                  | Research; 10 s..5 min                                       |
+| `DRIVE_WRITE_MIN_INTERVAL_MS`              | 5 min                                                     | cadence                  | Research; 1..30 min                                         |
+| `DRIVE_WRITE_MIN_INTERVAL_MAX_MS`          | 30 min                                                    | cadence                  | Research back-off cap                                       |
+| `DRIVE_BACKOFF_CALM_MS`                    | 60 min                                                    | cadence                  | Research                                                    |
+| `DRIVE_BACKOFF_MAX_LEVEL`                  | 5                                                         | cadence                  | 2^5 x 2 min > the 60-minute cap                             |
+| `DRIVE_PAGE_TOKEN_PERSIST_MIN_INTERVAL_MS` | 10 min                                                    | cadence                  | Research                                                    |
+| `DRIVE_TOKEN_RENEW_BEFORE_MS`              | 5 min                                                     | cadence                  | D4; 1..10 min of a 60-minute token                          |
+| `DRIVE_TOKEN_RATE_LIMITER`                 | 10 per 60 s                                               | `apps/api/wrangler.toml` | Lead review; about one token an hour is healthy; 5..30      |
+| `DRIVE_LEASE_MS`                           | 15 min                                                    | api-schema `drive.ts`    | Spec; 5..30 min                                             |
+| `DRIVE_LEASE_RENEW_BEFORE_MS`              | 5 min                                                     | api-schema               | Spec                                                        |
+| `DRIVE_STATE_TTL_MS`                       | 10 min                                                    | api-schema               | Spec                                                        |
+| `DRIVE_ACCOUNT_SWITCH_TTL_MS`              | 30 min                                                    | api-schema               | Spec; time to read and answer the dialog; 10..60 min        |
+| `DRIVE_ITEMS_PUT_MAX`                      | 100                                                       | api-schema               | One D1 batch; D1 allows 1000 statements                     |
+| `DRIVE_ITEMS_PUT_BATCH`                    | 25                                                        | cadence                  | D5                                                          |
+| `DRIVE_MULTIPART_MAX_BYTES`                | 5 MiB                                                     | cadence                  | Google multipart limit                                      |
+| `DRIVE_THUMBNAIL_WIDTH_PX`                 | 1600                                                      | cadence                  | Google's recommendation; min 220                            |
+| `DRIVE_THUMBNAIL_MAX_BYTES`                | 2 MB                                                      | cadence                  | Google limit                                                |
+| `DRIVE_FILE_MIME`                          | `application/vnd.livedoc+json`                            | api-schema               | Spec                                                        |
+| `DRIVE_FILE_EXTENSION`                     | `.livedoc`                                                | api-schema               | Spec                                                        |
+| `driveRootName(host)`                      | `livedoc` / `livedoc (staging)` / `livedoc (self-hosted)` | api-schema               | Spec, "The root folder's name"                              |
+| `DRIVE_SCOPES`                             | `drive.file drive.install`                                | api-schema               | Spec                                                        |
 
 Env: api `GOOGLE_CLIENT_ID` (var), `GOOGLE_CLIENT_SECRET` (secret), `DRIVE_TOKEN_KEY` (secret, base64 of 32 bytes,
 `openssl rand -base64 32`), `GOOGLE_OAUTH_BASE_URL` (tests only); live `NEXT_PUBLIC_GOOGLE_CLIENT_ID`,
-`NEXT_PUBLIC_GOOGLE_API_KEY`. On livediagram.app the client id and the Picker key are per environment (below).
+`NEXT_PUBLIC_GOOGLE_API_KEY`. On docs.nu the client id and the Picker key are per environment (below).
 
 ### Hosted profile per environment
 
-livediagram.app's per-environment Google identity lives in `apps/api/hosted-vars.json`, read by
+docs.nu's per-environment Google identity lives in `apps/api/hosted-vars.json`, read by
 `apps/api/scripts/hosted-vars.mjs`:
 
 ```json

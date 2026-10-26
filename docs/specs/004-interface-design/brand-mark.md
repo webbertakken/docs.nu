@@ -1,8 +1,8 @@
 # Brand mark
 
-The livediagram logo is the **Living Prism**: an isometric glass cube whose translucent faces fold over one another,
+The LiveDoc logo is the **Living Prism**: an isometric glass cube whose translucent faces fold over one another,
 with a faint diagram (two nodes joined through a centre node) inside and a live signal pulse running along its front
-edge. It reads as "a workspace with a diagram living in it". The **wordmark** beside it reads `livediagram`, with
+edge. It reads as "a workspace with a diagram living in it". The **wordmark** beside it reads `livedoc`, with
 `live` in the accent and `diagram` in ink.
 
 ## The mark
@@ -46,7 +46,7 @@ same depth as the blue one.
 
 ## Mono
 
-On a solid brand tile (marketing's comparison badges, the "Why pick livediagram" card) the mark draws in one colour, the
+On a solid brand tile (marketing's comparison badges, the "Why pick LiveDoc" card) the mark draws in one colour, the
 tile's text colour, with each face at its own opacity so the fold still shows.
 
 ## Wordmark

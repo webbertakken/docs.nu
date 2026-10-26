@@ -1,10 +1,10 @@
 # Router app
 
-A small Cloudflare Worker that fronts the apex domain (`livediagram.app`) and routes URL paths to the right underlying app.
+A small Cloudflare Worker that fronts the apex domain (`docs.nu`) and routes URL paths to the right underlying app.
 
 - **Workspace:** `apps/router` (`@livedoc/router`).
 - **Runtime:** Cloudflare Workers.
-- **Production hostname:** `livediagram.app` (custom domain configured in the Cloudflare dashboard). Default Workers URL also remains reachable.
+- **Production hostname:** `docs.nu` (custom domain configured in the Cloudflare dashboard). Default Workers URL also remains reachable.
 
 ## Routing table
 

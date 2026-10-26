@@ -13,7 +13,7 @@ recorded revision, and a change made to it is a proposal that reaches that branc
 [changeset](../024-agents/agent-changesets.md), or does not count ([Branches](#branches)).
 
 This spec names things as LiveDoc's command line does: the command `livedoc`, the link file `livedoc.toml`, the
-mirror file `<slug>.livedoc.json`. [Repository link](repository-link.md) keeps livediagram's spelling of the same
+mirror file `<slug>.livedoc.json`. [Repository link](repository-link.md) keeps LiveDoc's spelling of the same
 names until the rename reaches it.
 
 ## What a link writes

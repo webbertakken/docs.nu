@@ -42,7 +42,7 @@ facts.
 
 - A small panel at the bottom centre of the screen, above the canvas, in the app's chrome
   colours, light and dark. It never covers the dialogs and never takes focus.
-- Copy: **"A new version of livediagram is ready."** with two buttons, **"Reload"** and
+- Copy: **"A new version of LiveDoc is ready."** with two buttons, **"Reload"** and
   **"Not now"**.
 - `role="status"`, so a screen reader announces it once, politely; both buttons are in the tab
   order and work from the keyboard; it honours reduced motion (no slide-in).

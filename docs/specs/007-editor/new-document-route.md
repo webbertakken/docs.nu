@@ -345,15 +345,15 @@ answered. It does not ask where the document goes or what it is called:
   Blank Diagram.
 - **No Location step.** The document goes where new documents go by default, so the person is never asked:
   - **Stored** where [Save Locations → The default depends on who is creating](../006-document/save-locations.md#the-default-depends-on-who-is-creating)
-    says: This Browser for a guest (with sign-in enabled), livediagram for everyone else. Decided at commit by
+    says: This Browser for a guest (with sign-in enabled), LiveDoc for everyone else. Decided at commit by
     `resolveSaveLocation`, the same as the bypass links: a guest never waits, a browser that looks signed in waits
     for identity, so a signed-in person is never handed a document in This Browser.
-  - **Filed** (livediagram) in the `/new?folder=` / `?team=` context when there is one, an explicit placement;
+  - **Filed** (LiveDoc) in the `/new?folder=` / `?team=` context when there is one, an explicit placement;
     otherwise the create carries no placement and the server files it in the person's
     [default folder](../013-workspace/default-folders.md) for its intent, else the root of My Documents.
   - **Named** after its template ("Untitled Diagram", `untitledNameForTemplate`); it is renamed in the editor.
   - People change where documents go in **Settings > Documents > Default Folders**, and move a document between
-    livediagram and this browser afterwards ([Offline Mode](../006-document/offline-mode.md)).
+    LiveDoc and this browser afterwards ([Offline Mode](../006-document/offline-mode.md)).
   - Why: the step asked three questions (name, store, folder) most people answer with the default, before they
     have anything on the canvas. Every answer has a later, better home (the title, Default Folders, Sync Document
     or Take Offline), so asking up front only slowed the first document down.

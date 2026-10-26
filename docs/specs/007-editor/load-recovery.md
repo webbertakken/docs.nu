@@ -67,9 +67,9 @@ button, a recovery card. It shows for every load error, timed out or not:
 
 - **Copy Diagnostics** copies a plain-text report (below) for the person to
   paste to support. The button confirms with "Copied".
-- **Repair This Browser** clears this browser's saved livediagram settings and
+- **Repair This Browser** clears this browser's saved LiveDoc settings and
   caches (below) and reloads. It asks first, inline under the button: "This
-  clears livediagram's saved settings and caches in this browser." and what is
+  clears LiveDoc's saved settings and caches in this browser." and what is
   kept, with **Repair and Reload** and **Cancel**. Inline rather than a modal,
   so the same component serves the editor and the help page.
 - **Troubleshooting steps** links to the "A Document Will Not Load" help
@@ -118,7 +118,7 @@ out-of-date browser).
 Repair clears what is safe to lose and keeps what would lose work or identity.
 
 **Cleared:** every `localStorage` and `sessionStorage` key starting with
-`livedoc:` or `livediagram-` that is not kept below. This covers editor
+`livedoc:` or `livedoc-` that is not kept below. This covers editor
 preferences, panel layout, dismissed banners and tours, the recent-documents
 cache, cached share passwords, and the stale-build reload guards.
 

@@ -1,8 +1,8 @@
-# livediagram
+# LiveDoc
 
-A collaborative diagram editor that works without signing in. Open a link, draw, share. Real-time presence, cursors, comments, undo and redo. The canvas never sits behind an auth wall, so the friction to start is "open the link, start drawing."
+A workspace for documents of every kind (pages, diagrams, boards, sheets and forms), made together in real time, that works without signing in. Open a link, write, draw, share. Real-time presence, cursors, comments, undo and redo. Nothing sits behind an auth wall, so the friction to start is "open the link, start working."
 
-**Live at [livediagram.app](https://livediagram.app).** MIT-licensed and self-hostable end-to-end.
+**Live at [docs.nu](https://docs.nu).** MIT-licensed and self-hostable end-to-end.
 
 ```
 apps/        marketing site + editor + telemetry dashboard + help centre + community + api + mcp server + router + cli
@@ -14,14 +14,14 @@ marketing/   off-site copy + media for listings and promotion (see docs/specs/01
 
 ## Start here
 
-| If you want to...                                     | Read                                                                           |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Understand what livediagram does and where it's going | [docs/README.md](docs/README.md)                                               |
-| Run it on your machine                                | [docs/development/local-development.md](docs/development/local-development.md) |
-| Host it on your own Cloudflare account                | [docs/operations/self-hosting.md](docs/operations/self-hosting.md)             |
-| See the repo's shape (apps, packages, deploy)         | [docs/development/architecture.md](docs/development/architecture.md)           |
-| Propose a change                                      | [docs/development/contributing.md](docs/development/contributing.md)           |
-| Read the spec for a specific behaviour                | [docs/specs/README.md](docs/specs/README.md)                                   |
+| If you want to...                                 | Read                                                                           |
+| ------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Understand what LiveDoc does and where it's going | [docs/README.md](docs/README.md)                                               |
+| Run it on your machine                            | [docs/development/local-development.md](docs/development/local-development.md) |
+| Host it on your own Cloudflare account            | [docs/operations/self-hosting.md](docs/operations/self-hosting.md)             |
+| See the repo's shape (apps, packages, deploy)     | [docs/development/architecture.md](docs/development/architecture.md)           |
+| Propose a change                                  | [docs/development/contributing.md](docs/development/contributing.md)           |
+| Read the spec for a specific behaviour            | [docs/specs/README.md](docs/specs/README.md)                                   |
 
 ## The 30-second tour
 
@@ -31,7 +31,7 @@ marketing/   off-site copy + media for listings and promotion (see docs/specs/01
 - **Telemetry** at `/telemetry` is the public anonymous-events dashboard (off in OSS forks by default).
 - **Help** at `/help` is the static help centre (guides, feature docs, troubleshooting).
 - **Community** at `/community` is the public gallery of shared documents: browse, like and copy what people publish ([Community](docs/specs/025-community/community.md)).
-- **MCP** at `mcp.livediagram.app` is a Cloudflare Worker that exposes the document tools to AI clients (Claude and other MCP hosts) over OAuth — its own host, not a router path.
+- **MCP** at `mcp.docs.nu` is a Cloudflare Worker that exposes the document tools to AI clients (Claude and other MCP hosts) over OAuth — its own host, not a router path.
 - **Router** stitches the six under one hostname.
 - **CLI** (`apps/cli`) is `livedoc`, the command line agents and scripts read, lint and change documents with, published on npm as `@livedoc/cli`. It also links a repository to its diagrams and opens a document inside a developer tool ([CLI](docs/specs/015-api/cli.md), [Repositories](docs/specs/027-repositories/README.md), [Workbench embeds](docs/specs/013-workspace/workbench-embeds.md)).
 
@@ -46,10 +46,10 @@ The whole stack runs on Cloudflare Workers (Static Assets for the Next.js apps).
 
 ## Security
 
-Found a vulnerability? Please report it privately through [GitHub's advisory form](https://github.com/livediagram-app/livediagram.app/security/advisories/new), never in a public issue. See [`SECURITY.md`](SECURITY.md) and the [full policy](https://livediagram.app/help/policies/report-a-vulnerability/).
+Found a vulnerability? Please report it privately through [GitHub's advisory form](https://github.com/webbertakken/livedoc/security/advisories/new), never in a public issue. See [`SECURITY.md`](SECURITY.md) and the [full policy](https://docs.nu/help/policies/report-a-vulnerability/).
 
 ## License
 
-[MIT](LICENSE). Anyone can self-host. A free hosted version runs alongside at [livediagram.app](https://livediagram.app); there's **no paid tier and no plan to introduce one** ([`docs/specs/002-project-scope/open-source-and-business-model.md`](docs/specs/002-project-scope/open-source-and-business-model.md)). Sign-in runs on better-auth inside the api worker, off until its secret is set. Its SaaS integrations are all optional — Google (sign-in), Resend (transactional email and sign-in codes), and OpenAI (the AI assistant), each gated on its own key — and the editor runs fully without any of them.
+[MIT](LICENSE). Anyone can self-host. A free hosted version runs alongside at [docs.nu](https://docs.nu); there's **no paid tier and no plan to introduce one** ([`docs/specs/002-project-scope/open-source-and-business-model.md`](docs/specs/002-project-scope/open-source-and-business-model.md)). Sign-in runs on better-auth inside the api worker, off until its secret is set. Its SaaS integrations are all optional — Google (sign-in), Resend (transactional email and sign-in codes), and OpenAI (the AI assistant), each gated on its own key — and the editor runs fully without any of them.
 
-Icon artwork includes Lucide (ISC) and Feather (MIT); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Every third-party work the deployed apps ship is credited, with its licence and notices, on the generated [/licences](https://livediagram.app/licences) page ([Third-party licences](docs/specs/002-project-scope/third-party-licences.md)).
+Icon artwork includes Lucide (ISC) and Feather (MIT); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Every third-party work the deployed apps ship is credited, with its licence and notices, on the generated [/licences](https://docs.nu/licences) page ([Third-party licences](docs/specs/002-project-scope/third-party-licences.md)).

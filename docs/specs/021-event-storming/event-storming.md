@@ -20,7 +20,7 @@ lives in `plans/0003-event-storming.md`.
 
 ## Why a template, not a new surface
 
-livediagram's "diagram types" are template kinds
+LiveDoc's "diagram types" are template kinds
 (`packages/templates/src/templates.ts`): a `TemplateKind`, a catalogue
 entry, a pure element builder, a preview tile, and per-kind canvas
 overrides. Event storming fits that mould exactly — it is ordinary
@@ -1548,12 +1548,12 @@ hundred small notes.
   ordinary draft bar in the editor — **Add** or **Discard** — because a draft is
   derived from the tab's elements; nothing new to learn, nothing lands
   without the author.
-- **The photograph never goes to livediagram.** The agent holds it; only the
+- **The photograph never goes to LiveDoc.** The agent holds it; only the
   notes it read cross the wire, as they would if the author typed them.
 - **Discoverable, never required.** The help centre's photo-import article
   and the MCP prompt list mention it; the editor does not nag. No tier, no
   flag: whoever has an agent can use it, whoever does not loses nothing.
-- **A CLI is the same tool without an agent**: `livediagram import-wall
+- **A CLI is the same tool without an agent**: `LiveDoc import-wall
 <photo>` with the author's own key (a flash-class vision model) or a local
   one, tiled for small notes, writing the same draft through the API.
 
