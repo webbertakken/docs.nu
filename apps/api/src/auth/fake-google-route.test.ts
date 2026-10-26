@@ -51,3 +51,25 @@ describe('routeGoogleTokenCallsToFake', () => {
     expect(error).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('routeGoogleTokenCallsToFake, called again', () => {
+  it('wraps fetch once, follows a new origin, and stays quiet once routed', async () => {
+    const seen: string[] = [];
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      seen.push(new Request(input).url);
+      return new Response('{}');
+    });
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {});
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    routeGoogleTokenCallsToFake(envWith('http://127.0.0.1:8797'));
+    const wrapped = globalThis.fetch;
+    routeGoogleTokenCallsToFake(envWith('http://127.0.0.1:8797'));
+    routeGoogleTokenCallsToFake(envWith('http://localhost:8798'));
+    routeGoogleTokenCallsToFake(envWith('https://elsewhere.example'));
+    expect(globalThis.fetch).toBe(wrapped);
+    expect(info).toHaveBeenCalledTimes(2);
+    expect(error).not.toHaveBeenCalled();
+    await fetch('https://oauth2.googleapis.com/token');
+    expect(seen).toEqual(['http://localhost:8798/token']);
+  });
+});
