@@ -20,22 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type { Env } from '../types';
 import { sendEmail } from './client';
-import {
-  type RenderedEmail,
-  accountDeletedEmail,
-  activationEmail,
-  commentNotificationEmail,
-  documentJoinedEmail,
-  firstShareEmail,
-  inviteResponseEmail,
-  milestoneEmail,
-  teamInviteEmail,
-  tokenExpiringEmail,
-  week1Email,
-  week2Email,
-  welcomeEmail,
-  winBackEmail,
-} from './templates';
+import { everyEmail } from './test-email-fixtures';
 
 function devVars(): Record<string, string> {
   try {
@@ -64,30 +49,12 @@ const ENABLED = nodeEnv.RESEND_LIVE_TEST === '1' && !!TO && !!KEY;
 
 const env = {
   RESEND_API_KEY: KEY,
-  EMAIL_FROM: vars.EMAIL_FROM ?? 'livediagram <onboarding@resend.dev>',
-  APP_BASE_URL: vars.APP_BASE_URL ?? 'https://livediagram.app',
+  EMAIL_FROM: vars.EMAIL_FROM ?? 'LiveDoc <onboarding@resend.dev>',
+  APP_BASE_URL: vars.APP_BASE_URL ?? 'https://docs.nu',
 } as unknown as Env;
 
 describe.skipIf(!ENABLED)('live email send (manual harness)', () => {
-  const cases: Record<string, RenderedEmail> = {
-    // Onboarding series
-    welcome: welcomeEmail(env),
-    'week1-explorer': week1Email(env),
-    'week2-teams': week2Email(env),
-    activation: activationEmail(env),
-    'win-back': winBackEmail(env),
-    milestone: milestoneEmail(env, 10),
-    'first-share': firstShareEmail(env),
-    // Transactional
-    'team-invite': teamInviteEmail(env, 'Acme Inc'),
-    'account-deleted': accountDeletedEmail(env),
-    'token-expiry': tokenExpiringEmail(env, 'CI deploy token', Date.UTC(2026, 0, 5)),
-    // Opt-out notifications
-    'comment-notification': commentNotificationEmail(env, 'Q3 Roadmap', 'diagram-id-123', 'Anna'),
-    'document-joined': documentJoinedEmail(env, 'Q3 Roadmap', 'Anna'),
-    'invite-accepted': inviteResponseEmail(env, 'Acme Inc', 'sam@example.com', true),
-    'invite-declined': inviteResponseEmail(env, 'Acme Inc', 'sam@example.com', false),
-  };
+  const cases = everyEmail(env);
   for (const [name, msg] of Object.entries(cases)) {
     it(`sends ${name} to ${TO}`, async () => {
       const res = await sendEmail(env, { to: TO!, ...msg });

@@ -54,7 +54,7 @@ describe('brand icon', () => {
     );
     expect(
       readFileSync(
-        fileURLToPath(new URL('apps/marketing/public/email/livediagram-mark-64.png', REPO)),
+        fileURLToPath(new URL('apps/marketing/public/email/livedoc-mark-64.png', REPO)),
       ).equals(mark),
       REGENERATE,
     ).toBe(true);

@@ -16,7 +16,7 @@ const MUTED = '#475569';
 // The brand prism's light-to-deep sky run, for the band across the top of the
 // card. Outlook ignores the gradient and paints BRAND underneath instead.
 const BAND_GRADIENT = 'linear-gradient(90deg,#38bdf8 0%,#0ea5e9 45%,#1d4ed8 100%)';
-// The page behind the card: brand-50, so the frame reads livediagram before a
+// The page behind the card: brand-50, so the frame reads LiveDoc before a
 // word is read.
 const CANVAS = '#f0f9ff';
 
@@ -24,14 +24,14 @@ const CANVAS = '#f0f9ff';
 // inline SVG: Gmail and Outlook drop SVG, and most clients block data: images.
 // `pnpm icons:brand` writes it into the marketing app's public/email/, a path kept
 // for email alone because every message ever sent points at it. 64px, 2x the slot.
-const LOGO_PATH = '/email/livediagram-mark-64.png';
+const LOGO_PATH = '/email/livedoc-mark-64.png';
 const LOGO_SIZE = 28;
 
 // Default sign-off, used by the onboarding emails (their recipients all have an
 // account). The invite + account-deleted builders pass their own, since those
 // recipients may not have (or no longer have) an account.
 const ACCOUNT_FOOTER =
-  'You’re receiving this because you have a livediagram account. The editor is free and open source.';
+  'You’re receiving this because you have a LiveDoc account. The editor is free and open source.';
 
 // docs/specs/014-identity/transactional-email.md: footer for an opt-out notification email, the reason plus a link to
 // the settings where the recipient can turn the category off in one click.
@@ -46,7 +46,7 @@ function manageNotificationsFooter(env: Env, reason: string): string {
 function tipsFooter(env: Env): string {
   return manageNotificationsFooter(
     env,
-    'You’re receiving this because you have a livediagram account and tips and check-ins are on.',
+    'You’re receiving this because you have a LiveDoc account and tips and check-ins are on.',
   );
 }
 
@@ -110,7 +110,7 @@ type Section = {
   footer?: string;
 };
 
-// The mark + "live"/"diagram" wordmark, linked home. A table rather than flex so
+// The mark + "Live"/"Doc" wordmark, linked home. A table rather than flex so
 // the two sit on one baseline in Outlook too. The image's alt is empty because
 // the wordmark beside it already says the name when images are blocked.
 function lockup(base: string, fontSize: number, centred = false): string {
@@ -118,7 +118,7 @@ function lockup(base: string, fontSize: number, centred = false): string {
   const margin = centred ? 'margin:0 auto' : 'margin:0';
   return `<a href="${base}" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="${margin}"><tr>
           <td style="padding-right:10px;vertical-align:middle"><img src="${base}${LOGO_PATH}" width="${mark}" height="${mark}" alt="" style="display:block;border:0;outline:none;width:${mark}px;height:${mark}px"></td>
-          <td style="vertical-align:middle;font-size:${fontSize}px;font-weight:600;letter-spacing:-0.3px;color:${INK}"><span style="color:${WORDMARK_ACCENT}">live</span>diagram</td>
+          <td style="vertical-align:middle;font-size:${fontSize}px;font-weight:600;letter-spacing:-0.3px;color:${INK}"><span style="color:${WORDMARK_ACCENT}">Live</span>Doc</td>
         </tr></table></a>`;
 }
 
@@ -167,7 +167,7 @@ function shell(env: Env, section: Section): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
       <tr><td align="center" style="padding:20px 32px 0">
         ${lockup(base, 14, true)}
-        <p style="margin:8px 0 0;color:#94a3b8;font-size:12px;line-height:1.6">Diagram, draw and make pages together, live. Free and open source. <a href="${base}" style="color:${WORDMARK_ACCENT};text-decoration:none">${base.replace(/^https?:\/\//, '')}</a></p>
+        <p style="margin:8px 0 0;color:#94a3b8;font-size:12px;line-height:1.6">Documents of every kind, together, in real time. Free and open source. <a href="${base}" style="color:${WORDMARK_ACCENT};text-decoration:none">${base.replace(/^https?:\/\//, '')}</a></p>
       </td></tr>
     </table>
   </td></tr></table>
@@ -178,18 +178,18 @@ export function welcomeEmail(env: Env): RenderedEmail {
   const base = appBaseUrl(env);
   return {
     kind: 'Welcome',
-    subject: 'Welcome to livediagram',
+    subject: 'Welcome to LiveDoc',
     html: shell(env, {
-      heading: 'Welcome, let’s draw something',
+      heading: 'Welcome, let’s make something',
       intro:
-        'livediagram is a fast, no-friction canvas for diagrams. Here’s how to get your first one going:',
+        'LiveDoc is a free workspace for documents of every kind, made together in real time. Here’s how to get your first one going:',
       points: [
         '<strong>Drop a shape</strong> from the palette, double-click it to type, and drag the corners to resize.',
         '<strong>Connect things</strong> by hovering an element’s edge and dragging an arrow to another, and the arrow stays pinned as you move them.',
         '<strong>Start from a template</strong> (flowchart, mind map, kanban, SWOT and more) or pick one of the built-in themes for an instant look.',
       ],
       outro: 'Everything autosaves as you go, so you can just start and come back later.',
-      ctaText: 'Start drawing',
+      ctaText: 'Start a document',
       ctaHref: `${base}/new`,
     }),
   };
@@ -220,9 +220,9 @@ export function week2Email(env: Env): RenderedEmail {
   const base = appBaseUrl(env);
   return {
     kind: 'Week2',
-    subject: 'Bring your team onto the canvas',
+    subject: 'Bring your team along',
     html: shell(env, {
-      heading: 'Diagrams are better together',
+      heading: 'Documents are better together',
       intro:
         'If you’re working with other people, a team gives everyone a shared home for documents:',
       points: [
@@ -230,7 +230,7 @@ export function week2Email(env: Env): RenderedEmail {
         '<strong>A shared folder</strong> every member can open and edit (no more passing links around).',
         '<strong>Admin and Member roles</strong>: admins manage who’s in the team, everyone else just gets to work.',
       ],
-      outro: 'The canvas itself still needs no account. Teams just add a shared home on top.',
+      outro: 'LiveDoc itself still needs no account. Teams just add a shared home on top.',
       ctaText: 'Create a team',
       ctaHref: `${base}/explorer/team`,
       footer: tipsFooter(env),
@@ -263,7 +263,7 @@ function teamInviteSection(
     ctaText: 'View your invite',
     ctaHref: `${appBaseUrl(env)}/explorer/invites`,
     footer:
-      'You’re receiving this because someone invited you to a team on livediagram. If it wasn’t expected, you can safely ignore it, nothing happens unless you accept.',
+      'You’re receiving this because someone invited you to a team on LiveDoc. If it wasn’t expected, you can safely ignore it, nothing happens unless you accept.',
   };
 }
 
@@ -282,14 +282,14 @@ export function teamInviteEmail(
   const name = teamNames(teamName);
   return {
     kind: 'TeamInvite',
-    subject: `You’ve been invited to ${name.text} on livediagram`,
+    subject: `You’ve been invited to ${name.text} on LiveDoc`,
     html: shell(
       env,
       teamInviteSection(
         env,
         {
           heading: `You’re invited to ${name.html}`,
-          intro: `Someone invited you to join <strong>${name.html}</strong> on livediagram, a shared space for documents you and your teammates can open and edit together.`,
+          intro: `Someone invited you to join <strong>${name.html}</strong> on LiveDoc, a shared space for documents you and your teammates can open and edit together.`,
         },
         declineToken,
       ),
@@ -301,19 +301,19 @@ export function teamInviteEmail(
 // one says the invite closes in a week, which is when it expires.
 const REMINDER_COPY: Record<1 | 2 | 3, (team: { html: string; text: string }) => TeamInviteCopy> = {
   1: (team) => ({
-    subject: `Reminder: you’re invited to ${team.text} on livediagram`,
+    subject: `Reminder: you’re invited to ${team.text} on LiveDoc`,
     heading: `Your invite to ${team.html} is waiting`,
-    intro: `Yesterday someone invited you to join <strong>${team.html}</strong> on livediagram, a shared space for documents you and your teammates can open and edit together.`,
+    intro: `Yesterday someone invited you to join <strong>${team.html}</strong> on LiveDoc, a shared space for documents you and your teammates can open and edit together.`,
   }),
   2: (team) => ({
     subject: `Your invite to ${team.text} is still waiting`,
     heading: `Still thinking about ${team.html}?`,
-    intro: `A week ago someone invited you to join <strong>${team.html}</strong> on livediagram. The invite is still open whenever you are ready.`,
+    intro: `A week ago someone invited you to join <strong>${team.html}</strong> on LiveDoc. The invite is still open whenever you are ready.`,
   }),
   3: (team) => ({
     subject: `Last reminder: your invite to ${team.text} closes in a week`,
     heading: `Your invite to ${team.html} closes soon`,
-    intro: `Someone invited you to join <strong>${team.html}</strong> on livediagram three weeks ago. This is the last reminder: the invite closes in a week if nobody answers it.`,
+    intro: `Someone invited you to join <strong>${team.html}</strong> on LiveDoc three weeks ago. This is the last reminder: the invite closes in a week if nobody answers it.`,
   }),
 };
 
@@ -351,14 +351,14 @@ export function accountDeletedEmail(env: Env): RenderedEmail {
   const base = appBaseUrl(env);
   return {
     kind: 'AccountDeleted',
-    subject: 'Your livediagram account has been deleted',
+    subject: 'Your LiveDoc account has been deleted',
     html: shell(env, {
       heading: 'Your account has been deleted',
       intro:
-        'This confirms that your livediagram account and the documents stored under it have been permanently removed, as you requested. There’s nothing left for you to do.',
+        'This confirms that your LiveDoc account and the documents stored under it have been permanently removed, as you requested. There’s nothing left for you to do.',
       outro:
-        'If this wasn’t you, or you change your mind, you’re always welcome back. The canvas is free and needs no account to start.',
-      ctaText: 'Start a new diagram',
+        'If this wasn’t you, or you change your mind, you’re always welcome back. LiveDoc is free and needs no account to start.',
+      ctaText: 'Start a new document',
       ctaHref: `${base}/new`,
       footer:
         'This is a one-time confirmation of your account deletion. We won’t send any further email to this address.',
@@ -480,7 +480,7 @@ export function actionAssignedEmail(
             ctaText: 'Open the document',
             ctaHref: `${base}/document/${encodeURIComponent(document.id)}`,
           }
-        : { ctaText: 'Open livediagram', ctaHref: `${base}/explorer` }),
+        : { ctaText: 'Open LiveDoc', ctaHref: `${base}/explorer` }),
       footer: manageNotificationsFooter(
         env,
         'You’re receiving this because a teammate assigned you an action.',
@@ -575,7 +575,7 @@ export function tokenExpiringEmail(
   const when = `${EXPIRY_MONTHS[d.getUTCMonth()]!} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
   return {
     kind: 'TokenExpiring',
-    subject: 'Your livediagram API token expires soon',
+    subject: 'Your LiveDoc API token expires soon',
     html: shell(env, {
       heading: 'An API token is about to expire',
       intro: `Your API token <strong>${name}</strong> expires on ${when}. Once it lapses, any script or connected tool using it will stop being able to reach your documents.`,
@@ -588,7 +588,7 @@ export function tokenExpiringEmail(
       ctaText: 'Manage your tokens',
       ctaHref: `${base}/explorer?settings=tokens`,
       footer:
-        'You’re receiving this because an API token on your livediagram account is nearing its expiry.',
+        'You’re receiving this because an API token on your LiveDoc account is nearing its expiry.',
     }),
   };
 }
@@ -599,18 +599,18 @@ export function activationEmail(env: Env): RenderedEmail {
   const base = appBaseUrl(env);
   return {
     kind: 'Activation',
-    subject: 'Your canvas is waiting',
+    subject: 'Your workspace is waiting',
     html: shell(env, {
       heading: 'Ready when you are',
       intro:
-        'You signed up for livediagram but haven’t made a diagram yet. It takes about thirty seconds to get going:',
+        'You signed up for LiveDoc but haven’t made a document yet. It takes about thirty seconds to get going:',
       points: [
         'Open a blank canvas and drop a shape, or start from a template (flowchart, mind map, kanban and more).',
         'Double-click to type, drag from an edge to connect, and it all autosaves as you go.',
         'Pick a theme for an instant look you can change any time.',
       ],
-      outro: 'No pressure: the canvas is free and always here.',
-      ctaText: 'Make your first diagram',
+      outro: 'No pressure: LiveDoc is free and always here.',
+      ctaText: 'Make your first document',
       ctaHref: `${base}/new`,
       footer: tipsFooter(env),
     }),
@@ -722,10 +722,10 @@ export function winBackEmail(env: Env): RenderedEmail {
     html: shell(env, {
       heading: 'It’s been a while',
       intro:
-        'You haven’t opened livediagram in a few weeks, and your documents are right where you left them. A few things you can pick back up:',
+        'You haven’t opened LiveDoc in a few weeks, and your documents are right where you left them. A few things you can pick back up:',
       points: [
         'Start something new in seconds from a template or theme.',
-        'Share a document with a live link, or bring a team onto the canvas.',
+        'Share a document with a live link, or bring a team along.',
         'Export to PDF / PNG / SVG / Markdown whenever you need a copy.',
       ],
       outro: 'No rush: it’s all still here whenever you want it.',
@@ -743,10 +743,10 @@ export function milestoneEmail(env: Env, count: number): RenderedEmail {
   const base = appBaseUrl(env);
   return {
     kind: 'Milestone',
-    subject: `You’ve made ${count} documents on livediagram`,
+    subject: `You’ve made ${count} documents on LiveDoc`,
     html: shell(env, {
       heading: `That’s ${count} documents`,
-      intro: `Nice work, you’ve created <strong>${count}</strong> documents on livediagram. Thanks for building with us.`,
+      intro: `Nice work, you’ve created <strong>${count}</strong> documents on LiveDoc. Thanks for building with us.`,
       outro: 'Here’s to the next one.',
       ctaText: 'Open your Explorer',
       ctaHref: `${base}/explorer`,
@@ -776,8 +776,7 @@ export function firstShareEmail(env: Env): RenderedEmail {
         'Set a link to <strong>expire</strong> after a week, a month, or six months.',
         'Revoke a link any time from the Share dialog, and it stops working instantly.',
       ],
-      outro:
-        'Collaboration needs no account, so whoever you share with can jump straight onto the canvas.',
+      outro: 'Collaboration needs no account, so whoever you share with can jump straight in.',
       ctaText: 'Open your Explorer',
       ctaHref: `${base}/explorer`,
       footer: manageNotificationsFooter(

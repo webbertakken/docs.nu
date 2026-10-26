@@ -5,7 +5,7 @@
 //   - marketing/media/icons/: transparent PNGs at Google Drive's sizes, and
 //     white-tile PNGs (also copied to apps/marketing/public/ for the manifest)
 //   - apps/{help,community}/app/icon.png: the 256px tile, their favicon's PNG fallback
-//   - apps/marketing/public/email/livediagram-mark-64.png: the transparent 64px mark
+//   - apps/marketing/public/email/livedoc-mark-64.png: the transparent 64px mark
 //     the api's emails show beside the wordmark (2x their 28px slot)
 // Run via `pnpm icons:brand` from the repo root. apps/marketing/lib/brand-icon.test.ts
 // fails when a committed SVG drifts from the module.
@@ -96,7 +96,7 @@ for (const app of ['help', 'community']) {
 mkdirSync(`${root}apps/marketing/public/email`, { recursive: true });
 copyFileSync(
   `${root}marketing/media/icons/livediagram-icon-transparent-64.png`,
-  `${root}apps/marketing/public/email/livediagram-mark-64.png`,
+  `${root}apps/marketing/public/email/livedoc-mark-64.png`,
 );
-console.log('brand-icons: apps/marketing/public/email/livediagram-mark-64.png');
+console.log('brand-icons: apps/marketing/public/email/livedoc-mark-64.png');
 await browser.close();
