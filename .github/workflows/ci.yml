@@ -100,7 +100,11 @@ jobs:
         run: pnpm turbo run test:coverage --concurrency=2 --filter=!@livediagram/live
 
       # Every workspace's lcov above, reported on Codecov; see the upload in Editor unit tests.
+      # Codecov is a report, never a gate: a hung upload once ran the job into its timeout after every test
+      # had passed, so the step has its own short budget and cannot fail the job.
       - name: Upload coverage
+        timeout-minutes: 3
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         with:
           use_oidc: true
@@ -150,7 +154,11 @@ jobs:
 
       # OIDC, so no Codecov secret; a pull request from a fork uploads tokenless instead. A Codecov
       # outage must not hold back a merge: the upload logs its error and the job still passes.
+      # Codecov is a report, never a gate: a hung upload once ran the job into its timeout after every test
+      # had passed, so the step has its own short budget and cannot fail the job.
       - name: Upload coverage
+        timeout-minutes: 3
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         with:
           use_oidc: true
