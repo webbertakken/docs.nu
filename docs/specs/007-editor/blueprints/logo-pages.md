@@ -84,7 +84,7 @@ Exclude), **Wordmark**, **Logo Kit**.
   is medium). Synced like every preference.
 - Session only, never stored: the mirrored pages (none at open).
 - Per page, in this browser (`lib/logo-page-guides.ts`, local storage key
-  `livediagram:v2:logo-page-guides`, `{ [logoPageGuidesKey(tabId, pageId)]: boolean }`, the key
+  `livedoc:v2:logo-page-guides`, `{ [logoPageGuidesKey(tabId, pageId)]: boolean }`, the key
   `<tabId>:<pageId>` since page ids repeat across tabs, the latest `LOGO_PAGE_GUIDES_MAX` = 200): a page's own Show Guides; absent follows `logoGuides`. Not a synced preference: the
   api caps preferences at 4 KB.
 - Migration: none. Older readers see `kind: 'logo'` as infographic and the artboard as A4; they

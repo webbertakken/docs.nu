@@ -15,7 +15,7 @@ const MAX_TOKENS = 10;
 // Two instances can be mounted at once (the Explorer's, for its timeline
 // token menus, and the Settings token manager's), so a create or revoke in
 // one tells the others to re-read rather than leaving them stale.
-const TOKENS_CHANGED_EVENT = 'livediagram:tokens-changed';
+const TOKENS_CHANGED_EVENT = 'livedoc:tokens-changed';
 const announceChange = () => window.dispatchEvent(new Event(TOKENS_CHANGED_EVENT));
 
 export type TokensController = {

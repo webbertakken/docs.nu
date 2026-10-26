@@ -94,7 +94,7 @@ export function setClientNavigator(
 - **One reload guard** (`apps/live/lib/reload-guard.ts`): `claimReloadIn(storage, key, url, now,
 windowMs)`, self-contained so the pre-boot guard embeds its source (`claimReloadIn.toString()`);
   `claimReload(url, storage, now)` is the app's call. A `sessionStorage` map under
-  `RELOAD_GUARD_KEY` (`livediagram:stale-chunk-reloads`) of page (`url` without its hash) to time;
+  `RELOAD_GUARD_KEY` (`livedoc:stale-chunk-reloads`) of page (`url` without its hash) to time;
   true, and recorded, when the page has no entry inside `RELOAD_GUARD_WINDOW_MS`; entries older than
   the window are pruned on write; junk restarts the map; a read or write that throws refuses.
 - **Hand-over:** `installStaleBuildNavigation` sets `window[APP_RECOVERY_FLAG]`

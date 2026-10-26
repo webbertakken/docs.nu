@@ -92,7 +92,7 @@ export async function apiDeleteAccount(): Promise<DeleteAccountOutcome> {
 // Guest → authed ownership migration. Called once on first sign-in
 // from editor-page.tsx + new/page.tsx when both conditions hold:
 //   - the session is active (a Bearer token will be sent)
-//   - `livediagram:v2:self-id` is still in localStorage
+//   - `livedoc:v2:self-id` is still in localStorage
 // On success the caller clears the localStorage id so subsequent
 // loads use only the account id.
 //

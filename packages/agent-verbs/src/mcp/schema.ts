@@ -48,7 +48,7 @@ import {
   truncateName,
 } from '@livediagram/document';
 
-export const SCHEMA_RESOURCE_URI = 'livediagram://schema/elements';
+export const SCHEMA_RESOURCE_URI = 'livedoc://schema/elements';
 
 const types = [...ELEMENT_TYPES].join(', ');
 const anchors = [...ANCHORS].join(', ');

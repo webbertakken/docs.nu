@@ -17,7 +17,7 @@ import { track } from '@/lib/telemetry';
 import { useLatest } from '@/hooks/ui/useLatest';
 
 /** Where a document's baton token lives while the tab is open. */
-const tokenKey = (documentId: string) => `livediagram:facilitator:${documentId}`;
+const tokenKey = (documentId: string) => `livedoc:facilitator:${documentId}`;
 
 function readToken(documentId: string | null): string | null {
   if (!documentId || typeof window === 'undefined') return null;

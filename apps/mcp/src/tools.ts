@@ -243,7 +243,7 @@ export function registerTools(server: McpServer, env: Env): void {
       if (!t.elements || !isValidTab(candidate)) {
         return errorResult(
           `Invalid elements in tab "${t.name}". Provide "elements" (or a "template" kind ` +
-            'from list_templates). Check the livediagram://schema/elements resource: every ' +
+            'from list_templates). Check the livedoc://schema/elements resource: every ' +
             'element needs id/type/x/y/width/height (arrows need from/to), and arrays must ' +
             'be well-formed.',
         );
@@ -332,7 +332,7 @@ export function registerTools(server: McpServer, env: Env): void {
     if (!args.template && !input.graph && !args.elements && !dashboard) {
       return errorResult(
         'Invalid input. Provide a "graph" (nodes + edges), "mermaid", "elements", or a "template" kind ' +
-          'from list_templates. Check the livediagram://schema/elements resource.',
+          'from list_templates. Check the livedoc://schema/elements resource.',
       );
     }
     const drawn = args.elements ? packFreehandPoints(args.elements) : null;

@@ -297,7 +297,7 @@ A signed-in author can narrow the gallery to their own posts, to review them and
   needs an account.**
 - The rest of the Community needs no identity, so the Community app reads the session (`apps/community/lib/session.ts`,
   the same plain-`fetch` layer the editor uses, `@livediagram/account-session`) only once My Shares is on. My Shares
-  is offered unless this browser last learned that the host has no sign-in (`livediagram:v2:sign-in-offered`). The
+  is offered unless this browser last learned that the host has no sign-in (`livedoc:v2:sign-in-offered`). The
   api answers `GET /api/community/mine` (session token required, never cached); the public list ignores `is:mine`.
 - Turning it on is tracked as `Community·Selected·Mine`.
 

@@ -26,12 +26,12 @@ async function openAs(
   await ctx.addInitScript(
     ({ o, sig }) => {
       if (o) {
-        localStorage.setItem('livediagram:v2:self-id', o);
-        if (sig) localStorage.setItem('livediagram:v2:self-sig', sig);
-        localStorage.setItem('livediagram:v2:name-confirmed', '1');
+        localStorage.setItem('livedoc:v2:self-id', o);
+        if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
+        localStorage.setItem('livedoc:v2:name-confirmed', '1');
       }
       localStorage.setItem(
-        'livediagram:user-preferences:v1',
+        'livedoc:user-preferences:v1',
         JSON.stringify({ planTourSeen: true, planTourTracks: ['boards', 'sheets'] }),
       );
     },

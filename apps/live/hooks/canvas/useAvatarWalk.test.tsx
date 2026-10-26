@@ -16,7 +16,7 @@ function setup(onPresence = vi.fn(), elements: Element[] = []) {
       useAvatarWalk({
         active,
         config: DEFAULT_AVATAR_CONFIG,
-        onToggleGender: vi.fn(),
+        onToggleFigure: vi.fn(),
         elements,
         mainRef: { current: null },
         wrapperRef: { current: null },
@@ -159,7 +159,7 @@ describe('useAvatarWalk with a drink', () => {
         useAvatarWalk({
           active: true,
           config: DEFAULT_AVATAR_CONFIG,
-          onToggleGender: vi.fn(),
+          onToggleFigure: vi.fn(),
           elements: [cooler],
           mainRef: { current: null },
           wrapperRef: { current: null },
@@ -192,7 +192,7 @@ describe('useAvatarWalk with a status', () => {
           active: true,
           config: DEFAULT_AVATAR_CONFIG,
           status,
-          onToggleGender: vi.fn(),
+          onToggleFigure: vi.fn(),
           elements: [],
           mainRef: { current: null },
           wrapperRef: { current: null },

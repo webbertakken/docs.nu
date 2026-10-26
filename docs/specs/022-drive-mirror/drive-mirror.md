@@ -1,7 +1,7 @@
 # Google Drive mirror
 
 A signed-in user can **mirror My Documents to their own Google Drive**.
-Every document becomes a `.livediagram` file in a folder tree that matches their
+Every document becomes a `.livedoc` file in a folder tree that matches their
 livediagram folders, kept in step both ways while a livediagram tab is open.
 Double-clicking such a file in Drive opens it in livediagram.
 
@@ -149,11 +149,11 @@ this spec does not restate it.
   tester's Drive (each environment makes its own root: its own Google project,
   database and `ldRoot`):
 
-  | Host                                                                                                           | Root folder name            |
-  | -------------------------------------------------------------------------------------------------------------- | --------------------------- |
-  | `livediagram.app`, `www.livediagram.app`                                                                       | `livediagram`               |
-  | `staging.livediagram.app`; loopback (`localhost`, `127.0.0.1`, `::1`, any port), which uses the staging client | `livediagram (staging)`     |
-  | any other host (a self-hosted deployment)                                                                      | `livediagram (self-hosted)` |
+  | Host                                                   | Root folder name        |
+  | ------------------------------------------------------ | ----------------------- |
+  | `docs.nu`, `www.docs.nu`                               | `LiveDoc`               |
+  | loopback (`localhost`, `127.0.0.1`, `::1`, any port)   | `LiveDoc (development)` |
+  | any other host (a preview or a self-hosted deployment) | `LiveDoc (self-hosted)` |
 
   Hosts compare case-insensitively. The name is given only when the root is
   **created**; a root the user renamed keeps its name, and livediagram never
@@ -240,14 +240,14 @@ this spec does not restate it.
 
 ## The file
 
-- **Name:** the document name plus `.livediagram`. Names that Drive would
+- **Name:** the document name plus `.livedoc`. Names that Drive would
   alter are stored as Drive holds them, and the next inbound rename is
   compared against that stored form, never against the livediagram name.
-- **MIME type:** `application/vnd.livediagram+json`, registered as the app's
+- **MIME type:** `application/vnd.livedoc+json`, registered as the app's
   default type for "Open with".
 - **Contents:** a whole-document envelope, the sibling of the per-tab export's
-  `livediagram.tab` envelope (`packages/document/src/export-tab-text.ts`):
-  `{ kind: 'livediagram.document', schemaVersion, exportedAt, document }`, where
+  `livedoc.tab` envelope (`packages/document/src/export-tab-text.ts`):
+  `{ kind: 'livedoc.document', schemaVersion, exportedAt, document }`, where
   `diagram` holds the id, name and every tab with its folders and slide
   deck. Images stay references to livediagram's image store; the file does
   not embed image bytes.
@@ -294,7 +294,7 @@ folder id):
 | In Drive                                             | In livediagram                                                                                         |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | File copied (Drive's "Make a copy")                  | Nothing: livediagram never sees the copy (**verified**, [Copies made in Drive](#copies-made-in-drive)) |
-| File renamed                                         | Document renamed (the `.livediagram` extension is dropped; an empty name keeps the old one)            |
+| File renamed                                         | Document renamed (the `.livedoc` extension is dropped; an empty name keeps the old one)                |
 | File moved to another mirrored folder                | Document moved to that folder                                                                          |
 | File moved to the root folder                        | Document moved to the root of My Documents                                                             |
 | File moved to a folder livediagram cannot see        | Document moved to the root of My Documents, with a notice (see below)                                  |
@@ -375,7 +375,7 @@ copy (below), or **Duplicate** inside livediagram.
 ## Folders livediagram cannot see
 
 Under `drive.file`, a folder the user creates in Drive is invisible to
-livediagram: moving a document's file into it shows up only as "moved to an
+livedoc: moving a document's file into it shows up only as "moved to an
 unknown folder". The user's goal is to shape the tree from either side with
 the same result, so the mirror handles this openly, never silently:
 
@@ -434,7 +434,7 @@ Named constants in one cadence module of the mirror code, with the values and bu
   skips a real change: the start token names the position after the latest
   change, so an equal token means nothing new since the stored one; it only
   saves cost. The arrival catch-up and every requested check use the same gate.
-- **Diagnostic:** with `localStorage['livediagram:v2:drive-diagnostics'] = '1'`
+- **Diagnostic:** with `localStorage['livedoc:v2:drive-diagnostics'] = '1'`
   every check logs `drive: start-token moved=<bool> listed=<n>`, which is how
   the unverified point below (research E-A3) is settled against real Drive.
 - **Writes:** a document is mirrored after 60 seconds without edits, at most
@@ -588,7 +588,7 @@ D1, owned by the api worker:
   failure is traceable from either side. The console lines are trace lines
   ([Console logging](../003-system-architecture/console-logging.md)): shown in
   development, and in production only with the debug flag set
-  (`localStorage['livediagram:debug'] = 'drive-mirror'`); its warnings always.
+  (`localStorage['livedoc:debug'] = 'drive-mirror'`); its warnings always.
 
 ## Self-hosting
 
@@ -637,7 +637,7 @@ What the operator configured (changed only by the operator):
 | JavaScript origins                                       | `https://livediagram.app`, `https://www.livediagram.app` | `https://staging.livediagram.app`, `http://localhost:4000`, `http://localhost:4002` |
 | Redirect URIs                                            | each origin + `/drive/connected`                         | each origin + `/drive/connected`                                                    |
 | Drive UI Open URL                                        | `https://livediagram.app/drive/open`                     | `https://staging.livediagram.app/drive/open`                                        |
-| Default MIME type                                        | `application/vnd.livediagram+json`                       | the same                                                                            |
+| Default MIME type                                        | `application/vnd.livedoc+json`                           | the same                                                                            |
 | Default extension                                        | `livediagram`                                            | the same                                                                            |
 | Scopes                                                   | `drive.file`, `drive.install`                            | the same                                                                            |
 | Automatic consent                                        | off                                                      | off                                                                                 |

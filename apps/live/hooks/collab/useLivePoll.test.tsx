@@ -173,7 +173,7 @@ describe('surviving reconnects and refreshes (docs/specs/012-collaboration/colla
     expect(first?.length).toBeGreaterThan(20);
     expect(second).toBe(first);
     expect(first).not.toBe('me');
-    expect(localStorage.getItem('livediagram:v2:collab-secret')).toBe(first);
+    expect(localStorage.getItem('livedoc:v2:collab-secret')).toBe(first);
   });
 
   it('hosts the poll it starts, until it ends or a peer poll replaces it', () => {

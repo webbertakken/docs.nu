@@ -4,7 +4,7 @@
 // copy covers storage refused.
 import type { StarterId } from '@livediagram/forms';
 
-const KEY = (tabId: string) => `livediagram:pending-form-start:${tabId}`;
+const KEY = (tabId: string) => `livedoc:pending-form-start:${tabId}`;
 const memory = new Map<string, StarterId>();
 
 export function markPendingFormStart(tabId: string, starter: StarterId): void {

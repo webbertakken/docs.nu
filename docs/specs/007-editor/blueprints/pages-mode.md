@@ -223,7 +223,7 @@ page; "template" stays the whole-tab starting point.
 - No migration: every new field is optional and absent on old data; old pages parse unchanged (as
   unchosen infographic pages, their row on the origin).
 - The page you were last on, per person (`lib/last-page.ts`, local storage key
-  `livediagram:v2:last-illustrate-page`, `{ [lastPageKey(documentId, tabId)]: pageId }`,
+  `livedoc:v2:last-illustrate-page`, `{ [lastPageKey(documentId, tabId)]: pageId }`,
   the key `<documentId>:<tabId>` so a tab id repeated across documents never borrows another's
   page, the latest `LAST_PAGE_MAX` = 200 entries, a re-recorded entry moved to the most
   recent, an unchanged write skipped). Read through `safeJson`; a malformed value or a non-string

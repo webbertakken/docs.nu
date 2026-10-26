@@ -13,7 +13,7 @@ import {
   writeLastPage,
 } from './last-page';
 
-const STORAGE_KEY = 'livediagram:v2:last-illustrate-page';
+const STORAGE_KEY = 'livedoc:v2:last-illustrate-page';
 const page = (id: string, x: number): LaidOutPage =>
   ({ id, rect: { x, y: 0, width: 100, height: 140 } }) as unknown as LaidOutPage;
 const row = [page('a', 0), page('b', 140), page('c', 280)];

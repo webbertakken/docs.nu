@@ -214,7 +214,7 @@ const TEXT_PANELS: Record<
     blurb:
       "This tab as a LiveDoc JSON export. Edit it here to copy a variant; your edits don't change the tab.",
     downloadLabel: 'Download .json',
-    ext: 'livediagram-tab.json',
+    ext: 'livedoc-tab.json',
     mime: 'application/json',
     getText: tabToJsonText,
   },

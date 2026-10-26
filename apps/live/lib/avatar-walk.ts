@@ -154,7 +154,7 @@ export function waveFrame(elapsedMs: number, waveForMs: number): number | null {
 
 // Is `point` (canvas coords) on the character? The sprite is drawn centred on
 // its feet, so the box runs half a width either side and a full height up.
-// Used by the right-click gender toggle, which must only fire when the press
+// Used by the right-click figure toggle, which must only fire when the press
 // actually lands on the figure. `lift` raises the box mid-jump so a right-click
 // still hits a character in the air, and `scale` follows the Size choice so a
 // small character isn't clickable well outside itself (nor a tall one short).

@@ -94,7 +94,7 @@ test('an element the person has selected is held from the agent', async ({
   const { link } = (await share.json()) as { link: { code: string } };
   const visitor = await page.context().browser()!.newContext({ baseURL, colorScheme: 'dark' });
   const bea = await visitor.newPage();
-  await bea.addInitScript(() => localStorage.setItem('livediagram:v2:name-confirmed', '1'));
+  await bea.addInitScript(() => localStorage.setItem('livedoc:v2:name-confirmed', '1'));
   await bea.goto(`/document/shared?s=${link.code}`);
   const join = bea.getByRole('button', { name: /^join$/i });
   if (await join.isVisible({ timeout: 5_000 }).catch(() => false)) await join.click();

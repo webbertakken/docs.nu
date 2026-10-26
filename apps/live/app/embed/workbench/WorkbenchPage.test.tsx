@@ -176,7 +176,7 @@ describe('WorkbenchPage', () => {
     rerender(<WorkbenchPage />);
 
     expect(port.send).toHaveBeenCalledTimes(1);
-    expect(port.send).toHaveBeenCalledWith({ type: 'livediagram:ended', v: 1, reason: 'revoked' });
+    expect(port.send).toHaveBeenCalledWith({ type: 'livedoc:ended', v: 1, reason: 'revoked' });
     expect(screen.getByText('editor workbench as Webber ended revoked')).toBeTruthy();
   });
 

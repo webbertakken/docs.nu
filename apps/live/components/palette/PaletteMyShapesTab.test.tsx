@@ -76,7 +76,7 @@ describe('PaletteMyShapesTab', () => {
       dataTransfer: { setData, effectAllowed: '' },
     });
     expect(setData).toHaveBeenCalledWith(
-      'application/x-livediagram-library-shape',
+      'application/x-livedoc-library-shape',
       JSON.stringify({ libraryId: 'l1', itemId: 'a' }),
     );
   });

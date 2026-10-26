@@ -23,7 +23,7 @@ async function tracked(tabs: Tab[] = [tab('t1', 'A'), tab('t2', 'B')]) {
     recorded[t.id] = { rev: i + 1, ...hashes[t.id]! };
   }
   const file: MirrorFile = {
-    kind: 'livediagram.document',
+    kind: 'livedoc.document',
     schemaVersion: 1,
     document: { id: 'd1', name: 'Home', presentation: null, tabs },
     livedocSync: { host: 'https://docs.nu', tabs: recorded },

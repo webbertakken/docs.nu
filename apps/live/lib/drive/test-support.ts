@@ -29,7 +29,7 @@ import {
 import { memorySeenStore } from './tombstones';
 import type { TokenSource } from './token-source';
 
-export const HOST = 'livediagram.test';
+export const HOST = 'livedoc.test';
 export const OWNER = 'user_me';
 export const T0 = Date.parse('2026-09-28T09:00:00Z');
 

@@ -173,7 +173,7 @@ describe('Report This Form', () => {
     expect(await screen.findByText('Thanks. We’ve recorded your report.')).toBeTruthy();
     const body = sentJson(calls[1]!.init) as Record<string, unknown>;
     expect(body).toMatchObject({ reason: 'phishing', note: 'Asks for my bank login' });
-    expect(body.browser).toBe(localStorage.getItem('livediagram:form-browser'));
+    expect(body.browser).toBe(localStorage.getItem('livedoc:form-browser'));
   });
 
   it('says when a report could not be sent, and Cancel closes it', async () => {

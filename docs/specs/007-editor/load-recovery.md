@@ -93,7 +93,7 @@ holding identifiers and states only, never document content:
 - the identity, the same lines on every surface:
   - **Signed in:** yes or no. The editor adds the account id it resolved. The
     help page, which reads no session, reads the signed-in hint the auth bridge
-    keeps in `localStorage` (`livediagram:v2:signed-in`: `1` signed in, `0`
+    keeps in `localStorage` (`livedoc:v2:signed-in`: `1` signed in, `0`
     signed out), which says whether but not who; with no hint it reports
     "unknown".
   - **Guest id in this browser:** only its first 8 characters (a full guest id
@@ -118,21 +118,21 @@ out-of-date browser).
 Repair clears what is safe to lose and keeps what would lose work or identity.
 
 **Cleared:** every `localStorage` and `sessionStorage` key starting with
-`livediagram:` or `livediagram-` that is not kept below. This covers editor
+`livedoc:` or `livediagram-` that is not kept below. This covers editor
 preferences, panel layout, dismissed banners and tours, the recent-documents
 cache, cached share passwords, and the stale-build reload guards.
 
 **Kept, always:**
 
 - the guest identity: `self-id`, `self-sig`, `pending-signed-id`,
-  `name-confirmed` (all under `livediagram:v2:`). Losing the guest id loses
+  `name-confirmed` (all under `livedoc:v2:`). Losing the guest id loses
   every document a guest owns;
 - `collab-key`, its secret half `collab-secret`, and `community-key`, the
   per-browser keys that past answers, votes and
   likes are matched against;
-- Google Drive mirror state (`livediagram:v2:drive-*`,
-  `livediagram:drive-mirror*`);
-- the offline store (IndexedDB `livediagram-offline`): Offline Mode documents
+- Google Drive mirror state (`livedoc:v2:drive-*`,
+  `livedoc:drive-mirror*`);
+- the offline store (IndexedDB `livedoc-offline`): Offline Mode documents
   exist nowhere else;
 - cookies, the session cookie among them: repair never signs anyone out (the
   signed-in hint it clears is written again by the next session read).

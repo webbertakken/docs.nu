@@ -47,7 +47,7 @@ export type OpenWithImportReason = 'no-access' | 'foreign' | 'no-id' | 'copy';
 export type OpenWithOutcome =
   | { kind: 'open'; documentId: string }
   | { kind: 'import'; reason: OpenWithImportReason; name: string }
-  | { kind: 'error'; reason: 'unreadable' | 'not-livediagram' };
+  | { kind: 'error'; reason: 'unreadable' | 'not-livedoc' };
 
 // The telemetry type of an outcome (docs/specs/022-drive-mirror/drive-mirror.md, "Telemetry").
 export function openWithTelemetryType(
@@ -77,8 +77,8 @@ export async function resolveOpenWith(
     file.mimeType === DRIVE_FILE_MIME ||
     file.name.toLowerCase().endsWith(DRIVE_FILE_EXTENSION) ||
     !!documentId;
-  if (!ours) return { kind: 'error', reason: 'not-livediagram' };
-  const name = file.name.replace(/\.livediagram$/i, '') || 'Document';
+  if (!ours) return { kind: 'error', reason: 'not-livedoc' };
+  const name = file.name.replace(/\.livedoc$/i, '') || 'Document';
   if (!documentId) return { kind: 'import', reason: 'no-id', name };
   if (file.appProperties[DRIVE_PROP_ORIGIN] !== deps.host)
     return { kind: 'import', reason: 'foreign', name };

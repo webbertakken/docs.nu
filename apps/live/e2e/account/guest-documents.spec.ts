@@ -39,7 +39,7 @@ async function signInThroughPage(
 // The page's own signed guest identity, once this host has given it one.
 async function guestHeaders(page: Page, baseURL: string): Promise<Record<string, string>> {
   await expect
-    .poll(() => page.evaluate(() => localStorage.getItem('livediagram:v2:self-sig')))
+    .poll(() => page.evaluate(() => localStorage.getItem('livedoc:v2:self-sig')))
     .toBeTruthy();
   return pageOwnerHeaders(page, { Origin: new URL(baseURL).origin });
 }

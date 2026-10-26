@@ -22,8 +22,8 @@ async function personPage(browser: Browser, baseURL: string, name: string | null
     colorScheme: 'dark',
   });
   await ctx.addInitScript(() => {
-    localStorage.setItem('livediagram:v2:name-confirmed', '1');
-    localStorage.setItem('livediagram:user-preferences:v1', JSON.stringify({ tourSeen: true }));
+    localStorage.setItem('livedoc:v2:name-confirmed', '1');
+    localStorage.setItem('livedoc:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
   const pictureRequests: string[] = [];
   await ctx.route(GOOGLE_PICTURES, (route) => {
@@ -157,10 +157,10 @@ test('signed-in collaborators see the picture; anonymous visitors see initials',
 
   // Ann turns the switch off: Bob's roster drops her picture on the next presence update.
   await ann.page.evaluate(() => {
-    const key = 'livediagram:user-preferences:v1';
+    const key = 'livedoc:user-preferences:v1';
     const prefs = JSON.parse(localStorage.getItem(key) ?? '{}') as Record<string, unknown>;
     localStorage.setItem(key, JSON.stringify({ ...prefs, showProfilePicture: false }));
-    window.dispatchEvent(new Event('livediagram:preferences-changed'));
+    window.dispatchEvent(new Event('livedoc:preferences-changed'));
   });
   await expect(annAvatar(bob.page).locator('xpath=..').locator('img')).toHaveCount(0);
 

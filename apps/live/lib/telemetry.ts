@@ -22,7 +22,7 @@ let preferenceListenersAttached = false;
 // User-preference opt-out (docs/specs/007-editor/user-preferences.md). Cached so the hot path doesn't
 // hit localStorage on every track() call (some events fire in bursts:
 // undo/redo, zoom). Invalidated by the same-tab
-// `livediagram:preferences-changed` event the writer dispatches, or
+// `livedoc:preferences-changed` event the writer dispatches, or
 // by the browser's native `storage` event for cross-tab updates.
 // `null` means "not yet read; consult localStorage on next track".
 let cachedOptIn: boolean | null = null;

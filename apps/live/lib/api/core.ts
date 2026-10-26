@@ -290,7 +290,7 @@ export function getSessionSharePassword(): string | null {
 const SHARE_GRANT_CACHE_PREFIX = 'livedoc:share-grant:';
 const SHARE_GRANT_SHAPE = /^spg_[A-Za-z0-9_-]{43}$/;
 // Where browsers kept the password itself before grants: removed on sight, so no copy outlives the change.
-const LEGACY_SHARE_PASSWORD_PREFIX = 'livediagram:share-password:';
+const LEGACY_SHARE_PASSWORD_PREFIX = 'livedoc:share-password:';
 export function readCachedShareGrant(shareCode: string): string | null {
   removeLocalStorageSafe(`${LEGACY_SHARE_PASSWORD_PREFIX}${shareCode}`);
   const raw = readLocalStorageSafe(`${SHARE_GRANT_CACHE_PREFIX}${shareCode}`);

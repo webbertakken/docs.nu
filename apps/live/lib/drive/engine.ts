@@ -427,7 +427,7 @@ export class DriveMirrorEngine {
     this.publish({ state: 'idle', error: offline ? 'offline' : 'failed', progress: null });
   }
 
-  // The `livediagram` folder, by id. Found again by its `ldRoot` after a
+  // The `LiveDoc` root folder, by id. Found again by its `ldRoot` after a
   // reconnect; made in My Drive otherwise. The first page token is taken
   // before anything is written, so every later write reads back as an echo.
   private async ensureRoot(

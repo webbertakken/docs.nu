@@ -131,7 +131,7 @@ grant**, never the password: the resolve (`GET /api/share/:code`) answers a prot
   the password causes): the entry is removed, the session password dropped, and the gate shown afresh.
 - **Lifetime** is otherwise unbounded: the entry stays until it is refused or the visitor clears their site data.
   A revoked link never reaches the cache read (the resolve answers `404` first), so its entry is inert.
-- **No password at rest.** Browsers that kept the password itself, under `livediagram:share-password:<code>`
+- **No password at rest.** Browsers that kept the password itself, under `livedoc:share-password:<code>`
   before grants, have that entry removed the first time the code is read.
 - In an **embed**, browsers partition third-party iframe storage, so the cache is per embedding site
   ([Read-only embeds (`/embed`)](embeds.md)).

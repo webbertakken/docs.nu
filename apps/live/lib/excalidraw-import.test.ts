@@ -72,7 +72,7 @@ describe('Excalidraw import envelope', () => {
   });
 
   it('rejects JSON that is not an excalidraw scene', () => {
-    const r = importOnDiagram('{"kind":"livediagram.tab"}');
+    const r = importOnDiagram('{"kind":"livedoc.tab"}');
     expect(r).toMatchObject({ ok: false });
     if (!r.ok) expect(r.error).toMatch(/excalidraw/i);
   });

@@ -2,7 +2,7 @@
 // Nobody is asked: `defaultSaveLocationFor` decides, and `/new` branches its create on the id. A third store (GitHub,
 // say) is one id in the union, a rule here for who gets it, and one create branch in /new.
 
-export type SaveLocationId = 'livediagram' | 'browser';
+export type SaveLocationId = 'livedoc' | 'browser';
 
 // Where a new document goes when nobody picked (docs/specs/006-document/save-locations.md "The default
 // depends on who is creating"): a guest starts This Browser, so a visitor trying things out never
@@ -12,7 +12,7 @@ export function defaultSaveLocationFor(who: {
   signedIn: boolean;
   signInOffered: boolean;
 }): SaveLocationId {
-  return who.signInOffered && !who.signedIn ? 'browser' : 'livediagram';
+  return who.signInOffered && !who.signedIn ? 'browser' : 'livedoc';
 }
 
 // Whether an id resolves to the browser-only IndexedDB store (Offline Mode,

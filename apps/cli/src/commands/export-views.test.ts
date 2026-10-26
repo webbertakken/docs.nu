@@ -176,7 +176,7 @@ describe('export --all', () => {
 
 describe('a pull file read offline', () => {
   const file: PullFile = {
-    kind: 'livediagram.document',
+    kind: 'livedoc.document',
     schemaVersion: 1,
     exportedAt: NOW,
     document: {

@@ -5,7 +5,7 @@ import { compileQuery, type QueryFile } from './query';
 const file = (over: Partial<QueryFile> = {}): QueryFile => ({
   parents: ['root'],
   trashed: false,
-  mimeType: 'application/vnd.livediagram+json',
+  mimeType: 'application/vnd.livedoc+json',
   appProperties: { ldOrigin: 'docs.nu' },
   ...over,
 });

@@ -49,7 +49,7 @@ export function AvatarWalker({
   // Feet position in canvas coords.
   pos: { x: number; y: number };
   facing: AvatarFacing;
-  // Gender / clothing / hair / size, from the Avatar Panel (or a peer's packet).
+  // Figure / clothing / hair / size, from the Avatar Panel (or a peer's packet).
   config: AvatarConfig;
   walking: boolean;
   // 0 / 1 — the two-frame leg swing, advanced by distance walked.

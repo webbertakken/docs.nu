@@ -28,7 +28,7 @@ const tab = (over: Partial<Tab> = {}): Tab => ({
 });
 
 const file = (tabs: Tab[] = [tab()]): PullFile => ({
-  kind: 'livediagram.document',
+  kind: 'livedoc.document',
   schemaVersion: 1,
   exportedAt: 1,
   document: { id: 'd1', name: 'Shop', presentation: null, tabs },
@@ -76,7 +76,7 @@ describe('pullFileText and parsePullFile', () => {
   it('round-trips, keeping the envelope the editor imports', () => {
     const text = pullFileText(file());
     expect(JSON.parse(text)).toMatchObject({
-      kind: 'livediagram.document',
+      kind: 'livedoc.document',
       livedocSync: { host: 'https://docs.nu' },
     });
     expect(parsePullFile(text)).toEqual({ ok: true, file: file() });
@@ -84,7 +84,7 @@ describe('pullFileText and parsePullFile', () => {
 
   it('refuses what is not a pull file, naming why', () => {
     expect(parsePullFile('{')).toEqual({ ok: false, message: 'not JSON' });
-    expect(parsePullFile('{"kind":"livediagram.tab"}')).toEqual({
+    expect(parsePullFile('{"kind":"livedoc.tab"}')).toEqual({
       ok: false,
       message: 'not a LiveDoc document',
     });

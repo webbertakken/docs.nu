@@ -2,7 +2,7 @@
 //
 // Emits `Participant`/`Returned` with type `Anonymous` (guest) or
 // `Authenticated` (signed in) at most once per browser per UTC day,
-// gated by the `livediagram:v2:last-active-day` key. It is the
+// gated by the `livedoc:v2:last-active-day` key. It is the
 // counterpart to `Participant`/`Created` (the once-per-browser
 // new-visitor signal): together they answer "how many people showed up
 // today, and how many of them had been here before". Querying

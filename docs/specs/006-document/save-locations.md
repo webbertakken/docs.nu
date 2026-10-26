@@ -34,12 +34,12 @@ Why a guest starts local: [Auth + guest access → Guest documents start local](
   in the wizard, its **Create** and **Skip**, and the wizard-less links (`/new?template=`, `/new?blank=1`).
 - A `/new?folder=` / `?team=` context names a server place, so it is
   livediagram whoever is creating.
-- Before the session read has answered, `signedIn` is the signed-in hint (`livediagram:v2:signed-in`,
+- Before the session read has answered, `signedIn` is the signed-in hint (`livedoc:v2:signed-in`,
   [Who is a guest, before the session answers](../014-identity/auth-and-guest-access.md#who-is-a-guest-before-the-session-answers)).
   A browser that looks signed in waits for the settled answer before creating, so a signed-in person is never handed
   a document in This Browser; a guest never waits.
 - `signInOffered` is the live answer once the page has one (`signInOfferedHere` in `apps/live/lib/auth-config.ts`),
-  else the one this browser last saw (`livediagram:v2:sign-in-offered`); only a browser that has never asked waits
+  else the one this browser last saw (`livedoc:v2:sign-in-offered`); only a browser that has never asked waits
   for it.
 - There is no per-person override: no setting chooses the store. Where a document is **filed** on livediagram is the
   person's to set, in Settings > Documents > Default Folders ([Default folders](../013-workspace/default-folders.md)).

@@ -75,7 +75,7 @@ describe('exportTabAsJson', () => {
     const blob = exportTabAsJson(tab());
     expect(blob.type).toBe('application/json');
     const env = JSON.parse(await text(blob)) as ExportedTabEnvelope;
-    expect(env.kind).toBe('livediagram.tab');
+    expect(env.kind).toBe('livedoc.tab');
     expect(env.schemaVersion).toBe(TAB_SCHEMA_VERSION);
     expect(typeof env.exportedAt).toBe('number');
     expect(env.tab.id).toBe('tab-1');

@@ -138,7 +138,7 @@ The workspace scope adds or changes, by file:
 | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apps/api/migrations/0099_workbench_workspace.sql`                                                                                                       | `scope` on requests, pairings, tickets and sessions; `folder_id` and a nullable `document_id` on tickets and sessions (rebuilt); `workbench_session_rooms` |
 | `packages/api-schema/src/workbench.ts`                                                                                                                   | `WorkbenchScope`, `WORKBENCH_SCOPES`, `pairingCoversScope`; the scoped wire types; `workbenchRouteVerdict` by scope (`WORKSPACE_ROUTES`)                   |
-| `packages/api-schema/src/workbench-messages.ts`                                                                                                          | `livediagram:place`, `livediagram:open`; the workspace `ready`                                                                                             |
+| `packages/api-schema/src/workbench-messages.ts`                                                                                                          | `livedoc:place`, `livedoc:open`; the workspace `ready`                                                                                                     |
 | `apps/api/src/db/workbench.ts`                                                                                                                           | Scope and folder on every row; requests per scope; approval widens a pairing; `noteWorkbenchSessionRoom`                                                   |
 | `apps/api/src/auth/workbench-session.ts`, `workbench-confinement.ts`                                                                                     | `WorkbenchContext.scope`, `folderId`; ambient headers and the view-level share-link list by scope                                                          |
 | `apps/api/src/routes/workbench-ticket-route.ts`, `workbench-session-routes.ts`, `workbench-pairing-routes.ts`                                            | The scoped mint, redemption, requests and pairings                                                                                                         |
@@ -153,7 +153,7 @@ The workspace scope adds or changes, by file:
 | `apps/live/app/embed/workbench/explorer/page.tsx` (new)                                                                                                  | The static workspace frame page; renders `WorkbenchPage`                                                                                                   |
 | `apps/live/app/embed/workbench/WorkbenchPage.tsx`, `workbench-machine.ts`, `workbench-fragment.ts`, `useWorkbenchHandshake.ts`, `useWorkbenchRenewal.ts` | The address's scope; the scope check at redemption and renewal; the workspace frame once mounted                                                           |
 | `apps/live/app/embed/workbench/WorkspaceFrame.tsx` (new, + test)                                                                                         | The mounted workspace frame: the place from the address, the Explorer or the editor, Back, `place`, `open`                                                 |
-| `apps/live/app/embed/workbench/useWorkspaceNavigation.ts` (new, + test)                                                                                  | The interceptor, the link capture, New document in place, `livediagram:open`                                                                               |
+| `apps/live/app/embed/workbench/useWorkspaceNavigation.ts` (new, + test)                                                                                  | The interceptor, the link capture, New document in place, `livedoc:open`                                                                                   |
 | `apps/live/app/embed/workbench/create-in-place.ts` (new, + test)                                                                                         | `createDocumentInPlace(ownerId, { folderId, teamId, templateKind })`                                                                                       |
 | `apps/live/lib/new-document-content.ts` (new)                                                                                                            | `newDocumentContent`: a new document's tabs, card types and example cards, extracted from `/new` so the frame makes the same document                      |
 | `apps/live/hooks/persistence/useTeams.ts`, `apps/live/app/explorer/sidebar/sidebar-structure.ts`, `apps/live/components/panels/TeamPane.tsx`             | `invites: false`, `administration: false`: no invites read, no Invites or New Team rows, no team administration in the frame                               |
@@ -192,14 +192,14 @@ The workspace scope adds or changes, by file:
 | Confinement         | `WORKBENCH_ROUTES`, `workbenchRouteVerdict`, `403 workbench_confined` | What a session may reach                                                   |
 | Workbench page      | `/embed/workbench`, `WorkbenchPage`, `WorkbenchPhase`                 | The frameable page that binds and hosts the editor                         |
 | Binding             | `hello` / `hello-ack`                                                 | Proof that the parent is the minting origin                                |
-| Renewal             | `livediagram:renew` / `livediagram:ticket`                            | A fresh ticket redeemed before the session expires                         |
-| Workbench message   | `WorkbenchMessage`, `type` `livediagram:*`, `v: 1`                    | One `postMessage` between the page and its workbench                       |
+| Renewal             | `livedoc:renew` / `livedoc:ticket`                                    | A fresh ticket redeemed before the session expires                         |
+| Workbench message   | `WorkbenchMessage`, `type` `livedoc:*`, `v: 1`                        | One `postMessage` between the page and its workbench                       |
 | Selection reference | `selectionReference()`, `SelectionReference { text, count }`          | The text a workbench attaches to the person's message                      |
 | Editor surface      | `EditorSurface` `'app' \| 'embed' \| 'workbench'`                     | Where the editor runs; `workbench` is a distinct surface                   |
 | Ended               | `WorkbenchEndReason` `expired`, `revoked`, `trashed`, `refused`       | Why a page stopped editing                                                 |
 | Scope               | `WorkbenchScope` `document`, `workspace`; `scope` on rows and wire    | What a ticket, session or pairing reaches: one document, or the workspace  |
 | Workspace frame     | `/embed/workbench/explorer[...]`, `WorkspaceFrame`                    | The Explorer inside a workbench, under a workspace session                 |
-| Place               | `WorkspacePlace`, `livediagram:place`                                 | Where a workspace frame is: an Explorer view, or a document                |
+| Place               | `WorkspacePlace`, `livedoc:place`                                     | Where a workspace frame is: an Explorer view, or a document                |
 | Frame address       | `workspaceFramePath(place)`                                           | A place's path inside the frame, walked by the frame's own history         |
 | Explorer surface    | `ExplorerSurface` `'app' \| 'workbench'`                              | Where the Explorer runs; `workbench` drops the app's surroundings          |
 
@@ -225,7 +225,7 @@ Don't allow).
   neither read a request's page view nor answer it.
 - **I7** Secrets (ticket, session) are stored as SHA-256 hex only; logs carry the session id's first 8 characters
   and the token id, never a secret, a code or an origin path.
-- **I8** The workbench page mounts no editor and sends no `livediagram:*` message other than `hello` (and `ended`
+- **I8** The workbench page mounts no editor and sends no `livedoc:*` message other than `hello` (and `ended`
   `refused`, to the session's origin) before a valid `hello-ack`.
 - **I9** The editor in a workbench never runs the guest migration, never writes the participant record, and never
   writes preferences to the api.
@@ -415,7 +415,7 @@ window.parent` and `parseWorkbenchMessage` gives `hello-ack`. None: `unbound`, `
 4. `mounted`: `WorkbenchAuthBridge` renders with the session; `setWorkbenchConfinement(session)`; the editor mounts
    with `surface="workbench"`; `track('Session', 'Opened', 'Workbench')` once.
 5. Renewal (`useWorkbenchRenewal`): at `expiresAt - WORKBENCH_RENEW_LEAD_MS` post `renew`, then every
-   `WORKBENCH_RENEW_RETRY_MS` until a ticket lands or the session expires. A `livediagram:ticket` is redeemed; a 201
+   `WORKBENCH_RENEW_RETRY_MS` until a ticket lands or the session expires. A `livedoc:ticket` is redeemed; a 201
    whose `documentId` and `origin` equal the bound ones swaps the session (provider, confinement, context), deletes
    the old one, logs `[workbench] renewed`; anything else is logged `[workbench] renew-failed { reason }` and the
    retry continues. A `ticket` outside the renew window is redeemed alike (WB14).
@@ -474,7 +474,7 @@ The Surface table, every gate `workbenchMode` touches (`appChrome` is `surface =
 | `LoadErrorCard`, `NotFound`                                                                                                                 | `editor-page.tsx`                                            | `embed` forms (no recovery card; create-new in a new tab) |
 
 Preferences: `fetchUserPreferences` runs; `writeUserPreferences` keeps the local write and the event and skips
-`apiPutPreferences` under confinement. Appearance: `livediagram:theme` calls `setAppearanceOverride(scheme)`; before
+`apiPutPreferences` under confinement. Appearance: `livedoc:theme` calls `setAppearanceOverride(scheme)`; before
 one arrives the override is `null` and the system scheme applies (the stored setting in the frame's partitioned
 storage is ignored while `workbenchMode`, WB15).
 
@@ -674,7 +674,7 @@ other phase is the document scope's.
 2. `navigate(href, { replace })`: `framePathOfAppHref(href)` maps `/explorer/...` and `/document/<id>[?s=][&tab=]`
    to a frame path and calls `history.pushState` (or `replaceState`), which the App Router hears; `/new...` runs New
    document in place (below); any other app href (help, sign-in, Community, an external page) opens in a new tab
-   with `noopener` (WB57). Logged `[workbench] open { kind }` only for `livediagram:open`.
+   with `noopener` (WB57). Logged `[workbench] open { kind }` only for `livedoc:open`.
 3. The place (`workspacePlaceOf(usePathname(), useSearchParams())`) renders:
    - an Explorer view: `ExplorerShell` (its surface read from the session, `useExplorerSurface`) around `ExplorerPane`,
      the pane keyed by the view's path and its `id` and `folder`, as each /explorer page remounts it; unmounted while
@@ -756,7 +756,7 @@ Explorer view, the same control at the right end of the Explorer's bottom bar li
   `tabName`, `role` the editor's `sessionRole`, the folder fields null). Logged `[workbench] place { view }`.
 - The editor in a workspace frame sends `place` where the document scope sends `ready`, and `tab`, `selection` and
   `reveal` as in the document scope; on an Explorer view they do nothing.
-- `open` (`livediagram:open`, accepted while mounted): `{ view: 'home' }` → Home, `{ folderId }` → that folder,
+- `open` (`livedoc:open`, accepted while mounted): `{ view: 'home' }` → Home, `{ folderId }` → that folder,
   `{ documentId, tabId? }` → that document (from the current place). Pushed like any move; an unreachable id shows
   the Explorer's or the editor's own not-found. Logged `[workbench] open { kind: 'home' | 'folder' | 'document' }`.
 
@@ -890,10 +890,10 @@ roles teach `consumeWsTicket` to read it.
 Every message is `{ type, v: 1, ... }`; strings are bounded as stated; anything else is invalid.
 
 ```ts
-type HelloMessage = { type: 'livediagram:hello'; v: 1 };
-type HelloAckMessage = { type: 'livediagram:hello-ack'; v: 1; name: string }; // 1..40 after trim
+type HelloMessage = { type: 'livedoc:hello'; v: 1 };
+type HelloAckMessage = { type: 'livedoc:hello-ack'; v: 1; name: string }; // 1..40 after trim
 type ReadyMessage = {
-  type: 'livediagram:ready';
+  type: 'livedoc:ready';
   v: 1;
   documentId: string;
   documentName: string;
@@ -901,9 +901,9 @@ type ReadyMessage = {
   tabName: string;
   role: WorkbenchRole;
 };
-type TabMessage = { type: 'livediagram:tab'; v: 1; tabId: string; tabName: string };
+type TabMessage = { type: 'livedoc:tab'; v: 1; tabId: string; tabName: string };
 type SelectionMessage = {
-  type: 'livediagram:selection';
+  type: 'livedoc:selection';
   v: 1;
   documentId: string;
   documentName: string;
@@ -912,12 +912,12 @@ type SelectionMessage = {
   count: number; // 0 when nothing is selected
   reference: string; // selectionReference().text, always present (WB28)
 };
-type RenewMessage = { type: 'livediagram:renew'; v: 1 };
-type TicketMessage = { type: 'livediagram:ticket'; v: 1; ticket: string }; // 22 base64url
-type RevealMessage = { type: 'livediagram:reveal'; v: 1; refs: string[] }; // 1..20, each 1..64
-type ThemeMessage = { type: 'livediagram:theme'; v: 1; colourScheme: 'light' | 'dark' };
+type RenewMessage = { type: 'livedoc:renew'; v: 1 };
+type TicketMessage = { type: 'livedoc:ticket'; v: 1; ticket: string }; // 22 base64url
+type RevealMessage = { type: 'livedoc:reveal'; v: 1; refs: string[] }; // 1..20, each 1..64
+type ThemeMessage = { type: 'livedoc:theme'; v: 1; colourScheme: 'light' | 'dark' };
 type EndedMessage = {
-  type: 'livediagram:ended';
+  type: 'livedoc:ended';
   v: 1;
   reason: 'expired' | 'revoked' | 'trashed' | 'refused';
 };
@@ -927,13 +927,13 @@ The workspace scope's messages:
 
 ```ts
 type WorkspaceReadyMessage = {
-  type: 'livediagram:ready';
+  type: 'livedoc:ready';
   v: 1;
   scope: 'workspace';
   role: WorkbenchRole;
 };
 type PlaceMessage = {
-  type: 'livediagram:place';
+  type: 'livedoc:place';
   v: 1;
   view: string; // a SelectedNode kind, or 'document'
   folderId: string | null;
@@ -946,7 +946,7 @@ type PlaceMessage = {
   role: WorkbenchRole;
 };
 type OpenMessage = {
-  type: 'livediagram:open';
+  type: 'livedoc:open';
   v: 1;
   to: { view: 'home' } | { folderId: string } | { documentId: string; tabId?: string }; // ids 1..64
 };
@@ -1169,7 +1169,7 @@ CREATE TABLE workbench_session_rooms (
 - **E44** The started folder is deleted before the frame loads: the Explorer's folder not-found, as a stale link.
 - **E45** A view workspace session tries New document: `403 workbench_read_only`, the Explorer's create-failed toast;
   the Explorer offers no create while `role` is `view` (its own read-only state, `prefs`-free).
-- **E46** `livediagram:open` with an id the person cannot reach: the Explorer's or the editor's not-found; logged.
+- **E46** `livedoc:open` with an id the person cannot reach: the Explorer's or the editor's not-found; logged.
 - **E47** Unpair or revoke while a workspace frame has a document open: the room closes with 4006 (the session's
   rooms are recorded), the frame ends `revoked`.
 

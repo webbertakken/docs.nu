@@ -376,7 +376,7 @@ settles signed in and `0` whenever it settles signed out or the person signs out
 - **No flag, or `0`**: a guest. The create goes ahead at once, This Browser.
 - **`1`**: probably signed in. The create waits for the session (as it always has) and then uses the settled answer.
 - **Whether the host offers sign-in at all** is the same kind of hint: the last answer this browser saw
-  (`livediagram:v2:sign-in-offered`). A host without sign-in keeps everyone on livediagram at once; only a browser
+  (`livedoc:v2:sign-in-offered`). A host without sign-in keeps everyone on livediagram at once; only a browser
   that has never asked waits for the session read before its first create.
 - Starting a Google sign-in writes `1` before leaving for Google, so the page the round trip lands on never hands the
   new account a document in This Browser; a round trip that fails is the safe direction.
@@ -390,7 +390,7 @@ Signing in never moves a document in This Browser by itself ([Offline Mode → A
 
 - **Move Documents in This Browser to Your Account?** A dialog lists each document in This Browser (name, last edited), every one ticked, with **Move** and **Not Now**.
 - **Move** runs Sync Document ([Offline Mode → Save to server](../006-document/offline-mode.md#save-to-server-offline--cloud)) on each ticked document in turn, showing progress. A document that fails stays This Browser and is named in the result; the rest move.
-- **Not Now** is remembered for this account in this browser (`livediagram:v2:local-move-dismissed:<userId>`), with the count of documents in This Browser at the time. The dialog comes back only when that count grows, so a person who keeps a deliberate document in This Browser is not asked again about it.
+- **Not Now** is remembered for this account in this browser (`livedoc:v2:local-move-dismissed:<userId>`), with the count of documents in This Browser at the time. The dialog comes back only when that count grows, so a person who keeps a deliberate document in This Browser is not asked again about it.
 - The same move is always reachable by hand: **Sync Document** on any document in This Browser.
 
 ## Implications for how we build

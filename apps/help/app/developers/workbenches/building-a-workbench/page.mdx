@@ -74,7 +74,7 @@ The workspace scope frames the person's Explorer: Home, or the folder `--folder`
 }
 ```
 
-Inside the frame the person browses, opens documents (with a **Back**) and makes new ones in place; the account, Settings and team administration stay out. The frame moves by itself, so keep listening to `livediagram:place`.
+Inside the frame the person browses, opens documents (with a **Back**) and makes new ones in place; the account, Settings and team administration stay out. The frame moves by itself, so keep listening to `livedoc:place`.
 
 ## The Frame
 
@@ -86,16 +86,16 @@ If the ticket has expired or was already used, the frame shows **Open this diagr
 
 ## The Handshake
 
-Once the ticket is redeemed, the page posts `livediagram:hello` to its parent, with `targetOrigin` set to your origin, so no other site ever receives it. Answer with `livediagram:hello-ack` and your name within **five seconds**, or the page ends the session and mounts nothing:
+Once the ticket is redeemed, the page posts `livedoc:hello` to its parent, with `targetOrigin` set to your origin, so no other site ever receives it. Answer with `livedoc:hello-ack` and your name within **five seconds**, or the page ends the session and mounts nothing:
 
 ```js
 const appOrigin = new URL(url).origin;
 window.addEventListener('message', (event) => {
   if (event.origin !== appOrigin || event.source !== frame.contentWindow) return;
   const message = event.data;
-  if (message?.type === 'livediagram:hello') {
+  if (message?.type === 'livedoc:hello') {
     frame.contentWindow.postMessage(
-      { type: 'livediagram:hello-ack', v: 1, name: 'Acme Editor' },
+      { type: 'livedoc:hello-ack', v: 1, name: 'Acme Editor' },
       appOrigin,
     );
   }
@@ -110,36 +110,36 @@ Every message is an object `{ type, v: 1, ... }`. The page sends only to your or
 
 | Type                    | Direction    | Payload                                                                                                                                                                                     |
 | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `livediagram:hello`     | Page to tool | Nothing: asks the tool to answer                                                                                                                                                            |
-| `livediagram:hello-ack` | Tool to page | `name`: 1 to 40 characters                                                                                                                                                                  |
-| `livediagram:ready`     | Page to tool | `documentId`, `documentName`, `tabId`, `tabName`, `role` (`view`, `participate` or `edit`), once the document is loaded                                                                     |
-| `livediagram:tab`       | Page to tool | `tabId`, `tabName`: the tab now shown, after each later tab change                                                                                                                          |
-| `livediagram:selection` | Page to tool | `documentId`, `documentName`, `tabId`, `rev`, `count` (`0` for nothing selected), `reference`: the selection reference                                                                      |
-| `livediagram:renew`     | Page to tool | Nothing: asks for a fresh ticket                                                                                                                                                            |
-| `livediagram:ticket`    | Tool to page | `ticket`: the 22-character ticket from a new `workbench open` link                                                                                                                          |
-| `livediagram:reveal`    | Tool to page | `refs`: 1 to 20 element refs, each 1 to 64 characters; brings them into view on the current tab and outlines them                                                                           |
-| `livediagram:theme`     | Tool to page | `colourScheme`: `light` or `dark`; until one arrives, the editor follows the system                                                                                                         |
-| `livediagram:ended`     | Page to tool | `reason`: `expired`, `revoked`, `trashed` or `refused`                                                                                                                                      |
-| `livediagram:place`     | Page to tool | Workspace only, on every move: `view` (`home`, `folder`, `recent`, ..., or `document`), `folderId`, `folderName`, `documentCount`, `documentId`, `documentName`, `tabId`, `tabName`, `role` |
-| `livediagram:open`      | Tool to page | Workspace only: `to` is `{ view: 'home' }`, `{ folderId }` or `{ documentId, tabId? }`                                                                                                      |
+| `livedoc:hello`     | Page to tool | Nothing: asks the tool to answer                                                                                                                                                            |
+| `livedoc:hello-ack` | Tool to page | `name`: 1 to 40 characters                                                                                                                                                                  |
+| `livedoc:ready`     | Page to tool | `documentId`, `documentName`, `tabId`, `tabName`, `role` (`view`, `participate` or `edit`), once the document is loaded                                                                     |
+| `livedoc:tab`       | Page to tool | `tabId`, `tabName`: the tab now shown, after each later tab change                                                                                                                          |
+| `livedoc:selection` | Page to tool | `documentId`, `documentName`, `tabId`, `rev`, `count` (`0` for nothing selected), `reference`: the selection reference                                                                      |
+| `livedoc:renew`     | Page to tool | Nothing: asks for a fresh ticket                                                                                                                                                            |
+| `livedoc:ticket`    | Tool to page | `ticket`: the 22-character ticket from a new `workbench open` link                                                                                                                          |
+| `livedoc:reveal`    | Tool to page | `refs`: 1 to 20 element refs, each 1 to 64 characters; brings them into view on the current tab and outlines them                                                                           |
+| `livedoc:theme`     | Tool to page | `colourScheme`: `light` or `dark`; until one arrives, the editor follows the system                                                                                                         |
+| `livedoc:ended`     | Page to tool | `reason`: `expired`, `revoked`, `trashed` or `refused`                                                                                                                                      |
+| `livedoc:place`     | Page to tool | Workspace only, on every move: `view` (`home`, `folder`, `recent`, ..., or `document`), `folderId`, `folderName`, `documentCount`, `documentId`, `documentName`, `tabId`, `tabName`, `role` |
+| `livedoc:open`      | Tool to page | Workspace only: `to` is `{ view: 'home' }`, `{ folderId }` or `{ documentId, tabId? }`                                                                                                      |
 
-A `livediagram:selection` is sent once the selection has been still for a quarter of a second, and only when its text changed, so a marquee drag is one message. After `ready` and after each `tab`, the page sends the selection for the tab now shown. A `reveal` skips refs it cannot find on the current tab.
+A `livedoc:selection` is sent once the selection has been still for a quarter of a second, and only when its text changed, so a marquee drag is one message. After `ready` and after each `tab`, the page sends the selection for the tab now shown. A `reveal` skips refs it cannot find on the current tab.
 
 In a workspace frame, `ready` carries `scope: 'workspace'` and `role`, and no document; `tab`, `selection` and `reveal` speak of the document open in the frame and do nothing on an Explorer view. `documentCount` is the documents directly in the folder shown (null on other views), so you can offer something of your own beside an empty folder. A trashed document ends nothing there: the frame returns to the Explorer.
 
 ## Renewing the Session
 
-A session lasts **eight hours**. Ten minutes before it expires, the page posts `livediagram:renew`, then again every minute until a ticket arrives. Answer by running `workbench open` for the same document and origin, taking the ticket from the new link's fragment (`#ticket=`), and posting it:
+A session lasts **eight hours**. Ten minutes before it expires, the page posts `livedoc:renew`, then again every minute until a ticket arrives. Answer by running `workbench open` for the same document and origin, taking the ticket from the new link's fragment (`#ticket=`), and posting it:
 
 ```js
-frame.contentWindow.postMessage({ type: 'livediagram:ticket', v: 1, ticket }, appOrigin);
+frame.contentWindow.postMessage({ type: 'livedoc:ticket', v: 1, ticket }, appOrigin);
 ```
 
 The page redeems it and carries on without reloading. A ticket for a different document or origin is refused, and the page keeps asking. Renewal can continue as long as the token lives.
 
 ## When a Session Ends
 
-The page posts `livediagram:ended` and turns read-only. The reasons:
+The page posts `livedoc:ended` and turns read-only. The reasons:
 
 - `expired`: the session ran out without a renewal. The editor shows "Reconnect in" your name "to keep editing."
 - `revoked`: the token was revoked or the workbench unpaired. The editor shows the same line.
@@ -167,7 +167,7 @@ Show the person what will be attached (for example "Home screen · 3 selected", 
 
 ## Read-Only Tickets
 
-A ticket is never stronger than the token that minted it. A **Read-only access** token mints `view` tickets: the frame opens read-only and `livediagram:ready` reports `role: "view"`. The role is also capped by the person's own access to the document at that moment, through their own documents or their teams. Read `role` from `ready` rather than assuming `edit`.
+A ticket is never stronger than the token that minted it. A **Read-only access** token mints `view` tickets: the frame opens read-only and `livedoc:ready` reports `role: "view"`. The role is also capped by the person's own access to the document at that moment, through their own documents or their teams. Read `role` from `ready` rather than assuming `edit`.
 
 ## What a Session Can and Cannot Do
 

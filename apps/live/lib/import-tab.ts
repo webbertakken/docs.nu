@@ -71,7 +71,7 @@ export function parseImportedTab(text: string): ImportResult {
     return { ok: false, error: 'Expected a JSON object at the top level.' };
   }
   const env = raw as Partial<ExportedTabEnvelope>;
-  if (env.kind !== 'livediagram.tab') {
+  if (env.kind !== 'livedoc.tab') {
     return {
       ok: false,
       error: "This file isn't a LiveDoc tab export (missing kind field).",

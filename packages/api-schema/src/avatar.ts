@@ -15,7 +15,8 @@
 //
 // Colour is deliberately absent. The shirt takes the participant's presence
 // colour so a character matches its owner's cursor and name chip.
-export type AvatarGender = 'male' | 'female';
+// The figure: a broad build, or a slender one with narrower shoulders and a softer face.
+export type AvatarFigure = 'broad' | 'slender';
 
 export type AvatarClothing =
   | 'tee'
@@ -54,7 +55,7 @@ export type AvatarHair =
 export type AvatarSize = 'small' | 'regular' | 'tall';
 
 export type AvatarConfig = {
-  gender: AvatarGender;
+  figure: AvatarFigure;
   clothing: AvatarClothing;
   hair: AvatarHair;
   size: AvatarSize;

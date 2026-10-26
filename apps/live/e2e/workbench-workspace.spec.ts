@@ -29,7 +29,7 @@ test.afterAll(async () => {
 
 type Place = { type: string; view?: string; documentId?: string | null; [k: string]: unknown };
 const places = async (page: Parameters<typeof received>[0]) =>
-  (await received(page)).filter((m): m is Place => m.type === 'livediagram:place');
+  (await received(page)).filter((m): m is Place => m.type === 'livedoc:place');
 
 test('a workspace frame is its own approval, browses the Explorer, and opens documents in place', async ({
   page,
@@ -76,7 +76,7 @@ test('a workspace frame is its own approval, browses the Explorer, and opens doc
     frame.getByRole('link', { name: 'Open in LiveDoc (opens in a new tab)' }),
   ).toBeVisible();
   await expect
-    .poll(async () => (await received(page)).find((m) => m.type === 'livediagram:ready'))
+    .poll(async () => (await received(page)).find((m) => m.type === 'livedoc:ready'))
     .toMatchObject({ scope: 'workspace', role: 'edit' });
   await expect.poll(async () => (await places(page)).at(-1)?.view).toBe('home');
 
@@ -137,7 +137,7 @@ test('a workspace frame is its own approval, browses the Explorer, and opens doc
   await page.evaluate(
     (id) =>
       (window as unknown as { post: (m: unknown) => void }).post({
-        type: 'livediagram:open',
+        type: 'livedoc:open',
         v: 1,
         to: { folderId: id },
       }),

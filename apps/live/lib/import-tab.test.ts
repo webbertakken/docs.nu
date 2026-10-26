@@ -13,7 +13,7 @@ const validTab: Tab = { id: 'tab-1', name: 'Imported', elements: [] };
 
 // Build a well-formed envelope, overridable per test.
 const envelope = (overrides: Partial<ExportedTabEnvelope> = {}): ExportedTabEnvelope => ({
-  kind: 'livediagram.tab',
+  kind: 'livedoc.tab',
   schemaVersion: TAB_SCHEMA_VERSION,
   exportedAt: 0,
   tab: validTab,
@@ -62,7 +62,7 @@ describe('parseImportedTab — rejections (never throws)', () => {
   });
 
   it('rejects a missing or non-numeric schemaVersion', () => {
-    const result = parse({ kind: 'livediagram.tab', tab: validTab });
+    const result = parse({ kind: 'livedoc.tab', tab: validTab });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toMatch(/Missing schemaVersion/);
   });
@@ -75,7 +75,7 @@ describe('parseImportedTab — rejections (never throws)', () => {
 
   it('rejects an envelope missing the tab payload', () => {
     const result = parse({
-      kind: 'livediagram.tab',
+      kind: 'livedoc.tab',
       schemaVersion: TAB_SCHEMA_VERSION,
       exportedAt: 0,
     });

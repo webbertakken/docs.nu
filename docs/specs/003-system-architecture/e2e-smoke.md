@@ -239,7 +239,7 @@ model fetches of the photo tests). A test that takes `pageErrors` ends with
 **`expectNoPageErrors(pageErrors)`**, which fails naming what leaked. A Trusted Types violation is one of them:
 the page logs `[trusted-types] violation` as an error ([Trusted Types](../016-platform/trusted-types.md)).
 
-The same `test` sets the editor's debug flag (`livediagram:debug` = `*`) on its browser
+The same `test` sets the editor's debug flag (`livedoc:debug` = `*`) on its browser
 context before any page loads, so the production build the suite drives writes its trace lines
 ([Console logging](console-logging.md)) and a spec may wait for one (`[drive-mirror] pass-end`).
 A spec that opens its own context with `browser.newContext()` sets it there with

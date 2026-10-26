@@ -392,7 +392,7 @@ through the editor (upload, paste or drop) and the assistant places them from th
 
 ### 4.6 Schema resource (not a tool)
 
-A static, cacheable MCP **resource** — e.g. `livediagram://schema/elements` —
+A static, cacheable MCP **resource** — e.g. `livedoc://schema/elements` —
 returning a compact description of the element schema: the element types
 (`shape` / `text` / `sticky` / `arrow` / `table` / …), the shape vocabulary,
 required fields, the pinned-arrow anchor convention (`from.e → to.w` etc.), and

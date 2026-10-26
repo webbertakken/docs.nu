@@ -109,7 +109,7 @@ export function parseEraserConfig(raw: unknown): EraserConfig {
 
 // --- Storage ----------------------------------------------------------------
 
-const STORAGE_KEY = 'livediagram:v2:eraser-config';
+const STORAGE_KEY = 'livedoc:v2:eraser-config';
 
 export function loadEraserConfig(): EraserConfig {
   return parseEraserConfig(readLocalStorageSafe(STORAGE_KEY));

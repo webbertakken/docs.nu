@@ -151,8 +151,8 @@ another document is kept. Nothing writes a record any more.
 - `UserPreferences.planTourTracks?: PlanTourTrack[]` (`'boards' | 'sheets' | 'dashboards'`; PlanTourHost runs the
   first two, `BoardSheetTrack`); missing = none answered. `planTourSeen?: boolean` counts every
   track only while `powerUserMode` is on. No migration (free-form preferences blob).
-- `PLAN_TOUR_RELAUNCH_EVENT = 'livediagram:plan-tour-relaunch'`, dispatched by `requestPlanTourRelaunch()`.
-- Leftover record (read only): `localStorage['livediagram:v2:plan-tour-content']` = JSON `PlanTourContent`; a
+- `PLAN_TOUR_RELAUNCH_EVENT = 'livedoc:plan-tour-relaunch'`, dispatched by `requestPlanTourRelaunch()`.
+- Leftover record (read only): `localStorage['livedoc:v2:plan-tour-content']` = JSON `PlanTourContent`; a
   malformed value is dropped, never thrown. A record from before the Sheets track (`boardId`) reads as its
   `elementId`.
 - Settings switches: **Plan Tours** (`tourTracksSwitch`, key `planTourSeen`, label **Plan Tours**, the second toggle
@@ -255,11 +255,11 @@ surface is fixed-position over the canvas.
 
 ## Constants and configuration
 
-| Constant                | Value                                | Provenance                              | Safe range   |
-| ----------------------- | ------------------------------------ | --------------------------------------- | ------------ |
-| `OFFER_DELAY_MS`        | 800                                  | The Diagram tour's settle delay         | 300 to 2000  |
-| `TARGET_WAIT_MS`        | 3500                                 | The Diagram tour's target wait          | 1000 to 6000 |
-| `PLAN_TOUR_CONTENT_KEY` | `'livediagram:v2:plan-tour-content'` | The editor's storage key scheme (sweep) | fixed        |
+| Constant                | Value                            | Provenance                              | Safe range   |
+| ----------------------- | -------------------------------- | --------------------------------------- | ------------ |
+| `OFFER_DELAY_MS`        | 800                              | The Diagram tour's settle delay         | 300 to 2000  |
+| `TARGET_WAIT_MS`        | 3500                             | The Diagram tour's target wait          | 1000 to 6000 |
+| `PLAN_TOUR_CONTENT_KEY` | `'livedoc:v2:plan-tour-content'` | The editor's storage key scheme (sweep) | fixed        |
 
 ## Defaults ledger
 

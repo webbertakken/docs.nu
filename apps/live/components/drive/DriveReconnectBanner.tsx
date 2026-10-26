@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { CloseIcon } from '@livediagram/ui';
 import { useDriveMirror } from './drive-mirror-context';
 
-const DISMISS_KEY = 'livediagram:v2:drive-banner-dismissed';
+const DISMISS_KEY = 'livedoc:v2:drive-banner-dismissed';
 
 export function DriveReconnectBanner() {
   const { status, connect, resume } = useDriveMirror();

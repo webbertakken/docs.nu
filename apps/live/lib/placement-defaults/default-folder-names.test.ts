@@ -47,7 +47,7 @@ describe('default folder names', () => {
 
   it('reads unreadable storage as nothing remembered', () => {
     const store = memoryStore();
-    store.setItem('livediagram:v2:default-folder-names:owner', '{not json');
+    store.setItem('livedoc:v2:default-folder-names:owner', '{not json');
     expect(rememberedDefaultFolder('owner', 'w', store)).toBeNull();
   });
 });

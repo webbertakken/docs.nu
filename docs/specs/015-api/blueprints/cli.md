@@ -716,7 +716,7 @@ file exits 7 naming it.
 
 ### The pull file
 
-The `livediagram.document` envelope (`DocumentEnvelope`, schema version 1, from the moved `document-envelope.ts`),
+The `livedoc.document` envelope (`DocumentEnvelope`, schema version 1, from the moved `document-envelope.ts`),
 so the editor's "Import a copy" reads it, plus one key the envelope parser ignores (CLI27):
 
 ```ts

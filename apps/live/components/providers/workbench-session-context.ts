@@ -14,7 +14,7 @@ import type {
 } from '@livediagram/api-schema';
 import type { WorkbenchPort } from '@/lib/workbench/workbench-port';
 
-// Where the editor in a workspace frame is, for `livediagram:place`.
+// Where the editor in a workspace frame is, for `livedoc:place`.
 export type DocumentPlace = {
   documentId: string;
   documentName: string;

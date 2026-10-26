@@ -194,7 +194,7 @@ describe('hiding from Recent', () => {
       USER_PREFERENCES_STORAGE_KEY,
       JSON.stringify({ recentExcludedIds: ['a'] }),
     );
-    window.dispatchEvent(new Event('livediagram:preferences-changed'));
+    window.dispatchEvent(new Event('livedoc:preferences-changed'));
     expect(note().map((d) => d.id)).toEqual(['b']);
 
     localStorage.setItem(

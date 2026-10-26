@@ -35,8 +35,8 @@ naming what the format can express. Bridges reuse the existing importers ([Merma
   the direction it would use, and, confirmed (or `--yes` when piped), creates one document per source file in the
   link's folder (one tab per fenced block for a Markdown file holding several), and binds each.
 - **The marker.** A binding is written into the source itself, as a comment in the format's own syntax on its first
-  line: `%% livediagram: doc_3h9x2a/0b34 relaxed` (Mermaid), `' livediagram: ...` (PlantUML),
-  `// livediagram: ...` (DOT). A source moved or copied keeps its binding; a copy of a bound source is refused as a
+  line: `%% livedoc: doc_3h9x2a/0b34 relaxed` (Mermaid), `' livedoc: ...` (PlantUML),
+  `// livedoc: ...` (DOT). A source moved or copied keeps its binding; a copy of a bound source is refused as a
   second binding of one tab until its marker is removed. Formats without comments (draw.io, Excalidraw) are bound by
   the link file's `[[sources]]` table, path to tab.
 - **The tab knows.** The tab records its binding's format and compatibility (`source: { format, compatibility }`),
@@ -57,9 +57,9 @@ Each bound tab is **relaxed** (the default) or **strict**.
 ### Relaxed
 
 Anything livediagram offers can be added. The source receives the tab's **projection**: everything its format can
-express. The rest is **residue**, kept only in livediagram:
+express. The rest is **residue**, kept only in livedoc:
 
-- The serialiser writes one comment line saying so, after the marker: `%% livediagram: 3 elements and 2 styles not
+- The serialiser writes one comment line saying so, after the marker: `%% livedoc: 3 elements and 2 styles not
 expressible here; see https://livediagram.app/document/...`.
 - In the editor, the tab's source badge reads "Mermaid · relaxed", and its popover lists the residue by element; a
   residue element shows no mark of its own on the canvas, so the drawing stays clean.

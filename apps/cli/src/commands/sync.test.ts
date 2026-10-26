@@ -226,7 +226,7 @@ describe('sync at files', () => {
   it('keeps a gone file that changed here, and a new one written by hand, never creating it', async () => {
     const { io, host } = setup('files', [home()], {
       '/work/diagrams/hand.livedoc.json': JSON.stringify({
-        kind: 'livediagram.document',
+        kind: 'livedoc.document',
         schemaVersion: 1,
         document: { id: 'd-hand', name: 'By hand', tabs: [] },
       }),

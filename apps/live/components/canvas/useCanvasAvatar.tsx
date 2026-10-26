@@ -64,7 +64,7 @@ export function useCanvasAvatar({
   // Avatar mode (docs/specs/008-canvas/avatar-mode.md): the walking character's position / facing / step
   // frame, its click-to-walk entry point, and the camera follow. Owns its own
   // rAF loop, dormant unless the tool is active.
-  // The character's gender / clothing / hair / size (docs/specs/008-canvas/avatar-mode.md), persisted per
+  // The character's figure / clothing / hair / size (docs/specs/008-canvas/avatar-mode.md), persisted per
   // browser. Owned here because both the sprite and the Avatar Panel (down in
   // CanvasChrome) read it, and it outlives any one walk.
   const avatarLook = useAvatarConfig({ active: canvasTool === 'avatar' });
@@ -96,7 +96,7 @@ export function useCanvasAvatar({
     active: canvasTool === 'avatar',
     config: avatarLook.config,
     status: avatarStatus,
-    onToggleGender: avatarLook.toggleGender,
+    onToggleFigure: avatarLook.toggleFigure,
     elements: walkElements,
     mainRef,
     wrapperRef,

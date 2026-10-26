@@ -73,7 +73,7 @@ function hiddenFromRecent(): string[] {
 
 // lib/user-preferences.ts PREFERENCES_CHANGED_EVENT (same tab) and the browser's storage event (another
 // tab): either may be a diagram hidden from, or returned to, Recent.
-const PREFERENCES_CHANGED_EVENT = 'livediagram:preferences-changed';
+const PREFERENCES_CHANGED_EVENT = 'livedoc:preferences-changed';
 
 function listenForHiddenChanges(): void {
   if (listening) return;

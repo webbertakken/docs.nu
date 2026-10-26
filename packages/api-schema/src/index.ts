@@ -19,7 +19,7 @@ import type { BackgroundPattern, EditorMode, ShapeKind, Tab } from '@livediagram
 import type { CreationTabKind, TemplateFamily } from './placement-defaults';
 import type { ItemTypeCatalogue } from '@livediagram/items';
 
-export type { AvatarClothing, AvatarConfig, AvatarGender, AvatarHair, AvatarSize } from './avatar';
+export type { AvatarClothing, AvatarConfig, AvatarFigure, AvatarHair, AvatarSize } from './avatar';
 
 // ---------------------------------------------------------------------
 // Documents
@@ -492,7 +492,7 @@ export type ParticipantPresence = {
   // publishing that is exactly what §6 forbids.
   //
   // So this is a separate, per-browser random the client mints and keeps
-  // (`livediagram:v2:collab-key`), relayed VERBATIM: unlike `id` and `role`
+  // (`livedoc:v2:collab-key`), relayed VERBATIM: unlike `id` and `role`
   // it is claimed, not verified. That is deliberate and costs nothing — it is
   // not a credential and grants nothing, and any edit-role peer could already
   // write any participant id straight into the document. Optional, so an

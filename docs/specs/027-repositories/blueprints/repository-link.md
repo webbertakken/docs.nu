@@ -569,7 +569,7 @@ two, a comma after every element but the last; an empty array prints `[]`. LF li
       }
     ]
   },
-  "kind": "livediagram.document",
+  "kind": "livedoc.document",
   "livedocSync": {
     "host": "https://docs.nu",
     "tabs": {

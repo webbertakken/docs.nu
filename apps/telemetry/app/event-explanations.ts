@@ -1160,8 +1160,8 @@ export const EXACT: Readonly<Record<string, string>> = {
     'Someone added a slide to the Slide Deck: either a fresh slide built from the current selection, or a duplicate of an existing one.',
   'UI|Changed|AvatarClothing':
     "Someone changed the Avatar-mode character's clothing, in the Avatar panel.",
-  'UI|Changed|AvatarGender':
-    "Someone changed the Avatar-mode character's gender, in the Avatar panel.",
+  'UI|Changed|AvatarFigure':
+    "Someone changed the Avatar-mode character's figure (broad or slender), in the Avatar panel.",
   'UI|Changed|AvatarHair': "Someone changed the Avatar-mode character's hair, in the Avatar panel.",
   'UI|Changed|AvatarStatus':
     'Someone set or cleared their status in Avatar mode (Available, Focusing, In a Meeting or Away). Never which.',

@@ -264,7 +264,7 @@ export function useCanvasSurfaceGestures({
       const point = rect ? pointerToCanvas(e.clientX, e.clientY, rect, viewportZoom) : null;
       if (!point) return;
       // Left-click walks there; right-click ON the character changes who it
-      // is (male / female), and a right-click anywhere else is swallowed —
+      // is (broad / slender), and a right-click anywhere else is swallowed —
       // the context menu stays shut in this mode either way.
       if (e.button === 0) {
         const detail = e.detail;

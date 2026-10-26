@@ -13,7 +13,7 @@ import {
 } from '@livediagram/api-schema';
 import { reportForm } from '@/lib/api/forms-public';
 
-const BROWSER_KEY = 'livediagram:form-browser';
+const BROWSER_KEY = 'livedoc:form-browser';
 
 function browserId(): string {
   try {

@@ -41,7 +41,7 @@ One term, one identifier. The left column is the only spelling used in code, tes
 | Canvas surface     | `CanvasSurface` (`'light' \| 'dark'`)                 | The paper a canvas colour amounts to, from `canvasSurface(bg)` |
 | Dark Reader lock   | `<meta name="darkreader-lock">`                       | The extension's opt-out, declared through `metadata.other`     |
 
-Banned synonyms: "UI mode" and "dark mode toggle" in code and copy (the stored key `livediagram:v2:ui-mode` keeps its
+Banned synonyms: "UI mode" and "dark mode toggle" in code and copy (the stored key `livedoc:v2:ui-mode` keeps its
 name as data on the wire); "theme" for the appearance, since a theme is the document's.
 
 ## Behaviour and state
@@ -100,9 +100,9 @@ editor.
 
 ## Data and persistence
 
-| Field                    | Store                             | Class             | Notes                                    |
-| ------------------------ | --------------------------------- | ----------------- | ---------------------------------------- |
-| `livediagram:v2:ui-mode` | `localStorage`, this browser only | Device preference | Values `'light'` / `'dark'` / `'system'` |
+| Field                | Store                             | Class             | Notes                                    |
+| -------------------- | --------------------------------- | ----------------- | ---------------------------------------- |
+| `livedoc:v2:ui-mode` | `localStorage`, this browser only | Device preference | Values `'light'` / `'dark'` / `'system'` |
 
 Nothing is synced to the api or written into a document. Migration: none; older builds wrote `'light'` / `'dark'`, which
 read back unchanged, and anything older reads as the default.
@@ -188,7 +188,7 @@ layout inlines the real string rather than a client-reference stub.
 
 | Constant                       | Value                            | Provenance                              | Safe range                            |
 | ------------------------------ | -------------------------------- | --------------------------------------- | ------------------------------------- |
-| `APPEARANCE_STORAGE_KEY`       | `'livediagram:v2:ui-mode'`       | Stored data; renaming resets every user | Fixed; no quote, backslash or newline |
+| `APPEARANCE_STORAGE_KEY`       | `'livedoc:v2:ui-mode'`           | Stored data; renaming resets every user | Fixed; no quote, backslash or newline |
 | `DARK_MEDIA_QUERY`             | `'(prefers-color-scheme: dark)'` | CSS Media Queries Level 5               | Fixed                                 |
 | `DEFAULT_APPEARANCE_SETTING`   | `'system'`                       | Spec: System is the default             | One of the three literals             |
 | `DEFAULT_BACKGROUND_COLOR`     | `#ffffff`                        | Colour scheme: canvas is pure white     | Light (`isLightColor` true)           |

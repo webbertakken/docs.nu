@@ -10,8 +10,8 @@ import { ensureSignedGuestIdentity } from './guest-identity';
 
 const mockMint = vi.mocked(apiMintGuestId);
 
-const ID = 'livediagram:v2:self-id';
-const SIG = 'livediagram:v2:self-sig';
+const ID = 'livedoc:v2:self-id';
+const SIG = 'livedoc:v2:self-sig';
 
 function fakeStorage(): Storage {
   const m = new Map<string, string>();

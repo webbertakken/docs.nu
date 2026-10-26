@@ -29,9 +29,7 @@ describe('excalidrawTextFromPaste', () => {
   it('is null for ordinary text, our own payload or nothing', () => {
     expect(excalidrawTextFromPaste(data({ 'text/plain': 'hello' }))).toBeNull();
     expect(
-      excalidrawTextFromPaste(
-        data({ 'text/plain': '{"kind":"livediagram.elements","elements":[]}' }),
-      ),
+      excalidrawTextFromPaste(data({ 'text/plain': '{"kind":"livedoc.elements","elements":[]}' })),
     ).toBeNull();
     expect(excalidrawTextFromPaste(data({}))).toBeNull();
     expect(excalidrawTextFromPaste(null)).toBeNull();

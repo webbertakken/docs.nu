@@ -177,7 +177,7 @@ describe('the workbench page’s surroundings', () => {
   });
 
   it('let the editor beneath settle as the person, with no guest migration', async () => {
-    localStorage.setItem('livediagram:v2:self-id', 'guest-1');
+    localStorage.setItem('livedoc:v2:self-id', 'guest-1');
     const { AuthBridge, WorkbenchAuthBridge, boot, core } = await load();
     let result: ReturnType<typeof boot.useAccountApiBootstrap> | null = null;
     function Editor() {

@@ -270,7 +270,7 @@ describe('link status, the files a sync would refuse or remove', () => {
     io.fileMap.set(LINK, { data: '[covers]\nfolder = "games-0001"\n', mode: 0o644 });
     io.fileMap.set('/work/diagrams/hand.livedoc.json', {
       data: JSON.stringify({
-        kind: 'livediagram.document',
+        kind: 'livedoc.document',
         schemaVersion: 1,
         document: { id: 'd-hand', name: 'By hand', tabs: [] },
       }),

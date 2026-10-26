@@ -76,7 +76,7 @@ const THEME_VALUE_OF: Readonly<Record<string, 'elementFill' | 'elementStroke' | 
   textColor: 'elementText',
 };
 
-const STORAGE_PREFIX = 'livediagram:v2:style-memory:';
+const STORAGE_PREFIX = 'livedoc:v2:style-memory:';
 export const styleMemoryKey = (documentId: string): string => `${STORAGE_PREFIX}${documentId}`;
 
 export function styleKindOf(el: Element, board = false): StyleKindKey | null {

@@ -32,7 +32,7 @@ import { useAuthHrefs } from '@/components/chrome/auth-shared';
 import { useSignInMode } from '@/lib/auth-config';
 import { useLocalStorageValue, writeLocalStorageValue } from '@/hooks/ui/useLocalStorageValue';
 
-const DISMISS_KEY = 'livediagram:v2:signin-prompt-dismissed';
+const DISMISS_KEY = 'livedoc:v2:signin-prompt-dismissed';
 
 const subscribeNever = () => () => {};
 

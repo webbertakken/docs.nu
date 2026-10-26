@@ -12,6 +12,7 @@
 
 import {
   readLocalStorageSafe,
+  removeLocalStorageSafe,
   pickOption,
   storedRecord,
   writeLocalStorageSafe,
@@ -25,14 +26,14 @@ import { randomPick } from './random';
 export type {
   AvatarClothing,
   AvatarConfig,
-  AvatarGender,
+  AvatarFigure,
   AvatarHair,
   AvatarSize,
 } from '@livediagram/api-schema';
 import type {
   AvatarClothing,
   AvatarConfig,
-  AvatarGender,
+  AvatarFigure,
   AvatarHair,
   AvatarSize,
 } from '@livediagram/api-schema';
@@ -45,7 +46,7 @@ import type {
 export const AVATAR_FALLBACK_COLOUR = '#0ea5e9';
 
 export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
-  gender: 'male',
+  figure: 'broad',
   clothing: 'tee',
   hair: 'short',
   size: 'regular',
@@ -54,9 +55,9 @@ export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
 // The option catalogues, in panel order. Exported so the panel renders from
 // the same source the parser validates against — a new option can't appear in
 // the UI without becoming loadable, or vice versa.
-export const AVATAR_GENDERS: readonly { id: AvatarGender; label: string }[] = [
-  { id: 'male', label: 'Male' },
-  { id: 'female', label: 'Female' },
+export const AVATAR_FIGURES: readonly { id: AvatarFigure; label: string }[] = [
+  { id: 'broad', label: 'Broad' },
+  { id: 'slender', label: 'Slender' },
 ];
 
 export const AVATAR_CLOTHING: readonly { id: AvatarClothing; label: string }[] = [
@@ -128,21 +129,21 @@ export function avatarScale(size: AvatarSize): number {
   return SIZE_SCALE[size];
 }
 
-// A random character for a first-time visitor: gender, clothing, and hair are
+// A random character for a first-time visitor: figure, clothing, and hair are
 // rolled from their catalogues so two people walking into a document don't
 // arrive as the same figure. SIZE is deliberately not rolled — it changes how
 // much of the canvas the character covers, so it starts Regular and stays a
 // deliberate choice.
 export function randomAvatarConfig(): AvatarConfig {
   return {
-    gender: randomPick(AVATAR_GENDERS)?.id ?? DEFAULT_AVATAR_CONFIG.gender,
+    figure: randomPick(AVATAR_FIGURES)?.id ?? DEFAULT_AVATAR_CONFIG.figure,
     clothing: randomPick(AVATAR_CLOTHING)?.id ?? DEFAULT_AVATAR_CONFIG.clothing,
     hair: randomPick(AVATAR_HAIR)?.id ?? DEFAULT_AVATAR_CONFIG.hair,
     size: DEFAULT_AVATAR_CONFIG.size,
   };
 }
 
-const STORAGE_KEY = 'livediagram:v2:avatar-config';
+const STORAGE_KEY = 'livedoc:v2:avatar-config';
 
 // Parse a stored (or received) config, field by field, so one unrecognised
 // value — a stale option id from a later release, a hand-edited key — costs
@@ -152,7 +153,7 @@ export function parseAvatarConfig(raw: unknown): AvatarConfig {
   const o = storedRecord(raw);
   if (!o) return { ...DEFAULT_AVATAR_CONFIG };
   return {
-    gender: pickOption(o.gender, AVATAR_GENDERS, DEFAULT_AVATAR_CONFIG.gender),
+    figure: pickOption(o.figure, AVATAR_FIGURES, DEFAULT_AVATAR_CONFIG.figure),
     clothing: pickOption(o.clothing, AVATAR_CLOTHING, DEFAULT_AVATAR_CONFIG.clothing),
     hair: pickOption(o.hair, AVATAR_HAIR, DEFAULT_AVATAR_CONFIG.hair),
     size: pickOption(o.size, AVATAR_SIZES, DEFAULT_AVATAR_CONFIG.size),
@@ -163,13 +164,33 @@ export function parseAvatarConfig(raw: unknown): AvatarConfig {
 // first use of the mode. The hook uses it to decide whether to PIN a freshly
 // rolled character (see useAvatarConfig): random once, then yours.
 export function hasStoredAvatarConfig(): boolean {
-  return readLocalStorageSafe(STORAGE_KEY) !== null;
+  return (
+    readLocalStorageSafe(STORAGE_KEY) !== null || readLocalStorageSafe(OLD_STORAGE_KEY) !== null
+  );
 }
 
 // The stored character, or a fresh random one on first use of the mode.
 export function loadAvatarConfig(): AvatarConfig {
+  const old = takeOldAvatarConfig();
   const raw = readLocalStorageSafe(STORAGE_KEY);
-  return raw === null ? randomAvatarConfig() : parseAvatarConfig(raw);
+  if (raw !== null) return parseAvatarConfig(raw);
+  if (!old) return randomAvatarConfig();
+  saveAvatarConfig(old);
+  return old;
+}
+
+// The key a character was saved under before the figure choice, holding the old field in place of `figure`.
+// Read once and removed (docs/specs/008-canvas/avatar-mode.md "Persistence"), so the old field never stays on
+// the device. The figure is chosen by comparison, never copied, so nothing of the old value is written back.
+const OLD_STORAGE_KEY = 'livediagram:v2:avatar-config';
+
+function takeOldAvatarConfig(): AvatarConfig | null {
+  const raw = readLocalStorageSafe(OLD_STORAGE_KEY);
+  if (raw === null) return null;
+  removeLocalStorageSafe(OLD_STORAGE_KEY);
+  const old = storedRecord(raw);
+  const figure: AvatarFigure = old?.gender === 'female' ? 'slender' : 'broad';
+  return { ...parseAvatarConfig(raw), figure };
 }
 
 export function saveAvatarConfig(config: AvatarConfig): void {

@@ -114,7 +114,7 @@ export function appHrefOfPlace(place: WorkspacePlace): string {
   return place.shareCode ? `${path}?s=${encodeURIComponent(place.shareCode)}` : path;
 }
 
-// The place's name for `livediagram:place`: the Explorer view's kind, or `document`.
+// The place's name for `livedoc:place`: the Explorer view's kind, or `document`.
 export function placeView(place: WorkspacePlace): string {
   return place.kind === 'document' ? 'document' : place.node.kind;
 }

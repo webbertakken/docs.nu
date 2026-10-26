@@ -232,12 +232,12 @@ Kept on the editor route:
 
 The new route owns:
 
-- The participant-identity bootstrap (same `livediagram:v2:self-id`
+- The participant-identity bootstrap (same `livedoc:v2:self-id`
   localStorage key, same `apiLoadSelf` / `apiSaveSelf` API).
 - `templatePickerMode = 'welcome'` (only).
 - The mode choice (as the mode's blank template) locally until the user commits.
 - The "name confirmed" persistence (same
-  `livediagram:v2:name-confirmed` localStorage key).
+  `livedoc:v2:name-confirmed` localStorage key).
 - On commit: mint a UUID, POST `/api/documents` with the
   templated tab(s) inline, navigate to `/document/<id>`.
 - On Skip: mint a UUID, POST an empty-tab document, navigate to
@@ -401,7 +401,7 @@ updates live."; a **Participant** is pointed at a sticky, text or an image. It s
 (its dock is the hint, [Draw mode](../023-draw-mode/draw-mode.md)), Pages and Plan show none. It offers no action
 of its own: an Editor's empty tab shows its start instead, and **Help** on a desktop. It goes once the
 canvas has content, and a **Close** (×) in its top right corner closes it for good on that tab for this person in
-this browser (a per-browser list of the last 200 closed keys, `livediagram:v2:empty-card-dismissed` in localStorage,
+this browser (a per-browser list of the last 200 closed keys, `livedoc:v2:empty-card-dismissed` in localStorage,
 shared with the starts' own close). It takes presses only on itself: the canvas around it still pans. It hides while
 a draw tool is armed. The card: a small picture of what the tab's mode makes, in the brand's
 tints on a soft panel (`EmptyCanvasArt`), "Tab 1 is empty" (15 px semibold), then its one line, in full. **On a

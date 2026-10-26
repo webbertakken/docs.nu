@@ -138,7 +138,7 @@ describe('runWorkbenchHandshake', () => {
     expect(events.at(-1)).toEqual({ type: 'redeemed', session: other });
     expect(endSession).toHaveBeenCalledWith(SESSION.session);
     expect(parent.postMessage).toHaveBeenCalledWith(
-      { type: 'livediagram:ended', v: 1, reason: 'refused' },
+      { type: 'livedoc:ended', v: 1, reason: 'refused' },
       ORIGIN,
     );
   });
@@ -160,11 +160,11 @@ describe('runWorkbenchHandshake', () => {
 
     const running = runWorkbenchHandshake(win, dispatch);
     await vi.waitFor(() => expect(parent.postMessage).toHaveBeenCalled());
-    deliver({ type: 'livediagram:hello-ack', v: 1, name: 'Acme Editor' });
+    deliver({ type: 'livedoc:hello-ack', v: 1, name: 'Acme Editor' });
     const port = await running;
 
     expect(parent.postMessage).toHaveBeenCalledTimes(1);
-    expect(parent.postMessage).toHaveBeenCalledWith({ type: 'livediagram:hello', v: 1 }, ORIGIN);
+    expect(parent.postMessage).toHaveBeenCalledWith({ type: 'livedoc:hello', v: 1 }, ORIGIN);
     expect(events.at(-1)).toEqual({ type: 'acked', name: 'Acme Editor' });
     expect(port?.origin).toBe(ORIGIN);
     expect(endSession).not.toHaveBeenCalled();
@@ -178,9 +178,9 @@ describe('runWorkbenchHandshake', () => {
 
     const running = runWorkbenchHandshake(win, dispatch);
     await vi.waitFor(() => expect(parent.postMessage).toHaveBeenCalled());
-    deliver({ type: 'livediagram:hello-ack', v: 1, name: 'Evil' }, 'https://evil.example');
-    deliver({ type: 'livediagram:hello-ack', v: 1, name: '' });
-    deliver({ type: 'livediagram:theme', v: 1, colourScheme: 'dark' });
+    deliver({ type: 'livedoc:hello-ack', v: 1, name: 'Evil' }, 'https://evil.example');
+    deliver({ type: 'livedoc:hello-ack', v: 1, name: '' });
+    deliver({ type: 'livedoc:theme', v: 1, colourScheme: 'dark' });
     await vi.advanceTimersByTimeAsync(WORKBENCH_HANDSHAKE_MS);
 
     expect(await running).toBeNull();
@@ -213,7 +213,7 @@ describe('useWorkbenchHandshake', () => {
     const { result } = renderHook(() => useWorkbenchHandshake(win));
 
     await waitFor(() => expect(result.current.phase.phase).toBe('binding'));
-    act(() => deliver({ type: 'livediagram:hello-ack', v: 1, name: 'Acme Editor' }));
+    act(() => deliver({ type: 'livedoc:hello-ack', v: 1, name: 'Acme Editor' }));
     await waitFor(() => expect(result.current.port).not.toBeNull());
     act(() => result.current.dispatch({ type: 'ended', reason: 'revoked' }));
 

@@ -16,7 +16,7 @@ One row per default applied where the spec is silent or qualitative.
 | D10 | drive-mirror | Where the reconnect banner sits                         | Bottom-left, dismissible for the browser session                                                        |
 | D11 | drive-mirror | Relative wording of **Last synced**                     | "Just now" under a minute, then the shared relative-time formatter, "Not yet" before the first pass     |
 | D12 | drive-mirror | Where `/drive/connected` returns to                     | The page the user connected from, else `/explorer`                                                      |
-| D13 | drive-mirror | Lease holder identity                                   | A random per-browser id in `localStorage` (`livediagram:v2:drive-device`)                               |
+| D13 | drive-mirror | Lease holder identity                                   | A random per-browser id in `localStorage` (`livedoc:v2:drive-device`)                                   |
 | D14 | drive-mirror | When a content edit made in Drive is rewritten          | At the ordinary write cadence (idle and minimum interval), not at once                                  |
 | D15 | drive-mirror | Where the unseen-folder notice shows on a row           | A small amber folder mark after the document's name, in list rows and cards alike                       |
 | D16 | drive-mirror | Which pages run the engine                              | Every page of the live app except `/embed` and the `/drive` routes, from the root layout                |
