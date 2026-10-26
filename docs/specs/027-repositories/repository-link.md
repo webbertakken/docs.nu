@@ -56,6 +56,7 @@ web = "https://github.com/acme/app/blob/main"  # optional; where links out of a 
 block = false                      # true: a commit fails when its sync cannot run
 
 [git]                              # native files (Native files)
+binding = "branches"               # branches | none; none makes a local copy (Local copy); default branches
 branch = "main"                    # the main git branch (Branch binding); default: the remote's default branch
 commit = "none"                    # none | commit | push; default none
 
@@ -70,7 +71,8 @@ tab = "doc_3h9x2a/0b34"
 
 These are every table and key a link file holds; [Diagram sources](diagram-sources.md) owns `[[sources]]`,
 [Native files](native-files.md#adopting-files) owns `ignore`, [Links](../032-wikis/links.md#links-out-of-the-wiki)
-owns `[repository]`, [Branch binding](branch-binding.md) owns `[git] branch`, and
+owns `[repository]`, [Branch binding](branch-binding.md) owns `[git] branch`, [Local copy](local-copy.md) owns
+`[git] binding`, and
 [Committed files](committed-files.md) owns `[files]`.
 
 - **Covers.** A link covers the documents in its `folder` (subfolders included) and its listed `documents`. Either

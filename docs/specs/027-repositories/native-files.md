@@ -35,8 +35,8 @@ At the `files` level, per covered document:
 - **A render** (`.livedoc.svg`) is written while any covered page embeds the document
   (`![Architecture](architecture.livedoc.svg)`) and removed when none does. Its bytes are deterministic, like every
   file a link writes.
-- **Generated files are never documents.** Mirror files, outline files, renders, `INDEX.md` and the sync records are
-  never adopted as pages; an edit made to an outline or a render is reported as not sent and overwritten at their next
+- **Generated files are never documents.** Mirror files, outline files, renders, `INDEX.md`, the link file and the
+  sync records are never adopted, wherever the link's `dir` puts them; an edit made to an outline or a render is reported as not sent and overwritten at their next
   write.
 - `INDEX.md` is not written where a page's file would take its path, compared case-insensitively: a wiki's
   [entry page](../032-wikis/wiki.md#the-entry-page) holds that place.
@@ -125,7 +125,8 @@ ignore = ["drafts/**", "*.tmp"]   # never adopted, never written
 ### A page
 
 1. **The base is the snapshot the file is nearest to.** Among the snapshots the sync can reach (its kept bases, the
-   revision in the record, and inside git the file's own history) the base is the one fewest characters away from the
+   CLI's read copies of the page, LiveDoc's text while it is still at the record's revision, and inside git the
+   file's own history) the base is the one fewest characters away from the
    file; a tie takes the newest. An agent that read a page, waited, and wrote the whole file back started from an
    older snapshot; merging it from the newest would quietly undo everything that arrived in between. With no snapshot
    to reach (a fresh clone of a squashed history, a lost record), the merge is
@@ -184,6 +185,9 @@ restorable ([File tab](../006-document/file-tab.md#changing-it)), or in git's hi
   delete: a file deleted while LiveDoc changed its document since the file's base is written again, and the sync
   says so.
 - **A folder** whose documents have all gone, either way, goes with them.
+- **A directory gone whole is never a delete.** When the link's `dir` is missing, or every recorded file is missing
+  at once, nothing is deleted or written; the sync says so at every run until the files are back
+  ([Local copy](local-copy.md#deleted)).
 
 ## While people and agents edit
 

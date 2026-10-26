@@ -21,11 +21,11 @@ describes, and the same change is a live document branch people and agents edit 
 
 ## The binding
 
-| The checkout is on                | It syncs with                                         | Its commits carry                                               |
-| --------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- |
-| The main git branch               | Each document's main                                  | Main's snapshot of every covered document                       |
-| Any other git branch `B`          | Each document's branch `B`, in this repository        | `B`'s snapshot of the documents it branched; git's for the rest |
-| Nothing (outside a git work tree) | Each document's main, as a [local copy](#without-git) | No commits                                                      |
+| The checkout is on                                                         | It syncs with                                         | Its commits carry                                               |
+| -------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- |
+| The main git branch                                                        | Each document's main                                  | Main's snapshot of every covered document                       |
+| Any other git branch `B`                                                   | Each document's branch `B`, in this repository        | `B`'s snapshot of the documents it branched; git's for the rest |
+| Nothing (outside a git work tree), or a link with `[git] binding = "none"` | Each document's main, as a [local copy](#without-git) | No commits                                                      |
 
 - **The main git branch** is `[git] branch` in the link file. Absent, it is the remote's default branch as the clone
   knows it (`origin/HEAD`); a clone that does not know it is refused, "Set `[git] branch` in LiveDoc.toml: this clone
@@ -259,9 +259,9 @@ Opting in is per person; the repository works the same for everyone else.
 
 ## Without git
 
-Outside a git work tree a link is a **local copy**: a live two-way sync between LiveDoc and a folder of plain files,
-always with main. There are no branches, hooks or commits; everything else in
-[Native files](native-files.md) holds.
+Outside a git work tree, or with `[git] binding = "none"` inside one, a link is a **local copy**: a live two-way
+sync between LiveDoc and a folder of plain files, always with main. There are no branches, hooks or commits;
+everything else in [Native files](native-files.md) holds. [Local copy](local-copy.md) settles every path.
 
 ## Observability and telemetry
 

@@ -48,6 +48,7 @@ So the markdown tab holds **the text itself**, and every view of it, the editor 
 | `name`        | The tab's name, as every tab has; in a single-tab document it is never shown               |
 | `text`        | The text, every character as written, line endings and trailing whitespace included        |
 | `bom`         | `true` when the file opened with a UTF-8 byte order mark; the mark itself is not in `text` |
+| `extension`   | `md` or `markdown`: the file's, as it was read; `md` for a page made in LiveDoc            |
 | `marginNotes` | Comment threads, each anchored to a stretch of the text ([Collaboration](#collaboration))  |
 | merge state   | What the live merge needs to keep concurrent edits apart ([Storage](#storage))             |
 
