@@ -6,7 +6,7 @@ Derived from [Next.js](../nextjs.md).
 
 | Term            | Identifier                               | Meaning                                                       |
 | --------------- | ---------------------------------------- | ------------------------------------------------------------- |
-| Shared config   | `livedocNextConfig(options)`         | The settings every app shares, from `@livedoc/next-config`    |
+| Shared config   | `livedocNextConfig(options)`             | The settings every app shares, from `@livedoc/next-config`    |
 | App config      | each app's `next.config.ts`              | The shared config spread, plus the app's own settings         |
 | Turbopack build | `isTurbopack(env)` (`env.TURBOPACK` set) | Next sets `TURBOPACK` before it loads the config              |
 | Static export   | `output: 'export'`                       | Always, except the editor's dev server (`exportInDev: false`) |

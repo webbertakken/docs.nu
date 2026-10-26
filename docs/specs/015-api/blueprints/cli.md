@@ -112,7 +112,7 @@ Scope, by file:
 | Loopback login      | `loginWithBrowser`                                                      | OAuth with PKCE and a `127.0.0.1` redirect                               |
 | Device login        | `loginWithDevice`, `DeviceGrant`                                        | The RFC 8628 grant; the person approves at `/oauth/device`               |
 | User code           | `userCode`, `formatUserCode`, `normaliseUserCode`                       | The 8-letter code the person types                                       |
-| Built-in CLI client | `CLI_CLIENT_ID` `livedoc-cli`, `CLI_CLIENT_NAME` `LiveDoc CLI`      | The public client the server vouches for                                 |
+| Built-in CLI client | `CLI_CLIENT_ID` `livedoc-cli`, `CLI_CLIENT_NAME` `LiveDoc CLI`          | The public client the server vouches for                                 |
 | Room stream         | `openRoomStream`                                                        | The CLI's listening socket for `wait` and `watch`                        |
 | Guide topic         | `GUIDE_TOPICS` key: `build`, `edit`, `comments`, ..., `workbench` (six) | One how-to                                                               |
 | Skill               | `renderSkill()`, `SKILL.md`                                             | The agent skill file                                                     |
@@ -1075,7 +1075,7 @@ WebSocket) with a fixed clock; none waits on a real timer or the network.
 | `UPDATE_CHECK_INTERVAL_MS`         | 86400000               | Spec "once a day at most"                   | fixed by spec      |
 | `UPDATE_CHECK_TIMEOUT_MS`          | 1500                   | CLI43                                       | 500 to 3000        |
 | `LOGIN_TIMEOUT_MS`                 | 600000                 | The authorize session's 10-minute TTL       | equal to it        |
-| `CLI_CLIENT_ID`                    | `livedoc-cli`      | MCP server §3                               | fixed              |
+| `CLI_CLIENT_ID`                    | `livedoc-cli`          | MCP server §3                               | fixed              |
 | `CLI_CLIENT_NAME`                  | `LiveDoc CLI`          | Spec (the token's name)                     | fixed              |
 | `DEVICE_CODE_TTL_S`                | 600                    | The authorize session's TTL, CLI36          | 300 to 1800        |
 | `DEVICE_POLL_INTERVAL_S`           | 5                      | RFC 8628 §3.2 default                       | 5 to 15            |

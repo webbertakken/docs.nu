@@ -4,17 +4,17 @@ Derived from [Trusted Types](../trusted-types.md).
 
 ## Domain and naming
 
-| Term               | Identifier                                         | Meaning                                                                                                                            |
-| ------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Term               | Identifier                                         | Meaning                                                                                                                    |
+| ------------------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | The header value   | `TRUSTED_TYPES_CSP`                                | `require-trusted-types-for 'script'; trusted-types livedoc-markup livedoc-inert-parse nextjs ProseMirrorClipboard default` |
-| Markup policy      | `MARKUP_POLICY` (`'livedoc-markup'`)           | Makes `TrustedHTML` from livediagram's own builders' markup                                                                        |
-| Inert-parse policy | `INERT_PARSE_POLICY` (`'livedoc-inert-parse'`) | Lets `DOMParser` read a file a person opened                                                                                       |
-| Default policy     | `'default'`                                        | The browser's fallback for a plain string at a sink                                                                                |
-| Boot script        | `trustedTypesBootScript(assetPrefix, origins)`     | Inline, first in each layout's `<head>`: the default policy and the violation log                                                  |
-| Asset prefix       | `''`, `/live`, `/help`, `/community`, `/telemetry` | Where an app's own build is served from (`assetPrefix` or `basePath`)                                                              |
-| Markup helper      | `trustedHtml(markup)`                              | `TrustedHTML` in a browser with Trusted Types, else the string itself                                                              |
-| Inert parse        | `parseInert(source, type)`                         | `DOMParser` through the inert-parse policy                                                                                         |
-| Allowed origin     | `trustedScriptOrigins(env)`                        | Third-party script origins the default policy lets through (Google's)                                                              |
+| Markup policy      | `MARKUP_POLICY` (`'livedoc-markup'`)               | Makes `TrustedHTML` from livediagram's own builders' markup                                                                |
+| Inert-parse policy | `INERT_PARSE_POLICY` (`'livedoc-inert-parse'`)     | Lets `DOMParser` read a file a person opened                                                                               |
+| Default policy     | `'default'`                                        | The browser's fallback for a plain string at a sink                                                                        |
+| Boot script        | `trustedTypesBootScript(assetPrefix, origins)`     | Inline, first in each layout's `<head>`: the default policy and the violation log                                          |
+| Asset prefix       | `''`, `/live`, `/help`, `/community`, `/telemetry` | Where an app's own build is served from (`assetPrefix` or `basePath`)                                                      |
+| Markup helper      | `trustedHtml(markup)`                              | `TrustedHTML` in a browser with Trusted Types, else the string itself                                                      |
+| Inert parse        | `parseInert(source, type)`                         | `DOMParser` through the inert-parse policy                                                                                 |
+| Allowed origin     | `trustedScriptOrigins(env)`                        | Third-party script origins the default policy lets through (Google's)                                                      |
 
 ## Modules
 

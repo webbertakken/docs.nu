@@ -39,7 +39,7 @@ Scope, by file:
 | `apps/live/lib/drive/drive-client.ts`                           | `DriveClient` interface, `DriveApiError`                                                |
 | `apps/live/lib/drive/drive-rest-client.ts`                      | `DriveClient` over Google's REST API                                                    |
 | `apps/live/lib/drive/thumbnail.ts`                              | SVG snapshot to PNG `contentHints.thumbnail`                                            |
-| `apps/live/lib/drive/livedoc-port.ts`                       | `LivedocPort` interface + implementation over `lib/api`                             |
+| `apps/live/lib/drive/livedoc-port.ts`                           | `LivedocPort` interface + implementation over `lib/api`                                 |
 | `apps/live/lib/drive/snapshot.ts`                               | `MirrorSnapshot` and its indexes                                                        |
 | `apps/live/lib/drive/plan-outbound.ts`                          | Pure: snapshot + items to outbound ops                                                  |
 | `apps/live/lib/drive/plan-inbound.ts`                           | Pure: a change + snapshot + items to an inbound decision                                |
