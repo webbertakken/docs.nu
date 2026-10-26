@@ -14,7 +14,7 @@ describe('pageScale', () => {
     expect(pageScale(graphOf(vertex('a', '', 'width="120" height="60"', 'parent="1"')))).toBe(1);
   });
 
-  it("gives draw.io's 12 px labels in 120 px boxes livediagram's room", () => {
+  it("gives draw.io's 12 px labels in 120 px boxes LiveDoc's room", () => {
     // 14 px labels: the padded ratio wins, (1.4114 · 116 + 12) / 120 ≈ 1.4644... over the line ratio.
     const rw = (14 * 0.4785) / (12 * 0.4746);
     const rh = (14 * 1.25) / (12 * 1.2);

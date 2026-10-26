@@ -229,10 +229,10 @@ export function buildOpenApiDocument(): OpenApiDocument {
   return {
     openapi: '3.1.0',
     info: {
-      title: 'livediagram API',
+      title: 'LiveDoc API',
       version: '1.0.0',
       description:
-        'The REST API behind livediagram. The same surface the web editor uses, callable ' +
+        'The REST API behind LiveDoc. The same surface the web editor uses, callable ' +
         'programmatically. External callers authenticate with an API token ' +
         '(`Authorization: Bearer lvd_…`); see the "API tokens" help article to create one. ' +
         'Endpoints an external token can use are marked `x-token-usable`. The realtime ' +

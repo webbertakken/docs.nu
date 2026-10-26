@@ -12,7 +12,7 @@ export type DriveItemKind = 'document' | 'folder';
 
 export const DRIVE_ITEM_KINDS: readonly DriveItemKind[] = ['document', 'folder'];
 
-// The item was moved in Drive into a folder livediagram cannot see.
+// The item was moved in Drive into a folder LiveDoc cannot see.
 export type DriveNotice = 'unseen_folder';
 
 // The connection summary. The refresh token itself never leaves the worker;
@@ -29,9 +29,9 @@ export type DriveConnection = {
   pendingAccountSwitch: { expiresAt: number } | null;
 };
 
-// One mirrored document or folder, with the Drive state livediagram last wrote
+// One mirrored document or folder, with the Drive state LiveDoc last wrote
 // (or last accepted from Drive). `name` is the name as Drive holds it; `ldName`
-// the livediagram name it mirrors.
+// the LiveDoc name it mirrors.
 export type DriveItem = {
   kind: DriveItemKind;
   ldId: string;
@@ -87,7 +87,7 @@ export function driveFileName(name: string): string {
 
 const EXTENSION_RE = /\.livediagram$/i;
 
-// The livediagram name a Drive file name stands for: the extension dropped,
+// The LiveDoc name a Drive file name stands for: the extension dropped,
 // trimmed, and cut to `max`. Null when nothing is left, so an empty rename in
 // Drive keeps the old name.
 export function stripDriveName(driveName: string, max = Number.POSITIVE_INFINITY): string | null {
@@ -136,6 +136,6 @@ function hostName(host: string): string {
 export function driveRootName(host: string): string {
   const name = hostName(host);
   if (PRODUCTION_HOSTS.has(name)) return 'livediagram';
-  if (STAGING_HOSTS.has(name)) return 'livediagram (staging)';
-  return 'livediagram (self-hosted)';
+  if (STAGING_HOSTS.has(name)) return 'LiveDoc (staging)';
+  return 'LiveDoc (self-hosted)';
 }

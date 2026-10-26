@@ -86,7 +86,7 @@ describe('the form page', () => {
     render(<FormRespondPage />);
     await screen.findByRole('heading', { name: 'Feedback' });
     // The title is set in an effect, which can flush after the heading paints when the machine is busy.
-    await waitFor(() => expect(document.title).toBe('Feedback | livediagram'));
+    await waitFor(() => expect(document.title).toBe('Feedback | LiveDoc'));
     // The tab's look dresses the page: its finish, font and colour.
     const main = document.querySelector('main')!;
     expect(main.getAttribute('data-form-finish')).toBe('sketch');

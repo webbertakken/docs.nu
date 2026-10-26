@@ -14,7 +14,7 @@ import { registerPrompts } from './prompts';
 
 export function buildServer(env: Env): McpServer {
   const server = new McpServer(
-    { name: 'livediagram', version: '0.1.0' },
+    { name: 'livedoc', version: '0.1.0' },
     { instructions: SERVER_INSTRUCTIONS },
   );
 
@@ -22,7 +22,7 @@ export function buildServer(env: Env): McpServer {
     'element-schema',
     SCHEMA_RESOURCE_URI,
     {
-      title: 'livediagram element schema',
+      title: 'LiveDoc element schema',
       description:
         'Element types, shape vocabulary, pinned-arrow anchors, and design rules for ' +
         'producing well-formed diagrams. Read before create_document / update_document.',

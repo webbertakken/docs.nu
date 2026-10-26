@@ -21,7 +21,7 @@ type CompetitorLook = {
   // The card's header wash and the glyph's colour.
   panel: string;
   glyph: string;
-  // Three short chips: what livediagram offers that this comparison turns on.
+  // Three short chips: what LiveDoc offers that this comparison turns on.
   highlights: [string, string, string];
 };
 

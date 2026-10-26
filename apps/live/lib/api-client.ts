@@ -1,4 +1,4 @@
-// Barrel for the livediagram HTTP/WS client. The implementation is split
+// Barrel for the LiveDoc HTTP/WS client. The implementation is split
 // by domain under lib/api/* (core plumbing + documents / tabs / share /
 // folders / self / room / images / preferences / ai); this
 // file re-exports the public surface so existing `@/lib/api-client`

@@ -1,9 +1,9 @@
-// What the Drive mirror needs from livediagram itself
+// What the Drive mirror needs from LiveDoc itself
 // (docs/specs/022-drive-mirror/blueprints/drive-mirror.md, "LivediagramPort"):
 // My Documents reads, the ordinary writes an inbound change goes through
 // (so authorisation, the change log and realtime rooms behave exactly as if
 // the user had done it here), and the mirror's own rows. The engine only ever
-// sees this interface; tests give it an in-memory livediagram.
+// sees this interface; tests give it an in-memory LiveDoc.
 
 import { storeAsCreates } from '@livediagram/items';
 import { fetchItems } from '../api/items';
@@ -88,7 +88,7 @@ export interface LivediagramPort {
   moveFolder(id: string, parentId: string | null): Promise<void>;
   deleteFolder(id: string): Promise<void>;
   // A new document in My Documents from an envelope; returns its id. `target`
-  // pins the id, name and folder (a copy opened with livediagram).
+  // pins the id, name and folder (a copy opened with LiveDoc).
   importDocumentCopy(envelope: DocumentEnvelope, target?: CopyTarget): Promise<string>;
 
   getConnection(): Promise<DriveConnection | null>;

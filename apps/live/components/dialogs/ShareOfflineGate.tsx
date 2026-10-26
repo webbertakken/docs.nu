@@ -33,7 +33,7 @@ export function ShareOfflineGate({
         onSyncToCloud={onSyncToCloud}
         ready={ready}
         onBusyChange={setBusy}
-        message="It is saved only in this browser, so there is nothing to share yet. Sync it to livediagram to share it: share links, real-time collaboration and the live image all need it on our servers. You can take it offline again any time."
+        message="It is saved only in this browser, so there is nothing to share yet. Sync it to LiveDoc to share it: share links, real-time collaboration and the live image all need it on our servers. You can take it offline again any time."
       />
 
       <DialogFooter>

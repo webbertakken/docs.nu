@@ -1,5 +1,5 @@
 // Applying inbound decisions (docs/specs/022-drive-mirror/blueprints/drive-mirror.md,
-// "Inbound"). Every effect goes through the ordinary livediagram routes via
+// "Inbound"). Every effect goes through the ordinary LiveDoc routes via
 // the port, and the snapshot follows along so later changes in the same read
 // see what the earlier ones did.
 
@@ -183,7 +183,7 @@ async function applyDecision(
   }
 }
 
-// Apply one read of changes, folders first. Returns whether livediagram
+// Apply one read of changes, folders first. Returns whether LiveDoc
 // changed, so the pass re-reads before planning outbound.
 export async function applyInbound(ctx: PassContext, changes: DriveChange[]): Promise<boolean> {
   const queue = orderChanges(changes, ctx.snapshot);

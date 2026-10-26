@@ -477,7 +477,7 @@ export class DriveMirrorEngine {
     return { connection: await deps.port.putConnection({ rootFolderId: rootId }), fresh: true };
   }
 
-  // After a (re)connect: record a row for every file livediagram made earlier
+  // After a (re)connect: record a row for every file LiveDoc made earlier
   // whose document or folder still exists, instead of making a second copy.
   private async adoptExisting(snapshot: MirrorSnapshot): Promise<void> {
     const files = await this.deps.drive.listFiles(
@@ -570,7 +570,7 @@ export class DriveMirrorEngine {
   }
 
   // Settles research E-A3 against real Drive: does the start token move for
-  // changes livediagram cannot see? Opt-in, one quiet line per check.
+  // changes LiveDoc cannot see? Opt-in, one quiet line per check.
   private diagnose(moved: boolean, listed: number): void {
     if (this.deps.diagnostics?.()) debugLog(`drive: start-token moved=${moved} listed=${listed}`);
   }
@@ -675,7 +675,7 @@ export class DriveMirrorEngine {
 
   // ---- adoption --------------------------------------------------------------
 
-  // The user picked the folder livediagram could not see: make the matching
+  // The user picked the folder LiveDoc could not see: make the matching
   // folder in My Documents under its nearest mirrored ancestor, and move the
   // noticed item into it (docs/specs/022-drive-mirror/drive-mirror.md, "Adopting a folder").
   async adoptFolder(kind: DriveItemKind, ldId: string, pickedFolderId: string): Promise<void> {

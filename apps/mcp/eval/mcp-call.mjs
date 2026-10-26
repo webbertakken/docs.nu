@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Drives a livediagram MCP server over JSON-RPC (streamable HTTP), so an evaluating agent that cannot mount a new MCP
+// Drives a LiveDoc MCP server over JSON-RPC (streamable HTTP), so an evaluating agent that cannot mount a new MCP
 // server mid-session still calls exactly the tools a real assistant would (docs/instructions/evaluate-mcp-output.md).
 //
 //   node mcp-call.mjs instructions            the server instructions

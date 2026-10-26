@@ -1,6 +1,6 @@
 'use client';
 
-// Under a form on its page (docs/specs/030-forms/forms.md "Filling in a form"): "Made with livediagram" and Report
+// Under a form on its page (docs/specs/030-forms/forms.md "Filling in a form"): "Made with LiveDoc" and Report
 // This Form, which opens a short report in place: a reason, an optional note, Send. One report per browser per form,
 // the browser named by a random id kept in local storage (never the editor's identity).
 import { useId, useState } from 'react';

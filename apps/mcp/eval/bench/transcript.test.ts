@@ -10,13 +10,13 @@ const transcript = [
     subtype: 'init',
     model: 'claude-haiku-5-5',
     session_id: 's-1',
-    mcp_servers: [{ name: 'livediagram', status: 'connected' }],
+    mcp_servers: [{ name: 'livedoc', status: 'connected' }],
   }),
   line({
     type: 'assistant',
     message: {
       content: [
-        { type: 'tool_use', id: 't1', name: 'mcp__livediagram__add_form', input: { name: 'RSVP' } },
+        { type: 'tool_use', id: 't1', name: 'mcp__livedoc__add_form', input: { name: 'RSVP' } },
       ],
     },
   }),
@@ -37,7 +37,7 @@ const transcript = [
     type: 'assistant',
     message: {
       content: [
-        { type: 'tool_use', id: 't2', name: 'mcp__livediagram__add_form', input: { name: 'RSVP' } },
+        { type: 'tool_use', id: 't2', name: 'mcp__livedoc__add_form', input: { name: 'RSVP' } },
       ],
     },
   }),
@@ -59,7 +59,7 @@ const transcript = [
   line({
     type: 'assistant',
     message: {
-      content: [{ type: 'tool_use', id: 't3', name: 'mcp__livediagram__find_diagrams', input: {} }],
+      content: [{ type: 'tool_use', id: 't3', name: 'mcp__livedoc__find_diagrams', input: {} }],
     },
   }),
   line({
@@ -129,7 +129,7 @@ describe('mcpConnected', () => {
     const failed = JSON.stringify({
       type: 'system',
       subtype: 'init',
-      mcp_servers: [{ name: 'livediagram', status: 'failed' }],
+      mcp_servers: [{ name: 'livedoc', status: 'failed' }],
     });
     expect(parseTranscript(failed).mcpConnected).toBe(false);
     expect(parseTranscript('').mcpConnected).toBeNull();

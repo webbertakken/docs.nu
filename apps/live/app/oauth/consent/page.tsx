@@ -199,8 +199,8 @@ function Consent() {
       <h1 className={AUTH_TITLE}>Connect {client}</h1>
       <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
         <span className="font-medium text-slate-700 dark:text-slate-200">{client}</span> wants to
-        access your livediagram documents on your behalf. Approving creates an API token, which you
-        can revoke any time from Settings, under Account › API Tokens.
+        access your LiveDoc documents on your behalf. Approving creates an API token, which you can
+        revoke any time from Settings, under Account › API Tokens.
       </p>
       <ReadOnlyAccessToggle readOnly={readOnly} onChange={setReadOnly} />
       {/* The one fact worth checking before approving, and now the server's

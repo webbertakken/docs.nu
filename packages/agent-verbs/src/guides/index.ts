@@ -109,7 +109,7 @@ Something changed since you read? The changeset is refused as a conflict: read a
 A workbench (a coding tool or an editor) shows a document live beside you. When the person writes
 to you about it, the message carries a selection reference:
 
-  [livediagram] "Home screen" \u203a tab "Wireframe" (doc 3h9x2a, tab 0b34, rev 41)
+  [LiveDoc] "Home screen" \u203a tab "Wireframe" (doc 3h9x2a, tab 0b34, rev 41)
   selected: button 146b "Play", frame e4a8 "Game grid", sticky 0c84 "Daily streak goes here"
   read: livedoc tab view 3h9x2a --tab 0b34 --view show --ref 146b
 

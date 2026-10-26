@@ -273,11 +273,11 @@ for (const theme of THEMES) {
         'The Explorer after the rename in Drive reached it, without a reload',
       );
 
-      // Needs attention: a file moved into a folder livediagram cannot see.
+      // Needs attention: a file moved into a folder LiveDoc cannot see.
       const hidden = google.fake.userCreateFolder(
         USER,
         'Clients',
-        fileNamed('livediagram (staging)')!.id,
+        fileNamed('LiveDoc (staging)')!.id,
       );
       google.fake.userMove(fileNamed('Quarterly plan.livediagram')!.id, hidden);
       row = await openCloudSync(page);

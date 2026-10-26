@@ -98,7 +98,7 @@ export default async function AlternativePage({ params }: { params: Promise<{ sl
         ]}
       />
       <main className="pb-20 sm:pb-24">
-        <PageHero eyebrow={`livediagram vs ${alt.name}`} title={alt.h1} lede={alt.lede}>
+        <PageHero eyebrow={`LiveDoc vs ${alt.name}`} title={alt.h1} lede={alt.lede}>
           <div className="mt-8 flex justify-center">
             <VsBadge slug={alt.slug} />
           </div>
@@ -150,7 +150,7 @@ export default async function AlternativePage({ params }: { params: Promise<{ sl
                     <span className="flex size-8 items-center justify-center rounded-lg bg-brand-700 text-white dark:bg-brand-600">
                       <BrandMark className="size-5" tone="mono" />
                     </span>
-                    Why pick livediagram
+                    Why pick LiveDoc
                   </h3>
                   <ul className="mt-4 space-y-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
                     {alt.usBest.map((point) => (

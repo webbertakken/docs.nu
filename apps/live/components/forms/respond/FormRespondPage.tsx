@@ -53,7 +53,7 @@ export function FormRespondPage() {
         : page.data.heading
       : null;
   useEffect(() => {
-    if (heading) document.title = `${heading} | livediagram`;
+    if (heading) document.title = `${heading} | LiveDoc`;
   }, [heading]);
 
   // The form's look (its tab's theme, finish and font) dresses the whole page, the backdrop included.

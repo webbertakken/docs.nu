@@ -37,7 +37,7 @@ export async function generateMetadata({
   const section = getLandingSection(slug);
   if (!section) return {};
   return pageMetadata({
-    title: `${section.label}: ${section.title} | livediagram`,
+    title: `${section.label}: ${section.title} | LiveDoc`,
     description: section.metaDescription,
     path: `/features/${slug}`,
     // This route ships its own per-category opengraph-image / twitter-image.

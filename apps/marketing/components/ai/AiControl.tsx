@@ -22,7 +22,7 @@ const FACTS = [
   {
     icon: lucideGlyph(lucideCpu, 18),
     title: 'Your AI does the thinking',
-    body: 'livediagram runs no AI model of its own here. It checks, lays out and saves what your tool asks for.',
+    body: 'LiveDoc runs no AI model of its own here. It checks, lays out and saves what your tool asks for.',
   },
 ];
 

@@ -61,7 +61,7 @@ export function ChromeControls({
           <span className="hidden sm:contents">
             <HoverCard
               title="Source on GitHub"
-              description="View livediagram's open-source code on GitHub."
+              description="View LiveDoc's open-source code on GitHub."
             >
               <a
                 href={REPO_URL}

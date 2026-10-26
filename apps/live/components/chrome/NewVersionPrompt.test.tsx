@@ -37,7 +37,7 @@ describe('NewVersionPrompt', () => {
     render(<NewVersionPrompt hasUnsavedChanges={() => false} reload={vi.fn()} />);
     newer();
     const status = screen.getByRole('status');
-    expect(status.textContent).toContain('A new version of livediagram is ready.');
+    expect(status.textContent).toContain('A new version of LiveDoc is ready.');
     expect(document.activeElement).not.toBe(screen.getByRole('button', { name: 'Reload' }));
     expect(screen.getByRole('button', { name: 'Not now' })).toBeTruthy();
     expect(track).toHaveBeenCalledWith('UI', 'Opened', 'NewVersionPrompt');

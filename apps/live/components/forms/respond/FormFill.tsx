@@ -246,7 +246,7 @@ export function FormFill({
           </button>
         )}
         <span className="order-first mr-auto basis-full text-[12px] text-slate-500 sm:basis-auto dark:text-slate-400">
-          Never submit passwords through livediagram forms.
+          Never submit passwords through LiveDoc forms.
         </span>
       </div>
       {footer}

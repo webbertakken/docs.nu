@@ -5,7 +5,7 @@ import type { Env } from './env';
 
 export type ClientReg = { redirectUris: readonly string[]; clientName: string };
 
-// The clients livediagram ships (docs/specs/015-api/blueprints/cli.md "OAuth server", CLI35): looked up before any
+// The clients LiveDoc ships (docs/specs/015-api/blueprints/cli.md "OAuth server", CLI35): looked up before any
 // registration. Registration mints random hex ids, so it can never take one of these.
 export const BUILT_IN_CLIENTS: Readonly<Record<string, ClientReg>> = {
   [CLI_CLIENT_ID]: { clientName: CLI_CLIENT_NAME, redirectUris: CLI_REDIRECT_URIS },

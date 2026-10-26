@@ -2,7 +2,7 @@ import { BrandMark } from '@livediagram/ui';
 
 import { COMPETITOR_LOOK } from '@/components/compare/competitor-look';
 
-// The "livediagram vs <tool>" pair of tiles: our mark against a generic glyph of what the other tool is
+// The "LiveDoc vs <tool>" pair of tiles: our mark against a generic glyph of what the other tool is
 // (competitor-look.ts), never its logo, so the page compares without borrowing anyone's brand.
 export function VsBadge({ slug, size = 'lg' }: { slug: string; size?: 'lg' | 'sm' }) {
   const look = COMPETITOR_LOOK[slug];

@@ -178,8 +178,8 @@ function Device() {
           <h1 className={HEADING}>Connect {clientName}</h1>
           <p className={BODY}>
             <span className="font-medium text-slate-700 dark:text-slate-200">{clientName}</span>{' '}
-            wants to access your livediagram documents on your behalf. Approving creates an API
-            token, which you can revoke any time from Settings, under Account › API Tokens.
+            wants to access your LiveDoc documents on your behalf. Approving creates an API token,
+            which you can revoke any time from Settings, under Account › API Tokens.
           </p>
           <ReadOnlyAccessToggle readOnly={readOnly} onChange={setReadOnly} />
           {failed ? (

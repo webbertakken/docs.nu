@@ -11,7 +11,7 @@ export const SKILL_FRONTMATTER_MAX_TOKENS = 80;
 export const SKILL_BODY_MAX_TOKENS = 1500;
 
 export const SKILL_DESCRIPTION =
-  'Read, build, edit and comment on LiveDoc documents with the livedoc CLI. Use when asked to draw, change or check a document on docs.nu, or when a message carries a [livediagram] line.';
+  'Read, build, edit and comment on LiveDoc documents with the livedoc CLI. Use when asked to draw, change or check a document on docs.nu, or when a message carries a [LiveDoc] line.';
 
 export const SKILL_DIRECTORIES: readonly { path: string; agent: string }[] = [
   { path: '~/.claude/skills', agent: 'Claude Code, every project' },
@@ -43,7 +43,7 @@ export function renderSkill(): string {
       (topic) => `- \`livedoc guide ${topic}\`: ${GUIDE_TOPICS[topic].summary}`,
     ),
     '',
-    'A message carrying a `[livediagram]` line is a selection reference from a workbench: read `livedoc guide workbench` first.',
+    'A message carrying a `[LiveDoc]` line is a selection reference from a workbench: read `livedoc guide workbench` first.',
     '',
     'stdout is data and stderr is hints; --json gives JSON; exit 0 is done, 1 rejected, 2 usage,',
     '3 not found, 4 auth, 5 conflict, 6 rate limited, 7 network or server.',

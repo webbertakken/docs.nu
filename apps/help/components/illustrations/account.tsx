@@ -90,7 +90,7 @@ export function SignInCard() {
     <Scene w={420} h={250} bg="plain">
       <Panel x={98} y={14} w={224} h={222}>
         <Label x={210} y={38} anchor="middle" size={14} weight={700} tone="strong">
-          livediagram
+          LiveDoc
         </Label>
         <Label x={210} y={56} anchor="middle" size={10} tone="muted">
           Sign in to keep your documents

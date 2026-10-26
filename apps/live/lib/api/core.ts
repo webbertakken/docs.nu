@@ -201,7 +201,7 @@ export type SharedDocumentResolution =
 // `X-Owner-Id: <participant-id>` as before.
 //
 // Module-level state (rather than threading a tokenProvider through
-// 22 function signatures) because livediagram ships only as a static
+// 22 function signatures) because LiveDoc ships only as a static
 // export — single browser tab, single-threaded, single session
 // per page load. useAccountApiBootstrap wires it up once in a layout effect
 // (`setTokenProvider((opts) => getToken(opts))`) and clears on unmount.

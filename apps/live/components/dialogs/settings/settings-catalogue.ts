@@ -1545,7 +1545,7 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         label: 'API Tokens',
         cta: 'Manage API Tokens',
         target: 'tokens',
-        description: 'Let your scripts, and AI tools connected over MCP, use livediagram as you.',
+        description: 'Let your scripts, and AI tools connected over MCP, use LiveDoc as you.',
         available: (ctx) => ctx.authEnabled === true,
       },
     ],
@@ -1770,7 +1770,7 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         keywords: 'api token key mcp integration script developer access create revoke secret',
         label: 'API Tokens',
         description:
-          'Let your scripts, and AI tools connected over MCP, use livediagram as you. Treat each like a password: it lasts six months, and you can revoke it any time.',
+          'Let your scripts, and AI tools connected over MCP, use LiveDoc as you. Treat each like a password: it lasts six months, and you can revoke it any time.',
         helpArticle: 'apiTokens',
         available: (ctx) => ctx.authEnabled === true,
       },

@@ -73,7 +73,7 @@ test('a workspace frame is its own approval, browses the Explorer, and opens doc
   await expect(frame.getByRole('button', { name: 'Settings' })).toHaveCount(0);
   await expect(frame.getByRole('button', { name: 'New Team' })).toHaveCount(0);
   await expect(
-    frame.getByRole('link', { name: 'Open in livediagram (opens in a new tab)' }),
+    frame.getByRole('link', { name: 'Open in LiveDoc (opens in a new tab)' }),
   ).toBeVisible();
   await expect
     .poll(async () => (await received(page)).find((m) => m.type === 'livediagram:ready'))

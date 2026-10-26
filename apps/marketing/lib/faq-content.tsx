@@ -46,15 +46,15 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   {
     id: 'getting-started',
     title: 'Getting started',
-    blurb: 'What livediagram is and how to begin.',
+    blurb: 'What LiveDoc is and how to begin.',
     icon: lucideGlyph(lucideZap, ICON),
     items: [
       {
-        q: 'What is livediagram?',
+        q: 'What is LiveDoc?',
         a: 'A free, real-time canvas for diagrams, whiteboards, illustrations and plans. Every document is a stack of tabs, and each tab can be worked on in five modes: Diagram for shapes and arrows, Draw for freehand whiteboarding, Workshop for running a session with your team, Pages for slides, articles, posters and logos, and Plan for boards of cards, spreadsheets and forms. Your team can join any of them live.',
       },
       {
-        q: 'Do I need an account to use livediagram?',
+        q: 'Do I need an account to use LiveDoc?',
         a: (
           <>
             No. Open the editor and start drawing straight away, with no sign-up. Your work saves in
@@ -130,7 +130,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: 'Is it really free?',
-        a: 'Yes. Every feature is free for everyone, with no paid tier, no trial and no plan to introduce one. If we ship it, every user gets it.',
+        a: 'Yes. Every feature is free for everyone, with no paid tier and no trial, and no feature will ever sit behind a plan. If we ship it, every user gets it.',
       },
       {
         q: 'Is the code open source?',
@@ -516,8 +516,8 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         q: 'Can I connect my own AI assistant, like Claude?',
         a: (
           <>
-            Yes. livediagram runs an MCP server at mcp.docs.nu. Connect a compatible AI tool and,
-            after a one-time authorisation, it can find, read, create and edit the documents in your
+            Yes. LiveDoc runs an MCP server at mcp.docs.nu. Connect a compatible AI tool and, after
+            a one-time authorisation, it can find, read, create and edit the documents in your
             account, including writing articles, building slide decks and designing logos. Its
             changes appear live for anyone on the tab, outlined so you can see them and undo them.{' '}
             <a href="/ai">Build with AI</a> walks you through connecting Claude, ChatGPT, Cursor and
@@ -525,7 +525,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
           </>
         ),
         aText:
-          'Yes. livediagram runs an MCP server at mcp.docs.nu. Connect a compatible AI tool and, after a one-time authorisation, it can find, read, create and edit the documents in your account, including writing articles, building slide decks and designing logos. Its changes appear live for anyone on the tab, outlined so you can see them and undo them. Build with AI walks you through connecting Claude, ChatGPT, Cursor and more.',
+          'Yes. LiveDoc runs an MCP server at mcp.docs.nu. Connect a compatible AI tool and, after a one-time authorisation, it can find, read, create and edit the documents in your account, including writing articles, building slide decks and designing logos. Its changes appear live for anyone on the tab, outlined so you can see them and undo them. Build with AI walks you through connecting Claude, ChatGPT, Cursor and more.',
       },
       {
         q: 'Is there AI built into the editor?',
@@ -553,12 +553,12 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
           <>
             Yes. Link a repository to a folder of documents with the CLI, and it keeps a snapshot of
             each one in the repository, so coding agents find your diagrams by name and read them as
-            text. livediagram stays the home of every document. See{' '}
+            text. LiveDoc stays the home of every document. See{' '}
             <a href="/help/developers/repositories/">diagrams in your repository</a>.
           </>
         ),
         aText:
-          'Yes. Link a repository to a folder of documents with the CLI, and it keeps a snapshot of each one in the repository, so coding agents find your diagrams by name and read them as text. livediagram stays the home of every document. See diagrams in your repository.',
+          'Yes. Link a repository to a folder of documents with the CLI, and it keeps a snapshot of each one in the repository, so coding agents find your diagrams by name and read them as text. LiveDoc stays the home of every document. See diagrams in your repository.',
       },
     ],
   },
@@ -574,7 +574,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Does it work with Mermaid?',
-        a: 'Yes, both ways. Paste or open a Mermaid flowchart, state diagram or ER diagram and livediagram lays it out on the canvas with every connection intact. Export a diagram tab back to Mermaid text for your READMEs, issues and AI tools. Other Mermaid types, such as sequence, class, Gantt, pie and mind map, are not supported.',
+        a: 'Yes, both ways. Paste or open a Mermaid flowchart, state diagram or ER diagram and LiveDoc lays it out on the canvas with every connection intact. Export a diagram tab back to Mermaid text for your READMEs, issues and AI tools. Other Mermaid types, such as sequence, class, Gantt, pie and mind map, are not supported.',
       },
       {
         q: 'Can I move my boards over from another tool?',
@@ -582,7 +582,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Can I turn a photo of sticky notes into a board?',
-        a: 'Yes, on an event storming board. Take a photo of the wall and livediagram finds the sticky notes and places them on the canvas for you to tidy up.',
+        a: 'Yes, on an event storming board. Take a photo of the wall and LiveDoc finds the sticky notes and places them on the canvas for you to tidy up.',
       },
       {
         q: 'Can I keep a copy in my own Google Drive?',
@@ -629,13 +629,13 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         a: (
           <>
             A document kept only in your browser goes with it, so share it or sign in first. Share
-            syncs a document online in one step, and after you sign in livediagram offers to move
-            every browser-only document into your account. Documents saved to your account are never
+            syncs a document online in one step, and after you sign in LiveDoc offers to move every
+            browser-only document into your account. Documents saved to your account are never
             touched. See <a href="/help/privacy-and-security/offline-mode/">Offline Mode</a>.
           </>
         ),
         aText:
-          'A document kept only in your browser goes with it, so share it or sign in first. Share syncs a document online in one step, and after you sign in livediagram offers to move every browser-only document into your account. Documents saved to your account are never touched. See Offline Mode.',
+          'A document kept only in your browser goes with it, so share it or sign in first. Share syncs a document online in one step, and after you sign in LiveDoc offers to move every browser-only document into your account. Documents saved to your account are never touched. See Offline Mode.',
       },
       {
         q: 'Is my work saved automatically?',
@@ -662,7 +662,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     icon: lucideGlyph(lucidePackage, ICON),
     items: [
       {
-        q: 'Can I self-host livediagram?',
+        q: 'Can I self-host LiveDoc?',
         a: (
           <>
             Yes. It is MIT-licensed and the source is{' '}
@@ -671,11 +671,11 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             </a>
             . Deploy the static frontends and the Cloudflare Workers backend to your own Cloudflare
             account and you get every feature. See{' '}
-            <a href="/help/self-hosting/deploying-livediagram/">deploying livediagram</a>.
+            <a href="/help/self-hosting/deploying-livedoc/">deploying LiveDoc</a>.
           </>
         ),
         aText:
-          'Yes. It is MIT-licensed and the source is on GitHub. Deploy the static frontends and the Cloudflare Workers backend to your own Cloudflare account and you get every feature. See deploying livediagram.',
+          'Yes. It is MIT-licensed and the source is on GitHub. Deploy the static frontends and the Cloudflare Workers backend to your own Cloudflare account and you get every feature. See deploying LiveDoc.',
       },
       {
         q: 'Do I need sign-in or an AI key to self-host?',
@@ -703,7 +703,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
           'Try reloading first. If it still will not open, the editor offers to repair this browser’s saved state without touching your documents. The troubleshooting guide walks through every step.',
       },
       {
-        q: 'Is livediagram up right now?',
+        q: 'Is LiveDoc up right now?',
         a: (
           <>
             The <a href="/status">status page</a> lists every part of the service and notes any
@@ -714,7 +714,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
           'The status page lists every part of the service and notes any incident we are working on. If it loads, the site is up.',
       },
       {
-        q: 'Who makes livediagram?',
+        q: 'Who makes LiveDoc?',
         a: (
           <>
             It is built in the open by{' '}

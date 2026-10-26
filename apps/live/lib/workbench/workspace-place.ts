@@ -107,7 +107,7 @@ export function isNewDocumentHref(href: string, origin: string): boolean {
   return sameOrigin(url, origin) && url.pathname.replace(/\/+$/, '') === '/new';
 }
 
-// The same place in a full tab: Open in livediagram.
+// The same place in a full tab: Open in LiveDoc.
 export function appHrefOfPlace(place: WorkspacePlace): string {
   if (place.kind === 'explorer') return explorerPathFor(place.node);
   const path = `/document/${encodeURIComponent(place.documentId)}`;

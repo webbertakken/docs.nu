@@ -1,6 +1,6 @@
 'use client';
 
-// livediagram's timeline renderers (docs/specs/013-workspace/timeline.md §7).
+// LiveDoc's timeline renderers (docs/specs/013-workspace/timeline.md §7).
 //
 // These are the half of the Timeline that knows about this product:
 // which route a card opens, what its preview shows, and when to say

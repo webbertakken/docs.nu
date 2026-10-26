@@ -1,4 +1,4 @@
-// Wire-format type definitions for the livediagram API — the single
+// Wire-format type definitions for the LiveDoc API — the single
 // source of truth for what travels between the `api` Cloudflare
 // Worker and the `live` Next.js editor.
 //

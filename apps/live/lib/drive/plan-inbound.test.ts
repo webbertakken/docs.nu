@@ -5,7 +5,7 @@ import { orderChanges, planAdoption, planInbound } from './plan-inbound';
 import { buildSnapshot } from './snapshot';
 
 // Each row of the spec's Inbound table as a pure decision
-// (docs/specs/022-drive-mirror/drive-mirror.md, "Inbound: Drive to livediagram").
+// (docs/specs/022-drive-mirror/drive-mirror.md, "Inbound: Drive to LiveDoc").
 
 const HOST = 'livediagram.test';
 const T = Date.parse('2026-09-28T12:00:00Z');
@@ -116,7 +116,7 @@ describe('planInbound: documents', () => {
   });
 
   it('lets the later side win when both renamed', () => {
-    // livediagram renamed to "Local" after Drive's change: livediagram wins.
+    // LiveDoc renamed to "Local" after Drive's change: LiveDoc wins.
     const localLater = planInbound(
       change(file({ name: 'Drive.livediagram' })),
       snap({ name: 'Local', savedAt: T + 1000 }),
@@ -141,7 +141,7 @@ describe('planInbound: documents', () => {
     });
   });
 
-  it('moves to the root of My Documents with a notice for a folder livediagram cannot see, or none', () => {
+  it('moves to the root of My Documents with a notice for a folder LiveDoc cannot see, or none', () => {
     const d = planInbound(
       change(file({ parents: ['hidden'] })),
       snap({ folderId: 'f1', items: [item({ parentId: 'file-f1' }), folderItem] }),
@@ -194,7 +194,7 @@ describe('planInbound: documents', () => {
     });
   });
 
-  it('records a change whose value livediagram already holds without applying it', () => {
+  it('records a change whose value LiveDoc already holds without applying it', () => {
     const d = planInbound(change(file({ name: 'Plan2.livediagram' })), snap({ name: 'Plan2' }));
     expect(d).toMatchObject({
       kind: 'apply',

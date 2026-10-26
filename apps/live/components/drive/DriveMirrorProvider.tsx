@@ -463,7 +463,7 @@ export function DriveMirrorProvider({ children }: { children: ReactNode }) {
     if (!accountId) return;
     const ok = await confirm({
       title: 'Disconnect Google Drive?',
-      message: 'Your files stay in Drive; livediagram stops updating them.',
+      message: 'Your files stay in Drive; LiveDoc stops updating them.',
       confirmLabel: 'Disconnect',
     });
     if (!ok) return;

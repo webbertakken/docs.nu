@@ -16,7 +16,7 @@ const CAPABILITIES = [
   {
     icon: lucideGlyph(lucideWorkflow, 20),
     title: 'Diagrams from a sentence',
-    body: 'Flowcharts, architecture, org charts, mind maps and state machines. Your AI names the boxes and links; livediagram lays them out. Mermaid works too.',
+    body: 'Flowcharts, architecture, org charts, mind maps and state machines. Your AI names the boxes and links; LiveDoc lays them out. Mermaid works too.',
   },
   {
     icon: lucideGlyph(lucideSquareKanban, 20),

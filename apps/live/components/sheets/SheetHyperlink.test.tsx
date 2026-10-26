@@ -21,7 +21,7 @@ beforeEach(() => {
   vi.stubGlobal('open', open);
 });
 
-const LINK = '=HYPERLINK("https://docs.nu", "livediagram")';
+const LINK = '=HYPERLINK("https://docs.nu", "LiveDoc")';
 const textOf = (label: string) =>
   [...document.querySelectorAll<HTMLElement>('[data-sheet-text]')].find(
     (el) => el.textContent === label,
@@ -30,7 +30,7 @@ const textOf = (label: string) =>
 describe('a HYPERLINK cell', () => {
   it('draws its label underlined, as a link', async () => {
     await mountGrid({ cells: { A1: LINK, A2: 'plain' } });
-    expect(textOf('livediagram').style.textDecoration).toBe('underline');
+    expect(textOf('LiveDoc').style.textDecoration).toBe('underline');
     expect(textOf('plain').style.textDecoration).toBe('');
   });
 

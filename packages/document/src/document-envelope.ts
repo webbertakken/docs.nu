@@ -3,7 +3,7 @@
 // copy" reads back. The sibling of the per-tab `livediagram.tab` envelope in
 // export-tab-text.ts: same shape (kind, schemaVersion, exportedAt), one
 // document with every tab, each tab's per-document folder, and the slide deck.
-// Images stay references to livediagram's image store; no bytes are embedded.
+// Images stay references to LiveDoc's image store; no bytes are embedded.
 
 import type { Tab } from './index';
 import { readItemTypeCatalogue, type Item, type ItemTypeCatalogue } from '@livediagram/items';

@@ -5,7 +5,7 @@ import { helpMetadata } from '@/lib/seo';
 export const metadata = helpMetadata({
   title: 'Working with Documents',
   description:
-    'Worked livediagram API examples: list, read, create, and update documents, tabs, and folders, and create a share link, all with curl.',
+    'Worked LiveDoc API examples: list, read, create, and update documents, tabs, and folders, and create a share link, all with curl.',
   path: '/help/developers/working-with-documents/',
 });
 
@@ -111,7 +111,7 @@ Add `budget=2000` to fit any view except `lint` to about 2,000 tokens. The view 
 
 ## Create a document
 
-`POST /documents` creates a document. You supply the `id`, a `name`, and optionally the `tabs` to seed it with. Nodes are **shape** elements with a position and size; this creates one tab with two boxes. Ids are shared across all of livediagram, not just your account, so use a fresh UUID for the document, each tab and each folder; an id someone else already holds is refused or swapped for a new one:
+`POST /documents` creates a document. You supply the `id`, a `name`, and optionally the `tabs` to seed it with. Nodes are **shape** elements with a position and size; this creates one tab with two boxes. Ids are shared across all of LiveDoc, not just your account, so use a fresh UUID for the document, each tab and each folder; an id someone else already holds is refused or swapped for a new one:
 
 ```bash
 DOC=$(uuidgen) TAB=$(uuidgen) FOLDER=$(uuidgen)

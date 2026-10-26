@@ -45,7 +45,7 @@ const COLUMNS: { title: string; links: (FooterLink | typeof COMMUNITY | typeof G
     title: 'Resources',
     links: [
       { href: '/help/', label: 'Help Centre', icon: lucideGlyph(lucideBookOpen, ICON_SIZE) },
-      { href: '/help/about/what-is-livediagram/', label: 'About' },
+      { href: '/help/about/what-is-livedoc/', label: 'About' },
       { href: '/status', label: 'Status' },
       { href: '/telemetry', label: 'Telemetry' },
     ],

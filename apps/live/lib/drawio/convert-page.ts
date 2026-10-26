@@ -1,4 +1,4 @@
-// One draw.io page to livediagram elements
+// One draw.io page to LiveDoc elements
 // (docs/specs/020-import-export/blueprints/drawio-import.md step 15): walk the
 // layers depth-first in paint order, build each vertex, drop groups, skip
 // hidden and collapsed content, then build the edges against the elements

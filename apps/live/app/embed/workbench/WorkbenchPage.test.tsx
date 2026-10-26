@@ -153,7 +153,7 @@ describe('WorkbenchPage', () => {
     harness.initial = { phase: 'reading' };
     render(<Page />);
     expect(screen.getByRole('status').textContent).toBe('Opening your diagram…');
-    expect(metadata).toEqual({ title: 'Workbench | livediagram', robots: { index: false } });
+    expect(metadata).toEqual({ title: 'Workbench | LiveDoc', robots: { index: false } });
   });
 
   it('ends the page when the editor finds the document trashed', () => {

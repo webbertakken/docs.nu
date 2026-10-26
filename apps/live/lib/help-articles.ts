@@ -282,7 +282,7 @@ export const HELP_LINK_COPY: Record<HelpArticleKey, { title: string; description
   },
   apiTokens: {
     title: 'Learn about API tokens',
-    description: 'Create tokens to call the livediagram API from your own scripts.',
+    description: 'Create tokens to call the LiveDoc API from your own scripts.',
   },
   trash: {
     title: 'Learn about the Trash',

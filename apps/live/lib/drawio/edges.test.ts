@@ -198,7 +198,7 @@ describe('edge heads and stroke', () => {
     expect(convert(boxA + boxB + edge('endSize=10;')).arrow.arrowheadSize).toBe('extra-large');
   });
 
-  it('counts heads livediagram does not draw', () => {
+  it('counts heads LiveDoc does not draw', () => {
     expect(convert(boxA + boxB + edge('endArrow=async;')).notes).toEqual([
       { kind: 'arrowhead-approximated', count: 1 },
     ]);

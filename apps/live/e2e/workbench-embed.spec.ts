@@ -59,9 +59,9 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   await frame.locator('[data-canvas-a11y-root]').waitFor();
   await expect(frame.locator('[data-element-id="el-play"]').first()).toBeVisible();
 
-  // The workbench chrome: no app header, Explorer or Share; the tab bar and Open in livediagram stay.
+  // The workbench chrome: no app header, Explorer or Share; the tab bar and Open in LiveDoc stay.
   await expect(
-    frame.getByRole('link', { name: 'Open in livediagram (opens in a new tab)' }),
+    frame.getByRole('link', { name: 'Open in LiveDoc (opens in a new tab)' }),
   ).toBeVisible();
   await expect(frame.getByRole('button', { name: /^Share/ })).toHaveCount(0);
   await expect(frame.getByText('Explorer', { exact: true })).toHaveCount(0);
@@ -113,7 +113,7 @@ test('a paired workbench frames the editor, hears the selection, renews, and end
   await frame.locator('[data-element-id="el-play"]').first().click();
   await expect.poll(() => selectionOf('Play')).toBeTruthy();
   const selection = (await selectionOf('Play'))!;
-  expect(selection.reference).toMatch(/^\[livediagram\] "Home screen" › tab "Wireframe" \(doc /);
+  expect(selection.reference).toMatch(/^\[LiveDoc\] "Home screen" › tab "Wireframe" \(doc /);
   expect(selection.reference).toContain('"Play"');
   expect(selection.reference).toContain(`read: livedoc tab view ${seeded.documentId}`);
 

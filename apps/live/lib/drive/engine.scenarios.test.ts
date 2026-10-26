@@ -9,7 +9,7 @@ import { fileOf, makeEngine, OWNER, world } from './test-support';
 import { createBrokerTokenSource, createBrowserTokenSource } from './token-source';
 
 // The mirror over time and across devices (docs/specs/022-drive-mirror/drive-mirror.md,
-// "Cadence", "Errors and edge cases", "Folders livediagram cannot see",
+// "Cadence", "Errors and edge cases", "Folders LiveDoc cannot see",
 // "Disconnecting").
 
 const MIN = 60_000;
@@ -200,7 +200,7 @@ describe('tokens', () => {
   });
 });
 
-describe('folders livediagram cannot see', () => {
+describe('folders LiveDoc cannot see', () => {
   it('adopting the picked folder makes the matching folder and moves the document in; it then syncs both ways', async () => {
     const w = world();
     w.ld.createFolderAs('f1', 'Work');
@@ -411,7 +411,7 @@ describe('the 2-minute gated pace (docs/specs/022-drive-mirror/drive-mirror.md, 
         true,
       );
       lines.length = 0;
-      // Activity livediagram cannot see: whether the real token moves for it is
+      // Activity LiveDoc cannot see: whether the real token moves for it is
       // exactly what the diagnostic is for (E-A3); the fake says it does.
       w.google.userCreateFolder(OWNER, 'Elsewhere');
       await d.engine.syncNow();
@@ -511,7 +511,7 @@ describe('the root folder name in the status (blueprint "Cloud Sync in Settings"
     const { engine, statuses } = makeEngine(w);
     await engine.start();
     // The test host is a self-hosted one.
-    expect(statuses.at(-1)!.rootName).toBe('livediagram (self-hosted)');
+    expect(statuses.at(-1)!.rootName).toBe('LiveDoc (self-hosted)');
     w.google.userRename(w.ld.connection!.rootFolderId!, 'My Documents');
     await engine.syncNow();
     expect(statuses.at(-1)!.rootName).toBe('My Documents');
