@@ -286,8 +286,10 @@ describe('withPageSplit', () => {
 
 // Entering the mode runs on every switch: linear, never the O(n²) clustering (measured ~2 ms at 3000 elements).
 // Asserted as growth, not as a wall-clock budget: a fixed millisecond budget failed on a machine busy with other
-// work while the code was as fast as ever. Four times the elements must cost well under the sixteen times a
-// quadratic pass would; each size takes its best of five runs, so a stall in one run does not count.
+// work while the code was as fast as ever. Eight times the elements must cost well under the sixty-four times a
+// quadratic pass would (24 sits between them, with room for an n log n sort at ~9); each size takes its best of
+// nine runs, so a stall in a few runs does not count. A four-fold step with a limit of 8 sat too close to the
+// linear 4 and failed on a loaded machine.
 describe('withContentOnAPage: cost', () => {
   const board = (n: number) =>
     Array.from({ length: n }, (_, i) =>
@@ -308,10 +310,11 @@ describe('withContentOnAPage: cost', () => {
   };
 
   it('grows linearly with the board, never quadratically', () => {
-    const small = board(1250);
-    const large = board(5000);
-    enter(large)(); // warm the code paths before timing
-    const ratio = bestOf(5, enter(large)) / Math.max(bestOf(5, enter(small)), 0.05);
-    expect(ratio).toBeLessThan(8);
+    const small = board(750);
+    const large = board(6000);
+    enter(small)(); // warm the code paths before timing
+    enter(large)();
+    const ratio = bestOf(9, enter(large)) / Math.max(bestOf(9, enter(small)), 0.05);
+    expect(ratio).toBeLessThan(24);
   });
 });
