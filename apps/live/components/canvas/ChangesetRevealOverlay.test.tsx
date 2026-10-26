@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render } from '@testing-library/react';
-import { CHANGESET_REVEAL_MS } from '@livediagram/api-schema';
-import type { Element } from '@livediagram/document';
+import { CHANGESET_REVEAL_MS } from '@livedoc/api-schema';
+import type { Element } from '@livedoc/document';
 import { createRevealStore } from '@/lib/changeset-reveals';
 import { ChangesetRevealContext, ChangesetRevealOverlay } from './ChangesetRevealOverlay';
 

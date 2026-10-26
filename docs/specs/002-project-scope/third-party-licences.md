@@ -27,7 +27,7 @@ reach a deployed artefact, and nothing else.
   deployed; its bundle ships its own `THIRD_PARTY_LICENSES` beside the code, generated from its
   esbuild metafile ([CLI blueprint](../015-api/blueprints/cli.md)), so the page leaves it out.
   `DISTRIBUTED_APPS` names it, so every directory in `apps/` is still accounted for.
-- **First-party code is not listed.** The `@livediagram/*` workspaces are this repo, under its MIT
+- **First-party code is not listed.** The `@livedoc/*` workspaces are this repo, under its MIT
   licence.
 - **Vendored works.** A directory inside a package that carries its own `package.json` name and its
   own licence file is a separate work. Next vendors React, React DOM, the scheduler and a few

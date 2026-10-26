@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { communityPostPath } from '@livediagram/api-schema';
+import { communityPostPath } from '@livedoc/api-schema';
 import { BackIcon } from '../shared/icons';
 import { EmbedFrame } from './EmbedFrame';
 import { PostActions } from './PostActions';

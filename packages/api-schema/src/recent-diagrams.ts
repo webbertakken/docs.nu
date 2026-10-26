@@ -3,7 +3,7 @@
 // the static marketing site loading sign-in or calling the api. One contract, written by apps/live and read
 // by apps/marketing on the same origin.
 
-import { parseEditorMode, type EditorMode } from '@livediagram/document';
+import { parseEditorMode, type EditorMode } from '@livedoc/document';
 import type { DocumentSummary } from './index';
 
 // The localStorage key the note lives under. Versioned: a change to the shape takes a new key.

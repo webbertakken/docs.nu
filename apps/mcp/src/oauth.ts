@@ -11,7 +11,7 @@ import {
   objectOrEmpty,
   oauthRedirectUrl,
   pkceChallenge,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import type { Hono } from 'hono';
 import type { Env } from './env';
 import { lookupClient, type ClientReg } from './oauth-clients';

@@ -128,7 +128,7 @@ Invariant: on every path the bootstrap leaves `loadingDocument` false or the wat
 - The report never carries a share code (`?s=` reduced to "share link: yes") or a full guest id
   (8-character prefix, cut inside `readBrowserIdentity` so no caller sees the whole id). A
   signed-in account id is not a credential on its own and is included by the editor only.
-- The signed-in hint (`SIGNED_IN_HINT_KEY` from `@livediagram/account-session`, `1` signed in, `0` signed out,
+- The signed-in hint (`SIGNED_IN_HINT_KEY` from `@livedoc/account-session`, `1` signed in, `0` signed out,
   absent unknown) is read as a hint; it is never sent anywhere but the copied report.
 - The repair cannot sign anyone out or remove identity; the kept list is guarded by a test against
   `LOCAL_IDENTITY_KEYS`.

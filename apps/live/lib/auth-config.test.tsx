@@ -8,7 +8,7 @@ vi.mock('@/lib/api-client', () => ({
   apiGetCapabilities: vi.fn(async () => caps.answer),
 }));
 
-import { SIGN_IN_OFFERED_KEY } from '@livediagram/account-session';
+import { SIGN_IN_OFFERED_KEY } from '@livedoc/account-session';
 import { apiGetCapabilities } from '@/lib/api-client';
 import {
   AUTH_CONFIG_UNKNOWN,

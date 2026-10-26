@@ -1,7 +1,7 @@
 // An account's owner id (docs/specs/014-identity/auth-and-guest-access.md "Who is who"): `acct_` and 24 base62
 // characters, about 143 bits. Never a UUID, the guest id's shape, so one prefix test tells the two apart
-// (`isAccountIdShape` in @livediagram/api-schema).
-import { ACCOUNT_ID_PREFIX } from '@livediagram/api-schema';
+// (`isAccountIdShape` in @livedoc/api-schema).
+import { ACCOUNT_ID_PREFIX } from '@livedoc/api-schema';
 
 export const ACCOUNT_ID_RANDOM_LENGTH = 24;
 

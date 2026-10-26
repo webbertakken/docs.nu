@@ -12,14 +12,8 @@ import {
   type ChartSource,
   type ShapeElement,
   type Tab,
-} from '@livediagram/document';
-import {
-  formatRange,
-  idRangeOf,
-  parseRangeText,
-  posRangeOf,
-  type Sheet,
-} from '@livediagram/sheets';
+} from '@livedoc/document';
+import { formatRange, idRangeOf, parseRangeText, posRangeOf, type Sheet } from '@livedoc/sheets';
 
 export const NOT_A_RANGE = 'Not a range on this sheet';
 

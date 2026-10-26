@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Element, ShapeElement } from '@livediagram/document';
-import { PAGE_LAYOUTS } from '@livediagram/templates';
+import type { Element, ShapeElement } from '@livedoc/document';
+import { PAGE_LAYOUTS } from '@livedoc/templates';
 
 // docs/specs/007-editor/pages-mode.md "Layouts": the Compare set beyond the core four.
 const IDS = [

@@ -4,7 +4,7 @@ import {
   getBuiltInTheme,
   type Tab,
   type ThemeDefinition,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { formatResultLines } from './format-results';
 import { checkoutFlow, fixedIds } from './fixtures/checkout-flow';
 import { applied, refused } from './fixtures/outcomes';

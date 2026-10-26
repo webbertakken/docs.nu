@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { VERBS } from '@livediagram/agent-verbs';
-import { MCP_TOOL_VERBS } from '@livediagram/agent-verbs/mcp';
+import { VERBS } from '@livedoc/agent-verbs';
+import { MCP_TOOL_VERBS } from '@livedoc/agent-verbs/mcp';
 import { COMMAND_OF_TOOL, inCliWords } from './tool-names';
 import { formatError } from './cli-error';
 

@@ -2,8 +2,8 @@
 // blueprint "The selection reference"): the text a workbench attaches to the person's message, so their
 // agent reads exactly what was selected then. Built on the view model, so refs, kind words and labels
 // are the outline's own; labels are JSON-quoted, so a label is data and can never forge a line.
-import { WORKBENCH_SELECTION_MAX_REFS } from '@livediagram/api-schema';
-import type { Element, Tab } from '@livediagram/document';
+import { WORKBENCH_SELECTION_MAX_REFS } from '@livedoc/api-schema';
+import type { Element, Tab } from '@livedoc/document';
 import { LABEL_CUT_CHARS } from './constants';
 import { textField } from './fields';
 import { buildViewModel, type ViewModel } from './model';

@@ -1,4 +1,4 @@
-import { SITE_NAME, SITE_PITCH, renderSocialCard } from '@livediagram/ui';
+import { SITE_NAME, SITE_PITCH, renderSocialCard } from '@livedoc/ui';
 import { ImageResponse } from 'next/og';
 
 // Open Graph + Twitter social card (1200x630). Rendered to a static

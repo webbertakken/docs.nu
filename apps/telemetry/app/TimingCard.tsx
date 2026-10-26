@@ -1,6 +1,6 @@
 'use client';
 
-import type { TelemetrySummary, TelemetryWindowKey } from '@livediagram/api-schema';
+import type { TelemetrySummary, TelemetryWindowKey } from '@livedoc/api-schema';
 import type { TimingChart } from './catalogue/timings';
 import {
   bucketLabel,

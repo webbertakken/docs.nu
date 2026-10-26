@@ -718,7 +718,7 @@ next), ownerId)`; the editor follows the cache (`useEditorPreferences`). Setting
 - **Find**: `filterContents(rows, query, texts)` folds case and width (NFKC, lower case) and needs
   every word in the number, name, kind line or the page's words; `usePageContents` computes `texts`
   with `pageTexts` (`apps/live/lib/page-texts.ts`: one walk, each element to the page its anchor
-  lies on via `rowPageAt`, its `elementFindTexts` from `@livediagram/document-views`, plus an
+  lies on via `rowPageAt`, its `elementFindTexts` from `@livedoc/document-views`, plus an
   article page's runs and code) only while the query is not blank.
 - **Add Page**: `ContentsAddPage` is two buttons in a row: the wide one (`data-contents-add`,
   **Add Page** with `lucidePlus`, its tooltip `addAnotherLabel(lastPage)`) calls `addLike()` (`edit.addPageLike(lastPage.id)`); the

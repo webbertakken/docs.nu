@@ -4,13 +4,7 @@
 //
 // An offline document's tags live on its offline record, never on the server (the spec's "An offline document's tags
 // live in the browser"), so the link calls dispatch on isOfflineId and the list merges the two, as favourites do.
-import {
-  TAG_ERRORS,
-  TAG_LIMIT,
-  type Tag,
-  type TagLink,
-  type TagsList,
-} from '@livediagram/api-schema';
+import { TAG_ERRORS, TAG_LIMIT, type Tag, type TagLink, type TagsList } from '@livedoc/api-schema';
 import { dedupeInFlight } from '../dedupe';
 import { isOfflineId, offlineListTagLinks, offlineSetDocumentTag } from '../offline/offline-store';
 import { API_BASE, ApiError, apiFetch, apiHeaders, expectOk, expectOkVoid } from './core';

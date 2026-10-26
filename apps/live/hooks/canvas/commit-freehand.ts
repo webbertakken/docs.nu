@@ -15,8 +15,8 @@ import {
   type PenStroke,
   type Endpoint,
   type ShapeElement,
-} from '@livediagram/document';
-import type { Tab } from '@livediagram/document';
+} from '@livedoc/document';
+import type { Tab } from '@livedoc/document';
 import type { MutableRefObject } from 'react';
 import { ARROW_SNAP_THRESHOLD_PX } from '@/lib/canvas';
 import { NEW_ARROW_THEME_STROKE_FALLBACK } from '@/lib/draw-commit';

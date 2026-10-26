@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Button, Glyph } from '@livediagram/ui';
+import { Button, Glyph } from '@livedoc/ui';
 import { useToast } from '@/hooks/ui/useToast';
 import { syncFailureMessage } from '@/lib/offline/offline-convert';
 import { Spinner } from '@/components/palette/template-picker-icons';

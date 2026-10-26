@@ -2,9 +2,9 @@
 // "Passes"): My Documents as LiveDoc holds it, and the mirror's item
 // rows, indexed the ways the planners look them up.
 
-import type { DriveItem, DriveItemKind } from '@livediagram/api-schema';
+import type { DriveItem, DriveItemKind } from '@livedoc/api-schema';
 import type { DriveFile } from './drive-client';
-import type { MirrorDocument, MirrorFolder, MirrorTrashed } from './livediagram-port';
+import type { MirrorDocument, MirrorFolder, MirrorTrashed } from './livedoc-port';
 import type { SeenRow } from './tombstones';
 
 export type MirrorSnapshot = {

@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const host = vi.hoisted(() => ({ offered: true as boolean | null }));
 vi.mock('@/lib/auth-config', () => ({ signInOfferedHere: () => host.offered }));
 
-import { SIGNED_IN_HINT_KEY } from '@livediagram/account-session';
+import { SIGNED_IN_HINT_KEY } from '@livedoc/account-session';
 import { useNewDocumentLocation } from './useNewDocumentLocation';
 
 function setHint(value: '0' | '1' | null) {

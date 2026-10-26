@@ -83,7 +83,7 @@ Cost controls, all in `e2e.yml` and `playwright.config.ts`:
   slots that every other pull request's run waits on. When the suite grows past the floor, the
   shard count grows with it.
 - **No type check in the builds**: `e2e.yml` sets `BUILD_SKIP_TYPECHECK=1`, so `next build` skips its
-  own type check (`typescriptConfig()` in `@livediagram/next-config`, shared by the five Next
+  own type check (`typescriptConfig()` in `@livedoc/next-config`, shared by the five Next
   apps). CI's required Checks job already type-checks every app with `tsc --noEmit` against the
   same tsconfig; repeating it cost each live build about 40 seconds. Deploys leave it unset.
 - **A warm build cache**: each job restores Turbopack's build cache (`.next/cache`) from the latest
@@ -123,7 +123,7 @@ The suite runs against the **real production build**, the live app's
 `output: 'export'` static bundle plus the real api worker on local D1,
 so it exercises exactly what ships, not a dev-only code path.
 The stack serves whatever `apps/live/out` holds and never rebuilds it, so locally run
-`pnpm --filter @livediagram/live build` first; an old `out/` fails audits for code that has since changed.
+`pnpm --filter @livedoc/live build` first; an old `out/` fails audits for code that has since changed.
 
 `scripts/e2e-stack.mjs` boots the stack Playwright's `webServer` waits on:
 
@@ -176,7 +176,7 @@ key (`E2E_NO_AI`) or with its AI budget spent (`E2E_AI_BUDGET_SPENT`); see
 
 Locally the same `playwright.config.ts` sets `reuseExistingServer`, so a
 developer with `pnpm dev` already running (live :4002 + api :8787) runs
-`pnpm --filter @livediagram/live test:e2e` against that stack with no
+`pnpm --filter @livedoc/live test:e2e` against that stack with no
 extra boot.
 
 ## Signed-in specs
@@ -208,7 +208,7 @@ sends the code back to better-auth's callback. State, PKCE, the code exchange, t
 session cookie are all real. The fake's code exchange answers an unsigned OpenID `id_token`, as better-auth reads
 Google's server-to-server answer without verifying it.
 
-`pnpm --filter @livediagram/live test:e2e:account` sets `E2E_ACCOUNT=1`, which adds the `account` project (dark mode)
+`pnpm --filter @livedoc/live test:e2e:account` sets `E2E_ACCOUNT=1`, which adds the `account` project (dark mode)
 and boots that stack on its own ports (live `:3015`, api `:8788`, marketing `:3016`), so a guest stack already up on
 `:4002` is never reused for it. The workbench (`test:e2e:workbench`, `:3021`) and Drive (`test:e2e:drive`, `:3023`)
 runs need an account too and boot the same kind of stack on ports of their own. `e2e.yml` runs the account and
@@ -219,7 +219,7 @@ workbench projects in their own job, beside the smoke shards; Drive stays opt-in
 Every stack enforces guest signatures (above), so every spec runs as production does once armed.
 The specs in `apps/live/e2e/armed/` focus on the entry paths: a first-time guest who arrives on `/` or `/new`, or opens the
 Explorer first, gets a signed id before any owner-scoped call, creates a document (`201`) and sees
-the canvas, and no api response is `401`. `pnpm --filter @livediagram/live test:e2e:armed` sets
+the canvas, and no api response is `401`. `pnpm --filter @livedoc/live test:e2e:armed` sets
 `E2E_GUEST_SIG_ENFORCE=1`, which adds the `armed` project (dark mode) and boots a guest-only stack on its own
 ports (live `:3017`, api `:8789`, marketing `:3018`). It reuses the live export, so `e2e.yml` runs it as a second
 step of the Sites audit job, which has built it already.

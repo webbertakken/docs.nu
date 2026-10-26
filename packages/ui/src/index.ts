@@ -125,7 +125,7 @@ export {
 } from './seo';
 export * from './appearance';
 export * from './random-uuid-boot';
-export { indefiniteArticle, withArticle } from '@livediagram/items';
+export { indefiniteArticle, withArticle } from '@livedoc/items';
 export * from './optical';
 export * from './menu';
 export { Dialog, type DialogProps } from './dialog/Dialog';

@@ -3,8 +3,8 @@
 // the api's (blueprint "Catalogue routes").
 
 import { z } from 'zod';
-import type { IconSearchResponse, TemplateCatalogueResponse } from '@livediagram/api-schema';
-import { ApiError } from '@livediagram/api-client';
+import type { IconSearchResponse, TemplateCatalogueResponse } from '@livedoc/api-schema';
+import { ApiError } from '@livedoc/api-client';
 import { defineVerb, VerbRefusal, type VerbContext } from '../define';
 import { columns } from './shared';
 

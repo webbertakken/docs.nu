@@ -1,8 +1,8 @@
 'use client';
 
-import { isAbortError } from '@livediagram/api-schema';
+import { isAbortError } from '@livedoc/api-schema';
 import { useEffect, useState } from 'react';
-import type { CommunityPostResponse } from '@livediagram/api-schema';
+import type { CommunityPostResponse } from '@livedoc/api-schema';
 import { fetchPost } from '@/lib/api';
 import { communityTelemetry } from '@/lib/telemetry';
 

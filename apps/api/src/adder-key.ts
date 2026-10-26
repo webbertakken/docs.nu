@@ -3,8 +3,8 @@
 // else. Derived on the server from the caller's identity on the document, never read from a request: stable for
 // one person on one document across devices, opaque, and different on every document.
 
-import { ADDER_KEY_LENGTH } from '@livediagram/document';
-import { sha256Hex } from '@livediagram/api-schema';
+import { ADDER_KEY_LENGTH } from '@livedoc/document';
+import { sha256Hex } from '@livedoc/api-schema';
 
 export async function adderKeyFor(documentId: string, ownerId: string): Promise<string> {
   const digest = await sha256Hex(

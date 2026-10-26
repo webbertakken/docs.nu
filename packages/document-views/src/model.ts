@@ -11,7 +11,7 @@ import {
   type Element,
   type RefTable,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { edgesOf, type Edges } from './edges';
 import { countElements, threadCounts, type HeaderFacts } from './header';
 import { buildViewTree, type ViewTree } from './tree';

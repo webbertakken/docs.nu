@@ -7,7 +7,7 @@
 //
 // Lives in `components/` (not `packages/`) because the styling is app-specific; no other workspace consumes it.
 
-import { buttonClassName, TextInput, ButtonContent } from '@livediagram/ui';
+import { buttonClassName, TextInput, ButtonContent } from '@livedoc/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { sameOriginPath } from '@/lib/same-origin-path';

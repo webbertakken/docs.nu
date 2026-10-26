@@ -7,8 +7,8 @@ import {
   svgWrapLines,
   type DashboardContent,
   type PlanPalette,
-} from '@livediagram/document';
-import { relativeSince } from '@livediagram/ui/relative-time';
+} from '@livedoc/document';
+import { relativeSince } from '@livedoc/ui/relative-time';
 import {
   FORM_METRIC_NAMES,
   SHEET_METRIC_NAMES,

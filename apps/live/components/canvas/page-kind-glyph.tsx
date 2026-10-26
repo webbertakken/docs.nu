@@ -2,9 +2,9 @@
 
 // A page kind's glyph (docs/specs/007-editor/pages-mode.md "Adding a page"): the one each kind wears
 // wherever pages are added, the Add a Page chooser and Contents' Add Page alike.
-import type { PageKind } from '@livediagram/document';
-import { lucideFileText, lucidePanelsTopLeft, lucideShapes } from '@livediagram/icons/lucide';
-import { lucideGlyph } from '@livediagram/ui';
+import type { PageKind } from '@livedoc/document';
+import { lucideFileText, lucidePanelsTopLeft, lucideShapes } from '@livedoc/icons/lucide';
+import { lucideGlyph } from '@livedoc/ui';
 import { SlideDeckIcon } from '@/components/palette/palette-icons';
 import { DeviceGlyph } from './wireframe/DeviceGlyph';
 

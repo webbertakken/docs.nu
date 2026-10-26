@@ -1,9 +1,5 @@
-import {
-  lucideCircleCheck,
-  lucideClipboardPaste,
-  lucideWandSparkles,
-} from '@livediagram/icons/lucide';
-import { lucideGlyph } from '@livediagram/ui';
+import { lucideCircleCheck, lucideClipboardPaste, lucideWandSparkles } from '@livedoc/icons/lucide';
+import { lucideGlyph } from '@livedoc/ui';
 
 // The three steps (docs/specs/019-marketing/build-with-ai.md "The page" 2), one row, joined by a line on wide
 // screens so they read as a sequence.

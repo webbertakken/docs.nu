@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { elementFingerprint } from '@livediagram/document';
-import type { ChangesetRequest } from '@livediagram/api-schema';
+import { elementFingerprint } from '@livedoc/document';
+import type { ChangesetRequest } from '@livedoc/api-schema';
 import { baseFromCopy, readPlainTab, recordCopy } from './copies';
 import { VerbRefusal } from './define';
 import { contextOf, DOC_A, fakeApi } from './testing/fake-api';

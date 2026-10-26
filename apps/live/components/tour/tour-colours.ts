@@ -2,12 +2,7 @@
 // (useStartPalette) as the CSS variables TourPopover and TourStage paint from, so every tour (Diagram, Plan,
 // Workshop, Draw, Pages, the card type tour) reads as part of the tab it runs on. Pure.
 import type { CSSProperties } from 'react';
-import {
-  contrastRatio,
-  isLightColor,
-  toneToContrast,
-  type PlanPalette,
-} from '@livediagram/document';
+import { contrastRatio, isLightColor, toneToContrast, type PlanPalette } from '@livedoc/document';
 
 const LIGHT_INK = '#ffffff';
 const DARK_INK = '#0f172a';

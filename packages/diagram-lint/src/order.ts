@@ -1,12 +1,7 @@
 // The order findings are reported in (blueprint step 4, LN18): severity, then code order, then the
 // primary subject's reading position (rounded top, then left; none first), then the refs.
 
-import {
-  LINT_CODES,
-  LINT_SEVERITIES,
-  LINT_SEVERITY,
-  type LintFinding,
-} from '@livediagram/api-schema';
+import { LINT_CODES, LINT_SEVERITIES, LINT_SEVERITY, type LintFinding } from '@livedoc/api-schema';
 import type { RawFinding } from './checks/types';
 
 // By UTF-16 code units, as the refs sort: no locale.

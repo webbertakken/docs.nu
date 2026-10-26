@@ -4,7 +4,7 @@ Status: shipped
 
 ## What
 
-Every workspace is linted by **oxlint** with one shared config, `@livediagram/oxlint-config`
+Every workspace is linted by **oxlint** with one shared config, `@livedoc/oxlint-config`
 (`packages/oxlint-config`). `pnpm lint` runs `turbo run lint`, and each workspace's `lint` script is
 `oxlint`: it reads the workspace's `oxlint.config.ts`, which re-exports the shared config (`apps/live`
 adds one override for its Playwright suite). Every rule is an **error**; there are no warnings.
@@ -91,7 +91,7 @@ is the whole of what the repo enforces.
   as an inferred project, without the workspace's options and paths; only the tool configs
   (`oxlint.config.ts`, `vitest.config.ts`) are.
 - `oxlint-tsgolint` is a root dev dependency, so every workspace's `oxlint` resolves it as its peer,
-  and a dependency of `@livediagram/oxlint-config`, whose tests run it.
+  and a dependency of `@livedoc/oxlint-config`, whose tests run it.
 - A caught reason passed on unchanged keeps its type, `unknown`: `only-throw-error` allows throwing it
   by default, and `prefer-promise-reject-errors` is set to allow rejecting with it
   (`allowThrowingUnknown`). Wrapping it would lose what was caught. A value typed `any` is still

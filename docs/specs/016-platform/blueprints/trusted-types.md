@@ -6,9 +6,9 @@ Derived from [Trusted Types](../trusted-types.md).
 
 | Term               | Identifier                                         | Meaning                                                                                                                            |
 | ------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| The header value   | `TRUSTED_TYPES_CSP`                                | `require-trusted-types-for 'script'; trusted-types livediagram-markup livediagram-inert-parse nextjs ProseMirrorClipboard default` |
-| Markup policy      | `MARKUP_POLICY` (`'livediagram-markup'`)           | Makes `TrustedHTML` from livediagram's own builders' markup                                                                        |
-| Inert-parse policy | `INERT_PARSE_POLICY` (`'livediagram-inert-parse'`) | Lets `DOMParser` read a file a person opened                                                                                       |
+| The header value   | `TRUSTED_TYPES_CSP`                                | `require-trusted-types-for 'script'; trusted-types livedoc-markup livedoc-inert-parse nextjs ProseMirrorClipboard default` |
+| Markup policy      | `MARKUP_POLICY` (`'livedoc-markup'`)           | Makes `TrustedHTML` from livediagram's own builders' markup                                                                        |
+| Inert-parse policy | `INERT_PARSE_POLICY` (`'livedoc-inert-parse'`) | Lets `DOMParser` read a file a person opened                                                                                       |
 | Default policy     | `'default'`                                        | The browser's fallback for a plain string at a sink                                                                                |
 | Boot script        | `trustedTypesBootScript(assetPrefix, origins)`     | Inline, first in each layout's `<head>`: the default policy and the violation log                                                  |
 | Asset prefix       | `''`, `/live`, `/help`, `/community`, `/telemetry` | Where an app's own build is served from (`assetPrefix` or `basePath`)                                                              |
@@ -18,17 +18,17 @@ Derived from [Trusted Types](../trusted-types.md).
 
 ## Modules
 
-| File                                                         | Responsibility                                                                                                                                                           |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/ui/src/trusted-types-csp.ts`                       | `TRUSTED_TYPES_CSP`, `MARKUP_POLICY`, `INERT_PARSE_POLICY`; import-free, so `scripts/e2e-stack.mjs` runs it as is                                                        |
-| `packages/ui/src/trusted-types.ts`                           | `trustedHtml`, `parseInert`, `isAllowedScriptUrl`, `trustedScriptOrigins`, `trustedTypesBootScript`; exported from `@livediagram/ui` and `@livediagram/ui/trusted-types` |
-| `apps/*/app/layout.tsx` (all five)                           | `TRUSTED_TYPES_BOOT` (the boot script for the app's prefix and third-party origins), first in `<head>`; help, community and telemetry gain a `<head>` for it             |
-| `apps/live/src/worker.ts`                                    | `Content-Security-Policy: TRUSTED_TYPES_CSP` among its security headers                                                                                                  |
-| `apps/{marketing,help,community,telemetry}/public/_headers`  | The same header on `/*`                                                                                                                                                  |
-| `scripts/e2e-stack.mjs`                                      | Sends the header on every HTML response, as production does                                                                                                              |
-| Every `dangerouslySetInnerHTML` site                         | `__html: trustedHtml(markup)`                                                                                                                                            |
-| Every `innerHTML`, `outerHTML` or `insertAdjacentHTML` write | `el.innerHTML = trustedHtml(markup) as string` (`useFaceFinishPass.ts`, the Marker and Sketch face ink)                                                                  |
-| `apps/live/lib/drawio/{envelope,label,library}.ts`           | `parseInert` in place of `new DOMParser().parseFromString`                                                                                                               |
+| File                                                         | Responsibility                                                                                                                                                   |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui/src/trusted-types-csp.ts`                       | `TRUSTED_TYPES_CSP`, `MARKUP_POLICY`, `INERT_PARSE_POLICY`; import-free, so `scripts/e2e-stack.mjs` runs it as is                                                |
+| `packages/ui/src/trusted-types.ts`                           | `trustedHtml`, `parseInert`, `isAllowedScriptUrl`, `trustedScriptOrigins`, `trustedTypesBootScript`; exported from `@livedoc/ui` and `@livedoc/ui/trusted-types` |
+| `apps/*/app/layout.tsx` (all five)                           | `TRUSTED_TYPES_BOOT` (the boot script for the app's prefix and third-party origins), first in `<head>`; help, community and telemetry gain a `<head>` for it     |
+| `apps/live/src/worker.ts`                                    | `Content-Security-Policy: TRUSTED_TYPES_CSP` among its security headers                                                                                          |
+| `apps/{marketing,help,community,telemetry}/public/_headers`  | The same header on `/*`                                                                                                                                          |
+| `scripts/e2e-stack.mjs`                                      | Sends the header on every HTML response, as production does                                                                                                      |
+| Every `dangerouslySetInnerHTML` site                         | `__html: trustedHtml(markup)`                                                                                                                                    |
+| Every `innerHTML`, `outerHTML` or `insertAdjacentHTML` write | `el.innerHTML = trustedHtml(markup) as string` (`useFaceFinishPass.ts`, the Marker and Sketch face ink)                                                          |
+| `apps/live/lib/drawio/{envelope,label,library}.ts`           | `parseInert` in place of `new DOMParser().parseFromString`                                                                                                       |
 
 ## Behaviour and state
 
@@ -95,8 +95,8 @@ Google sign-in is a full-page redirect.
 
 ```ts
 export const TRUSTED_TYPES_CSP: string;
-export const MARKUP_POLICY: 'livediagram-markup';
-export const INERT_PARSE_POLICY: 'livediagram-inert-parse';
+export const MARKUP_POLICY: 'livedoc-markup';
+export const INERT_PARSE_POLICY: 'livedoc-inert-parse';
 export function trustedHtml(markup: string): TrustedHTML | string;
 export function parseInert(source: string, type: DOMParserSupportedType): Document;
 export function isAllowedScriptUrl(

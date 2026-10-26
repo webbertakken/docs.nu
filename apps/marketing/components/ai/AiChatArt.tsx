@@ -1,5 +1,5 @@
-import { lucideCircleCheck, lucideSparkles } from '@livediagram/icons/lucide';
-import { DiagramBuildAnimation, lucideGlyph } from '@livediagram/ui';
+import { lucideCircleCheck, lucideSparkles } from '@livedoc/icons/lucide';
+import { DiagramBuildAnimation, lucideGlyph } from '@livedoc/ui';
 
 const CheckIcon = lucideGlyph(lucideCircleCheck, 14);
 const SparklesIcon = lucideGlyph(lucideSparkles, 14);

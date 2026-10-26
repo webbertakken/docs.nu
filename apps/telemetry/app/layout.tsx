@@ -12,7 +12,7 @@ import {
   WebVitalsBoot,
   trustedHtml,
   trustedTypesBootScript,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 
 // The public transparency dashboard (docs/specs/017-telemetry/telemetry.md). Indexable: it's part of
 // the open, "here's exactly what we measure" story, not a private app.

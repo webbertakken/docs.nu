@@ -16,7 +16,7 @@ import {
   WebVitalsBoot,
   trustedHtml,
   trustedTypesBootScript,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 import { VIEW_TRANSITION_GUARD_SCRIPT } from '../lib/view-transition-guard';
 import { HERO_FAN_BOOT_SCRIPT } from '@/lib/hero-fan-boot';
 
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   },
   // Favicon set: the SVG mark (app/icon.svg), a raster PNG fallback and the
   // opaque iOS tile from app/apple-icon.tsx. Shared with telemetry + the
-  // editor; see BRAND_ICONS in @livediagram/ui for why each entry is there.
+  // editor; see BRAND_ICONS in @livedoc/ui for why each entry is there.
   icons: BRAND_ICONS,
   other: DARK_READER_LOCK,
 };

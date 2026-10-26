@@ -1,4 +1,4 @@
-import { readSignedInHint as readStoredHint } from '@livediagram/account-session';
+import { readSignedInHint as readStoredHint } from '@livedoc/account-session';
 
 // Whether this browser is probably signed in, answered before the session read does
 // (docs/specs/014-identity/auth-and-guest-access.md "Who is a guest, before the session answers"): the auth bridge

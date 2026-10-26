@@ -9,7 +9,7 @@ import {
   DRIVE_PROP_ORIGIN,
   driveFileName,
   type DriveItem,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { DriveApiError, type DriveFile } from './drive-client';
 import { folderAppProperties } from './engine-inbound';
 import { driveLog, driveWarn } from './log';
@@ -22,7 +22,7 @@ import {
   fileState,
   itemKey,
 } from './snapshot';
-import type { MirrorDocument } from './livediagram-port';
+import type { MirrorDocument } from './livedoc-port';
 
 type OutboundHooks = {
   onContentWritten(documentId: string): void;

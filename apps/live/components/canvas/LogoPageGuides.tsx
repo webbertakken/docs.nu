@@ -6,12 +6,7 @@
 // strength. A view only: never stored, never exported, taking no presses. While Mirror is on, its
 // axes are drawn solid (a centre line per reflection, a spoke per radial copy). Over the artwork on a page with content; under the page's
 // own cards (the layout invitation) on an empty page, which has no artwork to sit over.
-import {
-  logoGuides,
-  mirrorAxisLines,
-  type GuideLine,
-  type LaidOutPage,
-} from '@livediagram/document';
+import { logoGuides, mirrorAxisLines, type GuideLine, type LaidOutPage } from '@livedoc/document';
 import type { PagesModeView } from '@/hooks/editor/usePagesMode';
 import type { LogoToolsView } from '@/hooks/editor/useLogoTools';
 import { LOGO_GUIDE_ALPHA } from '@/lib/logo-guide-prefs';

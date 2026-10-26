@@ -4,16 +4,16 @@
 // **Import a copy** or, for a copy of a mirrored file, **Import as new
 // document**, or say the file cannot be opened.
 
-import { parseDocumentEnvelope } from '@livediagram/document';
+import { parseDocumentEnvelope } from '@livedoc/document';
 import {
   DRIVE_FILE_EXTENSION,
   DRIVE_FILE_MIME,
   DRIVE_PROP_DOCUMENT_ID,
   DRIVE_PROP_ORIGIN,
   isDriveFileId,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { DriveApiError, type DriveClient } from './drive-client';
-import type { LivediagramPort } from './livediagram-port';
+import type { LivedocPort } from './livedoc-port';
 import { driveLog, driveWarn } from './log';
 import { importAsNewDocument, type CopyPort } from './open-with-copy';
 
@@ -59,7 +59,7 @@ export function openWithTelemetryType(
 export async function resolveOpenWith(
   deps: {
     drive: DriveClient;
-    port: Pick<LivediagramPort, 'canOpenDocument' | 'listItems'>;
+    port: Pick<LivedocPort, 'canOpenDocument' | 'listItems'>;
     host: string;
   },
   state: OpenWithState,

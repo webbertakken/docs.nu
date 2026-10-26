@@ -10,7 +10,7 @@ import {
   parseCommunityListQuery,
   type CommunityMinePost,
   type CommunityPost,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { communityEnabled } from '../community-enabled';
 import { edgeCached } from '../edge-cache';
 import { clientIp } from '../client-ip';

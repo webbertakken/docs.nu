@@ -129,7 +129,7 @@ as an optimisation, built on the same pure functions; it is not needed for corre
 ### 4.2 Presence and attribution
 
 - **Who the agent is.** The token proves the human; the agent names itself (`--as Claude`, or
-  `LIVEDIAGRAM_AGENT` in the environment, default from the token's name). The server always
+  `LIVEDOC_AGENT` in the environment, default from the token's name). The server always
   renders it as **"Claude for Webber"**: the agent part is a self-declared label, the "for" part is
   the verified token owner, so an agent can never pass itself off as a person.
 - **Presence without a socket.** `POST /api/documents/:id/presence` with `{ status, tabId,

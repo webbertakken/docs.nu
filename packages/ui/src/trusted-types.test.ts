@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { runInlineScript } from '@livediagram/vitest-config/inline-script';
+import { runInlineScript } from '@livedoc/vitest-config/inline-script';
 import {
   INERT_PARSE_POLICY,
   MARKUP_POLICY,
@@ -40,7 +40,7 @@ afterEach(() => {
 describe('TRUSTED_TYPES_CSP', () => {
   it('enforces Trusted Types and names every policy the pages may create', () => {
     expect(TRUSTED_TYPES_CSP).toBe(
-      "require-trusted-types-for 'script'; trusted-types livediagram-markup livediagram-inert-parse nextjs ProseMirrorClipboard default",
+      "require-trusted-types-for 'script'; trusted-types livedoc-markup livedoc-inert-parse nextjs ProseMirrorClipboard default",
     );
   });
 });
@@ -115,7 +115,7 @@ describe('trustedHtml', () => {
     expect(trustedHtml('<svg/>')).toBe('<svg/>');
   });
 
-  it('wraps it through livediagram-markup, created once', () => {
+  it('wraps it through livedoc-markup, created once', () => {
     const { tt } = stubTrustedTypes();
     expect(trustedHtml('<svg/>')).toEqual({ trusted: MARKUP_POLICY, html: '<svg/>' });
     trustedHtml('<g/>');
@@ -124,7 +124,7 @@ describe('trustedHtml', () => {
 });
 
 describe('parseInert', () => {
-  it('parses through livediagram-inert-parse into an inert document', () => {
+  it('parses through livedoc-inert-parse into an inert document', () => {
     const { created } = stubTrustedTypes();
     const parse = vi.spyOn(DOMParser.prototype, 'parseFromString');
     const doc = parseInert('<mxfile><diagram/></mxfile>', 'application/xml');

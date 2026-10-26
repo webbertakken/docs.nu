@@ -3,7 +3,7 @@
 // stencil lookups, and the container kinds; everything else is unmatched and
 // becomes a labelled box.
 
-import type { ShapeKind } from '@livediagram/document';
+import type { ShapeKind } from '@livedoc/document';
 import type { DrawioCell, DrawioGraph } from './cells';
 import { readColour, readFill } from './colour';
 import { shapeName, type DrawioStyle } from './style';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { DriveItem } from '@livediagram/api-schema';
+import type { DriveItem } from '@livedoc/api-schema';
 import type { DriveChange, DriveFile } from './drive-client';
 import { orderChanges, planAdoption, planInbound } from './plan-inbound';
 import { buildSnapshot } from './snapshot';

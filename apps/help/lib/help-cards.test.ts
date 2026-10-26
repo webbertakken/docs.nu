@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CARD_SUBTITLE_MAX } from '@livediagram/ui';
+import { CARD_SUBTITLE_MAX } from '@livedoc/ui';
 import { articleHref, articles, categories, categoryHref } from './articles';
 import {
   cardRoute,

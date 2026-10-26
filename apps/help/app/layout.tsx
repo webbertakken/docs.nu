@@ -16,7 +16,7 @@ import {
   WebVitalsBoot,
   trustedHtml,
   trustedTypesBootScript,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 
 // The LiveDoc help centre (docs/specs/018-help/help-app.md). Indexable static site served
 // under /help by the router. No third-party scripts, it stays

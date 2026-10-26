@@ -2,7 +2,7 @@
 // drawio-import.md "The import report", board-scene.md "The report"): what landed, counted by kind,
 // and each change on the way in as a rule, a short sentence the report shows as "count · rule".
 
-import type { Element } from '@livediagram/document';
+import type { Element } from '@livedoc/document';
 import type { BoardSceneReport, ReportRule } from '@/lib/board-scene/report';
 import type { SceneItemKind } from '@/lib/board-scene/scene';
 import { importImageReportTotal, type ImportImageReport } from '@/lib/import-images';

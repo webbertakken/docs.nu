@@ -12,7 +12,7 @@ import {
   randomBase64Url,
   DRIVE_STATE_TTL_MS,
   oauthRedirectUrl,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { timingSafeEqual } from '../auth/timing-safe';
 import { driveKeyBytes } from './crypto';
 

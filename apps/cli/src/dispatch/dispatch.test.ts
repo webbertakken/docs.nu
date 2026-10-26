@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { defineVerb, verbById, type Verb } from '@livediagram/agent-verbs';
+import { defineVerb, verbById, type Verb } from '@livedoc/agent-verbs';
 import { CliError, type CliFailure } from '../output/cli-error';
 import { didYouMean } from './did-you-mean';
 import { fieldsOf, flagOf } from './fields';

@@ -2,8 +2,8 @@
 // its lint, as the api serves them.
 
 import { z } from 'zod';
-import { revOfEtag, TAB_VIEW_NAMES, type LintReport } from '@livediagram/api-schema';
-import { formatLintReport } from '@livediagram/diagram-lint';
+import { revOfEtag, TAB_VIEW_NAMES, type LintReport } from '@livedoc/api-schema';
+import { formatLintReport } from '@livedoc/diagram-lint';
 import { readPlainTab, recordCopy, type ReadCopy } from '../copies';
 import { defineVerb, type VerbContext } from '../define';
 import { shortestUniquePrefixes } from '../refs';

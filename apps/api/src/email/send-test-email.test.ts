@@ -5,7 +5,7 @@
 // RESEND_TEST_TO are present (read from apps/api/.dev.vars, gitignored).
 //
 // Run it:
-//   RESEND_LIVE_TEST=1 pnpm --filter @livediagram/api exec \
+//   RESEND_LIVE_TEST=1 pnpm --filter @livedoc/api exec \
 //     vitest run src/email/send-test-email.test.ts
 //
 // .dev.vars needs:

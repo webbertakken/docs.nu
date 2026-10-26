@@ -11,7 +11,7 @@ import {
   removedFieldRemap,
   type EntityField,
   type ShapeElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   getEntityFieldEdit,
   setEntityFieldEdit,

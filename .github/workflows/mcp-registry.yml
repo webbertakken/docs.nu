@@ -4,13 +4,12 @@ name: Publish MCP server to registry
 # Registry (registry.modelcontextprotocol.io) from the root server.json.
 # PulseMCP and other directories ingest from that registry.
 #
-# Runs when server.json changes on main, or by hand. The registry refuses a
-# version it has already seen, so bump "version" in server.json to republish.
+# Runs by hand only: mcp.docs.nu is not deployed yet (the MCP job is opt-in), and a
+# listing must not point at an endpoint that does not answer. Restore the push
+# trigger once it serves. The registry refuses a version it has already seen, so
+# bump "version" in server.json to republish.
 
 on:
-  push:
-    branches: [main]
-    paths: [server.json]
   workflow_dispatch:
 
 permissions:
@@ -20,7 +19,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # GitHub OIDC login for the io.github.livediagram-app namespace
+      id-token: write # GitHub OIDC login for the io.github.webbertakken namespace
       contents: read
     steps:
       - uses: actions/checkout@v7

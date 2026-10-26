@@ -1,8 +1,8 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import type { Server } from 'node:http';
 import type { BrowserContext, Page } from '@playwright/test';
-import type { FakeGoogle } from '@livediagram/fake-google';
-import { DRIVE_FILE_MIME } from '@livediagram/api-schema';
+import type { FakeGoogle } from '@livedoc/fake-google';
+import { DRIVE_FILE_MIME } from '@livedoc/api-schema';
 import { test, expect } from './fixtures';
 import { signIn, type Account } from './account/sign-in';
 import { routeGoogle, startFakeGoogle } from './drive-support';
@@ -10,7 +10,7 @@ import { routeGoogle, startFakeGoogle } from './drive-support';
 // Screenshots of every Google Drive mirror state, in light and dark
 // (docs/specs/022-drive-mirror/drive-mirror.md): Settings > Account > Cloud Sync, Open with, and the Explorer following a change made in
 // Drive. Against the fake Google, with deterministic data and no personal data.
-// Opt-in: `pnpm --filter @livediagram/live test:e2e:drive-shots` (after the
+// Opt-in: `pnpm --filter @livedoc/live test:e2e:drive-shots` (after the
 // drive build), writing to E2E_DRIVE_PR_SHOTS (default /tmp/ld-drive-pr-shots).
 
 test.describe.configure({ mode: 'serial' });

@@ -24,9 +24,9 @@ first id the editor minted threw `crypto.randomUUID is not a function` while it 
   `crypto.getRandomValues`, which every context has, so the ids are as random as the real ones. A browser that
   has `randomUUID` keeps its own. Call sites keep calling `crypto.randomUUID()`: one shim, no second id helper.
 - **Hashes work everywhere.** Every SHA-256 the code computes (a Plan card person's id, a Q&A board's voter id,
-  an image's content address, the CLI's PKCE challenge) goes through `sha256` in `@livediagram/items`
-  (`packages/items/src/sha256.ts`, the dependency-free package both `@livediagram/document` and
-  `@livediagram/api-schema` already use). It calls `crypto.subtle.digest` wherever the context has it and
+  an image's content address, the CLI's PKCE challenge) goes through `sha256` in `@livedoc/items`
+  (`packages/items/src/sha256.ts`, the dependency-free package both `@livedoc/document` and
+  `@livedoc/api-schema` already use). It calls `crypto.subtle.digest` wherever the context has it and
   otherwise computes the same FIPS 180-4 digest in plain code (about 24 ms per MB, measured on Node 22, so a 5 MB
   image costs about 120 ms, and only outside a secure context). The two must match byte for byte: the server
   re-hashes an upload, and clients compare person and voter ids.

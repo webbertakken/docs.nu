@@ -9,9 +9,9 @@ import {
   unionRects,
   type Element,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { autoAlignElements } from '@/lib/auto-align';
-import type { AccessLevel } from '@livediagram/api-schema';
+import type { AccessLevel } from '@livedoc/api-schema';
 
 export function createTab(name: string): Tab {
   // New tabs (and a new document's first tab) default the per-tab text size

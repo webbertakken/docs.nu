@@ -6,7 +6,7 @@
 
 // Wire-format types re-exported under the names the live app has
 // historically imported from here. The canonical definitions live in
-// `@livediagram/api-schema`; see that package's index.ts for the shapes
+// `@livedoc/api-schema`; see that package's index.ts for the shapes
 // and per-type rationale.
 export type {
   Folder,
@@ -19,7 +19,7 @@ export type {
   TeamMember,
   TeamMemberStatus,
   TeamRole,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 
 // Core plumbing the app uses directly (base URL, identity headers,
 // token / share-password session state). The internal helpers

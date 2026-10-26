@@ -4,7 +4,7 @@ import {
   type ArrowElement,
   type ShapeElement,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { run } from '../main';
 import { pullFileText, type PullFile } from '../sync/pull-file';
 import { fakeIo, NOW, TOKEN, type FakeIo, type Route } from '../testing/fake-io';

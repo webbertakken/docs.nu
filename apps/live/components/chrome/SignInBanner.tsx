@@ -10,7 +10,7 @@
 // dismissal is persisted (useDismissibleBanner) in one place.
 
 import dynamic from 'next/dynamic';
-import { CloseIcon, SparkleIcon } from '@livediagram/ui';
+import { CloseIcon, SparkleIcon } from '@livedoc/ui';
 import { SignInIcon } from '@/components/chrome/AuthControls';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';

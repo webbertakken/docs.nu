@@ -1,4 +1,4 @@
-import { lucideSparkles } from '@livediagram/icons/lucide';
+import { lucideSparkles } from '@livedoc/icons/lucide';
 
 import { ButtonContent, buttonClassName } from './Button';
 import { lucideGlyph } from './icons/lucide-glyph';

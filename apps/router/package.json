@@ -1,5 +1,5 @@
 {
-  "name": "@livediagram/router",
+  "name": "@livedoc/router",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,10 +15,10 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261007.1",
-    "@livediagram/api-schema": "workspace:*",
-    "@livediagram/help-registry": "workspace:*",
-    "@livediagram/oxlint-config": "workspace:*",
-    "@livediagram/vitest-config": "workspace:*",
+    "@livedoc/api-schema": "workspace:*",
+    "@livedoc/help-registry": "workspace:*",
+    "@livedoc/oxlint-config": "workspace:*",
+    "@livedoc/vitest-config": "workspace:*",
     "@types/node": "^26.6.4",
     "oxlint": "^1.88.0",
     "typescript": "^7.0.2",

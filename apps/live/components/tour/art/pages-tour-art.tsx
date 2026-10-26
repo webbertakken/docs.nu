@@ -1,6 +1,6 @@
 'use client';
 
-import type { PageKind } from '@livediagram/document';
+import type { PageKind } from '@livedoc/document';
 import type { ReactNode } from 'react';
 import { ART, TourArtFrame } from './TourArtFrame';
 

@@ -4,13 +4,13 @@
 // This Form, which opens a short report in place: a reason, an optional note, Send. One report per browser per form,
 // the browser named by a random id kept in local storage (never the editor's identity).
 import { useId, useState } from 'react';
-import { MadeWithLivediagram } from './MadeWithLivediagram';
+import { MadeWithLivedoc } from './MadeWithLivedoc';
 import {
   FORM_REPORT_NOTE_MAX,
   FORM_REPORT_REASONS,
   FORM_REPORT_REASON_LABELS,
   type FormReportReason,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { reportForm } from '@/lib/api/forms-public';
 
 const BROWSER_KEY = 'livedoc:form-browser';
@@ -38,7 +38,7 @@ export function FormFooter({ code }: { code: string }) {
       {/* Each part stays whole and the line breaks between them: on a 320px phone it broke inside both ("Made /
           with", "Report This / Form"). There the two take a line each, with no separator left dangling. */}
       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 whitespace-nowrap">
-        <MadeWithLivediagram />
+        <MadeWithLivedoc />
         <span aria-hidden className="max-[359px]:hidden">
           ·
         </span>

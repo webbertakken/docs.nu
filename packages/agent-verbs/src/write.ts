@@ -3,7 +3,7 @@
 // after a write that rebased over nothing (CLI24, CLI25).
 
 import { z } from 'zod';
-import { ApiError } from '@livediagram/api-client';
+import { ApiError } from '@livedoc/api-client';
 import {
   CHANGESET_SUMMARY_MAX,
   type ChangesetBase,
@@ -11,7 +11,7 @@ import {
   type ChangesetRequest,
   type ChangesetResponse,
   type HeldElement,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { baseFromCopy, recordCopy } from './copies';
 import { VerbRefusal, type VerbContext } from './define';
 

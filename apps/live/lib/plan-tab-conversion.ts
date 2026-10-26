@@ -11,7 +11,7 @@ import {
   type DashboardContent,
   type Element,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 
 const PLAN_SHAPES = new Set(['plan-board', 'plan-sheet', 'plan-view']);
 

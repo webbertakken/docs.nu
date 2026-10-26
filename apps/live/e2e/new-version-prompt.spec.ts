@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { DOCUMENT_FORMAT, DOCUMENT_FORMAT_HEADER } from '@livediagram/api-schema';
+import { DOCUMENT_FORMAT, DOCUMENT_FORMAT_HEADER } from '@livedoc/api-schema';
 import { dismissQuickTour, expect, expectNoPageErrors, test } from './fixtures';
 
 // The new version prompt (docs/specs/016-platform/new-version-prompt.md), in dark mode: this build is

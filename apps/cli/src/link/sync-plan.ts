@@ -3,7 +3,7 @@
 // file, documents in index order (RL41), then the files that name no readable document, by path. Pure. A document
 // with no answer this pass (a pass narrowed to another) gets no action.
 
-import type { OverviewView } from '@livediagram/api-schema';
+import type { OverviewView } from '@livedoc/api-schema';
 import type { Coverage } from './coverage';
 import { isCovered } from './coverage';
 import type { MirrorLevel } from './link-file';

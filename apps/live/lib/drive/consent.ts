@@ -3,7 +3,7 @@
 // drive.install with offline access. `prompt=consent` only when no refresh
 // token is stored, so the user normally consents once.
 
-import { DRIVE_SCOPES } from '@livediagram/api-schema';
+import { DRIVE_SCOPES } from '@livedoc/api-schema';
 import { sameOriginPath } from '../same-origin-path';
 
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';

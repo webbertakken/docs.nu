@@ -22,7 +22,7 @@ Drive traffic goes from each person's browser straight to Google. Your api Worke
 <Step n={1}>In the Google Cloud console, create a project for your deployment and enable the **Google Drive API**.</Step>
 <Step n={2}>Configure the OAuth consent screen. It needs only two scopes, `drive.file` (the files LiveDoc creates or is shown) and `drive.install` (the **Open with** entry in Drive). Both are non-sensitive, so Google asks for no verification or security assessment.</Step>
 <Step n={3}>Create an OAuth client of type **Web application**. Add `https://<your-host>` as an authorised JavaScript origin and `https://<your-host>/drive/connected` as an authorised redirect URI. If your site redirects one host to another (as docs.nu sends `www` to its bare domain), register both hosts.</Step>
-<Step n={4}>For **Open with** in Drive, configure the Drive API's Drive UI integration: Open URL `https://<your-host>/drive/open`, default MIME type `application/vnd.livedoc+json`, default extension `livediagram`.</Step>
+<Step n={4}>For **Open with** in Drive, configure the Drive API's Drive UI integration: Open URL `https://<your-host>/drive/open`, default MIME type `application/vnd.livedoc+json`, default extension `livedoc`.</Step>
 <Step n={5}>Optionally, create a browser API key for the Google Picker, restricted by HTTP referrer to your host. It lets people show LiveDoc a folder they made in Drive themselves; without it the mirror works and that one step is not offered.</Step>
 
 ### Set the Variables
@@ -38,8 +38,8 @@ Drive traffic goes from each person's browser straight to Google. Your api Worke
 The api Worker and the live build must carry the **same** client id. Set the two secrets with:
 
 ```bash
-pnpm --filter @livediagram/api exec wrangler secret put GOOGLE_CLIENT_SECRET
-pnpm --filter @livediagram/api exec wrangler secret put DRIVE_TOKEN_KEY   # openssl rand -base64 32
+pnpm --filter @livedoc/api exec wrangler secret put GOOGLE_CLIENT_SECRET
+pnpm --filter @livedoc/api exec wrangler secret put DRIVE_TOKEN_KEY   # openssl rand -base64 32
 ```
 
 Once all of this is in place, signed-in people find the mirror in **Settings**, under **Account**, then **Cloud Sync**. The folder it creates in each person's Drive is named **LiveDoc (self-hosted)**, so someone who also uses docs.nu never gets two folders with the same name.
@@ -64,7 +64,7 @@ The MCP server is its own Cloudflare Worker, `apps/mcp`. It carries no AI model 
 </Step>
 <Step n={2}>
   Give the Worker a hostname of its own, such as `mcp.diagrams.example.com`: in the Cloudflare
-  dashboard, open the `livediagram-mcp` Worker and add a custom domain under **Domains & Routes**.
+  dashboard, open the `docs-nu-mcp` Worker and add a custom domain under **Domains & Routes**.
   The deploy token only uploads Workers, so hostnames are attached by hand, as for every other
   Worker.
 </Step>
@@ -78,7 +78,7 @@ The MCP server is its own Cloudflare Worker, `apps/mcp`. It carries no AI model 
 </Step>
 
 ```bash
-pnpm --filter @livediagram/mcp exec wrangler kv namespace create OAUTH_KV
+pnpm --filter @livedoc/mcp exec wrangler kv namespace create OAUTH_KV
 ```
 
 | Variable                 | Where                                   | Set it to                                                                       |

@@ -1,4 +1,4 @@
-import { BrandMark } from '@livediagram/ui';
+import { BrandMark } from '@livedoc/ui';
 
 import { COMPETITOR_LOOK } from '@/components/compare/competitor-look';
 

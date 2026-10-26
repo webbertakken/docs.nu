@@ -18,8 +18,8 @@ import {
   ALTERNATIVES_LAST_UPDATED,
   getAlternative,
 } from '@/lib/alternatives';
-import { lucideCheck, lucideCircleDot } from '@livediagram/icons/lucide';
-import { BrandMark, JsonLd, lucideGlyph, pageMetadata } from '@livediagram/ui';
+import { lucideCheck, lucideCircleDot } from '@livedoc/icons/lucide';
+import { BrandMark, JsonLd, lucideGlyph, pageMetadata } from '@livedoc/ui';
 
 const H2 = 'text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100';
 const CheckIcon = lucideGlyph(lucideCheck, 16);

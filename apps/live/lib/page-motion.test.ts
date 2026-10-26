@@ -6,7 +6,7 @@ import {
   PAGE_MOTIONS,
   sameFill,
   type PageFill,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { backgroundCategoryOf, isCustomGradient } from './page-paint';
 import {
   colouringOf,

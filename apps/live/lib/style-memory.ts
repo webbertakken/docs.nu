@@ -11,7 +11,7 @@ import {
   rederiveQuickSwatches,
   type Element,
   type ThemeDefinition,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { safeJson } from './local-storage-safe';
 import { isQuickStyleTarget } from './quick-style';
 

@@ -25,7 +25,7 @@
 // Until the session read says which kind of host this is, it renders nothing.
 
 import { useSyncExternalStore } from 'react';
-import { buttonClassName, CloseIcon, ButtonContent } from '@livediagram/ui';
+import { buttonClassName, CloseIcon, ButtonContent } from '@livedoc/ui';
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
 import Link from 'next/link';
 import { useAuthHrefs } from '@/components/chrome/auth-shared';

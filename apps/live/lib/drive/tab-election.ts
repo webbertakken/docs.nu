@@ -3,7 +3,7 @@
 // elected tab's status to the others and their requests (an api write, a
 // flush, Sync now, an adoption) back to it.
 
-import type { DriveAccessToken, DriveItemKind } from '@livediagram/api-schema';
+import type { DriveAccessToken, DriveItemKind } from '@livedoc/api-schema';
 import type { DriveMirrorStatus } from './engine';
 
 const LOCK_NAME = 'livedoc:drive-mirror';

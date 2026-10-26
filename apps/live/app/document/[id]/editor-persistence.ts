@@ -2,7 +2,7 @@ import type { SavedItemTypes } from '@/lib/api/item-types';
 import { getOnline } from '@/lib/online-status';
 import { useEffect, useState } from 'react';
 
-import { UNTITLED_DOCUMENT_NAME } from '@livediagram/templates';
+import { UNTITLED_DOCUMENT_NAME } from '@livedoc/templates';
 import type { SaveStatus } from '@/components/chrome/EditorHeader';
 import type { useToast } from '@/hooks/ui/useToast';
 import {

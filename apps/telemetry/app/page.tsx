@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useDeferredValue, useEffect, useRef, useState, type ReactNode } from 'react';
-import { EmptyState, SiteFooter, SiteHeader } from '@livediagram/ui';
-import type { TelemetrySummary, TelemetryWindowKey } from '@livediagram/api-schema';
+import { EmptyState, SiteFooter, SiteHeader } from '@livedoc/ui';
+import type { TelemetrySummary, TelemetryWindowKey } from '@livedoc/api-schema';
 import {
   ActivityGlyph,
   AlertGlyph,

@@ -1,6 +1,6 @@
 'use client';
 
-import { trustedHtml } from '@livediagram/ui';
+import { trustedHtml } from '@livedoc/ui';
 
 import dynamic from 'next/dynamic';
 import {
@@ -43,12 +43,8 @@ import { trackDailyReturn } from '@/lib/daily-return';
 import { markNameConfirmed } from '@/lib/local-identity';
 import { ensureSignedGuestIdentity } from '@/lib/guest-identity';
 import { useSignedGuestId } from '@/hooks/persistence/useSignedGuestId';
-import {
-  templateFamilyOf,
-  untitledNameForTemplate,
-  type TemplateKind,
-} from '@livediagram/templates';
-import { creationIntentOf } from '@livediagram/api-schema';
+import { templateFamilyOf, untitledNameForTemplate, type TemplateKind } from '@livedoc/templates';
+import { creationIntentOf } from '@livedoc/api-schema';
 import {
   WIZARD_BYPASS_PARAMS,
   choosePlacementAgainUrl,
@@ -65,7 +61,7 @@ import { debugLog } from '@/lib/debug-log';
 import { handStartQuery } from '@/components/start/start-query';
 import { closeStartForBlank } from '@/components/start/close-start-for-blank';
 import { handTemplatePick } from '@/lib/placement-defaults/template-pick-handoff';
-import { isBlankTemplate } from '@livediagram/templates';
+import { isBlankTemplate } from '@livedoc/templates';
 import { NEW_DOCUMENT_THEME_ID, newDocumentContent } from '@/lib/new-document-content';
 
 // In-place handoff (docs/specs/007-editor/new-document-route.md): once a document is created, this page

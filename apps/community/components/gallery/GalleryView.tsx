@@ -1,6 +1,6 @@
 'use client';
 
-import { onAccountChange } from '@livediagram/account-session';
+import { onAccountChange } from '@livedoc/account-session';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { hasActiveFilters } from '@/lib/query-state';
 import {

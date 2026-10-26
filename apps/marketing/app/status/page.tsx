@@ -1,7 +1,7 @@
 import { BreadcrumbJsonLd } from '@/components/BreadcrumbJsonLd';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
-import { CONTACT_FORM_URL, pageMetadata, REPO_URL } from '@livediagram/ui';
+import { CONTACT_FORM_URL, pageMetadata, REPO_URL } from '@livedoc/ui';
 
 const STATUS_TITLE = 'Status · LiveDoc';
 const STATUS_DESCRIPTION =

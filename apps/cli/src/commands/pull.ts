@@ -1,8 +1,8 @@
 // `pull <doc> [--to <dir>] [--svg]` (docs/specs/015-api/blueprints/cli.md "Pull and push", CLI27): the document and
 // every tab with its revision, written as a pull file, each tab kept as a read copy; `--svg` adds a drawing per tab.
 
-import { resolveDocument, tabPath, type VerbContext } from '@livediagram/agent-verbs';
-import { DOCUMENT_ENVELOPE_KIND, DOCUMENT_SCHEMA_VERSION } from '@livediagram/document';
+import { resolveDocument, tabPath, type VerbContext } from '@livedoc/agent-verbs';
+import { DOCUMENT_ENVELOPE_KIND, DOCUMENT_SCHEMA_VERSION } from '@livedoc/document';
 import type { CliIo } from '../io';
 import { isLocallyChanged } from '../link/sync-state';
 import { CliError } from '../output/cli-error';

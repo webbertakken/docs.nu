@@ -4,7 +4,7 @@
 // the page you were on"): stored in this browser, capped, and found from where the view rests.
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { LaidOutPage } from '@livediagram/document';
+import type { LaidOutPage } from '@livedoc/document';
 import {
   LAST_PAGE_MAX,
   lastPageKey,

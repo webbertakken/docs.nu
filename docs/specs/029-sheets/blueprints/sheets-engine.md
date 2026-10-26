@@ -1,7 +1,7 @@
 # Sheets engine blueprint
 
 Derived from [Formulas](../formulas.md), [Sheet store](../sheet-store.md) and the pure parts of [Sheet](../sheet.md).
-Implementation contract for the `@livediagram/sheets` package: pure TypeScript, no DOM, no dependencies, shared by
+Implementation contract for the `@livedoc/sheets` package: pure TypeScript, no DOM, no dependencies, shared by
 the live editor (lazily loaded), the api worker (validation, renders, agents) and the MCP worker.
 
 ## Domain and naming

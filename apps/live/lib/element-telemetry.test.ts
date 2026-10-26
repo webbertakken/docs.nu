@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SHAPE_KINDS, type Element } from '@livediagram/document';
-import { ALL_PALETTE_TELEMETRY_TYPES } from '@livediagram/api-schema';
+import { SHAPE_KINDS, type Element } from '@livedoc/document';
+import { ALL_PALETTE_TELEMETRY_TYPES } from '@livedoc/api-schema';
 
 const trackMock = vi.fn<typeof import('@/lib/telemetry').track>();
 vi.mock('@/lib/telemetry', () => ({

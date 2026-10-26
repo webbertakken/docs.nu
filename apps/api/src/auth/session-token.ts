@@ -5,7 +5,7 @@
 //
 // Returns null for anything that is not a valid session token, so the caller falls through to the guest header:
 // the guest path must always serve. Every rejection is logged with a stable reason, never the token.
-import { isAccountIdShape } from '@livediagram/api-schema';
+import { isAccountIdShape } from '@livedoc/api-schema';
 import {
   createLocalJWKSet,
   decodeProtectedHeader,

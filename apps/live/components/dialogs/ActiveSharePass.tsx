@@ -3,15 +3,7 @@
 import { useState } from 'react';
 import { ConfirmPopover } from '@/components/primitives/ConfirmPopover';
 import { TrashIcon } from '@/components/primitives/explorer-icons';
-import {
-  CheckIcon,
-  CopyIcon,
-  HoverCard,
-  LinkIcon,
-  LockIcon,
-  Select,
-  Tooltip,
-} from '@livediagram/ui';
+import { CheckIcon, CopyIcon, HoverCard, LinkIcon, LockIcon, Select, Tooltip } from '@livedoc/ui';
 import type { ShareLink } from '@/lib/api-client';
 import { buildEmbedSnippet, embedUrlFor } from '@/lib/embed';
 import { liveImageHtml, liveImageMarkdown, liveImageUrlFor } from '@/lib/live-image';

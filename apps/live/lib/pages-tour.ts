@@ -1,4 +1,4 @@
-import type { PageKind } from '@livediagram/document';
+import type { PageKind } from '@livedoc/document';
 import { tourTrackSeen, withTracksAnswered } from './tour-tracks';
 import type { UserPreferences } from './user-preferences';
 

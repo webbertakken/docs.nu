@@ -1,8 +1,8 @@
 'use client';
 
-import { ctaHref, type CtaSurface } from '@livediagram/api-schema';
+import { ctaHref, type CtaSurface } from '@livedoc/api-schema';
 import { useSyncExternalStore } from 'react';
-import { readSignedInHint } from '@livediagram/account-session';
+import { readSignedInHint } from '@livedoc/account-session';
 import { ButtonContent, buttonClassName } from './Button';
 
 // The site header's primary (docs/specs/019-marketing/marketing-site.md "Header"): Choose Template

@@ -10,8 +10,8 @@ import {
   parseRecentDiagrams,
   recentThumbPath,
   type DocumentSummary,
-} from '@livediagram/api-schema';
-import { USER_PREFERENCES_STORAGE_KEY } from '@livediagram/telemetry-client';
+} from '@livedoc/api-schema';
+import { USER_PREFERENCES_STORAGE_KEY } from '@livedoc/telemetry-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // A Cache Storage stand-in: jsdom has none. One map of url → Response per named cache.

@@ -3,7 +3,7 @@
 // number chooses, other text narrows, Enter alone, end of input or Ctrl-C cancels. Never redrawn, so a screen reader
 // reads each list once. Where stdin or stdout is not a terminal, the folders as runnable commands instead (RL39).
 
-import type { FolderChoice } from '@livediagram/agent-verbs';
+import type { FolderChoice } from '@livedoc/agent-verbs';
 import type { DebugLog } from '../debug';
 import type { CliIo } from '../io';
 import { CliError } from '../output/cli-error';

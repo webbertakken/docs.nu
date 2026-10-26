@@ -7,8 +7,8 @@ import {
   lucideUndo2,
   lucideWorkflow,
   lucideFileText,
-} from '@livediagram/icons/lucide';
-import { lucideGlyph } from '@livediagram/ui';
+} from '@livedoc/icons/lucide';
+import { lucideGlyph } from '@livedoc/ui';
 
 // What it can do (docs/specs/019-marketing/build-with-ai.md "The page" 5): the MCP's tools in plain words. Every
 // card maps to a shipped tool (docs/specs/015-api/mcp-server.md §4); a new tool earns a card here only once it ships.

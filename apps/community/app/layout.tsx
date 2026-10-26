@@ -15,7 +15,7 @@ import {
   WebVitalsBoot,
   trustedHtml,
   trustedTypesBootScript,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 
 // The LiveDoc Community (docs/specs/025-community/community.md): an indexable static site served
 // under /community by the router. No third-party scripts, and the session is read only for My Shares; it stays self-host-clean

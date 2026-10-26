@@ -32,7 +32,7 @@ import { mainThreadTasks, type TraceEvent } from './trace-tasks';
 // fit and at 100%, every gesture traced with the CPU slowed to the reference speed (calibrate.ts),
 // judged against the budget. It reports and never
 // fails on a budget miss; a harness error (seeding, the stack, a missing element) does fail it.
-// Run with `pnpm --filter @livediagram/live perf:canvas`.
+// Run with `pnpm --filter @livedoc/live perf:canvas`.
 
 const OUT = 'test-results/perf';
 const CATEGORIES = 'devtools.timeline,disabled-by-default-devtools.timeline';

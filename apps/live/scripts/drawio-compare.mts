@@ -7,7 +7,7 @@
 // the binary) and `<out>/<slug>/ld-p<n>.png` (the file imported through the editor's Import dialog
 // against a running live app, each page's tab clipped to its elements at twice the pixel density).
 //
-//   pnpm --filter @livediagram/live exec tsx scripts/drawio-compare.mts <file or folder> [...] \
+//   pnpm --filter @livedoc/live exec tsx scripts/drawio-compare.mts <file or folder> [...] \
 //     --out /tmp/drawio-compare --base http://localhost:3015 [--drawio /path/to/drawio] [--only <slug>]
 //
 // Exits non-zero when any file fails to import or render.

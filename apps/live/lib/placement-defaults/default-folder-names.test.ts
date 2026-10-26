@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PlacementDefaultKey } from '@livediagram/api-schema';
+import type { PlacementDefaultKey } from '@livedoc/api-schema';
 import { buildDefaultFolderIndex } from './default-destination';
 import { rememberDefaultFolders, rememberedDefaultFolder } from './default-folder-names';
 

@@ -7,13 +7,13 @@
 // file cannot be opened.
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
-import { Button } from '@livediagram/ui';
+import { Button } from '@livedoc/ui';
 import { ApiError, apiDriveToken } from '@/lib/api-client';
 import { useAccountApiBootstrap } from '@/hooks/persistence/useAccountApiBootstrap';
 import { googleClientId } from '@/lib/drive/config';
 import { createDriveRestClient } from '@/lib/drive/drive-rest-client';
 import { requestBrowserAccessToken } from '@/lib/drive/google-scripts';
-import { createApiLivediagramPort } from '@/lib/drive/livediagram-port';
+import { createApiLivedocPort } from '@/lib/drive/livedoc-port';
 import { driveWarn } from '@/lib/drive/log';
 import {
   importOpenWithCopy,
@@ -91,7 +91,7 @@ export function DriveOpen() {
     void resolveOpenWith(
       {
         drive: client(token),
-        port: createApiLivediagramPort(accountId),
+        port: createApiLivedocPort(accountId),
         host: window.location.host,
       },
       state,
@@ -127,7 +127,7 @@ export function DriveOpen() {
       const id = await importOpenWithCopy(
         {
           drive: client(token),
-          port: createApiLivediagramPort(accountId),
+          port: createApiLivedocPort(accountId),
           host: window.location.host,
         },
         state,

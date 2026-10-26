@@ -10,7 +10,7 @@
 // is slow or failing, the shell is served exactly as built: the page still works, it just names no post until its
 // script runs.
 
-import type { CommunityPostResponse, CommunitySitemapResponse } from '@livediagram/api-schema';
+import type { CommunityPostResponse, CommunitySitemapResponse } from '@livedoc/api-schema';
 import {
   API_TIMEOUT_MS,
   escapeHtml,

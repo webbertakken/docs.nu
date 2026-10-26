@@ -8,7 +8,7 @@
 // no shared document reaches it.
 
 import { useEffect, useRef, useState } from 'react';
-import { Button } from '@livediagram/ui';
+import { Button } from '@livedoc/ui';
 import { Dialog } from '@/components/dialogs/Dialog';
 import { DialogFooter } from '@/components/dialogs/DialogFooter';
 import { ApiError } from '@/lib/api/core';

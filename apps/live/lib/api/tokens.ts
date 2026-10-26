@@ -1,7 +1,7 @@
 // API token calls (docs/specs/015-api/public-api-and-tokens.md). Signed-in only: the routes reject a
 // guest, and apiHeaders attaches the session Bearer when signed in. Used by the
 // Explorer "API tokens" library section.
-import type { ApiToken } from '@livediagram/api-schema';
+import type { ApiToken } from '@livedoc/api-schema';
 import {
   API_BASE,
   apiDelete,

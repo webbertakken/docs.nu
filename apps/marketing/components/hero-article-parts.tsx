@@ -9,8 +9,8 @@ import {
   lucideList,
   lucideLock,
   lucideSettings,
-} from '@livediagram/icons/lucide';
-import { Glyph, Prims } from '@livediagram/ui';
+} from '@livedoc/icons/lucide';
+import { Glyph, Prims } from '@livedoc/ui';
 import type { ReactNode } from 'react';
 import { FONT, at } from '@/components/art-tokens';
 

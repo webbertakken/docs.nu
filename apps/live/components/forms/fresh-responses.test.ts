@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
-import { FROM_FORM_FIELD } from '@livediagram/forms';
+import { FROM_FORM_FIELD } from '@livedoc/forms';
 import {
   FRESH_OPENED_MAX,
   FRESH_RESPONSE_MS,

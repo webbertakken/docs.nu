@@ -4,8 +4,8 @@ import {
   type Tab,
   TAB_SCHEMA_VERSION,
   type ExportedTabEnvelope,
-} from '@livediagram/document';
-import { defaultCatalogue } from '@livediagram/items';
+} from '@livedoc/document';
+import { defaultCatalogue } from '@livedoc/items';
 import { parseImportedTab } from './import-tab';
 
 // A minimal but valid tab payload.

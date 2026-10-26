@@ -1,6 +1,6 @@
 // The OAuth clients the authorization server knows (docs/specs/015-api/blueprints/cli.md "OAuth server").
 
-import { CLI_CLIENT_ID, CLI_CLIENT_NAME, CLI_REDIRECT_URIS } from '@livediagram/api-schema';
+import { CLI_CLIENT_ID, CLI_CLIENT_NAME, CLI_REDIRECT_URIS } from '@livedoc/api-schema';
 import type { Env } from './env';
 
 export type ClientReg = { redirectUris: readonly string[]; clientName: string };

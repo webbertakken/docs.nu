@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bytesToBase64, DRIVE_STATE_TTL_MS } from '@livediagram/api-schema';
+import { bytesToBase64, DRIVE_STATE_TTL_MS } from '@livedoc/api-schema';
 import { isAllowedRedirectUri, signDriveState, verifyDriveState } from './state';
 
 // The consent `state` binds the user, the redirect URI and ten minutes

@@ -24,7 +24,7 @@ import {
   type Tab,
   type TabPlanData,
   type TextSize,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { planBoardParts, planCardLabel, type PlanPart } from './excalidraw-export-plan';
 
 // The common Excalidraw element chassis. Excalidraw's restore() fills in

@@ -9,7 +9,7 @@ import {
   isAccountIdShape,
   type AccessLevel,
   type RoomTicketResponse,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { adderKeyFor } from '../adder-key';
 import { guestSignatureEnforced } from '../auth/guest-rest';
 import { verifyOwnerId } from '../auth/owner-signature';

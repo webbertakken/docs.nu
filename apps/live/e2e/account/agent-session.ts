@@ -59,7 +59,7 @@ export async function arrange(context: BrowserContext, baseURL: string): Promise
 
 export async function agentSubmits(page: Page, s: Setup, body: unknown) {
   return page.request.post(`/api/documents/${s.id}/tabs/${s.tabId}/changesets`, {
-    headers: { Authorization: `Bearer ${s.token}`, 'X-Livediagram-Client': 'cli' },
+    headers: { Authorization: `Bearer ${s.token}`, 'X-Livedoc-Client': 'cli' },
     data: body,
   });
 }

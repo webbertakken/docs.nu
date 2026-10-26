@@ -2,8 +2,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createShape, type ShapeElement } from '@livediagram/document';
-import { ITEM_TYPES, presetSetup } from '@livediagram/items';
+import { createShape, type ShapeElement } from '@livedoc/document';
+import { ITEM_TYPES, presetSetup } from '@livedoc/items';
 import {
   PlanBoardMenuSections,
   PlanBoardSectionsPanel,

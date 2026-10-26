@@ -4,9 +4,9 @@
 // resolved when an op runs, since a folder created earlier in the same pass
 // is the parent of what follows.
 
-import { stripDriveName, type DriveItem } from '@livediagram/api-schema';
+import { stripDriveName, type DriveItem } from '@livedoc/api-schema';
 import { DRIVE_WRITE_IDLE_MS } from './cadence';
-import type { MirrorDocument, MirrorFolder } from './livediagram-port';
+import type { MirrorDocument, MirrorFolder } from './livedoc-port';
 import {
   expectedDocumentParent,
   expectedFolderParent,

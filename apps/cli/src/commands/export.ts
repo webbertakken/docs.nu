@@ -4,21 +4,16 @@
 // a rate-limited read waits a minute and tries again, up to three times. A document that fails is reported and the
 // rest still go (CLI84).
 
-import {
-  EXPORT_FORMATS,
-  listAllDocuments,
-  tabPath,
-  type VerbContext,
-} from '@livediagram/agent-verbs';
-import { ApiError } from '@livediagram/api-client';
-import type { DocumentResponse } from '@livediagram/api-schema';
+import { EXPORT_FORMATS, listAllDocuments, tabPath, type VerbContext } from '@livedoc/agent-verbs';
+import { ApiError } from '@livedoc/api-client';
+import type { DocumentResponse } from '@livedoc/api-schema';
 import {
   documentToEnvelopeText,
   mermaidFromTab,
   tabToMarkdownText,
   type EnvelopeTab,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import type { CliIo } from '../io';
 import { CliError, formatError } from '../output/cli-error';
 import { EXIT, type ExitCode } from '../output/exit-codes';

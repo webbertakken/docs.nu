@@ -3,7 +3,7 @@
 // prints one line of measures each. Nothing reaches the api.
 
 import { z } from 'zod';
-import { graphFromMermaid, type GraphInput } from '@livediagram/document';
+import { graphFromMermaid, type GraphInput } from '@livedoc/document';
 import {
   compareGraphLayouts,
   type LintLogger,
@@ -11,8 +11,8 @@ import {
   formatLintReport,
   lintGraph,
   parseCompareDimensions,
-} from '@livediagram/diagram-lint';
-import { graphBodyIssue } from '@livediagram/edit-operations';
+} from '@livedoc/diagram-lint';
+import { graphBodyIssue } from '@livedoc/edit-operations';
 import { defineVerb, VerbRefusal } from '../define';
 import { classifySource } from '../source-kind';
 

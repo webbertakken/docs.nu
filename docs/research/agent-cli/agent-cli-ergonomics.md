@@ -406,7 +406,7 @@ This aligns with gh's 4 for auth. The codes stay few enough to state in the top 
 
 ### 4.10 Destructive verbs, dry runs and undo
 
-- **No interactive prompts unless stdin and stdout are both TTYs.** `LIVEDIAGRAM_NO_PROMPT=1` and `CI` also
+- **No interactive prompts unless stdin and stdout are both TTYs.** `LIVEDOC_NO_PROMPT=1` and `CI` also
   disable them. A command that would have asked fails with exit 2 and names the flag (`--yes`).
 - **Prefer reversibility to confirmation.** Confirmation teaches agents to append `--yes` reflexively.
   - `doc rm` moves the document to the Trash (30 days) and prints the `doc restore` command. No prompt.
@@ -440,7 +440,7 @@ This aligns with gh's 4 for auth. The codes stay few enough to state in the top 
 
 ### 4.13 Non-interactive guarantees
 
-- Auth by `LIVEDIAGRAM_TOKEN` (an `lvd_…` token) with no other setup. `auth login` (browser or device flow)
+- Auth by `LIVEDOC_TOKEN` (an `lvd_…` token) with no other setup. `auth login` (browser or device flow)
   is for humans and writes the same token to the config file. `auth status` prints the account, the token
   name, whether it is read-only, and when it expires.
 - No pager, no spinner, no update notice, no ANSI and no emoji on stderr when piped (unlike wrangler, §2.5).
@@ -513,7 +513,7 @@ Start
   livediagram tab add "Auth flow" --mermaid - build a tab from Mermaid on stdin
   livediagram guide build                     building a diagram from scratch
 
-Env: LIVEDIAGRAM_TOKEN (lvd_...), LIVEDIAGRAM_API. Never prompts when piped.
+Env: LIVEDOC_TOKEN (lvd_...), LIVEDOC_API. Never prompts when piped.
 More: livediagram <resource> --help, livediagram <resource> <verb> --help
 ```
 
@@ -675,7 +675,7 @@ must settle.
 - AWS CLI, [output formats](https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-output-format.html);
   gcloud, [formats](https://cloud.google.com/sdk/gcloud/reference/topic/formats);
   [llm usage](https://llm.datasette.io/en/stable/usage.html)
-- Local, read-only measurements: installed `gh`, `kubectl`, `wrangler`, `git`, `jq`; `@livediagram/templates`
+- Local, read-only measurements: installed `gh`, `kubectl`, `wrangler`, `git`, `jq`; `@livedoc/templates`
   `buildTemplate`; `apps/mcp` `registerTools` via `mcp-test-client.ts`; `js-tiktoken` `o200k_base`.
 - Repo context: `docs/specs/015-api/mcp-server.md`, `docs/specs/015-api/public-api-and-tokens.md`,
   `docs/specs/015-api/api.md` (tab `PUT` row), `apps/api/src/room-client.ts`, `packages/document/src/comments.ts`,

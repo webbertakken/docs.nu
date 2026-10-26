@@ -1,5 +1,5 @@
 {
-  "name": "livediagram",
+  "name": "livedoc",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "test:coverage": "turbo run test:coverage",
     "typecheck": "turbo run typecheck",
     "deploy:check": "turbo run deploy:check",
-    "licences": "pnpm --filter @livediagram/marketing licences",
+    "licences": "pnpm --filter @livedoc/marketing licences",
     "bench:readers": "tsx scripts/read-bench.mts",
     "bench:stroke-points": "node --expose-gc --import ./scripts/ts-source-hooks.mjs scripts/stroke-points-bench.ts",
     "demo:sticky-vision:build": "node docs/demo/sticky-vision/build.mjs",
@@ -21,13 +21,13 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "clean": "turbo run clean && rm -rf node_modules",
-    "icons:vendor": "pnpm --filter @livediagram/icons vendor:lucide",
-    "icons:sheet": "pnpm --filter @livediagram/live icons:sheet",
-    "icons:brand": "pnpm --filter @livediagram/live icons:brand"
+    "icons:vendor": "pnpm --filter @livedoc/icons vendor:lucide",
+    "icons:sheet": "pnpm --filter @livedoc/live icons:sheet",
+    "icons:brand": "pnpm --filter @livedoc/live icons:brand"
   },
   "devDependencies": {
-    "@livediagram/oxlint-config": "workspace:*",
-    "@livediagram/prettier-config": "workspace:*",
+    "@livedoc/oxlint-config": "workspace:*",
+    "@livedoc/prettier-config": "workspace:*",
     "esbuild": "^0.28.2",
     "oxlint": "^1.88.0",
     "oxlint-tsgolint": "^7.0.2004",

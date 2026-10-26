@@ -15,7 +15,7 @@ vi.mock('@/lib/recent-diagrams-snapshot', () => ({ forgetRecentDiagrams }));
 const apiDeleteAccount = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/api/self', () => ({ apiDeleteAccount }));
 
-import { ACCOUNT_CHANNEL_NAME, SIGNED_IN_HINT_KEY } from '@livediagram/account-session';
+import { ACCOUNT_CHANNEL_NAME, SIGNED_IN_HINT_KEY } from '@livedoc/account-session';
 import { readAuthConfig, resetAuthConfigForTests } from '@/lib/auth-config';
 import { AuthBridge } from './AuthBridge';
 import { DEFERRED_AUTH_PENDING, useDeferredAuth, type DeferredAuthState } from './deferred-auth';

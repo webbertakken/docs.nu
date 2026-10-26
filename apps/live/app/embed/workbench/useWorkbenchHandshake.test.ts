@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  WORKBENCH_HANDSHAKE_MS,
-  type WorkbenchDocumentSessionResponse,
-} from '@livediagram/api-schema';
+import { WORKBENCH_HANDSHAKE_MS, type WorkbenchDocumentSessionResponse } from '@livedoc/api-schema';
 import type { WorkbenchRedeemOutcome } from '@/lib/api/workbench';
 import type { WorkbenchEvent } from './workbench-machine';
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { COMMUNITY_KEY_STORAGE, isCommunityKey } from '@livediagram/api-schema';
+import { COMMUNITY_KEY_STORAGE, isCommunityKey } from '@livedoc/api-schema';
 import { getCommunityKey, resetCommunityKeyForTests } from './community-key';
 
 // The community key (blueprint §5, §6 "Storage blocked", §13): read or minted, kept in localStorage,

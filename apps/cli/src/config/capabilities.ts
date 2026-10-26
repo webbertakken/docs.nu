@@ -1,7 +1,7 @@
 // What a host offers (blueprint "Capabilities", CLI8): from GET <host>/api/capabilities, cached an hour per
 // profile. An absent field reads as the older worker meant it.
 
-import type { CapabilitiesResponse } from '@livediagram/api-schema';
+import type { CapabilitiesResponse } from '@livedoc/api-schema';
 import type { DebugLog } from '../debug';
 import type { CliIo } from '../io';
 import { CliError } from '../output/cli-error';

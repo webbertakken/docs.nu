@@ -1,13 +1,7 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  createShape,
-  defaultScheme,
-  opensInOf,
-  type Element,
-  type Tab,
-} from '@livediagram/document';
+import { createShape, defaultScheme, opensInOf, type Element, type Tab } from '@livedoc/document';
 import type { PendingDraw } from '@/lib/draw-mode';
 import { boardShape, whiteboardShapeIntent } from '@/lib/whiteboard-tool';
 import { useQuickStyle } from './useQuickStyle';

@@ -3,8 +3,8 @@
 // the active profile's api with no credential, awaited at most TELEMETRY_FLUSH_TIMEOUT_MS. Off by environment or
 // config; the first send prints what is counted, once.
 
-import { errorTypeToken, pascalToken } from '@livediagram/api-schema';
-import { ApiError, postEvents } from '@livediagram/api-client';
+import { errorTypeToken, pascalToken } from '@livedoc/api-schema';
+import { ApiError, postEvents } from '@livedoc/api-client';
 import type { ConfigFile } from './config/config-file';
 import { cacheDir } from './config/paths';
 import type { DebugLog } from './debug';

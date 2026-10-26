@@ -47,12 +47,12 @@ describe('parseConsentSession', () => {
       parseConsentSession({
         clientName: 'LiveDoc CLI',
         redirectHost: '127.0.0.1:5',
-        clientId: 'livediagram-cli',
+        clientId: 'livedoc-cli',
       }),
     ).toEqual({
       clientName: 'LiveDoc CLI',
       redirectHost: '127.0.0.1:5',
-      clientId: 'livediagram-cli',
+      clientId: 'livedoc-cli',
     });
   });
 

@@ -13,7 +13,7 @@ import {
   validateShapeLibraryItems,
   type ShapeLibraryItem,
   type ShapeLibrarySource,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import {
   createShapeLibrary,
   deleteShapeLibrary,

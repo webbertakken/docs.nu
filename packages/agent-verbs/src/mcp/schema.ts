@@ -10,13 +10,13 @@
 // the structure still lives in one authoritative place (this string is guidance,
 // not a second validator).
 import { z } from 'zod';
-import { METRIC_KINDS, PLAN_VISUALISATIONS } from '@livediagram/items';
+import { METRIC_KINDS, PLAN_VISUALISATIONS } from '@livedoc/items';
 import {
   FIND_QUERY_MAX_LENGTH,
   REF_INPUT_MAX_LENGTH,
   TAB_VIEW_NAMES,
   VIEW_BUDGET_MAX,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import {
   ANCHORS,
   BADGE_LABEL_MAX,
@@ -46,7 +46,7 @@ import {
   STICKY_PRESETS,
   THEMES,
   truncateName,
-} from '@livediagram/document';
+} from '@livedoc/document';
 
 export const SCHEMA_RESOURCE_URI = 'livedoc://schema/elements';
 
@@ -353,7 +353,7 @@ const layoutField = z
   );
 
 // Template kinds are validated at runtime against the shared catalogue
-// (@livediagram/templates) rather than a z.enum, so a new template is one
+// (@livedoc/templates) rather than a z.enum, so a new template is one
 // catalogue entry with no schema churn; list_templates is the discovery
 // surface.
 // A new Dashboard tab (docs/specs/026-plan/plan-agents.md "Making a dashboard"), everything named as people name it.

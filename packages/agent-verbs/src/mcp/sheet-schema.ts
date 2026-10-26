@@ -17,8 +17,8 @@ import {
   SHEET_COLS_MAX,
   SHEET_LOOKS,
   SHEET_ROWS_MAX,
-} from '@livediagram/sheets';
-import { CHART_PALETTES, CHART_TYPES, type ChartPaletteId } from '@livediagram/document';
+} from '@livedoc/sheets';
+import { CHART_PALETTES, CHART_TYPES, type ChartPaletteId } from '@livedoc/document';
 import { BORDER_COLOUR_DEFAULT } from '../sheets/sheet-shape-change';
 import { DESIGN_ACCENT_DEFAULT } from '../sheets/sheet-design';
 import { SHEET_CHART_SIZE } from '../sheets/sheet-charts';

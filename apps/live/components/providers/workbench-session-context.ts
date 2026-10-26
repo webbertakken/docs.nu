@@ -11,7 +11,7 @@ import type {
   WorkbenchPerson,
   WorkbenchRole,
   WorkbenchScope,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import type { WorkbenchPort } from '@/lib/workbench/workbench-port';
 
 // Where the editor in a workspace frame is, for `livedoc:place`.

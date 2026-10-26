@@ -124,7 +124,7 @@ Date.now())`; `whatHappened` as sent; call `onSeen()` (the unread clear: the rea
 ### New
 
 `useHome` keeps `lastSeenAt` from the first successful read of the mount (`undefined` when the api says `null`) and
-never replaces it. `isNewEvent(at, lastSeenAt)` (`@livediagram/ui`, the Timeline's rule: none without a mark) marks an
+never replaces it. `isNewEvent(at, lastSeenAt)` (`@livedoc/ui`, the Timeline's rule: none without a mark) marks an
 `ActionEntry` by its action's `occurredAt` and a `SummaryEntry` by its `latestAt`. The pill is the Timeline card's:
 `bg-brand-600` (`SOLID_BRAND_DARK` in dark), white 9 px semibold caps, "New", first in the entry's meta line, inside
 the link or button so it is part of the accessible name.

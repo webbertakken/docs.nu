@@ -9,7 +9,7 @@ import {
   verbById,
   verbsOf,
   type Verb,
-} from '@livediagram/agent-verbs';
+} from '@livedoc/agent-verbs';
 import { CliError } from '../output/cli-error';
 import { EXIT } from '../output/exit-codes';
 import { didYouMean } from './did-you-mean';

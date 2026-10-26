@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { presetSetup } from '@livediagram/items';
-import type { Tab } from '@livediagram/document';
+import { presetSetup } from '@livedoc/items';
+import type { Tab } from '@livedoc/document';
 import { suggestedDashboards } from './suggested-dashboards';
 
 // docs/specs/026-plan/plan-mode.md "Starting a board": Dashboards built from the document's own work.

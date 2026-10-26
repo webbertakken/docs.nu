@@ -2,7 +2,7 @@ import { STORAGE_KEY as USER_PREFERENCES_STORAGE_KEY } from '@/lib/user-preferen
 
 // The editor-only snippet the root layout inlines into a `<script>` that runs
 // BEFORE first paint (the appearance one is shared by every app and lives in
-// @livediagram/ui). It lives here, as a string in a plain module, so the layout
+// @livedoc/ui). It lives here, as a string in a plain module, so the layout
 // stays readable and a test can reach the source.
 //
 // Deliberately NOT `'use client'`, and neither is anything it imports: the

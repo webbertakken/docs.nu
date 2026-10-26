@@ -2,8 +2,8 @@
 // its result lines, and the revert of one.
 
 import { z } from 'zod';
-import type { ChangesetDetail, ChangesetSummary, RevertResponse } from '@livediagram/api-schema';
-import { lintFooterPart } from '@livediagram/diagram-lint';
+import type { ChangesetDetail, ChangesetSummary, RevertResponse } from '@livedoc/api-schema';
+import { lintFooterPart } from '@livedoc/diagram-lint';
 import { resolveTab } from '../addressing';
 import { defineVerb } from '../define';
 import { documentOf, LIST_DEFAULT_LIMIT, LIST_MAX_LIMIT, minute } from './shared';

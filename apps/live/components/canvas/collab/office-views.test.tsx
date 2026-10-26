@@ -1,12 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  createShape,
-  OFFICE_TONES,
-  ROOM_DOOR_WIDTH,
-  type ShapeElement,
-} from '@livediagram/document';
+import { createShape, OFFICE_TONES, ROOM_DOOR_WIDTH, type ShapeElement } from '@livedoc/document';
 import { FurnitureView, isFurnitureViewShape } from './FurnitureView';
 import { RoomView } from './RoomView';
 

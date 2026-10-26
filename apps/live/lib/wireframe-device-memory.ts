@@ -5,7 +5,7 @@ import {
   DEFAULT_WIREFRAME_DEVICE,
   isWireframeDeviceId,
   type WireframeDeviceId,
-} from '@livediagram/document';
+} from '@livedoc/document';
 
 const KEY = 'livedoc:v2:wireframe-device';
 

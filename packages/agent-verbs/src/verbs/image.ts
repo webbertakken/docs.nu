@@ -1,7 +1,7 @@
 // `image ls` (docs/specs/015-api/cli.md "Commands", docs/specs/009-elements/images.md "Agents"): the caller's image
 // gallery, so an image element's imageId= names a picture the user uploaded. The listing is the MCP's list_images'.
 import { z } from 'zod';
-import type { ImageSummary } from '@livediagram/api-schema';
+import type { ImageSummary } from '@livedoc/api-schema';
 import { defineVerb } from '../define';
 import { IMAGE_LIST_DEFAULT_LIMIT, IMAGE_LIST_MAX_LIMIT, galleryListing } from '../images/gallery';
 import { columns } from './shared';

@@ -9,7 +9,7 @@ import {
   responseOf,
   type EstimateScale,
   type ShapeElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { answeringKeys, type Participant } from '@/lib/identity';
 import { CollabPanel } from './collab-chrome';
 import { CollabAccentScope } from './collab-accent';

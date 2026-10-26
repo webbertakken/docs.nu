@@ -1,9 +1,9 @@
-import { type TextAlignX, type TextAlignY } from '@livediagram/document';
+import { type TextAlignX, type TextAlignY } from '@livedoc/document';
 import { AlignIcon } from '@/components/palette/palette-icons';
 import { onMouseHover } from '@/components/primitives/hover-preview';
 import { useState } from 'react';
-import { HoverCard, Tooltip } from '@livediagram/ui';
-import type { StandardTone } from '@livediagram/document';
+import { HoverCard, Tooltip } from '@livedoc/ui';
+import type { StandardTone } from '@livedoc/document';
 import { ColourPopover } from '@/components/colour/ColourPopover';
 import { SwatchChip } from '@/components/colour/ColourSwatch';
 import { standardGroup, standardOptions } from '@/components/colour/colour-options';

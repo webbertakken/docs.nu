@@ -10,7 +10,7 @@ import type {
   DocumentResponse,
   ShareLinkResponse,
   TabResponse,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import {
   buildGraphTab,
   buildTab,
@@ -19,7 +19,7 @@ import {
   normaliseElements,
   resolveGraphInput,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   buildDashboardTab,
   buildTemplateTabs,
@@ -31,14 +31,14 @@ import {
   validTemplateKinds,
   closestTemplatesHint,
   type TemplateKind,
-} from '@livediagram/templates';
+} from '@livedoc/templates';
 import {
   DEFAULT_MCP_SHARE_LEVEL,
   TRASH_RETENTION_DAYS,
   creationIntentOf,
   type LiveDoc,
   type TrashedDocument,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { createdFolderLabel } from './created-folder';
 import { ApiError, apiFetch, apiJson, clientFor, reportApiFailure } from './api';
 import { readDocument } from './read-document';
@@ -49,8 +49,8 @@ import {
   matchDocuments,
   resolveDashboardInput,
   type DashboardInput,
-} from '@livediagram/agent-verbs';
-import { catalogueWithBoardTypes, typesOf } from '@livediagram/items';
+} from '@livedoc/agent-verbs';
+import { catalogueWithBoardTypes, typesOf } from '@livedoc/items';
 import { dashboardTabKind, documentDashboard } from './dashboard-tabs';
 import {
   deepLink,
@@ -62,11 +62,11 @@ import {
   type Extra,
 } from './tool-helpers';
 import { lintLineOf, lintReportsOf, lintTextOf } from './lint-summary';
-import { withoutFindings } from '@livediagram/diagram-lint';
+import { withoutFindings } from '@livedoc/diagram-lint';
 import { idsOf, resolveArrowEnds } from './arrow-ends';
 import { elementsIssue, graphIconIssue } from './element-values';
 import { packFreehandPoints } from './freehand-points';
-import { searchIcons } from '@livediagram/icons/search';
+import { searchIcons } from '@livedoc/icons/search';
 import { imageResult } from './image-result';
 import { imageIdIssue, registerImageTools } from './image-tools';
 import {
@@ -98,7 +98,7 @@ import {
   mcpSearchIcons,
   mcpShareDocument,
   mcpUpdateDocument,
-} from '@livediagram/agent-verbs/mcp';
+} from '@livedoc/agent-verbs/mcp';
 
 export function registerTools(server: McpServer, env: Env): void {
   // The items Plan boards show (docs/specs/026-plan/plan-mode.md "Agents").

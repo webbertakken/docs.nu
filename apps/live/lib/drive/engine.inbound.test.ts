@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { FakeGoogle } from '@livediagram/fake-google';
-import { DRIVE_FILE_MIME } from '@livediagram/api-schema';
+import { FakeGoogle } from '@livedoc/fake-google';
+import { DRIVE_FILE_MIME } from '@livedoc/api-schema';
 import { DRIVE_WRITE_MIN_INTERVAL_MS } from './cadence';
 import { fileOf, makeEngine, OWNER, world } from './test-support';
 

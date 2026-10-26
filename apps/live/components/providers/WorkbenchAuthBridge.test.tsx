@@ -11,8 +11,8 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import type { WorkbenchSession } from './workbench-session-context';
 
 const sessions = vi.hoisted(() => ({ reads: 0 }));
-vi.mock('@livediagram/account-session', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@livediagram/account-session')>()),
+vi.mock('@livedoc/account-session', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@livedoc/account-session')>()),
   readSession: async () => {
     sessions.reads++;
     return { status: 'signed-out' };

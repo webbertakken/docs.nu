@@ -9,8 +9,8 @@ import type {
   HomePerson,
   HomeVerb,
   HomeVerbCount,
-} from '@livediagram/api-schema';
-import { timeLabel } from '@livediagram/ui';
+} from '@livedoc/api-schema';
+import { timeLabel } from '@livedoc/ui';
 
 export const HOME_COPY = {
   jumpBackIn: 'Jump Back In',

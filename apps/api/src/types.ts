@@ -1,5 +1,5 @@
 // API-worker type surface. The wire-format DTOs are now defined in
-// `@livediagram/api-schema` so the api worker and the live editor
+// `@livedoc/api-schema` so the api worker and the live editor
 // share the same source of truth (no more parallel type definitions
 // drifting between them — see AGENTS.md's reuse-over-duplication
 // rule). This file re-exports the canonical names under the
@@ -22,7 +22,7 @@ export type {
   ShareLink as ShareLinkDTO,
   ServerMessage,
   ClientMessage,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 
 // Worker bindings injected by Cloudflare at runtime. Not part of the
 // wire format (purely a server-side capability handle).

@@ -8,9 +8,9 @@ import {
   communityPostPath,
   type CommunityPost,
   type CommunitySitemapEntry,
-} from '@livediagram/api-schema';
-import { breadcrumbJsonLd } from '@livediagram/ui/seo';
-import { SITE_URL } from '@livediagram/ui/site';
+} from '@livedoc/api-schema';
+import { breadcrumbJsonLd } from '@livedoc/ui/seo';
+import { SITE_URL } from '@livedoc/ui/site';
 
 // The same title suffix the page sets for itself once the post loads (components/post/PostView.tsx).
 const POST_TITLE_SUFFIX = ' | LiveDoc Community';
@@ -86,7 +86,7 @@ export function escapeHtml(value: string): string {
 }
 
 // JSON-LD inlined in a <script>: every `<` escaped so no string inside can close the tag (the same rule as the
-// shared JsonLd component in @livediagram/ui).
+// shared JsonLd component in @livedoc/ui).
 export function jsonLdScript(data: unknown): string {
   return `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 }

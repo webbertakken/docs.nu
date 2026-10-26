@@ -2,9 +2,9 @@
 // until a comment is added, or until a change settles for WAIT_SETTLE_MS, then prints it. `--timeout` ends with a
 // line saying nothing came; Ctrl-C ends with exit 1; the document moved to the Trash with exit 3.
 
-import { documentOf, resolveTab, tabPath, type VerbContext } from '@livediagram/agent-verbs';
-import { revOfEtag, type DocumentCommentsResponse } from '@livediagram/api-schema';
-import { threadListingLines } from '@livediagram/document-views';
+import { documentOf, resolveTab, tabPath, type VerbContext } from '@livedoc/agent-verbs';
+import { revOfEtag, type DocumentCommentsResponse } from '@livedoc/api-schema';
+import { threadListingLines } from '@livedoc/document-views';
 import type { CliIo } from '../io';
 import { CliError } from '../output/cli-error';
 import { EXIT } from '../output/exit-codes';

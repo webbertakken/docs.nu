@@ -6,7 +6,7 @@
 // Images stay references to LiveDoc's image store; no bytes are embedded.
 
 import type { Tab } from './index';
-import { readItemTypeCatalogue, type Item, type ItemTypeCatalogue } from '@livediagram/items';
+import { readItemTypeCatalogue, type Item, type ItemTypeCatalogue } from '@livedoc/items';
 
 export const DOCUMENT_ENVELOPE_KIND = 'livedoc.document';
 export const DOCUMENT_SCHEMA_VERSION = 1;

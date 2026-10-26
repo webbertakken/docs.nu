@@ -10,12 +10,8 @@
 // stay as pure-render presentational markup. Adding a new glyph means
 // appending one function here and one branch in EventIcon.
 
-import {
-  lucideSlidersHorizontal,
-  lucideSquareDashed,
-  lucideUndo2,
-} from '@livediagram/icons/lucide';
-import { Glyph, lucideGlyph } from '@livediagram/ui';
+import { lucideSlidersHorizontal, lucideSquareDashed, lucideUndo2 } from '@livedoc/icons/lucide';
+import { Glyph, lucideGlyph } from '@livedoc/ui';
 
 export function RectGlyph() {
   return (

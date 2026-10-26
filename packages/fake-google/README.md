@@ -1,4 +1,4 @@
-# @livediagram/fake-google
+# @livedoc/fake-google
 
 An in-memory Google for tests: the Drive REST API v3 surface the Drive mirror
 uses (files, folders, parents, the bin, `changes.list` with page tokens,
@@ -12,7 +12,7 @@ uploads, `fields` and `q`) and the OAuth token and revoke endpoints
 - The `user*` methods act as the person in the Drive UI (rename, move, bin,
   restore, delete forever, create a folder LiveDoc cannot see, edit
   contents); `fail` injects 401 / 403 / 404 / 429 / 5xx.
-- `@livediagram/fake-google/server` serves it over HTTP for the e2e stack.
+- `@livedoc/fake-google/server` serves it over HTTP for the e2e stack.
 
 It models `drive.file`: the app sees only files it created or was given
 (Open with, the Picker). Where Google's behaviour is not yet verified

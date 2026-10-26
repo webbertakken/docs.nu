@@ -1,4 +1,4 @@
-import { DOCUMENT_FORMAT } from '@livediagram/api-schema';
+import { DOCUMENT_FORMAT } from '@livedoc/api-schema';
 import { identityConfigOf } from '../auth/identity-config';
 import { aiConfigured } from '../ai-provider';
 import { communityEnabled } from '../community-enabled';

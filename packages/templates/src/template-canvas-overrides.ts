@@ -2,11 +2,7 @@
 // kind. Its own module, apart from the template catalogue in templates.ts: these read the template builders (a
 // template's pages are built here), and the editor reads the catalogue (a template's title) on every load, which
 // drew every builder into its first load while the two shared a module.
-import {
-  WHITEBOARD_DEFAULT_PATTERN,
-  type BackgroundPattern,
-  type Tab,
-} from '@livediagram/document';
+import { WHITEBOARD_DEFAULT_PATTERN, type BackgroundPattern, type Tab } from '@livedoc/document';
 import { articleTemplateOverrides } from './article-template';
 import { workingBackwardsOverrides } from './template-working-backwards';
 import { blankPageTemplateOverrides } from './blank-page-templates';

@@ -1,4 +1,4 @@
-import { SIGNED_IN_HINT_KEY } from '@livediagram/account-session';
+import { SIGNED_IN_HINT_KEY } from '@livedoc/account-session';
 import { GUEST_IDENTITY_KEYS } from './kept-keys';
 
 // Who this browser is, for the diagnostics report (docs/specs/007-editor/load-recovery.md "Diagnostics").

@@ -3,11 +3,7 @@
 // live in share-link-row.ts so the defensive mapper has its own test
 // surface.
 
-import {
-  SHARE_LINK_EXPIRY_MS,
-  type ShareLinkExpiry,
-  type SharePurpose,
-} from '@livediagram/api-schema';
+import { SHARE_LINK_EXPIRY_MS, type ShareLinkExpiry, type SharePurpose } from '@livedoc/api-schema';
 import {
   legacyRoleColumn,
   levelColumn,

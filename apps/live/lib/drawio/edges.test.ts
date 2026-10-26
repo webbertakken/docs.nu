@@ -6,7 +6,7 @@ import {
   endpointPosition,
   isValidElement,
   type ArrowElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { DRAWIO_CAPTION_WIDTH_SLACK } from './edges';
 import { labelTextWidth } from './text-size';
 import type { Pt } from './cells';

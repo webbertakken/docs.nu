@@ -1,12 +1,5 @@
-import type { Element } from '@livediagram/document';
-import {
-  DuplicateIcon,
-  EllipsisIcon,
-  LockIcon,
-  TrashIcon,
-  HoverCard,
-  Glyph,
-} from '@livediagram/ui';
+import type { Element } from '@livedoc/document';
+import { DuplicateIcon, EllipsisIcon, LockIcon, TrashIcon, HoverCard, Glyph } from '@livedoc/ui';
 import type { CombineOp } from '@/lib/combine/combine';
 import { CombineMenuButton } from '@/components/canvas/CombineMenu';
 import { buildFilterGroups, SelectionFilterMenu } from '@/components/canvas/SelectionFilterMenu';

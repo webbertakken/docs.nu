@@ -9,7 +9,7 @@ import {
   documentRestoredMessage,
 } from '@/lib/document-toast-copy';
 import type { useToast } from '@/hooks/ui/useToast';
-import type { LiveDoc } from '@livediagram/api-schema';
+import type { LiveDoc } from '@livedoc/api-schema';
 
 /** Which Trash a deleted document went to, as the Trash's own telemetry types it. */
 export type DeletedTrash = 'Personal' | 'Team' | 'Local';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CLI_CLIENT_ID, DEVICE_CODE_GRANT } from '@livediagram/api-schema';
+import { CLI_CLIENT_ID, DEVICE_CODE_GRANT } from '@livedoc/api-schema';
 import { run } from '../main';
 import { fakeIo, TOKEN, type FakeIo, type Route } from '../testing/fake-io';
 import { LOGIN_TIMEOUT_MS } from './oauth';

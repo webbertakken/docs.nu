@@ -1,9 +1,4 @@
-import {
-  ES_LANES,
-  eventStormingNoteSize,
-  isEventStormingTab,
-  type Tab,
-} from '@livediagram/document';
+import { ES_LANES, eventStormingNoteSize, isEventStormingTab, type Tab } from '@livedoc/document';
 import type { PendingDraw } from '@/lib/draw-mode';
 import type { LanePreview } from '@/lib/lane-preview';
 import { paletteDragSnapAt } from '@/lib/palette-drag-snap';

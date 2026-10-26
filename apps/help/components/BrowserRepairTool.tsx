@@ -8,7 +8,7 @@ import {
   readBrowserIdentity,
   runBrowserChecks,
   type BrowserChecks,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 import { track } from '@/lib/telemetry';
 
 // The Repair page's live panel (docs/specs/007-editor/load-recovery.md "Repair page in the help

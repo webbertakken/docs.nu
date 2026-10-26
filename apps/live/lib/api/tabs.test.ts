@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { sentText } from '@livediagram/vitest-config/sent-request';
-import type { Tab } from '@livediagram/document';
+import { sentText } from '@livedoc/vitest-config/sent-request';
+import type { Tab } from '@livedoc/document';
 import { apiLoadTabRevisioned, apiSaveTab, flushDocumentSavesBeacon } from './tabs';
 import * as offlineStore from '../offline/offline-store';
 import { SAVE_TIMEOUT_BASE_MS, saveTimeoutMs } from './core';

@@ -135,10 +135,10 @@ describe('previewConfig', () => {
   it('refuses a service binding outside docs.nu', () => {
     expect(() =>
       previewConfig(
-        { name: 'docs-nu-live', services: [{ binding: 'API', service: 'livediagram-api' }] },
+        { name: 'docs-nu-live', services: [{ binding: 'API', service: 'livedoc-api' }] },
         { ...opts, app: 'live' },
       ),
-    ).toThrow(/livediagram-api/);
+    ).toThrow(/livedoc-api/);
   });
 
   it("points the database and the bucket at the preview's own", () => {

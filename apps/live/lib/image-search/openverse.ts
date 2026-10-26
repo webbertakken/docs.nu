@@ -2,12 +2,7 @@
 // the request URL, a defensive parse of the answer, and the credit a picked
 // picture leaves on its element. Pure, so it runs under Node in tests.
 
-import {
-  IMAGE_CREDIT_TEXT_MAX,
-  isCreditUrl,
-  isRecord,
-  type ImageCredit,
-} from '@livediagram/document';
+import { IMAGE_CREDIT_TEXT_MAX, isCreditUrl, isRecord, type ImageCredit } from '@livedoc/document';
 
 const OPENVERSE_API_BASE = 'https://api.openverse.org/v1';
 // Openverse's anonymous maximum.

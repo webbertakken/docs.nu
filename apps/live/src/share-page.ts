@@ -10,7 +10,7 @@ import {
   shareCardImagePath,
   sharePreviewCardPath,
   type SharePreviewResponse,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 
 // The few runtime types used here, written out so the app's one DOM-lib typecheck covers this file too (as the
 // Community worker does, apps/community/worker/index.ts).

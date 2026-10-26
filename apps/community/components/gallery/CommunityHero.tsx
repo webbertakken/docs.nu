@@ -1,4 +1,4 @@
-import { buttonClassName, ButtonContent, CommunityHelpLink } from '@livediagram/ui';
+import { buttonClassName, ButtonContent, CommunityHelpLink } from '@livedoc/ui';
 import { SHARE_YOUR_OWN_HREF } from '@/lib/links';
 import { SparklesIcon } from '../shared/icons';
 

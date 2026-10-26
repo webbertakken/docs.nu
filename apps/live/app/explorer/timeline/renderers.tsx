@@ -4,7 +4,7 @@
 //
 // These are the half of the Timeline that knows about this product:
 // which route a card opens, what its preview shows, and when to say
-// "you" instead of a name. The components in @livediagram/ui take this
+// "you" instead of a name. The components in @livedoc/ui take this
 // registry as a prop and never import a route themselves, which is what
 // lets a per-document feed reuse them without inheriting the Explorer's
 // copy.
@@ -22,8 +22,8 @@ import type {
   TimelineRenderer,
   TimelineRendererContext,
   TimelineRendererRegistry,
-} from '@livediagram/ui';
-import { SourceTypeIcon } from '@livediagram/ui';
+} from '@livedoc/ui';
+import { SourceTypeIcon } from '@livedoc/ui';
 import { DocumentThumbnail } from '@/components/panels/DocumentThumbnail';
 import { EVENT_ICONS } from './icons';
 import { requestOpenSettings } from '@/lib/open-settings';

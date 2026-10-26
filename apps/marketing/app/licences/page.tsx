@@ -2,7 +2,7 @@ import { BreadcrumbJsonLd } from '@/components/BreadcrumbJsonLd';
 import { Footer } from '@/components/Footer';
 import { LicencesView } from '@/components/licences/LicencesView';
 import { loadLicencesManifest } from '@/lib/licences-manifest';
-import { pageMetadata, SiteHeader } from '@livediagram/ui';
+import { pageMetadata, SiteHeader } from '@livedoc/ui';
 
 export const metadata = pageMetadata({
   title: 'Open-source licences · LiveDoc',

@@ -1,4 +1,4 @@
-import { ctaSurfaceOf, isCtaSource, parseTimingType } from '@livediagram/api-schema';
+import { ctaSurfaceOf, isCtaSource, parseTimingType } from '@livedoc/api-schema';
 import { SURFACE_LABELS, ctaSourceLabel } from './cta-funnel';
 import { cliCommandSentence } from './cli-commands';
 import { API_OPERATIONS, BY_ACTION, EXACT } from './event-explanations';

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { pageMetadata } from '@livediagram/ui';
+import { pageMetadata } from '@livedoc/ui';
 import { helpCardImage } from './help-cards';
 
 // The help centre's name in link previews (the OG siteName); everything else

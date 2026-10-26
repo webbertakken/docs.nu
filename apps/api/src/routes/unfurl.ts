@@ -5,7 +5,7 @@
 // SSRF before any fetch and the read is bounded. Always returns 200 with at
 // least the resolved url (the card falls back to the bare URL on a miss).
 
-import type { UnfurlResult } from '@livediagram/api-schema';
+import type { UnfurlResult } from '@livedoc/api-schema';
 import { badRequest, json, notFound, rateLimited } from '../responses';
 import { clientRateKey } from '../client-ip';
 import type { RouteContext } from './context';

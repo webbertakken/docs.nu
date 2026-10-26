@@ -12,11 +12,7 @@ export const ACTION_CUT_CHARS = 48;
 // URL-safe without quotes or spaces (VW15).
 export const ATTR_BARE_PATTERN = /^[A-Za-z0-9._:/#?&=%+@~-]+$/;
 // The query bounds are wire contract, kept beside the view names (VW53).
-export {
-  FIND_QUERY_MAX_LENGTH,
-  REF_INPUT_MAX_LENGTH,
-  VIEW_BUDGET_MAX,
-} from '@livediagram/api-schema';
+export { FIND_QUERY_MAX_LENGTH, REF_INPUT_MAX_LENGTH, VIEW_BUDGET_MAX } from '@livedoc/api-schema';
 // `show`'s ref for the owner's live selection, the edit operations' selector word (VW65).
 export const SELECTED_REF = 'selected';
 // About 15 MB of tab bodies at the tab cap (VW47).

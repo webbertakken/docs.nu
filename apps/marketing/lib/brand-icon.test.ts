@@ -1,12 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { brandLogoSvg, brandMarkSvg } from '@livediagram/ui';
+import { brandLogoSvg, brandMarkSvg } from '@livedoc/ui';
 
 // Each frontend ships its own app/icon.svg, because Next's icon file
 // convention wants one per app (and help's is served under its basePath), and
 // marketing/media/logo/ holds the mark and lockup as files. All are written by
-// `pnpm icons:brand` from the Living Prism module in @livediagram/ui. Nothing
+// `pnpm icons:brand` from the Living Prism module in @livedoc/ui. Nothing
 // at runtime notices one of them drifting; this does.
 
 const APPS = ['marketing', 'live', 'help', 'telemetry', 'community'] as const;

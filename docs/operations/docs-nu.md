@@ -28,7 +28,7 @@ The token needs, on the account: Workers Scripts, D1, Workers R2 Storage and Wor
 
 ## npm
 
-LiveDoc publishes to npm under its own scope, `@livedoc`, an npm organisation owned by Webber's npm account. Its CLI is `@livedoc/cli`, the command `livedoc`. It never publishes under livediagram's names: upstream owns `@livediagram/cli`.
+LiveDoc publishes to npm under its own scope, `@livedoc`, an npm organisation owned by Webber's npm account. Its CLI is `@livedoc/cli`, the command `livedoc`. It never publishes under livediagram's names: upstream owns `@livedoc/cli`.
 
 - Why `@livedoc`: the `livedocs` scope belongs to an unrelated npm user account, and the unscoped `livedocs` and `livedoc` packages belong to other people.
 - Publishing goes through npm trusted publishing (OIDC) from `.github/workflows/cli-publish.yml`, with provenance. No npm token is stored anywhere.

@@ -3,7 +3,7 @@
 // argument is a usage error (exit 2).
 
 import { parseArgs } from 'node:util';
-import type { Verb } from '@livediagram/agent-verbs';
+import type { Verb } from '@livedoc/agent-verbs';
 import { CliError } from '../output/cli-error';
 import { EXIT } from '../output/exit-codes';
 import { fieldsOf, flagOf, keyOf, restName, type Field } from './fields';

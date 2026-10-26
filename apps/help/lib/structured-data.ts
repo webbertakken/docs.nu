@@ -7,7 +7,7 @@
 // `${SITE}/help${appPath}` where appPath is the app-relative href the article
 // registry produces (articleHref / categoryHref, which omit the basePath).
 
-import { SITE_NAME, SITE_URL as SITE } from '@livediagram/ui';
+import { SITE_NAME, SITE_URL as SITE } from '@livedoc/ui';
 import { HELP_URL as HELP } from './site';
 
 /** Absolute help-centre URL from an app-relative href (e.g. "/canvas/themes/"). */

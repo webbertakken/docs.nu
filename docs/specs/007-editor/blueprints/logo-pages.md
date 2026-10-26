@@ -440,7 +440,7 @@ page, count)`.
 - `combineElements(els, op, newId): Promise<CombineResult>`.
 - `encodeIco(images: readonly { size: number; png: Uint8Array }[]): Uint8Array`.
 - `exportLogoKit(tab, page, opts?): Promise<Blob>`.
-- Validation as in Data and persistence; OpenAPI regenerated (`pnpm --filter @livediagram/api
+- Validation as in Data and persistence; OpenAPI regenerated (`pnpm --filter @livedoc/api
 gen:openapi`).
 
 ## Errors and edge cases

@@ -10,7 +10,7 @@ import {
   resolveItem,
   type Item,
   type ItemFields,
-} from '@livediagram/items';
+} from '@livedoc/items';
 import { defineVerb, VerbRefusal, type VerbContext } from '../define';
 import { applyItemChanges, type ItemChange } from '../plan/item-changes';
 import { FIELD_HINT } from '../plan/api-refusal';

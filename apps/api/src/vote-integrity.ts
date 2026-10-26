@@ -1,4 +1,4 @@
-import { sha256Hex } from '@livediagram/api-schema';
+import { sha256Hex } from '@livedoc/api-schema';
 import { clientRateKey } from './client-ip';
 import { personTagFor } from './person-tag';
 import { json } from './responses';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ImageSummary } from '@livediagram/api-schema';
-import { cpuBudgetMs, cpuMsOf } from '@livediagram/vitest-config/cpu-time';
+import type { ImageSummary } from '@livedoc/api-schema';
+import { cpuBudgetMs, cpuMsOf } from '@livedoc/vitest-config/cpu-time';
 import {
   galleryListing,
   imageName,

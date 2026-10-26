@@ -12,10 +12,10 @@ import {
   CHANGESET_REVEAL_MS,
   WORKBENCH_SELECTION_SETTLE_MS,
   type ShareRole,
-} from '@livediagram/api-schema';
-import { computeRefs, resolveRef, type Tab } from '@livediagram/document';
-import { selectionReference } from '@livediagram/document-views';
-import { setAppearanceOverride } from '@livediagram/ui';
+} from '@livedoc/api-schema';
+import { computeRefs, resolveRef, type Tab } from '@livedoc/document';
+import { selectionReference } from '@livedoc/document-views';
+import { setAppearanceOverride } from '@livedoc/ui';
 import type { WorkbenchDocumentSession } from '@/components/providers/workbench-session-context';
 import type { RevealStore } from '@/lib/changeset-reveals';
 import { selectionIds, type SelectionStore } from '@/lib/selection-store';

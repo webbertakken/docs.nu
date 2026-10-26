@@ -9,10 +9,10 @@ import {
   sheetFigure,
   sparklineOf,
   summarise,
-} from '@livediagram/sheets';
-import type { SheetMetricContent } from '@livediagram/document';
+} from '@livedoc/sheets';
+import type { SheetMetricContent } from '@livedoc/document';
 import type { SheetRead } from './useSheetReader';
-import type { SheetMetricShown } from '@livediagram/plan-art';
+import type { SheetMetricShown } from '@livedoc/plan-art';
 
 // Its shape is shared with the figure's picture in an image export.
 export type { SheetMetricShown };

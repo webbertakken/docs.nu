@@ -8,8 +8,8 @@
 // per message"). Syncing is automatic, so there is no Sync now.
 
 import { useEffect, useRef, useState } from 'react';
-import { lucideCloud, lucideTriangleAlert } from '@livediagram/icons/lucide';
-import { Button, StableLabel, lucideGlyph } from '@livediagram/ui';
+import { lucideCloud, lucideTriangleAlert } from '@livedoc/icons/lucide';
+import { Button, StableLabel, lucideGlyph } from '@livedoc/ui';
 import { ArrowOutIcon } from '@/components/primitives/HelpArticleLink';
 import { SettingsRowShell } from '@/components/dialogs/settings/SettingsRowShell';
 import type { SettingsCloudSyncRowSpec } from '@/components/dialogs/settings/settings-catalogue';

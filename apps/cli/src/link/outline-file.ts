@@ -2,8 +2,8 @@
 // file"): generated, linking the document, then each tab's outline view whole, in a `text` fence (RL32). What an
 // agent reads first, at a tenth of the JSON's tokens.
 
-import type { Tab } from '@livediagram/document';
-import { renderView } from '@livediagram/document-views';
+import type { Tab } from '@livedoc/document';
+import { renderView } from '@livedoc/document-views';
 import { fenceFor, markdownText } from './markdown';
 
 const outlineGeneratedLine = (host: string, documentId: string) =>

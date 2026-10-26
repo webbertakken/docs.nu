@@ -5,7 +5,7 @@
 import { track } from '../telemetry';
 import { createDriveRestClient } from './drive-rest-client';
 import { DriveMirrorEngine, type DriveMirrorStatus } from './engine';
-import { createApiLivediagramPort } from './livediagram-port';
+import { createApiLivedocPort } from './livedoc-port';
 import { rasteriseSvgToPng } from './thumbnail';
 import { localSeenStore } from './tombstones';
 import type { TokenSource } from './token-source';
@@ -34,7 +34,7 @@ export function createBrowserEngine(input: {
     ownerId: input.ownerId,
     host: window.location.host,
     deviceId: driveDeviceId(),
-    port: createApiLivediagramPort(input.ownerId),
+    port: createApiLivedocPort(input.ownerId),
     drive: createDriveRestClient({
       fetch: (i, init) => fetch(i, init),
       getAccessToken: (opts) => input.tokens.get(opts),

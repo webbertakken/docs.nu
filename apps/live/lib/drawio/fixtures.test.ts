@@ -8,7 +8,7 @@ import {
   type ArrowElement,
   type Element,
   type ShapeElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import type { ImportNote } from './notes';
 import { importDrawio, type ImportedPage } from './import';
 import { fixtureBytes } from './test-support';

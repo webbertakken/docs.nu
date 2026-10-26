@@ -3,7 +3,7 @@
 // the port, and the snapshot follows along so later changes in the same read
 // see what the earlier ones did.
 
-import { DRIVE_PROP_FOLDER_ID, DRIVE_PROP_ORIGIN } from '@livediagram/api-schema';
+import { DRIVE_PROP_FOLDER_ID, DRIVE_PROP_ORIGIN } from '@livedoc/api-schema';
 import { ApiError } from '../api/core';
 import type { DriveChange } from './drive-client';
 import { driveLog, driveWarn } from './log';

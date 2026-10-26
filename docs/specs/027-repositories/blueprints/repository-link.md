@@ -966,7 +966,7 @@ Environment: none new. `LIVEDOC_DEBUG`, `XDG_CACHE_HOME` and the profile variabl
 
 Each is the second build (`plans/0047-repository-sync.md`) and is blueprinted when that plan's phase 1 runs.
 
-- **Merging** (`@livediagram/tab-merge`, the merge table, fields, live fields, lost local values, the CAS loop,
+- **Merging** (`@livedoc/tab-merge`, the merge table, fields, live fields, lost local values, the CAS loop,
   `SYNC_MERGE_ATTEMPTS`): `ahead` and `diverged` are refused in this slice.
 - **Base snapshots** in `<state dir>/bases/` (`SYNC_BASES_KEPT`) and the `git log` fallback.
 - **Pending proposals** in `<state dir>/pending/` and their send.

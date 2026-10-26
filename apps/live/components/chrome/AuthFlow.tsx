@@ -10,8 +10,8 @@
 // read; other tabs are nudged to read theirs. Google's round trip ends at better-auth's own callback, which redirects
 // to the same destination (or back here with `?error=`).
 
-import { announceAccountChange, writeSignedInHint } from '@livediagram/account-session';
-import { Button, TextInput } from '@livediagram/ui';
+import { announceAccountChange, writeSignedInHint } from '@livedoc/account-session';
+import { Button, TextInput } from '@livedoc/ui';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';

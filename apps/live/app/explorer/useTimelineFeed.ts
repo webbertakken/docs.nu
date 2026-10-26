@@ -18,12 +18,8 @@ import {
   type TimelineControlsState,
   type TimelineEvent,
   type TimelineMode,
-} from '@livediagram/ui';
-import {
-  TIMELINE_PAGE_MAX,
-  TIMELINE_PAGE_SIZE,
-  type TimelineScopeRef,
-} from '@livediagram/api-schema';
+} from '@livedoc/ui';
+import { TIMELINE_PAGE_MAX, TIMELINE_PAGE_SIZE, type TimelineScopeRef } from '@livedoc/api-schema';
 import {
   apiDismissTimelineEvent,
   apiDismissTimelineEvents,

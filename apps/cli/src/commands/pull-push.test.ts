@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ChangesetRequest } from '@livediagram/api-schema';
-import type { ShapeElement } from '@livediagram/document';
+import type { ChangesetRequest } from '@livedoc/api-schema';
+import type { ShapeElement } from '@livedoc/document';
 import { run } from '../main';
 import { mirrorFileText } from '../link/mirror-file';
 import { parsePullFile, type PullFile } from '../sync/pull-file';

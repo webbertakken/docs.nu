@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { ShapeLibrary, ShapeLibraryItem } from '@livediagram/api-schema';
-import { NoMatches } from '@livediagram/ui';
+import type { ShapeLibrary, ShapeLibraryItem } from '@livedoc/api-schema';
+import { NoMatches } from '@livedoc/ui';
 import { SearchInput } from '@/components/primitives/SearchInput';
 import { useShapeLibraries } from '@/components/primitives/ShapeLibraryProvider';
 import { LibraryShapeTile } from './LibraryShapeTile';

@@ -11,7 +11,7 @@ import {
   type ItemTypeDef,
   type PlanBoardSetup,
   type PlanColumn,
-} from '@livediagram/items';
+} from '@livedoc/items';
 import type { Rect } from './geometry-primitives';
 
 const PLAN_BOARD_HEADER_H = 52;

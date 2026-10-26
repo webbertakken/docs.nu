@@ -16,8 +16,8 @@ import {
   type LaneHead,
   type StatusPhase,
   namedStatus,
-} from '@livediagram/items';
-import { Tooltip } from '@livediagram/ui';
+} from '@livedoc/items';
+import { Tooltip } from '@livedoc/ui';
 import type { PlanPalette } from '../plan-palette';
 import { PHASE_COLOURS, openProps } from './view-frame';
 import type { PlanViewProps } from './PlanViewView';

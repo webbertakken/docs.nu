@@ -27,7 +27,7 @@ import {
   type TelemetryAction,
   type TelemetryCategory,
   type TelemetryEvent,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 
 export { onPageHide } from './page-hide';
 export * from './timing';

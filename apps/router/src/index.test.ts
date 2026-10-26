@@ -220,7 +220,7 @@ describe('bare help-article paths', () => {
     // The list in index.ts is hand-kept; this is what stops it drifting when
     // the help centre grows a category. `explorer` is the one exclusion: the
     // live app owns that segment.
-    const { categories } = await import('@livediagram/help-registry');
+    const { categories } = await import('@livedoc/help-registry');
     expect(categories.length).toBeGreaterThan(15);
     const missed: string[] = [];
     for (const category of categories) {

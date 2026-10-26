@@ -1,6 +1,6 @@
 // Assembles the OpenAPI 3.1 document served at GET /api/openapi.json (docs/specs/015-api/api-documentation.md)
 // from three runtime-safe inputs: the route manifest (the declared surface),
-// the generated component schemas (derived from @livediagram/api-schema), and
+// the generated component schemas (derived from @livedoc/api-schema), and
 // the static auth-scheme / info metadata below. Pure and deterministic — the
 // worker memoises the result once per isolate (see routes/openapi.ts). No part
 // of the heavy schema GENERATOR is imported here; this file only consumes its

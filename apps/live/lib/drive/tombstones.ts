@@ -3,7 +3,7 @@
 // in Drive"). A purge or a folder deletion takes its row with it in the same
 // batch; remembering the row is what lets the next pass finish the Drive side.
 
-import type { DriveItem, DriveItemKind } from '@livediagram/api-schema';
+import type { DriveItem, DriveItemKind } from '@livedoc/api-schema';
 
 export type SeenRow = { kind: DriveItemKind; ldId: string; driveFileId: string };
 

@@ -1,13 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  createShape,
-  pagesOf,
-  layOutPages,
-  type ArticleBlock,
-  type Tab,
-} from '@livediagram/document';
+import { createShape, pagesOf, layOutPages, type ArticleBlock, type Tab } from '@livedoc/document';
 import { useArticleIntake } from './useArticleIntake';
 
 vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));

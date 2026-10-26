@@ -26,8 +26,8 @@ import {
   type FormDefinition,
   type FormQuestion,
   type SectionRule,
-} from '@livediagram/forms';
-import { parseColourBackground, type ColourBackground } from '@livediagram/page-background';
+} from '@livedoc/forms';
+import { parseColourBackground, type ColourBackground } from '@livedoc/page-background';
 import {
   setGoesTo,
   setRespondsTo,

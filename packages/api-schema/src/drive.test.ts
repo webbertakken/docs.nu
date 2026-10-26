@@ -5,7 +5,7 @@ import {
   driveFileName,
   isDriveFileId,
   isDriveLeaseHolder,
-  isLivediagramId,
+  isLivedocId,
   stripDriveName,
 } from './drive';
 
@@ -47,9 +47,9 @@ describe('id validators', () => {
   });
 
   it('accepts LiveDoc ids (uuid and short ids)', () => {
-    expect(isLivediagramId('0f5ca4af-9a8a-4a60-be5e-1179e5555880')).toBe(true);
-    expect(isLivediagramId('abc_123')).toBe(true);
-    expect(isLivediagramId('../etc')).toBe(false);
+    expect(isLivedocId('0f5ca4af-9a8a-4a60-be5e-1179e5555880')).toBe(true);
+    expect(isLivedocId('abc_123')).toBe(true);
+    expect(isLivedocId('../etc')).toBe(false);
   });
 
   it('accepts a lease holder of 1..64 url-safe characters', () => {

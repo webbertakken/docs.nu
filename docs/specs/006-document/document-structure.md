@@ -39,7 +39,7 @@ Activating a tab/element/document link is a navigation action; a `url` link open
 
 ## Data model
 
-Canonical types live in **`@livediagram/document`** — that package is the source of truth for the cross-app shape (consumed by the live editor, the api worker, and any future code that handles documents). Everything is re-exported through `src/index.ts`, so consumers import from the package and never from a file inside it; the split below is for readability only and can change without touching a caller.
+Canonical types live in **`@livedoc/document`** — that package is the source of truth for the cross-app shape (consumed by the live editor, the api worker, and any future code that handles documents). Everything is re-exported through `src/index.ts`, so consumers import from the package and never from a file inside it; the split below is for readability only and can change without touching a caller.
 
 | File               | Holds                                                                   |
 | ------------------ | ----------------------------------------------------------------------- |

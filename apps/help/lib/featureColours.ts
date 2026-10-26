@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { topCategorySlug } from '@livediagram/help-registry';
+import { topCategorySlug } from '@livedoc/help-registry';
 
 /** Feature slug → accent colour (hex). The home + features grid and the
  *  MDX <Feature> cards tint each feature with a distinct hue so the index

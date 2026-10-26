@@ -1,7 +1,7 @@
 import type { Server } from 'node:http';
 import type { Page } from '@playwright/test';
-import { FakeGoogle } from '@livediagram/fake-google';
-import { serveFakeGoogle } from '@livediagram/fake-google/server';
+import { FakeGoogle } from '@livedoc/fake-google';
+import { serveFakeGoogle } from '@livedoc/fake-google/server';
 import { expect, expectNoPageErrors, test } from '../fixtures';
 import { freshEmail, giveOwnClientAddress, sessionOf, signIn } from './sign-in';
 

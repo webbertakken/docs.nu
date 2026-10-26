@@ -5,13 +5,8 @@
 // type someone gave Votes). Never on a Dashboard tab. A vote or timer already running keeps its button, so it can be
 // seen and stopped.
 import { useMemo } from 'react';
-import {
-  ITEM_TYPES,
-  boardAddTypes,
-  normaliseBoardSetup,
-  type ItemTypeDef,
-} from '@livediagram/items';
-import type { Element } from '@livediagram/document';
+import { ITEM_TYPES, boardAddTypes, normaliseBoardSetup, type ItemTypeDef } from '@livedoc/items';
+import type { Element } from '@livedoc/document';
 import { usePlan } from '@/components/plan/PlanContext';
 import { usePlanTabKind } from './plan-cover-store';
 

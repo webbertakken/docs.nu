@@ -306,7 +306,7 @@ existing import/export type lists, replacing the removed `Text` type.
 ## Removed: the `.lvd` text DSL (the removed text-DSL spec)
 
 The text DSL is deleted — `packages/document/src/text-dsl/`, its
-`@livediagram/document/text-dsl` subpath export, `export-tab-text`'s DSL branch,
+`@livedoc/document/text-dsl` subpath export, `export-tab-text`'s DSL branch,
 the Text cards in both dialogs, and the removed text-DSL spec. It was a bespoke format nobody
 outside livediagram speaks; Mermaid does the same job (human-editable,
 connection-preserving, round-trip) with a format the world already uses.

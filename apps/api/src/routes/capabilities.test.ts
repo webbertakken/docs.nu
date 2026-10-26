@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bytesToBase64 } from '@livediagram/api-schema';
+import { bytesToBase64 } from '@livedoc/api-schema';
 import type { Env } from '../types';
 import { handleCapabilities } from './capabilities';
 import { makeTestRouteContext } from './test-route-context';

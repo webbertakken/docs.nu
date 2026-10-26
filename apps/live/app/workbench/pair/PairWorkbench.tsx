@@ -5,10 +5,7 @@
 // their own browser. One read after auth settles, one answer; focus follows the heading at each state.
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import {
-  WORKBENCH_HANDLE_PATTERN,
-  type WorkbenchPairingRequestView,
-} from '@livediagram/api-schema';
+import { WORKBENCH_HANDLE_PATTERN, type WorkbenchPairingRequestView } from '@livedoc/api-schema';
 import {
   apiAnswerPairingRequest,
   apiReadPairingRequest,

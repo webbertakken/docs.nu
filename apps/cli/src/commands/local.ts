@@ -7,11 +7,11 @@ import {
   renderSkill,
   SKILL_DIRECTORIES,
   SKILL_NAME,
-} from '@livediagram/agent-verbs';
+} from '@livedoc/agent-verbs';
 import { discover, loginWithBrowser, loginWithDevice } from '../auth/oauth';
 import type { DebugLog } from '../debug';
-import type { ApiClient } from '@livediagram/api-client';
-import { isApiTokenFormat, type CurrentTokenResponse } from '@livediagram/api-schema';
+import type { ApiClient } from '@livedoc/api-client';
+import { isApiTokenFormat, type CurrentTokenResponse } from '@livedoc/api-schema';
 import {
   forgetCredential,
   storeCredential,

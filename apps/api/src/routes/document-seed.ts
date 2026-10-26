@@ -3,19 +3,19 @@
 // as a `replace` changeset compiles, so the CLI and the MCP create documents the way they replace tabs. A tab the
 // engine refuses refuses the whole create, by its id, before anything is written.
 
-import { creationIntentOf, type CreationIntent } from '@livediagram/api-schema';
-import type { Tab } from '@livediagram/document';
-import { applyReplace, type ReplaceBody } from '@livediagram/edit-operations';
+import { creationIntentOf, type CreationIntent } from '@livedoc/api-schema';
+import type { Tab } from '@livedoc/document';
+import { applyReplace, type ReplaceBody } from '@livedoc/edit-operations';
 import {
   buildTemplateTabs,
   isTemplateKind,
   templateKindOf,
   templateFamilyOf,
   templateTabName,
-} from '@livediagram/templates';
+} from '@livedoc/templates';
 import { engineLog } from '../changesets/log';
 import { engineRefusal } from '../changesets/request';
-import { isRecord } from '@livediagram/document';
+import { isRecord } from '@livedoc/document';
 
 const SOURCES = ['graph', 'mermaid', 'template'] as const;
 

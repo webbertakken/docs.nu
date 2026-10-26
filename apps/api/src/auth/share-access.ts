@@ -6,9 +6,9 @@
 // between three copies. Kept apart from document-access.ts so the room route
 // can reuse the rules while its tests stub the whole-request gates.
 
-import { bytesToBase64Url } from '@livediagram/api-schema';
+import { bytesToBase64Url } from '@livedoc/api-schema';
 import { timingSafeEqual } from './timing-safe';
-import { sha256Hex, type ShareLink } from '@livediagram/api-schema';
+import { sha256Hex, type ShareLink } from '@livedoc/api-schema';
 import { getDocumentSharePassword, getShareLink, upgradeDocumentSharePassword } from '../db';
 import type { Env } from '../types';
 import { hashSharePassword, verifySharePassword } from './share-password-hash';

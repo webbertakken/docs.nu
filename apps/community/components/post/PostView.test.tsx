@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { communityPostFixture } from '@livediagram/api-schema/testing';
+import { communityPostFixture } from '@livedoc/api-schema/testing';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { sentJson } from '@livediagram/vitest-config/sent-request';
+import { sentJson } from '@livedoc/vitest-config/sent-request';
 
 // The post page (docs/specs/025-community/community.md "Post"): it loads the post named in the address, says when
 // it is gone or failed, offers Make a Copy, Open Document, the heart and Report, and its report dialog sends a

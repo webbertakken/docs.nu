@@ -2,16 +2,16 @@
 // "Agents"): list_images, and the check every element-writing tool runs so an imageId names a picture the caller may
 // place. Pictures reach the gallery through the editor; no tool uploads.
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ImageSummary } from '@livediagram/api-schema';
+import type { ImageSummary } from '@livedoc/api-schema';
 import {
   CONTACT_SHEET_MAX,
   galleryListing,
   imagesPlacedIn,
   unknownImageIssue,
   type GalleryImage,
-} from '@livediagram/agent-verbs';
-import { mcpListImages } from '@livediagram/agent-verbs/mcp';
-import type { Element, Tab } from '@livediagram/document';
+} from '@livedoc/agent-verbs';
+import { mcpListImages } from '@livedoc/agent-verbs/mcp';
+import type { Element, Tab } from '@livedoc/document';
 import { ApiError, apiJson } from './api';
 import type { Env } from './env';
 import { imageResult } from './image-result';

@@ -11,10 +11,10 @@ import {
   ruleQuestion,
   ruleQuestions,
   type FormSection,
-} from '@livediagram/forms';
-import { Select, lucideGlyph } from '@livediagram/ui';
-import { lucideGitFork } from '@livediagram/icons/lucide';
-import { updateSection } from '@livediagram/forms';
+} from '@livedoc/forms';
+import { Select, lucideGlyph } from '@livedoc/ui';
+import { lucideGitFork } from '@livedoc/icons/lucide';
+import { updateSection } from '@livedoc/forms';
 import { FormSheet } from './FormSheet';
 import { useFormBuilder } from './form-builder-context';
 

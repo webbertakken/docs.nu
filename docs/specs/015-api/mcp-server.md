@@ -40,7 +40,7 @@ the MCP is **signed-in only** and **absent end-to-end** on a no-auth self-host.
 ## 2. Architecture
 
 A **new standalone Cloudflare Worker**, `apps/mcp` (worker name
-`livediagram-mcp`), mirroring how Manager Toolkit ships its MCP as its own
+`docs-nu-mcp`), mirroring how Manager Toolkit ships its MCP as its own
 worker. Not folded into `apps/api`: it has a distinct dependency surface (the MCP
 SDK, OAuth/KV, a WASM rasteriser) and a distinct public origin, and `apps/api`
 stays a pure REST/WS surface.
@@ -94,7 +94,7 @@ This implements the OAuth flow Manager Toolkit uses:
    local clients; the scheme is checked on its own, so a loopback host never
    admits another scheme such as `javascript:`, and never with a fragment, per RFC 6749
    §3.1.2; one rule shared with the api's Drive redirect, `oauthRedirectUrl` in
-   `@livediagram/api-schema`), stored in KV with a TTL.
+   `@livedoc/api-schema`), stored in KV with a TTL.
    Rate-limited per IP. Authorize re-checks the scheme of the requested
    redirect URI, and the consent page only ever navigates to an http(s) URL.
    The token endpoint refuses a code presented with another `client_id`.
@@ -168,7 +168,7 @@ the MCP simply don't deploy `apps/mcp`; nothing else references it.
 **The CLI signs in here too** ([CLI](cli.md#authentication)). This server is the
 one authorisation server for both front doors, so it also offers what a
 command-line client needs: a loopback redirect matched on scheme, host and path
-with any port (RFC 8252 §7.3), a pre-registered public client `livediagram-cli`
+with any port (RFC 8252 §7.3), a pre-registered public client `livedoc-cli`
 whose name the consent screen can trust, and the device authorisation grant
 (RFC 8628) with a `/oauth/device` page in `apps/live` for machines without a
 browser. A token minted for the CLI is named "LiveDoc CLI".
@@ -234,7 +234,7 @@ Create a new document from elements the model produced. Input: `name`, `tabs:
 document in one call — an overview plus a detail tab per subsystem), the
 optional `layout`, and the optional `markUsed` (boolean, default `true`). Each tab may instead pass `template: TemplateKind` in place
 of `elements` — the server materialises the hand-tuned scaffold from
-`@livediagram/templates` ([§4.5](#45-list_templates)), keeping its curated
+`@livedoc/templates` ([§4.5](#45-list_templates)), keeping its curated
 layout (`layout` is ignored for a template tab) and applying that template's
 canvas overrides; the model then personalises labels via `update_document`'s
 `ops` mode. The MCP:
@@ -349,7 +349,7 @@ of every template, so a tab read back as JSON writes again unchanged.
 
 Browse the template library — the same hand-tuned catalogue the editor's
 template starts ship ([Canvas and palette](../008-canvas/canvas-and-palette.md)), served from the shared
-`@livediagram/templates` package so the worker and the editor can't drift.
+`@livedoc/templates` package so the worker and the editor can't drift.
 No input. Returns the categories plus one row per template:
 `{ kind, title, description, category }` — enough for the model to pick a
 `kind` and pass it as `template` on `create_document` / `add_tab` (a template of several tabs, such as the
@@ -369,7 +369,7 @@ sailboat. Valid kinds: ...`. The CLI's and api's template bodies refuse with the
 
 Finds icons by what they show, best match first, across the line-art set and the Technology set (brand, cloud and
 database marks): `{ query, limit? }` (20 by default, at most 50) answers `{ icons: [{ id, label, set }], more }`. An
-id is what an element's `iconId` takes. The catalogue is bundled with the worker (`@livediagram/icons`'s
+id is what an element's `iconId` takes. The catalogue is bundled with the worker (`@livedoc/icons`'s
 `searchIcons`, the api's `/icons` route and the CLI's `icon search` use the same ranking), so the search makes no
 api call. Read-only.
 
@@ -850,7 +850,7 @@ status, fields }`, `set` `{ item, fields, clear, type }`, `move` `{ item, status
 The spreadsheets Sheet elements show ([Sheet store](../029-sheets/sheet-store.md#agents)). A sheet is named by its
 title (case aside) or id, cells by A1, rows by number and columns by letter, never the ids of rows and columns; the
 server (`apps/mcp/src/sheet-tools.ts` over `packages/agent-verbs/src/sheets/`) resolves them and refuses an unknown
-sheet with the sheets there are. Values are worked out by the editor's engine (`@livediagram/sheets`), with the
+sheet with the sheets there are. Values are worked out by the editor's engine (`@livedoc/sheets`), with the
 document's Plan cards when a formula reads them.
 
 - **`list_sheets`** (read): the document's sheets (or one tab's), each with its title, tab, the rows and columns in
@@ -915,8 +915,8 @@ A Form tab's form ([Forms](../030-forms/forms.md#agents)): its questions, sectio
 form link. Everything is named as the builder names it (a question by id or prompt, a section by id, title or place,
 a board, card type, column, sheet and card field by name); the server (`apps/mcp/src/form-tools.ts` over
 `packages/agent-verbs/src/forms/`) resolves them and refuses an unknown name with the ones there are. The form is
-built with the editor's own edits (`@livediagram/forms`) and started as Start Planning starts one
-(`@livediagram/templates` `planFormStart`).
+built with the editor's own edits (`@livedoc/forms`) and started as Start Planning starts one
+(`@livedoc/templates` `planFormStart`).
 
 - **`read_form`** (read): the form in words (sections, questions with their settings, each answer's destination by
   field name, section rules by prompt), where responses go, the settings, state, response count, the form link (an
@@ -1188,7 +1188,7 @@ The output literals that named the container changed with it: `renamed`, `delete
   draws from its Twemoji SVG (release 15.1.0 on jsDelivr, CC-BY 4.0, in `THIRD_PARTY_NOTICES.md`), fetched by its
   code points when the preview is made (`preview-emoji.ts`: at most `PREVIEW_EMOJI_MAX` (40) a preview, within
   `PREVIEW_EMOJI_TIMEOUT_MS` (2.5 s), each file at most 64 kB and kept in the Cache API, alongside the fonts). One
-  that cannot be fetched in time draws as a disc labelled emoji (`previewResolvers` in `@livediagram/icons/resolve`).
+  that cannot be fetched in time draws as a disc labelled emoji (`previewResolvers` in `@livedoc/icons/resolve`).
 - Article summaries (`write_article`, `change_pages`, the `pages` view) carry `estimatedPages`, the pages the writing
   reaches once laid out, from the same estimate; `write_article`'s last line says it in words ("It takes about 2 pages
   once laid out"), so an agent asked for one page sees at once that it ran over.
@@ -1212,7 +1212,7 @@ Worker (no DOM, no React).
   carrying its own copy) and the MCP worker. This is the reuse rule applied: one
   renderer, two callers.
 - **A Plan tab as the editor exports it.** A Board, Sheet or Dashboard tab previews as the editor's image export draws
-  it ([Plan tabs](../026-plan/plan-tabs.md) "Export", `@livediagram/plan-art` `planImageOf`): a Board tab its board
+  it ([Plan tabs](../026-plan/plan-tabs.md) "Export", `@livedoc/plan-art` `planImageOf`): a Board tab its board
   alone, a Dashboard its page laid out row by row, each metric, chart and card drawn from the document's cards
   (`resolvePlanArt`), each tab slot that tab's board or Sheet. A Dashboard's preview reads the document's other tabs
   (up to `PLAN_PREVIEW_TABS_MAX`, 20) and its plan's column names; any read that fails draws as the editor draws it
@@ -1246,7 +1246,7 @@ Worker (no DOM, no React).
   `GET /api/images/:id`) and inlines them as base64 data URIs through the
   renderer's `resolveImageHref` hook — resvg (WASM) can't fetch, so the bytes
   must be inline. A tab with no images does no extra work. The fetch-and-inline core is
-  `embedTabImages` in `@livediagram/api-schema`, shared with the api worker's
+  `embedTabImages` in `@livedoc/api-schema`, shared with the api worker's
   snapshot render ([Document SVG snapshots](../006-document/document-snapshots.md)), which passes its own byte source
   (R2) and a total byte budget.
 - **Picture budget.** resvg decodes every picture at full size and holds them all while it draws: about 4 bytes a
@@ -1278,7 +1278,7 @@ Worker (no DOM, no React).
   plain boxes / label-only.
 - **Icon elements render their real glyph.** The renderer takes an injected
   `resolveIconArt(iconId)` (like `resolveImageHref`); the MCP worker supplies
-  `resolveIconExportArt` from `@livediagram/icons/resolve` (a static import of
+  `resolveIconExportArt` from `@livedoc/icons/resolve` (a static import of
   the catalogue data — fine in a Worker), so line-art icons draw stroke-tinted
   and Technology marks draw their brand tile instead of the old
   box-with-caption fallback. Without a resolver (or for an unknown id) the

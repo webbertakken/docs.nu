@@ -1,9 +1,9 @@
-import { cardSubtitle, type SocialCardOptions } from '@livediagram/ui';
+import { cardSubtitle, type SocialCardOptions } from '@livedoc/ui';
 import { articleHref, articles, categories, categoryHref, topCategorySlug } from './articles';
 import { HELP_URL } from './site';
 
 // The help centre's own social cards (docs/specs/018-help/help-app.md "SEO"): one per article and per
-// category landing, on the shared branded card (renderSocialCard in @livediagram/ui), pre-rendered to a
+// category landing, on the shared branded card (renderSocialCard in @livedoc/ui), pre-rendered to a
 // PNG at build time by app/og/[...card]/route.tsx. A link to an article then previews with its own
 // title instead of the generic brand card. Pages outside the registry (the home, the features index)
 // keep the brand card.

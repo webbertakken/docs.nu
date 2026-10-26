@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHANGESET_MAX_OPERATIONS } from '@livediagram/api-schema';
+import { CHANGESET_MAX_OPERATIONS } from '@livedoc/api-schema';
 import { checkoutFlow } from './fixtures/checkout-flow';
 import {
   elementLocked,

@@ -1,8 +1,8 @@
 // Any thrown thing as the failure the CLI reports (docs/specs/015-api/cli.md "Exit codes", blueprint CLI14-16):
 // its exit code, a stable code, one line, candidates and a runnable fix. Never a stack trace.
 
-import { AddressError, VerbRefusal } from '@livediagram/agent-verbs';
-import { ApiError } from '@livediagram/api-client';
+import { AddressError, VerbRefusal } from '@livedoc/agent-verbs';
+import { ApiError } from '@livedoc/api-client';
 import { CliError, type CliFailure } from './cli-error';
 import { EXIT, exitCodeForStatus } from './exit-codes';
 

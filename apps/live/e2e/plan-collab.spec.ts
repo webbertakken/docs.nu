@@ -1,5 +1,5 @@
 import type { Browser, Page } from '@playwright/test';
-import { defaultCatalogue, presetSetup } from '@livediagram/items';
+import { defaultCatalogue, presetSetup } from '@livedoc/items';
 import {
   dismissQuickTour,
   expect,

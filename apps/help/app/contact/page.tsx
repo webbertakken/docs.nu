@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { helpMetadata } from '@/lib/seo';
-import { buttonClassName, CONTACT_FORM_URL, REPO_URL, ButtonContent } from '@livediagram/ui';
+import { buttonClassName, CONTACT_FORM_URL, REPO_URL, ButtonContent } from '@livedoc/ui';
 import { ExternalLinkIcon } from '@/lib/chrome-icons';
 
 export const metadata: Metadata = helpMetadata({

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ChangesetRequest } from '@livediagram/api-schema';
-import { parseEditOperations } from '@livediagram/edit-operations';
+import type { ChangesetRequest } from '@livedoc/api-schema';
+import { parseEditOperations } from '@livedoc/edit-operations';
 import { argvToOperationLine } from '../argv-line';
 import { VerbRefusal } from '../define';
 import { contextOf, DOC_A, fakeApi, library, tabsOfA } from '../testing/fake-api';

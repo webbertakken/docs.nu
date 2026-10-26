@@ -1,4 +1,4 @@
-import type { LicencesManifest } from '@livediagram/licences';
+import type { LicencesManifest } from '@livedoc/licences';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
@@ -47,9 +47,9 @@ const manifest: LicencesManifest = {
 const html = renderToStaticMarkup(<LicencesView manifest={manifest} />);
 
 describe('LicencesView', () => {
-  // docs/specs/002-project-scope/livediagram-upstream.md: LiveDoc began as a fork of livediagram, whose MIT
+  // docs/specs/002-project-scope/livediagram-upstream.md: LiveDoc began as a fork of livedoc, whose MIT
   // notice LiveDoc keeps; the licences page says where the code came from.
-  it('credits livediagram as the origin of the code, linked to its repository', () => {
+  it('credits livedoc as the origin of the code, linked to its repository', () => {
     expect(html).toContain('LiveDoc is MIT licensed');
     expect(html).toContain('began as a fork of');
     expect(html).toContain('<a href="https://github.com/livediagram-app/livediagram.app"');

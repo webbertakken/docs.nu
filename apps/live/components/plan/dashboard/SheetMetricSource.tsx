@@ -13,8 +13,8 @@ import {
   figureSuggestions,
   numberColumns,
   type SheetCellRef,
-} from '@livediagram/sheets';
-import type { SheetMetricContent } from '@livediagram/document';
+} from '@livedoc/sheets';
+import type { SheetMetricContent } from '@livedoc/document';
 import { AnchoredPopover } from '@/components/primitives/AnchoredPopover';
 import { useSheetRead } from './useSheetReader';
 import {

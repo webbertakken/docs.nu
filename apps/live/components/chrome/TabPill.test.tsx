@@ -5,8 +5,8 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Tab } from '@livediagram/document';
-import { FlowchartIcon, MarkerIcon } from '@livediagram/ui';
+import type { Tab } from '@livedoc/document';
+import { FlowchartIcon, MarkerIcon } from '@livedoc/ui';
 import { EditorModeProvider } from './editor-mode/editor-mode-context';
 import { TabPill, type TabPillCtx } from './TabPill';
 

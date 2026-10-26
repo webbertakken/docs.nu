@@ -13,7 +13,7 @@
 // that works from a keydown handler in every browser we support; the richer
 // `ClipboardItem` API is gated differently per browser and buys nothing here.
 //
-// The envelope mirrors the tab export's (`export-tab-text.ts` in `@livediagram/document`): a `kind`
+// The envelope mirrors the tab export's (`export-tab-text.ts` in `@livedoc/document`): a `kind`
 // discriminator so we never try to paste somebody else's JSON, and a numeric
 // `schemaVersion` so a future breaking change can be refused with a clear
 // message instead of pasting nonsense.
@@ -23,8 +23,8 @@ import {
   migrateIncomingElements,
   ORIGINAL_ONLY_FIELDS,
   type Element,
-} from '@livediagram/document';
-import type { SheetJson } from '@livediagram/sheets';
+} from '@livedoc/document';
+import type { SheetJson } from '@livedoc/sheets';
 import { sheetsForClipboard, stashSheetSeeds } from './sheet-seeds';
 
 // 2: freehand points are packed (docs/specs/006-document/stroke-points.md); an older editor

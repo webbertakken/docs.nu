@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  buttonClassName,
-  ButtonContent,
-  CONTACT_FORM_URL,
-  GlyphDisc,
-  REPO_URL,
-} from '@livediagram/ui';
+import { buttonClassName, ButtonContent, CONTACT_FORM_URL, GlyphDisc, REPO_URL } from '@livedoc/ui';
 import { SearchInput } from '@/components/SearchInput';
 import { CategoryCard, guideCount } from '@/components/CategoryCard';
 import { CategoryArt } from '@/components/category-art';

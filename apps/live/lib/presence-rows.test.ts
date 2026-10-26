@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Participant } from './identity';
-import type { AvatarPresence } from '@livediagram/api-schema';
+import type { AvatarPresence } from '@livedoc/api-schema';
 import {
   buildLaserTrailRows,
   buildParticipantsByTab,

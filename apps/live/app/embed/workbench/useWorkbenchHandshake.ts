@@ -6,7 +6,7 @@
 // from the parent at that origin within WORKBENCH_HANDSHAKE_MS (I8). Every failure after a session
 // exists revokes it. Runs once per page load, whatever React does with effects.
 import { useEffect, useReducer, useRef, useState, type Dispatch } from 'react';
-import { WORKBENCH_HANDSHAKE_MS, type HelloAckMessage } from '@livediagram/api-schema';
+import { WORKBENCH_HANDSHAKE_MS, type HelloAckMessage } from '@livedoc/api-schema';
 import { apiEndWorkbenchSession, apiRedeemWorkbenchTicket } from '@/lib/api/workbench';
 import { createWorkbenchPort, type WorkbenchPort } from '@/lib/workbench/workbench-port';
 import { debugLog } from '@/lib/debug-log';

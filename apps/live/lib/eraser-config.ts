@@ -4,7 +4,7 @@
 // Device-local, like the other tool panels (docs/specs/008-canvas/laser-panel.md, docs/specs/008-canvas/spotlight-panel.md): it is set for
 // the job in front of you, not stored on the document. Never sent to the api.
 
-import type { Element } from '@livediagram/document';
+import type { Element } from '@livedoc/document';
 import {
   readLocalStorageSafe,
   pickOption,

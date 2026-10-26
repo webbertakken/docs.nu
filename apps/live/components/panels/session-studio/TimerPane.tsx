@@ -11,12 +11,7 @@
 // room needs a little longer.
 
 import { useState } from 'react';
-import {
-  formatTimerClock,
-  timerDisplayMs,
-  type TabTimer,
-  type TimerMode,
-} from '@livediagram/document';
+import { formatTimerClock, timerDisplayMs, type TabTimer, type TimerMode } from '@livedoc/document';
 import { useNow } from '@/hooks/ui/useNow';
 import type { SessionToolsProps } from '@/components/chrome/session-tools-props';
 import { DIAL_LAP_MINUTES, dialFraction, formatMinutesLabel } from './session-studio';

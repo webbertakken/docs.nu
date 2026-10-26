@@ -18,14 +18,8 @@ import {
 } from '@/components/rich-text/toolbar-chrome';
 import { noFocusSteal, ToolbarDropdown } from '@/components/rich-text/ToolbarDropdown';
 import type { ActiveFormat } from '@/components/rich-text/rich-text-format';
-import type {
-  ListStyle,
-  RunBoolKey,
-  RunHeading,
-  TextAlignX,
-  TextAlignY,
-} from '@livediagram/document';
-import { HoverCard } from '@livediagram/ui';
+import type { ListStyle, RunBoolKey, RunHeading, TextAlignX, TextAlignY } from '@livedoc/document';
+import { HoverCard } from '@livedoc/ui';
 import { ColourSwatchButton } from '@/components/colour/ColourSwatchButton';
 import { standardGroup } from '@/components/colour/colour-options';
 import { useCanvasSurface } from '@/components/canvas/CanvasSurfaceContext';

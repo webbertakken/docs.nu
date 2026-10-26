@@ -13,7 +13,7 @@ import {
   DOCUMENT_FORMAT_HEADER,
   DOCUMENT_OPEN_HEADER,
   DOCUMENT_TRASHED_ERROR,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 
 // CORS for the browser. Live app runs at the same hostname as the
 // API (router worker stitches them together) so this is mostly a

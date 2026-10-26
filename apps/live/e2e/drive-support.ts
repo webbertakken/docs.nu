@@ -4,8 +4,8 @@
 
 import type { Server } from 'node:http';
 import type { Page, Route } from '@playwright/test';
-import { FakeGoogle } from '@livediagram/fake-google';
-import { serveFakeGoogle } from '@livediagram/fake-google/server';
+import { FakeGoogle } from '@livedoc/fake-google';
+import { serveFakeGoogle } from '@livedoc/fake-google/server';
 
 // The same default scripts/e2e-stack.mjs gives the api worker.
 const GOOGLE_PORT = Number(process.env.E2E_DRIVE_GOOGLE_PORT ?? 8796);

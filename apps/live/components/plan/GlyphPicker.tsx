@@ -13,15 +13,8 @@ import {
   planGlyphLabel,
   type ItemTypeDef,
   type PlanGlyphId,
-} from '@livediagram/items';
-import {
-  ChevronDownIcon,
-  NoMatches,
-  SearchIcon,
-  Select,
-  TextInput,
-  Tooltip,
-} from '@livediagram/ui';
+} from '@livedoc/items';
+import { ChevronDownIcon, NoMatches, SearchIcon, Select, TextInput, Tooltip } from '@livedoc/ui';
 import { AnchoredPopover } from '@/components/primitives/AnchoredPopover';
 import { PlanTypeGlyph } from './plan-type-glyph';
 import { ACCENT_TEXT, ACCENT_TINT, accentVars } from './plan-palette';

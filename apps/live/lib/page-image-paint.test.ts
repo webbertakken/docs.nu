@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PageImageFill } from '@livediagram/document';
+import type { PageImageFill } from '@livedoc/document';
 import { backgroundCategoryOf, fillCss, pageSheetStyle } from './page-paint';
 import {
   pageImageCssUrl,

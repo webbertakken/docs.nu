@@ -1,7 +1,7 @@
 // The board verb (docs/specs/026-plan/plan-agents.md "Adding a board"): `board add` puts a Plan board on a tab,
 // from a preset or columns by name, through the Plan engine the MCP's add_board shares.
 import { z } from 'zod';
-import { PLAN_BOARD_PRESET_IDS } from '@livediagram/items';
+import { PLAN_BOARD_PRESET_IDS } from '@livedoc/items';
 import { defineVerb, VerbRefusal } from '../define';
 import { addBoard } from '../plan/add-board';
 import { changeBoard, EVERY_TYPE } from '../plan/change-board';

@@ -7,7 +7,7 @@
 // configured), mirroring useTeams. Tokens are account-only, so `ownerId` here is
 // always the signed-in account id when enabled.
 import { useCallback, useEffect, useState } from 'react';
-import type { ApiToken } from '@livediagram/api-schema';
+import type { ApiToken } from '@livedoc/api-schema';
 import { apiCreateToken, apiListTokens, apiRevokeToken } from '@/lib/api-client';
 import { track } from '@/lib/telemetry';
 

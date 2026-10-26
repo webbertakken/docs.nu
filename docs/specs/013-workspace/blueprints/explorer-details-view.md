@@ -48,7 +48,7 @@ The spec decides; this file adds engineering precision. Defaults are ledgered in
 
 ### Tab stats
 
-- `tabStatsOf(body, data)` (`@livediagram/document`) is pure. `mode = opensInOf(body)`;
+- `tabStatsOf(body, data)` (`@livedoc/document`) is pure. `mode = opensInOf(body)`;
   `elementCount = body.elements.length` (0 when not an array); `commentCount` sums
   `commentThread.comments.length` over the elements; `dataBytes` is the UTF-8 length of `data`.
 - `tabStatsOfData(data)` (api) parses a stored body and counts it; a body that is not a JSON object

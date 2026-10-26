@@ -8,7 +8,7 @@ import {
   elementSchemaDoc,
   SCHEMA_RESOURCE_URI,
   SERVER_INSTRUCTIONS,
-} from '@livediagram/agent-verbs/mcp';
+} from '@livedoc/agent-verbs/mcp';
 import { registerTools } from './tools';
 import { registerPrompts } from './prompts';
 

@@ -11,8 +11,8 @@ import {
   type DriveConnection,
   type DriveItem,
   type DriveItemKind,
-} from '@livediagram/api-schema';
-import { stripDriveName } from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
+import { stripDriveName } from '@livedoc/api-schema';
 import { Backoff } from './backoff';
 import {
   DRIVE_FOCUS_POLL_MIN_GAP_MS,
@@ -22,7 +22,7 @@ import {
 import { DriveApiError, type DriveChange, type DriveClient } from './drive-client';
 import { applyInbound, folderAppProperties } from './engine-inbound';
 import { runOutbound } from './engine-outbound';
-import type { LivediagramPort } from './livediagram-port';
+import type { LivedocPort } from './livedoc-port';
 import { driveLog, driveWarn } from './log';
 import { PassContext } from './pass-context';
 import { planOutbound } from './plan-outbound';
@@ -80,7 +80,7 @@ type DriveEngineDeps = {
   ownerId: string;
   host: string;
   deviceId: string;
-  port: LivediagramPort;
+  port: LivedocPort;
   drive: DriveClient;
   tokens: TokenSource;
   rasterise: Rasteriser;

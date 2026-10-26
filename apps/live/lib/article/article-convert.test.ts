@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ArticleBlock } from '@livediagram/document';
+import type { ArticleBlock } from '@livedoc/document';
 import { blocksToDoc, docToBlocks } from './article-convert';
 
 // docs/specs/007-editor/article-pages.md "Blocks": every block survives the round trip.

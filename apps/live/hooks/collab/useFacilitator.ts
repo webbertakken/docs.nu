@@ -12,7 +12,7 @@
 // seat at the table, not the same one.
 
 import { useCallback, useState } from 'react';
-import type { FacilitatorReason } from '@livediagram/api-schema';
+import type { FacilitatorReason } from '@livedoc/api-schema';
 import { track } from '@/lib/telemetry';
 import { useLatest } from '@/hooks/ui/useLatest';
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseDocumentEnvelope } from '@livediagram/document';
+import { parseDocumentEnvelope } from '@livedoc/document';
 import { parsePullFile } from '../sync/pull-file';
 import { hasConflictMarkers, mirrorFileText, type MirrorFile } from './mirror-file';
 

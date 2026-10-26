@@ -9,8 +9,8 @@ import {
   planPalette,
   type BoxedElement,
   type TabPlanData,
-} from '@livediagram/document';
-import { itemTitle, type Item } from '@livediagram/items';
+} from '@livedoc/document';
+import { itemTitle, type Item } from '@livedoc/items';
 
 export type PlanPart = {
   id: string;

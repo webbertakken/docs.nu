@@ -1,5 +1,5 @@
 {
-  "name": "@livediagram/community",
+  "name": "@livedoc/community",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,20 +12,20 @@
     "clean": "rm -rf .next .next-dev .next-analyze out node_modules .turbo"
   },
   "dependencies": {
-    "@livediagram/account-session": "workspace:*",
-    "@livediagram/api-schema": "workspace:*",
-    "@livediagram/icons": "workspace:*",
-    "@livediagram/telemetry-client": "workspace:*",
-    "@livediagram/ui": "workspace:*",
+    "@livedoc/account-session": "workspace:*",
+    "@livedoc/api-schema": "workspace:*",
+    "@livedoc/icons": "workspace:*",
+    "@livedoc/telemetry-client": "workspace:*",
+    "@livedoc/ui": "workspace:*",
     "next": "^16.4.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@livediagram/next-config": "workspace:*",
-    "@livediagram/oxlint-config": "workspace:*",
-    "@livediagram/tailwind-config": "workspace:*",
-    "@livediagram/vitest-config": "workspace:*",
+    "@livedoc/next-config": "workspace:*",
+    "@livedoc/oxlint-config": "workspace:*",
+    "@livedoc/tailwind-config": "workspace:*",
+    "@livedoc/vitest-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.4",

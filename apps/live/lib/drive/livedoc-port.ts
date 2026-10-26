@@ -1,11 +1,11 @@
 // What the Drive mirror needs from LiveDoc itself
-// (docs/specs/022-drive-mirror/blueprints/drive-mirror.md, "LivediagramPort"):
+// (docs/specs/022-drive-mirror/blueprints/drive-mirror.md, "LivedocPort"):
 // My Documents reads, the ordinary writes an inbound change goes through
 // (so authorisation, the change log and realtime rooms behave exactly as if
 // the user had done it here), and the mirror's own rows. The engine only ever
 // sees this interface; tests give it an in-memory LiveDoc.
 
-import { storeAsCreates } from '@livediagram/items';
+import { storeAsCreates } from '@livedoc/items';
 import { fetchItems } from '../api/items';
 import {
   creationIntentOf,
@@ -13,7 +13,7 @@ import {
   type DriveItem,
   type DriveItemKind,
   type DriveLease,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import {
   remapTabLinks,
   type StoredPresentation,
@@ -22,7 +22,7 @@ import {
   type DocumentEnvelope,
   type EnvelopeSheet,
   type EnvelopeTab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   ApiError,
   API_BASE,
@@ -48,9 +48,9 @@ import {
   apiUpdateFolder,
 } from '../api-client';
 import { apiFetch, apiHeaders, expectOk } from '../api/core';
-import type { DocumentListResponse } from '@livediagram/api-schema';
+import type { DocumentListResponse } from '@livedoc/api-schema';
 import { fetchAllSheets, sheetAsCreate } from '../api/sheets';
-import type { SheetJson } from '@livediagram/sheets';
+import type { SheetJson } from '@livedoc/sheets';
 
 export type MirrorDocument = {
   id: string;
@@ -66,7 +66,7 @@ export type MirrorFolder = { id: string; name: string; parentId: string | null; 
 
 export type MirrorTrashed = { id: string; name: string; trashedAt: number };
 
-export interface LivediagramPort {
+export interface LivedocPort {
   // My Documents: live cloud documents (never team, shared or offline ones).
   listPersonalDocuments(): Promise<MirrorDocument[]>;
   listPersonalFolders(): Promise<MirrorFolder[]>;
@@ -137,7 +137,7 @@ export function copyEnvelope(envelope: DocumentEnvelope): {
 }
 
 // The production port, over lib/api.
-export function createApiLivediagramPort(ownerId: string): LivediagramPort {
+export function createApiLivedocPort(ownerId: string): LivedocPort {
   return {
     async listPersonalDocuments() {
       // The raw cloud list: apiListDocuments merges this browser's offline

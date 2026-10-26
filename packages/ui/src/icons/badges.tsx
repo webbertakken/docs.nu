@@ -5,7 +5,7 @@ import {
   lucideMessageSquare,
   lucideStickyNote,
   lucideWandSparkles,
-} from '@livediagram/icons/lucide';
+} from '@livedoc/icons/lucide';
 
 import { lucideGlyph } from './lucide-glyph';
 

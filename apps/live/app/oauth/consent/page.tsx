@@ -9,7 +9,7 @@
 import { Suspense, use, useEffect, useState } from 'react';
 import { browser } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
-import { CLI_CLIENT_ID } from '@livediagram/api-schema';
+import { CLI_CLIENT_ID } from '@livedoc/api-schema';
 import { OAUTH_PRIMARY, OauthHelpLink, OauthShell, ReadOnlyAccessToggle } from '../oauth-shell';
 import { AUTH_TITLE } from '@/components/chrome/AuthStage';
 import { apiExchangeOauthToken, apiRevokeToken } from '@/lib/api-client';

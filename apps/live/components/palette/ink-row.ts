@@ -1,12 +1,7 @@
 // The element menu's colour rows and Ink (docs/specs/007-editor/editor-modes.md "One look"): Ink is
 // offered after the theme's colours wherever the element stores a stock colour by name, and a
 // stored name shows in its version for the canvas.
-import {
-  PEN_INK,
-  resolveStockColours,
-  type CanvasSurface,
-  type Element,
-} from '@livediagram/document';
+import { PEN_INK, resolveStockColours, type CanvasSurface, type Element } from '@livedoc/document';
 
 export type InkRole = 'line' | 'text';
 

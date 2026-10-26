@@ -94,5 +94,5 @@ rather than reloading. A modified click (new tab or window) keeps the browser's 
 ## One source
 
 Every copy of the mark (the React component, the favicons, the logo files in `marketing/media/logo/`, the PNG icons, the
-email mark, the Apple icon and the social card) is drawn from one geometry and palette module in `@livediagram/ui`. Static files are
+email mark, the Apple icon and the social card) is drawn from one geometry and palette module in `@livedoc/ui`. Static files are
 regenerated from it and a test fails if one drifts.

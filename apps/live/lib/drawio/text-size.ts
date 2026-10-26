@@ -10,7 +10,7 @@ import {
   RUN_XS_PX,
   arrowLabelFontSize,
   type RunSize,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { nearest } from './nearest';
 
 /** The scale an element's text sizes on: a shape's label, a sticky note's, an arrow's. */

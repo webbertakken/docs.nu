@@ -9,12 +9,7 @@
 // editor knows"), and it is a hand-kept list beside the hand-kept key maps in
 // hooks/canvas/editor-shortcut-keys.ts. The test pins the two together.
 
-import {
-  editorModeLabel,
-  modesBesidePlanRule,
-  REACTION_LABEL,
-  REACTIONS,
-} from '@livediagram/document';
+import { editorModeLabel, modesBesidePlanRule, REACTION_LABEL, REACTIONS } from '@livedoc/document';
 import { AVATAR_BEHAVIOUR_KEYS, AVATAR_BURST_KEYS } from '@/lib/avatar-action-keys';
 import { AVATAR_REACTIONS } from '@/lib/avatar-reactions';
 

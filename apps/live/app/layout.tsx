@@ -11,9 +11,9 @@ import { KeyboardAvoidanceBoot } from '@/components/providers/KeyboardAvoidanceB
 import { ConfirmProvider } from '@/hooks/ui/useConfirm';
 import { DriveMirrorProvider } from '@/components/drive/DriveMirrorProvider';
 import { ToastProvider } from '@/hooks/ui/useToast';
-import { googleFontsHref } from '@livediagram/document';
-import { BRAND_OG_IMAGE, BRAND_TWITTER_IMAGE } from '@livediagram/ui/seo';
-import { SITE_NAME } from '@livediagram/ui/site';
+import { googleFontsHref } from '@livedoc/document';
+import { BRAND_OG_IMAGE, BRAND_TWITTER_IMAGE } from '@livedoc/ui/seo';
+import { SITE_NAME } from '@livedoc/ui/site';
 import {
   APPEARANCE_BOOT_SCRIPT,
   BRAND_ICONS,
@@ -22,7 +22,7 @@ import {
   trustedHtml,
   trustedScriptOrigins,
   trustedTypesBootScript,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 import {
   REDUCE_MOTION_BOOT_SCRIPT,
   WEBFONTS_STYLESHEET_ID,
@@ -129,7 +129,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
         {/* The build this export was made from (docs/specs/016-platform/stale-builds.md), for
             developers, support and the e2e suite; the app itself compares EDITOR_BUILD_ID. */}
-        {EDITOR_BUILD_ID ? <meta name="livediagram-build" content={EDITOR_BUILD_ID} /> : null}
+        {EDITOR_BUILD_ID ? <meta name="livedoc-build" content={EDITOR_BUILD_ID} /> : null}
         {/* Text fonts (docs/specs/004-interface-design/fonts.md). One stylesheet defines every option's
             @font-face; browsers only fetch the families actually applied,
             and `display=swap` keeps text visible in the fallback stack
@@ -155,7 +155,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             honours it — including /live/new and the welcome / template-picker
             flow, which never mount the TabBar that's the only caller of
             useAppearance. Without this they'd render light over the dark body.
-            The appearance snippet is shared by every app (@livediagram/ui);
+            The appearance snippet is shared by every app (@livedoc/ui);
             both are executed by tests against stub globals. */}
         <script dangerouslySetInnerHTML={{ __html: trustedHtml(APPEARANCE_BOOT_SCRIPT) }} />
         <script dangerouslySetInnerHTML={{ __html: trustedHtml(REDUCE_MOTION_BOOT_SCRIPT) }} />

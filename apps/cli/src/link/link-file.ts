@@ -3,7 +3,7 @@
 // names, so a typo never silently does nothing; `[hooks]` and `[[sources]]` are checked and left unread (RL2).
 
 import { posix } from 'node:path';
-import { MIRROR_LEVELS } from '@livediagram/agent-verbs';
+import { MIRROR_LEVELS } from '@livedoc/agent-verbs';
 import { parse, type TomlError } from 'smol-toml';
 import { didYouMean } from '../dispatch/did-you-mean';
 import { CliError } from '../output/cli-error';

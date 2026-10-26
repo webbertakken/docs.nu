@@ -18,7 +18,7 @@ import type {
   TeamMember,
   TeamRole,
   TeamsResponse,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { dedupeInFlight } from '../dedupe';
 import { API_BASE, apiDelete, apiHeaders, expectOk, expectOkOrNull, apiFetch } from './core';
 

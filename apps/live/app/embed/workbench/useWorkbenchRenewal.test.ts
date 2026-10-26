@@ -7,7 +7,7 @@ import {
   WORKBENCH_RENEW_RETRY_MS,
   type WorkbenchDocumentSessionResponse,
   type WorkbenchToPageMessage,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import type { WorkbenchRedeemOutcome } from '@/lib/api/workbench';
 import type { WorkbenchPort } from '@/lib/workbench/workbench-port';
 import { workbenchTransition, type WorkbenchPhase } from './workbench-machine';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { isLayerLocked, isLayerVisible, layerOpacityOf, type Layer } from '@livediagram/document';
+import { isLayerLocked, isLayerVisible, layerOpacityOf, type Layer } from '@livedoc/document';
 import {
   BringToTopIcon,
   ClearIcon,
@@ -19,13 +19,7 @@ import {
 import { ConfirmPopover } from '@/components/primitives/ConfirmPopover';
 import { MenuActionRow, MenuGroupSeparator } from '@/components/primitives/PortalMenu';
 import { OpacityRow } from '@/components/palette/context-menu-rows';
-import {
-  MenuTreeContext,
-  useClickOutside,
-  useControlMenu,
-  Portal,
-  trustedHtml,
-} from '@livediagram/ui';
+import { MenuTreeContext, useClickOutside, useControlMenu, Portal, trustedHtml } from '@livedoc/ui';
 
 // The menu's width (w-64) and its gap from the panel and the viewport edges, in px.
 const MENU_WIDTH = 256;

@@ -2,10 +2,10 @@
 // section per covered document in a stable order (folder path, then name, then id, RL41), so a new document never
 // reorders the rest. A document not read this pass keeps its previous section verbatim (RL16).
 
-import type { TabKind } from '@livediagram/document';
+import type { TabKind } from '@livedoc/document';
 import type { MirrorLevel } from './link-file';
 import { codeSpan, markdownText } from './markdown';
-import { plural } from '@livediagram/document';
+import { plural } from '@livedoc/document';
 
 export type IndexTab = {
   name: string;
