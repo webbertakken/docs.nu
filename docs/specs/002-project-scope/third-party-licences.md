@@ -1,9 +1,9 @@
 # Third-party licences
 
-livediagram is MIT, and every app it deploys carries other people's open-source work. The licences
+LiveDoc is MIT, and every app it deploys carries other people's open-source work. The licences
 of that work (MIT, BSD, ISC, Apache-2.0 and the rest) ask for their copyright and licence text to
 travel with every copy, and our production bundles strip the comments that would otherwise carry
-them. So livediagram publishes one **licences page**, generated at build time from what each app
+them. So LiveDoc publishes one **licences page**, generated at build time from what each app
 actually ships, and links it from every public footer and from the editor.
 
 ## What counts as shipped
@@ -65,7 +65,7 @@ reach a deployed artefact, and nothing else.
 
 - **One page, at `/licences`,** served by marketing (which already answers every path no other app
   claims). One page rather than one per app: most works ship in several apps, the router serves them
-  all under one origin, and a visitor looking for "what is in livediagram" should not need to know
+  all under one origin, and a visitor looking for "what is in LiveDoc" should not need to know
   the app boundaries. Each entry names the apps that ship it.
 - **Two sections.** "In your browser" lists the works sent to people's browsers by the editor, the
   website, the help centre, the Community and the telemetry dashboard. "On our servers" lists the works bundled

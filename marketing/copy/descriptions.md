@@ -103,7 +103,7 @@ For longer listing bodies and "about this project" sections.
 For directories with a generous body field, a landing-page "about" block, or a
 detailed GitHub / Product Hunt write-up.
 
-> ### LiveDoc: diagram together, no sign-in required
+> ### LiveDoc: documents together, no sign-in required
 >
 > LiveDoc is a collaborative diagram and mindmap editor that lives in the
 > browser. It is built around one stubborn principle: the canvas always works

@@ -1,6 +1,6 @@
 # MCP server
 
-**Status: live.** Merged and deployed at `mcp.livediagram.app`; connect flow
+**Status: live.** Merged and deployed at `mcp.docs.nu`; connect flow
 verified end-to-end from Claude. Builds directly on [Public API and API tokens](public-api-and-tokens.md)
 (API tokens), which it picks up where §7 left off: [Public API and API tokens](public-api-and-tokens.md) deferred "OAuth /
 third-party app authorization" — this spec adds exactly that, scoped to one
@@ -9,7 +9,7 @@ mints. No new authorization model; an OAuth front door onto the existing token.
 
 ## 1. Goal
 
-Let a person connect livediagram to whatever AI tool they already drive (Claude
+Let a person connect LiveDoc to whatever AI tool they already drive (Claude
 desktop/web, Claude Code, any MCP client) and, from inside that tool:
 
 1. **Find and view** the documents they already have — search by name, get back a
@@ -61,7 +61,7 @@ stays a pure REST/WS surface.
   `isLayoutCandidate`), and a new pure SVG renderer ([§5](#5-visualise--inline-image-render)).
   This is the reuse-over-duplication rule: the MCP must not re-implement layout,
   validation, geometry, or theme-colour resolution.
-- **Routing + deploy.** Served at **`mcp.livediagram.app`** (its own hostname,
+- **Routing + deploy.** Served at **`mcp.docs.nu`** (its own hostname,
   like the api). Add the service to the deploy workflow alongside marketing /
   live / telemetry / api (it depends on api existing, so it deploys in the same
   wave as api or just after). The `router` worker is unchanged — `mcp.` is a
@@ -208,7 +208,7 @@ merges, and ranks newest-saved first. The team sweep is best-effort: a teams
 failure degrades to personal-only results, never an error. Input: optional
 `query` (name match), `limit`. Returns a compact list:
 `{ id, name, updatedAt, library, url }` where `library` is `personal` or the
-team's name and `url` is the `livediagram.app` deep link to open it. **No image
+team's name and `url` is the `docs.nu` deep link to open it. **No image
 here** — kept lightweight so the model can scan many results cheaply, then
 `read_document` the one it wants.
 
@@ -769,7 +769,7 @@ is checked against the tab shape by the tool rather than repeating that shape (t
 schema: the definition halved, from about 41 KB to 21 KB, the size of `update_document` and `add_tab`.
 
 **No CLI hints.** An edit's result text is the api's, less its footer's revert line: that line names the
-`livediagram changeset revert` command, which no MCP tool runs. Its `@x,y` positions are from the content's top-left as it was read, while an element's `x` and `y` are canvas
+`livedoc changeset revert` command, which no MCP tool runs. Its `@x,y` positions are from the content's top-left as it was read, while an element's `x` and `y` are canvas
 coordinates; when the content does not start at 0,0, a closing line gives the offset (`x, y = @x + ox, @y + oy`),
 so a position read from a result is not sent back off by it.
 
@@ -991,10 +991,10 @@ Every post (these reports and `Mcp·Used`) is handed to the request's
 The MCP worker reads three bindings and two out-of-band values. Bindings
 (`API` service binding, `OAUTH_KV`) are declared in `wrangler.toml`; the rest:
 
-| Name                  | Where                          | Absent means                                                                                                                                                                     |
-| --------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CONSENT_BASE_URL`    | `[vars]` (not secret)          | Defaults to `https://livediagram.app`, so a self-host's OAuth callers land on the hosted consent screen instead of their own. Also the host of every tool's `url` and share link |
-| `INTERNAL_EVENTS_KEY` | worker secret, **also on api** | This worker's telemetry shares the anonymous per-IP rate-limit bucket and throttles itself ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md))          |
+| Name                  | Where                          | Absent means                                                                                                                                                             |
+| --------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CONSENT_BASE_URL`    | `[vars]` (not secret)          | Defaults to `https://docs.nu`, so a self-host's OAuth callers land on the hosted consent screen instead of their own. Also the host of every tool's `url` and share link |
+| `INTERNAL_EVENTS_KEY` | worker secret, **also on api** | This worker's telemetry shares the anonymous per-IP rate-limit bucket and throttles itself ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md))  |
 
 `INTERNAL_EVENTS_KEY` exists because §4.12's telemetry posts travel over the
 **service binding**, which carries no `CF-Connecting-IP` — so the api's
@@ -1083,10 +1083,10 @@ The hosted server is listed in the official **MCP Registry**
 them) ingest from, so one listing reaches several catalogues.
 
 - **Descriptor.** `server.json` at the repo root, under the registry's
-  `2025-12-11` schema. Name `io.github.livediagram-app/livediagram`: the
+  `2025-12-11` schema. Name `io.github.livedoc-app/livedoc`: the
   `io.github.<org>` namespace is proven by the repo's own GitHub OIDC token, so
   publishing needs no DNS record and no secret. One `remotes` entry,
-  `streamable-http` at `https://mcp.livediagram.app/mcp`, with no `headers`:
+  `streamable-http` at `https://mcp.docs.nu/mcp`, with no `headers`:
   OAuth (§3) is discovered from the server's metadata, not configured by the
   client. The icon is the 512px mark in `marketing/media/icons`.
 - **Publishing.** `.github/workflows/mcp-registry.yml` runs `mcp-publisher
@@ -1287,7 +1287,7 @@ Worker (no DOM, no React).
 ## 6. Rollout
 
 1. **`apps/mcp` skeleton** — worker, Hono, MCP SDK, service binding to api,
-   `/health`, deploy wiring + `mcp.livediagram.app` host. `.env.example`.
+   `/health`, deploy wiring + `mcp.docs.nu` host. `.env.example`.
 2. **Shared SVG renderer** — extract `packages/document/src/svg-render.ts` from
    `export-tab.ts`, repoint the in-app export to it (no behaviour change), add
    `@resvg/resvg-wasm` rasterisation in the worker.

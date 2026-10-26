@@ -547,7 +547,7 @@ More: livedoc <resource> --help, livedoc guide <topic>
   [workbench blueprint](../../013-workspace/blueprints/workbench-embeds.md#the-cli)'s.
 - **Skill**: `renderSkill()` gives frontmatter `name: livedoc` and `description: SKILL_DESCRIPTION` (within
   `SKILL_FRONTMATTER_MAX_TOKENS`), then a body naming the four starting commands, each guide topic's command and
-  the `[livediagram]` line that sends an agent to `guide workbench` (within `SKILL_BODY_MAX_TOKENS`).
+  the `[livedoc]` line that sends an agent to `guide workbench` (within `SKILL_BODY_MAX_TOKENS`).
   `skill install --to <dir>` writes `<dir>/livedoc/SKILL.md`, overwriting only a file whose frontmatter `name`
   is `livedoc` (CLI52). Without `--to` it exits 2 listing `SKILL_DIRECTORIES`:
 

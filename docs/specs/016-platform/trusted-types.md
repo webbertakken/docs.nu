@@ -2,7 +2,7 @@
 
 Status: shipped
 
-Every page on livediagram.app enforces Trusted Types, so a string can never reach a DOM injection sink
+Every page on docs.nu enforces Trusted Types, so a string can never reach a DOM injection sink
 (`innerHTML`, `DOMParser`, a script's or a worker's URL, `eval`) unless a named policy made it. A DOM-based script
 injection then needs a policy's help, and every policy is small, named and listed here.
 
@@ -29,7 +29,7 @@ All three come from one shared module, `@livedoc/ui`'s `trusted-types`, and noth
   `javascript:` one included, for a worker too.
   For HTML it allows exactly `<script></script>`, the empty script React DOM parses to create a `<script>` element on
   a client render (a script inserted through `innerHTML` never runs); any other HTML string is refused.
-- **`livedoc-markup`** turns markup that livediagram's own builders produced into `TrustedHTML`
+- **`livedoc-markup`** turns markup that LiveDoc's own builders produced into `TrustedHTML`
   (`trustedHtml(markup)`). Its callers are the builders that escape every piece of content they place: the icon,
   sticker and template SVG builders (`@livedoc/icons`, `@livedoc/templates`), the headless tab renderer's
   thumbnails, the JSON-LD block, and the inline boot scripts in each layout. It does not sanitise; the trust is that

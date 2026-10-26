@@ -1501,7 +1501,7 @@ In Pages mode the Export dialog exports **pages**, not the tab's content bounds.
 
 ## Import
 
-In Pages mode the Import dialog offers **JSON** only (a livediagram tab, which may carry
+In Pages mode the Import dialog offers **JSON** only (a LiveDoc tab, which may carry
 pages), and opens straight at it, with no list of formats to go back to. Mermaid, Markdown, Excalidraw and draw.io
 are diagram formats and are not offered.
 

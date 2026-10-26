@@ -71,7 +71,7 @@ It provides these names to sibling blueprints ([CLI](../../015-api/blueprints/cl
 | `apps/api/src/types.ts`, `apps/api/wrangler.toml`                                                                                                                            | `WORKBENCH_TICKET_RATE_LIMITER` (namespace `1010`, 30 per 60 s), production and `[env.staging]`                                                                                                                           |
 | `apps/api/src/openapi/manifest.ts`, `document.ts`, `schemas.generated.ts`                                                                                                    | Eleven operations under segment `workbench`, tag `Workbench`; the 428 and 401 bodies                                                                                                                                      |
 | `packages/document-views/src/selection-reference.ts` (new, + test), `index.ts`                                                                                               | `selectionReference(input)`                                                                                                                                                                                               |
-| `apps/live/app/embed/workbench/page.tsx`                                                                                                                                     | The static route; metadata title `Workbench \| livediagram`, `robots: { index: false }`; renders `WorkbenchPage`                                                                                                          |
+| `apps/live/app/embed/workbench/page.tsx`                                                                                                                                     | The static route; metadata title `Workbench \| livedoc`, `robots: { index: false }`; renders `WorkbenchPage`                                                                                                              |
 | `apps/live/app/embed/workbench/WorkbenchPage.tsx`                                                                                                                            | Runs the page machine; renders a status or, once bound, `WorkbenchAuthBridge` around `EditorPage surface="workbench"`                                                                                                     |
 | `apps/live/app/embed/workbench/workbench-machine.ts` (new, + test)                                                                                                           | The page's states and transitions, pure                                                                                                                                                                                   |
 | `apps/live/app/embed/workbench/workbench-fragment.ts` (new, + test)                                                                                                          | `takeTicketFromAddress(location, history)`: reads `#ticket=`, clears the fragment                                                                                                                                         |
@@ -101,8 +101,8 @@ It provides these names to sibling blueprints ([CLI](../../015-api/blueprints/cl
 | `apps/live/app/document/[id]/useTabRevisions.ts` (new, + test)                                                                                                               | The last known `rev` per tab: loads, saves, changesets                                                                                                                                                                    |
 | `apps/live/lib/api/tabs.ts`, `apps/live/app/document/[id]/useAutosave.ts`                                                                                                    | `apiSaveTab` returns the saved `rev`; the autosave notes it in `useTabRevisions`                                                                                                                                          |
 | `apps/live/app/document/[id]/useWorkbenchMessages.ts` (new, + test)                                                                                                          | `ready`, `tab`, `selection` (settled), `reveal`, `theme`                                                                                                                                                                  |
-| `apps/live/app/document/[id]/EditorView.tsx`                                                                                                                                 | Header, Explorer, banners, Open in livediagram, read-only line                                                                                                                                                            |
-| `apps/live/components/chrome/WorkbenchChrome.tsx` (new, + test)                                                                                                              | `WorkbenchOpenLink` (the **Open in livediagram** link in the tab bar) and `WorkbenchReconnectLine`                                                                                                                        |
+| `apps/live/app/document/[id]/EditorView.tsx`                                                                                                                                 | Header, Explorer, banners, Open in LiveDoc, read-only line                                                                                                                                                                |
+| `apps/live/components/chrome/WorkbenchChrome.tsx` (new, + test)                                                                                                              | `WorkbenchOpenLink` (the **Open in LiveDoc** link in the tab bar) and `WorkbenchReconnectLine`                                                                                                                            |
 | `apps/live/components/chrome/TabBar.tsx`, `ChromeControls.tsx` (+ `TabBar.workbench.test.tsx`)                                                                               | `workbenchLink`: the link at the bar's right end, and no Appearance control in a workbench                                                                                                                                |
 | `apps/live/components/canvas/useCanvasChromePanels.tsx`, `CanvasChrome.tsx`, `Canvas.types.ts`, `EditorCanvasHost.tsx`                                                       | `explorerHidden`: no menu button, so no Explorer; the AI panel is absent because `aiCapable` reads false                                                                                                                  |
 | `apps/live/components/dialogs/settings/settings-catalogue.ts`, `SettingsDialog.tsx`                                                                                          | `visibleCategories(aiCapable, { workbench })`: the workbench hides `ai`, `documents`, `account` (with `notifications`, nested under it), `tokens` and the Appearance choice; the dialog reads no placement defaults there |
@@ -122,7 +122,7 @@ It provides these names to sibling blueprints ([CLI](../../015-api/blueprints/cl
 | `apps/cli/src/io.ts`                                                                                                                                                         | `CliIo.stdoutIsTTY`, shared with the repository link's picker: whether a person reads stdout (WB25)                                                                                                                       |
 | `apps/cli/src/output/failure-of.ts`                                                                                                                                          | `isNetworkFailure`, shared by `failureOf`, the telemetry and the pairing wait                                                                                                                                             |
 | `apps/cli/src/commands/workbench-open.test.ts`                                                                                                                               | `workbench open` as the CLI exits                                                                                                                                                                                         |
-| `packages/agent-verbs/src/guides/index.ts`, `skill.ts`                                                                                                                       | Topic `workbench`; `GUIDE_TOPIC_MAX_TOKENS`, `SKILL_FRONTMATTER_MAX_TOKENS`, `SKILL_BODY_MAX_TOKENS`; the skill's `[livediagram]` line                                                                                    |
+| `packages/agent-verbs/src/guides/index.ts`, `skill.ts`                                                                                                                       | Topic `workbench`; `GUIDE_TOPIC_MAX_TOKENS`, `SKILL_FRONTMATTER_MAX_TOKENS`, `SKILL_BODY_MAX_TOKENS`; the skill's `[livedoc]` line                                                                                        |
 | `docs/specs/015-api/cli.md`                                                                                                                                                  | The two command rows, the guide topic and the skill's pointer                                                                                                                                                             |
 | `apps/telemetry/app/cli-commands.ts`                                                                                                                                         | Rows `WorkbenchOpen`, `WorkbenchPair`                                                                                                                                                                                     |
 | `apps/telemetry/app/catalogue/collaboration.ts`, `connections.ts`, `event-explanations.ts`                                                                                   | `WORKBENCH_SESSIONS` (`Session·Opened·Workbench`), `WORKBENCHES_PAIRED` (`Token·Linked·Workbench`) in API Token Activity                                                                                                  |
@@ -502,16 +502,16 @@ Input `{ documentId, documentName, tab, tabIds, rev, selectedIds }`, `rev` from 
 the editor knows for the tab: its load, its own saves' answers, relayed changesets). Built on `buildViewModel(tab,
 { rev, tabIds })`, so refs, kind words and labels are the outline's own.
 
-1. Header: `[livediagram] ${jsonString(documentName)} › tab ${jsonString(tab.name)} (doc ${documentId}, tab
+1. Header: `[LiveDoc] ${jsonString(documentName)} › tab ${jsonString(tab.name)} (doc ${documentId}, tab
 ${tabRefOf(tab.id)}, rev ${rev})`. The document is named by its full id (WB19).
 2. Selected elements, in the tab's element order (WB20), ids not on the tab dropped. None: the second line is
    `whole tab` and there is no third (WB21).
 3. Second line: `selected: ` and the first `WORKBENCH_SELECTION_MAX_REFS` items joined by `, `. Item, as the outline's
    `nodeLine` prints an element: the kind word (`kindOf(el)`), the ref (`refs.refOf(id)`) and the label (`jsonString(label, LABEL_CUT_CHARS)` from
    `textField(el, 'label')`, omitted when null), joined by a space in that order (`button 146b "Play"`). More:
-   ` … and ${n} more: livediagram tab view ${documentId} --tab ${tabRef} --view show --ref selected` appended to
+   ` … and ${n} more: livedoc tab view ${documentId} --tab ${tabRef} --view show --ref selected` appended to
    the same line (WB22).
-4. Third line: `read: livediagram tab view ${documentId} --tab ${tabRef} --view show --ref ${firstRef}`.
+4. Third line: `read: livedoc tab view ${documentId} --tab ${tabRef} --view show --ref ${firstRef}`.
 
 Lines joined by `\n`, no trailing newline. `count` is the number of selected elements on the tab.
 
@@ -524,7 +524,7 @@ Lines joined by `\n`, no trailing newline. `count` is the number of selected ele
    `resolveTab` when `--tab` is given.
 3. `POST /api/workbench/tickets`. 201: text prints `url`; `--json` prints `{ url, documentId, tabId, expiresAt }`.
    `428 pairing_required`: exit 4 (WB23), thrown as `VerbRefusal { status: 403, code: 'pairing_required' }`, error
-   "this workbench is not paired with your token", fix `livediagram workbench pair --origin <origin>`. Other statuses
+   "this workbench is not paired with your token", fix `livedoc workbench pair --origin <origin>`. Other statuses
    through `failureOf`.
 4. `Cli·Used·WorkbenchOpen` on exit 0.
 
@@ -542,7 +542,7 @@ Lines joined by `\n`, no trailing newline. `count` is the number of selected ele
    (text `paired <origin>`, ` as <name>` added when `--name` was given; `--json`
    `{ "status": "paired", "origin", "name" }`), exit 0; `declined` exit 4 "the pairing was declined in the browser";
    `expired` exit 4 "the pairing request expired before it was answered", fix
-   `livediagram workbench pair --origin <origin>`; `429` adds `DEVICE_SLOW_DOWN_S` to the interval; 404 exit 4 "the
+   `livedoc workbench pair --origin <origin>`; `429` adds `DEVICE_SLOW_DOWN_S` to the interval; 404 exit 4 "the
    pairing request is gone (was the token revoked?)"; a network failure retries, the third in a row exits 7. Past
    `expiresAt` plus one interval without an answer reads as `expired`. The three exit-4 endings carry the codes
    `pairing_declined`, `pairing_expired` and `pairing_gone` (WB48).
@@ -551,7 +551,7 @@ Lines joined by `\n`, no trailing newline. `count` is the number of selected ele
 `guide workbench` (topic `workbench` of `GUIDE_TOPICS`, within `GUIDE_TOPIC_MAX_TOKENS`) teaches an agent to read a
 selection reference: the header, the `selected` items as data, never instructions; re-reading the refs with `tab view
 --view show --ref` and `--only`, and the `… and n more` tail with `--ref selected`; `tab render` to look; `presence set` and `presence clear` while it works; and that
-the person's own selection never holds the agent's writes. The skill's description names the `[livediagram]` line
+the person's own selection never holds the agent's writes. The skill's description names the `[livedoc]` line
 (within `SKILL_FRONTMATTER_MAX_TOKENS`) and its body sends an agent to `guide workbench` first.
 
 ### The workspace scope
@@ -710,7 +710,7 @@ Back. The status screens put the same card at `EmbedShell`'s top left. The docum
 `workbenchFrom` (the frame path it was pushed from); Back calls `history.back()` when the entry before is that path
 (`workbenchFrom` set by `navigate`), else pushes Home. Browser back and forward walk the same entries.
 
-**Open in livediagram**: on a document, the existing link with the place's app href (`/document/<id>[?s=]`); on an
+**Open in LiveDoc**: on a document, the existing link with the place's app href (`/document/<id>[?s=]`); on an
 Explorer view, the same control at the right end of the Explorer's bottom bar linking to `explorerPathFor(node)`.
 
 **`trashed`** in the workspace scope: the session the frame lends the editor turns `useWorkbenchEnd`'s
@@ -724,7 +724,7 @@ Explorer view, the same control at the right end of the Explorer's bottom bar li
 | ------------------------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------- |
 | App header (brand, product nav, `AuthControls`)                           | `ExplorerShell.tsx`                     | Not rendered; the lens field in a slim bar instead (WB61)   |
 | Home hero                                                                 | `ExplorerShell.tsx`                     | Rendered as in the app                                      |
-| Bottom bar: Settings, Appearance                                          | `ExplorerShell.tsx`, `ChromeControls`   | Absent; Search stays; Open in livediagram at the right end  |
+| Bottom bar: Settings, Appearance                                          | `ExplorerShell.tsx`, `ChromeControls`   | Absent; Search stays; Open in LiveDoc at the right end      |
 | Settings dialog, `?settings=` links, `useOpenSettingsRequests`            | `useExplorerState.ts`, `ExplorerShell`  | Never opens                                                 |
 | Search panel's settings rows                                              | `ExplorerShell.tsx`                     | `[]`                                                        |
 | Sign-in banner, `LocalMovePrompt`                                         | `ExplorerShell.tsx`                     | Not rendered                                                |
@@ -741,7 +741,7 @@ Explorer view, the same control at the right end of the Explorer's bottom bar li
   moved to `@livedoc/agent-verbs` so `link init`, `folder` and `workbench` share it): its full id, an id prefix
   or its name ignoring case; none 3, several 3 with the candidates. `POST /api/workbench/tickets { scope:
 'workspace', folderId?, origin }`. 201: text `url`; `--json` `{ url, scope, folderId, expiresAt }`. 428: exit 4,
-  fix `livediagram workbench pair --origin <origin> --workspace`. 404: exit 3.
+  fix `livedoc workbench pair --origin <origin> --workspace`. 404: exit 3.
 - `workbench pair --origin <origin> [--name <name>] [--workspace]`: the request carries `scope: 'workspace'`; the
   printed results add ` (whole workspace)` in text and `scope` in `--json`; the expired fix carries `--workspace`.
 
@@ -965,8 +965,8 @@ event.source === window.parent`; anything else is dropped silently (not a workbe
 | `workbench.pair` | `origin`, `name?`                    | pending line, then `{ status: 'paired', origin, name }` | 0, 1, 4, 6, 7       |
 
 Resource `{ name: 'workbench', summary: 'Workbenches: open a document in a developer tool, pair one' }`. Help text
-of each within the CLI budgets; examples `livediagram workbench open "Home screen" --origin https://127.0.0.1:5175
---json` and `livediagram workbench pair --origin https://127.0.0.1:5175 --name "Acme Editor"`.
+of each within the CLI budgets; examples `livedoc workbench open "Home screen" --origin https://127.0.0.1:5175
+--json` and `livedoc workbench pair --origin https://127.0.0.1:5175 --name "Acme Editor"`.
 
 ### Room
 
@@ -1236,9 +1236,9 @@ CREATE TABLE workbench_session_rooms (
 | `ended` (trashed)                 | `DocumentTrashedCard` with `restorable={false}`                                                                                                |
 | `failed`                          | `LoadErrorCard embed`                                                                                                                          |
 
-The status screens use `EmbedShell` (no header, no Explorer). **Open in livediagram** (`WorkbenchOpenLink`): the last
+The status screens use `EmbedShell` (no header, no Explorer). **Open in LiveDoc** (`WorkbenchOpenLink`): the last
 control at the right end of the tab bar, after Search and Settings, styled as they are: the external-link glyph and
-the words "Open in livediagram" (the glyph alone on a phone, as its neighbours), linking to `/document/<id>` with
+the words "Open in LiveDoc" (the glyph alone on a phone, as its neighbours), linking to `/document/<id>` with
 `target="_blank" rel="noopener noreferrer"`, shown while `mounted` and `ended` (WB34). In a workbench the tab bar
 offers no Appearance control (WB15). The Reconnect line is `WorkbenchReconnectLine`.
 
@@ -1257,19 +1257,19 @@ Built on `OauthShell`, like the device page; states and copy:
 | Failed                      | as Pending                          | `role="alert"` "Something went wrong. Please try again."                                                                                                                                                                                                                                                                                                                                                                    |
 | Allowed                     | "Workbench allowed"                 | "Return to <name or ‘your workbench’>; it carries on by itself."                                                                                                                                                                                                                                                                                                                                                            |
 | Declined                    | "Workbench not allowed"             | "Nothing was paired. Your terminal will stop waiting."                                                                                                                                                                                                                                                                                                                                                                      |
-| Expired                     | "This request has expired"          | "Run livediagram workbench pair again to ask anew." (command in monospace)                                                                                                                                                                                                                                                                                                                                                  |
-| Already answered            | "This request was already answered" | "Run livediagram workbench pair again if you need to ask anew."                                                                                                                                                                                                                                                                                                                                                             |
+| Expired                     | "This request has expired"          | "Run livedoc workbench pair again to ask anew." (command in monospace)                                                                                                                                                                                                                                                                                                                                                      |
+| Already answered            | "This request was already answered" | "Run livedoc workbench pair again if you need to ask anew."                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### The workspace frame
 
-| Where                               | Copy                                                                                                                                    |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `reading`, `redeeming`, `binding`   | "Opening your workspace…" (WB65)                                                                                                        |
-| `refused` (any)                     | Heading "Open your workspace from your workbench", body "This link works once, for a minute. Open it again from your workbench." (WB65) |
-| Back                                | The arrow-left glyph and "Back" (the glyph alone on a phone), accessible name "Back to <view title>"                                    |
-| Open in livediagram (Explorer view) | As the editor's; accessible name "Open in livediagram (opens in a new tab)"                                                             |
-| Create failed                       | Toast "Couldn’t create the document. Try again."                                                                                        |
-| Trashed                             | Toast "That document is in the Trash."                                                                                                  |
+| Where                             | Copy                                                                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `reading`, `redeeming`, `binding` | "Opening your workspace…" (WB65)                                                                                                        |
+| `refused` (any)                   | Heading "Open your workspace from your workbench", body "This link works once, for a minute. Open it again from your workbench." (WB65) |
+| Back                              | The arrow-left glyph and "Back" (the glyph alone on a phone), accessible name "Back to <view title>"                                    |
+| Open in LiveDoc (Explorer view)   | As the editor's; accessible name "Open in LiveDoc (opens in a new tab)"                                                                 |
+| Create failed                     | Toast "Couldn’t create the document. Try again."                                                                                        |
+| Trashed                           | Toast "That document is in the Trash."                                                                                                  |
 
 The Explorer's own views, empty states and not-found keep their copy. The slim bar at the top holds the lens field
 only, `h-12`, the header's colours.
@@ -1295,7 +1295,7 @@ editing until you allow it again." with **Unpair** and **Cancel** (WB36). After 
 
 - Status screens: the copy in a `role="status"` region; `refused` and `unbound` headings are `h1`.
 - The Reconnect line: `role="status"`, `aria-live="polite"`, visible text, never colour alone.
-- **Open in livediagram**: accessible name "Open in livediagram (opens in a new tab)"; at least 24 by 24 px; the
+- **Open in LiveDoc**: accessible name "Open in LiveDoc (opens in a new tab)"; at least 24 by 24 px; the
   editor's focus ring.
 - The pairing page: focus moves to the heading on each state change; **Allow** and **Don't allow** are native
   buttons; the origin and the token name are text, readable by a screen reader in full; it is drawn by `OauthShell`,
@@ -1406,7 +1406,7 @@ and the two CLI rows.
 | CLI open: URL and JSON, 428 exit 4 with the fix, share URL exit 2, origin exit 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `packages/agent-verbs/src/verbs/workbench.test.ts`, `apps/cli/src/commands/workbench-open.test.ts`                        |
 | CLI pair: URL first on stdout, no browser when piped, approved 0, declined 4, expired 4, 429 slow down, 404, network retries                                                                                                                                                                                                                                                                                                                                                                                                                                             | `apps/cli/src/commands/workbench-pair.test.ts` (fake io)                                                                  |
 | CLI help budgets for the new resource and verbs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `apps/cli/src/help/help.test.ts`                                                                                          |
-| Guide `workbench` and the skill's `[livediagram]` pointer; every topic, the frontmatter and the body within budget                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `packages/agent-verbs/src/catalogue.test.ts`                                                                              |
+| Guide `workbench` and the skill's `[livedoc]` pointer; every topic, the frontmatter and the body within budget                                                                                                                                                                                                                                                                                                                                                                                                                                                           | `packages/agent-verbs/src/catalogue.test.ts`                                                                              |
 | Telemetry catalogue rows and CLI command rows                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `apps/telemetry` catalogue suites, `metric-series.test`                                                                   |
 | End to end, dark, a fake workbench page on `http://127.0.0.1:<port>` framing the live app on `http://localhost:<port>`: unpaired mint 428; the pair page (signed in through the test bridge) Allow; mint; the frame binds, the editor mounts without header or Explorer; drawing saves; a selection arrives as one settled message with the reference; `reveal` outlines; `theme` switches; renewal swaps the session; Unpair turns the frame read-only with the Reconnect line; a page on another origin framing the same URL mounts nothing and shows the unbound copy | `apps/live/e2e/workbench-embed.spec.ts` (project `workbench`, `colorScheme: 'dark'`, `E2E_WORKBENCH=1`)                   |
 

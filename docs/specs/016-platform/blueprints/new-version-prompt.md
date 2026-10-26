@@ -97,7 +97,7 @@ current when called.
   import bars sit), on the chrome layer (`z-[var(--z-chrome)]`, below dialogs); max width 28rem,
   never wider than the viewport less 2rem; rounded panel, chrome surface colours (`bg-white` /
   `dark:bg-slate-900`, border `slate-200` / `slate-700`), shadow.
-- Text: "A new version of livediagram is ready." In `saving`: "Saving your changes…" with the
+- Text: "A new version of LiveDoc is ready." In `saving`: "Saving your changes…" with the
   buttons disabled. In `unsaved`: "Your latest changes aren't saved yet. Reload once they are."
 - Buttons: primary "Reload", secondary "Not now" (the shared `Button` primitive).
 

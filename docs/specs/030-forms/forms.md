@@ -3,7 +3,7 @@
 A **Form tab** is a Plan tab that holds one form: questions someone builds in place, shared as a **form link**
 that anyone can open and fill in without an account. Each **response** becomes a card on a Board tab of the same
 document, in the status the form names, so collecting answers leads straight into working them on a board. It is
-livediagram's answer to Google Forms: building a form, sharing it and reading the answers happen in the document
+LiveDoc's answer to Google Forms: building a form, sharing it and reading the answers happen in the document
 where the work then happens.
 
 ## Why
@@ -405,7 +405,7 @@ Tour** stack beside the Draw tour's.
   - A document kept on this device only (an offline document) cannot publish until it is synced, so Share Form offers
     the same move the document's Share dialog does ([Offline mode](../006-document/offline-mode.md#sharing-a-document-in-this-browser)):
     the shared sync prompt (`SyncDocumentPrompt`, the one `ShareOfflineGate` draws) says **This Document Is in This Browser**,
-    "It is saved only in this browser, so this form can't be published yet. Sync it to livediagram to publish it: the
+    "It is saved only in this browser, so this form can't be published yet. Sync it to LiveDoc to publish it: the
     form link and its responses need it on our servers. You can take it offline again any time.", with **Sync
     Document**. It syncs the document in place; the toast confirms and the same dialog carries straight on to the
     unpublished view (Publish Form, held while the link is first read), so the Editor publishes without reopening
@@ -455,7 +455,7 @@ The form link opens a page of its own, outside the editor: no Explorer, no docum
 no editor code loaded (its own small bundle).
 
 - **Look**: the form in its tab's [look](#look) (colour, font, finish and backdrop, each following the respondent's
-  system). The Report This Form panel keeps livediagram's own look. A footer: "Made with livediagram" linking to the marketing site, and
+  system). The Report This Form panel keeps LiveDoc's own look. A footer: "Made with LiveDoc" linking to the marketing site, and
   **Report This Form** (below).
 - **Sections**: one section at a time, a progress bar across the top ("Section 2 of 3"), **Back** and **Next**; Next
   checks only that section's questions. The last section's button is **Submit**. Sections that do not show for the
@@ -490,7 +490,7 @@ no editor code loaded (its own small bundle).
   found page, its Form tab says "This form’s link was suspended after reports from respondents", and the owner is
   emailed. Publishing again makes a new link; a document whose form links have been suspended twice cannot publish
   another.
-- Beside Submit, in small type: "Never submit passwords through livediagram forms."
+- Beside Submit, in small type: "Never submit passwords through LiveDoc forms."
 
 ## What a response makes
 

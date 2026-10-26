@@ -106,7 +106,7 @@ an agent through the CLI is designing their own diagram.
 - `<resource> <verb> --help` gives usage, flags, two examples and what it prints, within `HELP_VERB_MAX_TOKENS`.
 - `guide <topic>` and `schema <kind>` carry the depth, so it is paid for only when needed.
 - `skill print` prints a `SKILL.md` whose frontmatter (about 60 tokens) says when to use the CLI and whose body
-  points at `guide`, and at `guide workbench` when a message carries a `[livediagram]`
+  points at `guide`, and at `guide workbench` when a message carries a `[livedoc]`
   [selection reference](../013-workspace/workbench-embeds.md#the-selection-reference). `skill install --to <dir>`
   writes it into that agent skills directory; without `--to` it lists the common ones.
 - Help, guides and the skill come from the verb catalogue; templates, icons and the element format (`schema`) come

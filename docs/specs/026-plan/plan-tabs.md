@@ -330,7 +330,7 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
   the tab names the copy of that Sheet made with it (as a chart from it does), and a layout read with a repeated row or
   slot id gives the repeat a fresh one.
 - Anything else is refused in the dialog, the dashboard left as it was: text that is not JSON (**File isn't valid
-  JSON.**), JSON that is not a livediagram tab, and a tab that is not a Dashboard (**This file isn't a Dashboard.
+  JSON.**), JSON that is not a LiveDoc tab, and a tab that is not a Dashboard (**This file isn't a Dashboard.
   Export a Dashboard tab as JSON, then import that.**).
 - A slot showing another tab keeps naming it by id: in another document it reads as deleted until cleared.
 - Import is an Editor's, as the tab menu is (a Viewer or Participant has no tab menu); a locked tab refuses it.

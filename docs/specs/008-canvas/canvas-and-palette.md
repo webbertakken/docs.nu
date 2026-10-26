@@ -1318,7 +1318,7 @@ Every palette `Add ...` button auto-selects the newly created element. The selec
 
 The editor header carries three things:
 
-- The `livediagram` brand mark (left), accent-coloured from the active tab's theme stroke.
+- The `livedoc` brand mark (left), accent-coloured from the active tab's theme stroke.
 - The **document title** (centre). Defaults to `Untitled document`. Click to rename in place — the title becomes a text input with the current name pre-selected. **Enter** commits, **Escape** cancels, **blur** commits. Empty value reverts to the previous name. A small **Private** or **Shared** badge sits immediately to the right of the title and surfaces the current sharing state.
 - The **Share button** (right). Visible only to the document owner — visitors arriving via a share link can't toggle sharing on their host's document. Opens the share dialog (manage links, roles).
 

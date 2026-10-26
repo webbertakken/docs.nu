@@ -80,7 +80,7 @@ status=<n>` or `save-not-confirmed`) leaves the mark, and the
 The original v1 shape was localStorage-only on the grounds that
 flags were UI-only and a server round-trip per toggle was
 overkill. That trade-off was wrong for the user experience:
-signed-in users who use livediagram on a laptop and a phone had
+signed-in users who use LiveDoc on a laptop and a phone had
 to re-flip every setting on each device. Per-account sync is the
 expected behaviour for an account-bound app.
 

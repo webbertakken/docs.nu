@@ -39,20 +39,20 @@ silent are ledgered in [DEFAULTS.md](DEFAULTS.md) and cited as `Dn`.
 
 ## Domain and naming
 
-| Term          | Identifier                                           | Meaning                                                                                                       |
-| ------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| App           | `LicenceApp`, `AppId`                                | One deployed app: `live`, `marketing`, `help`, `telemetry`, `community`, `api`, `mcp`, `router`               |
-| Side          | `Side` = `'browser' \| 'server'`                     | Where an app's bundle runs                                                                                    |
-| Bundle        | `AppBundle`                                          | One app's shipped `sources` (repo-relative paths) and `assets` (emitted file basenames)                       |
-| Work          | `WorkRecord` (collect), `WorkEntry` (manifest)       | Third-party material with its own licence                                                                     |
-| Work kind     | `WorkKind` = `'package' \| 'vendored' \| 'embedded'` | npm package, vendored inside a package, inside a binary or our source                                         |
-| Carrier       | `carrier`                                            | What holds a vendored or embedded work (`next 16.3.6`, `@tensorflow/tfjs-backend-wasm`, `livediagram source`) |
-| Licence text  | `LicenceText` `{ label, text }`                      | One licence or notice file's normalised content                                                               |
-| Text hash     | `hash`                                               | First 16 hex of the sha256 of a normalised text; its file name                                                |
-| Override      | `Override`                                           | Committed texts for one exact package version                                                                 |
-| Embedded work | `EmbeddedWork`                                       | A reviewed table entry for material the bundler cannot see                                                    |
-| Binary asset  | (a basename)                                         | Emitted file with an extension in `BINARY_ASSET_EXTENSIONS`                                                   |
-| Manifest      | `LicencesManifest`                                   | What the page renders                                                                                         |
+| Term          | Identifier                                           | Meaning                                                                                                   |
+| ------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| App           | `LicenceApp`, `AppId`                                | One deployed app: `live`, `marketing`, `help`, `telemetry`, `community`, `api`, `mcp`, `router`           |
+| Side          | `Side` = `'browser' \| 'server'`                     | Where an app's bundle runs                                                                                |
+| Bundle        | `AppBundle`                                          | One app's shipped `sources` (repo-relative paths) and `assets` (emitted file basenames)                   |
+| Work          | `WorkRecord` (collect), `WorkEntry` (manifest)       | Third-party material with its own licence                                                                 |
+| Work kind     | `WorkKind` = `'package' \| 'vendored' \| 'embedded'` | npm package, vendored inside a package, inside a binary or our source                                     |
+| Carrier       | `carrier`                                            | What holds a vendored or embedded work (`next 16.3.6`, `@tensorflow/tfjs-backend-wasm`, `livedoc source`) |
+| Licence text  | `LicenceText` `{ label, text }`                      | One licence or notice file's normalised content                                                           |
+| Text hash     | `hash`                                               | First 16 hex of the sha256 of a normalised text; its file name                                            |
+| Override      | `Override`                                           | Committed texts for one exact package version                                                             |
+| Embedded work | `EmbeddedWork`                                       | A reviewed table entry for material the bundler cannot see                                                |
+| Binary asset  | (a basename)                                         | Emitted file with an extension in `BINARY_ASSET_EXTENSIONS`                                               |
+| Manifest      | `LicencesManifest`                                   | What the page renders                                                                                     |
 
 Banned: "licence" and "license" as synonyms of each other in identifiers; the code spells the
 British `licence` everywhere except the npm `license` field and file names.
@@ -245,9 +245,12 @@ Route `/licences`, the shared `SiteHeader` without a funnel surface (D15) and ma
 content column `max-w-3xl`.
 
 - Title (h1): "Open-source licences".
-- Lead: "livediagram is MIT licensed and built on the work of many open-source projects. These are
+- Lead: "LiveDoc is MIT licensed and built on the work of many open-source projects. These are
   the ones our apps ship, generated from what each app actually bundles every time the site is
   built."
+- Origin credit, a second paragraph: "LiveDoc began as a fork of livediagram, which is MIT licensed too. Its
+  copyright notice is kept in the repository's licence.", with "livediagram" linking to its repository
+  ([livediagram upstream](../livediagram-upstream.md)).
 - Section h2 "In your browser", intro: "Sent to your browser by the editor, this website, the help
   centre, the Community and the telemetry dashboard." Section h2 "On our servers", intro: "Bundled into the API,
   MCP server and router, which run on Cloudflare rather than on your device."

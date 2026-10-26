@@ -53,13 +53,13 @@ Prose follows the context:
 - **Diagram types** keep their names: a sequence diagram, an ER diagram,
   an architecture diagram.
 - **Diagramming** and **diagram tool** describe the product and the activity;
-  livediagram is built for every kind of diagram, and also does
+  LiveDoc is built for every kind of diagram, and also does
   whiteboarding, event storming and slideshows well.
 - A new tab kind joins the table above; the container keeps its name.
 
 ## What keeps its name
 
-- **livediagram** stays the product and brand name.
+- **LiveDoc** stays the product and brand name.
 - A document mirrored to Google Drive is a `.livedoc` file of MIME type
   `application/vnd.livedoc+json` ([Google Drive mirror](../022-drive-mirror/drive-mirror.md)):
   both name the app that opens the file, not what is inside it.

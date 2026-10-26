@@ -1,6 +1,6 @@
 # Within reach
 
-**Within reach** is how livediagram keeps the things a person reaches for close to hand: a small set of
+**Within reach** is how LiveDoc keeps the things a person reaches for close to hand: a small set of
 **most used** items beside the **recent** ones. It is one pattern, used wherever a surface offers a short
 "what you probably want next" list, so every such list fills by the same rule and reads alike.
 

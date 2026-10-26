@@ -639,7 +639,7 @@ Text, two spaces after the ref, `·` between changes:
 
 Footer (`formatResultFooter`), composed by the api or the CLI from what only they know:
 
-- Write: `rev 41→42 · cs_8k2m4q7d1x · <lint summary> · revert: livediagram changeset revert <documentId> cs_8k2m4q7d1x`
+- Write: `rev 41→42 · cs_8k2m4q7d1x · <lint summary> · revert: livedoc changeset revert <documentId> cs_8k2m4q7d1x`
   (the document's full id, so the command resolves without a search);
   rebased: `rev 41→44 · rebased over 3 writes · cs_… · …`. The lint summary is the summary line of the api's
   `?view=lint` for the next tab.
@@ -678,7 +678,7 @@ and by the api for the tab byte cap.
 | `not_connected`     | `no arrow <a>→<b>`; the arrows touching a and b as `ref  from→to "label"`                                   | `connect <a> -> <b> first, or insert between the ends of one of these` |
 | `frame_captures`    | `the <frame> @x,y w×h would hold non-members:` and each bystander                                           | `add them to the members, or add absorb or make-room`                  |
 | `test_failed`       | `<ref> <key>: expected <value>, actual <value>`                                                             | `re-read <ref>: it changed since you read it`                          |
-| `invalid_result`    | `<ref> <field>: <rule>` from `elementValidationIssue`                                                       | `see the format: livediagram schema <kind>`                            |
+| `invalid_result`    | `<ref> <field>: <rule>` from `elementValidationIssue`                                                       | `see the format: livedoc schema <kind>`                                |
 | `too_large`         | `<n> operations; the cap is <CHANGESET_MAX_OPERATIONS>`                                                     | `split it into several changesets, or send a replace`                  |
 
 Every rejection prints `error <code> · op <n> · <formatOperation(op)>` (parse errors: `· line <n>`), its detail

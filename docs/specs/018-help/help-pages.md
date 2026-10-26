@@ -52,7 +52,7 @@ Top to bottom:
    Shortcuts, Templates, Exporting Diagrams, Plan Mode). The list is `POPULAR_TOPICS` in `lib/home-sections.ts`
    and a test checks every entry names a real article.
 2. **Start here.** A full-width card, the Getting Started scene beside the first four Getting Started guides as
-   numbered steps and a link to the rest, then About livediagram and Tips and Tricks as two wide cards.
+   numbered steps and a link to the rest, then About LiveDoc and Tips and Tricks as two wide cards.
 3. **Editor guides.** The feature categories as art cards, three across on a computer.
 4. **Your account and data.** Account and Data, Privacy and Security, Supported Devices and Policies.
 5. **Developers and self-hosting.** Developers and Self-Hosting, as wide cards.

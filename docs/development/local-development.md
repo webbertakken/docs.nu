@@ -1,6 +1,6 @@
 # Local development
 
-How to run livediagram on your machine.
+How to run LiveDoc on your machine.
 
 ## Requirements
 
@@ -12,8 +12,8 @@ Cloudflare is not required for local development. The api worker runs locally vi
 ## Clone and install
 
 ```sh
-git clone https://github.com/livediagram-app/livediagram.app livediagram
-cd livediagram
+git clone https://github.com/webbertakken/livedoc livedoc
+cd livedoc
 pnpm install
 ```
 
@@ -61,7 +61,7 @@ A remote api works too: a pull request's preview api (the address in its preview
 followed by `/api`) has its own database and is the one to reach for; the production api reads
 and writes real people's documents ([Preview deployments](../specs/016-platform/preview-deployments.md)).
 
-Without it the editor loads, the canvas works, and the first save fails with **“Couldn’t create the document”** — which reads like a broken api worker rather than a missing variable, so it is worth setting up front. `apps/telemetry`, `apps/help` and `apps/community` read the same variable: the dashboard needs it to show anything on `:4003`, the Community needs it to list any posts on `:4005`, and the help centre only loses its telemetry posts without it. To work on the dashboard against real numbers without seeding a local database, point it at production's summary instead: `NEXT_PUBLIC_API_BASE=https://www.livediagram.app/api` in `apps/telemetry/.env.local`. `GET /api/telemetry/summary` is public, read-only and allows any origin, and the dashboard only sends events itself when `NEXT_PUBLIC_TELEMETRY_ENABLED=true`, which local builds leave unset.
+Without it the editor loads, the canvas works, and the first save fails with **“Couldn’t create the document”** — which reads like a broken api worker rather than a missing variable, so it is worth setting up front. `apps/telemetry`, `apps/help` and `apps/community` read the same variable: the dashboard needs it to show anything on `:4003`, the Community needs it to list any posts on `:4005`, and the help centre only loses its telemetry posts without it. To work on the dashboard against real numbers without seeding a local database, point it at production's summary instead: `NEXT_PUBLIC_API_BASE=https://www.docs.nu/api` in `apps/telemetry/.env.local`. `GET /api/telemetry/summary` is public, read-only and allows any origin, and the dashboard only sends events itself when `NEXT_PUBLIC_TELEMETRY_ENABLED=true`, which local builds leave unset.
 
 The editor works in pure-guest mode without any auth setup: `pnpm dev` and open `http://localhost:4000/new`. Documents persist to the local D1 file the api worker creates on first start. (On `http://localhost:4002/new` instead, set `NEXT_PUBLIC_API_BASE` first — see the note above.)
 

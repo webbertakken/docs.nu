@@ -4,7 +4,7 @@
 
 A **workbench** is a developer tool that shows a document live beside an agent: an agent workbench first, then VS Code
 and other editors. A **workbench embed** is the editor inside that tool's frame, signed in as the person, so they draw
-there, everything they draw reaches livediagram at once, and their agent, working through the
+there, everything they draw reaches LiveDoc at once, and their agent, working through the
 [CLI](../015-api/cli.md), sees the drawing and their selection. It is the signed-in sibling of the share-code
 [embed](embeds.md).
 
@@ -28,7 +28,7 @@ scope's document, or the document open in a workspace frame.
 A frame needs no CORS: CORS governs `fetch`, not framing. What stops a signed-in editor in another tool's frame is:
 
 - **Framing.** The editor sends `X-Frame-Options: DENY`; only `/embed` may be framed ([Embeds](embeds.md#frame-headers)).
-- **Third-party storage.** Inside a frame on another site, browsers partition or block livediagram's cookies and
+- **Third-party storage.** Inside a frame on another site, browsers partition or block LiveDoc's cookies and
   storage (Safari, Firefox, and Chrome with third-party cookies off), so the person's session is not there, and
   Google's sign-in refuses to run in a frame.
 
@@ -84,7 +84,7 @@ second, explicit approval, never an existing pairing widened in silence.
    it lives.
 2. **Ask.** `livedoc workbench pair --origin <origin> [--name <workbench>]` opens `pairingUrl` in the browser
    (or prints it when it cannot) and waits for the answer, as `auth login --device` waits. `workbench open` refused
-   for pairing prints that command and exits 4. A workbench shows the URL as one button, "Approve in livediagram".
+   for pairing prints that command and exits 4. A workbench shows the URL as one button, "Approve in LiveDoc".
 3. **Approve.** `<live origin>/workbench/pair?code=<code>` is an ordinary editor page (never framed), for a signed-in
    person only, and only the token's owner may answer. It reads: "Allow **Acme Editor** at `https://127.0.0.1:5175` to
    open your documents with the token **LiveDoc CLI**?", with **Allow** and **Don't allow**. The workbench name
@@ -127,7 +127,7 @@ The bullets above are the document scope. A **workspace** session is confined di
 - **Everything the Explorer does.** Create, rename, move, copy, favourite, share (links, roles, password, expiry),
   trash, restore, and create, rename, move and delete folders, at the person's own access to each.
 - **Never Community.** Publishing a document to [Community](../025-community/community.md) makes it public, and only
-  the owner's own signed-in browser does that: a token cannot publish, so neither can a frame. **Open in livediagram**
+  the owner's own signed-in browser does that: a token cannot publish, so neither can a frame. **Open in LiveDoc**
   is one click away for it.
 - **Never the account.** Refused `403 workbench_confined`, as in the document scope: the profile, preferences'
   writes, the guest migration, API tokens and pairings, team administration (invites, members, roles, plans,
@@ -139,7 +139,7 @@ The bullets above are the document scope. A **workspace** session is confined di
 
 The editor of the document, minus the app's surroundings: no app header, Explorer or account menu. The canvas, the
 tab bar, the palette, the toolbars and the panels stay, since a workbench embed is for drawing. An **Open in
-livediagram** button opens the document in a full tab. The colour scheme follows the workbench (`livedoc:theme`),
+LiveDoc** button opens the document in a full tab. The colour scheme follows the workbench (`livedoc:theme`),
 else the system. Presence shows the person as themselves; their agent shows as their status line
 ([Agent presence](../024-agents/agent-presence.md)).
 
@@ -151,7 +151,7 @@ where back controls live: a button of its own in the corner the app's menu butto
 toolbar and clear of it, and the first of the editor's controls for the keyboard. It is not in the tab bar. A
 document's status screens (deleted, load error, not found) carry Back at their top left too. The document scope has
 no Back. **New document** creates the document in place and opens
-it in the frame, never `/new`. **Open in livediagram** opens the current view or document in a full tab. A frame
+it in the frame, never `/new`. **Open in LiveDoc** opens the current view or document in a full tab. A frame
 started on a folder shows that folder; its empty state is the Explorer's own, with New document and the templates.
 
 ## Workbench messages
@@ -194,7 +194,7 @@ What the person meant when they typed. A workbench attaches it to the message th
 reads exactly what was selected then, even when the selection has moved on since:
 
 ```text
-[livediagram] "Home screen" › tab "Wireframe" (doc 3h9x2a, tab 0b34, rev 41)
+[livedoc] "Home screen" › tab "Wireframe" (doc 3h9x2a, tab 0b34, rev 41)
 selected: button 146b "Play", frame e4a8 "Game grid", sticky 0c84 "Daily streak goes here"
 read: livedoc tab view 3h9x2a --tab 0b34 --view show --ref 146b
 ```
@@ -210,18 +210,18 @@ read: livedoc tab view 3h9x2a --tab 0b34 --view show --ref 146b
   terminal reads the live selection.
 - The CLI teaches an agent to read one in `livedoc guide workbench`: re-reading the refs, looking at the tab
   with `tab render`, and showing presence while it works. The agent skill sends an agent there when a message
-  carries `[livediagram]`.
+  carries `[livedoc]`.
 
 ## A workbench's side
 
 What a workbench does to fit this contract (its own documentation holds the detail):
 
 - **Opening.** A workbench opens a document in a view of its own: from a `*.livedoc.json` mirror file (with its JSON
-  one step away) or from a livediagram document link. It mints through the person's own CLI
-  (`livedoc workbench open ... --origin <its origin> --json`), so it never holds a livediagram credential, and
+  one step away) or from a LiveDoc document link. It mints through the person's own CLI
+  (`livedoc workbench open ... --origin <its origin> --json`), so it never holds a LiveDoc credential, and
   shows the one command that fixes a missing CLI or sign-in.
 - **Pairing.** Unpaired, it runs `livedoc workbench pair --origin <its origin> --name <its name>` and shows the
-  printed URL as an "Approve in livediagram" button, then opens the frame once paired.
+  printed URL as an "Approve in LiveDoc" button, then opens the frame once paired.
 - **The selection.** While a diagram is in view, the place the person types to their agent names the document and
   what is selected ("Home screen · 3 selected", or "Home screen · whole tab"). Sending attaches the selection
   reference to the message as text, and the person can leave it off any one message.

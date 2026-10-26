@@ -56,10 +56,8 @@ Each AI request optionally includes a `history` array of prior `{ role, content 
   in production for an unknown period, so the endpoint served any origin while this spec
   described it as locked down; a probe (`POST /api/ai` with no `Origin` answering
   `400 invalid mode` instead of `403 origin_not_allowed`) is how to tell.
-  The value is **`https://www.livediagram.app,https://livediagram.app`**, and the `www`
-  entry is the load-bearing one: the apex 301-redirects to `www`, so `www` is the origin a
-  real browser sends. The apex-only value this spec used to recommend would have returned
-  403 for every genuine request from the editor. Self-hosters set their own hostname —
+  The value is **`https://docs.nu`**: `www.docs.nu` 301-redirects to the apex, so the apex is the origin a
+  real browser sends. Self-hosters set their own hostname —
   whichever one the browser actually lands on after redirects — plus dev origins like
   `http://localhost:4002`.
 - Optional account-only gate (`AI_REQUIRE_ACCOUNT`). When set to `"true"`, `/api/ai` rejects
@@ -304,7 +302,7 @@ fires it, because the route cannot know whether the author kept the result).
 | `AI_BASE_URL`                                                | Worker var (generic only) | The OpenAI-COMPATIBLE chat-completions base for `AI_API_KEY`: a laptop points it at llama.cpp or Ollama. The google and openai keys bring their own.                                                                      |
 | `AI_MODEL`                                                   | Worker var (optional)     | Model id for the assistant. Defaults per provider (table above); required for the generic key.                                                                                                                            |
 | `AI_VISION_MODEL`                                            | Worker var (optional)     | Model id for reading note crops (`/api/ai/read-notes`, [Event storming](../021-event-storming/event-storming.md) Phase 8). Defaults as in "Which model": `AI_MODEL` only when the reader shares the assistant's provider. |
-| `AI_ALLOWED_ORIGINS`                                         | Worker var (optional)     | Comma-separated `Origin` values that may call `/api/ai`. Unset = no check. Example: `https://livediagram.app,http://localhost:4002`. Entries are matched case-sensitive against the request's `Origin` header verbatim.   |
+| `AI_ALLOWED_ORIGINS`                                         | Worker var (optional)     | Comma-separated `Origin` values that may call `/api/ai`. Unset = no check. Example: `https://docs.nu,http://localhost:4002`. Entries are matched case-sensitive against the request's `Origin` header verbatim.           |
 | `AI_REQUIRE_ACCOUNT`                                         | Worker var (optional)     | Set to `"true"` to require a verified session token on `/api/ai` (rejects the `X-Owner-Id` guest path with 401). Unset / any other value = guests allowed.                                                                |
 
 Set via `wrangler secret put <the key var>` for production; drop into `apps/api/.dev.vars`

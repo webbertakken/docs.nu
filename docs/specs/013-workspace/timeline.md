@@ -8,7 +8,7 @@ sidebar's Overview group, under the Inbox (§8).
 
 Modelled on the Timeline subsystem in the Manager Toolkit monorepo
 (`specs/dashboard/timeline/spec.md` + `packages/ui/src/timeline/*` there),
-adapted to livediagram's data model and its light/dark UI.
+adapted to LiveDoc's data model and its light/dark UI.
 
 ## Why
 
@@ -39,7 +39,7 @@ has happened since they were last here**, not just a list of files.
   per-entry revert, was removed on 2026-10-03.)
 - **Not realtime.** No Durable Object fan-out, no per-user socket. The
   feed is read on load, with a Refresh button and a stale-read refresh
-  (§6.3). livediagram's realtime rooms are per-document; a per-user
+  (§6.3). LiveDoc's realtime rooms are per-document; a per-user
   channel is a whole new object type for a screen the user looks at
   once a session.
 - **No favourites / starring.** The Manager Toolkit timeline has them
@@ -50,7 +50,7 @@ has happened since they were last here**, not just a list of files.
   since shipped (§2.9): a busy day needed pruning more than it needed
   starring.
 - **No AI day summary.** Manager Toolkit gates one behind Pro;
-  livediagram has no paid tier ([Open source + distribution](../002-project-scope/open-source-and-business-model.md)), so it would be free for
+  LiveDoc has no paid tier ([Open source + distribution](../002-project-scope/open-source-and-business-model.md)), so it would be free for
   everyone and gated only on the model key. Deferred as its own
   decision rather than smuggled in with this one.
 - **No manual entries.** Every event is emitted by the system from a
@@ -1032,7 +1032,7 @@ Favourites are not built. Everything here is additive.
 
 Every event is emitted **inline on the write path** in the api worker.
 There are no scanners and no cron-driven scanning: unlike Manager
-Toolkit, livediagram has no entities whose state drifts silently, so a
+Toolkit, LiveDoc has no entities whose state drifts silently, so a
 "rescan for what I missed" pass would find nothing. The two exceptions
 are the future-dated expiry events (§4.5), which the existing daily
 crons already compute.
@@ -1492,7 +1492,7 @@ failed read and toasts rather than flashing its empty state.
 ## 7. UI packaging
 
 Per the reuse principle, the generic pieces go in
-**`packages/ui/src/timeline/`** and know nothing about livediagram's
+**`packages/ui/src/timeline/`** and know nothing about LiveDoc's
 domain:
 
 ```
@@ -1529,7 +1529,7 @@ components without inheriting Explorer-specific copy.
 **Colour.** Each tone gets a CSS variable pair
 (`--ld-timeline-<tone>` and `--ld-timeline-<tone>-soft`) defined in the
 live app's `globals.css` with **both light and dark values** —
-livediagram has a class-based dark mode ([Live app](../007-editor/live-app.md)), unlike Manager
+LiveDoc has a class-based dark mode ([Live app](../007-editor/live-app.md)), unlike Manager
 Toolkit which is dark-only, so every tint needs two, and dark mode
 lifts the bold value (a 600-weight hue goes muddy on slate-900) while
 dropping the soft one (an alpha tint over a dark surface reads far

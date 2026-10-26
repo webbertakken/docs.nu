@@ -199,7 +199,7 @@ not a hand's stroke, and follow their tab's finish as a shape does:
 
 ### Flexible
 
-Draws exactly as livediagram did before finishes existed.
+Draws exactly as LiveDoc did before finishes existed.
 
 ## Where it is set
 

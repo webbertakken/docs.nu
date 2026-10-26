@@ -77,7 +77,7 @@ Scope, by file (all under `apps/live/` unless stated):
 | Image request | `ImportImageRequest`   | The import image pipeline's `{ elementId, key, source, hint }`                           |
 | Byte budget   | `ByteBudget`           | Remaining inflate allowance for one import                                               |
 
-Banned synonyms: "diagram" for a page (a livediagram diagram is the whole document; say page), "shape"
+Banned synonyms: "diagram" for a page (a LiveDoc diagram is the whole document; say page), "shape"
 for an edge, "warning" for a note, "stencil" for a named style (`ellipse` is a named style,
 `mxgraph.aws4.s3` is a stencil).
 
@@ -418,7 +418,7 @@ strokeWidth)` (`@livedoc/document`, the canvas marker's own size) is nearest `L`
     origin plus its `x`, `y` for an absolute one; the centre of that box). `labelOffset =
 projectToArrow(style, from, to, …, point, curvePoints)` on the arrow as built, always set when
     there is a label. `labelMaxWidth = ceil(widest line's labelTextWidth(chars,
-arrowLabelFontSize(textSize)) × DRAWIO_CAPTION_WIDTH_SLACK)`, in livediagram px.
+arrowLabelFontSize(textSize)) × DRAWIO_CAPTION_WIDTH_SLACK)`, in LiveDoc px.
 14. A child vertex of an edge that is not a label is built as its own element with its box's corner
     at `pointAlong(state, x, y, offset)` (`mxGraphView.getPoint`), right after the arrow.
 
@@ -512,7 +512,7 @@ HELVETICA_EM_ADVANCE)`, the line ratio `rh = L · LABEL_LINE_HEIGHT / (px · DRA
    Any other holder with a hex fill gives a text without `textColor` `inkOnFill(fill)`.
 9. **Scale** (`scalePage(elements, scale)`): about the page origin, multiply boxed `x`, `y`, `width`,
    `height`, lane `headerSize`, table `rowHeights` / `colWidths`, arrow `curvePoints`, `curveOffset`, free
-   endpoints and `labelOffset.offset`; `labelMaxWidth` is already in livediagram px. Stroke widths,
+   endpoints and `labelOffset.offset`; `labelMaxWidth` is already in LiveDoc px. Stroke widths,
    presets and font sizes are untouched. Skipped at scale 1.
 10. Result `{ elements, layers?, backgroundColor? }`: `backgroundColor` is the page background unless
     white (`#fff`, `#ffffff`, `#ffffffff`), which stays unset. Pending images carry `ctx.tabId`.
@@ -1053,7 +1053,7 @@ End to end: `e2e/drawio-import.spec.ts` on the production build (`scripts/e2e-st
   generator derives from them (compressed `.drawio`, `.drawio.svg`, `.drawio.png` with `tEXt` and
   `zTXt`, a `stress` page). `generate.ts` rebuilds them deterministically
   (`node lib/drawio/__fixtures__/generate.ts`); `README.md` there records provenance and licence.
-- No vendor artwork is copied: stencil names are identifiers, and icons render from livediagram's
+- No vendor artwork is copied: stencil names are identifiers, and icons render from LiveDoc's
   own catalogues.
 - `lib/drawio/route/` ports draw.io's view geometry (jgraph/drawio v31.7.0, `mxGraphView`,
   `mxEdgeStyle`, `mxPerimeter`, `mxUtils`, `mxShape.getWaypoints`, parts of Graph.js and

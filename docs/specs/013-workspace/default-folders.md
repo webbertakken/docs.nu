@@ -284,7 +284,7 @@ it has no Location step and shows no folder browser.
   placement, only its intent, so the server's [precedence](#precedence) files it: the default for its kind, template
   or mode, else the root of My Documents. A default the browser has not loaded yet is still honoured, as the server
   resolves it.
-- **A context is explicit.** A `/new?folder=` or `?team=` link files the document there, in livediagram, ahead of
+- **A context is explicit.** A `/new?folder=` or `?team=` link files the document there, in LiveDoc, ahead of
   any default.
 - **Where to change it.** Settings > Documents > Default Folders ([Settings](#settings)), the folder menus' **Use as
   Default for** and My Documents' own menu. The wizard itself sets nothing.
