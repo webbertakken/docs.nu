@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { DRIVE_CONNECT_FAILED } from '@/lib/drive/cloud-sync-copy';
 import { usePathname } from 'next/navigation';
-import type { DriveAccessToken, DriveMode } from '@livediagram/api-schema';
+import type { DriveAccessToken, DriveMode } from '@livedoc/api-schema';
 import {
   apiDisconnectDrive,
   apiDriveState,

@@ -17,7 +17,7 @@ import {
   type ListedDocument,
   type StatusRow,
   type VerbContext,
-} from '@livediagram/agent-verbs';
+} from '@livedoc/agent-verbs';
 import type { ConfigFile } from '../config/config-file';
 import type { Profile } from '../config/profiles';
 import { debugLog } from '../debug';

@@ -407,7 +407,7 @@ read for an export). Anyone may read it; only an Editor changes its form or copi
 Add to Slot's **From a Sheet** fills a slot with a figure (or a chart: [Sheet Chart](#sheet-chart)) read live from one
 of the document's Sheets: the same value
 the Sheet shows, in its own number format, following every edit (a collaborator's too), and following its cells as
-rows and columns are inserted, deleted or moved (they are named by stable row and column ids, `@livediagram/sheets`
+rows and columns are inserted, deleted or moved (they are named by stable row and column ids, `@livedoc/sheets`
 `sheet-metrics.ts`). Each fits any slot.
 
 - **Sheet Figure**: one cell's value, large, named by the text to its left (else its column's header, else its

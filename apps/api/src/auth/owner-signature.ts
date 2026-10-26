@@ -17,7 +17,7 @@
 // The key is derived from the sign-in secret (auth/guest-key.ts). A host
 // without one signs nothing: `signOwnerId` returns null there.
 
-import { bytesToBase64Url } from '@livediagram/api-schema';
+import { bytesToBase64Url } from '@livedoc/api-schema';
 import type { Env } from '../types';
 import { guestSigningKey } from './guest-key';
 import { timingSafeEqual } from './timing-safe';

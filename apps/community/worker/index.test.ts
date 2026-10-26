@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { communityPostFixture } from '@livediagram/api-schema/testing';
+import { communityPostFixture } from '@livedoc/api-schema/testing';
 import worker, { type Env } from './index';
 import { API_TIMEOUT_MS } from './post-head';
 

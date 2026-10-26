@@ -18,7 +18,7 @@ import {
   type StickyElement,
   type TextElement,
   type TextSize,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import type { ImportImageRequest } from '@/lib/import-images';
 import type { DrawioCell, Rect } from './cells';
 import { requestDataUrlImage } from './images';

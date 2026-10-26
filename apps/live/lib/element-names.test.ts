@@ -7,7 +7,7 @@ import {
   createSticky,
   createText,
   type Element,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   describeMany,
   describeOne,

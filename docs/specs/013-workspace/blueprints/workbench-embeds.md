@@ -33,7 +33,7 @@ It provides these names to sibling blueprints ([CLI](../../015-api/blueprints/cl
 | `workspaceFramePath(place)`, `workspacePlaceOf(pathname, search)`    | The workspace frame's addresses, both ways                               |
 | `assignAppLocation(href)`, `setAppNavigationInterceptor(fn)`         | The app's one way to leave a page, which a workspace frame takes over    |
 | `WORKBENCH_ENDED_CLOSE` 4006                                         | The room's close code for a session whose pairing or token ended         |
-| `selectionReference(input)`                                          | The selection reference text, in `@livediagram/document-views`           |
+| `selectionReference(input)`                                          | The selection reference text, in `@livedoc/document-views`               |
 | `EditorSurface = 'app' \| 'embed' \| 'workbench'`                    | The editor's surface, replacing the `embed` boolean                      |
 | `POST /api/workbench/tickets`, `/sessions`, `/pairing-requests`, ... | The routes, below                                                        |
 
@@ -738,7 +738,7 @@ Explorer view, the same control at the right end of the Explorer's bottom bar li
 - `workbench open --workspace [--folder <f>] --origin <origin> [--json]`: `<doc>` and `--workspace` exclude each
   other, one is required (exit 2 "name a document, or --workspace"); `--tab` with `--workspace` exits 2. `--folder`
   without `--workspace` exits 2. `<f>` resolves as `link init --folder` does (`resolveFolder` over `folderChoices`,
-  moved to `@livediagram/agent-verbs` so `link init`, `folder` and `workbench` share it): its full id, an id prefix
+  moved to `@livedoc/agent-verbs` so `link init`, `folder` and `workbench` share it): its full id, an id prefix
   or its name ignoring case; none 3, several 3 with the candidates. `POST /api/workbench/tickets { scope:
 'workspace', folderId?, origin }`. 201: text `url`; `--json` `{ url, scope, folderId, expiresAt }`. 428: exit 4,
   fix `livediagram workbench pair --origin <origin> --workspace`. 404: exit 3.

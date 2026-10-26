@@ -3,13 +3,7 @@
 // grows until every label has the room draw.io gave it, in LiveDoc's own type. Positions,
 // sizes, waypoints and label offsets scale; strokes, presets and font sizes do not.
 
-import {
-  LABEL_FONT_PX,
-  PADDING_PX,
-  isBoxed,
-  type Element,
-  type Endpoint,
-} from '@livediagram/document';
+import { LABEL_FONT_PX, PADDING_PX, isBoxed, type Element, type Endpoint } from '@livedoc/document';
 import type { DrawioGraph } from './cells';
 import { cellLabel } from './label';
 import {

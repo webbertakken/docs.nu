@@ -1,4 +1,4 @@
-import { PROFILE_PICTURE_HOST } from '@livediagram/api-schema';
+import { PROFILE_PICTURE_HOST } from '@livedoc/api-schema';
 
 // Profile pictures for the signed-in specs (docs/specs/014-identity/profile-picture.md). An account's picture is
 // better-auth's `user.image`, drawn only from Google's picture host, so each spec gives its account a picture there

@@ -4,7 +4,7 @@
 // person's browser, so the CLI runs it (CLI55).
 
 import { z } from 'zod';
-import { ApiError } from '@livediagram/api-client';
+import { ApiError } from '@livedoc/api-client';
 import {
   normaliseWorkbenchName,
   parseWorkbenchOrigin,
@@ -12,7 +12,7 @@ import {
   type WorkbenchTicketRequest,
   type WorkbenchTicketResponse,
   type WorkbenchWorkspaceTicketResponse,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { readLibraries } from '../find-documents';
 import { folderChoices, resolveFolderRef } from '../folders';
 import { AddressError, parseDocumentUrl, resolveDocument } from '../addressing';

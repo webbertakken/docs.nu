@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from './env';
-import { pkceChallenge } from '@livediagram/api-schema';
+import { pkceChallenge } from '@livedoc/api-schema';
 import { isAllowedRedirectUri, registerOauthRoutes } from './oauth';
 
 function mockKV(): KVNamespace {
@@ -452,7 +452,7 @@ describe('isAllowedRedirectUri', () => {
 });
 
 describe('the CLI client (docs/specs/015-api/blueprints/cli.md "OAuth server", CLI35, CLI77)', () => {
-  const authorize = (redirect: string, client = 'livediagram-cli') =>
+  const authorize = (redirect: string, client = 'livedoc-cli') =>
     app.request(
       `/oauth/authorize?client_id=${client}&redirect_uri=${encodeURIComponent(redirect)}&code_challenge=${'c'.repeat(43)}&code_challenge_method=S256&response_type=code`,
       {},
@@ -467,7 +467,7 @@ describe('the CLI client (docs/specs/015-api/blueprints/cli.md "OAuth server", C
       const looked = await app.request(`/oauth/session/${session}`, {}, env);
       expect(await looked.json()).toMatchObject({
         clientName: 'LiveDoc CLI',
-        clientId: 'livediagram-cli',
+        clientId: 'livedoc-cli',
       });
     }
   });

@@ -5,7 +5,7 @@
 // panel's actions. Every tab has it; only the elected tab runs the engine.
 
 import { createContext, useContext } from 'react';
-import type { DriveMode } from '@livediagram/api-schema';
+import type { DriveMode } from '@livedoc/api-schema';
 import type { DriveMirrorNotice, DriveMirrorStatus } from '@/lib/drive/engine';
 
 export type DriveMirrorContextValue = {

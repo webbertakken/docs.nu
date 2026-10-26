@@ -20,7 +20,7 @@ import {
   type TextAlignY,
   type TextRun,
   type TextSize,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import type { ReportTally } from './notes';
 import type { DrawioCell } from './cells';
 import { readFill, readInk, type DrawioColour } from './colour';

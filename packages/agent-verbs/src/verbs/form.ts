@@ -2,7 +2,7 @@
 // change` (change_form, its changes from a JSON file or stdin), `form share` (share_form) and `form try` (try_form, its
 // answers from a JSON file or stdin), over the calls the MCP's tools share. A Form tab is named by name or id; questions by id or prompt.
 import { z } from 'zod';
-import { STARTER_IDS, type StarterId } from '@livediagram/forms';
+import { STARTER_IDS, type StarterId } from '@livedoc/forms';
 import { defineVerb, VerbRefusal, type Verb, type VerbContext } from '../define';
 import { addForm, changeForm, readForm, shareForm, type FormCallResult } from '../forms/form-calls';
 import type { FormChange } from '../forms/form-changes';

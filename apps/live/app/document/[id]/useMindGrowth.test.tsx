@@ -9,7 +9,7 @@ import {
   type Element,
   type ShapeElement,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { resetMindHandoff } from '@/lib/mind-handoff';
 import { useMindGrowth } from './useMindGrowth';
 

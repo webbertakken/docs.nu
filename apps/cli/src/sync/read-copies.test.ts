@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ReadCopy } from '@livediagram/agent-verbs';
+import type { ReadCopy } from '@livedoc/agent-verbs';
 import { fakeIo } from '../testing/fake-io';
 import { fileReadCopies, READ_COPY_MAX_BYTES, READ_COPY_REVS_PER_TAB } from './read-copies';
 

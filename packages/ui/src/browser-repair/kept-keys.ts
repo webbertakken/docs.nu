@@ -5,7 +5,7 @@
 // matched against. apps/live's local-identity test fails if one of its identity keys is not listed here.
 
 /** The prefixes a repair considers at all. Anything else is never touched. */
-export const REPAIR_SCOPE_PREFIXES = ['livedoc:', 'livediagram-'] as const;
+export const REPAIR_SCOPE_PREFIXES = ['livedoc:', 'livedoc-'] as const;
 
 /** The guest identity's keys (apps/live/lib/local-identity.ts, which a test holds to these names). */
 export const GUEST_IDENTITY_KEYS = {

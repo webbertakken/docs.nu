@@ -32,7 +32,7 @@ import {
   type Padding,
   type ShapeElement,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { track } from '@/lib/telemetry';
 import {
   withSetAnimationRepeat,

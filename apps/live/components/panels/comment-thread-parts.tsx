@@ -6,15 +6,8 @@
 // `comfortable` (a feed: larger text, the composer beside your own avatar), the popover `compact`.
 import { useRef, useState, type RefObject } from 'react';
 import { useAutoHeight } from '@/hooks/ui/useAutoHeight';
-import {
-  Button,
-  CheckIcon,
-  IDENTITY_FILL,
-  TrashIcon,
-  Tooltip,
-  identityVars,
-} from '@livediagram/ui';
-import type { Comment, CommentMention, CommentThread } from '@livediagram/document';
+import { Button, CheckIcon, IDENTITY_FILL, TrashIcon, Tooltip, identityVars } from '@livedoc/ui';
+import type { Comment, CommentMention, CommentThread } from '@livedoc/document';
 import { MentionMenu } from '@/components/primitives/MentionMenu';
 import { MentionText } from '@/components/primitives/MentionText';
 import { useMentionAutocomplete } from '@/hooks/ui/useMentionAutocomplete';

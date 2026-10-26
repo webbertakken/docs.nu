@@ -15,7 +15,7 @@ import {
   groupSectionFeatures,
   LANDING_SECTION_IDS,
 } from '@/lib/landing-content';
-import { pageMetadata } from '@livediagram/ui';
+import { pageMetadata } from '@livedoc/ui';
 
 // One detail page per feature category at /features/<id>, reading the matching
 // LANDING_SECTIONS entry (see docs/specs/019-marketing/marketing-site.md "Feature category

@@ -1,4 +1,4 @@
-import { truthFrom, type Truth } from '@livediagram/sticky-vision';
+import { truthFrom, type Truth } from '@livedoc/sticky-vision';
 
 // EXPORTING GROUND TRUTH from the review surface (docs/research/vision/sticky-detection.md).
 //

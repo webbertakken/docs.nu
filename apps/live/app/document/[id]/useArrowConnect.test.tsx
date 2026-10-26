@@ -7,7 +7,7 @@ import {
   type Element,
   type LaidOutPage,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { useArrowConnect } from './useArrowConnect';
 
 vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));

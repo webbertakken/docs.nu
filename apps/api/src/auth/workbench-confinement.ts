@@ -3,11 +3,7 @@
 // (by scope), the allow-list of its scope, then the session's level. Null lets the request through to its route,
 // which re-gates with the owner's identity.
 
-import {
-  apiRouteLabel,
-  workbenchAmbientHeaders,
-  workbenchRouteVerdict,
-} from '@livediagram/api-schema';
+import { apiRouteLabel, workbenchAmbientHeaders, workbenchRouteVerdict } from '@livedoc/api-schema';
 import { forbidden, notFound } from '../responses';
 import type { WorkbenchContext } from '../routes/context';
 import { sessionPrefixOf } from './workbench-session';

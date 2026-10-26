@@ -8,7 +8,7 @@ import type { ImportImageProgress } from '@/lib/import-images';
 import { reportHasLosses } from '@/lib/board-scene/report';
 import { ImportImageReport } from './ImportImageReport';
 import type { ImportFormat as Format } from '@/hooks/persistence/useTabImport';
-import { Glyph, DialogCloseButton, DialogHeader } from '@livediagram/ui';
+import { Glyph, DialogCloseButton, DialogHeader } from '@livedoc/ui';
 
 type ImportTabDialogProps = {
   // The active tab's name — shown in the warning so it's clear which

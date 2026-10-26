@@ -4,22 +4,22 @@ Derived from [Iconography](../iconography.md).
 
 ## Domain and naming
 
-| Term (spec)        | Identifier                                                                                                           | Home                                                 |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| On-screen stroke   | `ICON_STROKE_PX`, `ICON_STROKE_PX_SMALL`                                                                             | `packages/icons/src/weight.ts`                       |
-| Stroke in units    | `strokeUnits(px, sizePx, units)` (exporters, tech tiles)                                                             | `packages/icons/src/weight.ts`                       |
-| Ink geometry       | `primsBounds`, `inkInsets`                                                                                           | `packages/icons/src/ink.ts`                          |
-| Glyph child reader | `childPrims(children)`                                                                                               | `packages/ui/src/icons/glyph-ink.ts`                 |
-| Non-scaling rule   | `.lvd-glyph *`                                                                                                       | `packages/tailwind-config/theme.css`                 |
-| Icon size step     | `GlyphSize` = `12 \| 14 \| 16 \| 20 \| 24`, `GLYPH_SIZES`                                                            | `packages/icons/src/weight.ts`                       |
-| Icon primitive     | `Glyph`                                                                                                              | `packages/ui/src/icons/Glyph.tsx`                    |
-| Icon weight        | `IconWeight` = `'thin' \| 'regular' \| 'bold'`                                                                       | `packages/document/src/icon-weight.ts`               |
-| Icon weight px     | `ICON_WEIGHT_PX`, `DEFAULT_ICON_WEIGHT`                                                                              | `packages/document/src/icon-weight.ts`               |
-| Element field      | `iconWeight?: IconWeight`                                                                                            | `BoxedElement` in `element-types.ts`                 |
-| Vendored Lucide    | one `lucide<Name>` export per glyph in `packages/icons/src/lucide.generated.ts`, subpath `@livediagram/icons/lucide` | written by `packages/icons/scripts/vendor-lucide.ts` |
-| Vendor manifest    | `packages/icons/lucide-manifest.json`                                                                                | pinned version + glyph names                         |
-| Centring exception | `CENTRING_EXCEPTIONS`, `ASYMMETRIC`                                                                                  | each centring test (named glyph → reason)            |
-| Art allow-list     | `ICON_ART_ALLOWLIST`, `RAW_ICON_SVG`                                                                                 | `packages/oxlint-config/raw-svg.ts`                  |
+| Term (spec)        | Identifier                                                                                                       | Home                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| On-screen stroke   | `ICON_STROKE_PX`, `ICON_STROKE_PX_SMALL`                                                                         | `packages/icons/src/weight.ts`                       |
+| Stroke in units    | `strokeUnits(px, sizePx, units)` (exporters, tech tiles)                                                         | `packages/icons/src/weight.ts`                       |
+| Ink geometry       | `primsBounds`, `inkInsets`                                                                                       | `packages/icons/src/ink.ts`                          |
+| Glyph child reader | `childPrims(children)`                                                                                           | `packages/ui/src/icons/glyph-ink.ts`                 |
+| Non-scaling rule   | `.lvd-glyph *`                                                                                                   | `packages/tailwind-config/theme.css`                 |
+| Icon size step     | `GlyphSize` = `12 \| 14 \| 16 \| 20 \| 24`, `GLYPH_SIZES`                                                        | `packages/icons/src/weight.ts`                       |
+| Icon primitive     | `Glyph`                                                                                                          | `packages/ui/src/icons/Glyph.tsx`                    |
+| Icon weight        | `IconWeight` = `'thin' \| 'regular' \| 'bold'`                                                                   | `packages/document/src/icon-weight.ts`               |
+| Icon weight px     | `ICON_WEIGHT_PX`, `DEFAULT_ICON_WEIGHT`                                                                          | `packages/document/src/icon-weight.ts`               |
+| Element field      | `iconWeight?: IconWeight`                                                                                        | `BoxedElement` in `element-types.ts`                 |
+| Vendored Lucide    | one `lucide<Name>` export per glyph in `packages/icons/src/lucide.generated.ts`, subpath `@livedoc/icons/lucide` | written by `packages/icons/scripts/vendor-lucide.ts` |
+| Vendor manifest    | `packages/icons/lucide-manifest.json`                                                                            | pinned version + glyph names                         |
+| Centring exception | `CENTRING_EXCEPTIONS`, `ASYMMETRIC`                                                                              | each centring test (named glyph → reason)            |
+| Art allow-list     | `ICON_ART_ALLOWLIST`, `RAW_ICON_SVG`                                                                             | `packages/oxlint-config/raw-svg.ts`                  |
 
 "Glyph" is the rendered icon; "icon" in `shape: 'icon'` is the canvas element. Do not use either as a synonym for the other in code.
 
@@ -95,7 +95,7 @@ export function iconWeightPx(w: IconWeight | undefined): number;
 - Copy: row label "Weight"; tiles "Thin", "Regular", "Bold".
 - Hover previews the weight live, as the Size row does.
 - Menu icons: `MENU_ICON_PX = 14` (rows, section headers, tiles) and `QUICK_ACTION_ICON_PX = 16` (icon-only buttons), exported from `apps/live/components/palette/context-menu-icons.tsx`; every menu glyph module sizes to them.
-- Contact sheet: `pnpm icons:sheet` renders every exported `*Icon` / `*Glyph` of the editor's icon modules and `@livediagram/ui`, plus every palette tile, at 1x and 4x into `$ICON_SHEET_DIR` (default `/tmp/icon-sheet`), then screenshots each page (dark, 2x) (`apps/live/scripts/icon-sheet/`).
+- Contact sheet: `pnpm icons:sheet` renders every exported `*Icon` / `*Glyph` of the editor's icon modules and `@livedoc/ui`, plus every palette tile, at 1x and 4x into `$ICON_SHEET_DIR` (default `/tmp/icon-sheet`), then screenshots each page (dark, 2x) (`apps/live/scripts/icon-sheet/`).
 
 ## Accessibility
 

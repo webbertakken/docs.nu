@@ -1,9 +1,4 @@
-import {
-  BORDER_RADIUS_PX,
-  cornerRadiusPx,
-  statRowLayout,
-  WEB_TEXT_MAX,
-} from '@livediagram/document';
+import { BORDER_RADIUS_PX, cornerRadiusPx, statRowLayout, WEB_TEXT_MAX } from '@livedoc/document';
 import { InlineTextLine } from '@/components/canvas/InlineTextLine';
 import { rectStyle, type WebFaceProps } from '@/components/canvas/web/web-face-props';
 import { useCanvasZoom } from '@/components/canvas/CanvasZoomContext';

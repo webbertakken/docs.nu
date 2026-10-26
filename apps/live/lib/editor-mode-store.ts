@@ -7,7 +7,7 @@
 //   place and never read.
 // - Event-storming boards are always Diagram and offer no switch.
 // - A view-role visitor, and everyone on a locked tab, follows the tab's mode and gets no switch.
-import { editorModeSwitchable, opensInOf, type EditorMode, type Tab } from '@livediagram/document';
+import { editorModeSwitchable, opensInOf, type EditorMode, type Tab } from '@livedoc/document';
 
 export type EditorModeTab = Pick<Tab, 'id' | 'kind' | 'opensIn' | 'layers' | 'locked'>;
 

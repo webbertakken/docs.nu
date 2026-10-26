@@ -5,8 +5,8 @@
 // FRESH_OPENED_MAX ids), and read through a small store so every card drawing the mark updates when one is opened.
 import { useSyncExternalStore } from 'react';
 import { useToday } from '@/hooks/ui/useToday';
-import { FROM_FORM_FIELD, readFromForm } from '@livediagram/forms';
-import type { Item } from '@livediagram/items';
+import { FROM_FORM_FIELD, readFromForm } from '@livedoc/forms';
+import type { Item } from '@livedoc/items';
 import { createListeners } from '@/lib/listeners';
 
 // How long a response's card shows New when nobody opens it. Safe range 1..30 days.

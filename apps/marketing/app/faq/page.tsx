@@ -1,5 +1,5 @@
-import { lucideBookOpen, lucideMail } from '@livediagram/icons/lucide';
-import { JsonLd, lucideGlyph, pageMetadata } from '@livediagram/ui';
+import { lucideBookOpen, lucideMail } from '@livedoc/icons/lucide';
+import { JsonLd, lucideGlyph, pageMetadata } from '@livedoc/ui';
 
 import { BreadcrumbJsonLd } from '@/components/BreadcrumbJsonLd';
 import { FaqBrowser } from '@/components/faq/FaqBrowser';

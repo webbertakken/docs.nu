@@ -8,13 +8,13 @@ The editor is friction-free and discoverable, but there's no place that explains
 
 ## Shape
 
-A new Next.js app, `apps/help`, deployed as the `livediagram-help` Worker and stitched in by the router under `/help` — the same pattern as `apps/telemetry` (see [Router app](../016-platform/router-app.md), [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)):
+A new Next.js app, `apps/help`, deployed as the `docs-nu-help` Worker and stitched in by the router under `/help` — the same pattern as `apps/telemetry` (see [Router app](../016-platform/router-app.md), [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)):
 
 - `output: 'export'`, `basePath: '/help'`, `assetPrefix: '/help'`. Static only, no SSR (see [hard constraints](../../../AGENTS.md)).
 - The router strips `/help` and forwards to the worker, which serves `./out`.
 - Content is **MDX** (`@next/mdx`) plus a TypeScript article index (`lib/articles.ts`). Navigation/index pages are TSX.
 
-It started as a copy of the Manager Toolkit help centre and has since been redesigned in the marketing site's language; what each page looks like (the home page's sections, category art, grouped category pages, article navigation, search keys) is [Help pages](help-pages.md). The building blocks below stay: hero + client-side search, category cards, article pages with an auto-generated table of contents, breadcrumbs, "Was this helpful?" feedback, reading time, related-guide sidebar, and a back-to-top button. An article's sections (the tinted bands between its `##` headings) are grouped while it renders, so the static HTML already has them, and the reading-time row holds its height before the time is counted: nothing moves after the page appears. The difference is the categories/content (livediagram's) and the **brand**: livediagram is sky-blue (`brand-500`, see [Theme](../004-interface-design/color-scheme.md)) on light or dark chrome ([Appearance](../004-interface-design/appearance.md)), not MT's dark purple, so every surface uses the shared `@livediagram/tailwind-config` brand ramp and slate neutrals to match `apps/marketing` and `apps/telemetry`.
+It started as a copy of the Manager Toolkit help centre and has since been redesigned in the marketing site's language; what each page looks like (the home page's sections, category art, grouped category pages, article navigation, search keys) is [Help pages](help-pages.md). The building blocks below stay: hero + client-side search, category cards, article pages with an auto-generated table of contents, breadcrumbs, "Was this helpful?" feedback, reading time, related-guide sidebar, and a back-to-top button. An article's sections (the tinted bands between its `##` headings) are grouped while it renders, so the static HTML already has them, and the reading-time row holds its height before the time is counted: nothing moves after the page appears. The difference is the categories/content (livediagram's) and the **brand**: livediagram is sky-blue (`brand-500`, see [Theme](../004-interface-design/color-scheme.md)) on light or dark chrome ([Appearance](../004-interface-design/appearance.md)), not MT's dark purple, so every surface uses the shared `@livedoc/tailwind-config` brand ramp and slate neutrals to match `apps/marketing` and `apps/telemetry`.
 
 ### No paid tier
 
@@ -22,7 +22,7 @@ livediagram is free and MIT-licensed with no plan for a paid tier (see [Open sou
 
 ## Information architecture
 
-The **`@livediagram/help-registry` package** is the single source of truth for categories and articles; `apps/help/lib/articles.ts` re-exports it so the help app's `@/lib/articles` import path stays stable. It lives in `packages/` (not in the help app) because the live editor's search panel consumes the same catalogue (see "Help in global search" below). Two flat arrays (`categories`, `articles`) plus helpers (`getArticlesByCategory`, `getCategoryGroups`, `getSubArticles`, `searchArticles`). The link helpers (`articleHref`, `categoryHref`) also live apart in the data-free `@livediagram/help-registry/hrefs`, so a page that only builds links never bundles the catalogue: the article layout reads its own URL and its parent's off the route (`lib/article-route.ts`) and imports only the hrefs, and the search box loads the registry on the reader's first focus, hover or keystroke ([Web performance](../016-platform/web-performance.md)). An article's `categorySlug` is its full nested path (e.g. `canvas/the-canvas`); `parentSlug` links a sub-article to its feature landing page.
+The **`@livedoc/help-registry` package** is the single source of truth for categories and articles; `apps/help/lib/articles.ts` re-exports it so the help app's `@/lib/articles` import path stays stable. It lives in `packages/` (not in the help app) because the live editor's search panel consumes the same catalogue (see "Help in global search" below). Two flat arrays (`categories`, `articles`) plus helpers (`getArticlesByCategory`, `getCategoryGroups`, `getSubArticles`, `searchArticles`). The link helpers (`articleHref`, `categoryHref`) also live apart in the data-free `@livedoc/help-registry/hrefs`, so a page that only builds links never bundles the catalogue: the article layout reads its own URL and its parent's off the route (`lib/article-route.ts`) and imports only the hrefs, and the search box loads the registry on the reader's first focus, hover or keystroke ([Web performance](../016-platform/web-performance.md)). An article's `categorySlug` is its full nested path (e.g. `canvas/the-canvas`); `parentSlug` links a sub-article to its feature landing page.
 
 **Search keywords.** Every article carries a required `keywords` field: space-separated, lowercase synonyms for the vocabulary users actually type when they don't know the article's title — synonyms ("transparency" for opacity, "hotkey" for keyboard shortcuts), adjacent spellings ("color" beside "colour"), and concept words the copy doesn't happen to use. `searchArticles` matches case-insensitively on **title + description + keywords**, and the editor's search panel matches the same fields, so an article is findable by the concept it discusses, not only by an exact title match. A test enforces that no article ships without keywords. (Born from a user report: searching "Opacity" found nothing because the element-opacity article is titled "Layer Order and Opacity" and the in-editor catalogue didn't cover it.)
 
@@ -69,7 +69,7 @@ Where a feature's name would equal its category slug, the landing slug is distin
 
 There is **no Presentation Mode guide**: [Presentation mode](../012-collaboration/presentation-mode.md) is a draft and the feature is not built, so the article was unpublished rather than ship documentation for a non-existent feature.
 
-**Troubleshooting tools.** One Troubleshooting article is a working tool, not only text: _Repair This Browser_ renders `BrowserRepairTool` (`apps/help/components/`), the shared `BrowserRepairPanel` from `@livediagram/ui` plus the browser checks, so a person whose editor will not start can still clear its stuck settings from the help centre, which shares the editor's origin ([Load recovery](../007-editor/load-recovery.md)).
+**Troubleshooting tools.** One Troubleshooting article is a working tool, not only text: _Repair This Browser_ renders `BrowserRepairTool` (`apps/help/components/`), the shared `BrowserRepairPanel` from `@livedoc/ui` plus the browser checks, so a person whose editor will not start can still clear its stuck settings from the help centre, which shares the editor's origin ([Load recovery](../007-editor/load-recovery.md)).
 
 ## In-article illustrations
 
@@ -124,7 +124,7 @@ title. One distinct hue and glyph per category restores that much at least.
 Resolution order is `featureIcon(slug, categorySlug)` / `featureColour(...)`:
 the feature's own entry, then its category's, then the neutral default. The
 category lookup reads only the FIRST segment (`topCategorySlug` in
-`@livediagram/help-registry`, which owns the nested-slug convention), so
+`@livedoc/help-registry`, which owns the nested-slug convention), so
 `palette/tools/data-elements` inherits Palette's. Both resolvers are shared by
 the category index cards and the MDX `<Feature>` tile, so a feature looks the
 same wherever it appears. Adding a bespoke glyph is still the better answer for
@@ -282,15 +282,15 @@ Six articles about the container moved when it became a document ([Document](../
 
 ## Header
 
-The help centre's header is the shared `SiteHeader` from `@livediagram/ui`, the same bar marketing and the telemetry dashboard render, so the three read as one product: Brand + the apps menu (keyed to Help) on the left, the article search (`SearchInput`) in the header's centre slot from `sm` up, and on the right the same **Start Blank** and **Choose Template** CTA pair the landing page shows (`ctaSurface="Help"`, so its links carry `Help.HeaderBlank` and `Help.Header` for the [Landing funnel](../019-marketing/landing-funnel.md)), Start Blank hidden below `md` (rather than `sm`, as on pages without a centre slot) so the search box keeps room on a small tablet. It leaves the page-edge ShareRail off: the rail sits in the gutter beside a `max-w-6xl` page, and help's pages run `max-w-7xl`, so on an `xl` screen it would cover the article sidebar. It passes `wide`, which gives the bar help's own `max-w-7xl` / `md:px-8` column, so the logo lines up with the breadcrumb and article content below. The bar is a fixed 72px (`h-18`) at every breakpoint, which the sticky breadcrumb bar (`top-18`) and the article sidebar's sticky offset rely on.
+The help centre's header is the shared `SiteHeader` from `@livedoc/ui`, the same bar marketing and the telemetry dashboard render, so the three read as one product: Brand + the apps menu (keyed to Help) on the left, the article search (`SearchInput`) in the header's centre slot from `sm` up, and on the right the same **Start Blank** and **Choose Template** CTA pair the landing page shows (`ctaSurface="Help"`, so its links carry `Help.HeaderBlank` and `Help.Header` for the [Landing funnel](../019-marketing/landing-funnel.md)), Start Blank hidden below `md` (rather than `sm`, as on pages without a centre slot) so the search box keeps room on a small tablet. It leaves the page-edge ShareRail off: the rail sits in the gutter beside a `max-w-6xl` page, and help's pages run `max-w-7xl`, so on an `xl` screen it would cover the article sidebar. It passes `wide`, which gives the bar help's own `max-w-7xl` / `md:px-8` column, so the logo lines up with the breadcrumb and article content below. The bar is a fixed 72px (`h-18`) at every breakpoint, which the sticky breadcrumb bar (`top-18`) and the article sidebar's sticky offset rely on.
 
 ## SEO
 
-One rule for every public page, shared with the marketing site ([Marketing site](../019-marketing/marketing-site.md) "SEO and metadata"): per-page metadata comes from `pageMetadata` in `@livediagram/ui`, which help wraps as `helpMetadata({ title, description, path })` only to name itself (`siteName: 'livediagram Help'`).
+One rule for every public page, shared with the marketing site ([Marketing site](../019-marketing/marketing-site.md) "SEO and metadata"): per-page metadata comes from `pageMetadata` in `@livedoc/ui`, which help wraps as `helpMetadata({ title, description, path })` only to name itself (`siteName: 'livediagram Help'`).
 
 - **The title passes through as given.** Link previews (`og:title`, `twitter:title`) carry the bare article title, with the site name beside it. The document `<title>` still reads "<Title> | livediagram": the root layout's `title.template` adds the suffix to every child segment, and the help home (the root index, which the template doesn't reach) spells it out as `Help | livediagram`.
 - **Canonical and `og:url` are the page's path**, `/help/<categorySlug>/<slug>/`, resolved against the shared origin; `seo-canonical.test.ts` checks every article's path matches its route.
-- **Every article and category landing has its own card**: `og:type` article, Twitter `summary_large_image`, with a 1200x630 PNG at `/help/og/<route>.png` (`lib/help-cards.ts`, rendered at build time by `app/og/[...card]/route.tsx` through the shared `renderSocialCard` in `@livediagram/ui`, the one marketing's cards use). The card shows the top category as its kicker (Help Topic on a landing), the title, the registry's card description through `cardSubtitle` (two lines, ending on a whole word) and "Help Centre" in its footer beside the livediagram.app pill. Pages outside the registry (the home, the features index) carry the brand card marketing generates (`/opengraph-image`, `/twitter-image`).
+- **Every article and category landing has its own card**: `og:type` article, Twitter `summary_large_image`, with a 1200x630 PNG at `/help/og/<route>.png` (`lib/help-cards.ts`, rendered at build time by `app/og/[...card]/route.tsx` through the shared `renderSocialCard` in `@livedoc/ui`, the one marketing's cards use). The card shows the top category as its kicker (Help Topic on a landing), the title, the registry's card description through `cardSubtitle` (two lines, ending on a whole word) and "Help Centre" in its footer beside the livediagram.app pill. Pages outside the registry (the home, the features index) carry the brand card marketing generates (`/opengraph-image`, `/twitter-image`).
 - **The sitemap dates each page by its last commit** (`lib/article-dates.ts`): one `git log` pass over `app/` at build time, page files only, and a landing dated by its newest article. A shallow clone, or no git, leaves `lastModified` out rather than claim every page changed today; the deploy build fetches full history without file contents (`fetch-depth: 0`, `filter: blob:none`) for this.
 - **Category landings carry `CollectionPage` structured data** whose `ItemList` names the articles the landing lists, in order (`collectionJsonLd`, rendered by `FeatureCategoryIndex` and by `BrowsePage` given a `listing`). The home carries the `WebSite` node. There is no `SearchAction`: Google retired the sitelinks search box it fed, and help search is not addressable by URL.
 - **Breadcrumb structured data** is a `BreadcrumbList` rooted at the help home, built by the shared `breadcrumbJsonLd` (the one marketing's `BreadcrumbJsonLd` uses) and rendered through `JsonLd` from the `Breadcrumb` component.
@@ -306,7 +306,7 @@ The editor's `TabBar` gains a **Help** link on its right edge, beside the existi
 The editor's global search panel ([Canvas and palette](../008-canvas/canvas-and-palette.md)) surfaces matching help articles as a
 **Help** group, so "how do I…" is answerable without leaving the canvas. The
 searchable catalogue (`apps/live/lib/help-search.ts`) is derived from the
-**full `@livediagram/help-registry` registry** — every article, matched on its
+**full `@livedoc/help-registry` registry** — every article, matched on its
 title plus the registry's description + `keywords` synonyms, resolved to an
 absolute `/help` href, with the article's telemetry id ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md) Help) as the
 click's `UI·Opened` type.
@@ -321,11 +321,11 @@ but only for surfaces that link ONE article contextually — see [Contextual hel
 
 ## Analytics
 
-The help centre emits through the first-party pipeline ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)): `Help·View·<slug>` per article read, the settled search outcome, article votes, window-level errors, and page views ([Page view telemetry](../017-telemetry/page-view-telemetry.md)). It uses the public sites' shared `siteTrack` from `@livediagram/telemetry-client` (the `NEXT_PUBLIC_TELEMETRY_ENABLED` build gate plus the [User preferences](../007-editor/user-preferences.md) opt-out), the same instance the shared `PageViewBoot` reports page views through, so it runs one buffer. No third-party scripts; off by default, which keeps it self-host-clean.
+The help centre emits through the first-party pipeline ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)): `Help·View·<slug>` per article read, the settled search outcome, article votes, window-level errors, and page views ([Page view telemetry](../017-telemetry/page-view-telemetry.md)). It uses the public sites' shared `siteTrack` from `@livedoc/telemetry-client` (the `NEXT_PUBLIC_TELEMETRY_ENABLED` build gate plus the [User preferences](../007-editor/user-preferences.md) opt-out), the same instance the shared `PageViewBoot` reports page views through, so it runs one buffer. No third-party scripts; off by default, which keeps it self-host-clean.
 
 ## Deployment
 
-A `deploy-help` job in `.github/workflows/deploy.yml` mirrors `deploy-telemetry` (build artifact → `wrangler deploy`). The router's `deploy-router` job already depends on the static apps; it gains a dependency on `deploy-help`, and `apps/router/wrangler.toml` gains a `HELP` service binding to `livediagram-help`.
+A `deploy-help` job in `.github/workflows/deploy.yml` mirrors `deploy-telemetry` (build artifact → `wrangler deploy`). The router's `deploy-router` job already depends on the static apps; it gains a dependency on `deploy-help`, and `apps/router/wrangler.toml` gains a `HELP` service binding to `docs-nu-help`.
 
 ## Out of scope (for now)
 
@@ -335,7 +335,7 @@ A `deploy-help` job in `.github/workflows/deploy.yml` mirrors `deploy-telemetry`
   coverage makes the group noisy.
 
 (Previously listed here: surfacing the full article catalogue in editor
-search. That shipped — the registry moved to `@livediagram/help-registry` with
+search. That shipped — the registry moved to `@livedoc/help-registry` with
 per-article `keywords`, and `help-search.ts` now derives from it.)
 
 ## articleCount is pinned by a test

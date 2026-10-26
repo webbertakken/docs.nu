@@ -15,8 +15,4 @@
 // lives there as well, because the workers' image embedder sniffs with it
 // too; both are re-exported here because every caller of `sniffImageType` at
 // the upload boundary wants the pair together.
-export {
-  ACCEPTED_IMAGE_TYPES,
-  sniffImageType,
-  type AcceptedImageType,
-} from '@livediagram/api-schema';
+export { ACCEPTED_IMAGE_TYPES, sniffImageType, type AcceptedImageType } from '@livedoc/api-schema';

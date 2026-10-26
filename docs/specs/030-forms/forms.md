@@ -136,7 +136,7 @@ previewing), the help link and the form's **cog**.
   "Backgrounds", "Animated backgrounds"): the slide's **Background** section with **Solid**, **Gradient** (the tab
   theme's gradients first) and **Animated** (the slide motions, moving on screen; still under reduced motion), then
   **Pattern**. No **Image**: a cover takes no picture. Stored as `form.cover` (`{ fill?, pattern? }`, the
-  `@livediagram/page-background` shape a slide's colours share). A hover previews on the band; a press sets it.
+  `@livedoc/page-background` shape a slide's colours share). A hover previews on the band; a press sets it.
   Without a cover, a 10 px band of the form colour. **Add Cover** / **Change Cover** on hover (always shown on a
   touch screen, which has no hover) opens the cover popover, with **Remove Cover**.
 - **Heading**: the form's name (1 to 80 characters), edited in place (renaming it renames the board or sheet its
@@ -527,7 +527,7 @@ board settings, for switching back.
   question. No mapping needed." A sheet no longer on its tab says "Its sheet was removed. Choose where responses go."
   and pauses the form, as a broken board destination does.
 - **In the builder**: a question's footer reads "Its own column in the sheet" in place of the Answer goes to badge.
-- **The row** (`responseRowWrite`, `@livediagram/forms`): the sheet's first row holds the headers, **#**,
+- **The row** (`responseRowWrite`, `@livedoc/forms`): the sheet's first row holds the headers, **#**,
   **Submitted** and each question's wording (a repeated wording gets " (2)"); a question finds its column by its
   header, ignoring case, and one with none takes the next free column after the last header (columns added in one
   insert when the sheet has too few). Headers the form writes are bold, and a sheet given its first headers has row 1

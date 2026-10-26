@@ -5,12 +5,7 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  createShape,
-  type ConceptShape,
-  type Element,
-  type ShapeElement,
-} from '@livediagram/document';
+import { createShape, type ConceptShape, type Element, type ShapeElement } from '@livedoc/document';
 import { ConceptMenuSection } from './ConceptMenuSection';
 import type { ElementStyleOps } from '@/lib/element-style-ops';
 

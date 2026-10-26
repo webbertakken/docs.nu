@@ -1,7 +1,7 @@
 import type { Server } from 'node:http';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
-import type { FakeGoogle } from '@livediagram/fake-google';
-import { DRIVE_FILE_MIME } from '@livediagram/api-schema';
+import type { FakeGoogle } from '@livedoc/fake-google';
+import { DRIVE_FILE_MIME } from '@livedoc/api-schema';
 import { enableDebugLogs, test, expect, expectNoPageErrors } from './fixtures';
 import { signIn as signInAccount, type Account } from './account/sign-in';
 import { routeGoogle, startFakeGoogle } from './drive-support';
@@ -9,7 +9,7 @@ import { routeGoogle, startFakeGoogle } from './drive-support';
 // The Google Drive mirror end to end (docs/specs/022-drive-mirror/drive-mirror.md):
 // the real build and api worker, accounts signed in for real on the signed-in
 // stack, and the fake Google standing in for accounts.google.com and the Drive
-// API. Opt-in: `pnpm --filter @livediagram/live test:e2e:drive`.
+// API. Opt-in: `pnpm --filter @livedoc/live test:e2e:drive`.
 
 test.describe.configure({ mode: 'serial' });
 
@@ -23,7 +23,7 @@ const apiBase = '/api';
 // The e2e runs on a loopback host, which names the root like staging
 // (docs/specs/022-drive-mirror/drive-mirror.md, "The root folder's name").
 const ROOT_NAME = 'LiveDoc (development)';
-const SHOTS = process.env.E2E_DRIVE_SHOTS ?? '/tmp/livediagram-drive-e2e';
+const SHOTS = process.env.E2E_DRIVE_SHOTS ?? '/tmp/livedoc-drive-e2e';
 
 let google: { fake: FakeGoogle; server: Server };
 // One LiveDoc account per fake Google user, signed in once in a browser context of its own (held open for its

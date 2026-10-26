@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { TRUSTED_TYPES_CSP } from '@livediagram/ui/trusted-types';
+import { TRUSTED_TYPES_CSP } from '@livedoc/ui/trusted-types';
 import worker from './worker';
 
 function env() {

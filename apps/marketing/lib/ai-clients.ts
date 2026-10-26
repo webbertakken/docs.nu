@@ -2,7 +2,7 @@
 // "The clients"). One address, MCP_URL, feeds every snippet, so the page can never show two. It is this
 // deployment's MCP worker: a self-hosted build set with NEXT_PUBLIC_MCP_ORIGIN shows its own, never the hosted one.
 
-import { mcpEndpoint, resolveMcpOrigin } from '@livediagram/api-schema';
+import { mcpEndpoint, resolveMcpOrigin } from '@livedoc/api-schema';
 
 export const MCP_URL = mcpEndpoint(resolveMcpOrigin(process.env.NEXT_PUBLIC_MCP_ORIGIN));
 const MCP_NAME = 'livedoc';

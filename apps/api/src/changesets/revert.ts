@@ -1,6 +1,6 @@
-import type { ElementOp } from '@livediagram/document';
-import type { RevertResponse } from '@livediagram/api-schema';
-import { formatResultLines } from '@livediagram/edit-operations';
+import type { ElementOp } from '@livedoc/document';
+import type { RevertResponse } from '@livedoc/api-schema';
+import { formatResultLines } from '@livedoc/edit-operations';
 import { getChangesetPart, lastChangesetRev, type ChangesetRecord } from '../db';
 import { readRoomSelections } from '../room-client';
 import { personTagFor } from '../person-tag';

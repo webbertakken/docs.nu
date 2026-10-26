@@ -1,4 +1,4 @@
-import { TEMPLATES, templateEditorMode } from '@livediagram/templates';
+import { TEMPLATES, templateEditorMode } from '@livedoc/templates';
 import { describe, expect, it } from 'vitest';
 import { HERO_SCENES } from './hero-scenes';
 

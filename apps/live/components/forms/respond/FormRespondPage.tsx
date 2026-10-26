@@ -5,7 +5,7 @@
 // and the form itself are the page's four states; the form's own flow is FormFill.
 import { useEffect, useState, type CSSProperties } from 'react';
 import dynamic from 'next/dynamic';
-import type { PublicFormResponse } from '@livediagram/api-schema';
+import type { PublicFormResponse } from '@livedoc/api-schema';
 import { formCodeFromPath } from '@/lib/form-path';
 import { loadPublicForm, sendFormResponse } from '@/lib/api/forms-public';
 import { FormCoverBand } from '../FormCoverBand';
@@ -13,7 +13,7 @@ import { formLookProps } from '../form-look';
 import { FORM_ACCENT, FormFill } from './FormFill';
 import type { SubmitOutcome } from './useFormFill';
 import { FormFooter } from './FormFooter';
-import { MadeWithLivediagram } from './MadeWithLivediagram';
+import { MadeWithLivedoc } from './MadeWithLivedoc';
 
 // The tab's canvas style behind the form, fetched only for a form that has one (most keep a plain backdrop).
 const FormCanvasLayer = dynamic(() => import('./FormCanvasLayer').then((m) => m.FormCanvasLayer), {
@@ -190,7 +190,7 @@ function Notice({
         </button>
       ) : null}
       <p className="mt-8">
-        <MadeWithLivediagram />
+        <MadeWithLivedoc />
       </p>
     </div>
   );

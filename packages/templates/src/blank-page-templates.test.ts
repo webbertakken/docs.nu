@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pagesOf, offersPageKindChoice } from '@livediagram/document';
+import { pagesOf, offersPageKindChoice } from '@livedoc/document';
 import { BLANK_PAGE_TEMPLATE_KINDS, blankPageTemplateOverrides } from './blank-page-templates';
 import { buildTemplate } from './build-template';
 import { templateCategory } from './template-categories';
@@ -68,8 +68,7 @@ describe('blanks of a page kind', () => {
 describe('a blank infographic on its theme', () => {
   it("starts its page on the theme's default background, a blank deck's on Steel; other templates keep theirs", async () => {
     const { buildTemplateTab } = await import('./template-tab');
-    const { defaultPageBackground, getBuiltInTheme, pagesOf } =
-      await import('@livediagram/document');
+    const { defaultPageBackground, getBuiltInTheme, pagesOf } = await import('@livedoc/document');
     const tab = buildTemplateTab('t', 'T', 'blank-infographic', 'ocean');
     expect(pagesOf(tab)[0]!.background).toEqual(defaultPageBackground(getBuiltInTheme('ocean')));
     const slides = buildTemplateTab('s', 'S', 'blank-slide-deck', 'ocean');

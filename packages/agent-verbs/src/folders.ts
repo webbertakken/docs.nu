@@ -2,7 +2,7 @@
 // --folder`; blueprint CLI86, CLI87): the personal tree, then each joined team's in name order, each depth first,
 // siblings by name. A folder is named by its full id, an id prefix, or its name ignoring case, as a document is.
 
-import type { Folder } from '@livediagram/api-schema';
+import type { Folder } from '@livedoc/api-schema';
 import type { Libraries } from './find-documents';
 import { VerbRefusal } from './define';
 import { REF_MIN_PREFIX, shortestUniquePrefixes } from './refs';

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { isTrashed } from '@livediagram/items';
-import { CountBadge, TrashIcon } from '@livediagram/ui';
+import { isTrashed } from '@livedoc/items';
+import { CountBadge, TrashIcon } from '@livedoc/ui';
 import { usePlan } from '@/components/plan/PlanContext';
 import { ClusterPopoverSegment } from './ClusterPopoverButton';
 

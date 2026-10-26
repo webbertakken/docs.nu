@@ -1,13 +1,9 @@
 // @vitest-environment jsdom
-import { communityPostFixture } from '@livediagram/api-schema/testing';
+import { communityPostFixture } from '@livedoc/api-schema/testing';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type {
-  CommunityMinePost,
-  CommunityMineTotals,
-  CommunityPost,
-} from '@livediagram/api-schema';
+import type { CommunityMinePost, CommunityMineTotals, CommunityPost } from '@livedoc/api-schema';
 import type { CommunitySession } from '@/lib/session';
 
 // The gallery end to end (docs/specs/025-community/community.md "Gallery", "My Shares"): filters live in the URL
@@ -34,8 +30,8 @@ vi.mock('@/lib/session', async (importOriginal) => ({
   mineMayBeOffered: () => true,
   loadCommunitySession: async () => h.session,
 }));
-vi.mock('@livediagram/account-session', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@livediagram/account-session')>()),
+vi.mock('@livedoc/account-session', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@livedoc/account-session')>()),
   onAccountChange: (listener: () => void) => {
     h.accountChanged = listener;
     return () => {

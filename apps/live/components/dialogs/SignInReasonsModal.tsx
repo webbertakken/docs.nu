@@ -21,7 +21,7 @@ import {
   Glyph,
   ButtonContent,
   Portal,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 import { SignInIcon } from '@/components/chrome/AuthControls';
 import { useRef } from 'react';
 import type { ReactNode } from 'react';

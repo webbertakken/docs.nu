@@ -1,7 +1,7 @@
 // Text serialisation of a Tab: the non-visual export formats (JSON snapshot and Markdown outline), shared by the
 // editor's Export dialog and the CLI's export. They share nothing with a rasteriser beyond the Tab data model.
 
-import type { Item, ItemTypeCatalogue } from '@livediagram/items';
+import type { Item, ItemTypeCatalogue } from '@livedoc/items';
 import { isBoxed, type ArrowElement, type BoxedElement, type Tab } from './index';
 import { tabExportItems, tabPlanMarkdown, type TabPlanData } from './export-tab-plan';
 

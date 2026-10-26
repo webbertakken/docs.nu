@@ -5,7 +5,7 @@
 // or Submit, Back / Next / Submit, and then the confirmation. The form link's page and the builder's Preview both draw
 // it; only what Submit does differs.
 import { useEffect, useRef } from 'react';
-import { answerErrorMessage, promptOf, type PublicForm } from '@livediagram/forms';
+import { answerErrorMessage, promptOf, type PublicForm } from '@livedoc/forms';
 import { FormCoverBand } from '../FormCoverBand';
 import { LinkedText } from '../LinkedText';
 import { QuestionView } from '../QuestionView';

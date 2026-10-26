@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, type ShapeElement, type Tab } from '@livediagram/document';
+import { canonicalJson, type ShapeElement, type Tab } from '@livedoc/document';
 import {
   fileSlug,
   idSlug,

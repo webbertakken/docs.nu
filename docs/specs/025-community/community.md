@@ -167,7 +167,7 @@ type) and on the worker (authoritative).
   and again once the post loads. The static shell, shared by every post, carries none, and its Open Graph block has no
   `og:url`, so a link preview never folds a post into the gallery.
 - The gallery's metadata (canonical, Open Graph and Twitter card with the brand card) comes from the shared
-  `pageMetadata` in `@livediagram/ui`, with `og:type` `website` ([Marketing site](../019-marketing/marketing-site.md)
+  `pageMetadata` in `@livedoc/ui`, with `og:type` `website` ([Marketing site](../019-marketing/marketing-site.md)
   "SEO and metadata").
 
 ### Search engines
@@ -296,7 +296,7 @@ A signed-in author can narrow the gallery to their own posts, to review them and
   Community.** with **Try Again**, which reloads the page. A host without sign-in given `is:mine` says **My Shares
   needs an account.**
 - The rest of the Community needs no identity, so the Community app reads the session (`apps/community/lib/session.ts`,
-  the same plain-`fetch` layer the editor uses, `@livediagram/account-session`) only once My Shares is on. My Shares
+  the same plain-`fetch` layer the editor uses, `@livedoc/account-session`) only once My Shares is on. My Shares
   is offered unless this browser last learned that the host has no sign-in (`livedoc:v2:sign-in-offered`). The
   api answers `GET /api/community/mine` (session token required, never cached); the public list ignores `is:mine`.
 - Turning it on is tracked as `Community·Selected·Mine`.

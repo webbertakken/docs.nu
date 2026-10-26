@@ -5,9 +5,9 @@ import {
   lucideKey,
   lucideMail,
   lucideUsers,
-} from '@livediagram/icons/lucide';
+} from '@livedoc/icons/lucide';
 import type { ReactNode } from 'react';
-import { Prims } from '@livediagram/ui';
+import { Prims } from '@livedoc/ui';
 import { Glyph } from './featureIcons';
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DOCUMENT_TRASHED_CLOSE, type DocumentCommentThread } from '@livediagram/api-schema';
+import { DOCUMENT_TRASHED_CLOSE, type DocumentCommentThread } from '@livedoc/api-schema';
 import { run } from '../main';
 import { capabilities, fakeIo, NOW, TOKEN, type FakeIo, type Route } from '../testing/fake-io';
 import { DEFAULT_PROFILE } from '../config/profiles';

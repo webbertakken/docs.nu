@@ -12,7 +12,7 @@ import {
   type BoxedElement,
   type Element,
   type Layer,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { absoluteRect, type DrawioCell, type DrawioGraph, type Rect } from './cells';
 import { buildEntity, buildLane, buildTable } from './containers';
 import { createEdgeBuilder, type EdgeSlot } from './edge-pass';

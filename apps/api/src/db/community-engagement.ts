@@ -7,7 +7,7 @@ import {
   COMMUNITY_COUNTED_PER_NETWORK,
   type CommunityReportReason,
   sha256Hex,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { communityNetwork } from '../community-network';
 import type { Env } from '../types';
 

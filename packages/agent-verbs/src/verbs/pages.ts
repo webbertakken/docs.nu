@@ -3,8 +3,8 @@
 // over the calls the MCP's change_pages and write_article share. Pages are named by id, place or name; articles
 // by id or title.
 import { z } from 'zod';
-import { PAGE_CHANGES_MAX, type PageChange } from '@livediagram/api-schema';
-import { ARTICLE_LOOK_IDS, type ArticleLookId, type PageSizeId } from '@livediagram/document';
+import { PAGE_CHANGES_MAX, type PageChange } from '@livedoc/api-schema';
+import { ARTICLE_LOOK_IDS, type ArticleLookId, type PageSizeId } from '@livedoc/document';
 import { defineVerb, VerbRefusal, type Verb, type VerbContext } from '../define';
 import {
   changePages,

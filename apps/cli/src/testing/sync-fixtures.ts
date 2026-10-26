@@ -1,8 +1,8 @@
 // Building blocks for the sync planner's suites: a document's overview and envelope as the api answers them, a
 // tracked mirror file of it, and coverage.
 
-import type { OverviewView } from '@livediagram/api-schema';
-import type { Tab } from '@livediagram/document';
+import type { OverviewView } from '@livedoc/api-schema';
+import type { Tab } from '@livedoc/document';
 import type { Coverage, CoveredDocument } from '../link/coverage';
 import type { MirrorFile } from '../link/mirror-file';
 import type { ScannedFile, TabHashes } from '../link/mirror-scan';

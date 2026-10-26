@@ -18,7 +18,7 @@ import type {
   ActivityCardThread,
   ActivityThread,
   ActivityFormResponses,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { apiListActivity } from '@/lib/api-client';
 import { getGuestSelfId } from '@/lib/local-identity';
 import { readOfflineActivity, type OfflineActivity } from '@/lib/offline/offline-activity';

@@ -3,7 +3,7 @@ import {
   readSession,
   readSignInOffered,
   writeSignInOffered,
-} from '@livediagram/account-session';
+} from '@livedoc/account-session';
 import { API_BASE } from './config';
 
 // Who is signed in, for My Shares only (docs/specs/025-community/community.md "My Shares"). The rest of the

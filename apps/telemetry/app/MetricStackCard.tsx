@@ -1,6 +1,6 @@
 'use client';
 
-import { useAppearance } from '@livediagram/ui';
+import { useAppearance } from '@livedoc/ui';
 import { fmtDay } from './chart-utils';
 import {
   headlineCaption,

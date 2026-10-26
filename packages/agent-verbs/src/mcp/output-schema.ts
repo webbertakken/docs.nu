@@ -3,7 +3,7 @@
 // The SDK validates every successful result against these on the way out, so a
 // shape here that stops matching tools.ts fails the call rather than shipping a
 // wrong contract. Error results are exempt and carry text only.
-import { EMPTY_DOCUMENT_STALE_DAYS, TRASH_REASONS } from '@livediagram/api-schema';
+import { EMPTY_DOCUMENT_STALE_DAYS, TRASH_REASONS } from '@livedoc/api-schema';
 import { z } from 'zod';
 
 const url = z.string().describe('Link that opens the document in the LiveDoc editor.');

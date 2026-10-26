@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WORKBENCH_PAIRING_TTL_MS, WORKBENCH_SESSION_GRACE_MS } from '@livediagram/api-schema';
+import { WORKBENCH_PAIRING_TTL_MS, WORKBENCH_SESSION_GRACE_MS } from '@livedoc/api-schema';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import {
   answerPairingRequest,

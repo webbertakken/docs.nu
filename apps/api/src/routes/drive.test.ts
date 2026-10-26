@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { sentForm } from '@livediagram/vitest-config/sent-request';
-import {
-  bytesToBase64,
-  DRIVE_ACCOUNT_SWITCH_TTL_MS,
-  type DriveItem,
-} from '@livediagram/api-schema';
+import { sentForm } from '@livedoc/vitest-config/sent-request';
+import { bytesToBase64, DRIVE_ACCOUNT_SWITCH_TTL_MS, type DriveItem } from '@livedoc/api-schema';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import { getSealedRefreshToken } from '../db/drive';
 import { signDriveState } from '../drive/state';

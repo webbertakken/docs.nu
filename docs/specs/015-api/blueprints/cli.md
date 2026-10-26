@@ -18,7 +18,7 @@ Scope, by file:
 
 | File                                                                                                        | Role                                                                                                                                                                                                                                                                                                                                                          |
 | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/agent-verbs/{package.json,tsconfig.json,oxlint.config.ts,vitest.config.ts}`                       | New private package `@livediagram/agent-verbs`, laid out like `packages/explorer-lens`; depends on zod 4                                                                                                                                                                                                                                                      |
+| `packages/agent-verbs/{package.json,tsconfig.json,oxlint.config.ts,vitest.config.ts}`                       | New private package `@livedoc/agent-verbs`, laid out like `packages/explorer-lens`; depends on zod 4                                                                                                                                                                                                                                                          |
 | `packages/agent-verbs/src/define.ts`                                                                        | `Verb`, `defineVerb`, `VerbBehaviour`, `VerbContext`, `CliProjection`                                                                                                                                                                                                                                                                                         |
 | `packages/agent-verbs/src/catalogue.ts`                                                                     | `VERBS`, `verbById`, `verbsOf`, `RESOURCES`, `RESOURCE_ALIASES`, `TOP_LEVEL`; `COMMAND_ALIASES` with `edit`                                                                                                                                                                                                                                                   |
 | `packages/agent-verbs/src/verbs/{document,tab,edit,lifecycle,changeset,comment,presence}.ts`                | The CLI's api verbs: schemas, descriptions, behaviour, handlers, compact text, CLI projections                                                                                                                                                                                                                                                                |
@@ -38,9 +38,9 @@ Scope, by file:
 | `packages/agent-verbs/src/guides/index.ts`                                                                  | `GUIDE_TOPICS`, `GUIDE_TOPIC_NAMES`, `isGuideTopic`, `GUIDE_TOPIC_MAX_TOKENS`: build, edit, views, comments, collaborate, workbench                                                                                                                                                                                                                           |
 | `packages/agent-verbs/src/skill.ts`                                                                         | `SKILL_NAME`, `SKILL_DESCRIPTION`, `SKILL_DIRECTORIES`, `SKILL_FRONTMATTER_MAX_TOKENS`, `SKILL_BODY_MAX_TOKENS`, `renderSkill()`                                                                                                                                                                                                                              |
 | `packages/agent-verbs/src/testing/fake-api.ts`                                                              | `fakeApi`, `contextOf` and the library fixtures the verb suites share                                                                                                                                                                                                                                                                                         |
-| `packages/api-client/package.json`, `packages/api-client/src/client.ts`, `packages/api-client/src/index.ts` | New package `@livediagram/api-client`: `createApiClient`, `ApiError`, `postEvents`, from `apps/mcp/src/api.ts`                                                                                                                                                                                                                                                |
+| `packages/api-client/package.json`, `packages/api-client/src/client.ts`, `packages/api-client/src/index.ts` | New package `@livedoc/api-client`: `createApiClient`, `ApiError`, `postEvents`, from `apps/mcp/src/api.ts`                                                                                                                                                                                                                                                    |
 | `packages/api-client/src/client.test.ts`                                                                    | Moved from the MCP's api suite, rewritten against the injected fetch                                                                                                                                                                                                                                                                                          |
-| `packages/render-png/{package.json,...}`, `src/index.ts` (+ test)                                           | New package `@livediagram/render-png`: `createPngRenderer`, from `apps/mcp/src/render.ts`                                                                                                                                                                                                                                                                     |
+| `packages/render-png/{package.json,...}`, `src/index.ts` (+ test)                                           | New package `@livedoc/render-png`: `createPngRenderer`, from `apps/mcp/src/render.ts`                                                                                                                                                                                                                                                                         |
 | `packages/render-png/fonts/{Inter-Regular.ttf,Inter-Bold.otf,Inter-OFL.txt}`                                | `git mv` of `apps/mcp/fonts/*`                                                                                                                                                                                                                                                                                                                                |
 | `packages/api-schema/src/index.ts`                                                                          | `CapabilitiesResponse` gains five fields; `CurrentTokenResponse`; the catalogue route bodies                                                                                                                                                                                                                                                                  |
 | `packages/api-schema/src/oauth-clients.ts` (+ test)                                                         | `CLI_CLIENT_ID`, `CLI_CLIENT_NAME`, `CLI_REDIRECT_URIS`, `DEVICE_CODE_GRANT`, user-code helpers                                                                                                                                                                                                                                                               |
@@ -68,7 +68,7 @@ Scope, by file:
 | `apps/cli/src/commands/*.ts`                                                                                | Handlers of `pull`, `push`, `export`, `render`, `graph`, `diff`, `wait`, `watch`, `telemetry`                                                                                                                                                                                                                                                                 |
 | `apps/cli/src/sync/{pull-file,read-copies}.ts`                                                              | The pull file; the read copies that give the base and the diff                                                                                                                                                                                                                                                                                                |
 | `apps/cli/src/room/{room-stream,room-events}.ts`                                                            | Ticket, socket, reconnect; op classification and lines                                                                                                                                                                                                                                                                                                        |
-| `apps/cli/src/render/png.ts`, `apps/cli/src/commands/render.ts`                                             | The Node loaders for `@livediagram/render-png`                                                                                                                                                                                                                                                                                                                |
+| `apps/cli/src/render/png.ts`, `apps/cli/src/commands/render.ts`                                             | The Node loaders for `@livedoc/render-png`                                                                                                                                                                                                                                                                                                                    |
 | `apps/cli/src/telemetry.ts` (+ test)                                                                        | `sendCliUsed`, `reportApiFailure`, `telemetryOffReason`, `setTelemetry`, the notice once (`state.json`)                                                                                                                                                                                                                                                       |
 | `apps/cli/src/update-check.ts` (planned)                                                                    | The npm check                                                                                                                                                                                                                                                                                                                                                 |
 | `apps/telemetry/app/cli-commands.ts`, `apps/telemetry/app/catalogue/cli-commands.ts`                        | `CLI_COMMANDS` (one row a counted verb), `cliCommandSentence`; the CLI Commands stack (CLI56)                                                                                                                                                                                                                                                                 |
@@ -77,13 +77,13 @@ Scope, by file:
 | `apps/api/src/routes/catalogues.ts` (+ test), `index.ts`                                                    | `GET /api/templates[/:kind]`, `/api/icons`, `/api/schema[/:kind]`; dispatch of the three segments                                                                                                                                                                                                                                                             |
 | `apps/api/src/index.ts`                                                                                     | The token write choke point admits `DELETE /api/tokens/current` and the room-ticket mint                                                                                                                                                                                                                                                                      |
 | `apps/api/src/openapi/{manifest,document}.ts`                                                               | The capabilities fields; `tokens/current`; the catalogue routes                                                                                                                                                                                                                                                                                               |
-| `apps/mcp/src/api.ts`, `render.ts`, `image-result.ts`                                                       | Wiring of the extracted packages; the schema resource reads `elementSchemaDoc` from `@livediagram/document`                                                                                                                                                                                                                                                   |
+| `apps/mcp/src/api.ts`, `render.ts`, `image-result.ts`                                                       | Wiring of the extracted packages; the schema resource reads `elementSchemaDoc` from `@livedoc/document`                                                                                                                                                                                                                                                       |
 | `apps/mcp/src/oauth.ts`, `oauth-clients.ts`, `oauth-device.ts` (+ tests)                                    | Port-agnostic loopback, the built-in CLI client, the device grant; the session lookup returns `clientId`                                                                                                                                                                                                                                                      |
 | `apps/mcp/src/tools.ts`, `tool-annotations.ts`, `verb-parity.test.ts`                                       | Each tool registered from its verb in `mcp-tools.ts`; the parity test                                                                                                                                                                                                                                                                                         |
 | `apps/live/app/oauth/oauth-shell.tsx`, `apps/live/app/oauth/consent/page.tsx`                               | `OauthShell` and `OauthHelpLink` lifted out of the consent page; `Token·Created·Cli` for the CLI client                                                                                                                                                                                                                                                       |
 | `apps/live/lib/mcp-consent-session.ts`                                                                      | `McpConsentSession` gains `clientId`                                                                                                                                                                                                                                                                                                                          |
 | `apps/live/app/oauth/device/page.tsx`, `apps/live/lib/mcp-device-session.ts` (+ test)                       | The `/oauth/device` page and its trust boundary                                                                                                                                                                                                                                                                                                               |
-| `apps/live/lib/export-tab.ts`, the envelope's callers, `lib/search.ts`                                      | Import the moved modules from `@livediagram/document` and `@livediagram/icons`                                                                                                                                                                                                                                                                                |
+| `apps/live/lib/export-tab.ts`, the envelope's callers, `lib/search.ts`                                      | Import the moved modules from `@livedoc/document` and `@livedoc/icons`                                                                                                                                                                                                                                                                                        |
 | `apps/telemetry/app/catalogue/connections.ts`, `computed-emitters.ts`, `event-explanations.ts`              | The `CLI Commands` stack, `CLI Sign-Ins` in API Token Activity, the computed sites, the sentences (CLI56)                                                                                                                                                                                                                                                     |
 | `.github/workflows/ci.yml`, `.github/workflows/cli-publish.yml`                                             | Pack dry run on every PR; publish with provenance (CLI3)                                                                                                                                                                                                                                                                                                      |
 | `README.md`, `docs/development/{architecture,local-development}.md`, `docs/operations/self-hosting.md`      | The app, the packages, the two api vars, the CLI on a self-host, the env token's host; `AGENTS.md`'s layout needs the operator's permission                                                                                                                                                                                                                   |
@@ -112,7 +112,7 @@ Scope, by file:
 | Loopback login      | `loginWithBrowser`                                                      | OAuth with PKCE and a `127.0.0.1` redirect                               |
 | Device login        | `loginWithDevice`, `DeviceGrant`                                        | The RFC 8628 grant; the person approves at `/oauth/device`               |
 | User code           | `userCode`, `formatUserCode`, `normaliseUserCode`                       | The 8-letter code the person types                                       |
-| Built-in CLI client | `CLI_CLIENT_ID` `livediagram-cli`, `CLI_CLIENT_NAME` `LiveDoc CLI`      | The public client the server vouches for                                 |
+| Built-in CLI client | `CLI_CLIENT_ID` `livedoc-cli`, `CLI_CLIENT_NAME` `LiveDoc CLI`          | The public client the server vouches for                                 |
 | Room stream         | `openRoomStream`                                                        | The CLI's listening socket for `wait` and `watch`                        |
 | Guide topic         | `GUIDE_TOPICS` key: `build`, `edit`, `comments`, ..., `workbench` (six) | One how-to                                                               |
 | Skill               | `renderSkill()`, `SKILL.md`                                             | The agent skill file                                                     |
@@ -189,7 +189,7 @@ candidates. A share link's password is not sent: a password-protected link answe
 `resolveTab(document, input)`: absent is the first tab by `orderIndex`; else the tab whose name equals it ignoring
 case, or whose id starts with it (at least 4 characters) (CLI22). None or several exit 3 with the tab list.
 
-Comment verbs take an element ref, resolved with `resolveRef` from `@livediagram/document` (`element-refs.ts`)
+Comment verbs take an element ref, resolved with `resolveRef` from `@livedoc/document` (`element-refs.ts`)
 over the plain tab: not found or ambiguous exits 3 with the candidates `resolveRef` names. `reply`, `resolve` and
 `reopen` act on the thread on that element through its last comment's id; an element with no thread exits 3
 (`no thread on <ref>`) (CLI78).
@@ -281,7 +281,7 @@ answers after it cannot write it back as pending, whatever KV's cross-region sta
 - Copies are keyed `<profile>|<documentId>|<tabId>`, at most `READ_COPY_REVS_PER_TAB` revisions each and
   `READ_COPY_MAX_BYTES` in all, evicted least recently used (CLI24, CLI76).
 - `tab diff <doc> [--tab] --since <rev>`: the read copy at `<rev>` is `before`; the plain tab read now is `after`;
-  `diffView(before, after, context)` from `@livediagram/document-views` prints, and `after` is recorded. No copy at
+  `diffView(before, after, context)` from `@livedoc/document-views` prints, and `after` is recorded. No copy at
   `<rev>` exits 3 (`no copy of rev <rev>; tab diff compares against a revision this CLI has read`) naming the
   revisions it holds (CLI79). The api serves no diff view.
 
@@ -309,13 +309,13 @@ answers after it cannot write it back as pending, whatever KV's cross-region sta
 ### Previews
 
 - `tab render`: `GET .../tabs/:tabId/render.svg`; `--svg <file>` writes it; `--png <file>` rasterises it with
-  `@livediagram/render-png` at scale 1 (CLI30). Prints `<path>  <width>×<height> · <size>`, never bytes.
+  `@livedoc/render-png` at scale 1 (CLI30). Prints `<path>  <width>×<height> · <size>`, never bytes.
 - `graph render <file>`: reads graph JSON or Mermaid (`graphOfSource`), lays it out with `lintGraph`'s elements (the
   layout `create_document` uses), then `renderElementsToSvg` with `resolveIconExportArt` and `resolveStickerArt`;
   nothing reaches the api. An offline verb.
 - `export --format png` rasterises each tab's `render.svg` the same way. The render handlers and the renderer are
   imported dynamically, so other commands never evaluate them.
-- `graph lint <file> [--compare <variants>]`: the same tab through `@livediagram/diagram-lint` (`graphLint` in
+- `graph lint <file> [--compare <variants>]`: the same tab through `@livedoc/diagram-lint` (`graphLint` in
   `packages/agent-verbs/src/verbs/graph.ts`: a graph or Mermaid file, validated by `graphBodyIssue`); an `offline` verb.
 
 ## Interfaces and contracts
@@ -603,11 +603,11 @@ max-age=300` (CLI72).
 | `GET /api/schema`              | 200 `text/plain`: `elementFormatText()`, the kinds one line each                                                               | none                                                                                             |
 | `GET /api/schema/:kind`        | 200 `text/plain`: `elementFormatText(kind)`, the kind's fields, values and defaults                                            | 404 `unknown_kind { kinds }`                                                                     |
 
-- `searchIcons(query, limit)` (`@livediagram/icons`) ranks the line-art and Technology catalogues by `paletteRank`
+- `searchIcons(query, limit)` (`@livedoc/icons`) ranks the line-art and Technology catalogues by `paletteRank`
   over each icon's label and keywords, its id's words and a Technology icon's provider ("aws lambda" finds
   `aws-lambda`), ties in catalogue order (CLI74). A query that is an icon's id ranks it first; an emoji ranks
   `EMOJI_AFTER` (0.05) behind an icon answering as well, so a node's icon is a drawn glyph first.
-- `elementKindsText()` and `elementFormatText(kind)` (`@livediagram/edit-operations`) are read off the engine itself:
+- `elementKindsText()` and `elementFormatText(kind)` (`@livedoc/edit-operations`) are read off the engine itself:
   the kinds `add` makes (`buildKind`'s factories), each kind's first size, the aliases `set` takes for it (`aliasesOf`)
   with their values (theme slots, sticky presets, border styles, text sizes, line styles), and its stored fields; a
   shape names `SHAPE_COMMON_FIELDS` and its kind's `SHAPE_KIND_FIELDS`, as the shape type's fields span every kind.
@@ -619,7 +619,7 @@ max-age=300` (CLI72).
 - **Clients.** `lookupClient(env, clientId)` returns `BUILT_IN_CLIENTS[clientId]` first, then the KV registration.
   `BUILT_IN_CLIENTS = { [CLI_CLIENT_ID]: { clientName: CLI_CLIENT_NAME, redirectUris: CLI_REDIRECT_URIS } }` with
   `CLI_REDIRECT_URIS = ['http://127.0.0.1/callback', 'http://[::1]/callback']` (CLI35). Registration mints random
-  hex ids, so it can never take `livediagram-cli`.
+  hex ids, so it can never take `livedoc-cli`.
 - **Redirects.** `redirectUriAllowed(registered, uri)`: exact match, or, when the registered URI's host passes
   `isLoopbackHostname` and its scheme is `http:`, the same scheme, hostname and path with any port (RFC 8252 §7.3).
   `/oauth/authorize` uses it for every client.
@@ -646,7 +646,7 @@ random bytes, base64url; `user_code` is 8 letters of `USER_CODE_ALPHABET`, print
 - `discover(issuer)`: `GET {issuer}/.well-known/oauth-authorization-server`; the endpoints must share the issuer's
   origin, else exit 4.
 - `loginWithBrowser`: PKCE verifier of 32 random bytes (43 base64url characters), S256 challenge, 16-byte `state`;
-  `http.createServer` on `127.0.0.1`, port 0; authorize URL with `client_id=livediagram-cli`, `redirect_uri`
+  `http.createServer` on `127.0.0.1`, port 0; authorize URL with `client_id=livedoc-cli`, `redirect_uri`
   `http://127.0.0.1:<port>/callback`, `response_type=code`, `code_challenge_method=S256`; opens the browser
   (`openerFor` in `apps/cli/src/node-io.ts`: `open` on macOS, `xdg-open` on Linux, `rundll32
 url.dll,FileProtocolHandler <url>` on Windows; the URL is one argument and never passes through a shell, so `&` in
@@ -667,9 +667,9 @@ url.dll,FileProtocolHandler <url>` on Windows; the URL is one argument and never
 
 ```ts
 type ApiClientOptions = {
-  baseUrl: string; // 'https://livediagram-api/api' for the MCP binding, caps.apiBase for the CLI
+  baseUrl: string; // 'https://docs-nu-api/api' for the MCP binding, caps.apiBase for the CLI
   fetch: (request: Request) => Promise<Response>;
-  headers: () => Record<string, string>; // Authorization; X-Livediagram-Client: mcp | cli; X-Share-Code when addressed by a link
+  headers: () => Record<string, string>; // Authorization; X-Livedoc-Client: mcp | cli; X-Share-Code when addressed by a link
   onFailure?: (kind: string) => void; // 'Http503' | 'Internal', 5xx and network only
   timeoutMs?: number;
 };
@@ -862,7 +862,7 @@ minted token revoked`, or `[oauth] handover revoke failed` when the revoke itsel
   sweep, `2 + teams` reads. `tab view` reads the view and the plain tab in parallel; a changeset write adds one
   plain read after landing. `export --all`: the sweep plus, per document, one read and per tab one read and one
   `render.svg`, `EXPORT_CONCURRENCY` at a time, under the token's 120 reads a minute.
-- **Start-up.** One ESM file; `@livediagram/render-png`, the wasm and the font are loaded only by `tab render`,
+- **Start-up.** One ESM file; `@livedoc/render-png`, the wasm and the font are loaded only by `tab render`,
   `graph render`, `pull --svg` and `export` with `png`. `--help` evaluates no handler module beyond the catalogue.
 - **Package.** At most `CLI_PACKAGE_MAX_BYTES` unpacked (the wasm is 2.5 MB, the font 0.3 MB).
 - **Room stream.** One socket; no frames sent; reconnect backoff bounded by `ROOM_RECONNECT_MAX_MS`.
@@ -971,7 +971,7 @@ CLI lines print to stderr only under `LIVEDOC_DEBUG=1` (CLI44); server lines go 
 | `[tokens] current <read\|revoked> <tokenId>`                                             | api, `tokens/current` |
 | `[catalogues] <templates\|icons\|schema> <status>`                                       | api, catalogue routes |
 
-Requests carry `X-Livediagram-Client: cli` and `User-Agent: livedoc-cli/<version> node/<version> <platform>`
+Requests carry `X-Livedoc-Client: cli` and `User-Agent: livedoc-cli/<version> node/<version> <platform>`
 (CLI45), so the api's own logs and the changeset front door (`Agent·*·Cli`) name the CLI.
 
 ## Testing
@@ -1075,7 +1075,7 @@ WebSocket) with a fixed clock; none waits on a real timer or the network.
 | `UPDATE_CHECK_INTERVAL_MS`         | 86400000               | Spec "once a day at most"                   | fixed by spec      |
 | `UPDATE_CHECK_TIMEOUT_MS`          | 1500                   | CLI43                                       | 500 to 3000        |
 | `LOGIN_TIMEOUT_MS`                 | 600000                 | The authorize session's 10-minute TTL       | equal to it        |
-| `CLI_CLIENT_ID`                    | `livediagram-cli`      | MCP server §3                               | fixed              |
+| `CLI_CLIENT_ID`                    | `livedoc-cli`          | MCP server §3                               | fixed              |
 | `CLI_CLIENT_NAME`                  | `LiveDoc CLI`          | Spec (the token's name)                     | fixed              |
 | `DEVICE_CODE_TTL_S`                | 600                    | The authorize session's TTL, CLI36          | 300 to 1800        |
 | `DEVICE_POLL_INTERVAL_S`           | 5                      | RFC 8628 §3.2 default                       | 5 to 15            |

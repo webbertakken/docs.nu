@@ -6,16 +6,10 @@
 // answer control as respondents see it, its own settings, and a footer: where its answer goes (a badge opening Answer
 // Goes To), Move, Duplicate, Delete and Required. Everything about a question is edited in its card.
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from 'react';
-import {
-  HELP_MAX,
-  PROMPT_MAX,
-  effectiveTarget,
-  promptOf,
-  type FormQuestion,
-} from '@livediagram/forms';
-import { ArrowDownIcon, ArrowUpIcon, DuplicateIcon, TrashIcon, lucideGlyph } from '@livediagram/ui';
-import { lucideGripVertical } from '@livediagram/icons/lucide';
-import { Tooltip } from '@livediagram/ui';
+import { HELP_MAX, PROMPT_MAX, effectiveTarget, promptOf, type FormQuestion } from '@livedoc/forms';
+import { ArrowDownIcon, ArrowUpIcon, DuplicateIcon, TrashIcon, lucideGlyph } from '@livedoc/ui';
+import { lucideGripVertical } from '@livedoc/icons/lucide';
+import { Tooltip } from '@livedoc/ui';
 import {
   deleteQuestion,
   duplicateQuestion,
@@ -24,8 +18,8 @@ import {
   setOptions,
   setQuestionType,
   updateQuestion,
-} from '@livediagram/forms';
-import { newFormPartId } from '@livediagram/forms';
+} from '@livedoc/forms';
+import { newFormPartId } from '@livedoc/forms';
 import { ToggleSwitch } from '@/components/palette/palette-controls';
 import { QuestionControl } from '../QuestionControl';
 import { QuestionView } from '../QuestionView';

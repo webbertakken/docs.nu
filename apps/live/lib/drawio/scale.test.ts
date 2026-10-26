@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import type { ArrowElement, Element } from '@livediagram/document';
+import type { ArrowElement, Element } from '@livedoc/document';
 import { readGraph } from './cells';
 import { DRAWIO_MAX_PAGE_SCALE, pageScale, scalePage } from './scale';
 import { model, vertex } from './test-support';

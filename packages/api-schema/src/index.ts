@@ -15,9 +15,9 @@
 import type { AccessLevel } from './access-levels';
 import type { DocumentSource } from './document-source';
 import type { DriveMode } from './drive';
-import type { BackgroundPattern, EditorMode, ShapeKind, Tab } from '@livediagram/document';
+import type { BackgroundPattern, EditorMode, ShapeKind, Tab } from '@livedoc/document';
 import type { CreationTabKind, TemplateFamily } from './placement-defaults';
-import type { ItemTypeCatalogue } from '@livediagram/items';
+import type { ItemTypeCatalogue } from '@livedoc/items';
 
 export type { AvatarClothing, AvatarConfig, AvatarFigure, AvatarHair, AvatarSize } from './avatar';
 

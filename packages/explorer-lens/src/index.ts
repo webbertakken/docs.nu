@@ -1,4 +1,4 @@
-// @livediagram/explorer-lens: the Explorer's one filter state (docs/specs/013-workspace/explorer-filters.md,
+// @livedoc/explorer-lens: the Explorer's one filter state (docs/specs/013-workspace/explorer-filters.md,
 // blueprint docs/specs/013-workspace/blueprints/explorer-filters.md). Pure; no DOM, no React, no fetch.
 
 export * from './dimensions';

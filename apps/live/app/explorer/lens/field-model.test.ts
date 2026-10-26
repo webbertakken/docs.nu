@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { LensContext } from '@livediagram/explorer-lens';
+import type { LensContext } from '@livedoc/explorer-lens';
 import {
   chooseChipValue,
   composeField,

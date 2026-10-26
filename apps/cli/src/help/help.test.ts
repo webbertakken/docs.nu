@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { COMMAND_ALIASES, defineVerb, RESOURCES, TOP_LEVEL, VERBS } from '@livediagram/agent-verbs';
-import { estimateTokens } from '@livediagram/document-views';
+import { COMMAND_ALIASES, defineVerb, RESOURCES, TOP_LEVEL, VERBS } from '@livedoc/agent-verbs';
+import { estimateTokens } from '@livedoc/document-views';
 import {
   HELP_RESOURCE_MAX_TOKENS,
   HELP_TOP_MAX_TOKENS,

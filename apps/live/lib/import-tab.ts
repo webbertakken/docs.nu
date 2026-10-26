@@ -1,4 +1,4 @@
-// Counterpart to export-tab.ts — parses an imported `.livediagram-
+// Counterpart to export-tab.ts — parses an imported `.livedoc-
 // tab.json` envelope back into a Tab. Markdown is also importable
 // (docs/specs/020-import-export/markdown-import.md) via its own module (`markdown-import.ts`). The Import
 // dialog (docs/specs/020-import-export/markdown-import.md) lets the user pick which format; the chosen format
@@ -38,7 +38,7 @@ import {
   readItemTypeCatalogue,
   type Item,
   type ItemTypeCatalogue,
-} from '@livediagram/items';
+} from '@livedoc/items';
 import {
   isItemLike,
   isValidElement,
@@ -46,7 +46,7 @@ import {
   type Tab,
   TAB_SCHEMA_VERSION,
   type ExportedTabEnvelope,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import type { ImportImageReport } from './import-images';
 import type { BoardSceneReport } from './board-scene/report';
 

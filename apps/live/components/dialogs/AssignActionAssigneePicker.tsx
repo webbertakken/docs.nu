@@ -1,6 +1,6 @@
 import { initialsOf } from '@/lib/identity';
 import { useSignInAvailable } from '@/lib/auth-config';
-import { SOLID_BRAND_DARK, GlyphDisc } from '@livediagram/ui';
+import { SOLID_BRAND_DARK, GlyphDisc } from '@livedoc/ui';
 
 // One pickable assignee (docs/specs/012-collaboration/assigned-actions.md): the pinned Myself row, or a joined
 // member of the document's team.

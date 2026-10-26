@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bytesToBase64Url } from '@livediagram/api-schema';
+import { bytesToBase64Url } from '@livedoc/api-schema';
 import type { Env } from '../types';
 import { guestKeySecret, guestSigningKey } from './guest-key';
 

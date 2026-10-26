@@ -1,7 +1,7 @@
 import { usePlan } from '@/components/plan/PlanContext';
 import { tabCsvText } from '@/lib/export-plan/tab-csv';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { DialogCloseButton, DialogHeader } from '@livediagram/ui';
+import { DialogCloseButton, DialogHeader } from '@livedoc/ui';
 import { Dialog } from '@/components/dialogs/Dialog';
 import { FormatCard } from './FormatCard';
 import { FormatIcon } from './export-format-icons';
@@ -17,7 +17,7 @@ import {
   tabToJsonText,
   tabToMarkdownText,
   type TabPlanData,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   downloadBlob,
   exportTabAsPng,
@@ -40,7 +40,7 @@ import { track } from '@/lib/telemetry';
 import { HelpArticleLink } from '@/components/primitives/HelpArticleLink';
 import { useTabWindowExport } from './useTabWindowExport';
 import { usePlanImageExport } from './usePlanImageExport';
-import type { ExportFormatKey } from '@livediagram/plan-art';
+import type { ExportFormatKey } from '@livedoc/plan-art';
 
 // The animated GIF's panel and its capture, loaded only when the GIF card opens
 // (docs/specs/020-import-export/blueprints/animated-gif-export.md "Performance and limits").

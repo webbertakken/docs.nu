@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { PageHero } from '@/components/PageHero';
 import { TryItCard } from '@/components/TryItCard';
 import { ALTERNATIVES, ALTERNATIVES_LAST_UPDATED } from '@/lib/alternatives';
-import { JsonLd, pageMetadata, SITE_URL } from '@livediagram/ui';
+import { JsonLd, pageMetadata, SITE_URL } from '@livedoc/ui';
 
 // Hub page for the comparison set (see docs/specs/019-marketing/comparison-pages.md): a
 // crawlable parent that links to every /alternatives/<slug> page.

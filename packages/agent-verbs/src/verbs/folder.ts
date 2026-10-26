@@ -3,7 +3,7 @@
 // workbench names a project's folder by these ids (`workbench open --workspace --folder <f>`).
 
 import { z } from 'zod';
-import type { Folder } from '@livediagram/api-schema';
+import type { Folder } from '@livedoc/api-schema';
 import { defineVerb } from '../define';
 import { readLibraries } from '../find-documents';
 import { folderChoices, resolveFolderRef } from '../folders';

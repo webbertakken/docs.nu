@@ -1,7 +1,7 @@
 import { AppearanceToggle } from '@/components/chrome/AppearanceToggle';
 import { CHROME_BTN, CHROME_BTN_LABELLED, ChromeLabel } from '@/components/chrome/chrome-button';
 import { SettingsIcon, GithubIcon, SearchGlyph } from '@/components/chrome/tab-bar-icons';
-import { REPO_URL, HoverCard } from '@livediagram/ui';
+import { REPO_URL, HoverCard } from '@livedoc/ui';
 
 // The right-hand control cluster shared by the editor's bottom tab bar and
 // the Explorer's bottom bar (docs/specs/007-editor/live-app.md): search, the open-source GitHub

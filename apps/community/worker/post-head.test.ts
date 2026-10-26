@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { communityPostFixture } from '@livediagram/api-schema/testing';
+import { communityPostFixture } from '@livedoc/api-schema/testing';
 import {
   escapeHtml,
   jsonLdScript,

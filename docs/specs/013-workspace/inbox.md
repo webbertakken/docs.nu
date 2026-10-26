@@ -398,7 +398,7 @@ Hybrid identity (session token or `X-Owner-Id`); guests get their own
 page, keyed to their participant id. Read-only: nothing on the page is
 mutated from the page in v1, so there is no other verb.
 
-Wire types in `@livediagram/api-schema` (`activity.ts`), registered in
+Wire types in `@livedoc/api-schema` (`activity.ts`), registered in
 the OpenAPI manifest + schema roots ([API documentation (OpenAPI)](../015-api/api-documentation.md)):
 
 ```ts

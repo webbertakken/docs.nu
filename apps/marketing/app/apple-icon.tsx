@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { brandMarkSvg } from '@livediagram/ui';
+import { brandMarkSvg } from '@livedoc/ui';
 
 // iOS home-screen tile. Next.js convention: app/apple-icon.tsx →
 // /apple-icon.png + the <link rel="apple-touch-icon"> tag at build

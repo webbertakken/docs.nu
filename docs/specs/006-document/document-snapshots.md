@@ -34,15 +34,15 @@ On a read of either delivery path:
   bytes. No render, no element load.
 - **Stale** (or never rendered, or the object is missing): render the
   first tab (a Form tab as its form, the picture respondents see on its
-  tab's look: `formArt` from `@livediagram/plan-art`, as the MCP preview
-  draws it, since a form is not an element) with `renderElementsToSvg` (`@livediagram/document`, the same
+  tab's look: `formArt` from `@livedoc/plan-art`, as the MCP preview
+  draws it, since a form is not an element) with `renderElementsToSvg` (`@livedoc/document`, the same
   DOM-free renderer the MCP worker uses), write it to R2, stamp
   `thumb_rendered_at`, and return it. Icon elements render their real
   glyph (line art + Technology brand tiles) via the
-  `@livediagram/icons/resolve` resolver the worker passes in — see
+  `@livedoc/icons/resolve` resolver the worker passes in — see
   [Technology icons](../010-palette/technology-icons.md) "Rendering". Image elements render their real picture: the
   worker reads each upload from R2 and inlines it as a base64 data URL
-  through `embedTabImages` (`@livediagram/api-schema`, shared with the
+  through `embedTabImages` (`@livedoc/api-schema`, shared with the
   MCP preview, [MCP server](../015-api/mcp-server.md) §5), in document order under a 3 MB total budget
   so a tab of large photos can't produce a multi-megabyte snapshot. An
   image past the budget, missing from R2, or not a recognised raster
@@ -133,7 +133,7 @@ document renders lazily.
 - **An empty document is never asked for.** Every document list carries
   `empty` per document (`DocumentSummary`, `SharedWithItem`): true when its
   first tab has nothing to draw (no element and no form: `drawnCount` in
-  `@livediagram/document`), or it has no tab. Such a row shows the still,
+  `@livedoc/document`), or it has no tab. Such a row shows the still,
   dashed sketch at once, captioned "Nothing drawn yet" where there is room,
   and makes no request, so an Explorer of new or blank documents fires no
   404s. The list knows without reading any tab body: each tab row keeps its

@@ -1,4 +1,4 @@
-import { REPO_URL } from '@livediagram/ui';
+import { REPO_URL } from '@livedoc/ui';
 
 // The landing page's promises (docs/specs/019-marketing/marketing-site.md "Promises"): five things
 // that are true of LiveDoc today, under the page's golden rule (no claim the product does not

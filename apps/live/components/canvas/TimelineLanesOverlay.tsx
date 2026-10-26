@@ -2,12 +2,7 @@
 
 import { useCanvasViewKey } from '@/hooks/canvas/useViewportStore';
 import type { RefObject } from 'react';
-import {
-  deriveTextColorForBg,
-  ES_LANE_HEIGHT,
-  laneTop,
-  type EsTimeline,
-} from '@livediagram/document';
+import { deriveTextColorForBg, ES_LANE_HEIGHT, laneTop, type EsTimeline } from '@livedoc/document';
 import { getTheme, type ThemeId } from '@/lib/themes';
 import { useLanePreview } from '@/lib/lane-preview';
 import { useCanvasClientOrigin } from '@/hooks/canvas/useCanvasClientOrigin';

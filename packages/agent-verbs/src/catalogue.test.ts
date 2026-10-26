@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseEditOperations } from '@livediagram/edit-operations';
+import { parseEditOperations } from '@livedoc/edit-operations';
 import {
   COMMAND_ALIASES,
   countedVerbs,
@@ -10,7 +10,7 @@ import {
   verbById,
   verbsOf,
 } from './catalogue';
-import { estimateTokens } from '@livediagram/document-views';
+import { estimateTokens } from '@livedoc/document-views';
 import { GUIDE_TOPIC_MAX_TOKENS, GUIDE_TOPIC_NAMES, GUIDE_TOPICS, isGuideTopic } from './guides';
 import {
   renderSkill,

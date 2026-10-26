@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AGENT_PRESENCE_MAX_TTL_MS, AGENT_PRESENCE_ROOM_MAX } from '@livediagram/api-schema';
+import { AGENT_PRESENCE_MAX_TTL_MS, AGENT_PRESENCE_ROOM_MAX } from '@livedoc/api-schema';
 import {
   agentPresenceKey,
   agentRosterFor,

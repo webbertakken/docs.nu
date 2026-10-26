@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { FakeGoogle } from '@livediagram/fake-google';
-import { DRIVE_FILE_MIME } from '@livediagram/api-schema';
-import {
-  createFreehand,
-  type FreehandElement,
-  documentToEnvelopeText,
-} from '@livediagram/document';
+import { FakeGoogle } from '@livedoc/fake-google';
+import { DRIVE_FILE_MIME } from '@livedoc/api-schema';
+import { createFreehand, type FreehandElement, documentToEnvelopeText } from '@livedoc/document';
 import { createDriveRestClient } from './drive-rest-client';
 import {
   importOpenWithCopy,
@@ -14,14 +10,14 @@ import {
   parseOpenState,
   resolveOpenWith,
 } from './open-with';
-import { Clock, FakeLivediagram, HOST, OWNER } from './test-support';
+import { Clock, FakeLivedoc, HOST, OWNER } from './test-support';
 
 // "Open with" outcomes (docs/specs/022-drive-mirror/drive-mirror.md, "Open with").
 
 function setup() {
   const clock = new Clock();
   const google = new FakeGoogle({ now: () => clock.now });
-  const ld = new FakeLivediagram(clock);
+  const ld = new FakeLivedoc(clock);
   const drive = createDriveRestClient({
     fetch: google.fetch,
     getAccessToken: async () => google.issueAccessToken(OWNER),

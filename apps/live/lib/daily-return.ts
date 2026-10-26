@@ -24,7 +24,7 @@
 
 import { getLastActiveDay, setLastActiveDay } from './local-identity';
 import { track } from './telemetry';
-import { utcDay } from '@livediagram/api-schema';
+import { utcDay } from '@livedoc/api-schema';
 
 export function trackDailyReturn(authenticated: boolean): void {
   if (typeof window === 'undefined') return;

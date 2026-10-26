@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { Libraries } from '@livediagram/agent-verbs';
+import type { Libraries } from '@livedoc/agent-verbs';
 import { CliError, type CliFailure } from '../output/cli-error';
 import { fakeIo } from '../testing/fake-io';
 import { PICKER_PAGE } from './constants';
-import { folderChoices } from '@livediagram/agent-verbs';
+import { folderChoices } from '@livedoc/agent-verbs';
 import { folderNeededError, noFoldersError, pickFolder } from './folder-picker';
 
 // The folder picker (docs/specs/027-repositories/blueprints/repository-link.md "The folder picker"): choose, narrow,

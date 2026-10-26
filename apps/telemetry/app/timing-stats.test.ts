@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { metricKey, timingBuckets, type TelemetryCount } from '@livediagram/api-schema';
+import { metricKey, timingBuckets, type TelemetryCount } from '@livedoc/api-schema';
 import {
   bucketLabel,
   dailyP75,

@@ -2,8 +2,8 @@
 
 The HTTP + WebSocket layer the live editor calls for document persistence and realtime collab.
 
-- **Workspace:** `apps/api` (`@livediagram/api`).
-- **Worker name:** `livediagram-api`.
+- **Workspace:** `apps/api` (`@livedoc/api`).
+- **Worker name:** `docs-nu-api`.
 - **Mount:** routed from the [router worker](../016-platform/router-app.md) at `/api/*`. The router forwards the request as-is — the api worker sees the full `/api/...` path.
 
 ## Why this exists
@@ -18,7 +18,7 @@ The first prototype phase ([spec 02](../005-project-roadmap/prototype-scope.md))
 
 ## Wire-format types
 
-The DTO shapes the api worker emits + the live editor consumes live in `packages/api-schema` (`@livediagram/api-schema`) — `LiveDoc` (published as `Document`), `TabSummary`, `TabRecord`, `Folder`, `ShareLink`, `ServerMessage` / `ClientMessage`, and the room op vocabulary (`RoomOp` / `RoomOutgoing` / `RoomIncoming`). Both apps import them; the api worker also re-exports under historical `XxxDTO` aliases (`apps/api/src/types.ts`) for backward compatibility with its existing call sites.
+The DTO shapes the api worker emits + the live editor consumes live in `packages/api-schema` (`@livedoc/api-schema`) — `LiveDoc` (published as `Document`), `TabSummary`, `TabRecord`, `Folder`, `ShareLink`, `ServerMessage` / `ClientMessage`, and the room op vocabulary (`RoomOp` / `RoomOutgoing` / `RoomIncoming`). Both apps import them; the api worker also re-exports under historical `XxxDTO` aliases (`apps/api/src/types.ts`) for backward compatibility with its existing call sites.
 
 Defining the wire shapes once means server and client cannot drift — adding a field on one side without updating the other is a typechecker error. **Do not redefine these types inline in `apps/api/` or `apps/live/`**; extend the schema package instead. Per AGENTS.md the reuse-over-duplication rule is non-negotiable.
 
@@ -302,7 +302,7 @@ Local `wrangler dev` does not enforce it, so the api enforces it itself:
   headroom covers the row's other columns (the tab id, a UUID; the name, at
   most 60 characters, so at most 240 bytes; `updated_at`; SQLite's record
   header) many times over, so a tab under the cap always fits its row.
-- Both numbers live in `@livediagram/api-schema`, so the editor checks the same
+- Both numbers live in `@livedoc/api-schema`, so the editor checks the same
   cap the worker does and the two cannot drift.
 - **Every write of a tab's data** is checked against it, at the storage layer
   (`upsertTab`, `seedTabs`, `swapTabData`), so no route can store what D1
@@ -360,7 +360,7 @@ Edits and presence propagate as `op` messages. The room is **not** a stateless r
 
 ### Op classes
 
-Every op kind belongs to exactly one of three lists in `@livediagram/api-schema` (`packages/api-schema/src/room-messages.ts`), and the class decides its ordering, its role gate, and whether a client may send it at all. The room reads `op.kind` to classify; the payload stays `op: unknown` on the wire.
+Every op kind belongs to exactly one of three lists in `@livedoc/api-schema` (`packages/api-schema/src/room-messages.ts`), and the class decides its ordering, its role gate, and whether a client may send it at all. The room reads `op.kind` to classify; the payload stays `op: unknown` on the wire.
 
 - **Presence** (`PRESENCE_OP_KINDS`): ephemeral, mutate nothing. Relayed unordered (no `seq`), never logged, never replayed, from **any** connected session, so a view-only visitor still shows peers their cursor, selection, laser, walking character and tab, and can answer a poll.
 - **Mutation** (`MUTATION_OP_KINDS`): change the document. Relayed **only from a session whose verified role is `edit`**; each gets a monotonic `seq` within the room's `epoch` and a slot in the catch-up log.
@@ -416,7 +416,7 @@ Mutations are totally ordered by the single-threaded DO: a monotonic `seq` withi
 Durable Object storage, never D1, and none of it a copy of the document:
 
 - **`order-state`**: `{ epoch, seq }`, written on every mutation.
-- **The collaboration ledger** (`RoomLedgerStore`, `room-ledger-store.ts`; entries defined by the pure `collab-ledger.ts` in `@livediagram/document`): for every `el-delta` and `vote` it sequences, the latest state of each answer, idea, checklist tick, comment and the round's dots, one key per element (plus the tab's vote), tagged with the `seq` that set it. An entry that would pass the storage value limit stops growing. The api reads it back to merge a tab save (see the tab `PUT` above).
+- **The collaboration ledger** (`RoomLedgerStore`, `room-ledger-store.ts`; entries defined by the pure `collab-ledger.ts` in `@livedoc/document`): for every `el-delta` and `vote` it sequences, the latest state of each answer, idea, checklist tick, comment and the round's dots, one key per element (plus the tab's vote), tagged with the `seq` that set it. An entry that would pass the storage value limit stops growing. The api reads it back to merge a tab save (see the tab `PUT` above).
 - **The live poll** (`RoomLivePoll`, `room-live-poll.ts`, key `live-poll`): the running poll and every answer, replayed on `hello`, dropped on `poll-end`.
 - **The facilitator baton** (`RoomFacilitator`, `room-facilitator.ts`, key `facilitator`; rules in `facilitator.ts`): who holds it, the token only the holder was sent, and a grace deadline enforced by a DO alarm when the holder's socket goes away ([Facilitator](../012-collaboration/facilitator.md)).
 
@@ -521,8 +521,8 @@ A new owner-keyed table adds a row here, a statement to each function, and a see
 
 Before the first deploy:
 
-1. `pnpm --filter @livediagram/api exec wrangler d1 create livediagram`
+1. `pnpm --filter @livedoc/api exec wrangler d1 create livediagram`
 2. Copy the printed `database_id` into the `[[d1_databases]]` block in `apps/api/wrangler.toml`. The block is already there with its binding name (`DB`) — only the id changes. What is committed is livediagram.app's own database id, so a self-hoster is replacing a real value rather than filling in a blank.
-3. `pnpm --filter @livediagram/api run db:migrate:remote` to apply migrations.
+3. `pnpm --filter @livedoc/api run db:migrate:remote` to apply migrations.
 
-After that, GitHub Actions handles deploys via `deploy.yml` (`deploy-api` step). The router's service binding to `livediagram-api` means the API must deploy before the router.
+After that, GitHub Actions handles deploys via `deploy.yml` (`deploy-api` step). The router's service binding to `docs-nu-api` means the API must deploy before the router.

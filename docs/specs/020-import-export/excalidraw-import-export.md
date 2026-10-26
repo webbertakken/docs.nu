@@ -333,7 +333,7 @@ The editor's tab-scoped Import dialog card, paste and drop stay as they are.
 ## Export degradation table (Tab → `.excalidraw`)
 
 Every element exports (nothing is dropped), but only geometry, colours, label
-text, links, rotation, opacity and lock survive (`groupIds` is always empty); livediagram-only
+text, links, rotation, opacity and lock survive (`groupIds` is always empty); livedoc-only
 behaviour (animations, markers, notes, comments, actions, non-URL links,
 layers: the list flattens) does not. Export emits `version: 2` with
 `source: "https://livediagram.app"`, `appState.viewBackgroundColor` from the

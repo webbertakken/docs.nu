@@ -16,9 +16,9 @@ import {
   type ItemTypeDef,
   type PlanBoardSetup,
   type QuickFilter,
-} from '@livediagram/items';
-import { lucideGripVertical } from '@livediagram/icons/lucide';
-import { lucideGlyph } from '@livediagram/ui';
+} from '@livedoc/items';
+import { lucideGripVertical } from '@livedoc/icons/lucide';
+import { lucideGlyph } from '@livedoc/ui';
 import { BoardWidgetView, type WidgetContext } from './widgets/BoardWidgetView';
 import { BoardWidgetZone } from './widgets/BoardWidgetZone';
 import { BoardTitle } from './BoardTitle';

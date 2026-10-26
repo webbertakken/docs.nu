@@ -9,7 +9,7 @@ import {
   type ArrowElement,
   type Element,
   type TextElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { heading, type Kit } from './page-layout-kit';
 import { SOURCE_H } from './page-layout-parts';
 

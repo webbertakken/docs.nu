@@ -15,7 +15,7 @@ import {
   type Endpoint,
   type FreehandElement,
   type ShapeElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 
 type Point = { x: number; y: number };
 

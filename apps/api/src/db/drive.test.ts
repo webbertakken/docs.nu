@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DRIVE_LEASE_MS, type DriveItem } from '@livediagram/api-schema';
+import { DRIVE_LEASE_MS, type DriveItem } from '@livedoc/api-schema';
 import { setPendingAccountSwitch } from './drive-account';
 import { sqliteD1 } from '../test-sqlite-d1';
 import {

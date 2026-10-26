@@ -8,7 +8,7 @@ import {
   penColourLabel,
   type PenColour,
   type PenColourName,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   readLocalStorageSafe,
   safeJson,

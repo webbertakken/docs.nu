@@ -3,7 +3,7 @@
 // the sheet engine the MCP's list_sheets, read_sheet, change_sheet and add_sheet share. Sheets are named by title
 // or id, cells by A1, rows by number and columns by letter.
 import { z } from 'zod';
-import { parseCsv } from '@livediagram/sheets';
+import { parseCsv } from '@livedoc/sheets';
 import { defineVerb, VerbRefusal, type Verb, type VerbContext } from '../define';
 import { addSheet } from '../sheets/add-sheet';
 import { changeSheet } from '../sheets/change-sheet';

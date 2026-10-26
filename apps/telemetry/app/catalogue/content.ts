@@ -1,8 +1,8 @@
 // What gets made: documents, tabs, elements added and edited, undo, export and import (docs/specs/017-telemetry/telemetry.md).
 // Part of the metric catalogue: import from ../metric-catalogue.
 
-import { PALETTE_TELEMETRY_TYPES, SHEET_CHANGE_KINDS } from '@livediagram/api-schema';
-import { FORM_STARTERS, QUESTION_TYPE_TELEMETRY } from '@livediagram/forms';
+import { PALETTE_TELEMETRY_TYPES, SHEET_CHANGE_KINDS } from '@livedoc/api-schema';
+import { FORM_STARTERS, QUESTION_TYPE_TELEMETRY } from '@livedoc/forms';
 import { canonicalElementType, PALETTE_KINDS, type PaletteTab } from '../palette-types';
 import type { Metric, MetricStack } from '../metric-series';
 import { chart } from './helpers';

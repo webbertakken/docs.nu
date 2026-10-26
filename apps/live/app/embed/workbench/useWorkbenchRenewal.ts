@@ -10,7 +10,7 @@ import {
   WORKBENCH_RENEW_LEAD_MS,
   WORKBENCH_RENEW_RETRY_MS,
   type WorkbenchSessionResponse,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { apiEndWorkbenchSession, apiRedeemWorkbenchTicket } from '@/lib/api/workbench';
 import { debugLog } from '@/lib/debug-log';
 import type { WorkbenchPort } from '@/lib/workbench/workbench-port';

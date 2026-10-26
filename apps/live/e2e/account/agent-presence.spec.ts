@@ -9,7 +9,7 @@ import { arrange, open, type Setup } from './agent-session';
 
 test.use({ colorScheme: 'dark', viewport: { width: 1440, height: 860 } });
 
-const agent = (s: Setup) => ({ Authorization: `Bearer ${s.token}`, 'X-Livediagram-Client': 'cli' });
+const agent = (s: Setup) => ({ Authorization: `Bearer ${s.token}`, 'X-Livedoc-Client': 'cli' });
 
 function setPresence(page: Page, s: Setup, data: unknown) {
   return page.request.put(`/api/documents/${s.id}/tabs/${s.tabId}/presence`, {

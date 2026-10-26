@@ -9,7 +9,7 @@ import {
   type PresentationConfig,
 } from '@/lib/presentation-config';
 import type { SettingsCategoryId, SettingsIconId } from './settings-icons';
-import { titleCase, type TelemetryCategory } from '@livediagram/api-schema';
+import { titleCase, type TelemetryCategory } from '@livedoc/api-schema';
 import {
   autoRebindArrowsEnabled,
   showProfilePictureEnabled,
@@ -65,7 +65,7 @@ import {
   type LogoGuidePart,
   type LogoGuideStrength,
 } from '@/lib/logo-guide-prefs';
-import type { PlacementDefaultKey } from '@livediagram/api-schema';
+import type { PlacementDefaultKey } from '@livedoc/api-schema';
 import { DEFAULT_KEY_ENTRIES } from '@/lib/placement-defaults/default-key-entries';
 import {
   CLOUD_SYNC_PROVIDERS,

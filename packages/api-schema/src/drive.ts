@@ -109,7 +109,7 @@ export function isDriveFileId(value: unknown): value is string {
 }
 
 // Document and folder ids are uuids or short url-safe ids; the same charset.
-export const isLivediagramId = isDriveFileId;
+export const isLivedocId = isDriveFileId;
 
 export function isDriveLeaseHolder(value: unknown): value is string {
   return typeof value === 'string' && LEASE_HOLDER_RE.test(value);

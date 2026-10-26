@@ -2,12 +2,7 @@
 // the estimate and preview worked out once they settle, and the making, with progress, Cancel and its errors.
 import { useLatest } from '@/hooks/ui/useLatest';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  exportFontIds,
-  visibleLayerElements,
-  type LaidOutPage,
-  type Tab,
-} from '@livediagram/document';
+import { exportFontIds, visibleLayerElements, type LaidOutPage, type Tab } from '@livedoc/document';
 import { pageWritingFonts } from '@/lib/article/article-export';
 import { downloadBlob } from '@/lib/download-blob';
 import { embeddedFontFaceCss } from '@/lib/export-fonts';

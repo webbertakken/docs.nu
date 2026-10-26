@@ -1,7 +1,7 @@
 'use client';
 
-import { readSignInOffered, writeSignInOffered } from '@livediagram/account-session';
-import type { SignInMethod } from '@livediagram/api-schema';
+import { readSignInOffered, writeSignInOffered } from '@livedoc/account-session';
+import type { SignInMethod } from '@livedoc/api-schema';
 import { useEffect, useSyncExternalStore } from 'react';
 import { apiGetCapabilities } from '@/lib/api-client';
 

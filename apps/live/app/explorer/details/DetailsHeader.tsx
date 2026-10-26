@@ -1,8 +1,8 @@
 'use client';
 
-import { ChevronDownIcon } from '@livediagram/ui';
+import { ChevronDownIcon } from '@livedoc/ui';
 import { DETAILS_COLUMNS, type DetailsColumnId, type DetailsSort } from './details-columns';
-import { Tooltip } from '@livediagram/ui';
+import { Tooltip } from '@livedoc/ui';
 import { HEADER_ICON, SHOWN_FROM_CLASS } from './details-cells';
 
 // Column widths: the name takes what is left.

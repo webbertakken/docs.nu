@@ -154,7 +154,7 @@ export function McpArt() {
           fontWeight="600"
           fontFamily={MONO}
         >
-          livediagram.create_document
+          livedoc.create_document
         </text>
         <g className="fa-b-early">
           <circle

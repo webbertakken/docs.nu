@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  READY_MADE_CARD_TYPES,
-  validateItemTypeCatalogue,
-  type ItemTypeDef,
-} from '@livediagram/items';
+import { READY_MADE_CARD_TYPES, validateItemTypeCatalogue, type ItemTypeDef } from '@livedoc/items';
 import { effectiveTarget } from './mapping';
 import { STARTER_IDS, questionsOf } from './model';
 import { readForm } from './read';

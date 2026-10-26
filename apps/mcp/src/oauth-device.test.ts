@@ -5,7 +5,7 @@ import {
   DEVICE_CODE_GRANT,
   DEVICE_CODE_TTL_S,
   DEVICE_SLOW_DOWN_S,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import type { Env } from './env';
 import { registerOauthRoutes } from './oauth';
 

@@ -35,7 +35,7 @@ What you do NOT need:
 3. **Apply migrations to the new D1**:
 
    ```sh
-   pnpm --filter @livediagram/api db:migrate:remote
+   pnpm --filter @livedoc/api db:migrate:remote
    ```
 
    (this runs `wrangler d1 migrations apply DB --remote`: it takes the binding name `DB`, so it follows whichever database `database_name` and `database_id` name).
@@ -83,7 +83,7 @@ and the worker logs why once (`[auth] secret_without_methods`, `[auth] base_url_
 1. **The secret** (worker secret, at least 32 random bytes):
 
    ```sh
-   openssl rand -base64 32 | pnpm --filter @livediagram/api exec wrangler secret put BETTER_AUTH_SECRET
+   openssl rand -base64 32 | pnpm --filter @livedoc/api exec wrangler secret put BETTER_AUTH_SECRET
    ```
 
    Rotate it by adding a new version beside the old, never by replacing it (replacing signs everyone out and loses
@@ -98,7 +98,7 @@ and the worker logs why once (`[auth] secret_without_methods`, `[auth] base_url_
    `GOOGLE_AUTH_CLIENT_ID` as an api `[vars]` entry and the secret as a worker secret:
 
    ```sh
-   pnpm --filter @livediagram/api exec wrangler secret put GOOGLE_AUTH_CLIENT_SECRET
+   pnpm --filter @livedoc/api exec wrangler secret put GOOGLE_AUTH_CLIENT_SECRET
    ```
 
    One half without the other leaves Google off (`[auth] google_half_configured`).
@@ -133,13 +133,13 @@ pnpm install
 pnpm build           # static export for marketing + live + telemetry + help + community,
                      # plus the generated /licences page (no network needed)
 # Then deploy each worker (run from the repo root):
-pnpm --filter @livediagram/marketing exec wrangler deploy
-pnpm --filter @livediagram/live exec wrangler deploy
-pnpm --filter @livediagram/telemetry exec wrangler deploy
-pnpm --filter @livediagram/help exec wrangler deploy
-pnpm --filter @livediagram/community exec wrangler deploy
-pnpm --filter @livediagram/api exec wrangler deploy
-pnpm --filter @livediagram/router exec wrangler deploy   # last, depends on the six above
+pnpm --filter @livedoc/marketing exec wrangler deploy
+pnpm --filter @livedoc/live exec wrangler deploy
+pnpm --filter @livedoc/telemetry exec wrangler deploy
+pnpm --filter @livedoc/help exec wrangler deploy
+pnpm --filter @livedoc/community exec wrangler deploy
+pnpm --filter @livedoc/api exec wrangler deploy
+pnpm --filter @livedoc/router exec wrangler deploy   # last, depends on the six above
 ```
 
 Deploying by hand, give the editor build and the api the same build id so an open tab knows when a newer build is live ([Stale builds](../specs/016-platform/stale-builds.md)): `NEXT_PUBLIC_BUILD_ID=$(git rev-parse HEAD) pnpm build`, then `--var "BUILD_ID:$(git rev-parse HEAD)"` on the api's `wrangler deploy`. The workflow does this for you; leaving both unset only turns that detection off.
@@ -173,11 +173,11 @@ nothing. To run it:
 1. **Create a KV namespace** for OAuth state and put the id in `apps/mcp/wrangler.toml`:
 
    ```sh
-   pnpm --filter @livediagram/mcp exec wrangler kv namespace create OAUTH_KV
+   pnpm --filter @livedoc/mcp exec wrangler kv namespace create OAUTH_KV
    ```
 
 2. **Point it at your hosts.** Attach your MCP hostname to the worker in the
-   Cloudflare dashboard (Workers → `livediagram-mcp` → Domains & Routes → add a
+   Cloudflare dashboard (Workers → `docs-nu-mcp` → Domains & Routes → add a
    custom domain) — the same way every other worker here gets its hostname, since
    the deploy token only uploads scripts, not zone routes. Then set
    `CONSENT_BASE_URL` (in `apps/mcp/wrangler.toml`) to your live app's origin and
@@ -213,7 +213,7 @@ To turn it on, set the key as a worker secret:
 
 ```bash
 # One key serves every AI feature:
-pnpm --filter @livediagram/api exec wrangler secret put GOOGLE_AI_STUDIO_API_KEY
+pnpm --filter @livedoc/api exec wrangler secret put GOOGLE_AI_STUDIO_API_KEY
 # or OPENAI_API_KEY, or AI_API_KEY (with AI_BASE_URL + AI_MODEL as [vars]).
 # Set both named keys to split them: the assistant on OpenAI, the reader on Google.
 ```
@@ -249,7 +249,7 @@ The api worker can send a small set of account emails ([Transactional & lifecycl
 The worker picks the first transport it has (`apps/api/src/email/transport.ts`):
 
 1. **Cloudflare Email Service**, through the `[[send_email]]` binding `EMAIL` that `apps/api/wrangler.toml` declares. Onboard your sending domain under **Compute > Email Service > Email Sending** in the Cloudflare dashboard first. Sending to any address needs the Workers Paid plan, and Cloudflare takes transactional mail only.
-2. **Resend**, when the binding is absent: remove the `[[send_email]]` block, verify a domain in Resend, then `pnpm --filter @livediagram/api exec wrangler secret put RESEND_API_KEY`.
+2. **Resend**, when the binding is absent: remove the `[[send_email]]` block, verify a domain in Resend, then `pnpm --filter @livedoc/api exec wrangler secret put RESEND_API_KEY`.
 
 Optional knobs (plain `[vars]`):
 
@@ -300,8 +300,8 @@ Signed-in users can mirror My Documents to their own Google Drive ([Google Drive
 4. For syncing without a click every hour, also set two worker secrets (without them the browser holds hour-long tokens and asks the user to **Resume sync**):
 
 ```sh
-pnpm --filter @livediagram/api exec wrangler secret put GOOGLE_CLIENT_SECRET
-pnpm --filter @livediagram/api exec wrangler secret put DRIVE_TOKEN_KEY   # openssl rand -base64 32
+pnpm --filter @livedoc/api exec wrangler secret put GOOGLE_CLIENT_SECRET
+pnpm --filter @livedoc/api exec wrangler secret put DRIVE_TOKEN_KEY   # openssl rand -base64 32
 ```
 
 5. Optional: `NEXT_PUBLIC_GOOGLE_API_KEY`, a browser API key (restricted by HTTP referrer) for the Google Picker, which lets users show livediagram a folder they made in Drive. Without it the mirror works and that one step is not offered.

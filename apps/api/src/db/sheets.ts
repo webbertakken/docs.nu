@@ -10,7 +10,7 @@ import {
   type SheetJson,
   type SheetLayout,
   type SheetPerson,
-} from '@livediagram/sheets';
+} from '@livedoc/sheets';
 import type { Env } from '../types';
 import { sheetNoteUnreferencedStatement } from './sheet-refs';
 

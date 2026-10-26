@@ -8,12 +8,7 @@
 // element's whole-element text fields, a note inherits fixed body defaults).
 // Callers pass a `RunDefaults` instead, so one implementation serves both.
 
-import {
-  runsPlainText,
-  type RunBoolKey,
-  type RunHeading,
-  type TextRun,
-} from '@livediagram/document';
+import { runsPlainText, type RunBoolKey, type RunHeading, type TextRun } from '@livedoc/document';
 
 // The base an unset run delta falls back to.
 export type RunDefaults = {

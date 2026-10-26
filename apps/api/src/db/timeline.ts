@@ -10,8 +10,8 @@
 // Emit is fire-and-forget from every call site (wrapped in waitUntil):
 // a missing timeline row is cosmetic, a failed document save is not.
 
-import { HOME_OPENED_EVENT_TYPE } from '@livediagram/api-schema';
-import type { TimelineEvent, TimelineScopeRef } from '@livediagram/api-schema';
+import { HOME_OPENED_EVENT_TYPE } from '@livedoc/api-schema';
+import type { TimelineEvent, TimelineScopeRef } from '@livedoc/api-schema';
 import type { Env } from '../types';
 import { VISIBLE_DOCUMENTS_CTES } from './document-visibility';
 

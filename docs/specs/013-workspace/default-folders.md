@@ -52,7 +52,7 @@ order:
   `template` (the template family) and `mode` (opens in).
 - The keys are a **closed list** (`PLACEMENT_DEFAULT_KEYS`), generated from three closed lists. A key
   outside it is refused when set and ignored when read.
-  - **Mode keys** come from the editor modes (`EDITOR_MODES` in `@livediagram/document`), one
+  - **Mode keys** come from the editor modes (`EDITOR_MODES` in `@livedoc/document`), one
     `mode:<mode>` per mode in the modes' order: a new editor mode gains its key, and its entry in
     the list, with no other change.
   - **Kind keys** come from the specific tab kinds a document can be created with: every creatable
@@ -72,7 +72,7 @@ order:
     reads a tab's kind; `diagram` otherwise (a legacy whiteboard tab included). Absent on the wire
     reads as `diagram`.
   - `templateFamily`: by the **template** the document is made from. One exhaustive map from every
-    template to its family, or none, decides it (`templateFamilyOf` in `@livediagram/templates`):
+    template to its family, or none, decides it (`templateFamilyOf` in `@livedoc/templates`):
     every retrospective format (Retrospective, Start / Stop / Continue, Mad / Sad / Glad, 4Ls,
     Sailboat) is `retrospective`, the Kanban template `kanban`, every other template none, the
     Incident postmortem and Lean coffee included. A new template is not complete until it is

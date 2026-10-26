@@ -114,7 +114,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: /optical-audit-sites\.spec\.ts/,
     },
-    // Opt-in (pnpm --filter @livediagram/live test:e2e:drive): the Google Drive mirror against the fake
+    // Opt-in (pnpm --filter @livedoc/live test:e2e:drive): the Google Drive mirror against the fake
     // Google, signed in for real (docs/specs/022-drive-mirror/blueprints/drive-mirror.md, "Testing"). Kept
     // out of CI's default run: it needs a build that carries the e2e Google client id.
     ...(drive

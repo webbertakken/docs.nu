@@ -18,7 +18,7 @@ file). Built on [Board import](board-import.md); evidence in
 
 ## Connecting
 
-- One Miro app in a livediagram-owned developer team, distributed by its
+- One Miro app in a livedoc-owned developer team, distributed by its
   installation URL. No Marketplace listing.
 - Scope: `boards:read`.
 - The click on **Connect Miro** opens Miro's consent page in a popup. The user

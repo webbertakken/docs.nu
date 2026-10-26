@@ -8,7 +8,7 @@ import {
   themeColourMap,
   themeHalf,
   type Element,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { createStockColourProjector } from './stock-colour-projector';
 
 const stroke = (over: Partial<Element> = {}): Element =>

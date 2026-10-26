@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { Button, clampIntoRange, lucideGlyph, Portal } from '@livediagram/ui';
-import { lucideTriangleAlert } from '@livediagram/icons/lucide';
+import { Button, clampIntoRange, lucideGlyph, Portal } from '@livedoc/ui';
+import { lucideTriangleAlert } from '@livedoc/icons/lucide';
 import { VIEWPORT_EDGE_MARGIN as EDGE } from '@/lib/clamp-to-viewport';
 import { usePopoverLayer } from './popover-stack';
 

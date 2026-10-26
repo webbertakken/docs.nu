@@ -9,7 +9,7 @@
 //   guest-offline ──the browser comes back online──▶ read again
 //
 // The read also settles whether this host offers sign-in at all (auth-config.ts): `/api/auth/*` answers 404 on a
-// guest-only host. Plain `fetch` through `@livediagram/account-session`: no sign-in library on any page's first
+// guest-only host. Plain `fetch` through `@livedoc/account-session`: no sign-in library on any page's first
 // load. The guest migration that follows a sign-in is the api bootstrap's (useAccountApiBootstrap).
 
 import {
@@ -20,7 +20,7 @@ import {
   signOut as endSession,
   writeSignedInHint,
   type SessionState,
-} from '@livediagram/account-session';
+} from '@livedoc/account-session';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLatest } from '@/hooks/ui/useLatest';

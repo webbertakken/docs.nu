@@ -14,10 +14,10 @@ import {
   type FormDefinition,
   type FormQuestion,
   type StarterId,
-} from '@livediagram/forms';
-import { isDefaultTabName, newPlanSheetId, type Tab } from '@livediagram/document';
+} from '@livedoc/forms';
+import { isDefaultTabName, newPlanSheetId, type Tab } from '@livedoc/document';
 import { placeNewSheet } from '@/lib/sheet-seeds';
-import { newCustomFieldId, newItemTypeId, type ItemTypeDef } from '@livediagram/items';
+import { newCustomFieldId, newItemTypeId, type ItemTypeDef } from '@livedoc/items';
 import type { ItemTypesSlice } from '@/hooks/plan/useItemTypes';
 import { track } from '@/lib/telemetry';
 import { useLatest } from '@/hooks/ui/useLatest';
@@ -29,7 +29,7 @@ import {
   uniqueTypeLabel,
   withAutoBoardName,
   withBoardTaking,
-} from '@livediagram/templates';
+} from '@livedoc/templates';
 
 export type FormActions = {
   // A starter chosen on Start Planning: the tab becomes a Form tab holding it.

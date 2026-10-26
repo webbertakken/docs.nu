@@ -8,10 +8,10 @@ import {
   tabToJsonText,
   tabToMarkdownText,
   type ExportedTabEnvelope,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { exportScale, exportTabAsSvg, MAX_EXPORT_CANVAS_SIDE, renderTabToSvg } from './export-tab';
 import { parseImportedTab } from './import-tab';
-import { encodeStrokePoints, layOutPages } from '@livediagram/document';
+import { encodeStrokePoints, layOutPages } from '@livedoc/document';
 
 const shape = (id: string, overrides: Partial<ShapeElement> = {}): ShapeElement => ({
   id,

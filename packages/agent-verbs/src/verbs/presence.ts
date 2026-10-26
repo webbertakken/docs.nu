@@ -2,7 +2,7 @@
 // a tab what it is doing and what it is looking at, under its owner's name, for a while; or stops showing it.
 
 import { z } from 'zod';
-import { ApiError } from '@livediagram/api-client';
+import { ApiError } from '@livedoc/api-client';
 import {
   AGENT_PRESENCE_FOCUS_MAX,
   AGENT_PRESENCE_MAX_TTL_MS,
@@ -10,7 +10,7 @@ import {
   parseAgentPresenceRequest,
   type AgentPresenceRequestCode,
   type AgentPresenceResult,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { defineVerb, VerbRefusal } from '../define';
 import { tabOf, tabPath } from './shared';
 

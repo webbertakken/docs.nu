@@ -2,8 +2,8 @@
 // from a file or stdin, one element command a call, and `tab diff` against a read copy.
 
 import { z } from 'zod';
-import type { ChangesetResponse } from '@livediagram/api-schema';
-import { diffView } from '@livediagram/document-views';
+import type { ChangesetResponse } from '@livedoc/api-schema';
+import { diffView } from '@livedoc/document-views';
 import { argvToOperationLine } from '../argv-line';
 import { readPlainTab } from '../copies';
 import { defineVerb, VerbRefusal, type Verb, type VerbContext } from '../define';

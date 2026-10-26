@@ -7,8 +7,8 @@ import {
   lucideShapes,
   lucideStickyNote,
   lucideWorkflow,
-} from '@livediagram/icons/lucide';
-import { lucideGlyph } from '@livediagram/ui';
+} from '@livedoc/icons/lucide';
+import { lucideGlyph } from '@livedoc/ui';
 
 // How each competitor is drawn on the comparison pages (docs/specs/019-marketing/comparison-pages.md): a generic
 // glyph of what the tool IS (a sticky note for a workshop whiteboard, a tree for a mind-mapper), never its logo,

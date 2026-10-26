@@ -3,8 +3,8 @@
 // inert document (no scripts, no loads), and only text plus a closed set of
 // formats is read out of it.
 
-import { parseInert } from '@livediagram/ui/trusted-types';
-import { normalizeRuns, type RunHeading, type RunSize, type TextRun } from '@livediagram/document';
+import { parseInert } from '@livedoc/ui/trusted-types';
+import { normalizeRuns, type RunHeading, type RunSize, type TextRun } from '@livedoc/document';
 import { htmlFontSizePx } from './text-size';
 import { hexInk } from './colour';
 

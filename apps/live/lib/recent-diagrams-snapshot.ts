@@ -12,8 +12,8 @@ import {
   serializeRecentDiagrams,
   type DocumentSummary,
   type RecentDiagram,
-} from '@livediagram/api-schema';
-import { USER_PREFERENCES_STORAGE_KEY } from '@livediagram/telemetry-client';
+} from '@livedoc/api-schema';
+import { USER_PREFERENCES_STORAGE_KEY } from '@livedoc/telemetry-client';
 import {
   readLocalStorageSafe,
   removeLocalStorageSafe,

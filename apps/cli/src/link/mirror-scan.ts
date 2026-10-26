@@ -4,7 +4,7 @@
 // Paths are relative to the mirror directory.
 
 import { posix } from 'node:path';
-import { parseDocumentEnvelope } from '@livediagram/document';
+import { parseDocumentEnvelope } from '@livedoc/document';
 import type { CliIo } from '../io';
 import { parsePullFile, PULL_FILE_SUFFIX, sha256, tabHashes } from '../sync/pull-file';
 import { LINK_FILE_NAME } from './constants';

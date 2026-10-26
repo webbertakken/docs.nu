@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
-import type { ChangesetRoomOp, ChangesetSummary } from '@livediagram/api-schema';
-import type { Tab } from '@livediagram/document';
+import type { ChangesetRoomOp, ChangesetSummary } from '@livedoc/api-schema';
+import type { Tab } from '@livedoc/document';
 
 const apiRevertChangeset = vi.fn<typeof import('@/lib/api-client').apiRevertChangeset>();
 const apiListChangesets = vi.fn<typeof import('@/lib/api-client').apiListChangesets>();

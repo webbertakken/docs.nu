@@ -8,8 +8,8 @@
 import dynamic from 'next/dynamic';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import type { WorkbenchOpenTarget, WorkbenchRole } from '@livediagram/api-schema';
-import { setAppearanceOverride } from '@livediagram/ui';
+import type { WorkbenchOpenTarget, WorkbenchRole } from '@livedoc/api-schema';
+import { setAppearanceOverride } from '@livedoc/ui';
 import { WorkbenchReconnectLine } from '@/components/chrome/WorkbenchChrome';
 import {
   useWorkbenchSession,

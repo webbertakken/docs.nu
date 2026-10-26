@@ -13,7 +13,7 @@
 // once per action. `event-explanation.test.ts` checks every event the code
 // can send gets a real sentence, free of code names and jargon.
 
-import { COMMUNITY_CATEGORIES, COMMUNITY_REPORT_REASONS } from '@livediagram/api-schema';
+import { COMMUNITY_CATEGORIES, COMMUNITY_REPORT_REASONS } from '@livedoc/api-schema';
 
 // One sentence per Community category or report reason, read off the closed lists so a new one
 // reads by its own label the day it ships.

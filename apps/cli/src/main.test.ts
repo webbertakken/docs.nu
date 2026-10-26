@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { renderSkill } from '@livediagram/agent-verbs';
+import { renderSkill } from '@livedoc/agent-verbs';
 import { run } from './main';
 import { capabilities, fakeIo, NOW, TOKEN, type Route } from './testing/fake-io';
 import { CLI_VERSION } from './config/version';
@@ -90,7 +90,7 @@ describe('run', () => {
     });
     const request = io.requests.at(-1)!;
     expect(request.headers.get('Authorization')).toBe(`Bearer ${TOKEN}`);
-    expect(request.headers.get('X-Livediagram-Client')).toBe('cli');
+    expect(request.headers.get('X-Livedoc-Client')).toBe('cli');
     expect(request.headers.get('User-Agent')).toBe(`livedoc-cli/${CLI_VERSION} node/24.0.0 linux`);
   });
 

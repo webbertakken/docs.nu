@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { OverviewView } from '@livediagram/api-schema';
-import type { Tab } from '@livediagram/document';
+import type { OverviewView } from '@livedoc/api-schema';
+import type { Tab } from '@livedoc/document';
 import { tabHashes } from '../sync/pull-file';
 import type { MirrorFile } from './mirror-file';
 import type { TabHashes } from './mirror-scan';

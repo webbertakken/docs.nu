@@ -1,7 +1,7 @@
 // The three help levels (docs/specs/015-api/cli.md "Help"): top, resource and verb, from the catalogue, each
 // within its token budget.
 
-import { COMMAND_ALIASES, RESOURCES, verbsOf, type Verb } from '@livediagram/agent-verbs';
+import { COMMAND_ALIASES, RESOURCES, verbsOf, type Verb } from '@livedoc/agent-verbs';
 import { fieldsOf, flagOf, keyOf, restName } from '../dispatch/fields';
 
 export const HELP_TOP_MAX_TOKENS = 520;

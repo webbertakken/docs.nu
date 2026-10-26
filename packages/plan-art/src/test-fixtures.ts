@@ -1,6 +1,6 @@
 // Fixtures for the Plan image tests (docs/specs/026-plan/plan-tabs.md "Export"): cards, phases and a picture's data.
-import { ITEM_TYPES, type Item, type StatusPhase } from '@livediagram/items';
-import type { Element } from '@livediagram/document';
+import { ITEM_TYPES, type Item, type StatusPhase } from '@livedoc/items';
+import type { Element } from '@livedoc/document';
 import type { PlanArtData } from './plan-view-art';
 
 let n = 0;

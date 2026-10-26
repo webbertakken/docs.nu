@@ -5,9 +5,9 @@
 // against (the active cell), and the rule panels themselves (the Data Validation editor, the Conditional Formatting
 // popover, the Custom Number Format popover).
 import { lazy, Suspense, useState } from 'react';
-import { Tooltip, lucideGlyph } from '@livediagram/ui';
-import { lucideChevronDown } from '@livediagram/icons/lucide';
-import { cellKey, displayValue, formatA1, validationRuleAt } from '@livediagram/sheets';
+import { Tooltip, lucideGlyph } from '@livedoc/ui';
+import { lucideChevronDown } from '@livedoc/icons/lucide';
+import { cellKey, displayValue, formatA1, validationRuleAt } from '@livedoc/sheets';
 import { cellBox, mergeAt } from '../sheet-geometry';
 import { useSheetController } from '../sheet-controller';
 import type { SheetActions } from '../useSheetActions';

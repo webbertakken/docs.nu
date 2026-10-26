@@ -3,7 +3,7 @@
 // (labels at 60, other text at 48), tokens and numbers print bare, objects and arrays as
 // `(changed)`, and an absent value as nothing (EO43).
 
-import type { FieldChange, JsonValue, ResultLine } from '@livediagram/api-schema';
+import type { FieldChange, JsonValue, ResultLine } from '@livedoc/api-schema';
 import { quoteCut } from './element-text';
 import type { ResultFooter } from './types';
 import { LABEL_CUT_CHARS, VALUE_CUT_CHARS } from './vocabulary';

@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ES_LANES,
-  type ArrowElement,
-  type Element,
-  type StickyElement,
-} from '@livediagram/document';
+import { ES_LANES, type ArrowElement, type Element, type StickyElement } from '@livedoc/document';
 import {
   DEFAULT_INSERTION_GAP,
   applyInsertionShift,

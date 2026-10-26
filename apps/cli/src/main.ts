@@ -2,8 +2,8 @@
 // the verb's input, the profile and credential, the host's capabilities, the handler, and what it prints. The
 // exit code is one of eight; stdout carries data only.
 
-import { graphLint, renderSkill, type Verb, type VerbContext } from '@livediagram/agent-verbs';
-import { DOCUMENT_FORMAT } from '@livediagram/api-schema';
+import { graphLint, renderSkill, type Verb, type VerbContext } from '@livedoc/agent-verbs';
+import { DOCUMENT_FORMAT } from '@livedoc/api-schema';
 import { resolveCredential } from './auth/credentials';
 import { callApi, guideOf, installSkill, login, logout, status } from './commands/local';
 import { exportAll, type ExportInput } from './commands/export';

@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { TeamInviteDecline as TeamInviteDeclineInfo } from '@livediagram/api-schema';
-import { Button } from '@livediagram/ui';
+import type { TeamInviteDecline as TeamInviteDeclineInfo } from '@livedoc/api-schema';
+import { Button } from '@livedoc/ui';
 import {
   Body,
   Eyebrow,

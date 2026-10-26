@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createPath,
-  createShape,
-  cubicAt,
-  pathSegments,
-  type PathAnchor,
-} from '@livediagram/document';
+import { createPath, createShape, cubicAt, pathSegments, type PathAnchor } from '@livedoc/document';
 import {
   PATH_NODE_HIT_PX,
   bendAt,

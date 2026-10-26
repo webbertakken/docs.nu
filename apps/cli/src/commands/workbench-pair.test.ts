@@ -3,7 +3,7 @@ import {
   DEVICE_SLOW_DOWN_S,
   type PairingRequestStatus,
   type WorkbenchPairingRequestCreated,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { run } from '../main';
 import { capabilities, fakeIo, NOW, TOKEN, type FakeIo } from '../testing/fake-io';
 

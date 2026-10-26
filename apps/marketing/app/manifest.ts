@@ -1,4 +1,4 @@
-import { SITE_DESCRIPTION } from '@livediagram/ui';
+import { SITE_DESCRIPTION } from '@livedoc/ui';
 import type { MetadataRoute } from 'next';
 
 // Required for `output: 'export'`: route handlers must declare

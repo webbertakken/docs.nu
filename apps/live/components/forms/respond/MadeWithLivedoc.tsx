@@ -2,9 +2,9 @@
 
 // "Made with LiveDoc" under a form on its page (docs/specs/030-forms/forms.md "Filling in a form"): the words and
 // the real logo, its mark and wordmark (the shared Brand), linking to the marketing site.
-import { Brand } from '@livediagram/ui';
+import { Brand } from '@livedoc/ui';
 
-export function MadeWithLivediagram() {
+export function MadeWithLivedoc() {
   return (
     <a
       href="/"

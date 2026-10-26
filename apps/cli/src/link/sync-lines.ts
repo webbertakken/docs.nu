@@ -3,7 +3,7 @@
 
 import type { MirrorLevel } from './link-file';
 import type { SyncAction, TabMove } from './sync-plan';
-import { plural } from '@livediagram/document';
+import { plural } from '@livedoc/document';
 import { oneLine } from '../output/one-line';
 
 export type LineContext = {

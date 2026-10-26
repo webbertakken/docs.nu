@@ -2,12 +2,8 @@
 // edge cases"). Each builder returns the wire `EditRejection`; `formatRejections` prints a block of
 // them, ending `nothing was applied`.
 
-import {
-  CHANGESET_MAX_OPERATIONS,
-  type EditRejection,
-  type JsonValue,
-} from '@livediagram/api-schema';
-import type { Element } from '@livediagram/document';
+import { CHANGESET_MAX_OPERATIONS, type EditRejection, type JsonValue } from '@livedoc/api-schema';
+import type { Element } from '@livedoc/document';
 import { describeElement, kindOf, labelOf, quoteCut } from './element-text';
 import { nearestName } from './nearest';
 import {

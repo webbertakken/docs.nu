@@ -26,10 +26,10 @@ importers:
 
   .:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:packages/oxlint-config
-      '@livediagram/prettier-config':
+      '@livedoc/prettier-config':
         specifier: workspace:*
         version: link:packages/prettier-config
       esbuild:
@@ -59,40 +59,40 @@ importers:
 
   apps/api:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/diagram-lint':
+      '@livedoc/diagram-lint':
         specifier: workspace:*
         version: link:../../packages/diagram-lint
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../../packages/document
-      '@livediagram/document-views':
+      '@livedoc/document-views':
         specifier: workspace:*
         version: link:../../packages/document-views
-      '@livediagram/edit-operations':
+      '@livedoc/edit-operations':
         specifier: workspace:*
         version: link:../../packages/edit-operations
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../../packages/forms
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../../packages/items
-      '@livediagram/plan-art':
+      '@livedoc/plan-art':
         specifier: workspace:*
         version: link:../../packages/plan-art
-      '@livediagram/render-png':
+      '@livedoc/render-png':
         specifier: workspace:*
         version: link:../../packages/render-png
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../../packages/templates
       better-auth:
@@ -105,10 +105,10 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^5.20261007.1
         version: 5.20261007.1
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@types/node':
@@ -135,28 +135,28 @@ importers:
 
   apps/cli:
     dependencies:
-      '@livediagram/agent-verbs':
+      '@livedoc/agent-verbs':
         specifier: workspace:*
         version: link:../../packages/agent-verbs
-      '@livediagram/api-client':
+      '@livedoc/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/diagram-lint':
+      '@livedoc/diagram-lint':
         specifier: workspace:*
         version: link:../../packages/diagram-lint
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../../packages/document
-      '@livediagram/document-views':
+      '@livedoc/document-views':
         specifier: workspace:*
         version: link:../../packages/document-views
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@livediagram/render-png':
+      '@livedoc/render-png':
         specifier: workspace:*
         version: link:../../packages/render-png
       smol-toml:
@@ -166,10 +166,10 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@resvg/resvg-wasm':
@@ -196,19 +196,19 @@ importers:
 
   apps/community:
     dependencies:
-      '@livediagram/account-session':
+      '@livedoc/account-session':
         specifier: workspace:*
         version: link:../../packages/account-session
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@livediagram/telemetry-client':
+      '@livedoc/telemetry-client':
         specifier: workspace:*
         version: link:../../packages/telemetry-client
-      '@livediagram/ui':
+      '@livedoc/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -221,16 +221,16 @@ importers:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@livediagram/next-config':
+      '@livedoc/next-config':
         specifier: workspace:*
         version: link:../../packages/next-config
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/tailwind-config':
+      '@livedoc/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@tailwindcss/postcss':
@@ -266,19 +266,19 @@ importers:
 
   apps/help:
     dependencies:
-      '@livediagram/help-registry':
+      '@livedoc/help-registry':
         specifier: workspace:*
         version: link:../../packages/help-registry
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:^
         version: link:../../packages/icons
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
-      '@livediagram/telemetry-client':
+      '@livedoc/telemetry-client':
         specifier: workspace:*
         version: link:../../packages/telemetry-client
-      '@livediagram/ui':
+      '@livedoc/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@mdx-js/loader':
@@ -303,19 +303,19 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
     devDependencies:
-      '@livediagram/next-config':
+      '@livedoc/next-config':
         specifier: workspace:*
         version: link:../../packages/next-config
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/tailwind-config':
+      '@livedoc/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../../packages/templates
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@tailwindcss/postcss':
@@ -357,55 +357,55 @@ importers:
       '@jsquash/webp':
         specifier: 1.5.0
         version: 1.5.0
-      '@livediagram/account-session':
+      '@livedoc/account-session':
         specifier: workspace:*
         version: link:../../packages/account-session
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../../packages/document
-      '@livediagram/document-views':
+      '@livedoc/document-views':
         specifier: workspace:*
         version: link:../../packages/document-views
-      '@livediagram/explorer-lens':
+      '@livedoc/explorer-lens':
         specifier: workspace:*
         version: link:../../packages/explorer-lens
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../../packages/forms
-      '@livediagram/help-registry':
+      '@livedoc/help-registry':
         specifier: workspace:*
         version: link:../../packages/help-registry
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../../packages/items
-      '@livediagram/plan-art':
+      '@livedoc/plan-art':
         specifier: workspace:*
         version: link:../../packages/plan-art
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
-      '@livediagram/sticky-model':
+      '@livedoc/sticky-model':
         specifier: workspace:*
         version: link:../../packages/sticky-model
-      '@livediagram/sticky-vision':
+      '@livedoc/sticky-vision':
         specifier: workspace:*
         version: link:../../packages/sticky-vision
-      '@livediagram/telemetry-client':
+      '@livedoc/telemetry-client':
         specifier: workspace:*
         version: link:../../packages/telemetry-client
-      '@livediagram/template-previews':
+      '@livedoc/template-previews':
         specifier: workspace:*
         version: link:../../packages/template-previews
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../../packages/templates
-      '@livediagram/ui':
+      '@livedoc/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tensorflow/tfjs-backend-wasm':
@@ -460,22 +460,22 @@ importers:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@livediagram/fake-google':
+      '@livedoc/fake-google':
         specifier: workspace:*
         version: link:../../packages/fake-google
-      '@livediagram/next-config':
+      '@livedoc/next-config':
         specifier: workspace:*
         version: link:../../packages/next-config
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/source-ast':
+      '@livedoc/source-ast':
         specifier: workspace:*
         version: link:../../packages/source-ast
-      '@livediagram/tailwind-config':
+      '@livedoc/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@playwright/test':
@@ -523,19 +523,19 @@ importers:
 
   apps/marketing:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@livediagram/template-previews':
+      '@livedoc/template-previews':
         specifier: workspace:*
         version: link:../../packages/template-previews
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../../packages/templates
-      '@livediagram/ui':
+      '@livedoc/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -548,25 +548,25 @@ importers:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../../packages/document
-      '@livediagram/help-registry':
+      '@livedoc/help-registry':
         specifier: workspace:*
         version: link:../../packages/help-registry
-      '@livediagram/licences':
+      '@livedoc/licences':
         specifier: workspace:*
         version: link:../../packages/licences
-      '@livediagram/next-config':
+      '@livedoc/next-config':
         specifier: workspace:*
         version: link:../../packages/next-config
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/tailwind-config':
+      '@livedoc/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@tailwindcss/postcss':
@@ -605,43 +605,43 @@ importers:
 
   apps/mcp:
     dependencies:
-      '@livediagram/agent-verbs':
+      '@livedoc/agent-verbs':
         specifier: workspace:*
         version: link:../../packages/agent-verbs
-      '@livediagram/api-client':
+      '@livedoc/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/diagram-lint':
+      '@livedoc/diagram-lint':
         specifier: workspace:*
         version: link:../../packages/diagram-lint
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../../packages/document
-      '@livediagram/edit-operations':
+      '@livedoc/edit-operations':
         specifier: workspace:*
         version: link:../../packages/edit-operations
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../../packages/forms
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../../packages/items
-      '@livediagram/plan-art':
+      '@livedoc/plan-art':
         specifier: workspace:*
         version: link:../../packages/plan-art
-      '@livediagram/render-png':
+      '@livedoc/render-png':
         specifier: workspace:*
         version: link:../../packages/render-png
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../../packages/templates
       '@modelcontextprotocol/sdk':
@@ -660,10 +660,10 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^5.20261007.1
         version: 5.20261007.1
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@types/node':
@@ -690,16 +690,16 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^5.20261007.1
         version: 5.20261007.1
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/help-registry':
+      '@livedoc/help-registry':
         specifier: workspace:*
         version: link:../../packages/help-registry
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@types/node':
@@ -720,16 +720,16 @@ importers:
 
   apps/telemetry:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../../packages/forms
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@livediagram/ui':
+      '@livedoc/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -742,22 +742,22 @@ importers:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@livediagram/agent-verbs':
+      '@livedoc/agent-verbs':
         specifier: workspace:*
         version: link:../../packages/agent-verbs
-      '@livediagram/next-config':
+      '@livedoc/next-config':
         specifier: workspace:*
         version: link:../../packages/next-config
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../../packages/oxlint-config
-      '@livediagram/source-ast':
+      '@livedoc/source-ast':
         specifier: workspace:*
         version: link:../../packages/source-ast
-      '@livediagram/tailwind-config':
+      '@livedoc/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../../packages/vitest-config
       '@tailwindcss/postcss':
@@ -787,10 +787,10 @@ importers:
 
   packages/account-session:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -808,47 +808,47 @@ importers:
 
   packages/agent-verbs:
     dependencies:
-      '@livediagram/api-client':
+      '@livedoc/api-client':
         specifier: workspace:*
         version: link:../api-client
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
-      '@livediagram/diagram-lint':
+      '@livedoc/diagram-lint':
         specifier: workspace:*
         version: link:../diagram-lint
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/document-views':
+      '@livedoc/document-views':
         specifier: workspace:*
         version: link:../document-views
-      '@livediagram/edit-operations':
+      '@livedoc/edit-operations':
         specifier: workspace:*
         version: link:../edit-operations
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../forms
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../items
-      '@livediagram/page-background':
+      '@livedoc/page-background':
         specifier: workspace:*
         version: link:../page-background
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../templates
       zod:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -866,10 +866,10 @@ importers:
 
   packages/api-client:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -887,23 +887,23 @@ importers:
 
   packages/api-schema:
     dependencies:
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../forms
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../items
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../sheets
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       oxlint:
@@ -918,23 +918,23 @@ importers:
 
   packages/diagram-lint:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
     devDependencies:
-      '@livediagram/edit-operations':
+      '@livedoc/edit-operations':
         specifier: workspace:*
         version: link:../edit-operations
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../templates
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -955,26 +955,26 @@ importers:
 
   packages/document:
     dependencies:
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../forms
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../icons
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../items
-      '@livediagram/page-background':
+      '@livedoc/page-background':
         specifier: workspace:*
         version: link:../page-background
       perfect-freehand:
         specifier: ^1.2.3
         version: 1.2.3
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -995,20 +995,20 @@ importers:
 
   packages/document-views:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../templates
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1029,29 +1029,29 @@ importers:
 
   packages/edit-operations:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../forms
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../icons
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../templates
     devDependencies:
-      '@livediagram/document-views':
+      '@livedoc/document-views':
         specifier: workspace:*
         version: link:../document-views
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -1069,17 +1069,17 @@ importers:
 
   packages/explorer-lens:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -1097,10 +1097,10 @@ importers:
 
   packages/fake-google:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1118,20 +1118,20 @@ importers:
 
   packages/forms:
     dependencies:
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../items
-      '@livediagram/page-background':
+      '@livedoc/page-background':
         specifier: workspace:*
         version: link:../page-background
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../sheets
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -1149,7 +1149,7 @@ importers:
 
   packages/help-registry:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
       oxlint:
@@ -1165,10 +1165,10 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1192,10 +1192,10 @@ importers:
 
   packages/items:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -1213,10 +1213,10 @@ importers:
 
   packages/licences:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1241,7 +1241,7 @@ importers:
         specifier: ^16.4.3
         version: 16.4.3(@playwright/test@1.63.0)(@types/node@26.6.4)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
     devDependencies:
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       vitest:
@@ -1260,7 +1260,7 @@ importers:
         specifier: ^7.0.2004
         version: 7.0.2004
     devDependencies:
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1275,10 +1275,10 @@ importers:
 
   packages/page-background:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -1296,26 +1296,26 @@ importers:
 
   packages/plan-art:
     dependencies:
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../forms
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../icons
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../items
-      '@livediagram/ui':
+      '@livedoc/ui':
         specifier: workspace:*
         version: link:../ui
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@vitest/coverage-v8':
@@ -1339,10 +1339,10 @@ importers:
         specifier: ^2.6.2
         version: 2.6.2
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1363,10 +1363,10 @@ importers:
 
   packages/sheets:
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1391,10 +1391,10 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1412,14 +1412,14 @@ importers:
 
   packages/sticky-model:
     dependencies:
-      '@livediagram/sticky-vision':
+      '@livedoc/sticky-vision':
         specifier: workspace:*
         version: link:../sticky-vision
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@tensorflow/tfjs':
@@ -1440,14 +1440,14 @@ importers:
 
   packages/sticky-vision:
     dependencies:
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@playwright/test':
@@ -1468,14 +1468,14 @@ importers:
 
   packages/tailwind-config:
     dependencies:
-      '@livediagram/source-ast':
+      '@livedoc/source-ast':
         specifier: workspace:*
         version: link:../source-ast
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1493,14 +1493,14 @@ importers:
 
   packages/telemetry-client:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       oxlint:
@@ -1515,19 +1515,19 @@ importers:
 
   packages/template-previews:
     dependencies:
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../forms
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:*
         version: link:../icons
-      '@livediagram/templates':
+      '@livedoc/templates':
         specifier: workspace:*
         version: link:../templates
-      '@livediagram/ui':
+      '@livedoc/ui':
         specifier: workspace:*
         version: link:../ui
       react:
@@ -1537,13 +1537,13 @@ importers:
         specifier: ^19.3.0
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/tailwind-config':
+      '@livedoc/tailwind-config':
         specifier: workspace:*
         version: link:../tailwind-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@types/node':
@@ -1567,26 +1567,26 @@ importers:
 
   packages/templates:
     dependencies:
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/forms':
+      '@livedoc/forms':
         specifier: workspace:*
         version: link:../forms
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../items
-      '@livediagram/sheets':
+      '@livedoc/sheets':
         specifier: workspace:*
         version: link:../sheets
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       oxlint:
@@ -1601,28 +1601,28 @@ importers:
 
   packages/ui:
     dependencies:
-      '@livediagram/account-session':
+      '@livedoc/account-session':
         specifier: workspace:*
         version: link:../account-session
-      '@livediagram/api-schema':
+      '@livedoc/api-schema':
         specifier: workspace:*
         version: link:../api-schema
-      '@livediagram/document':
+      '@livedoc/document':
         specifier: workspace:*
         version: link:../document
-      '@livediagram/help-registry':
+      '@livedoc/help-registry':
         specifier: workspace:*
         version: link:../help-registry
-      '@livediagram/icons':
+      '@livedoc/icons':
         specifier: workspace:^
         version: link:../icons
-      '@livediagram/items':
+      '@livedoc/items':
         specifier: workspace:*
         version: link:../items
-      '@livediagram/tailwind-config':
+      '@livedoc/tailwind-config':
         specifier: workspace:*
         version: link:../tailwind-config
-      '@livediagram/telemetry-client':
+      '@livedoc/telemetry-client':
         specifier: workspace:*
         version: link:../telemetry-client
       react:
@@ -1632,10 +1632,10 @@ importers:
         specifier: ^19.3.0
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@livediagram/oxlint-config':
+      '@livedoc/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
-      '@livediagram/vitest-config':
+      '@livedoc/vitest-config':
         specifier: workspace:*
         version: link:../vitest-config
       '@testing-library/react':

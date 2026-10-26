@@ -6,16 +6,16 @@ Every pull request also gets a preview, which does deploy on its own: a complete
 
 ## Apps and their Cloudflare Workers
 
-| App              | Cloudflare Worker       | Type                                                                                                                                |
-| ---------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/marketing` | `livediagram-marketing` | Static assets only (Next.js `output: 'export'`).                                                                                    |
-| `apps/live`      | `livediagram-live`      | Static assets + a tiny path-rewrite worker.                                                                                         |
-| `apps/telemetry` | `livediagram-telemetry` | Static assets only (public dashboard, [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)).                  |
-| `apps/help`      | `livediagram-help`      | Static assets only (help centre, [Help app](../018-help/help-app.md)).                                                              |
-| `apps/community` | `livediagram-community` | Static assets plus a small worker for post metadata and the sitemap, bound to the api ([Community](../025-community/community.md)). |
-| `apps/api`       | `livediagram-api`       | Worker (D1 binding + Durable Object).                                                                                               |
-| `apps/mcp`       | `livediagram-mcp`       | Worker (OAuth + MCP tools; own host, [MCP server](../015-api/mcp-server.md)).                                                       |
-| `apps/router`    | `livediagram-router`    | Worker (service bindings to the other six).                                                                                         |
+| App              | Cloudflare Worker   | Type                                                                                                                                |
+| ---------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/marketing` | `docs-nu-marketing` | Static assets only (Next.js `output: 'export'`).                                                                                    |
+| `apps/live`      | `docs-nu-live`      | Static assets + a tiny path-rewrite worker.                                                                                         |
+| `apps/telemetry` | `docs-nu-telemetry` | Static assets only (public dashboard, [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)).                  |
+| `apps/help`      | `docs-nu-help`      | Static assets only (help centre, [Help app](../018-help/help-app.md)).                                                              |
+| `apps/community` | `docs-nu-community` | Static assets plus a small worker for post metadata and the sitemap, bound to the api ([Community](../025-community/community.md)). |
+| `apps/api`       | `docs-nu-api`       | Worker (D1 binding + Durable Object).                                                                                               |
+| `apps/mcp`       | `docs-nu-mcp`       | Worker (OAuth + MCP tools; own host, [MCP server](../015-api/mcp-server.md)).                                                       |
+| `apps/router`    | `docs-nu-router`    | Worker (service bindings to the other six).                                                                                         |
 
 The marketing worker serves files from `apps/marketing/out/` (`output: 'export'`). The live worker serves files from `apps/live/out/` plus a small worker (`apps/live/src/worker.ts`) that rewrites every `/document/<id>` request to the single statically-built `/document/placeholder/` page — see [New document route](../007-editor/new-document-route.md). The telemetry worker is static-assets-only like marketing, served under `/telemetry` ([22-telemetry](../017-telemetry/telemetry.md)). The help worker is static-assets-only too, served under `/help` ([55-help-app](../018-help/help-app.md)). The community worker serves its static export under `/community` with a small script (`apps/community/worker/index.ts`) that runs first for only the post page and the sitemap, reading from the api through an `API` service binding ([Community](../025-community/community.md) "Search engines"). The api worker holds the REST + WebSocket layer (see [11-api.md](../015-api/api.md)). The mcp worker exposes the AI tools over its own host `mcp.livediagram.app` (it binds to the api worker, not the router; see [62-mcp-server.md](../015-api/mcp-server.md)). The router holds **no application logic** — only `MARKETING`, `LIVE`, `TELEMETRY`, `HELP`, `COMMUNITY`, and `API` service bindings that forward requests to the right downstream worker.
 
@@ -35,7 +35,7 @@ The marketing worker serves files from `apps/marketing/out/` (`output: 'export'`
 Three jobs run in parallel, each after its own `pnpm install --frozen-lockfile`, so a PR waits for the slowest rather than their sum:
 
 - **Checks**: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`.
-- **Tests**: `pnpm turbo run test --concurrency=2` for every workspace without `test:coverage`, then `pnpm turbo run test:coverage --concurrency=2 --filter=!@livediagram/live` for those with it (enforcing the per-file coverage thresholds), and uploads their coverage to Codecov.
+- **Tests**: `pnpm turbo run test --concurrency=2` for every workspace without `test:coverage`, then `pnpm turbo run test:coverage --concurrency=2 --filter=!@livedoc/live` for those with it (enforcing the per-file coverage thresholds), and uploads their coverage to Codecov.
 - **Editor unit tests i/3**: the editor's suite (`apps/live`) under coverage, a third of its files per job (`vitest run --shard=i/3`), each uploading its coverage to Codecov ([Coverage report](../003-system-architecture/testing.md#coverage-report)). Each suite runs exactly once; `scripts/ci-test-filters.mjs` derives the exclusions from the manifests, so adding or removing a coverage script needs no CI edit.
 - **Build**: `pnpm build`, then `pnpm deploy:check`.
 

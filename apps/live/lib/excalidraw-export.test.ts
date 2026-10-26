@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { tabToExcalidrawText } from './excalidraw-export';
-import type { Element, Tab } from '@livediagram/document';
-import { createPath, DEFAULT_BACKGROUND_COLOR } from '@livediagram/document';
-import { STROKE_PRESSURE_MAX_ERROR, encodeStrokePoints } from '@livediagram/document';
+import type { Element, Tab } from '@livedoc/document';
+import { createPath, DEFAULT_BACKGROUND_COLOR } from '@livedoc/document';
+import { STROKE_PRESSURE_MAX_ERROR, encodeStrokePoints } from '@livedoc/document';
 
 const tab = (elements: Element[], over: Partial<Tab> = {}): Tab => ({
   id: 'tab-1',

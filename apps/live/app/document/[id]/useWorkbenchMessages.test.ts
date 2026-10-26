@@ -5,8 +5,8 @@ import {
   WORKBENCH_SELECTION_SETTLE_MS,
   type PageToWorkbenchMessage,
   type WorkbenchToPageMessage,
-} from '@livediagram/api-schema';
-import type { Tab } from '@livediagram/document';
+} from '@livedoc/api-schema';
+import type { Tab } from '@livedoc/document';
 import type { WorkbenchDocumentSession } from '@/components/providers/workbench-session-context';
 import { createRevealStore } from '@/lib/changeset-reveals';
 import { createSelectionStore } from '@/lib/selection-store';
@@ -16,7 +16,7 @@ import { createSelectionStore } from '@/lib/selection-store';
 // text changed), reveal, theme.
 
 const { appearance } = vi.hoisted(() => ({ appearance: { setAppearanceOverride: vi.fn() } }));
-vi.mock('@livediagram/ui', () => appearance);
+vi.mock('@livedoc/ui', () => appearance);
 
 const { useWorkbenchMessages } = await import('./useWorkbenchMessages');
 

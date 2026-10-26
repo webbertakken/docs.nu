@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SIGN_IN_OFFERED_KEY } from '@livediagram/account-session';
+import { SIGN_IN_OFFERED_KEY } from '@livedoc/account-session';
 
 // The two pieces around the app: CommunityGate (docs/specs/025-community/community.md "Turning the Community
 // off") and the session My Shares reads ("My Shares").
@@ -11,8 +11,8 @@ const h = vi.hoisted(() => ({
   replace: vi.fn(),
 }));
 
-vi.mock('@livediagram/ui', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@livediagram/ui')>()),
+vi.mock('@livedoc/ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@livedoc/ui')>()),
   useCommunityEnabled: () => h.enabled,
 }));
 

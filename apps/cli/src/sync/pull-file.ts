@@ -10,8 +10,8 @@ import {
   parseDocumentEnvelope,
   type DocumentEnvelope,
   type Tab,
-} from '@livediagram/document';
-import { sha256Hex } from '@livediagram/api-schema';
+} from '@livedoc/document';
+import { sha256Hex } from '@livedoc/api-schema';
 
 export type PulledTab = { rev: number; hash: string; settingsHash: string };
 // `pulledAt` is absent from a mirror file, which holds no time (repository-link blueprint "The mirror file").

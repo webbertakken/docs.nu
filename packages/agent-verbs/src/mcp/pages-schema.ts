@@ -3,7 +3,7 @@
 // or name; articles by flow id or title. The layout ids each kind offers come from the catalogue the
 // editor's page panel shows, so the two never disagree.
 import { z } from 'zod';
-import { PAGE_CHANGES_MAX } from '@livediagram/api-schema';
+import { PAGE_CHANGES_MAX } from '@livedoc/api-schema';
 import {
   ARTICLE_LOOK_IDS,
   ARTICLE_MARKDOWN_MAX,
@@ -16,8 +16,8 @@ import {
   type PageSizeId,
   type WireframeDeviceId,
   type WireframeFrameLook,
-} from '@livediagram/document';
-import { layoutCatalogueFor } from '@livediagram/templates';
+} from '@livedoc/document';
+import { layoutCatalogueFor } from '@livedoc/templates';
 
 const layoutIds = (kind: Exclude<PageKind, 'article'>) =>
   layoutCatalogueFor(kind)

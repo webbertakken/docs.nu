@@ -1,11 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CHANGESET_MAX_OPERATIONS } from '@livediagram/api-schema';
-import {
-  MAX_ELEMENTS_PER_TAB,
-  applyElementOps,
-  type Element,
-  type Tab,
-} from '@livediagram/document';
+import { CHANGESET_MAX_OPERATIONS } from '@livedoc/api-schema';
+import { MAX_ELEMENTS_PER_TAB, applyElementOps, type Element, type Tab } from '@livedoc/document';
 import { applyEditOperations } from './apply';
 import { EDIT_MAX_ERRORS } from './vocabulary';
 import { parseEditOperations } from './parse';

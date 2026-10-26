@@ -68,17 +68,17 @@ Every workspace that type-checks lists one TypeScript, **TypeScript 7**, the Go 
 TypeScript 7.0 ships no classic compiler API (`import ts from 'typescript'` finds nothing to call). Code that reads TypeScript source does it one of two ways:
 
 - **Linting** is oxlint, which parses TypeScript itself ([Linting](../specs/003-system-architecture/linting.md)).
-- **The repo's static guards** (the palette tests, the telemetry emitter scan, the optical guard) parse with `parseSourceFiles` from `@livediagram/source-ast`, which asks TypeScript 7's native compiler through `typescript/unstable/sync` and hands back `typescript/unstable/ast` trees: the same nodes, `is*` guards and `SyntaxKind` the classic API had, with `node.forEachChild(visit)` in place of `ts.forEachChild(node, visit)` ([Source scanners](../specs/003-system-architecture/source-scanners.md)).
+- **The repo's static guards** (the palette tests, the telemetry emitter scan, the optical guard) parse with `parseSourceFiles` from `@livedoc/source-ast`, which asks TypeScript 7's native compiler through `typescript/unstable/sync` and hands back `typescript/unstable/ast` trees: the same nodes, `is*` guards and `SyntaxKind` the classic API had, with `node.forEachChild(visit)` in place of `ts.forEachChild(node, visit)` ([Source scanners](../specs/003-system-architecture/source-scanners.md)).
 
 `apps/help/lib/typescript-version.test.ts` holds every workspace to the root manifest's `typescript` and rejects any alias to another TypeScript, so a second compiler cannot creep back in.
 
-The one exception is `ts-json-schema-generator` (the api's OpenAPI schema generator), which bundles its own TypeScript 5.9 to read the api-schema types; it runs only in `pnpm --filter @livediagram/api gen:openapi` and its drift test.
+The one exception is `ts-json-schema-generator` (the api's OpenAPI schema generator), which bundles its own TypeScript 5.9 to read the api-schema types; it runs only in `pnpm --filter @livedoc/api gen:openapi` and its drift test.
 
-`pnpm build` is safe to run while a dev server is alive: every Next.js app's dev server goes through `scripts/next-dev.mjs`, which points dev at an isolated `.next-dev/` cache so a concurrent build's `.next/` can never corrupt it. The flip side is a rule for new apps: **a new Next.js app spreads `livediagramNextConfig()` from `@livediagram/next-config` into its `next.config`**, which reads `NEXT_DISTDIR` for it, or the old build/dev cache race comes back.
+`pnpm build` is safe to run while a dev server is alive: every Next.js app's dev server goes through `scripts/next-dev.mjs`, which points dev at an isolated `.next-dev/` cache so a concurrent build's `.next/` can never corrupt it. The flip side is a rule for new apps: **a new Next.js app spreads `livedocNextConfig()` from `@livedoc/next-config` into its `next.config`**, which reads `NEXT_DISTDIR` for it, or the old build/dev cache race comes back.
 
 ## Tests
 
-Tests live next to the code they cover, as `*.test.ts` / `*.test.tsx` files. The runner is [Vitest](https://vitest.dev) with the shared config in `@livediagram/vitest-config`. See [`docs/specs/003-system-architecture/testing.md`](../specs/003-system-architecture/testing.md) for the testing contract.
+Tests live next to the code they cover, as `*.test.ts` / `*.test.tsx` files. The runner is [Vitest](https://vitest.dev) with the shared config in `@livedoc/vitest-config`. See [`docs/specs/003-system-architecture/testing.md`](../specs/003-system-architecture/testing.md) for the testing contract.
 
 `pnpm install` installs a pre-push hook (`.githooks/pre-push`) that runs format, lint, typecheck and tests for what your push changes, so a CI failure shows up on your machine first ([Before a push](../specs/003-system-architecture/testing.md#before-a-push)).
 
@@ -93,21 +93,21 @@ A [Playwright](https://playwright.dev) suite (`apps/live/e2e`, [`docs/specs/003-
 Run it locally against a running `pnpm dev` stack (it reuses the servers on `:4002` / `:8787`):
 
 ```sh
-pnpm --filter @livediagram/live test:e2e
+pnpm --filter @livedoc/live test:e2e
 ```
 
-Without a dev stack, it boots its own (`scripts/e2e-stack.mjs`) over the existing `apps/live/out`, which it never rebuilds: run `pnpm --filter @livediagram/live build` first, or it exits naming the missing build.
+Without a dev stack, it boots its own (`scripts/e2e-stack.mjs`) over the existing `apps/live/out`, which it never rebuilds: run `pnpm --filter @livedoc/live build` first, or it exits naming the missing build.
 
 The signed-in specs (`apps/live/e2e/account/`) run against the usual build, on their own stack with sign-in on (`:3015`), where each one signs in for real with an email code from the stack's outbox:
 
 ```sh
-pnpm --filter @livediagram/live test:e2e:account
+pnpm --filter @livedoc/live test:e2e:account
 ```
 
 The armed guest-signature specs (`apps/live/e2e/armed/`) run against the usual build, on a guest-only stack of their own (`:3017`):
 
 ```sh
-pnpm --filter @livediagram/live test:e2e:armed
+pnpm --filter @livedoc/live test:e2e:armed
 ```
 
 Those ports are defaults, not fixtures. Three environment variables move them, which is what you want when `:4002` is already taken (a second checkout, a worktree):
@@ -121,7 +121,7 @@ Those ports are defaults, not fixtures. Three environment variables move them, w
 
 `E2E_API_PORT` is self-contained: it sets the worker's port and the proxy that reaches it together. The other two are **not**. Playwright waits on `E2E_BASE_URL` while the stack binds `E2E_LIVE_PORT`, so moving the live app means setting both. Set only one and the run hangs until the 180-second `webServer` timeout, with nothing said about why.
 
-The optical audit also opens the help centre, the telemetry dashboard, the Community and the marketing site: build them (`pnpm --filter @livediagram/help --filter @livediagram/telemetry --filter @livediagram/community --filter @livediagram/marketing build`), or point `E2E_HELP_URL`, `E2E_TELEMETRY_URL`, `E2E_COMMUNITY_URL` and `E2E_MARKETING_URL` at their dev servers.
+The optical audit also opens the help centre, the telemetry dashboard, the Community and the marketing site: build them (`pnpm --filter @livedoc/help --filter @livedoc/telemetry --filter @livedoc/community --filter @livedoc/marketing build`), or point `E2E_HELP_URL`, `E2E_TELEMETRY_URL`, `E2E_COMMUNITY_URL` and `E2E_MARKETING_URL` at their dev servers.
 
 Keep the suite tiny — add a focused smoke for a browser-risky change, not a broad suite; depth belongs in unit tests where it's cheap.
 
@@ -140,8 +140,8 @@ A few hard rules from [`AGENTS.md`](../../AGENTS.md) that constrain PRs:
 - **Database access goes through the api worker**, never from the browser.
 - **Worker apps target the Cloudflare Workers runtime.** Prefer Web APIs (`fetch`, `Request`, `Response`, `crypto.subtle`) over Node-only APIs.
 - **The router worker holds no business logic.** Only service bindings. If you're tempted to add logic, it belongs in whichever app the router forwards to.
-- **New Next.js apps spread the shared config.** Dev servers run through `scripts/next-dev.mjs` with an isolated `.next-dev/`; a new app's `next.config` spreads `livediagramNextConfig()` (which reads `NEXT_DISTDIR`) or builds and dev race on `.next/` again, and `packages/next-config/apps-use-shared.test.js` lists the app.
-- **Markup and parsed files go through a Trusted Types policy.** Every page enforces Trusted Types ([Trusted Types](../specs/016-platform/trusted-types.md)): `dangerouslySetInnerHTML` takes `trustedHtml(markup)` from `@livediagram/ui`, and only for markup our own escaping builders made; `DOMParser` goes through `parseInert`. A new app puts the boot script first in its `<head>` and the header in its `public/_headers`; `packages/ui/src/trusted-types-sinks.test.ts` checks all of it.
+- **New Next.js apps spread the shared config.** Dev servers run through `scripts/next-dev.mjs` with an isolated `.next-dev/`; a new app's `next.config` spreads `livedocNextConfig()` (which reads `NEXT_DISTDIR`) or builds and dev race on `.next/` again, and `packages/next-config/apps-use-shared.test.js` lists the app.
+- **Markup and parsed files go through a Trusted Types policy.** Every page enforces Trusted Types ([Trusted Types](../specs/016-platform/trusted-types.md)): `dangerouslySetInnerHTML` takes `trustedHtml(markup)` from `@livedoc/ui`, and only for markup our own escaping builders made; `DOMParser` goes through `parseInert`. A new app puts the boot script first in its `<head>` and the header in its `public/_headers`; `packages/ui/src/trusted-types-sinks.test.ts` checks all of it.
 
 ## Reporting issues
 

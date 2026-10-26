@@ -1,8 +1,8 @@
 'use client';
 
-import { communityPostPath, documentPath } from '@livediagram/api-schema';
-import { Button, buttonClassName, lucideGlyph, CommunityAuthorBadge } from '@livediagram/ui';
-import { lucideArrowLeft, lucideCopyPlus, lucidePencil } from '@livediagram/icons/lucide';
+import { communityPostPath, documentPath } from '@livedoc/api-schema';
+import { Button, buttonClassName, lucideGlyph, CommunityAuthorBadge } from '@livedoc/ui';
+import { lucideArrowLeft, lucideCopyPlus, lucidePencil } from '@livedoc/icons/lucide';
 import type { CommunitySession } from '@/app/document/[id]/editor-realtime';
 
 const BackIcon = lucideGlyph(lucideArrowLeft, 14);

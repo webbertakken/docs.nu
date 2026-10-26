@@ -50,7 +50,7 @@ Banned: "photo" and "avatar URL" as identifiers.
 ## Behaviour and state
 
 `resolveProfilePicture(user)`, on every session read the auth bridge settles (`user.image` from
-`@livediagram/account-session`'s `readSession`, an empty string read as null):
+`@livedoc/account-session`'s `readSession`, an empty string read as null):
 
 1. `isProfilePictureUrl(user.image)` → `user.image`.
 2. null.

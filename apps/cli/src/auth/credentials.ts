@@ -3,7 +3,7 @@
 // role and expiry, and where its token is: the platform's keychain, a DPAPI blob, or, where neither works, the token
 // itself (keychain.ts). A file others can read is tightened with a warning (E14).
 
-import { isApiTokenFormat } from '@livediagram/api-schema';
+import { isApiTokenFormat } from '@livedoc/api-schema';
 import type { DebugLog } from '../debug';
 import type { CliIo } from '../io';
 import { CliError } from '../output/cli-error';

@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useSyncExternalStore, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import type { PageToWorkbenchMessage, WorkbenchToPageMessage } from '@livediagram/api-schema';
+import type { PageToWorkbenchMessage, WorkbenchToPageMessage } from '@livedoc/api-schema';
 import {
   useWorkbenchSession,
   WorkbenchSessionContext,

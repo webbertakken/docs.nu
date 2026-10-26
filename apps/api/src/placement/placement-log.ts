@@ -8,7 +8,7 @@ import type {
   PlacementDefaultKey,
   PlacementDefaultRejection,
   PlacementRejection,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import type { DefaultSkip, PlacementDecision } from './placement-types';
 
 type PlacementScope = 'personal' | 'team';

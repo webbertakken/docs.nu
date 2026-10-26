@@ -3,21 +3,15 @@
 // its element's ref, resolved over the plain tab (CLI78).
 
 import { z } from 'zod';
-import { ApiError } from '@livediagram/api-client';
+import { ApiError } from '@livedoc/api-client';
 import {
   COMMENT_LIST_STATUSES,
   type CommentListStatus,
   type DocumentCommentsResponse,
-} from '@livediagram/api-schema';
-import {
-  computeRefs,
-  resolveRef,
-  takesCellThreads,
-  threadAt,
-  type Tab,
-} from '@livediagram/document';
-import { parseA1 } from '@livediagram/sheets';
-import { threadListingLines } from '@livediagram/document-views';
+} from '@livedoc/api-schema';
+import { computeRefs, resolveRef, takesCellThreads, threadAt, type Tab } from '@livedoc/document';
+import { parseA1 } from '@livedoc/sheets';
+import { threadListingLines } from '@livedoc/document-views';
 import { resolveTab } from '../addressing';
 import { defineVerb, VerbRefusal, type VerbContext } from '../define';
 import { readSheets } from '../sheets/sheet-state';

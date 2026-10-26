@@ -1,9 +1,9 @@
 // A LiveDoc host for the repository link's suites: libraries with folders and teams, documents whose tabs move
 // on, the overview as the api renders it, and documents that can be trashed, purged, or fail. Over `fakeIo`.
 
-import type { VerbContext } from '@livediagram/agent-verbs';
-import type { Element } from '@livediagram/document';
-import { headerFactsOf, overviewView } from '@livediagram/document-views';
+import type { VerbContext } from '@livedoc/agent-verbs';
+import type { Element } from '@livedoc/document';
+import { headerFactsOf, overviewView } from '@livedoc/document-views';
 import { transport } from '../transport';
 import { NOW, TOKEN, type FakeIo, type Route } from './fake-io';
 

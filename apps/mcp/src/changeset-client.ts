@@ -8,7 +8,7 @@ import {
   type ChangesetReplaceBody,
   type ChangesetRequest,
   type ChangesetResponse,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import {
   computeRefs,
   elementFingerprint,
@@ -16,7 +16,7 @@ import {
   type Element,
   type Finish,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { ApiError, apiJson } from './api';
 import { idsOf, resolveArrowEnds } from './arrow-ends';
 import { elementsIssue } from './element-values';

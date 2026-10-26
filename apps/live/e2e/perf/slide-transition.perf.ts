@@ -10,7 +10,7 @@ import { mainThreadTasks, type TraceEvent } from './trace-tasks';
 // canvas probe's reference speed. Per move it reads the main thread (trace), the frame gaps (rAF), the
 // key's input-to-paint (Event Timing) and what the move leaves behind (stray snapshots, DOM, heap).
 // It reports and never judges; SLIDE_VARIANT names the build under test in the report.
-// Run with `E2E_PERF=1 pnpm --filter @livediagram/live exec playwright test --project=perf slide-transition`.
+// Run with `E2E_PERF=1 pnpm --filter @livedoc/live exec playwright test --project=perf slide-transition`.
 
 const OUT = 'test-results/perf';
 const CATEGORIES = 'devtools.timeline,disabled-by-default-devtools.timeline';

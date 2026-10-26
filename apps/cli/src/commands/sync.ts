@@ -3,7 +3,7 @@
 // keeps syncing until Ctrl-C.
 
 import { posix } from 'node:path';
-import type { VerbContext } from '@livediagram/agent-verbs';
+import type { VerbContext } from '@livedoc/agent-verbs';
 import { debugLog } from '../debug';
 import type { CliIo } from '../io';
 import { CliError } from '../output/cli-error';

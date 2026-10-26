@@ -5,12 +5,7 @@
 // left. The rows, Find a Page, the thumbnails, the page marked as here, going to a page, the
 // keyboard, reordering by drag and adding a page live here once; each home lays them out.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import {
-  MAX_PAGES,
-  pageKindOf,
-  type PageKind,
-  type WireframeDeviceId,
-} from '@livediagram/document';
+import { MAX_PAGES, pageKindOf, type PageKind, type WireframeDeviceId } from '@livedoc/document';
 import { usePageThumbnails, type PageThumbTab } from '@/hooks/ui/usePageThumbnails';
 import type { PagesModeView } from '@/hooks/editor/usePagesMode';
 import {

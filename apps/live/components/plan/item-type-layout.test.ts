@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { OVERVIEW_TAB_ID } from '@livediagram/items';
+import { OVERVIEW_TAB_ID } from '@livedoc/items';
 import {
   addField,
   addTab,

@@ -140,11 +140,11 @@ The wordmark's "live" half is the one vivid note: **sky-400 `#38bdf8`** in dark 
 
 - **Solid brand fill with white text** (primary buttons, active segments, filled step circles, avatar discs, count
   badges) sits on `brand-600` in dark mode, and a control hovers to `brand-700`: white on `#3a6599` is 6.0:1. The
-  pairing lives in two shared class constants in `@livediagram/ui`, `SOLID_BRAND_DARK` for a static fill and
+  pairing lives in two shared class constants in `@livedoc/ui`, `SOLID_BRAND_DARK` for a static fill and
   `SOLID_BRAND_DARK_CONTROL` for a control, never re-typed per component. In light mode the same fill is `brand-700`
   ([Usage rules](#usage-rules)).
 - **The selected segment of a segmented control** (a two- or more-way switch, a tab strip drawn as segments) is
-  that solid fill, in both appearances: `ACTIVE_SEGMENT` in `@livediagram/ui`. A fill that only lifts off the
+  that solid fill, in both appearances: `ACTIVE_SEGMENT` in `@livedoc/ui`. A fill that only lifts off the
   track (white on `slate-100`, `slate-900` on `slate-800`) is about 1.1:1 and does not mark a state; the
   selection is held to 3:1 against its track (WCAG 2.2 SC 1.4.11), measured in the Home switch's end-to-end test. The
   track is `SEGMENT_TRACK`, the deepest surface in dark mode (`slate-950`): `brand-600` reads 3.2:1 there, 2.7:1 on
@@ -231,7 +231,7 @@ The palette is exposed as a Tailwind v4 theme in `packages/tailwind-config/theme
 
 ```css
 @import 'tailwindcss';
-@import '@livediagram/tailwind-config';
+@import '@livedoc/tailwind-config';
 ```
 
 The package's `theme.css` declares the brand ramp as CSS variables inside a `@theme` block, which Tailwind v4 turns into the `brand-50`…`brand-950` utility classes automatically:

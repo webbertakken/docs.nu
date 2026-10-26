@@ -215,7 +215,7 @@ decision and lives in the live app's `globals.css`, light and dark.
 neutral fallback is right for an event type this build has never heard
 of and wrong for one it ships: an unclassified event renders in a colour
 that says the wrong thing about what happened. So
-`TIMELINE_EVENT_TYPES` in `@livediagram/api-schema` is a runtime array,
+`TIMELINE_EVENT_TYPES` in `@livedoc/api-schema` is a runtime array,
 `KnownTimelineEventType` derives from it, and both the tone map and the
 filter-category map are `Record<KnownTimelineEventType, …>` — adding an
 event type fails the build until it has a tone and a chip.
@@ -489,7 +489,7 @@ popover is clipped no matter its z-index.
 - **Loading**: a skeleton of three day-groups, not a spinner and not
   the empty state. The feed popping in after a fetch reads as a layout
   jump.
-- **Empty (new user)**: the shared `EmptyState` from `@livediagram/ui`,
+- **Empty (new user)**: the shared `EmptyState` from `@livedoc/ui`,
   copy "No activity yet" ("Create a document, comment on one, or join a
   team, and it will show up here."), with a New Document action. In practice a signed-up user is
   rarely empty because of the backfill (§5) — which is exactly why this
@@ -722,7 +722,7 @@ none, and the card still opens the document on click. Tombstones have no
 id to look up and get no menu for the same reason.
 
 **Where the menu comes from.** The Timeline components in
-`@livediagram/ui` know nothing about documents, so they can't build this
+`@livedoc/ui` know nothing about documents, so they can't build this
 menu. `<Timeline>` takes an optional **`cardSlots(event)`** hook
 returning `{ title?, menu? }`; the card places `menu` in its title row
 and stops the card's own click from firing under it, and renders
@@ -1469,7 +1469,7 @@ is the whole story.
 
 `TimelineEvent`, `TimelineScopeRef`, `TimelineReadResult`, and
 `TIMELINE_PAGE_SIZE` / `TIMELINE_PAGE_MAX` go in
-`@livediagram/api-schema`, per the existing
+`@livedoc/api-schema`, per the existing
 convention that every DTO the worker emits and the editor consumes
 lives there.
 
@@ -1625,7 +1625,7 @@ which is the point of the guest path existing at all.
 ## 10. Telemetry
 
 New category `Timeline` in the closed enum in
-`@livediagram/api-schema` ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)). Existing actions cover it:
+`@livedoc/api-schema` ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)). Existing actions cover it:
 
 - `Timeline`/`Opened` — the section is viewed. `type` is `Landing` when
   the page load started on it, `Nav` when reached from elsewhere (the

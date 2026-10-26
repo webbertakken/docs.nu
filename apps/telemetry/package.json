@@ -1,5 +1,5 @@
 {
-  "name": "@livediagram/telemetry",
+  "name": "@livedoc/telemetry",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,21 +12,21 @@
     "clean": "rm -rf .next .next-analyze out node_modules .turbo"
   },
   "dependencies": {
-    "@livediagram/api-schema": "workspace:*",
-    "@livediagram/forms": "workspace:*",
-    "@livediagram/icons": "workspace:*",
-    "@livediagram/ui": "workspace:*",
+    "@livedoc/api-schema": "workspace:*",
+    "@livedoc/forms": "workspace:*",
+    "@livedoc/icons": "workspace:*",
+    "@livedoc/ui": "workspace:*",
     "next": "^16.4.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@livediagram/agent-verbs": "workspace:*",
-    "@livediagram/next-config": "workspace:*",
-    "@livediagram/oxlint-config": "workspace:*",
-    "@livediagram/source-ast": "workspace:*",
-    "@livediagram/tailwind-config": "workspace:*",
-    "@livediagram/vitest-config": "workspace:*",
+    "@livedoc/agent-verbs": "workspace:*",
+    "@livedoc/next-config": "workspace:*",
+    "@livedoc/oxlint-config": "workspace:*",
+    "@livedoc/source-ast": "workspace:*",
+    "@livedoc/tailwind-config": "workspace:*",
+    "@livedoc/vitest-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",

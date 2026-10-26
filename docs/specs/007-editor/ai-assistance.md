@@ -70,7 +70,7 @@ Each AI request optionally includes a `history` array of prior `{ role, content 
   this is the spend-DoS defence on a public deployment: a third-party site can no longer
   drain the operator's OpenAI budget by minting fresh `X-Owner-Id` UUIDs.
 - Prompt capped at 1 000 characters server-side; element payload capped at 200 elements
-  (`AI_MAX_PROMPT_CHARS` / `AI_MAX_ELEMENTS` in `@livediagram/api-schema`, shared with the panel). The
+  (`AI_MAX_PROMPT_CHARS` / `AI_MAX_ELEMENTS` in `@livedoc/api-schema`, shared with the panel). The
   prompt box holds no more than the cap. The panel sends the whole tab as context while it is within the
   element cap; past it, the selection alone (`aiContextElements`), and with no selection, or one itself
   over the cap, it says so ("Select up to 200 and try again") rather than sending a request the api refuses.
@@ -113,7 +113,7 @@ Request body:
 }
 ```
 
-`elements` is the full active-tab `Element[]` from `@livediagram/document`. `focusIds` is the optional list of selected element IDs; the system prompt steers the model toward editing those while preserving everything else. `history` is the optional prior-turn list (capped server-side at the last 6 turns); both fields default to `[]`.
+`elements` is the full active-tab `Element[]` from `@livedoc/document`. `focusIds` is the optional list of selected element IDs; the system prompt steers the model toward editing those while preserving everything else. `history` is the optional prior-turn list (capped server-side at the last 6 turns); both fields default to `[]`.
 
 Response for **both modes**: `Content-Type: text/event-stream`, OpenAI SSE format piped through with CORS headers added. The JSON-mode payload (Clean) is collected by the client into a single `{ elements: [...] }` block on stream completion:
 
@@ -152,7 +152,7 @@ what drifted: `checklist` was requested by name, with its `checklistItems` schem
 squared on arrival.
 
 Past that normalisation (kind coerced, a missing size defaulted), a streamed element is held
-to the same structural guard every save is: `isValidElement` from `@livediagram/document`,
+to the same structural guard every save is: `isValidElement` from `@livedoc/document`,
 limited to the four types the assistant may add (shape, text, sticky, arrow). A looser local
 check used to live in the client and let through what the api then refused on save (an
 arrow with a junk endpoint, a non-finite coordinate). Renamed additions carry every

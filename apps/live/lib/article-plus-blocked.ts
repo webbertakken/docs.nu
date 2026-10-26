@@ -1,9 +1,4 @@
-import {
-  isDrawingElement,
-  zoneAnchorOf,
-  type Element,
-  type LaidOutPage,
-} from '@livediagram/document';
+import { isDrawingElement, zoneAnchorOf, type Element, type LaidOutPage } from '@livedoc/document';
 
 /**
  * Whether an element sits in an article's writing (docs/specs/007-editor/article-pages.md "Zones"): an object there

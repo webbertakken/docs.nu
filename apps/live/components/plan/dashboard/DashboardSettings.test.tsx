@@ -1,11 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  dashboardFromPreset,
-  setDashboardContent,
-  type DashboardLayout,
-} from '@livediagram/document';
+import { dashboardFromPreset, setDashboardContent, type DashboardLayout } from '@livedoc/document';
 import type { PlanTabActions } from '@/hooks/plan/usePlanTabActions';
 import { track } from '@/lib/telemetry';
 import { DashboardSettings } from './DashboardSettings';

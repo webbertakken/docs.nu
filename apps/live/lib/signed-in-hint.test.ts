@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { SIGNED_IN_HINT_KEY } from '@livediagram/account-session';
+import { SIGNED_IN_HINT_KEY } from '@livedoc/account-session';
 import { afterEach, describe, expect, it } from 'vitest';
 import { readSignedInHint } from './signed-in-hint';
 

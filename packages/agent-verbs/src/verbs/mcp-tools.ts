@@ -4,7 +4,7 @@
 // tools.ts), and a parity test fails when a registered tool and its verb disagree. The handlers stay in the MCP.
 
 import { z } from 'zod';
-import { TRASH_RETENTION_DAYS } from '@livediagram/api-schema';
+import { TRASH_RETENTION_DAYS } from '@livedoc/api-schema';
 import type { VerbBehaviour } from '../define';
 import {
   addFormOutput,

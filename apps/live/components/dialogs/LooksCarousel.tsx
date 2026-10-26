@@ -7,9 +7,9 @@
 // card is a live preview drawn by the exporter.
 
 import { useMemo, useState, type ReactNode } from 'react';
-import { FINISHES, type Finish } from '@livediagram/document';
-import { Select, lucideGlyph, trustedHtml } from '@livediagram/ui';
-import { lucideDices } from '@livediagram/icons/lucide';
+import { FINISHES, type Finish } from '@livedoc/document';
+import { Select, lucideGlyph, trustedHtml } from '@livedoc/ui';
+import { lucideDices } from '@livedoc/icons/lucide';
 import { FINISH_LABELS } from '@/components/palette/FinishSection';
 import { track } from '@/lib/telemetry';
 import { useAppearance } from '@/hooks/ui/useAppearance';

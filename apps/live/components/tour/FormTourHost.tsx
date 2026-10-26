@@ -5,13 +5,7 @@
 // and the settle delay has passed, or Show Me Around in the form's cog asks for a rerun. Its destination step opens the board
 // or sheet the form feeds and comes back to the form after; any other move away ends it.
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  addQuestion,
-  deleteQuestion,
-  newFormPartId,
-  questionsOf,
-  readForm,
-} from '@livediagram/forms';
+import { addQuestion, deleteQuestion, newFormPartId, questionsOf, readForm } from '@livedoc/forms';
 import { useEditorContext } from '@/app/document/[id]/EditorContext';
 import { useSelectTab } from '@/app/document/[id]/useSelectTab';
 import { useLatest } from '@/hooks/ui/useLatest';
@@ -22,7 +16,7 @@ import { setActiveTour, useActiveTour } from '@/lib/tour-active';
 import { useAnyModalOpen } from '@/lib/modal-guard';
 import { rebaseUserPreferences } from '@/lib/user-preferences';
 import { useStartPanelOpen } from '@/components/start/start-panel-open';
-import { FormStarterPicture } from '@livediagram/template-previews';
+import { FormStarterPicture } from '@livedoc/template-previews';
 import { formTourSteps, formTourStepTelemetryType, type FormTourApi } from './form-tour-steps';
 import { TourStage } from './TourStage';
 import { useTourEngine, type TourOutcome } from './useTourEngine';

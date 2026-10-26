@@ -1,4 +1,4 @@
-import { COMMUNITY_KEY_STORAGE, isCommunityKey } from '@livediagram/api-schema';
+import { COMMUNITY_KEY_STORAGE, isCommunityKey } from '@livedoc/api-schema';
 
 // The per-browser community key (docs/specs/025-community/community.md "Likes"; blueprint §5): a
 // random UUID that keys one like and one report per browser per post. Deliberately NOT the guest owner

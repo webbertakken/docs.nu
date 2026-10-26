@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ES_NOTE_GAP,
-  nextNoteBounds,
-  type Element,
-  type StickyElement,
-} from '@livediagram/document';
+import { ES_NOTE_GAP, nextNoteBounds, type Element, type StickyElement } from '@livedoc/document';
 import { applyInsertionShift } from './insert-between';
 import { planNextNote } from './next-note-add';
 

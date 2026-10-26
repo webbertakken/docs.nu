@@ -3,7 +3,7 @@
 // a reload) frames that page rather than the first. Not a synced preference: those are capped at
 // 4 KB, and tab ids would fill it. The most recent tabs are kept, the oldest dropped past
 // LAST_PAGE_MAX.
-import type { LaidOutPage } from '@livediagram/document';
+import type { LaidOutPage } from '@livedoc/document';
 import { readLocalStorageSafe, safeJson, writeLocalStorageSafe } from '@/lib/local-storage-safe';
 
 // Kept under the mode's old name (Illustrate), so nobody loses the page they were on.

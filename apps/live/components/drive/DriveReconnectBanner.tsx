@@ -6,7 +6,7 @@
 // the session (D10). Nothing is deleted either way.
 
 import { useState } from 'react';
-import { CloseIcon } from '@livediagram/ui';
+import { CloseIcon } from '@livedoc/ui';
 import { useDriveMirror } from './drive-mirror-context';
 
 const DISMISS_KEY = 'livedoc:v2:drive-banner-dismissed';

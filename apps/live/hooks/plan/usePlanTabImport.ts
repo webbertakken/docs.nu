@@ -3,12 +3,7 @@
 // Importing a tab's JSON export brings its Plan items with it (docs/specs/026-plan/items.md "Copies and exports"):
 // the file's types its new cards use, then the cards the document does not already hold, each its own undo step.
 // The tab's content lands first (useTabImport); this adds what its boards and cards draw from.
-import {
-  planTabItemsImport,
-  type Item,
-  type ItemTypeDef,
-  type ItemWrite,
-} from '@livediagram/items';
+import { planTabItemsImport, type Item, type ItemTypeDef, type ItemWrite } from '@livedoc/items';
 import type { ImportedPlanItems } from '@/lib/import-tab';
 import { waitUntil } from '@/lib/wait-until';
 import { useLatest } from '@/hooks/ui/useLatest';

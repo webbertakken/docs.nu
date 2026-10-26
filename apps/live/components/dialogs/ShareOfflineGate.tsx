@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, DialogCloseButton, DialogHeader } from '@livediagram/ui';
+import { Button, DialogCloseButton, DialogHeader } from '@livedoc/ui';
 import { Dialog } from '@/components/dialogs/Dialog';
 import { HelpArticleLink } from '@/components/primitives/HelpArticleLink';
 import { DialogFooter } from '@/components/dialogs/DialogFooter';

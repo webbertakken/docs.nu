@@ -5,9 +5,9 @@
 // nothing, the local sync state included (RL13).
 
 import { posix } from 'node:path';
-import type { VerbContext } from '@livediagram/agent-verbs';
-import { ApiError } from '@livediagram/api-client';
-import { DOCUMENT_ENVELOPE_KIND, DOCUMENT_SCHEMA_VERSION } from '@livediagram/document';
+import type { VerbContext } from '@livedoc/agent-verbs';
+import { ApiError } from '@livedoc/api-client';
+import { DOCUMENT_ENVELOPE_KIND, DOCUMENT_SCHEMA_VERSION } from '@livedoc/document';
 import { readDocumentSnapshot } from '../commands/snapshot';
 import type { CliIo } from '../io';
 import { EXIT, type ExitCode } from '../output/exit-codes';

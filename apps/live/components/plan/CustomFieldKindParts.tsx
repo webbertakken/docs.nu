@@ -9,15 +9,15 @@ import {
   ratingText,
   type CustomFieldDef,
   type CustomFieldKind,
-} from '@livediagram/items';
-import { CheckIcon, lucideGlyph } from '@livediagram/ui';
+} from '@livedoc/items';
+import { CheckIcon, lucideGlyph } from '@livedoc/ui';
 import {
   lucideHash,
   lucideList,
   lucideListChecks,
   lucideLink,
   lucideType,
-} from '@livediagram/icons/lucide';
+} from '@livedoc/icons/lucide';
 import { CUSTOM_KIND_LABELS } from './ItemTypeFieldForms';
 import { ItemDetailsRow } from './ItemPanelLayout';
 import { PlanTypeGlyph } from './plan-type-glyph';

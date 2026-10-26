@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ChangesetSummary, LintReport } from '@livediagram/api-schema';
+import type { ChangesetSummary, LintReport } from '@livedoc/api-schema';
 import { contextOf, DOC_A, DOC_C, fakeApi, library, tabsOfA } from '../testing/fake-api';
 import { changesetLs, changesetRevert, changesetShow } from './changeset';
 import { documentLs, documentView } from './document';

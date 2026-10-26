@@ -5,7 +5,7 @@
 // to <email>", one six-digit field, "Sign in", and the two ways out, "Use a different email" and "Send a new code"
 // (held for CODE_RESEND_COOLDOWN_S after each send, counting down silently and announced once it is available).
 
-import { Button, TextInput } from '@livediagram/ui';
+import { Button, TextInput } from '@livedoc/ui';
 import { useEffect, useId, useState } from 'react';
 
 // How long "Send a new code" waits after a send (D19). Safe range: 15 to 60 s.

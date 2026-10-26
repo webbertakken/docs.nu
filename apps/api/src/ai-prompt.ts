@@ -4,7 +4,7 @@
 // Split out of routes/ai.ts so the route file keeps to validation,
 // rate limiting, and the OpenAI call.
 
-import type { AiMode } from '@livediagram/api-schema';
+import type { AiMode } from '@livedoc/api-schema';
 
 // ---------------------------------------------------------------------------
 // Schema — single source of truth for what the model can produce.

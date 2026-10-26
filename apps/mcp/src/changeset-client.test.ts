@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { elementFingerprint, type Element, type Tab } from '@livediagram/document';
+import { elementFingerprint, type Element, type Tab } from '@livedoc/document';
 vi.mock('./image-result', () => ({
   imageResult: (value: Record<string, unknown>) => ({
     content: [{ type: 'text', text: JSON.stringify(value) }],

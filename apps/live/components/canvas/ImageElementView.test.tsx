@@ -8,7 +8,7 @@ import {
   MIN_TEXT_CONTRAST,
   type ImageElement,
   type ThemeDefinition,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   CanvasSurfaceProvider,
   CanvasThemeProvider,

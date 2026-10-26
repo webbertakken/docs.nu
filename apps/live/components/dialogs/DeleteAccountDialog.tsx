@@ -9,7 +9,7 @@
 // email, typed here, signs this browser in afresh, and the deletion runs once more. Cancelled or failed, nothing was
 // deleted, and the dialog says so.
 
-import { Button, useEscape, useFocusTrap, Portal } from '@livediagram/ui';
+import { Button, useEscape, useFocusTrap, Portal } from '@livedoc/ui';
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
 import { useEffect, useRef, useState } from 'react';
 import { track } from '@/lib/telemetry';

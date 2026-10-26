@@ -4,7 +4,7 @@
 // here is a function of plain numbers and ids so the gesture, the layout and the persistence can be
 // tested without a DOM.
 
-import { isRecord } from '@livediagram/document';
+import { isRecord } from '@livedoc/document';
 import {
   readLocalStorageSafe,
   removeLocalStorageSafe,

@@ -13,7 +13,7 @@ import {
   type Endpoint,
   type StickyElement,
   type TextElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { debugLog } from '@/lib/debug-log';
 import { inkOnFill } from './vertex-props';
 

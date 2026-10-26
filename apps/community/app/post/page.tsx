@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { BRAND_OG_IMAGE, BRAND_TWITTER_IMAGE } from '@livediagram/ui';
+import { BRAND_OG_IMAGE, BRAND_TWITTER_IMAGE } from '@livedoc/ui';
 import { PostView } from '@/components/post/PostView';
 import { PostSkeleton } from '@/components/post/PostStates';
 

@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-import { cardSubtitle, renderSocialCard } from '@livediagram/ui';
+import { cardSubtitle, renderSocialCard } from '@livedoc/ui';
 import { getLandingSection, LANDING_SECTION_IDS } from '@/lib/landing-content';
 
 // Per-category social card for /features/<id>: the same branded shell as the

@@ -9,13 +9,13 @@ import {
   type FreehandElement,
   type ShapeElement,
   type TextElement,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   cornerRadiusPx,
   encodeStrokePoints,
   freehandCanvasPoints,
   strokePointCount,
-} from '@livediagram/document';
+} from '@livedoc/document';
 
 // Excalidraw text through the one parser and the shared landing, as the Import dialog runs it
 // (useTabImport, useBoardSceneImport), at the tab's own coordinates.

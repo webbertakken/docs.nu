@@ -22,7 +22,7 @@ import {
   useMenu,
   useMenuButton,
   PictureDisc,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 import { useSignInAvailable } from '@/lib/auth-config';
 import { track } from '@/lib/telemetry';
 import { useAuthHrefs } from '@/components/chrome/auth-shared';

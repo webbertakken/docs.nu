@@ -15,7 +15,7 @@ import {
   DRIVE_PROP_ORIGIN,
   stripDriveName,
   type DriveItem,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import type { DriveChange, DriveFile } from './drive-client';
 import {
   expectedDocumentParent,

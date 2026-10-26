@@ -14,14 +14,9 @@ import {
   type ClipboardEvent,
   type KeyboardEvent,
 } from 'react';
-import {
-  lucideBold,
-  lucideItalic,
-  lucidePilcrow,
-  lucideUnderline,
-} from '@livediagram/icons/lucide';
-import { toggleFormatInRange, type RunBoolKey, type TextRun } from '@livediagram/document';
-import { ArrowDownIcon, ArrowUpIcon, IndentIcon, OutdentIcon, lucideGlyph } from '@livediagram/ui';
+import { lucideBold, lucideItalic, lucidePilcrow, lucideUnderline } from '@livedoc/icons/lucide';
+import { toggleFormatInRange, type RunBoolKey, type TextRun } from '@livedoc/document';
+import { ArrowDownIcon, ArrowUpIcon, IndentIcon, OutdentIcon, lucideGlyph } from '@livedoc/ui';
 import {
   domSelectionToOffsets,
   insertTextAtCaret,

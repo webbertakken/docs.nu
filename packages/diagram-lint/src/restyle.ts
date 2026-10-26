@@ -2,12 +2,7 @@
 // (docs/specs/024-agents/blueprints/diagram-lint.md "Fixes"). A fix that suggested a style blind made things worse,
 // and the next lint suggested the style back.
 
-import {
-  arrowRoutePoints,
-  arrowStyleOf,
-  type ArrowElement,
-  type Point,
-} from '@livediagram/document';
+import { arrowRoutePoints, arrowStyleOf, type ArrowElement, type Point } from '@livedoc/document';
 import type { LintContext } from './context';
 
 const RESTYLES = ['angled', 'curved', 'straight'] as const;

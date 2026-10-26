@@ -3,7 +3,7 @@
 // record shape and every operation on it live in ./offline-store.ts.
 
 import { upgradeStores } from './legacy-offline-store';
-import { INDEXED_DB_PROBE_TIMEOUT_MS } from '@livediagram/ui';
+import { INDEXED_DB_PROBE_TIMEOUT_MS } from '@livedoc/ui';
 import type { OfflineDocumentRecord } from './offline-store';
 
 const DB_NAME = 'livedoc-offline';

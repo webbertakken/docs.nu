@@ -10,8 +10,8 @@ import { LINK_ID_HEX, SYNC_REPORTS_KEPT } from './constants';
 import { gitDirOf } from './git';
 import type { LinkFile } from './link-file';
 import type { RecordedDocument } from './recorded-state';
-import { isRecord } from '@livediagram/document';
-import { sha256Hex } from '@livediagram/api-schema';
+import { isRecord } from '@livedoc/document';
+import { sha256Hex } from '@livedoc/api-schema';
 
 export type LinkState = {
   version: 1;

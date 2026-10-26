@@ -11,15 +11,15 @@ import type {
   Folder,
   ShareLink,
   ShareRole,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import {
   BUILD_ID_HEADER,
   DOCUMENT_FORMAT_HEADER,
   isAccountIdShape,
   readErrorCode,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { noteServerBuild, noteServerDocumentFormat } from '../server-release';
-import { stampTabKind, type Tab } from '@livediagram/document';
+import { stampTabKind, type Tab } from '@livedoc/document';
 import {
   readLocalStorageSafe,
   removeLocalStorageSafe,
@@ -50,7 +50,7 @@ import {
 //   1. `NEXT_PUBLIC_API_BASE` env var if set — used for local dev (e.g.
 //      `https://docs.nu/api` to hit prod, or
 //      `http://localhost:8787/api` to point at a local `wrangler dev`
-//      session of `@livediagram/api`). Baked into the static export at
+//      session of `@livedoc/api`). Baked into the static export at
 //      build time so it works in deployed builds too.
 //   2. Default `/api` — same-origin, served by the router worker in
 //      production (router stitches the api worker onto the same
@@ -139,7 +139,7 @@ function isTimelinePath(url: string): boolean {
 }
 
 // Envelope shapes the API wraps payloads in. The canonical inner
-// types come from `@livediagram/api-schema`, as do the envelopes the
+// types come from `@livedoc/api-schema`, as do the envelopes the
 // MCP server reads too (DocumentResponse, TabResponse, ...); the ones
 // below are the editor-only glue for `expectOk` to destructure.
 export type FolderResponse = { folder: Folder };

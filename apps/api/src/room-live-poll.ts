@@ -6,7 +6,7 @@ import {
   sha256Hex,
   type LivePoll,
   type RoomOp,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import { GUEST_VOTERS_PER_NETWORK } from './vote-integrity';
 
 // The poll that is running in a room, and everyone's answer to it (docs/specs/012-collaboration/collab-race-hardening.md).

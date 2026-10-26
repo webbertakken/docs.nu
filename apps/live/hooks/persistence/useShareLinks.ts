@@ -18,7 +18,7 @@ import {
   type ShareLinkExpiry,
   type ShareRole,
 } from '@/lib/api-client';
-import { LEVEL_TELEMETRY_TYPE } from '@livediagram/api-schema';
+import { LEVEL_TELEMETRY_TYPE } from '@livedoc/api-schema';
 import { track } from '@/lib/telemetry';
 import { ApiError } from '@/lib/api/core';
 import { useToast } from '@/hooks/ui/useToast';

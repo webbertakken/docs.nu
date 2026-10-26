@@ -2,7 +2,7 @@
 // poster, survey results, a progress report, a roadmap, an agenda, questions and answers, and a
 // profile. Same contract as page-layouts.ts: the page's content box in, uncoloured elements out, a
 // tall page stacking and a wide one setting side by side.
-import type { Element } from '@livediagram/document';
+import type { Element } from '@livedoc/document';
 import { heading, kit, type Kit, type LayoutBox } from './page-layout-kit';
 
 function sectionDivider(k: Kit): Element[] {

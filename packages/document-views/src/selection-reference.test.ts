@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Element, Tab } from '@livediagram/document';
+import type { Element, Tab } from '@livedoc/document';
 import { arrowBetween, shapeAt, strokeAt } from './__fixtures__/build';
 import { buildViewModel } from './model';
 import { selectionReference } from './selection-reference';

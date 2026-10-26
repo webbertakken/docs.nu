@@ -3,7 +3,7 @@
 // browser-only token model, and the Picker for adopting a folder LiveDoc
 // cannot see. Neither loads for a deployment without a client id.
 
-import { DRIVE_FOLDER_MIME, DRIVE_SCOPES, type DriveAccessToken } from '@livediagram/api-schema';
+import { DRIVE_FOLDER_MIME, DRIVE_SCOPES, type DriveAccessToken } from '@livedoc/api-schema';
 import { googleProjectNumber } from './config';
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client';

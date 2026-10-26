@@ -4,16 +4,16 @@
 // frame, a canvas drag, a resize of the chart) never reads the table again, nor re-compares the kept read.
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import * as sheets from '@livediagram/sheets';
-import { emptyLayout, type SheetJson } from '@livediagram/sheets';
-import type { Element, ShapeElement } from '@livediagram/document';
+import * as sheets from '@livedoc/sheets';
+import { emptyLayout, type SheetJson } from '@livedoc/sheets';
+import type { Element, ShapeElement } from '@livedoc/document';
 import * as api from '@/lib/api/sheets';
 import { SheetsBridgeContext, type SheetsBridge } from '@/hooks/sheets/useSheetsBridge';
 import { forgetSheetStores } from './sheet-store-client';
 import { SheetLinkedChart } from './SheetLinkedChart';
 
-vi.mock('@livediagram/sheets', async (importOriginal) => {
-  const real = await importOriginal<typeof import('@livediagram/sheets')>();
+vi.mock('@livedoc/sheets', async (importOriginal) => {
+  const real = await importOriginal<typeof import('@livedoc/sheets')>();
   return { ...real, sheetChartTable: vi.fn(real.sheetChartTable) };
 });
 vi.mock('@/lib/api/sheets', () => ({

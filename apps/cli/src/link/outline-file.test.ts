@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Tab } from '@livediagram/document';
+import type { Tab } from '@livedoc/document';
 import { outlineFileText } from './outline-file';
 
 // The outline file (docs/specs/027-repositories/blueprints/repository-link.md "The outline file"): generated, one

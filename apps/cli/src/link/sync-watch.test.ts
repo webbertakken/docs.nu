@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DOCUMENT_TRASHED_CLOSE } from '@livediagram/api-schema';
+import { DOCUMENT_TRASHED_CLOSE } from '@livedoc/api-schema';
 import { WAIT_SETTLE_MS } from '../commands/wait';
 import { run } from '../main';
 import { fakeIo, TOKEN, type FakeIo } from '../testing/fake-io';

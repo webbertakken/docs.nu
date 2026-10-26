@@ -17,10 +17,10 @@ import {
   type TabViewName,
   type ViewDoor,
   type ViewQueryParameter,
-} from '@livediagram/api-schema';
-import { formatLintReport, lintTab } from '@livediagram/diagram-lint';
+} from '@livedoc/api-schema';
+import { formatLintReport, lintTab } from '@livedoc/diagram-lint';
 import { lintLog } from '../changesets/lint';
-import { isKnownElement } from '@livediagram/document';
+import { isKnownElement } from '@livedoc/document';
 import {
   FIND_QUERY_MAX_LENGTH,
   headerFactsOf,
@@ -33,7 +33,7 @@ import {
   VIEW_SLOW_MS,
   type OverviewTabInput,
   type ViewRequest,
-} from '@livediagram/document-views';
+} from '@livedoc/document-views';
 import { redactTabForCommunity } from '../community-redact';
 import { personTagFor } from '../person-tag';
 import { readRoomSelections } from '../room-client';

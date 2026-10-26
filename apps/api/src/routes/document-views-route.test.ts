@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { OVERVIEW_TAB_BATCH } from '@livediagram/document-views';
-import type { Element } from '@livediagram/document';
+import { OVERVIEW_TAB_BATCH } from '@livedoc/document-views';
+import type { Element } from '@livedoc/document';
 import { createShareLink } from '../db/share';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import type { Env } from '../types';

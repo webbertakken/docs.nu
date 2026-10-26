@@ -5,7 +5,7 @@
 // place changes, never twice with the same fields. The Explorer reports its views, the editor its document; this is
 // the one sender. Logged by view only, never a name.
 import { useCallback, useRef } from 'react';
-import type { PlaceMessage } from '@livediagram/api-schema';
+import type { PlaceMessage } from '@livedoc/api-schema';
 import { debugLog } from '@/lib/debug-log';
 import type { WorkbenchPort } from '@/lib/workbench/workbench-port';
 

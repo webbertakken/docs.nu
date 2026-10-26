@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ResultLine } from '@livediagram/api-schema';
-import { getBuiltInTheme, type Element } from '@livediagram/document';
+import type { ResultLine } from '@livedoc/api-schema';
+import { getBuiltInTheme, type Element } from '@livedoc/document';
 import { formatResultFooter, formatResultLines } from './format-results';
 import { addedLine, buildResultLines, removedLine } from './results';
 import { checkoutFlow } from './fixtures/checkout-flow';

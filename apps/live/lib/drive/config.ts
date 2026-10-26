@@ -2,7 +2,7 @@
 // (docs/specs/022-drive-mirror/drive-mirror.md, "Self-hosting"; blueprint
 // "Deployment mode"). NEXT_PUBLIC_* values are baked in at build time.
 
-import type { DriveMode } from '@livediagram/api-schema';
+import type { DriveMode } from '@livedoc/api-schema';
 
 export const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
 // The Google Picker's browser key, for adopting a folder LiveDoc cannot

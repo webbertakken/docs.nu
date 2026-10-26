@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { POLL_OPTION_MAX } from '@livediagram/api-schema';
-import { STICKY_PRESETS } from '@livediagram/document';
-import {
-  quizPhase,
-  sessionButtonPlan,
-  type Element,
-  type ShapeElement,
-} from '@livediagram/document';
+import { POLL_OPTION_MAX } from '@livedoc/api-schema';
+import { STICKY_PRESETS } from '@livedoc/document';
+import { quizPhase, sessionButtonPlan, type Element, type ShapeElement } from '@livedoc/document';
 import { buildTemplate } from './build-template';
 import { templateCategory } from './template-categories';
 import { templateEditorMode } from './template-modes';

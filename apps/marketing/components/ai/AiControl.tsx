@@ -1,5 +1,5 @@
-import { lucideEye, lucideKey, lucideShieldCheck, lucideCpu } from '@livediagram/icons/lucide';
-import { lucideGlyph } from '@livediagram/ui';
+import { lucideEye, lucideKey, lucideShieldCheck, lucideCpu } from '@livedoc/icons/lucide';
+import { lucideGlyph } from '@livedoc/ui';
 
 // In your control (docs/specs/019-marketing/build-with-ai.md "The page" 6): the trust facts, each one true of the
 // shipped MCP server (docs/specs/015-api/mcp-server.md §3, §4.11).

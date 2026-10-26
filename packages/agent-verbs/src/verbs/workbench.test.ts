@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ApiError } from '@livediagram/api-client';
-import { WORKBENCH_NAME_MAX_LENGTH } from '@livediagram/api-schema';
+import { ApiError } from '@livedoc/api-client';
+import { WORKBENCH_NAME_MAX_LENGTH } from '@livedoc/api-schema';
 import { AddressError } from '../addressing';
 import { VerbRefusal } from '../define';
 import { contextOf, DOC_A, DOC_C, fakeApi, library, tabsOfA } from '../testing/fake-api';

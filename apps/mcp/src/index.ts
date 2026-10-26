@@ -3,7 +3,7 @@
 // responses), Bearer-gated; tools reach the api worker over the API service
 // binding, forwarding the caller's `Authorization: Bearer lvd_…`. OAuth 2.1
 // endpoints mount alongside (added in the OAuth step).
-import { bearerTokenOf } from '@livediagram/api-schema';
+import { bearerTokenOf } from '@livedoc/api-schema';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';

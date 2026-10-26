@@ -104,7 +104,7 @@ with nothing else to tell a screen reader they came.
 it, then a title containing it, then a description match, then a keyword match alone, then, for a query of
 several words, an article holding every word somewhere across its title, description and keywords (more of them in
 the title first: "export png" finds Exporting Diagrams); registry order breaks ties (`searchArticles` in
-`@livediagram/help-registry`). The editor's Help group in global search keeps its own flat matching, every word
+`@livedoc/help-registry`). The editor's Help group in global search keeps its own flat matching, every word
 across title and keywords ([Help app](help-app.md), "Out of scope").
 
 ## In-article figures

@@ -16,7 +16,7 @@ import {
   penColourLabel,
   type Appearance,
   type StandardColourName,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import {
   readLocalStorageSafe,
   pickOption,

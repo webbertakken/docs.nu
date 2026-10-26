@@ -1,4 +1,4 @@
-import type { LicencesManifest } from '@livediagram/licences';
+import type { LicencesManifest } from '@livedoc/licences';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
@@ -52,7 +52,9 @@ describe('LicencesView', () => {
   it('credits livediagram as the origin of the code, linked to its repository', () => {
     expect(html).toContain('LiveDoc is MIT licensed');
     expect(html).toContain('began as a fork of');
-    expect(html).toContain('<a href="https://github.com/livediagram-app/livediagram.app"');
+    expect(html).toMatch(
+      /began as a fork of <a href="https:\/\/github\.com\/livediagram-app\/livediagram\.app"[^>]*>livediagram<\/a>/,
+    );
   });
 
   it('titles the page and names both sections with their counts', () => {

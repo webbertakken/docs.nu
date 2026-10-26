@@ -6,14 +6,8 @@ import {
   lucideGitFork,
   lucideUsers,
   lucideUserX,
-} from '@livediagram/icons/lucide';
-import {
-  BrandMark,
-  ChevronRightIcon,
-  lucideGlyph,
-  REPO_URL,
-  type IconProps,
-} from '@livediagram/ui';
+} from '@livedoc/icons/lucide';
+import { BrandMark, ChevronRightIcon, lucideGlyph, REPO_URL, type IconProps } from '@livedoc/ui';
 import {
   useEffect,
   useLayoutEffect,

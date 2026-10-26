@@ -39,7 +39,7 @@ Scope, by file:
 | `apps/live/lib/drive/drive-client.ts`                           | `DriveClient` interface, `DriveApiError`                                                |
 | `apps/live/lib/drive/drive-rest-client.ts`                      | `DriveClient` over Google's REST API                                                    |
 | `apps/live/lib/drive/thumbnail.ts`                              | SVG snapshot to PNG `contentHints.thumbnail`                                            |
-| `apps/live/lib/drive/livediagram-port.ts`                       | `LivediagramPort` interface + implementation over `lib/api`                             |
+| `apps/live/lib/drive/livedoc-port.ts`                           | `LivedocPort` interface + implementation over `lib/api`                                 |
 | `apps/live/lib/drive/snapshot.ts`                               | `MirrorSnapshot` and its indexes                                                        |
 | `apps/live/lib/drive/plan-outbound.ts`                          | Pure: snapshot + items to outbound ops                                                  |
 | `apps/live/lib/drive/plan-inbound.ts`                           | Pure: a change + snapshot + items to an inbound decision                                |
@@ -254,7 +254,7 @@ their items in its batch). `recreate-folder` re-creates the folder with its old 
 its item, then lists the folder's children (`files.list q="'<id>' in parents"`) and plans each as a change, so the
 documents restored with it come back inside it whether or not Drive emitted a change per child.
 
-Every applied decision goes through the ordinary routes via `LivediagramPort` and fires
+Every applied decision goes through the ordinary routes via `LivedocPort` and fires
 `track('Drive', 'Applied', type)`.
 
 ### Tombstones
@@ -320,7 +320,7 @@ with the pending return set to this URL.
 
 ## Interfaces and contracts
 
-### Wire types (`@livediagram/api-schema`, `drive.ts`)
+### Wire types (`@livedoc/api-schema`, `drive.ts`)
 
 ```ts
 type DriveMode = 'off' | 'browser' | 'broker';
@@ -475,14 +475,14 @@ type DriveFileWrite = {
 `rateLimitExceeded`), `isNotFound` (404), `isAuth` (401). Content up to `DRIVE_MULTIPART_MAX_BYTES` goes
 `uploadType=multipart`; larger `uploadType=resumable` (session from `Location`, then one `PUT`).
 
-### LivediagramPort (`lib/drive/livediagram-port.ts`)
+### LivedocPort (`lib/drive/livedoc-port.ts`)
 
 Reads: `listPersonalDocuments`, `listPersonalFolders`, `listPersonalTrash`, `loadEnvelope(id)`,
 `loadSnapshotSvg(id)`, `canOpenDocument(id)`. Writes: `renameDocument`, `moveDocument`, `trashDocument`,
 `restoreDocument`, `purgeDocument`, `createFolder(id, name, parentId)`, `renameFolder`, `moveFolder`, `deleteFolder`,
 `importDocumentCopy(envelope)`. Mirror rows: `getConnection`, `putConnection`, `listItems`, `putItems`, `deleteItem`,
 `acquireLease`, `releaseLease`. The production implementation is a thin map onto `lib/api/*`; tests use
-`FakeLivediagram`.
+`FakeLivedoc`.
 
 ### Envelope (`packages/document/src/document-envelope.ts`)
 
@@ -829,7 +829,7 @@ Events: `elected`, `pass-start`, `pass-end`, `token`, `root-created`, `root-foun
 | Bearer survives a second session mount      | `apps/live/hooks/persistence/useAccountApiBootstrap.test.tsx`           |
 | Telemetry vocabulary                        | `apps/live/lib/telemetry-coverage.test.ts`, `apps/telemetry` tests      |
 
-The browser e2e is opt-in (`pnpm --filter @livediagram/live test:e2e:drive`), kept out of CI's default run to spare
+The browser e2e is opt-in (`pnpm --filter @livedoc/live test:e2e:drive`), kept out of CI's default run to spare
 its minutes: it rebuilds the live app with the e2e Google client id and Picker key, and boots the stack with
 `E2E_DRIVE=1` and sign-in on (`E2E_SIGN_IN=1`), on its own ports. Each test account signs in for real through
 `e2e/account/sign-in.ts` (an email code from the stack's outbox), once per fake Google user, and its session is entered

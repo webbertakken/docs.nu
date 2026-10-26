@@ -1,8 +1,4 @@
-import {
-  lucideBrushCleaning,
-  lucideLayers,
-  lucideSlidersHorizontal,
-} from '@livediagram/icons/lucide';
+import { lucideBrushCleaning, lucideLayers, lucideSlidersHorizontal } from '@livedoc/icons/lucide';
 
 import { Glyph, type IconProps } from './Glyph';
 import { lucideGlyph } from './lucide-glyph';

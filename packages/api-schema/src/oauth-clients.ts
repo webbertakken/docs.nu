@@ -2,7 +2,7 @@
 // "OAuth server", "The CLI's OAuth client", CLI35, CLI36). Shared by the MCP worker's authorization server, the
 // editor's /oauth/device page and the CLI.
 
-export const CLI_CLIENT_ID = 'livediagram-cli';
+export const CLI_CLIENT_ID = 'livedoc-cli';
 export const CLI_CLIENT_NAME = 'LiveDoc CLI';
 // Loopback callbacks, matched on any port (RFC 8252 §7.3).
 export const CLI_REDIRECT_URIS: readonly string[] = [

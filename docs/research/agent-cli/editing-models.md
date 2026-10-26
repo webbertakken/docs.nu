@@ -205,7 +205,7 @@ Derived from the above, in the order they bite:
  agent ──► livediagram edit (CLI)
              │  parse line ops / JSON ops
              │  resolve selectors against its last read (cache)
-             │  dry-run: apply locally with @livediagram/edit-ops, print plan, optional PNG
+             │  dry-run: apply locally with @livedoc/edit-ops, print plan, optional PNG
              ▼
            POST /api/documents/:id/tabs/:tabId/edits   { base, ops, options }
              │  api: load tab from D1, check base fingerprints, apply the same pure engine,
@@ -215,8 +215,8 @@ Derived from the above, in the order they bite:
 ```
 
 - **One pure engine**, `applyEditBatch(tab, ops, options) → { tab, changes, inverse, warnings } |
-{ errors }`, in a new package (working name `@livediagram/edit-ops`, depending on
-  `@livediagram/document` for layout, anchors, validation and normalisation). Consumers: the CLI
+{ errors }`, in a new package (working name `@livedoc/edit-ops`, depending on
+  `@livedoc/document` for layout, anchors, validation and normalisation). Consumers: the CLI
   (dry-run, local preview), the api (authoritative apply), and the MCP's `update_document` ops mode,
   which becomes a thin wrapper so the two agent surfaces cannot drift (reuse principle).
 - **One server change**: an edits endpoint that applies the batch server-side and relays it to the
@@ -603,7 +603,7 @@ These are genuine choices for the spec, not defaults the research could pick:
 3. **Line form and JSON form.** Two input syntaxes for one op model. Recommended: both, with the line
    form parsed into the JSON form by one parser, because heredoc line ops are what agents emit most
    cheaply and JSON is what scripts produce.
-4. **Where the engine lives.** A new `@livediagram/edit-ops` package vs files in `@livediagram/document`.
+4. **Where the engine lives.** A new `@livedoc/edit-ops` package vs files in `@livedoc/document`.
    Recommended: a new package, because it is one cohesive concern with three consumers.
 5. **Make-room scope.** Shift within the containing frame or component (recommended) vs the whole tab
    beyond the midline.

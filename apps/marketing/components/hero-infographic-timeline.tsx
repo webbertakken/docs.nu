@@ -1,11 +1,5 @@
-import type { StyledPrim } from '@livediagram/icons';
-import {
-  lucideFlag,
-  lucideHouse,
-  lucideSmile,
-  lucideStar,
-  lucideZap,
-} from '@livediagram/icons/lucide';
+import type { StyledPrim } from '@livedoc/icons';
+import { lucideFlag, lucideHouse, lucideSmile, lucideStar, lucideZap } from '@livedoc/icons/lucide';
 import { FONT, at } from '@/components/art-tokens';
 import {
   HAIRLINE,

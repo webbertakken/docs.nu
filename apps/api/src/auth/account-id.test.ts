@@ -1,4 +1,4 @@
-import { isAccountIdShape } from '@livediagram/api-schema';
+import { isAccountIdShape } from '@livedoc/api-schema';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ACCOUNT_ID_RANDOM_LENGTH, generateAccountId } from './account-id';
 

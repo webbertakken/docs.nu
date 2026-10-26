@@ -1,4 +1,4 @@
-import { defineProject } from '@livediagram/vitest-config';
+import { defineProject } from '@livedoc/vitest-config';
 
 // The lens is pure and small: every line and branch is covered (docs/specs/013-workspace/blueprints/explorer-filters.md).
 export default defineProject({

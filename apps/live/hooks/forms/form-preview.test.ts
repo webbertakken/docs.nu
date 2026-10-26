@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ItemCreate, ItemTypeDef } from '@livediagram/items';
-import { FROM_FORM_FIELD, type FormDefinition } from '@livediagram/forms';
+import type { ItemCreate, ItemTypeDef } from '@livedoc/items';
+import { FROM_FORM_FIELD, type FormDefinition } from '@livedoc/forms';
 import {
   PREVIEW_FAILED,
   PREVIEW_NO_DESTINATION,

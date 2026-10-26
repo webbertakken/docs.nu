@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { COMMUNITY_HELP } from '@livediagram/help-registry/community';
-import { articles } from '@livediagram/help-registry';
-import { articleTelemetryId, helpPathTelemetryId } from '@livediagram/help-registry/telemetry';
+import { COMMUNITY_HELP } from '@livedoc/help-registry/community';
+import { articles } from '@livedoc/help-registry';
+import { articleTelemetryId, helpPathTelemetryId } from '@livedoc/help-registry/telemetry';
 
 // The Community's deep links name registered articles, with the telemetry ids the registry gives them.
 describe('COMMUNITY_HELP', () => {

@@ -267,7 +267,7 @@ this spec does not restate it.
 - Every folder in My Documents is a Drive folder at the same place in the tree.
 - **Folders created in Drive** by the user are invisible to livediagram under
   `drive.file` until the user shows them to it; see
-  [Folders livediagram cannot see](#folders-livediagram-cannot-see).
+  [Folders livediagram cannot see](#folders-livedoc-cannot-see).
 
 ## Outbound: livediagram to Drive
 
@@ -359,7 +359,7 @@ copy (below), or **Duplicate** inside livediagram.
   as it is), so it mirrors the new document like any mirrored
   file and no second file is made for it. The new document lands in the
   livediagram folder the copy's Drive folder mirrors; at the root of My Documents when the copy
-  sits in the root, and at that root with [the notice](#folders-livediagram-cannot-see)
+  sits in the root, and at that root with [the notice](#folders-livedoc-cannot-see)
   when it sits in a folder livediagram cannot see.
 - **Afterwards.** Once opened, the copy can reach livediagram's change feed.
   An inbound change for a file that carries a mirrored document's id under
@@ -562,7 +562,7 @@ D1, owned by the api worker:
 - `refresh_token_enc` is empty for a browser-only connection (client id only).
 - `drive_items` also keeps `ld_name` (the livediagram name the Drive name
   mirrors, since Drive may store a name differently), and `notice` with
-  `notice_parent_id` for the [unseen-folder notice](#folders-livediagram-cannot-see).
+  `notice_parent_id` for the [unseen-folder notice](#folders-livedoc-cannot-see).
 - **Finishing a removal in Drive.** Because a purge or a folder deletion takes
   the row with it, each browser remembers the rows it last saw. A row that
   disappears while its document or folder is gone from livediagram is finished

@@ -7,7 +7,7 @@ import {
   PLAN_BOARD_PRESET_IDS,
   PLAN_GLYPH_IDS,
   PLAN_TYPE_COLOURS,
-} from '@livediagram/items';
+} from '@livedoc/items';
 
 const url = z.string().describe('Link that opens the document in the LiveDoc editor.');
 const documentId = z.string().describe('The document (from find_documents).');

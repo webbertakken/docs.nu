@@ -10,10 +10,10 @@ import {
   groupTabsIntoRuns,
   tabFolderName,
   type Tab,
-} from '@livediagram/document';
+} from '@livedoc/document';
 import { useAppearance } from '@/hooks/ui/useAppearance';
 import type { Participant } from '@/lib/identity';
-import { TabsLabelIcon, safeInlinePadding, safeInset } from '@livediagram/ui';
+import { TabsLabelIcon, safeInlinePadding, safeInset } from '@livedoc/ui';
 import { TabFolderChip } from '@/components/chrome/TabFolderChip';
 import { useTabReorderDrag } from './useTabReorderDrag';
 import { ChromeControls } from '@/components/chrome/ChromeControls';
@@ -25,7 +25,7 @@ const PortalMenu = dynamic(() => import('./TabPortalMenu').then((m) => m.PortalM
   ssr: false,
 });
 import { TabPill, type TabPillCtx } from './TabPill';
-import type { AccessLevel } from '@livediagram/api-schema';
+import type { AccessLevel } from '@livedoc/api-schema';
 import { deleteTabWarning } from '@/hooks/forms/forms-feeding';
 
 // Canvas-scoped actions folded into the unified tab / canvas menu. (Add-element actions and the

@@ -14,12 +14,7 @@
 // Each builder is pure: it takes a centre (cx, cy) and returns a fresh
 // Element[]. See docs/specs/008-canvas/canvas-and-palette.md "Templates" for the catalogue.
 
-import {
-  createPinnedArrow,
-  createShape,
-  type Element,
-  type ShapeElement,
-} from '@livediagram/document';
+import { createPinnedArrow, createShape, type Element, type ShapeElement } from '@livedoc/document';
 import {
   BUTTON_H,
   GAP,

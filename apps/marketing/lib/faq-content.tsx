@@ -9,8 +9,8 @@ import {
   lucideSparkles,
   lucideUsers,
   lucideZap,
-} from '@livediagram/icons/lucide';
-import { CONTACT_FORM_URL, lucideGlyph, REPO_URL } from '@livediagram/ui';
+} from '@livedoc/icons/lucide';
+import { CONTACT_FORM_URL, lucideGlyph, REPO_URL } from '@livedoc/ui';
 import type { ReactNode } from 'react';
 
 // The /faq page's content (docs/specs/019-marketing/marketing-site.md "Content pages (FAQ)"): questions grouped
@@ -31,7 +31,7 @@ export type FaqCategory = {
 };
 
 const ICON = 18;
-// Written out rather than read from @livediagram/templates: this module ships in the FAQ's client bundle, and the
+// Written out rather than read from @livedoc/templates: this module ships in the FAQ's client bundle, and the
 // catalogue is ~15 KB for one number. faq-content.test.tsx pins it to TEMPLATES.length.
 export const TEMPLATE_COUNT = 147;
 // The template categories, pinned to TEMPLATE_CATEGORIES.length by faq-content.test.tsx the same way.

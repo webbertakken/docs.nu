@@ -20,14 +20,14 @@ export type MapSize = 'short' | 'medium' | 'tall';
 // snapshot (see rebaseUserPreferences): another tab's write since that
 // render would otherwise be undone.
 
-import { upgradeLegacyPreferences } from '@livediagram/api-schema';
-import type { PageKind } from '@livediagram/document';
+import { upgradeLegacyPreferences } from '@livedoc/api-schema';
+import type { PageKind } from '@livedoc/document';
 import type { ElementTourKind } from './element-tours';
 import type { PlanTourTrack } from './plan-tour';
 import type { SwatchOverrideStore } from './swatch-overrides';
 import type { WhiteboardShapeKey } from './whiteboard-shape-catalogue';
 import type { ShapePicks } from './whiteboard-shape-slots';
-import { USER_PREFERENCES_STORAGE_KEY } from '@livediagram/telemetry-client';
+import { USER_PREFERENCES_STORAGE_KEY } from '@livedoc/telemetry-client';
 import { apiGetPreferences } from './api-client';
 import { fitPreferences, preferencesUnsynced, savePreferences } from './preferences-sync';
 import { getWorkbenchConfinement } from './api/workbench-confinement';

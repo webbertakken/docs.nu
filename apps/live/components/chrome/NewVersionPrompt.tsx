@@ -5,8 +5,8 @@
 // a polite status that never takes focus, never reloads by itself, and reloads only once everything
 // edited has been saved.
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { DOCUMENT_FORMAT } from '@livediagram/api-schema';
-import { Button } from '@livediagram/ui';
+import { DOCUMENT_FORMAT } from '@livedoc/api-schema';
+import { Button } from '@livedoc/ui';
 import {
   newVersionAvailable,
   serverDocumentFormat,

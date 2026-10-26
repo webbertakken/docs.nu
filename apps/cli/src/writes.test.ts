@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ChangesetRequest } from '@livediagram/api-schema';
-import { HELD_RETRY_INTERVAL_MS } from '@livediagram/agent-verbs';
+import type { ChangesetRequest } from '@livedoc/api-schema';
+import { HELD_RETRY_INTERVAL_MS } from '@livedoc/agent-verbs';
 import { run } from './main';
 import { capabilities, fakeIo, NOW, TOKEN, type Route } from './testing/fake-io';
 

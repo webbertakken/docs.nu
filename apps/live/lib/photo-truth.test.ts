@@ -92,7 +92,7 @@ describe('truthArmed on localhost', () => {
   it('is off for every public address, which is where the hosted site lives', () => {
     expect(truthArmedOn('172.32.0.1', null)).toBe(false); // just outside 172.16/12
     expect(truthArmedOn('8.8.8.8', null)).toBe(false);
-    expect(truthArmedOn('livediagram.example.com', null)).toBe(false);
+    expect(truthArmedOn('livedoc.example.com', null)).toBe(false);
   });
 
   it('lets the flag overrule the host, in both directions', () => {

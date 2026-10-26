@@ -1,4 +1,4 @@
-import type { LicencesManifest, LicencesSection, WorkEntry } from '@livediagram/licences';
+import type { LicencesManifest, LicencesSection, WorkEntry } from '@livedoc/licences';
 
 import { LicenceTexts } from './LicenceTexts';
 

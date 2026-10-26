@@ -326,13 +326,13 @@ Community app (`apps/community`):
   a legacy `?tag=`, `?category=` or `?sort=` folds into `q` in `readQueryState`. The search form sits on the
   toolbar layer (`--z-toolbar`): above the grid, below the sticky header and its menus.
 - My Shares: `is:mine` (`COMMUNITY_MINE_TOKEN`) in `q` switches `useGallery` to `fetchMine`, with a session token
-  from `loadCommunitySession` (`apps/community/lib/session.ts`, over `@livediagram/account-session`'s `readSession` and
+  from `loadCommunitySession` (`apps/community/lib/session.ts`, over `@livedoc/account-session`'s `readSession` and
   `createTokenProvider`; the session is read only once My Shares is on, and a missing token fails the load).
   `mineMayBeOffered` hides the toggle once this browser has learned the host has no sign-in
   (`livedoc:v2:sign-in-offered`); the same module holds `SESSION_LOAD_TIMEOUT_MS` and `signInHref`. `MineSummary` shows the **Your Shares** totals above the grid. Waiting
   past `SESSION_LOAD_TIMEOUT_MS` for the session, `GalleryView` shows `GalleryError` with a reload.
 - Post page (`apps/community/components/post/`): `PostView` over `usePost`, `EmbedFrame` (`/embed?s=<code>`, lazy,
-  titled, falling back to the card image after 15 s), `PostMeta`, `PostActions`, `ReportDialog` (on the shared `Dialog` shell from `@livediagram/ui`, a phone sheet below `sm`), `RelatedPosts`.
+  titled, falling back to the card image after 15 s), `PostMeta`, `PostActions`, `ReportDialog` (on the shared `Dialog` shell from `@livedoc/ui`, a phone sheet below `sm`), `RelatedPosts`.
   Links come from `apps/community/lib/links.ts`: Open Document `openDocumentHref` (`/document/shared?s=<code>`), Make
   a Copy `makeCopyHref` (`/document/shared?s=<code>&copy=1`). Once the post loads, `PostView` sets `document.title`
   and a `link rel="canonical"` to the post's own address (`apps/community/app/post/page.tsx` carries none).
@@ -539,4 +539,4 @@ See [DEFAULTS.md](DEFAULTS.md), rows C1 to C17.
 
 - App icon: `apps/community/app/icon.svg`, hand-authored in this repo (MIT).
 - Glyphs: `apps/community/components/shared/icons.tsx` draws Lucide-derived primitives (`lucide*`) from the shared
-  `@livediagram/icons` catalogue, under Lucide's ISC licence, credited on the generated `/licences` page.
+  `@livedoc/icons` catalogue, under Lucide's ISC licence, credited on the generated `/licences` page.

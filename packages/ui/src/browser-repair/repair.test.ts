@@ -36,7 +36,7 @@ describe('isRepairClearable', () => {
       'livedoc:share-password:abc',
       'livedoc:v2:ui-mode',
       'livedoc:stale-chunk-reloads',
-      'livediagram-build',
+      'livedoc-build',
     ]) {
       expect(isRepairClearable(k), k).toBe(true);
     }

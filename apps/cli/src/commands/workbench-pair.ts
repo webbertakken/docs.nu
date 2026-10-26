@@ -3,14 +3,14 @@
 // opens the browser only for a person at a terminal (WB25), then waits for the owner's answer as
 // `loginWithDevice` waits for the device grant's.
 
-import { workbenchNameOf, workbenchOriginOf } from '@livediagram/agent-verbs';
-import { ApiError, type ApiClient } from '@livediagram/api-client';
+import { workbenchNameOf, workbenchOriginOf } from '@livedoc/agent-verbs';
+import { ApiError, type ApiClient } from '@livedoc/api-client';
 import {
   DEVICE_SLOW_DOWN_S,
   type WorkbenchPairingRequestCreated,
   type WorkbenchPairingStatusResponse,
   type WorkbenchScope,
-} from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
 import type { DebugLog } from '../debug';
 import type { CliIo } from '../io';
 import { CliError } from '../output/cli-error';

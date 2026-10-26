@@ -9,9 +9,9 @@ import {
   VerbRefusal,
   type VerbContext,
   type WriteFlags,
-} from '@livediagram/agent-verbs';
-import type { ChangesetResponse, DocumentResponse } from '@livediagram/api-schema';
-import type { Tab } from '@livediagram/document';
+} from '@livedoc/agent-verbs';
+import type { ChangesetResponse, DocumentResponse } from '@livedoc/api-schema';
+import type { Tab } from '@livedoc/document';
 import type { CliIo } from '../io';
 import { mirrorFileText } from '../link/mirror-file';
 import { CliError, formatError } from '../output/cli-error';

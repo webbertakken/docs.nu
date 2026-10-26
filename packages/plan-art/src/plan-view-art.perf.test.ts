@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ShapeElement } from '@livediagram/document';
-import { PLAN_VIEW_IDS } from '@livediagram/items';
+import type { ShapeElement } from '@livedoc/document';
+import { PLAN_VIEW_IDS } from '@livedoc/items';
 import { planViewArt } from './plan-view-art';
 import { artData, card, shape } from './test-fixtures';
 

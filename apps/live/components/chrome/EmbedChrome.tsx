@@ -14,8 +14,8 @@
 // document has many tabs.
 
 import { useRef, type ReactNode } from 'react';
-import { MenuIcon, useClickOutside, Glyph, useMenu, useMenuButton } from '@livediagram/ui';
-import type { Tab } from '@livediagram/document';
+import { MenuIcon, useClickOutside, Glyph, useMenu, useMenuButton } from '@livedoc/ui';
+import type { Tab } from '@livedoc/document';
 
 // The external-link glyph, shared with the workbench chrome.
 export function OpenExternalIcon() {

@@ -171,7 +171,7 @@ and never created, and a conflicted file's refusal names the manual fix (keep on
 ## Merging
 
 A merge is a **three-way merge per tab, element by element**, of the **base** (the snapshot the local change was made
-from), the **local** file and the **remote** tab now. It lives in one pure package, `@livediagram/tab-merge`, so the
+from), the **local** file and the **remote** tab now. It lives in one pure package, `@livedoc/tab-merge`, so the
 CLI and git's merge driver merge alike, and any other front door can.
 
 **The base** is the tab at the recorded revision. The CLI keeps every snapshot it writes in its local sync state

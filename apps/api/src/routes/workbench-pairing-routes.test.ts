@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEVICE_POLL_INTERVAL_S, WORKBENCH_PAIRING_TTL_MS } from '@livediagram/api-schema';
+import { DEVICE_POLL_INTERVAL_S, WORKBENCH_PAIRING_TTL_MS } from '@livedoc/api-schema';
 import type { SqliteD1 } from '../test-sqlite-d1';
 import type { Env } from '../types';
 import { makeTestRouteContext } from './test-route-context';

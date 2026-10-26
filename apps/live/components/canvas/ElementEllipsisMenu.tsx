@@ -11,7 +11,7 @@ import {
   type MenuKind,
   type MenuTree,
   Portal,
-} from '@livediagram/ui';
+} from '@livedoc/ui';
 
 // A small `…` menu attached to an element's own face.
 //

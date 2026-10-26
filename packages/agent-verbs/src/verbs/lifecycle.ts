@@ -3,14 +3,14 @@
 // CLI75), so the CLI never writes a tab whole; names change through their own routes.
 
 import { z } from 'zod';
-import { ApiError } from '@livediagram/api-client';
+import { ApiError } from '@livedoc/api-client';
 import type {
   ChangesetReplaceBody,
   DocumentResponse,
   ShareLink,
   TrashedDocument,
-} from '@livediagram/api-schema';
-import { TRASH_RETENTION_DAYS } from '@livediagram/api-schema';
+} from '@livedoc/api-schema';
+import { TRASH_RETENTION_DAYS } from '@livedoc/api-schema';
 import { resolveTab } from '../addressing';
 import { defineVerb, VerbRefusal, type VerbContext } from '../define';
 import { shortestUniquePrefixes } from '../refs';

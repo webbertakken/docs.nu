@@ -1,31 +1,22 @@
 // Test support for the Drive mirror engine (docs/specs/022-drive-mirror/blueprints/drive-mirror.md,
-// "Testing"): an in-memory LiveDoc behind LivediagramPort that keeps the
+// "Testing"): an in-memory LiveDoc behind LivedocPort that keeps the
 // api's own rules (the Trash, folder deletion moving contents up, mirror rows
 // removed with their document or folder, the lease), and a harness wiring
 // engines to it and to the fake Google. Not a `.test.ts` file; tests import it.
 
-import {
-  documentToEnvelopeText,
-  type DocumentEnvelope,
-  type EnvelopeTab,
-} from '@livediagram/document';
+import { documentToEnvelopeText, type DocumentEnvelope, type EnvelopeTab } from '@livedoc/document';
 import {
   DRIVE_LEASE_MS,
   type DriveConnection,
   type DriveItem,
   type DriveItemKind,
   type DriveLease,
-} from '@livediagram/api-schema';
-import { FakeGoogle, fakePngBase64Url } from '@livediagram/fake-google';
+} from '@livedoc/api-schema';
+import { FakeGoogle, fakePngBase64Url } from '@livedoc/fake-google';
 import { ApiError } from '../api/core';
 import { createDriveRestClient } from './drive-rest-client';
 import { DriveMirrorEngine, type DriveMirrorStatus, type Timers } from './engine';
-import {
-  copyEnvelope,
-  type CopyTarget,
-  type LivediagramPort,
-  type MirrorFolder,
-} from './livediagram-port';
+import { copyEnvelope, type CopyTarget, type LivedocPort, type MirrorFolder } from './livedoc-port';
 import { memorySeenStore } from './tombstones';
 import type { TokenSource } from './token-source';
 
@@ -86,7 +77,7 @@ class ManualTimers implements Timers {
   }
 }
 
-export class FakeLivediagram {
+export class FakeLivedoc {
   readonly documents = new Map<string, StoredDocument>();
   readonly folders = new Map<string, MirrorFolder>();
   connection: DriveConnection | null = null;
@@ -148,8 +139,8 @@ export class FakeLivediagram {
     return d.teamId === null;
   }
 
-  // ---- LivediagramPort ------------------------------------------------------
-  port(): LivediagramPort {
+  // ---- LivedocPort ------------------------------------------------------
+  port(): LivedocPort {
     const write = <T>(fn: () => T): Promise<T> => {
       this.writes += 1;
       return new Promise<T>((resolve) => resolve(fn()));
@@ -304,7 +295,7 @@ function fakeTokens(google: FakeGoogle, user = OWNER): TokenSource {
 
 export function makeEngine(opts: {
   google: FakeGoogle;
-  ld: FakeLivediagram;
+  ld: FakeLivedoc;
   clock: Clock;
   timers: ManualTimers;
   deviceId?: string;
@@ -346,7 +337,7 @@ export function world() {
   const clock = new Clock();
   const timers = new ManualTimers(clock);
   const google = new FakeGoogle({ now: () => clock.now });
-  const ld = new FakeLivediagram(clock);
+  const ld = new FakeLivedoc(clock);
   ld.connection = {
     status: 'connected',
     hasRefreshToken: true,
@@ -360,7 +351,7 @@ export function world() {
 }
 
 // The Drive file mirroring a document or folder.
-export function fileOf(google: FakeGoogle, ld: FakeLivediagram, kind: DriveItemKind, ldId: string) {
+export function fileOf(google: FakeGoogle, ld: FakeLivedoc, kind: DriveItemKind, ldId: string) {
   const item = ld.item(kind, ldId);
   return item ? google.get(item.driveFileId) : undefined;
 }
