@@ -5,7 +5,7 @@ demo recordings.
 
 ## Screenshots
 
-Product screenshots of the live app at [livediagram.app](https://livediagram.app),
+Product screenshots of the live app at [docs.nu](https://docs.nu),
 split by viewport so the desktop and mobile pitches stay independent. Each is
 captioned with what it shows so copywriters can match it to a claim in
 [`../copy/facts.md`](../copy/facts.md).
@@ -41,10 +41,10 @@ Stale: these predate the phone's Toolbar layout (the palette as one strip across
 
 The Living Prism ([Brand mark](../../docs/specs/004-interface-design/brand-mark.md)), as SVG.
 
-| File                                | What it is                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------------- |
-| `livediagram-mark-{light,dark}.svg` | The full mark (inner diagram, sheen, signal pulse) for light or dark grounds. |
-| `livediagram-logo-{light,dark}.svg` | The horizontal lockup: mark plus `livediagram` wordmark, `live` accented.     |
+| File                            | What it is                                                                    |
+| ------------------------------- | ----------------------------------------------------------------------------- |
+| `livedoc-mark-{light,dark}.svg` | The full mark (inner diagram, sheen, signal pulse) for light or dark grounds. |
+| `livedoc-logo-{light,dark}.svg` | The horizontal lockup: mark plus `LiveDoc` wordmark, `live` accented.         |
 
 The lockup's wordmark is live text in the system UI font; outline it in a design tool before print use.
 
@@ -52,10 +52,10 @@ The lockup's wordmark is live text in the system UI font; outline it in a design
 
 The brand mark as PNGs, drawn in its light palette: the compact drawing below 48px, the full one from 48px.
 
-| File                                   | Background                                                                                                       |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `livediagram-icon-{256,512,1024}.png`  | White. For surfaces that show the icon as a tile, such as social previews.                                       |
-| `livediagram-icon-transparent-<n>.png` | Transparent, at 16, 32, 64, 128, 256 and 512. For surfaces that draw their own background, such as Google Drive. |
+| File                               | Background                                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `livedoc-icon-{256,512,1024}.png`  | White. For surfaces that show the icon as a tile, such as social previews.                                       |
+| `livedoc-icon-transparent-<n>.png` | Transparent, at 16, 32, 64, 128, 256 and 512. For surfaces that draw their own background, such as Google Drive. |
 
 `pnpm icons:brand` (`apps/live/scripts/brand-icons/render.mjs`) regenerates every static copy from the
 brand module in `@livediagram/ui`: the apps' `app/icon.svg` favicons, `logo/`, and both PNG sets (the white ones
@@ -63,7 +63,7 @@ also into `apps/marketing/public/`), rasterised by Playwright's Chromium. A test
 
 ## Guidance
 
-- **Brand color** is sky blue `#0EA5E9` ("livediagram blue"); the logo has its own sky-to-indigo prism palette. Page background
+- **Brand color** is sky blue `#0EA5E9` ("LiveDoc blue"); the logo has its own sky-to-indigo prism palette. Page background
   `#F8FAFC`, canvas white. Full palette in [Theme](../../docs/specs/004-interface-design/color-scheme.md).
 - **Show, don't tell.** Screenshots should feature a real diagram with visible
   multiplayer cursors, since "no sign-in, real-time" is the pitch.

@@ -1,6 +1,6 @@
 name: Publish MCP server to registry
 
-# Lists the hosted MCP server (mcp.livediagram.app) in the official MCP
+# Lists the hosted MCP server (mcp.docs.nu) in the official MCP
 # Registry (registry.modelcontextprotocol.io) from the root server.json.
 # PulseMCP and other directories ingest from that registry.
 #

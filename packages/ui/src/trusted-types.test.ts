@@ -46,16 +46,11 @@ describe('TRUSTED_TYPES_CSP', () => {
 });
 
 describe('isAllowedScriptUrl', () => {
-  const page = 'https://livediagram.app';
+  const page = 'https://docs.nu';
   it("lets the app's own build scripts through, under its asset prefix", () => {
     expect(isAllowedScriptUrl('/_next/static/chunks/a.js', page, '', [])).toBe(true);
     expect(
-      isAllowedScriptUrl(
-        'https://livediagram.app/live/_next/static/chunks/b.js',
-        page,
-        '/live',
-        [],
-      ),
+      isAllowedScriptUrl('https://docs.nu/live/_next/static/chunks/b.js', page, '/live', []),
     ).toBe(true);
     expect(isAllowedScriptUrl('/live/_next/static/media/reader.worker.js', page, '/live', [])).toBe(
       true,
@@ -69,7 +64,7 @@ describe('isAllowedScriptUrl', () => {
   });
 
   it('refuses a blob: URL, even for a worker', () => {
-    const blob = 'blob:https://livediagram.app/1234';
+    const blob = 'blob:https://docs.nu/1234';
     expect(isAllowedScriptUrl(blob, page, '', [])).toBe(false);
   });
 
@@ -84,7 +79,7 @@ describe('isAllowedScriptUrl', () => {
     expect(isAllowedScriptUrl('https://evil.example/_next/a.js', page, '', [])).toBe(false);
     expect(isAllowedScriptUrl('javascript:alert(1)', page, '', [])).toBe(false);
     expect(isAllowedScriptUrl('data:text/javascript,alert(1)', page, '', [])).toBe(false);
-    expect(isAllowedScriptUrl('blob:https://livediagram.app/1234', page, '', [])).toBe(false);
+    expect(isAllowedScriptUrl('blob:https://docs.nu/1234', page, '', [])).toBe(false);
     expect(isAllowedScriptUrl('::not a url', page, '', [])).toBe(false);
   });
 });
@@ -92,7 +87,7 @@ describe('isAllowedScriptUrl', () => {
 describe('trustedScriptOrigins', () => {
   // docs/specs/022-drive-mirror/drive-mirror.md: the Drive mirror's Google libraries, only for a build that offers it.
   it("lets Google's Drive libraries load where the build offers the Drive mirror, and only there", () => {
-    const page = 'https://www.livediagram.app';
+    const page = 'https://docs.nu';
     const withDrive = trustedScriptOrigins({
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: '123456789012-abc.apps.googleusercontent.com',
     });

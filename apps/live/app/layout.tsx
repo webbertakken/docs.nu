@@ -48,7 +48,7 @@ const TRUSTED_TYPES_BOOT = trustedTypesBootScript(
   }),
 );
 
-const TITLE = 'livediagram';
+const TITLE = 'LiveDoc';
 const DESCRIPTION = 'Diagrams, whiteboards, illustrations and documents. Multiplayer canvas.';
 
 export const metadata: Metadata = {
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
   },
   // PWA install affordances. The editor is what users add to their home
   // screen, but only its app/icon.svg favicon was linked, so an installed
-  // editor PWA showed no icon. livediagram.app is one origin (the router
+  // editor PWA showed no icon. docs.nu is one origin (the router
   // stitches the apps by path), and the marketing worker already serves the
   // origin's web manifest at /manifest.webmanifest and the opaque iOS tile at
   // /apple-icon (both carrying the brand icon, see docs/specs/019-marketing/marketing-site.md). Reference those

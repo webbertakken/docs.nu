@@ -6,7 +6,7 @@ import type { Env } from '../types';
 import { makeTestRouteContext } from './test-route-context';
 import { handleDocuments } from './documents';
 
-// livediagram-app/livediagram.app#343: agent and API tab writes were lost or clobbered people's
+// webbertakken/livedoc#343: agent and API tab writes were lost or clobbered people's
 // edits (docs/specs/024-agents/agent-changesets.md "Why"). An agent wrote with the editor's
 // whole-tab PUT, which never reached the room; a person's next save, built from a copy without the
 // agent's change, erased it; and a personal document had no room at all.

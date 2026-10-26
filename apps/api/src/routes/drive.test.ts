@@ -15,7 +15,7 @@ import { handleDrive } from './drive';
 // /api/drive/* (docs/specs/022-drive-mirror/blueprints/drive-mirror.md, "Routes").
 
 const KEY = bytesToBase64(new Uint8Array(32).map((_, i) => i));
-const URI = 'https://livediagram.app/drive/connected';
+const URI = 'https://docs.nu/drive/connected';
 const BROKER: Partial<Env> = {
   GOOGLE_CLIENT_ID: 'cid',
   GOOGLE_CLIENT_SECRET: 'secret',

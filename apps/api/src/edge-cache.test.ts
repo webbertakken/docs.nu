@@ -16,7 +16,7 @@ function stubCaches() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('edgeCached', () => {
-  const url = new URL('https://livediagram.app/api/community/featured');
+  const url = new URL('https://docs.nu/api/community/featured');
 
   it('runs the query once, then answers from the edge', async () => {
     stubCaches();

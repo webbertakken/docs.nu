@@ -25,9 +25,9 @@ export const metadata: Metadata = {
   // Canonical, Open Graph and Twitter card from the shared factory, so a link
   // to the dashboard previews with the brand card like every other public page.
   ...pageMetadata({
-    title: 'Telemetry · livediagram',
+    title: 'Telemetry · LiveDoc',
     description:
-      'Anonymous, first-party product usage for livediagram, in the open. No third-party vendors; data is never sold or shared beyond this page.',
+      'Anonymous, first-party product usage for LiveDoc, in the open. No third-party vendors; data is never sold or shared beyond this page.',
     path: '/telemetry',
     type: 'website',
   }),

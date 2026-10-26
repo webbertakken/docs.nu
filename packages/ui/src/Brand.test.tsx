@@ -18,17 +18,17 @@ describe('Brand', () => {
     const wordmark = container.querySelector('[data-logotype]')!.cloneNode(true) as HTMLElement;
     // The gleam overlay repeats the letters but is hidden from assistive tech.
     wordmark.querySelector('[aria-hidden="true"]')?.remove();
-    expect(wordmark.textContent).toBe('livediagram');
+    expect(wordmark.textContent).toBe('LiveDoc');
   });
 
-  it('accents "live", brand-700 in light and sky-400 in dark, with "diagram" in ink', () => {
+  it('accents "Live", brand-700 in light and sky-400 in dark, with "Doc" in ink', () => {
     const { container } = render(<Brand />);
     const live = container.querySelector('[data-logotype] > span');
-    expect(live?.textContent).toBe('live');
+    expect(live?.textContent).toBe('Live');
     expect(live?.className).toBe('text-brand-700 dark:text-sky-400');
   });
 
-  it('tints "live" and the mark from a theme accent', () => {
+  it('tints "Live" and the mark from a theme accent', () => {
     const { container } = render(<Brand accentColor="#db2777" />);
     const live = container.querySelector<HTMLElement>('[data-logotype] > span');
     expect(live?.style.color).toBe('rgb(219, 39, 119)');
@@ -40,7 +40,7 @@ describe('Brand', () => {
     const { container } = render(<Brand href="/" />);
     expect(container.querySelector('a')?.getAttribute('href')).toBe('/');
     // Named on the link, so it keeps a name where a caller hides the wordmark (the editor header on a phone).
-    expect(container.querySelector('a')?.getAttribute('aria-label')).toBe('livediagram');
+    expect(container.querySelector('a')?.getAttribute('aria-label')).toBe('LiveDoc');
   });
 });
 

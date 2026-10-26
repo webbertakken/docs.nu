@@ -12,7 +12,7 @@ import type { RouteContext } from './context';
 
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_HTML_BYTES = 512 * 1024; // only the <head> is needed
-const USER_AGENT = 'livediagram-unfurl/1.0 (+https://livediagram.app)';
+const USER_AGENT = 'livedoc-unfurl/1.0 (+https://docs.nu)';
 
 // --- Pure helpers (unit-tested) -------------------------------------------
 

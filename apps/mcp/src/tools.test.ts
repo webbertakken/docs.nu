@@ -629,7 +629,7 @@ describe('the Trash tools', () => {
       restored: 'document',
       id: 'd_1',
       name: 'Plan',
-      url: 'https://livediagram.app/document/d_1',
+      url: 'https://docs.nu/document/d_1',
     });
   });
 

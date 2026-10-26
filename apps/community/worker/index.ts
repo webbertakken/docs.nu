@@ -43,7 +43,7 @@ export interface Env {
 }
 
 // The origin the api binding is addressed through; a service binding ignores the host, only the path matters.
-const API_ORIGIN = 'https://livediagram.app';
+const API_ORIGIN = 'https://docs.nu';
 
 type ApiResult<T> = { status: 'ok'; body: T } | { status: 'missing' } | { status: 'unavailable' };
 

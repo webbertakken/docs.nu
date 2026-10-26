@@ -31,32 +31,32 @@ const COMPONENTS: Component[] = [
   {
     name: 'Marketing site',
     description:
-      'The public landing site at https://livediagram.app/. Static assets served by a Cloudflare Worker.',
+      'The public landing site at https://docs.nu/. Static assets served by a Cloudflare Worker.',
   },
   {
     name: 'Editor (live app)',
     description:
-      'The diagram editor at https://livediagram.app/new. Static export served by a Cloudflare Worker.',
+      'The diagram editor at https://docs.nu/new. Static export served by a Cloudflare Worker.',
   },
   {
     name: 'Telemetry dashboard',
     description:
-      'The public anonymous-events dashboard at https://livediagram.app/telemetry. Static export served by a Cloudflare Worker.',
+      'The public anonymous-events dashboard at https://docs.nu/telemetry. Static export served by a Cloudflare Worker.',
   },
   {
     name: 'Help centre',
     description:
-      'The help centre at https://livediagram.app/help. Static export served by a Cloudflare Worker.',
+      'The help centre at https://docs.nu/help. Static export served by a Cloudflare Worker.',
   },
   {
     name: 'Community',
     description:
-      'The public gallery of shared documents at https://livediagram.app/community. Static export served by a Cloudflare Worker.',
+      'The public gallery of shared documents at https://docs.nu/community. Static export served by a Cloudflare Worker.',
   },
   {
     name: 'API',
     description:
-      'The backend at https://livediagram.app/api. A Cloudflare Worker that owns the D1 binding.',
+      'The backend at https://docs.nu/api. A Cloudflare Worker that owns the D1 binding.',
   },
   {
     name: 'Realtime room',
@@ -81,7 +81,7 @@ const COMPONENTS: Component[] = [
   {
     name: 'MCP server',
     description:
-      'The AI-tools endpoint at https://mcp.livediagram.app. A Cloudflare Worker wrapping the api via a service binding.',
+      'The AI-tools endpoint at https://mcp.docs.nu. A Cloudflare Worker wrapping the api via a service binding.',
   },
 ];
 

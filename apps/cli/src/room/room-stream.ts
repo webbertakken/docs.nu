@@ -22,7 +22,7 @@ export type RoomStream = {
 type Deps = {
   io: CliIo;
   api: ApiClient;
-  // The api base the token talks to, e.g. https://www.docs.nu/api.
+  // The api base the token talks to, e.g. https://docs.nu/api.
   apiBase: string;
   documentId: string;
   log: (line: string) => void;

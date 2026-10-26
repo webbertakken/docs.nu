@@ -516,16 +516,16 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         q: 'Can I connect my own AI assistant, like Claude?',
         a: (
           <>
-            Yes. livediagram runs an MCP server at mcp.livediagram.app. Connect a compatible AI tool
-            and, after a one-time authorisation, it can find, read, create and edit the documents in
-            your account, including writing articles, building slide decks and designing logos. Its
+            Yes. livediagram runs an MCP server at mcp.docs.nu. Connect a compatible AI tool and,
+            after a one-time authorisation, it can find, read, create and edit the documents in your
+            account, including writing articles, building slide decks and designing logos. Its
             changes appear live for anyone on the tab, outlined so you can see them and undo them.{' '}
             <a href="/ai">Build with AI</a> walks you through connecting Claude, ChatGPT, Cursor and
             more.
           </>
         ),
         aText:
-          'Yes. livediagram runs an MCP server at mcp.livediagram.app. Connect a compatible AI tool and, after a one-time authorisation, it can find, read, create and edit the documents in your account, including writing articles, building slide decks and designing logos. Its changes appear live for anyone on the tab, outlined so you can see them and undo them. Build with AI walks you through connecting Claude, ChatGPT, Cursor and more.',
+          'Yes. livediagram runs an MCP server at mcp.docs.nu. Connect a compatible AI tool and, after a one-time authorisation, it can find, read, create and edit the documents in your account, including writing articles, building slide decks and designing logos. Its changes appear live for anyone on the tab, outlined so you can see them and undo them. Build with AI walks you through connecting Claude, ChatGPT, Cursor and more.',
       },
       {
         q: 'Is there AI built into the editor?',

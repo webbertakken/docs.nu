@@ -23,10 +23,10 @@ describe('brand icon', () => {
 
   it('ships the full mark and the lockup, light and dark, in marketing/media/logo/', () => {
     for (const scheme of ['light', 'dark'] as const) {
-      expect(read(`marketing/media/logo/livediagram-mark-${scheme}.svg`), REGENERATE).toBe(
+      expect(read(`marketing/media/logo/livedoc-mark-${scheme}.svg`), REGENERATE).toBe(
         brandMarkSvg({ variant: 'full', scheme }),
       );
-      expect(read(`marketing/media/logo/livediagram-logo-${scheme}.svg`), REGENERATE).toBe(
+      expect(read(`marketing/media/logo/livedoc-logo-${scheme}.svg`), REGENERATE).toBe(
         brandLogoSvg(scheme),
       );
     }
@@ -37,7 +37,7 @@ describe('brand icon', () => {
   // BRAND_ICONS (docs/specs/016-platform/nextjs.md "Features used and declined").
   it('gives help and community the PNG fallback, the same tile marketing serves', () => {
     const tile = readFileSync(
-      fileURLToPath(new URL('apps/marketing/public/livediagram-icon-256.png', REPO)),
+      fileURLToPath(new URL('apps/marketing/public/livedoc-icon-256.png', REPO)),
     );
     for (const app of ['help', 'community'])
       expect(
@@ -50,7 +50,7 @@ describe('brand icon', () => {
   // copy marketing serves for them must be the transparent 64px PNG the generator renders.
   it('serves the emails the transparent 64px mark', () => {
     const mark = readFileSync(
-      fileURLToPath(new URL('marketing/media/icons/livediagram-icon-transparent-64.png', REPO)),
+      fileURLToPath(new URL('marketing/media/icons/livedoc-icon-transparent-64.png', REPO)),
     );
     expect(
       readFileSync(

@@ -30,7 +30,7 @@ Tokens have the form `lvd_` followed by a random string, so they are easy to spo
 Pass the token in the `Authorization` header as a bearer credential on **every** request. There is no separate login or session step.
 
 ```bash
-curl https://livediagram.app/api/documents \
+curl https://docs.nu/api/documents \
   -H "Authorization: Bearer lvd_your_token_here"
 ```
 
@@ -41,7 +41,7 @@ Every request authenticated this way acts as your account, with the same access 
 `GET /tokens/current` describes the token the request presented: its account, name, whether it is read-only, and when it expires. It is a cheap way for a script to confirm its credential works. `DELETE /tokens/current` revokes that same token, so a script can clean up after itself without you opening Settings.
 
 ```bash
-curl https://livediagram.app/api/tokens/current \
+curl https://docs.nu/api/tokens/current \
   -H "Authorization: Bearer lvd_your_token_here"
 ```
 

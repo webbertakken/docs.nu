@@ -24,7 +24,7 @@ describe('isLoopbackHostname', () => {
     for (const u of ['http://localhost:4000', 'http://127.0.0.1', 'http://[::1]:8787']) {
       expect(isLoopbackHostname(new URL(u).hostname)).toBe(true);
     }
-    expect(isLoopbackHostname('livediagram.app')).toBe(false);
+    expect(isLoopbackHostname('docs.nu')).toBe(false);
   });
 });
 

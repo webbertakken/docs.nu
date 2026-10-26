@@ -21,7 +21,7 @@ beforeEach(() => {
   vi.stubGlobal('open', open);
 });
 
-const LINK = '=HYPERLINK("https://livediagram.app", "livediagram")';
+const LINK = '=HYPERLINK("https://docs.nu", "livediagram")';
 const textOf = (label: string) =>
   [...document.querySelectorAll<HTMLElement>('[data-sheet-text]')].find(
     (el) => el.textContent === label,
@@ -39,7 +39,7 @@ describe('a HYPERLINK cell', () => {
     fireEvent.pointerDown(h.viewport, { button: 0, ...cellPoint(0, 0), metaKey: true });
     fireEvent.pointerDown(h.viewport, { button: 0, ...cellPoint(0, 0), ctrlKey: true });
     expect(open).toHaveBeenCalledTimes(2);
-    expect(open).toHaveBeenCalledWith('https://livediagram.app/', '_blank', 'noopener,noreferrer');
+    expect(open).toHaveBeenCalledWith('https://docs.nu/', '_blank', 'noopener,noreferrer');
     expect(track).toHaveBeenCalledWith('Sheet', 'Opened', 'Hyperlink');
   });
 
@@ -64,7 +64,7 @@ describe('a HYPERLINK cell', () => {
       fireEvent.pointerMove(h.viewport, cellPoint(0, 0));
     });
     const tip = screen.getByRole('tooltip');
-    expect(tip.textContent).toContain('https://livediagram.app/');
+    expect(tip.textContent).toContain('https://docs.nu/');
     expect(tip.textContent).toMatch(/(⌘|Ctrl\+)Click to open/);
   });
 });

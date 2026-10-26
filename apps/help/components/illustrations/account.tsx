@@ -36,7 +36,7 @@ export function GuestIdentity() {
         strokeWidth={1.5}
       />
       <Label x={118} y={41} size={10} tone="muted">
-        livediagram.app/new
+        docs.nu/new
       </Label>
       {/* The stored guest id */}
       <rect

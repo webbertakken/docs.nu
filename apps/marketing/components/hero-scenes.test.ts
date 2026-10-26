@@ -10,18 +10,18 @@ describe('hero scenes', () => {
   it.each(HERO_SCENES.map((s) => [s.key, s] as const))(
     '%s links to the mode its window shows',
     (_, scene) => {
-      const url = new URL(scene.build, 'https://livediagram.app');
+      const url = new URL(scene.build, 'https://docs.nu');
       expect(url.pathname).toBe('/new');
       expect(url.searchParams.get('mode')).toBe(scene.mode);
     },
   );
 
   it.each(
-    HERO_SCENES.filter((s) =>
-      new URL(s.build, 'https://livediagram.app').searchParams.has('q'),
-    ).map((s) => [s.key, s] as const),
+    HERO_SCENES.filter((s) => new URL(s.build, 'https://docs.nu').searchParams.has('q')).map(
+      (s) => [s.key, s] as const,
+    ),
   )('%s searches for a template that opens in its mode', (_, scene) => {
-    const q = new URL(scene.build, 'https://livediagram.app').searchParams.get('q')!.toLowerCase();
+    const q = new URL(scene.build, 'https://docs.nu').searchParams.get('q')!.toLowerCase();
     const match = TEMPLATES.filter(
       (t) =>
         !t.hidden && t.title.toLowerCase().includes(q) && templateEditorMode(t.kind) === scene.mode,

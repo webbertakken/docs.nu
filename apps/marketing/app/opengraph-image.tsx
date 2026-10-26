@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og';
 // Open Graph + Twitter social card (1200x630). Rendered to a static
 // PNG at build time by Next.js's `output: 'export'` pipeline so the
 // asset ships baked into `out/`; no runtime dependency. Replaces
-// the prior empty-preview state where pasting livediagram.app into
+// the prior empty-preview state where pasting docs.nu into
 // Slack / Twitter / LinkedIn produced a blank card.
 //
 // Sibling `twitter-image.tsx` mirrors the same template so the

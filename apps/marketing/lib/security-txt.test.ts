@@ -16,9 +16,7 @@ describe('securityTxt', () => {
   );
 
   it('points Contact at the private GitHub advisory form', () => {
-    expect(fields.Contact).toBe(
-      'https://github.com/livediagram-app/livediagram.app/security/advisories/new',
-    );
+    expect(fields.Contact).toBe('https://github.com/webbertakken/livedoc/security/advisories/new');
   });
 
   it('expires one year after the build, in RFC 3339 without milliseconds', () => {
@@ -27,9 +25,9 @@ describe('securityTxt', () => {
   });
 
   it('links the policy, language and canonical URL', () => {
-    expect(fields.Policy).toBe('https://livediagram.app/help/policies/report-a-vulnerability/');
+    expect(fields.Policy).toBe('https://docs.nu/help/policies/report-a-vulnerability/');
     expect(fields['Preferred-Languages']).toBe('en');
-    expect(fields.Canonical).toBe('https://livediagram.app/.well-known/security.txt');
+    expect(fields.Canonical).toBe('https://docs.nu/.well-known/security.txt');
   });
 
   it('carries exactly the specified fields and ends with a newline', () => {

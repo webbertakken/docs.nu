@@ -3,7 +3,7 @@ import { runInlineScript } from '@livediagram/vitest-config/inline-script';
 
 import { VIEW_TRANSITION_GUARD_SCRIPT } from './view-transition-guard';
 
-const ORIGIN = 'https://livediagram.app';
+const ORIGIN = 'https://docs.nu';
 
 // Runs the inline script against a stub window and swaps the page to `url`.
 function swapTo(url: string, withTransition = true) {

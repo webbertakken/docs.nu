@@ -12,7 +12,7 @@ const blocks: ArticleBlock[] = [
     runs: [
       { text: 'plain ' },
       { text: 'bold\nnext', b: true },
-      { text: ' link', href: 'https://livediagram.app', u: true },
+      { text: ' link', href: 'https://docs.nu', u: true },
       { text: ' red', color: '#dc2626', hl: '#fef08a' },
       { text: 'x', sup: true },
     ],

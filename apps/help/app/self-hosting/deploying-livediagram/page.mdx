@@ -24,7 +24,7 @@ The product is split into focused apps, each deployed as a named Cloudflare Work
 - **help** is the help centre you are reading now, at `/help`.
 - **api** is the Worker that holds the REST and WebSocket layer, backed by the D1 database and the per-document Durable Object.
 - **router** sits in front and forwards each request to the right app by URL path. It holds no business logic, only routing.
-- **mcp** (optional) is the MCP server that lets people connect AI tools to their documents. It has its own hostname (`mcp.livediagram.app` on the hosted service), needs sign-in configured, and talks to the api Worker directly.
+- **mcp** (optional) is the MCP server that lets people connect AI tools to their documents. It has its own hostname (`mcp.docs.nu` on the hosted service), needs sign-in configured, and talks to the api Worker directly.
 
 The router is what makes the first six appear under one domain.
 

@@ -50,12 +50,12 @@ describe('isLocalhostPair', () => {
 
   describe('returns false for', () => {
     it('production hostname on either side', () => {
-      // The whole point of the filter: a request from livediagram.app
+      // The whole point of the filter: a request from docs.nu
       // to a victim's local server, or from a malicious site to
-      // livediagram.app, must not be granted dev-only escape.
-      expect(isLocalhostPair('https://livediagram.app', 'http://localhost:8787')).toBe(false);
-      expect(isLocalhostPair('http://localhost:4002', 'https://livediagram.app')).toBe(false);
-      expect(isLocalhostPair('https://example.com', 'https://livediagram.app')).toBe(false);
+      // docs.nu, must not be granted dev-only escape.
+      expect(isLocalhostPair('https://docs.nu', 'http://localhost:8787')).toBe(false);
+      expect(isLocalhostPair('http://localhost:4002', 'https://docs.nu')).toBe(false);
+      expect(isLocalhostPair('https://example.com', 'https://docs.nu')).toBe(false);
     });
 
     it('a hostname that contains "localhost" as a substring', () => {
