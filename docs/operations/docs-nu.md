@@ -4,13 +4,21 @@ LiveDoc runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The to
 
 ## Shape
 
-- Workers: `docs-nu-api`, `docs-nu-marketing`, `docs-nu-live`, `docs-nu-telemetry`, `docs-nu-help`, `docs-nu-community` and `docs-nu-router`. `docs-nu-mcp` is configured but not deployed: its consent page needs a signed-in account, and docs.nu does not run sign-in yet.
+- Workers: `docs-nu-api`, `docs-nu-marketing`, `docs-nu-live`, `docs-nu-telemetry`, `docs-nu-help`, `docs-nu-community` and `docs-nu-router`. `docs-nu-mcp` is configured but not deployed (the deploy's MCP job is opt-in), so `mcp.docs.nu` does not answer yet.
 - Resources: D1 `docs-nu` and R2 `docs-nu-images` (western Europe), and the KV namespace `docs-nu-mcp-oauth` for the MCP worker.
-- Rate limiters use namespace ids `7001`-`7012`: the ids are account-wide, and other workers on the account hold `1001` onwards.
+- Rate limiters use namespace ids `7001`-`7014`: the ids are account-wide, and other workers on the account hold `1001` onwards.
 - Hostnames: `docs.nu` is canonical. `www.docs.nu` is attached to the router too, and a zone redirect rule (301, path and query kept) sends it to the apex. The zone has Always Use HTTPS on. Both zone settings live in the dashboard, not in this repo.
 - Hosted profile (`apps/api/hosted-vars.json`, applied only in `webbertakken/livedoc`): telemetry on, image gallery caps of 100 images and 100 MB per owner, `APP_BASE_URL` `https://docs.nu`. No Google client id yet, so the Drive mirror is off.
-- Guest-only: no `BETTER_AUTH_SECRET`, so no sign-in, teams, API tokens or MCP. AI and email are off until their keys are set.
+- Sign-in is on (`BETTER_AUTH_SECRET`, Google and email codes); its codes are sent as `LiveDoc <hello@docs.nu>`. AI is off until its key is set.
 - No staging environment: every pull request gets its own preview at `https://<branch>.preview.docs.nu` ([Preview deployments](../specs/016-platform/preview-deployments.md)).
+
+## Brand
+
+docs.nu is LiveDoc's, and a guard keeps it so: `apps/help/lib/brand-name-guard.test.ts` fails on the old product name outside the pages about the [upstream project](../specs/002-project-scope/livediagram-upstream.md) and a few stored hash domains that must not change.
+
+- Emails show the mark from `/email/livedoc-mark-64.png`, served by the marketing app. Every email ever sent points at that path, so it never moves.
+- Documents are `.livedoc` files, `application/vnd.livedoc+json`; browser storage keys start `livedoc:`.
+- The MCP registry listing (`server.json`, `io.github.webbertakken/livedoc`) is published by hand from **Actions > Publish MCP server to registry**, once `mcp.docs.nu` serves. Restore the workflow's push trigger then.
 
 ## Deploy
 
@@ -33,7 +41,7 @@ LiveDoc publishes to npm under its own scope, `@livedoc`, an npm organisation ow
 - Why `@livedoc`: the `livedocs` scope belongs to an unrelated npm user account, and the unscoped `livedocs` and `livedoc` packages belong to other people.
 - Publishing goes through npm trusted publishing (OIDC) from `.github/workflows/cli-publish.yml`, with provenance. No npm token is stored anywhere.
 - The workflow runs on every push to `main` that changes `apps/cli/package.json`, and by hand. It publishes the version in that file unless npm already has it, so a version bump is a release.
-- The CLI's default host is `https://docs.nu`. docs.nu runs without sign-in, so the CLI's commands that reach the api stop with `https://docs.nu has no sign-in, so the CLI cannot act there` (exit 4); its local commands (`guide`, `skill install`, `graph lint`, offline views of pulled files, `--help`) work.
+- The CLI's default host is `https://docs.nu`. Browser login (`livedoc auth login`) goes through the MCP worker's OAuth server, which docs.nu does not run yet; until it does, sign in with an API token made in the Settings dialog (`livedoc auth login --with-token`). Its local commands (`guide`, `skill install`, `graph lint`, offline views of pulled files, `--help`) need no sign-in.
 
 ### Trusted publisher rules
 

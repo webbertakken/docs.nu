@@ -29,3 +29,10 @@ it, ports it, and it lands through a LiveDoc pull request like any other change.
 
 The upstream remote is fetch-only in every LiveDoc checkout: its push URL is disabled, so nothing reaches livediagram
 by accident.
+
+## The name
+
+LiveDoc never shows livediagram's name, except where it means the upstream project: this spec, the purpose's origin,
+the licences page's credit and livediagram's MIT notice in `LICENSE`. A few hash domains whose outputs are stored
+(`livediagram:adder:v1` and its kin) keep the name, because renaming them would orphan existing data; nobody sees
+them. `apps/help/lib/brand-name-guard.test.ts` fails on any other mention.
