@@ -4,24 +4,29 @@ import { createInMode, expect, expectNoPageErrors, test } from './fixtures';
 // panel in place as a View Transition of the start alone, on the short token; under reduced motion it starts none
 // (docs/specs/004-interface-design/motion.md "View Transitions").
 
-type Probe = { calls: number; animations: { pseudo: string; ms: number }[] };
+// `settled` counts the transitions whose `ready` has resolved or rejected: the animations are read there, a moment
+// after the panel shows its new mode, so a probe read before it would see none.
+type Probe = { calls: number; settled: number; animations: { pseudo: string; ms: number }[] };
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __vt: Probe };
-    w.__vt = { calls: 0, animations: [] };
+    w.__vt = { calls: 0, settled: 0, animations: [] };
     const start = Document.prototype.startViewTransition;
     if (!start) return;
     Document.prototype.startViewTransition = function (this: Document, ...args) {
       w.__vt.calls++;
       const transition = start.apply(this, args as never);
-      void transition.ready.then(() => {
-        for (const a of document.getAnimations()) {
-          const pseudo = (a.effect as KeyframeEffect | null)?.pseudoElement ?? '';
-          if (pseudo.startsWith('::view-transition'))
-            w.__vt.animations.push({ pseudo, ms: Number(a.effect?.getTiming().duration) });
-        }
-      });
+      void transition.ready
+        .then(() => {
+          for (const a of document.getAnimations()) {
+            const pseudo = (a.effect as KeyframeEffect | null)?.pseudoElement ?? '';
+            if (pseudo.startsWith('::view-transition'))
+              w.__vt.animations.push({ pseudo, ms: Number(a.effect?.getTiming().duration) });
+          }
+        })
+        .catch(() => {})
+        .finally(() => w.__vt.settled++);
       return transition;
     } as typeof start;
   });
@@ -37,6 +42,10 @@ async function switchToPages(page: import('@playwright/test').Page) {
   await expect(
     page.locator('[data-start-mode-switch]').getByRole('button', { name: /^Tab mode: Pages/ }),
   ).toBeVisible();
+  await page.waitForFunction(() => {
+    const vt = (window as unknown as { __vt: Probe }).__vt;
+    return vt.settled === vt.calls;
+  });
   return page.evaluate(() => (window as unknown as { __vt: Probe }).__vt);
 }
 
