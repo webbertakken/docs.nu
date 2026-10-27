@@ -1,7 +1,7 @@
 'use client';
 
 // One of Home's sections (docs/specs/013-workspace/explorer-home.md "Layout"): its own wrapper and
-// landmark, opened by a display heading row (Display headings) and, when the section has one, its
+// landmark, opened by a heading row with a rule under it and, when the section has one, its
 // quiet link at the row's end.
 
 import type { ReactNode } from 'react';
@@ -55,7 +55,7 @@ export function HomeSection({
   const headingId = `home-${id}`;
   return (
     <section aria-labelledby={headingId} aria-busy={busy} data-home-section={id}>
-      <div className={`mb-4 ${SECTION_HEADER}`}>
+      <div className={`mb-3 ${SECTION_HEADER}`}>
         <h2 id={headingId} className={SECTION_HEADING}>
           {title}
         </h2>

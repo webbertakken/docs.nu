@@ -1,7 +1,8 @@
 'use client';
 
 // Jump Back In (docs/specs/013-workspace/explorer-home.md "Jump Back In"): the person's Within reach
-// set of documents. On a desktop or tablet the Most Used cards then the Recent cards, each group under its label,
+// set of documents. On a desktop or tablet a grid of thumbnails, four across: Most Used then Recent, each group under
+// its small label and each tile with its quiet line,
 // with See More in the heading row; on a phone the alternating strip that ends in its See More tile, which
 // interleaves the groups and so labels neither. Each document carries its Explorer ⋯ menu when the Explorer has it,
 // and a document that leaves the Explorer's lists (moved to the Trash, taken off Shared With Me) leaves at once.
@@ -11,21 +12,18 @@ import { CompactEmptyState, useMediaQuery } from '@livedoc/ui';
 import { track } from '@/lib/telemetry';
 import { useRelativeNow } from '@/lib/relative-time';
 import { HOME_COPY } from '@/app/explorer/home/home-copy';
-import type { JumpBackInGroup, JumpBackInSet } from '@/app/explorer/home/home-model';
+import {
+  jumpBackInLine,
+  type JumpBackInGroup,
+  type JumpBackInSet,
+} from '@/app/explorer/home/home-model';
 import type { DocumentEntryFor } from '@/app/explorer/useDocumentEntryFor';
 import { HomeSection } from './HomeSection';
 import { GridSkeleton, StripSkeleton } from './HomeSkeletons';
 import { JumpBackInStrip } from './JumpBackInStrip';
-import { JumpBackInCard } from './JumpBackInCard';
+import { JumpBackInTile } from './JumpBackInTile';
 import type { JumpBackInMenuFor } from './JumpBackInMenu';
-import {
-  EMPTY_SLOT,
-  GROUP_LABEL,
-  JUMP_BACK_IN_MIN_HEIGHT,
-  LARGE_CARD,
-  MOST_USED_GRID,
-  RECENT_GRID,
-} from './home-styles';
+import { EMPTY_SLOT, GRID, GRID_THUMB, GROUP_LABEL, JUMP_BACK_IN_MIN_HEIGHT } from './home-styles';
 import { JumpBackInEmptyIcon } from './home-icons';
 
 /** The grid from the spec's `md:` up: desktop and tablet. */
@@ -95,10 +93,10 @@ export function JumpBackIn({
       ) : loading ? (
         <GridSkeleton />
       ) : empty ? (
-        // The shared empty state (docs/specs/004-interface-design/empty-states.md) in place of one most used card,
-        // so an empty Jump Back In looks like a list with one thing in it.
-        <div className={MOST_USED_GRID}>
-          <div className={`${LARGE_CARD} ${EMPTY_SLOT} rounded-[18px]`}>
+        // The shared empty state (docs/specs/004-interface-design/empty-states.md) in place of one tile's thumbnail and
+        // words, so an empty Jump Back In looks like a list with one thing in it.
+        <div className={GRID}>
+          <div className={`col-span-2 h-[7.25rem] ${EMPTY_SLOT}`}>
             <CompactEmptyState
               className="h-full w-full"
               icon={<JumpBackInEmptyIcon />}
@@ -117,7 +115,7 @@ export function JumpBackIn({
   );
 }
 
-/** One labelled group of cards; a group with no document draws nothing, label included. */
+/** One labelled group of tiles; a group with no document draws nothing, label included. */
 function CardGroup({
   ownerId,
   group,
@@ -137,14 +135,15 @@ function CardGroup({
       <h3 id={labelId} className={GROUP_LABEL}>
         {GROUP_LABELS[group]}
       </h3>
-      <ul aria-labelledby={labelId} className={group === 'mostUsed' ? MOST_USED_GRID : RECENT_GRID}>
+      <ul aria-labelledby={labelId} className={GRID}>
         {items.map((item) => (
           <li key={item.documentId} className="min-w-0">
-            <JumpBackInCard
+            <JumpBackInTile
               ownerId={ownerId}
               item={item}
               group={group}
-              now={now}
+              thumbClassName={GRID_THUMB}
+              line={jumpBackInLine(item, group, now)}
               entry={menuFor?.(item.documentId) ?? null}
             />
           </li>

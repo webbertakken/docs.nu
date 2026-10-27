@@ -31,10 +31,9 @@ Scope, by file:
 | `apps/live/components/panels/home/JumpBackIn.tsx`                       | The section: heading row, See More, the grid or the strip, the empty state              |
 | `apps/live/components/panels/home/JumpBackInStrip.tsx`                  | The phone's strip, its fade and its See More tile                                       |
 | `apps/live/components/panels/home/JumpBackInTile.tsx`                   | One document's tile (the strip) and the See More tile                                   |
-| `apps/live/components/panels/home/JumpBackInCard.tsx`                   | One document's card on a desktop or tablet: large (most used) or compact (recent)       |
-| `apps/live/components/panels/home/JumpBackInMenu.tsx`                   | A card's or tile's ⋯: the Explorer's DocumentEntryMenu, right-click, in-place rename    |
+| `apps/live/components/panels/home/JumpBackInMenu.tsx`                   | A tile's ⋯: the Explorer's DocumentEntryMenu, right-click, in-place rename              |
 | `apps/live/app/explorer/useDocumentEntryFor.ts`                         | A document id to its Explorer menu props, and whether it has left the Explorer's lists  |
-| `apps/live/components/panels/home/HomeSection.tsx`                      | `HomeSection` (wrapper, display heading row, quiet link) and `InAppLink`                |
+| `apps/live/components/panels/home/HomeSection.tsx`                      | `HomeSection` (wrapper, heading row with its rule, quiet link) and `InAppLink`          |
 | `apps/live/components/panels/home/WhatHappened.tsx`                     | The section: day headings, See Timeline, the entries                                    |
 | `apps/live/components/panels/home/WhatHappenedEntry.tsx`                | `ActionEntry` (one person) and `SummaryEntry` (the disclosure)                          |
 | `apps/live/components/panels/home/HomeAvatar.tsx`                       | `HomeAvatar`, `AvatarStack`: people without presence rings                              |
@@ -65,9 +64,8 @@ Scope, by file:
 | Timeline      | `{ kind: 'timeline' }`, `/explorer/timeline`     | The Timeline feed, its sidebar row and its page title         |
 | Jump Back In  | `JumpBackIn`, `JumpBackInSet`, `JumpBackInItem`  | The section and its within-reach set of documents             |
 | Group         | `JumpBackInGroup = 'mostUsed' \| 'recent'`       | Which half of the set an item belongs to; labelled when wide  |
-| Grid          | `JumpBackIn` wide branch                         | Desktop and tablet: Most Used cards, then Recent cards        |
-| Card          | `JumpBackInCard`                                 | A wide-screen document: large (most used) or compact (recent) |
-| Quiet line    | `jumpBackInLine(item, group, now)`               | "Used on N days" / "Used 2 hours ago" under a card's name     |
+| Grid          | `JumpBackIn` wide branch                         | Desktop and tablet: Most Used tiles, then Recent tiles        |
+| Quiet line    | `jumpBackInLine(item, group, now)`               | "Used on N days" / "Used 2 hours ago" under a tile's name     |
 | Strip         | `JumpBackInStrip`                                | The phone's sideways row, alternating, ending in See More     |
 | Phone order   | `phoneOrder(set)`                                | Most Used, recent, alternating, then the rest                 |
 | Tile          | `JumpBackInTile`, `SeeMoreTile`                  | One document's thumbnail and name; the strip's last tile      |
@@ -160,9 +158,9 @@ it runs out; at most `2n` (8) items, each with the half it came from (`group`), 
 
 ### Grid (desktop and tablet)
 
-`JumpBackIn` reads `useMediaQuery(HOME_WIDE_QUERY)`. Wide: the Most Used label and its `ul` of large cards, then the
-Recent label and its `ul` of compact cards; a group with no item draws neither its label nor its list. Each card's
-quiet line is `jumpBackInLine(item, group, now)` (`now` from `useRelativeNow`): most used `Used on ${useDays} day(s)`,
+`JumpBackIn` reads `useMediaQuery(HOME_WIDE_QUERY)`. Wide: the Most Used label and its `ul` of `JumpBackInTile`s, then the
+Recent label and its `ul` of tiles; a group with no item draws neither its label nor its list. Each tile's `line`,
+its quiet line, is `jumpBackInLine(item, group, now)` (`now` from `useRelativeNow`): most used `Used on ${useDays} day(s)`,
 recent `Used ${relativeSince(lastUsedAt, now)}`. The two groups' container holds `JUMP_BACK_IN_MIN_HEIGHT`, so it keeps
 both groups' height with fewer items (`D131`, `D168`).
 
@@ -173,14 +171,13 @@ passes it to `JumpBackIn`. `entryFor(id)` resolves the id against `useExplorerDo
 `sharedToPaneDocument(shared)`; the Timeline's cards resolve through the same map) and binds the Explorer's actions as
 `documentEntryPropsFor` does; an unloaded id gives `null`. `isGone(id)` is true once an id seen in the map (recorded in
 an effect after each render) is no longer in it; `JumpBackIn` filters both groups through it before drawing, so the
-strip's `phoneOrder` and the grid see the same set. Each `JumpBackInCard` and `JumpBackInTile` takes
+strip's `phoneOrder` and the grid see the same set. Each `JumpBackInTile` takes
 `entry = entryFor(item.documentId)` and wraps its link in `JumpBackInMenu`: a `group relative` box whose
 `onContextMenu` opens the menu (`useRowMenu`, off while renaming), the link, then an `EllipsisTriggerButton` (`reveal`,
 `label="Menu for ${name}"`) absolutely placed as a frosted chip (`bg-white/90 shadow-sm ring-1`, shown on
-`group-focus-within` too): `right-3.5 top-3.5` on a large card, `right-2.5 top-1/2 -translate-y-1/2` on a compact one
-(which gains `pr-11`), `right-1 top-1` on a tile. The menu is `DocumentEntryMenu entry={entry}`. The name drawn is
-`entry.document.name ?? item.name`. While `entry.renaming`, the card is a `div` (no link, no ⋯) whose name is
-`InlineRenameInput` (`ariaLabel="Rename ${name}"`, commit → `onCommitRename`, cancel → `onCancelRename`).
+`group-focus-within` too): `right-1 top-1` on the tile's thumbnail. The menu is `DocumentEntryMenu entry={entry}`. The name drawn is
+`entry.document.name ?? item.name`. While `entry.renaming`, the tile is a `div` (no link, no ⋯) whose name is
+`InlineRenameInput` (the name's 16 px box, so the tile keeps its height) (`ariaLabel="Rename ${name}"`, commit → `onCommitRename`, cancel → `onCancelRename`).
 
 ### Strip (phone)
 
@@ -335,23 +332,21 @@ Component props:
   Browse All Templates as the section's quiet link; Already Have Work? `grid sm:grid-cols-2 gap-4`: the sign-in card
   (`bg-[#0b1230] rounded-[20px] p-5`, the prism, a 180 px sky glow, a white `Sign In` button) and the import card
   (`PANEL_SURFACE rounded-[20px] p-5` round the Explorer's own Import From).
-- Body: one column, `flex flex-col gap-10` (40 px between sections); each section a `section` wrapper
+- Body: one column, `flex flex-col gap-7` (28 px between sections); each section a `section` wrapper
   (`data-home-section="jump-back-in"` / `"what-happened"`).
-- Heading row (`SECTION_HEADER`): `flex items-baseline justify-between gap-4`, 16 px above the section's body, no
-  rule. The heading (`h2`, `SECTION_HEADING`): `text-2xl font-extrabold tracking-[-0.03em] text-[#17153a]
-dark:text-slate-100`. The quiet link at the end (See More, See Timeline): `text-sm font-semibold text-brand-700
-dark:text-brand-300 hover:underline`.
-- Group label (`GROUP_LABEL`): `text-xs font-semibold uppercase tracking-[0.08em] text-slate-500
-dark:text-slate-400`, 10 px above its list; Recent's 16 px below Most Used's list.
-- Large card (`JumpBackInCard size="large"`): `flex flex-col gap-2.5 rounded-[18px] border border-slate-200 bg-white
-p-2 pb-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]` (dark `border-slate-700 bg-slate-800`); thumbnail `h-32 w-full
-rounded-xl border border-slate-100` (dark `border-slate-700`); name `text-[15px] font-semibold truncate`; quiet line
-  `text-[12.5px]` muted. Hover: `border-sky-300 shadow-[0_0_0_4px_rgba(125,211,252,0.25),0_18px_36px_-16px_
-rgba(2,132,199,0.45)] -translate-y-0.5` (`motion-safe:` on the transform), `duration-micro`.
-- Compact card (`size="compact"`): `flex items-center gap-3 rounded-[14px] border p-2` with the same colours; the
-  thumbnail `h-11 w-16 shrink-0 rounded-lg`; name `text-sm font-semibold truncate`; quiet line `text-xs` muted.
-- Lists: Most Used `grid grid-cols-2 gap-4 lg:grid-cols-4`, Recent `grid grid-cols-2 gap-2.5 lg:grid-cols-4`. Their
-  container holds `JUMP_BACK_IN_MIN_HEIGHT` so neither the load nor a short group moves what follows (`D168`).
+- Heading row (`SECTION_HEADER`): `flex items-baseline justify-between gap-4 border-b border-slate-200 pb-2` (dark
+  `border-slate-700`), 12 px above the section's body. The heading (`h2`, `SECTION_HEADING`): `text-base
+font-semibold text-slate-900 dark:text-slate-100`. The quiet link at the end (See More, See Timeline): `text-sm
+font-medium text-brand-700 dark:text-brand-300 hover:underline`.
+- Group label (`GROUP_LABEL`): `text-[10px] font-semibold uppercase tracking-wider text-slate-500
+dark:text-slate-400`, 8 px above its list; Recent's 16 px below Most Used's list.
+- Grid tile (`JumpBackInTile`, `thumbClassName={GRID_THUMB}`): the thumbnail `h-20 w-full rounded-md border
+border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `slate-300` (dark `slate-500`) on hover;
+  the name `mt-1 h-4 text-xs truncate text-slate-700` (dark `slate-300`); the quiet line `h-4 text-[11px] truncate`
+  muted, the link's `aria-describedby`. 116 px high in all.
+- Lists: each group `grid grid-cols-4 content-start gap-3` (`GRID`). Their container holds `JUMP_BACK_IN_MIN_HEIGHT`
+  (`min-h-[18.5rem]`: a label and a tile row each, and the gap) so neither the load nor a short group moves what
+  follows (`D168`).
   This Browser: `ThisBrowserPill asLabel` absolutely in the thumbnail's bottom-left corner (4 px inset).
 - Strip: a scroller `scrollbar-slim -mx-1 flex h-28 snap-x gap-3 overflow-x-auto px-1 pb-2 pt-1`; the `ul` inside it
   `flex gap-3`; tiles `w-32 shrink-0 snap-start` with a 128 × 80 thumbnail. See More tile: the same 128 × 80 box,
@@ -360,13 +355,12 @@ rgba(2,132,199,0.45)] -translate-y-0.5` (`motion-safe:` on the transform), `dura
   transition.
 - Empty states: the shared `CompactEmptyState` (docs/specs/004-interface-design/empty-states.md, "In place of one
   item") with the glyphs in `home-icons.tsx` (file for Jump Back In, history for What Happened). Jump Back In's is
-  regular size, `h-full w-full`, inside one `LARGE_CARD` slot (`EMPTY_SLOT`: dashed `border-slate-300`,
-  `bg-white/60`; dark `border-slate-600 bg-slate-800/50`, `rounded-[18px]`) in the first cell of `MOST_USED_GRID`,
+  regular size, `h-full w-full`, inside one slot a tile high and two columns wide (`col-span-2 h-[7.25rem]`,
+  `EMPTY_SLOT`: `rounded-md` dashed `border-slate-300`, dark `border-slate-600`) at the start of `GRID`,
   no labels, no reserved height and no See More; the strip's is small size, `w-48`, heading alone, with no See More
   tile. What Happened has none: `WhatHappened` renders nothing once loaded with no day.
-- What Happened: the days in one panel (`WHAT_HAPPENED_PANEL`: `rounded-[20px] border border-slate-200 bg-white px-3
-py-2 sm:px-5`, dark `border-slate-700 bg-slate-800`); day heading (`h3`, `text-xs font-semibold uppercase
-tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
+- What Happened: the days straight on the page, `flex flex-col gap-3`; day heading (`h3`, `px-2 text-xs font-medium`
+  muted), entries in a `ul` with 4 px between.
   `ActionEntry`: a link row, 28 px avatar, text column: "**Priya** commented on **Payments architecture**"
   (`text-sm`), the detail in quotes (`text-xs`, muted, truncated), then "location · time" (`text-xs`, muted,
   wrapping). `SummaryEntry`: a full-width button, overlapped 24 px avatars (`-ml-2`, a 2 px ring in the page colour,
@@ -387,10 +381,10 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
   shows the full name; the quiet line is the link's `aria-describedby`. On a desktop or tablet each group is its own
   `ul aria-labelledby` its label (**Most Used**, **Recent**) inside the section; the strip stays one list named by the
   section's heading.
-- A loaded document's card or tile also holds a `button` "Menu for ${name}" (`aria-haspopup="menu"`,
+- A loaded document's tile also holds a `button` "Menu for ${name}" (`aria-haspopup="menu"`,
   `aria-expanded`), a sibling of the link rather than inside it; Down or Up Arrow on it opens the menu, which takes
   focus to its first item and gives it back on close (`useRowMenu`, `DocumentEntryMenu`). Under a fine pointer it
-  shows on the card's hover or keyboard focus; on touch it always shows.
+  shows on the tile's hover or keyboard focus; on touch it always shows.
 - See More: a link named "See More" in the heading row (wide) or as the tile after the list (narrow), never both.
 - Summary: `button aria-expanded aria-controls=<list id>`; the list `ul id` follows it. Avatars `aria-hidden`; the
   sentence names everyone.
@@ -404,7 +398,7 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
 
 - LCP: the first screen is one api read; the largest element is a heading or the skeleton, both painted at once.
 - CLS 0: the page header renders whole with the shell (its text needs no read); headings render with the skeletons; Jump Back In, its skeleton and its empty state share
-  `JUMP_BACK_IN_MIN_HEIGHT` at each breakpoint (cards are a fixed height); the strip, its skeleton and its empty state share `h-28`; What
+  `JUMP_BACK_IN_MIN_HEIGHT` (tiles are a fixed height); the strip, its skeleton and its empty state share `h-28`; What
   happened is last on the page; thumbnails keep their box (`DocumentThumbnail`); the fade and the chevron change
   opacity / transform only. Expanding a group is a user-initiated change.
 - INP: handlers are one state set or one navigation each.
@@ -433,10 +427,10 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
 | Sentences, people, verbs, updates, location                                         | `apps/live/app/explorer/home/home-copy.test.ts`                                      |
 | Read, error, retry, stale owner, unread clear, mark kept                            | `apps/live/app/explorer/home/useHome.test.tsx`                                       |
 | A clear outlives an unread count still in flight                                    | `apps/live/app/explorer/useTimelineUnread.test.tsx`                                  |
-| Grid and strip: group labels, quiet lines, cards, pill, fade, See More, telemetry   | `apps/live/components/panels/home/JumpBackIn.test.tsx`                               |
+| Grid and strip: group labels, quiet lines, tiles, pill, fade, See More, telemetry   | `apps/live/components/panels/home/JumpBackIn.test.tsx`                               |
 | ⋯ menu: button beside the link, right-click, rename in place, gone, unloaded, strip | `apps/live/components/panels/home/JumpBackInMenu.test.tsx`                           |
 | Menu props by id: lists, bound actions, shared dismiss, history, gone               | `apps/live/app/explorer/useDocumentEntryFor.test.tsx`                                |
-| Display headings: the heading row and its link, per section, no rule                | `apps/live/components/panels/home/HomePane.test.tsx`                                 |
+| Headings: the heading row, its rule and its link, per section                       | `apps/live/components/panels/home/HomePane.test.tsx`                                 |
 | Entries: one-person links, summary disclosure, telemetry, See Timeline              | `apps/live/components/panels/home/WhatHappened.test.tsx`                             |
 | One column, two sections, no Timeline, the error state                              | `apps/live/components/panels/home/HomePane.test.tsx`                                 |
 | Routes, titles, crumbs (Recent under Home), the landing 302                         | `routes.test.ts`, `view-titles.test.ts`, `apps/live/src/worker.test.ts`              |
@@ -451,10 +445,9 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
 | `STRIP_FADE_EPSILON_PX`   | 1                    | `home-model.ts`  | Sub-pixel scroll widths          | 1 to 2         |
 | `SUMMARY_NAMES_MAX`       | 3                    | `home-copy.ts`   | Spec ("Priya, Sam and Lee")      | 2 to 4         |
 | `AVATAR_STACK_MAX`        | 3                    | `HomeAvatar.tsx` | `D99`                            | 2 to 5         |
-| Large card thumbnail      | 128 px high          | `home-styles.ts` | Spec ("128 px high")             | 96 to 160 px   |
-| Compact card thumbnail    | 64 × 44 px           | `home-styles.ts` | Spec ("64 × 44")                 | fixed          |
 | `JUMP_BACK_IN_MIN_HEIGHT` | see `home-styles.ts` | `home-styles.ts` | `D168`: both groups' rows        | fixed          |
-| Section gap               | 40 px (`gap-10`)     | `HomePane.tsx`   | Spec ("about 40 px")             | 32 to 48 px    |
+| Section gap               | 28 px (`gap-7`)      | `HomePane.tsx`   | Pre-restyle Home                 | 24 to 40 px    |
+| Grid thumbnail            | 80 px high           | `home-styles.ts` | Spec ("80 px high")              | 64 to 96 px    |
 | Strip thumbnail           | 128 × 80 px          | `home-styles.ts` | `D100`: "small", 16:10           | 96 to 160 wide |
 
 ## Defaults ledger
