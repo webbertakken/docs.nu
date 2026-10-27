@@ -65,12 +65,12 @@ vi.mock('../thumbnail', () => ({
 // Import AFTER the mock so the share.ts module picks up the stubbed
 // db helpers. passwordGate is module-private to share.ts, exported
 // only for this suite (see the comment on the export).
-import { handleShare, passwordGate } from './share';
+import { handleShare, handleShareImage, passwordGate } from './share';
 import { getDocument, getParticipant, getShareLink, recordSharedAccess } from '../db';
 import { notifyDocumentJoin } from '../email/notifications';
 import { reportServerEvent } from '../server-telemetry';
 import { getDocumentTabImageSvg, getDocumentThumbnailSvg } from '../thumbnail';
-import type { RouteContext } from './context';
+import type { DocumentRouteContext, RouteContext } from './context';
 
 const FAKE_ENV = {} as Env;
 // The live image is drawn by the document's room (document-image-request.ts), here over the same env.
@@ -256,6 +256,14 @@ describe('GET /api/share/<code>/image.svg (docs/specs/013-workspace/live-image-s
   it('404s an unknown / revoked / expired share code', async () => {
     getShareLinkMock.mockResolvedValue(null);
     const res = await handleShare(imageCtx('NOPE'));
+    expect(res.status).toBe(404);
+    expect(getDocumentMock).not.toHaveBeenCalled();
+  });
+
+  // The room reads the link again: one revoked between the worker's check and the room's answers as unknown.
+  it('404s, in the room, a link revoked after the worker resolved it', async () => {
+    getShareLinkMock.mockResolvedValue(null);
+    const res = await handleShareImage(imageCtx('GONE') as DocumentRouteContext, 'GONE');
     expect(res.status).toBe(404);
     expect(getDocumentMock).not.toHaveBeenCalled();
   });
