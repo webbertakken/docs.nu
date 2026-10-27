@@ -116,14 +116,16 @@ test('a draw.io library becomes a shape library, placed from My shapes', async (
   await expect(page.getByRole('article', { name: 'House shapes' })).toBeVisible();
   await shot(page, '2-explorer');
 
-  // Place both shapes from the palette's Library (My shapes) flyout: one box, then two boxes and their connection.
+  // Place both shapes from the palette's My shapes category, under More (docs/specs/007-editor/toolbar-layout.md
+  // "More": its only way in): one box, then two boxes and their connection.
   await startBlankDocument(page);
-  const libraryCategory = page.locator('[data-category-bar-button][aria-label="Library"]');
+  await page.getByRole('button', { name: 'Palette category' }).click();
+  await page.locator('[data-option-id="my-shapes"]').click();
+  const libraryCategory = page.getByRole('button', { name: /^More/ });
   await libraryCategory.click();
   await page.getByRole('button', { name: 'Insert Service from House shapes' }).click();
   await expect.poll(() => storedElements(page), { timeout: 15_000 }).toBe(1);
-  // Placing a shape puts the flyout away (docs/specs/007-editor/toolbar-layout.md "The category bar"), so open it
-  // again.
+  // Placing a shape puts More away (docs/specs/007-editor/toolbar-layout.md "More"), so open it again.
   await libraryCategory.click();
   await page.getByRole('button', { name: 'Insert Request from House shapes' }).click();
   await expect.poll(() => storedElements(page), { timeout: 15_000 }).toBe(4);
