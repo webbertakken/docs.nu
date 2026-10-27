@@ -289,15 +289,15 @@ editor`; the toast then reads the outcome.
 
 ### REST
 
-| Method | Path                                                | Gate                                   | Success                                              | Failures                                                                                                                                                                                                                      |
-| ------ | --------------------------------------------------- | -------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/api/documents/:id/tabs/:tabId/changesets`         | `gateEdit(..., tabId)`                 | 200 `ChangesetResponse`                              | 400 `invalid_body`, `parse_error`, `unknown_operation`, `invalid_base`, `strict_needs_base`; 403; 404; 409 `changeset_conflict`, `elements_held`, `tab_busy`, `tab_id_taken`; 410; 412 `stale_tab`; 413 `too_large`; 422; 429 |
-| GET    | `/api/documents/:id/changesets[?tab=&limit=]`       | `gateRead`; a scoped link its tab only | 200 `{ changesets: ChangesetSummary[] }`             | 400 bad `limit`; 404; 410                                                                                                                                                                                                     |
-| GET    | `/api/documents/:id/changesets/:changesetId`        | `gateRead` on the record's tab         | 200 `{ changeset: ChangesetSummary, results, text }` | 404 (no record for this document, or its tab outside a scoped link); 410                                                                                                                                                      |
-| POST   | `/api/documents/:id/changesets/:changesetId/revert` | `gateEdit` on the record's tab         | 200 `RevertResponse`                                 | 403; 404 (no record for this document, or tab unlinked); 409 `tab_busy`; 410                                                                                                                                                  |
-| PUT    | `/api/documents/:id/tabs/:tabId/name`               | `gateEdit(..., tabId)`                 | 200 `{ tab: TabSummary }`                            | 400 `invalid_name`; 403; 404; 410                                                                                                                                                                                             |
-| GET    | `/api/documents/:id/tabs/:tabId`                    | unchanged                              | `tab.rev`; header `ETag: W/"<rev>"` (CS5)            | unchanged                                                                                                                                                                                                                     |
-| PUT    | `/api/documents/:id/tabs/:tabId`                    | unchanged; tokens refused              | `tab.rev` in the echo                                | adds 405 `use_changesets` (any token), 409 `tab_busy`                                                                                                                                                                         |
+| Method | Path                                                | Gate                                   | Success                                              | Failures                                                                                                                                                                                                      |
+| ------ | --------------------------------------------------- | -------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/documents/:id/tabs/:tabId/changesets`         | `gateEdit(..., tabId)`                 | 200 `ChangesetResponse`                              | 400 `invalid_body`, `parse_error`, `unknown_operation`, `invalid_base`, `strict_needs_base`; 403; 404; 409 `changeset_conflict`, `elements_held`, `tab_busy`; 410; 412 `stale_tab`; 413 `too_large`; 422; 429 |
+| GET    | `/api/documents/:id/changesets[?tab=&limit=]`       | `gateRead`; a scoped link its tab only | 200 `{ changesets: ChangesetSummary[] }`             | 400 bad `limit`; 404; 410                                                                                                                                                                                     |
+| GET    | `/api/documents/:id/changesets/:changesetId`        | `gateRead` on the record's tab         | 200 `{ changeset: ChangesetSummary, results, text }` | 404 (no record for this document, or its tab outside a scoped link); 410                                                                                                                                      |
+| POST   | `/api/documents/:id/changesets/:changesetId/revert` | `gateEdit` on the record's tab         | 200 `RevertResponse`                                 | 403; 404 (no record for this document, or tab unlinked); 409 `tab_busy`; 410                                                                                                                                  |
+| PUT    | `/api/documents/:id/tabs/:tabId/name`               | `gateEdit(..., tabId)`                 | 200 `{ tab: TabSummary }`                            | 400 `invalid_name`; 403; 404; 410                                                                                                                                                                             |
+| GET    | `/api/documents/:id/tabs/:tabId`                    | unchanged                              | `tab.rev`; header `ETag: W/"<rev>"` (CS5)            | unchanged                                                                                                                                                                                                     |
+| PUT    | `/api/documents/:id/tabs/:tabId`                    | unchanged; tokens refused              | `tab.rev` in the echo                                | adds 405 `use_changesets` (any token), 409 `tab_busy`                                                                                                                                                         |
 
 The role a token or a share link needs is exactly the named gate's; this file names no role. `?dryRun=1` on the
 submit answers the same 200 shape with `dryRun: true`, `changeset: null`; any other value of `dryRun` is false.
@@ -476,23 +476,23 @@ CREATE TABLE agent_changeset_parts (
 );
 ```
 
-| Field                          | Class              | Notes                                                                    |
-| ------------------------------ | ------------------ | ------------------------------------------------------------------------ |
-| `tabs.rev`                     | state              | 0 on every existing row; 1 on insert (CS2); +1 on every write of the tab |
-| `agent_changesets.id`          | identity           | `cs_` + 10                                                               |
-| `document_id`, `tab_id`, `rev` | reference          | `(tab_id, rev)` unique: one changeset per revision                       |
-| `base_rev`                     | audit              | Null without a base                                                      |
-| `author_id`                    | personal           | Owner-keyed; deleted with the account, moved by guest migration (CS27)   |
-| `author_name`, `author_color`  | personal, snapshot | From `participants` at write; fallback CS16                              |
-| `token_id`                     | audit              | Null for a person; never on the wire except to the author                |
-| `summary`                      | content            | At most 80 characters                                                    |
-| `fingerprints`                 | derived            | JSON `{ before, after, beforeOrder? }`: fingerprints by id, order (CS17) |
-| `added`, `changed`, `removed`  | derived            | Counts for the list and the toast                                        |
-| `created_tab`, `revert_of`     | state              | 1 when it created the tab; the reverted changeset's id                   |
-| `created_at`                   | state              | Epoch ms; the sweep and the merge window key on it                       |
-| part `ops`, `inverse`          | content            | JSON `ElementOp[]`, comment author ids intact (server only)              |
-| part `results`                 | derived            | JSON `{ results: ResultLine[], text }`, for `GET .../changesets/:id`     |
-| DO `selection:<presenceId>`    | ephemeral          | Room storage, pruned on close                                            |
+| Field                          | Class              | Notes                                                                     |
+| ------------------------------ | ------------------ | ------------------------------------------------------------------------- |
+| `tabs.rev`                     | state              | 0 on every existing row; 1 on insert (CS2); +1 on every write of the tab  |
+| `agent_changesets.id`          | identity           | `cs_` + 10                                                                |
+| `document_id`, `tab_id`, `rev` | reference          | `(tab_id, rev)` unique: one changeset per revision                        |
+| `base_rev`                     | audit              | Null without a base                                                       |
+| `author_id`                    | personal           | In the room; goes with the room or its 30-day retention, not moved (CS27) |
+| `author_name`, `author_color`  | personal, snapshot | From `participants` at write; fallback CS16                               |
+| `token_id`                     | audit              | Null for a person; never on the wire except to the author                 |
+| `summary`                      | content            | At most 80 characters                                                     |
+| `fingerprints`                 | derived            | JSON `{ before, after, beforeOrder? }`: fingerprints by id, order (CS17)  |
+| `added`, `changed`, `removed`  | derived            | Counts for the list and the toast                                         |
+| `created_tab`, `revert_of`     | state              | 1 when it created the tab; the reverted changeset's id                    |
+| `created_at`                   | state              | Epoch ms; the sweep and the merge window key on it                        |
+| part `ops`, `inverse`          | content            | JSON `ElementOp[]`, comment author ids intact (server only)               |
+| part `results`                 | derived            | JSON `{ results: ResultLine[], text }`, for `GET .../changesets/:id`      |
+| DO `selection:<presenceId>`    | ephemeral          | Room storage, pruned on close                                             |
 
 Writers of the tab and their `rev`: `upsertTab` (`ON CONFLICT ... rev = tabs.rev + 1`, `RETURNING rev`, used by
 the comment routes), `upsertTabAtRev` (`rev = expected + 1` on both the insert and the conflict update),
@@ -502,15 +502,15 @@ so the record, its parts and the index rows never land without their tab write (
 writes no `data` and does not advance `rev`.
 
 Snapshot and restore: the record and its parts are the snapshot of its change; nothing else is copied. Trash: the
-rows wait with their document and go with its purge (cascade). A tab unlinked from every document takes its records
-(cascade). Retention: `deleteOldChangesets(env, cutoff)` from the daily cron through
-`scheduleSweep(ctx, env, 'changesets', 'rows', now - CHANGESET_RETENTION_MS, ...)`; parts follow by cascade (CS28).
+rows wait in their document's room and go with its purge. A tab leaving the document takes its records (cascade).
+Retention: the room's upkeep deletes records older than `CHANGESET_RETENTION_MS`, at most once a day
+([Document storage blueprint](../../006-document/blueprints/document-storage.md#upkeep)); parts follow by cascade (CS28).
 
 ## Errors and edge cases
 
 - **E1** Submit to a trashed document: 410 through `missingDocument`. A stranger: 404.
-- **E2** `replace` on a tab id this document lacks but `tabs` holds (another document's tab): `409 tab_id_taken`;
-  an id over 128 characters: 422 `invalid_value` (CS31).
+- **E2** `replace` on a tab id this document lacks creates this document's own tab, whatever another document holds
+  under that id (tab ids are unique per document); an id over 128 characters: 422 `invalid_value` (CS31).
 - **E3** Both `operations` and `replace`, or neither: `400 invalid_body`. More than `CHANGESET_MAX_OPERATIONS`
   operations (comment lines excluded; a `replace` counts as one): 413 `too_large` before compile.
 - **E4** Engine refusal: nothing written; codes and the engine's text returned; `[changeset] rejected` logged.
