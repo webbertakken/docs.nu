@@ -1,3 +1,4 @@
+import { CONTENT_MOVE_CRON, sweepContentMoves } from './document-room/content-move-sweep';
 import {
   fromLegacyRequest,
   isLegacyDocumentsPath,
@@ -592,6 +593,15 @@ const worker = {
         sweepWorkbench(env, now)
           .then((count) => console.log(`workbench sweep: deleted ${count} rows`))
           .catch((err) => console.error('workbench sweep failed', err)),
+      );
+    }
+    // docs/specs/006-document/document-storage-move.md "The sweep": every minute, documents whose content is still
+    // in D1 move into their rooms.
+    if (event.cron === CONTENT_MOVE_CRON) {
+      ctx.waitUntil(
+        sweepContentMoves(env, Date.now()).catch((err: unknown) =>
+          console.error('[content-move] sweep failed', err),
+        ),
       );
     }
   },

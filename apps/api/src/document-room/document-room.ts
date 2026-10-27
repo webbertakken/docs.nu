@@ -46,6 +46,8 @@ import { RoomFacilitator } from '../room-facilitator';
 
 import { writeQaAction, type QaWriteRequest } from '../qa-board-write';
 import { RoomContent, RoomIdMismatchError, RoomNotReadyError } from './room-content';
+import type { MoveOutcome } from './content-move';
+import type { DocumentRoomRpc } from './document-rpc';
 import type { Item } from '@livedoc/items';
 import type { ContentSummary } from '../db/content-summary';
 import type { DocumentCopy, DocumentOutline } from './document-content';
@@ -285,8 +287,9 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   // presence; the first request after the class change takes them over before it is answered
   // (docs/specs/006-document/document-storage-move.md "Handing over room state"). A fetch names its document in
   // X-Document-Id; an RPC names it as its first argument (RoomContent.rpc runs this first). Both bind the room to
-  // that id before anything is taken. Null to carry on, or the answer when the room cannot serve this document.
-  private async ensureHandedOver(request: Request): Promise<Response | null> {
+  // that id before anything is taken; then the move gate (RoomContent.ensureMoved) holds the request until the room
+  // holds its content. Null to carry on, or the answer when the room cannot serve this document yet.
+  private async ensureReady(request: Request): Promise<Response | null> {
     const documentId = request.headers.get(DOCUMENT_ID_HEADER);
     if (documentId) {
       try {
@@ -298,16 +301,20 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         throw error;
       }
     }
-    if (this.handedOver) return null;
     if (!documentId) {
       if (this.env?.LEGACY_DOCUMENT_ROOM && !this.missingIdLogged)
         console.warn('[legacy-handover] no document id', new URL(request.url).pathname);
       this.missingIdLogged = true;
       return null;
     }
-    const failed = await this.handOver(documentId);
-    if (failed) {
-      return json({ error: 'room_unavailable' }, { status: 503, headers: { 'Retry-After': '5' } });
+    if (!this.handedOver && (await this.handOver(documentId))) {
+      return new RoomNotReadyError(documentId, 'handover').response();
+    }
+    try {
+      await this.content.ensureMoved(documentId, false);
+    } catch (error) {
+      if (error instanceof RoomNotReadyError) return error.response();
+      throw error;
     }
     return null;
   }
@@ -366,8 +373,8 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   }
 
   override async fetch(request: Request): Promise<Response> {
-    const handover = await this.ensureHandedOver(request);
-    if (handover) return handover;
+    const notReady = await this.ensureReady(request);
+    if (notReady) return notReady;
     const url = new URL(request.url);
     const internal = await answerInternal(this.internal, request, url);
     if (internal) return internal;
@@ -1120,11 +1127,12 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   // ---------- RPC: what the worker asks of this document (document-client.ts, document-rpc.ts) ----------
 
   async route(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
-    return (await this.content.rpc(documentId)).route(documentId, request, identity);
+    return this.answer(documentId, (rpc) => rpc.route(documentId, request, identity));
   }
 
   async create(documentId: string, seed: DocumentSeed): Promise<CreateOutcome> {
-    return (await this.content.rpc(documentId)).create(documentId, seed);
+    // A new document is born moved (M4); a re-commit of one D1 already holds moves first.
+    return (await this.content.rpc(documentId, !seed.recommit)).create(documentId, seed);
   }
 
   async outline(documentId: string): Promise<DocumentOutline> {
@@ -1144,7 +1152,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   }
 
   async image(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
-    return (await this.content.rpc(documentId)).image(documentId, request, identity);
+    return this.answer(documentId, (rpc) => rpc.image(documentId, request, identity));
   }
 
   async exportCopy(
@@ -1156,7 +1164,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   }
 
   async importCopy(documentId: string, copy: DocumentCopy): Promise<ContentSummary> {
-    return (await this.content.rpc(documentId)).importCopy(documentId, copy);
+    return (await this.content.rpc(documentId, true)).importCopy(documentId, copy);
   }
 
   async item(documentId: string, itemId: string): Promise<Item | null> {
@@ -1168,6 +1176,31 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     request: Request,
     identity: RouteIdentity,
   ): Promise<Response> {
-    return (await this.content.rpc(documentId)).respondToForm(documentId, request, identity);
+    return this.answer(documentId, (rpc) => rpc.respondToForm(documentId, request, identity));
+  }
+
+  // The sweep's move (docs/specs/006-document/blueprints/document-storage-move.md "The sweep"): the room's move
+  // outcome, moving now when it has not; null when D1 has no row for the document (G1).
+  async move(documentId: string): Promise<MoveOutcome | null> {
+    this.content.bind(documentId);
+    if (!this.handedOver && (await this.handOver(documentId))) {
+      throw new RoomNotReadyError(documentId, 'handover');
+    }
+    return this.content.move(documentId);
+  }
+
+  // An RPC answering a Response: a room not ready yet answers its named 503 rather than throwing.
+  private async answer(
+    documentId: string,
+    call: (rpc: DocumentRoomRpc) => Promise<Response>,
+  ): Promise<Response> {
+    let rpc: DocumentRoomRpc;
+    try {
+      rpc = await this.content.rpc(documentId);
+    } catch (error) {
+      if (error instanceof RoomNotReadyError) return error.response();
+      throw error;
+    }
+    return call(rpc);
   }
 }

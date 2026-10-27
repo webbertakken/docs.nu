@@ -10,6 +10,7 @@
 import type { Item } from '@livedoc/items';
 import type { ContentSummary } from '../db/content-summary';
 import type { Env } from '../types';
+import type { MoveOutcome } from './content-move';
 import type { DocumentCopy, DocumentOutline } from './document-content';
 import type { CreateOutcome, DocumentSeed } from './document-create';
 import { roomUnavailable, type RouteIdentity } from './document-route';
@@ -33,10 +34,13 @@ export type DocumentRoomClient = {
   importCopy(copy: DocumentCopy): Promise<ContentSummary>;
   item(itemId: string): Promise<Item | null>;
   respondToForm(request: Request, identity: RouteIdentity): Promise<Response>;
+  // The sweep's move of the document's content into the room (content-move.ts); null when D1 has no row for it.
+  move(): Promise<MoveOutcome | null>;
 };
 
 type RoomStub = DocumentRoomRpc & {
   fetch(input: Request | string, init?: RequestInit): Promise<Response>;
+  move(documentId: string): Promise<MoveOutcome | null>;
 };
 
 export function documentRoom(
@@ -67,6 +71,7 @@ export function documentRoom(
     importCopy: (copy) => room.importCopy(documentId, copy),
     item: (itemId) => room.item(documentId, itemId),
     respondToForm: (request, identity) => room.respondToForm(documentId, request, identity),
+    move: () => room.move(documentId),
   };
 }
 

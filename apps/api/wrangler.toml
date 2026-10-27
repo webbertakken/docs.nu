@@ -158,8 +158,11 @@ new_sqlite_classes = ["DocumentRoom"]
 #     from R2 + D1 once nothing references them.
 # Plus the docs/specs/014-identity/transactional-email.md email sweeps (lifecycle onboarding + token-expiry
 # warnings), both no-ops when RESEND_API_KEY is unset.
+#
+# `* * * * *`: every minute, the content move sweep (docs/specs/006-document/document-storage-move.md "The sweep"):
+# documents whose content is still in D1 move into their rooms; idle once every document has moved.
 [triggers]
-crons = ["0 3 * * *"]
+crons = ["0 3 * * *", "* * * * *"]
 
 # Per-IP rate limiter for the AI assistance endpoint (POST /api/ai,
 # docs/specs/007-editor/ai-assistance.md). Separate namespace so AI abuse never eats into document-write

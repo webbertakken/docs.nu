@@ -90,6 +90,7 @@ describe('the document route', () => {
     });
     const res = await call('GET', '/api/documents/D/tabs/t1');
     expect(res.status).toBe(503);
+    expect(res.headers.get('Retry-After')).toBe('5');
     expect(await res.json()).toMatchObject({ error: 'room_unavailable' });
     expect(error).toHaveBeenCalledWith(
       '[room-route] failed id=D path=/api/documents/D/tabs/t1 error=Error',

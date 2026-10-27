@@ -33,6 +33,11 @@ function makeState() {
       setAlarm: async () => {},
       deleteAlarm: async () => {},
       deleteAll: async () => store.clear(),
+      kv: {
+        get: (key: string) => store.get(key),
+        put: (key: string, value: unknown) => store.set(key, value),
+        delete: (key: string) => store.delete(key),
+      },
       sql: sqlite.sql,
       transactionSync: sqlite.transactionSync,
     },
@@ -77,6 +82,8 @@ function room(entries: [string, unknown][], opts: { failFirst?: boolean } = {}) 
     state as unknown as DurableObjectState,
     {
       LEGACY_DOCUMENT_ROOM: ns,
+      // D1 holds no row for the document, so the move gate moves nothing (G1).
+      DB: { prepare: () => ({ bind: () => ({ first: async () => null }) }) },
     } as never,
   );
   const ask = async (headers: Record<string, string> = { [DOCUMENT_ID_HEADER]: 'doc-1' }) => {
