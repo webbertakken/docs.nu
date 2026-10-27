@@ -814,7 +814,7 @@ export const articles: Article[] = [
     title: 'Configuration and Optional Auth',
     description: 'Environment variables, optional sign-in, and guest-only mode.',
     keywords:
-      'env vars environment sign-in better-auth setup secrets settings configure resend email ai openai google drive mcp telemetry r2 community',
+      'env vars environment sign-in better-auth setup secrets settings configure resend email ai openai google drive mcp telemetry r2',
     category: 'Self-Hosting',
     categorySlug: 'self-hosting',
     parentSlug: 'self-hosting',
@@ -2051,7 +2051,7 @@ export const articles: Article[] = [
     description:
       'Narrow any document list with words, chips or typed filters like made-by:ai, and share it as a link.',
     keywords:
-      'search find filter filters chips narrow refine query token tokens made by ai generated opens in mode diagram draw kind event storming template retrospective kanban edited date last week recent people me others owner space team shared unsorted unfiled root lens results pages plan',
+      'search find filter filters fuzzy typo typos misspelt misspelled initials chips narrow refine query token tokens made by ai generated opens in mode diagram draw kind event storming template retrospective kanban edited date last week recent people me others owner space team shared unsorted unfiled root lens results pages plan',
     category: 'Explorer',
     categorySlug: 'explorer',
     group: 'Your Library',
@@ -2825,27 +2825,6 @@ export const articles: Article[] = [
 
   // ---- Sub-articles: Sharing ----
   {
-    slug: 'finding-community-documents',
-    title: 'Finding Documents in the Community',
-    description:
-      'Search the Community by words, #tags, category and sort, then make a document your own.',
-    keywords:
-      'community gallery browse search find filter hashtag tag tags sort most loved most copied newest category inspiration examples like heart copy duplicate report flag my shares mine own popular popularity stats hidden',
-    category: 'Collaboration',
-    categorySlug: 'collaboration/sharing',
-    parentSlug: 'sharing',
-  },
-  {
-    slug: 'community',
-    title: 'Sharing to the Community',
-    description: 'Publish a document to the public gallery for others to view and copy.',
-    keywords:
-      'community gallery public publish showcase inspiration examples share document proud like likes copy copies tags category report moderation discover browse',
-    category: 'Collaboration',
-    categorySlug: 'collaboration/sharing',
-    parentSlug: 'sharing',
-  },
-  {
     slug: 'share-passwords',
     title: 'Share Passwords',
     description: 'Gate view or edit access behind a password.',
@@ -3083,7 +3062,7 @@ export const articles: Article[] = [
     slug: 'search-documents',
     title: 'Finding Documents and Folders',
     description: 'Search across your documents, folders, and the documents shared with you.',
-    keywords: 'find lookup locate files library open diagrams',
+    keywords: 'find lookup locate files library open diagrams fuzzy typo initials',
     category: 'Search Panel',
     categorySlug: 'search-panel/the-search-panel',
     parentSlug: 'the-search-panel',

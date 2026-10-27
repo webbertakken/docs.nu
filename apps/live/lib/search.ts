@@ -12,6 +12,7 @@
 
 // The palette ranking lives with the icon catalogues, so the api's icon search ranks alike.
 import { matches, paletteRank } from '@livedoc/icons';
+import { compileTitleQuery, rankByTitle, type TitleQuery } from '@livedoc/explorer-lens';
 import type { ShapeKind, Tab } from '@livedoc/document';
 
 // Every word typed is found somewhere in the fields, case ignored: "export png" finds Export… (named Export, its
@@ -22,6 +23,21 @@ function matchesEveryWord(q: string, ...fields: string[]): boolean {
   if (words.length <= 1) return fields.some((f) => matches(q.trim(), f));
   const hay = fields.join(' ').toLowerCase();
   return words.every((w) => hay.includes(w));
+}
+
+// Document titles match as the Explorer's lens matches them, fuzzily and best first
+// (docs/specs/013-workspace/explorer-filters.md "Matching"); a typed name is found however it was written.
+const titleOf = (d: { name: string }) => d.name || 'Untitled document';
+
+// The team documents whose title matches, best first, then those found only by their team's name.
+function rankTeamDocuments<D extends { name: string; teamName: string }>(
+  documents: readonly D[],
+  query: TitleQuery,
+  q: string,
+): D[] {
+  const byTitle = rankByTitle(documents, query, titleOf);
+  const found = new Set(byTitle);
+  return [...byTitle, ...documents.filter((d) => !found.has(d) && matches(q, d.teamName))];
 }
 
 const DOCUMENT_LIMIT = 8;
@@ -273,11 +289,10 @@ export function buildSearchResults(input: SearchInput): SearchGroup[] {
     currentTabId,
   } = input;
   const q = query.trim();
+  const titleQuery = compileTitleQuery(q.split(/\s+/));
   const groups: SearchGroup[] = [];
 
-  const documentMatches = liveDocs
-    .filter((d) => matches(q, d.name || 'Untitled document'))
-    .slice(0, DOCUMENT_LIMIT);
+  const documentMatches = rankByTitle(liveDocs, titleQuery, titleOf).slice(0, DOCUMENT_LIMIT);
   if (documentMatches.length > 0) {
     groups.push({
       key: 'documents',
@@ -291,9 +306,7 @@ export function buildSearchResults(input: SearchInput): SearchGroup[] {
     });
   }
 
-  const sharedMatches = (shared ?? [])
-    .filter((s) => matches(q, s.name || 'Untitled document'))
-    .slice(0, SHARED_LIMIT);
+  const sharedMatches = rankByTitle(shared ?? [], titleQuery, titleOf).slice(0, SHARED_LIMIT);
   if (sharedMatches.length > 0) {
     groups.push({
       key: 'shared',
@@ -329,9 +342,10 @@ export function buildSearchResults(input: SearchInput): SearchGroup[] {
   const teamFolderMatches = (teamFolders ?? [])
     .filter((f) => matches(q, f.path) || matches(q, f.teamName))
     .slice(0, FOLDER_LIMIT);
-  const teamDocumentMatches = (teamDocuments ?? [])
-    .filter((d) => matches(q, d.name || 'Untitled document') || matches(q, d.teamName))
-    .slice(0, DOCUMENT_LIMIT);
+  const teamDocumentMatches = rankTeamDocuments(teamDocuments ?? [], titleQuery, q).slice(
+    0,
+    DOCUMENT_LIMIT,
+  );
   if (teamMatches.length + teamFolderMatches.length + teamDocumentMatches.length > 0) {
     groups.push({
       key: 'teams',

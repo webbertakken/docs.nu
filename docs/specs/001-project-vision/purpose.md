@@ -85,6 +85,8 @@ Collaboration earns the second person; sync earns the repository.
   LiveDoc holds what is written about it, beside it.
 - **Not a paywall.** No feature is reserved for a plan: plans buy more usage,
   never more product.
+- **Not a public gallery.** Documents reach people through share links, teams
+  and published forms; LiveDoc keeps no public showcase of what people write.
 
 ## Boundaries that have moved
 
@@ -102,6 +104,14 @@ the start:
   feature is ever gated.
 - **The landing page leads**: reversed by this spec. The Explorer is the front
   door; marketing is secondary.
+
+Since then:
+
+- **The Community gallery**: removed by this spec. The inherited public gallery
+  of shared documents, with its likes, reports and copies, is not part of
+  LiveDoc; its addresses (`/community`, `/api/community`) answer 404, and its
+  tables are dropped. Upstream changes to it are never picked
+  ([upstream](../002-project-scope/livediagram-upstream.md#what-is-shared-and-what-is-not)).
 
 ## Why it matters
 

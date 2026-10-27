@@ -42,8 +42,8 @@ or a raster is missing or the wrong size.
 
 | File                                                                  | Size              | Drawing        | Background  |
 | --------------------------------------------------------------------- | ----------------- | -------------- | ----------- |
-| `apps/{marketing,live,help,telemetry,community}/app/icon.svg`         | scalable          | compact, auto  | transparent |
-| `apps/{help,community}/app/icon.png`                                  | 256               | full, light    | white       |
+| `apps/{marketing,live,help,telemetry}/app/icon.svg`                   | scalable          | compact, auto  | transparent |
+| `apps/help/app/icon.png`                                              | 256               | full, light    | white       |
 | `apps/marketing/public/favicon.ico`                                   | 16, 32, 48 inside | compact, light | transparent |
 | `apps/marketing/public/livedoc-icon-256.png` (`BRAND_ICONS` fallback) | 256               | full, light    | white       |
 

@@ -1,7 +1,7 @@
 import type { Element, ShapeElement, Tab } from '@livedoc/document';
 import { describe, expect, it } from 'vitest';
 import { matches } from '@livedoc/icons';
-import { buildSearchResults } from './search';
+import { buildSearchResults, type SearchResultItem } from './search';
 
 const shape = (id: string, label?: string): ShapeElement => ({
   id,
@@ -294,6 +294,48 @@ describe('buildSearchResults — shared documents + teams (docs/specs/008-canvas
       folders: [{ id: 'f1', name: 'F' }],
     });
     expect(out.map((g) => g.key)).toEqual(['folders']);
+  });
+});
+
+const idOf = (item: SearchResultItem) => ('id' in item ? item.id : item.elementId);
+
+describe('buildSearchResults — document titles (docs/specs/013-workspace/explorer-filters.md "Matching")', () => {
+  const documents = [
+    { id: 'typo', name: 'Sprint meetnig' },
+    { id: 'kanban', name: 'Kanban' },
+    { id: 'initials', name: 'Meeting notes' },
+  ];
+  const itemsOf = (query: string, key: 'documents' | 'shared' | 'teams') =>
+    buildSearchResults({
+      query,
+      documents: key === 'documents' ? documents : [],
+      shared: key === 'shared' ? documents.map((d) => ({ ...d, shareCode: 'c' })) : [],
+      teamDocuments:
+        key === 'teams' ? documents.map((d) => ({ ...d, teamId: 't', teamName: 'Platform' })) : [],
+      folders: [],
+    })
+      .find((g) => g.key === key)
+      ?.items.map(idOf);
+
+  it.each(['documents', 'shared', 'teams'] as const)(
+    'finds %s by the lens’s fuzzy match, best first',
+    (key) => {
+      expect(itemsOf('meeting', key)).toEqual(['initials', 'typo']);
+      expect(itemsOf('mtg nts', key)).toEqual(['initials']);
+    },
+  );
+
+  it('lists team documents found only by their team’s name after those found by title', () => {
+    const out = buildSearchResults({
+      query: 'platform',
+      documents: [],
+      folders: [],
+      teamDocuments: [
+        { id: 'by-team', name: 'Roadmap', teamId: 't', teamName: 'Platform' },
+        { id: 'by-title', name: 'Platform plan', teamId: 't', teamName: 'Platform' },
+      ],
+    });
+    expect(out.find((g) => g.key === 'teams')!.items.map(idOf)).toEqual(['by-title', 'by-team']);
   });
 });
 

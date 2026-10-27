@@ -11,6 +11,7 @@ import {
   type OpensInValue,
   type TemplateValue,
 } from './dimensions';
+import { byScore, compileTitleQuery, scoreTitle } from './title-match';
 import type { Lens, LensSubject } from './types';
 
 const DAY_MS = 86_400_000;
@@ -62,11 +63,6 @@ export function sharedSubject(item: { name: string; savedAt: number }): LensSubj
   };
 }
 
-/** Lower case with accents stripped, so "Café" and "cafe" compare equal. */
-export function foldText(value: string): string {
-  return value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
-}
-
 /** The earliest save an Edited value includes, from `now` in local time. */
 export function editedCutoff(value: EditedValue, now: number): number {
   const date = new Date(now);
@@ -84,45 +80,69 @@ export function editedCutoff(value: EditedValue, now: number): number {
   }
 }
 
-function nameHasEvery(name: string, words: readonly string[]): boolean {
-  if (words.length === 0) return true;
-  const folded = foldText(name);
-  return words.every((word) => folded.includes(word));
-}
-
 /** Whether a set of values admits a subject's value: an unset dimension admits anything, a set one
  *  only its own values, and never an unknown. */
 function admits<T>(values: readonly T[], value: T | null): boolean {
   return values.length === 0 || (value !== null && values.includes(value));
 }
 
-/** Compiles a lens once into a predicate: the cutoff and the folded words are worked out up front.
- *  Values of one dimension combine with or; dimensions combine with and. */
-export function compileLens(lens: Lens, now: number): (subject: LensSubject) => boolean {
+/** Compiles a lens once into a scorer: how well a subject matches, lower first, or null when the
+ *  lens leaves it out. The cutoff and the title query are worked out up front. Values of one
+ *  dimension combine with or; dimensions combine with and; the text scores the name
+ *  (title-match.ts), so a lens without text scores every subject it keeps 0. */
+export function compileLensScore(lens: Lens, now: number): (subject: LensSubject) => number | null {
   const { filters } = lens;
-  const words = lens.text.map(foldText);
+  const query = compileTitleQuery(lens.text);
   const cutoffs = filters.edited.map((value) => editedCutoff(value, now));
   const cutoff = cutoffs.length === 0 ? null : Math.min(...cutoffs);
-  return (subject) =>
-    admits(filters['opens-in'], subject.opensIn) &&
-    admits(filters.kind, subject.kind) &&
-    admits(filters.template, subject.template) &&
-    (filters['made-by'].length === 0 || subject.madeByAi === true) &&
-    (cutoff === null || subject.savedAt >= cutoff) &&
-    admits(filters.people, subject.people) &&
-    admits(filters.space, subject.space) &&
-    nameHasEvery(subject.name, words);
+  return (subject) => {
+    const kept =
+      admits(filters['opens-in'], subject.opensIn) &&
+      admits(filters.kind, subject.kind) &&
+      admits(filters.template, subject.template) &&
+      (filters['made-by'].length === 0 || subject.madeByAi === true) &&
+      (cutoff === null || subject.savedAt >= cutoff) &&
+      admits(filters.people, subject.people) &&
+      admits(filters.space, subject.space);
+    return kept ? scoreTitle(query, subject.name) : null;
+  };
+}
+
+/** Compiles a lens once into a predicate: whether it keeps a subject. */
+export function compileLens(lens: Lens, now: number): (subject: LensSubject) => boolean {
+  const score = compileLensScore(lens, now);
+  return (subject) => score(subject) !== null;
 }
 
 export function matchesLens(subject: LensSubject, lens: Lens, now: number): boolean {
   return compileLens(lens, now)(subject);
 }
 
-/** The subjects the lens keeps, in their order, each with whatever else it carries. */
+/** The items the lens keeps, best match first; equal matches, and every item of a lens without
+ *  text, keep their order. `limit` takes that many of the kept items in their own order (Recent's
+ *  newest) before they are ranked. */
+export function rankByLens<T>(
+  items: readonly T[],
+  lens: Lens,
+  now: number,
+  subjectOf: (item: T) => LensSubject,
+  limit = Number.POSITIVE_INFINITY,
+): T[] {
+  const score = compileLensScore(lens, now);
+  const kept: { item: T; score: number; order: number }[] = [];
+  for (const item of items) {
+    if (kept.length >= limit) break;
+    const found = score(subjectOf(item));
+    if (found !== null) kept.push({ item, score: found, order: kept.length });
+  }
+  return byScore(kept);
+}
+
+/** The subjects the lens keeps, best match first, each with whatever else it carries. */
 export function applyLens<T extends LensSubject>(
   subjects: readonly T[],
   lens: Lens,
   now: number,
 ): T[] {
-  return subjects.filter(compileLens(lens, now));
+  return rankByLens(subjects, lens, now, (subject) => subject);
 }

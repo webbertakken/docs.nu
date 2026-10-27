@@ -38,7 +38,7 @@ echo "[deploy-docs-nu] applying D1 migrations"
 
 deploy api "${hosted_flags[@]}" --var "BUILD_ID:$build_id"
 (cd apps/api && node scripts/hosted-vars.mjs verify)
-for app in marketing telemetry help live community; do
+for app in marketing telemetry help live; do
   deploy "$app"
 done
 deploy router

@@ -112,6 +112,35 @@ describe('narrowRows', () => {
   it('keeps every row under the empty lens', () => {
     expect(narrowRows(rows, emptyLens(), 'me', NOW)).toHaveLength(2);
   });
+
+  const newestFirst = [
+    doc('Sprint meetnig'),
+    doc('Kanban'),
+    doc('Weekly meeting'),
+    doc('Meeting notes'),
+  ];
+
+  it('orders the matches by how well their names match, ties newest first', () => {
+    expect(narrowRows(newestFirst, lensOf('meeting'), 'me', NOW).map((d) => d.id)).toEqual([
+      'Weekly meeting',
+      'Meeting notes',
+      'Sprint meetnig',
+    ]);
+  });
+
+  it('keeps the order of a lens without text', () => {
+    expect(narrowRows(newestFirst, lensOf('edited:7d'), 'me', NOW).map((d) => d.id)).toEqual(
+      newestFirst.map((d) => d.id),
+    );
+  });
+
+  it('ranks the newest matches up to a limit, as Recent does', () => {
+    expect(narrowRows(newestFirst, lensOf('meeting'), 'me', NOW, 2).map((d) => d.id)).toEqual([
+      'Weekly meeting',
+      'Sprint meetnig',
+    ]);
+    expect(narrowRows(newestFirst, emptyLens(), 'me', NOW, 2)).toHaveLength(2);
+  });
 });
 
 describe('isLensSet', () => {

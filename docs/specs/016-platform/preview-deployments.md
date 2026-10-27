@@ -2,14 +2,14 @@
 
 Every pull request gets its own complete, isolated copy of the platform, at `https://<branch>.preview.docs.nu`, for as long as it is open. A change is _running_ somewhere before anyone decides to merge it, and a D1 migration runs against a real remote database before it reaches the one holding people's documents.
 
-Production stays as it is: manual, `workflow_dispatch`-only ([Deployment](deployment.md)). There is no staging environment; a preview per pull request takes its place.
+Production deploys every merge to `main` once its CI passes ([Deployment](deployment.md)). There is no staging environment; a preview per pull request takes its place, so a change runs somewhere real before the merge that ships it.
 
 ## A preview
 
 |               | Production       | Preview of pull request `n`                                       |
 | ------------- | ---------------- | ----------------------------------------------------------------- |
 | Address       | `docs.nu`        | `https://<branch>.preview.docs.nu`, and its router on workers.dev |
-| Trigger       | Manual           | Every push to the pull request                                    |
+| Trigger       | Every merge      | Every push to the pull request                                    |
 | Workflow      | `deploy.yml`     | `preview.yml`                                                     |
 | Worker names  | `docs-nu-<app>`  | `docs-nu-pr-<n>-<app>`                                            |
 | D1            | `docs-nu`        | `docs-nu-pr-<n>`, migrated on every deploy                        |
@@ -18,7 +18,7 @@ Production stays as it is: manual, `workflow_dispatch`-only ([Deployment](deploy
 | Indexable     | Yes              | **No**: `X-Robots-Tag: noindex, nofollow`                         |
 | Lifetime      | Permanent        | Deleted when the pull request closes                              |
 
-The seven path-routed workers deploy (api, marketing, telemetry, help, live, community, router); the MCP worker does not. Only the router is on workers.dev; the other six are reached through its service bindings, as in production.
+The six path-routed workers deploy (api, marketing, telemetry, help, live, router); the MCP worker does not. Only the router is on workers.dev; the other five are reached through its service bindings, as in production.
 
 ## The address
 
@@ -51,7 +51,7 @@ The hosted profile ([Deployment](deployment.md) "Hosted profile") is not applied
 ## Lifecycle
 
 - **Open, push or reopen**: refuse a host that already serves another pull request, build every app, create the D1 and R2 when missing, apply migrations, deploy the api first and the router last, detach any host the router kept from a renamed branch, then wait, up to 15 minutes, until the host answers over HTTPS. Only then is the preview named in the pull request's description, in its preview slot: ``Live preview (`<sha>`): https://<branch>.preview.docs.nu``, with the short commit it was built from.
-- **Close or merge**: detach every custom domain, then delete the seven workers (router first, so nothing still binds a worker when it goes), the D1, and the R2 bucket after emptying it, and empty the preview slot, so a description never names a preview that is gone.
+- **Close or merge**: detach every custom domain, then delete the six workers (router first, so nothing still binds a worker when it goes), the D1, and the R2 bucket after emptying it, and empty the preview slot, so a description never names a preview that is gone.
 - One run per pull request at a time; a newer push or the close cancels an unfinished one.
 - A brand-new worker is briefly invisible to wrangler's workers.dev step, which then fails with `10007` although the upload succeeded. Every first preview deploy creates seven, so the generator retries that one answer, and only that one, up to six times, 30 seconds apart.
 

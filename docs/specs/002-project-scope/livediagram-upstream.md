@@ -24,6 +24,9 @@ it, ports it, and it lands through a LiveDoc pull request like any other change.
   specs that describe them. Those specs stay true for LiveDoc until a LiveDoc change moves them.
 - **Not shared:** the name, the domains, the deployments, their resources and secrets, the published packages and the
   command line's name. LiveDoc never deploys to, publishes as, or reaches livediagram's infrastructure.
+- **Left behind:** livediagram's Community gallery. LiveDoc has no public gallery
+  ([purpose](../001-project-vision/purpose.md#boundaries-that-have-moved)), so an upstream change to it, or to a
+  piece only it used, is never picked.
 
 ## The git remote
 

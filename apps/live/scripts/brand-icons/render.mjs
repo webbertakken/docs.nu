@@ -4,7 +4,7 @@
 //   - apps/*/app/icon.svg: the compact mark, light/dark by prefers-color-scheme
 //   - apps/marketing/public/favicon.ico: 16, 32 and 48px, for browsers and tools that ask for it by name
 //   - apps/marketing/public/: the Android icons (white tiles, maskable tiles, the monochrome silhouette)
-//   - apps/{help,community}/app/icon.png: the 256px tile, their favicon's PNG fallback
+//   - apps/help/app/icon.png: the 256px tile, its favicon's PNG fallback
 //   - apps/marketing/public/email/livedoc-mark-64.png: the transparent 64px mark the api's emails show beside the
 //     wordmark (2x their 28px slot); its path never changes
 //   - marketing/media/logo/: the full mark (light, dark, mono black and white) and the lockup (SVG and PNG)
@@ -47,7 +47,7 @@ const write = (path, text) => {
 
 // ---- Vector files ----
 const favicon = brandMarkSvg({ variant: 'compact', scheme: 'auto' });
-for (const app of ['marketing', 'live', 'help', 'telemetry', 'community']) {
+for (const app of ['marketing', 'live', 'help', 'telemetry']) {
   write(`apps/${app}/app/icon.svg`, `${favicon}\n`);
 }
 for (const scheme of ['light', 'dark']) {
@@ -139,7 +139,7 @@ await shoot({
 });
 
 // The apps that serve their own icon under a basePath pair app/icon.svg with this PNG (Next emits both links).
-for (const app of ['help', 'community']) {
+for (const app of ['help']) {
   copyFileSync(
     `${root}apps/marketing/public/livedoc-icon-256.png`,
     `${root}apps/${app}/app/icon.png`,

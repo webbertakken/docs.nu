@@ -1,23 +1,22 @@
 # Deployment
 
-All deployments run **via GitHub Actions** to **Cloudflare Workers**. The **production** deploy is **manually triggered** — a green CI run no longer ships on its own.
+All deployments run **via GitHub Actions** to **Cloudflare Workers**. **Every merge to `main` deploys production**: when CI passes on the merge commit, that commit ships to docs.nu, with no one pressing a button. A red CI run ships nothing.
 
 Every pull request also gets a preview, which does deploy on its own: a complete copy with its own workers, D1 and R2 on workers.dev, deleted when the pull request closes. This spec covers production; [Preview deployments](preview-deployments.md) covers previews.
 
 ## Apps and their Cloudflare Workers
 
-| App              | Cloudflare Worker   | Type                                                                                                                                |
-| ---------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/marketing` | `docs-nu-marketing` | Static assets only (Next.js `output: 'export'`).                                                                                    |
-| `apps/live`      | `docs-nu-live`      | Static assets + a tiny path-rewrite worker.                                                                                         |
-| `apps/telemetry` | `docs-nu-telemetry` | Static assets only (public dashboard, [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)).                  |
-| `apps/help`      | `docs-nu-help`      | Static assets only (help centre, [Help app](../018-help/help-app.md)).                                                              |
-| `apps/community` | `docs-nu-community` | Static assets plus a small worker for post metadata and the sitemap, bound to the api ([Community](../025-community/community.md)). |
-| `apps/api`       | `docs-nu-api`       | Worker (D1 binding + Durable Object).                                                                                               |
-| `apps/mcp`       | `docs-nu-mcp`       | Worker (OAuth + MCP tools; own host, [MCP server](../015-api/mcp-server.md)).                                                       |
-| `apps/router`    | `docs-nu-router`    | Worker (service bindings to the other six).                                                                                         |
+| App              | Cloudflare Worker   | Type                                                                                                               |
+| ---------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `apps/marketing` | `docs-nu-marketing` | Static assets only (Next.js `output: 'export'`).                                                                   |
+| `apps/live`      | `docs-nu-live`      | Static assets + a tiny path-rewrite worker.                                                                        |
+| `apps/telemetry` | `docs-nu-telemetry` | Static assets only (public dashboard, [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)). |
+| `apps/help`      | `docs-nu-help`      | Static assets only (help centre, [Help app](../018-help/help-app.md)).                                             |
+| `apps/api`       | `docs-nu-api`       | Worker (D1 binding + Durable Object).                                                                              |
+| `apps/mcp`       | `docs-nu-mcp`       | Worker (OAuth + MCP tools; own host, [MCP server](../015-api/mcp-server.md)).                                      |
+| `apps/router`    | `docs-nu-router`    | Worker (service bindings to the other five).                                                                       |
 
-The marketing worker serves files from `apps/marketing/out/` (`output: 'export'`). The live worker serves files from `apps/live/out/` plus a small worker (`apps/live/src/worker.ts`) that rewrites every `/document/<id>` request to the single statically-built `/document/placeholder/` page — see [New document route](../007-editor/new-document-route.md). The telemetry worker is static-assets-only like marketing, served under `/telemetry` ([22-telemetry](../017-telemetry/telemetry.md)). The help worker is static-assets-only too, served under `/help` ([55-help-app](../018-help/help-app.md)). The community worker serves its static export under `/community` with a small script (`apps/community/worker/index.ts`) that runs first for only the post page and the sitemap, reading from the api through an `API` service binding ([Community](../025-community/community.md) "Search engines"). The api worker holds the REST + WebSocket layer (see [11-api.md](../015-api/api.md)). The mcp worker exposes the AI tools over its own host `mcp.docs.nu` (it binds to the api worker, not the router; see [62-mcp-server.md](../015-api/mcp-server.md)). The router holds **no application logic** — only `MARKETING`, `LIVE`, `TELEMETRY`, `HELP`, `COMMUNITY`, and `API` service bindings that forward requests to the right downstream worker.
+The marketing worker serves files from `apps/marketing/out/` (`output: 'export'`). The live worker serves files from `apps/live/out/` plus a small worker (`apps/live/src/worker.ts`) that rewrites every `/document/<id>` request to the single statically-built `/document/placeholder/` page — see [New document route](../007-editor/new-document-route.md). The telemetry worker is static-assets-only like marketing, served under `/telemetry` ([22-telemetry](../017-telemetry/telemetry.md)). The help worker is static-assets-only too, served under `/help` ([55-help-app](../018-help/help-app.md)). The api worker holds the REST + WebSocket layer (see [11-api.md](../015-api/api.md)). The mcp worker exposes the AI tools over its own host `mcp.docs.nu` (it binds to the api worker, not the router; see [62-mcp-server.md](../015-api/mcp-server.md)). The router holds **no application logic** — only `MARKETING`, `LIVE`, `TELEMETRY`, `HELP` and `API` service bindings that forward requests to the right downstream worker.
 
 `wrangler.toml` for each app sits at the app root and is the source of truth for the worker's name, compatibility date, `[assets]`, `[[services]]`, `[[d1_databases]]`, and Durable Object bindings. Account-level identifiers (account id, custom domain, secrets) **never** go in `wrangler.toml` — they live in environment variables or the Cloudflare dashboard. See [06-secrets-policy.md](../002-project-scope/secrets-policy.md).
 
@@ -43,7 +42,7 @@ No job needs another's output: only the nine apps have a `build` script, and no 
 
 The two test steps run two packages at a time. Each package's Vitest already fills the runner's cores, and turbo's default fan-out on the 4-vCPU runner slowed the CPU-heavy `sticky-vision` suite about 70x, into timeouts. `pnpm test` cannot carry the flag: it is pnpm's built-in test command, so CI calls turbo directly.
 
-CI is the gate you check before deploying to production, but it does **not** trigger that deploy: production is a separate, manually-dispatched workflow (see below).
+CI is production's gate: a push to `main` whose CI passes triggers the production deploy (see below), and one whose CI fails deploys nothing.
 
 `pnpm deploy:check` runs `wrangler deploy --dry-run` for the three workers that carry bindings (api, mcp, router), so a broken binding, database or service name fails in CI rather than in a deploy.
 
@@ -61,17 +60,40 @@ CI is the gate you check before deploying to production, but it does **not** tri
 
 The cost is runner time: a merge on `main` is about a dozen jobs (CI's six, E2E's shards, CodeQL), so a burst of merges queues for runners alongside open pull requests' runs.
 
+### A red main
+
+Any failure on `main` is an issue, never only a red mark in the Actions tab. `.github/workflows/main-red.yml` follows
+every run on `main` of CI, E2E Smoke, CodeQL, Deploy Production, CLI publish, Publish MCP server to registry and
+Lucide re-vendor (`workflow_run`), whatever started it: a push, a schedule, a dispatch or the deploy's own trigger.
+Canvas Performance is left out; it reports through its own issue.
+
+- **One issue per workflow**, titled `<workflow> on main is red` and labelled `main-red` (made on first use).
+- **A failure, a timeout or a startup failure** opens that issue, or comments on the one already open, naming the
+  commit, its title, the failed jobs (each linked) and the run.
+- **A green run closes it**, with a comment naming the commit and run, but only when the green commit is still the tip
+  of `main`: an older commit's run finishing late never closes an issue a newer failure opened.
+- **A cancelled or skipped run** reports nothing.
+- Runs report one at a time per workflow, in the order they finish, so two reports never race on one issue. Each
+  report logs one `main-red:` line saying what it did.
+- A pull request's runs never report: its checks already show its author what is red.
+
 ## Deploy
 
 The deploy is split in two: `.github/workflows/deploy-reusable.yml` holds every job below as a **reusable workflow** (`workflow_call`), and `deploy.yml` triggers it for production. Its inputs (`wrangler_env`, the MCP origin, `deploy_mcp`) and the secrets the caller passes are all that would differ for another environment. Previews deploy through `preview.yml` and `scripts/preview.mjs` instead, from configs generated off the same production files ([Preview deployments](preview-deployments.md)).
 
-`.github/workflows/deploy.yml` is **manual-only** (`workflow_dispatch`). It does not chain off CI; trigger it yourself from the Actions tab, where it appears as **Deploy Production** (or `gh workflow run deploy.yml --ref main` — the file name is passed rather than the display name, so a future rename can't stale this out) once CI on `main` is green and you've decided to ship. It checks out and builds whatever the current `main` is at trigger time.
+`.github/workflows/deploy.yml` runs on **every completed CI run** (`workflow_run`) and deploys when that run **passed on a push to `main`** in `webbertakken/livedoc`. It checks out and builds **exactly the commit CI passed** (`workflow_run.head_sha`, through the reusable workflow's `ref`), never whatever `main` has moved to since.
+
+- **Only the tip of `main` deploys.** CI on `main` runs once per commit and never cancels an older run, so two quick merges can finish out of order. The `Latest on main` job compares the passed commit with `main`'s tip; an older commit stands down with the log line `deploy: <sha> passed CI but main is at <tip>; its own CI run deploys it`, and the newer commit's own CI run deploys it. A newer commit whose CI fails leaves production on the last commit that deployed.
+- **Deploys queue, never cancel** (`concurrency: deploy-main`, `cancel-in-progress: false`): half a deploy would leave some workers on new code and some on old.
+- **A pull request's CI never deploys production**; pull requests deploy previews ([Preview deployments](preview-deployments.md)).
+- **A redeploy by hand** stays possible from the Actions tab, where the workflow appears as **Deploy Production** (or `gh workflow run deploy.yml --ref main`: the file name rather than the display name, so a rename can't stale this out). It builds the current `main`.
+- **Forks deploy by hand.** The automatic trigger is guarded to `webbertakken/livedoc`, which holds docs.nu's secrets; a self-hosted fork dispatches the workflow, or widens the guard once its own secrets are set.
 
 Every `wrangler` invocation in the reusable workflow ends in `${WRANGLER_ENV:+--env "$WRANGLER_ENV"}`, which expands to nothing for production — so production runs exactly the commands it always ran — and to `--env staging` for the staging caller. Shell expansion rather than a GitHub expression, so it reads the same locally as in the log.
 
 Jobs:
 
-1. **build** — installs deps, runs `pnpm build`, uploads `apps/marketing/out`, `apps/live/out`, `apps/telemetry/out`, `apps/help/out` and `apps/community/out` as workflow artifacts.
+1. **build** — installs deps, runs `pnpm build`, uploads `apps/marketing/out`, `apps/live/out`, `apps/telemetry/out` and `apps/help/out` as workflow artifacts.
 2. **deploy-marketing** — downloads `marketing-out`, runs `pnpm exec wrangler deploy` from `apps/marketing/`.
 3. **deploy-live** — downloads `live-out`, runs `pnpm exec wrangler deploy` from `apps/live/`.
 4. **deploy-api** — runs:
@@ -79,13 +101,13 @@ Jobs:
    - `pnpm exec wrangler d1 migrations apply DB --remote` applies any pending migrations BEFORE the worker deploy (after the secret syncs, straight before it) so the new code never briefly runs against an older schema; see Renaming migrations below for the non-additive case. If this step fails the job halts and surfaces a precise error pointing at the missing token scopes. (Wrangler 4 dropped the `--yes` flag; the command is non-interactive by default in CI.)
    - `pnpm exec wrangler deploy` from `apps/api/`, plus the hosted profile's `--var` flags on docs.nu's own repository (see "Hosted profile" below), then `node scripts/hosted-vars.mjs verify` against the live version.
 5. **deploy-telemetry** — downloads `telemetry-out`, runs `pnpm exec wrangler deploy` from `apps/telemetry/` (in parallel with marketing/live/api).
-6. **deploy-help** — downloads `help-out`, runs `pnpm exec wrangler deploy` from `apps/help/` (in parallel with the others). **deploy-community** does the same for `community-out` from `apps/community/`, after **deploy-api** (its worker has a service binding to the api, so api must exist first).
+6. **deploy-help** — downloads `help-out`, runs `pnpm exec wrangler deploy` from `apps/help/` (in parallel with the others).
 7. **deploy-mcp** — depends on **deploy-api** (the MCP worker has a service binding to the api worker, [MCP server](../015-api/mcp-server.md), so api must exist first). Runs `pnpm exec wrangler deploy` from `apps/mcp/` — no static artifact to download, the worker bundles from source. NOT a `deploy-router` dependency: `mcp.docs.nu` is its own host, not a path under the main hostname.
-8. **deploy-router** — depends on **deploy-marketing**, **deploy-live**, **deploy-api**, **deploy-telemetry**, **deploy-help** and **deploy-community**. Runs `pnpm exec wrangler deploy` from `apps/router/`. The router's service bindings target the six workers above, so it must deploy after they exist. This is the one job carrying a GitHub `environment`, so a run files a single deployment record with the public URL rather than eight.
+8. **deploy-router** — depends on **deploy-marketing**, **deploy-live**, **deploy-api**, **deploy-telemetry** and **deploy-help**. Runs `pnpm exec wrangler deploy` from `apps/router/`. The router's service bindings target the five workers above, so it must deploy after they exist. This is the one job carrying a GitHub `environment`, so a run files a single deployment record with the public URL rather than seven.
 
-`deploy-marketing`, `deploy-api`, `deploy-telemetry` and `deploy-help` run in parallel off `build`, and `deploy-live` and `deploy-community` follow `deploy-api`; `deploy-mcp` runs once `deploy-api` is up (parallel to the rest); `deploy-router` waits for the six it binds (not mcp, which is a separate host).
+`deploy-marketing`, `deploy-api`, `deploy-telemetry` and `deploy-help` run in parallel off `build`, and `deploy-live` follows `deploy-api`; `deploy-mcp` runs once `deploy-api` is up (parallel to the rest); `deploy-router` waits for the five it binds (not mcp, which is a separate host).
 
-All eight deploy jobs use raw `pnpm exec wrangler` rather than `cloudflare/wrangler-action` — wrangler 4 ships sensible defaults and the explicit invocation makes the workflow log read 1:1 against a local run.
+All seven deploy jobs use raw `pnpm exec wrangler` rather than `cloudflare/wrangler-action` — wrangler 4 ships sensible defaults and the explicit invocation makes the workflow log read 1:1 against a local run.
 
 ### Renaming migrations
 
@@ -98,12 +120,13 @@ versions briefly serve side by side. The deploy keeps that window short and reco
 - **deploy-api** syncs its secrets first and applies the migration straight before `wrangler deploy`,
   so the window is the deploy itself.
 - **deploy-live** waits for **deploy-api**, so a new editor never calls an api that lacks its routes;
-  **deploy-router** still waits for the six it binds.
+  **deploy-router** still waits for the five it binds.
 - The editor serves its old address during the overlap ([Router app](router-app.md#legacy-editor-route)),
   and a save that fails in the window is retried on its own
   ([Per-tab storage](../006-document/per-tab-storage.md#retrying-a-failed-save)).
-- Deploy a renaming migration to **staging first**, and to production at a quiet hour: for a minute or
-  so, api calls from open editors can fail and are retried.
+- A renaming migration runs first on its pull request's preview, against a real remote database
+  ([Preview deployments](preview-deployments.md)). Merge it at a quiet hour, since merging deploys it to
+  production: for a minute or so, api calls from open editors can fail and are retried.
 
 There is no down migration; a problem after a renaming migration is fixed forward.
 
@@ -159,7 +182,7 @@ Cloudflare dashboard → any zone → right sidebar → **Account ID** (copy).
 
 ## First deploy
 
-On the first run, none of the workers exist yet. The job ordering handles this: `deploy-marketing`, `deploy-live`, `deploy-api`, `deploy-telemetry`, `deploy-help` and `deploy-community` run first and create those workers, then `deploy-router` runs, by which point its six service-binding targets already exist, so wrangler accepts the bindings.
+On the first run, none of the workers exist yet. The job ordering handles this: `deploy-marketing`, `deploy-live`, `deploy-api`, `deploy-telemetry` and `deploy-help` run first and create those workers, then `deploy-router` runs, by which point its five service-binding targets already exist, so wrangler accepts the bindings.
 
 Subsequent deploys are idempotent updates.
 
@@ -169,7 +192,7 @@ Production lives at **`https://docs.nu`**. The apex routes to the router worker 
 
 - `https://docs.nu/api/*` → api worker (REST + WebSocket).
 - `https://docs.nu/live` and `https://docs.nu/live/<anything>` → live editor (the router strips the `/live` prefix before forwarding).
-- `https://docs.nu/telemetry` → telemetry dashboard; `https://docs.nu/help` → help centre; `https://docs.nu/community` → Community (all prefix-stripped).
+- `https://docs.nu/telemetry` → telemetry dashboard; `https://docs.nu/help` → help centre (both prefix-stripped).
 - Everything else → marketing.
 
 The workers themselves remain reachable at their default `*.workers.dev` URLs for direct testing.

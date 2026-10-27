@@ -3,8 +3,8 @@ import {
   applyLens,
   documentSubject,
   editedCutoff,
-  foldText,
   matchesLens,
+  rankByLens,
   sharedSubject,
 } from './match';
 import { emptyLens, parseLens } from './parse';
@@ -210,10 +210,34 @@ describe('applyLens', () => {
     ];
     expect(applyLens(rows, lensOf('template:kanban'), now).map((row) => row.id)).toEqual([1, 3]);
   });
+
+  it('orders the kept rows by how well their names match, ties in their own order', () => {
+    const rows = [
+      { ...subject({ name: 'Sprint meetnig' }), id: 1 },
+      { ...subject({ name: 'Meeting notes' }), id: 2 },
+      { ...subject({ name: 'Team meeting' }), id: 3 },
+      { ...subject({ name: 'Kanban' }), id: 4 },
+    ];
+    expect(applyLens(rows, lensOf('meeting'), now).map((row) => row.id)).toEqual([2, 3, 1]);
+  });
 });
 
-describe('foldText', () => {
-  it('folds case and accents', () => {
-    expect(foldText('Ångström ÉTÉ')).toBe('angstrom ete');
+describe('rankByLens', () => {
+  const rows = [
+    { name: 'Sprint meetnig', id: 1 },
+    { name: 'Kanban', id: 2 },
+    { name: 'Weekly meeting', id: 3 },
+    { name: 'Meeting notes', id: 4 },
+  ];
+  const subjectOf = (row: { name: string }) => subject({ name: row.name });
+
+  it('takes the first matches in their own order before ranking them', () => {
+    expect(rankByLens(rows, lensOf('meeting'), now, subjectOf, 2).map((row) => row.id)).toEqual([
+      3, 1,
+    ]);
+  });
+
+  it('keeps every row in its own order when the lens has no text', () => {
+    expect(rankByLens(rows, lensOf(''), now, subjectOf).map((row) => row.id)).toEqual([1, 2, 3, 4]);
   });
 });

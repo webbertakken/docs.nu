@@ -14,6 +14,7 @@ import { ViewInfo } from './ViewInfo';
 import { PaneLensBar } from './lens/PaneLensBar';
 import { FilteredEmpty, LoadFailed } from './lens/LensStates';
 import { narrowRows } from './lens/pane-lens';
+import { TitleHighlightProvider } from './lens/TitleHighlight';
 import { TimelineControls } from '@livedoc/ui';
 import { DocumentHistoryDialog } from '@/components/panels/DocumentHistoryDialog';
 import { isOfflineIdSync } from '@/lib/offline/offline-store';
@@ -165,12 +166,13 @@ export function ExplorerPane() {
     timelineUnread,
     refreshAfterTeamPage,
   } = useExplorer();
-  // The shared rows the pane's documents still show, by id: a scan of the documents per shared row was
-  // quadratic, rerun on every keystroke in the lens (63 ms at 1,000 rows).
-  const shownIds = useMemo(
-    () => new Set(paneContent.documents.map((d) => d.id)),
-    [paneContent.documents],
-  );
+  // The shared rows the pane's documents still show, in their order (best match first under a lens), by
+  // id: a scan of the documents per shared row was quadratic, rerun on every keystroke in the lens (63 ms at
+  // 1,000 rows).
+  const shownShared = useMemo(() => {
+    const byId = new Map(shared.map((s) => [s.id, s]));
+    return paneContent.documents.flatMap((d) => byId.get(d.id) ?? []);
+  }, [shared, paneContent.documents]);
 
   // A team you're not a member of 404s in TeamPane (it doesn't leak the
   // name). When that happens, drop the title/breadcrumb above it — there
@@ -276,7 +278,8 @@ export function ExplorerPane() {
   };
 
   return (
-    <>
+    // The lens's words marked in every listed name (explorer-filters.md "Matching").
+    <TitleHighlightProvider text={lensResult.text}>
       {imports.dialogs}
       {tagsPage.dialog}
       {/* Home's hero is its page header (docs/specs/013-workspace/explorer-home.md "The hero"); with the banner
@@ -418,7 +421,7 @@ export function ExplorerPane() {
         <FilteredEmpty issues={lens.parsed.issues} onClear={() => lens.setInput('')} />
       ) : selected.kind === 'shared' ? (
         <SharedList
-          shared={shared.filter((s) => shownIds.has(s.id))}
+          shared={shownShared}
           ownerId={ownerId}
           onDismiss={(id) => void dismissShared(id)}
         />
@@ -445,6 +448,6 @@ export function ExplorerPane() {
           documentName={historyFor?.name ?? null}
         />
       ) : null}
-    </>
+    </TitleHighlightProvider>
   );
 }

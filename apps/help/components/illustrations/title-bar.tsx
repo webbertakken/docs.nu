@@ -63,16 +63,6 @@ function TeamGlyph({ x, y, cls }: { x: number; y: number; cls: string }) {
   );
 }
 
-function GlobeGlyph({ x, y, cls }: { x: number; y: number; cls: string }) {
-  return (
-    <Glyph x={x} y={y} cls={cls}>
-      <circle r={4.8} />
-      <ellipse rx={2} ry={4.8} />
-      <path d="M-4.8 0 h9.6" />
-    </Glyph>
-  );
-}
-
 function BrowserGlyph({ x, y, cls }: { x: number; y: number; cls: string }) {
   return (
     <Glyph x={x} y={y} cls={cls}>
@@ -227,11 +217,10 @@ const STOPS = [
   { word: 'Just you', Icon: LockGlyph },
   { word: 'Link', Icon: LinkGlyph },
   { word: 'Team', Icon: TeamGlyph },
-  { word: 'Everyone', Icon: GlobeGlyph },
 ] as const;
 
 /** The legend that opens under the visibility pill, for a Shared document: the hero with its
- *  reach rings, the four audiences from Just you to Everyone with Link filled to, This Browser
+ *  reach rings, the three audiences from Just you to Team with Link filled to, This Browser
  *  apart beneath them, and Change Who Can See This for the owner. */
 export function VisibilityLegendFigure() {
   const cardX = 70;
@@ -241,7 +230,7 @@ export function VisibilityLegendFigure() {
   const ringsX = 112;
   const ringsY = top + 40;
   const stopY = 166;
-  const stopXs = [117, 179, 241, 303];
+  const stopXs = [117, 210, 303];
   return (
     <Scene w={420} h={300}>
       {/* The pill the legend hangs from, beside the document name. */}
@@ -286,11 +275,11 @@ export function VisibilityLegendFigure() {
       <circle
         cx={ringsX}
         cy={ringsY}
-        r={13}
+        r={17}
         className="fill-emerald-500/15 stroke-emerald-500"
         strokeWidth={1.4}
       />
-      {[20, 27].map((r) => (
+      {[27].map((r) => (
         <circle
           key={r}
           cx={ringsX}
@@ -307,8 +296,8 @@ export function VisibilityLegendFigure() {
         return (
           <circle
             key={deg}
-            cx={ringsX + 13 * Math.cos(a)}
-            cy={ringsY + 13 * Math.sin(a)}
+            cx={ringsX + 17 * Math.cos(a)}
+            cy={ringsY + 17 * Math.sin(a)}
             r={2.4}
             className="fill-emerald-600"
           />
@@ -338,11 +327,8 @@ export function VisibilityLegendFigure() {
       </Label>
 
       {/* The audiences on one scale, filled to the current stop. */}
-      <Label x={86} y={top + 100} size={8.5} weight={700} tone="muted">
-        FROM JUST YOU TO EVERYONE
-      </Label>
       <rect x={117} y={stopY - 2} width={186} height={4} rx={2} className="fill-slate-100" />
-      <rect x={117} y={stopY - 2} width={62} height={4} rx={2} className="fill-emerald-400" />
+      <rect x={117} y={stopY - 2} width={93} height={4} rx={2} className="fill-emerald-400" />
       {STOPS.map(({ word, Icon }, i) => {
         const cx = stopXs[i]!;
         const current = i === 1;

@@ -1,0 +1,94 @@
+name: Main red
+
+# Any red workflow run on `main` opens an issue, or comments on the one already open, and the next
+# green run of that workflow on `main` closes it. One issue per workflow, titled
+# "<workflow> on main is red" and labelled `main-red`, so each failure has one thread to follow.
+# See docs/specs/016-platform/deployment.md#a-red-main.
+#
+# Canvas Performance is left out: it already reports through its own issue (canvas-perf.yml).
+on:
+  workflow_run:
+    workflows:
+      - CI
+      - E2E Smoke
+      - CodeQL
+      - Deploy Production
+      - CLI publish
+      - Publish MCP server to registry
+      - Lucide re-vendor
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  issues: write
+
+# One report per workflow at a time, in the order the runs finish, so two reports never race on
+# the same issue.
+concurrency:
+  group: main-red-${{ github.event.workflow_run.workflow_id }}
+  cancel-in-progress: false
+
+jobs:
+  report:
+    name: Report
+    # Runs on `main` only: a pull request's run is its own author's to fix, and its checks say so.
+    if: >-
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Open, update or close the workflow's issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.event.workflow_run.name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          COMMIT_TITLE: ${{ github.event.workflow_run.display_title }}
+        run: |
+          set -euo pipefail
+          title="$WORKFLOW on main is red"
+          short="${SHA:0:10}"
+          issue=$(gh issue list --label main-red --state open --limit 100 --json number,title \
+            | jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty')
+
+          case "$CONCLUSION" in
+            failure | timed_out | startup_failure)
+              failed=$(gh api --paginate "repos/$GH_REPO/actions/runs/$RUN_ID/jobs" \
+                --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out") | "- [\(.name)](\(.html_url))"' \
+                || true)
+              [ -n "$failed" ] || failed='- (no job named; see the run)'
+              body=$(printf "\`%s\` (%s) on \`main\` ended **%s** (%s).\n\nFailed jobs:\n%s\n\nRun: %s\n" \
+                "$short" "$COMMIT_TITLE" "$CONCLUSION" "$RUN_EVENT" "$failed" "$RUN_URL")
+              gh label create main-red --color B60205 --description 'A workflow on main is red' --force
+              if [ -n "$issue" ]; then
+                gh issue comment "$issue" --body "$body"
+                echo "main-red: commented on #$issue ($WORKFLOW, $CONCLUSION at $short)"
+              else
+                url=$(gh issue create --title "$title" --label main-red --body "$body")
+                echo "main-red: opened $url ($WORKFLOW, $CONCLUSION at $short)"
+              fi
+              printf '%s\n' "$body" >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            success)
+              # Only the tip of `main` closes: an older commit's green run finishing late must not
+              # close an issue a newer commit's failure opened.
+              tip=$(gh api "repos/$GH_REPO/commits/main" --jq .sha)
+              if [ -n "$issue" ] && [ "$tip" != "$SHA" ]; then
+                echo "main-red: $WORKFLOW green at $short, but main is at ${tip:0:10}; #$issue stays open"
+              elif [ -n "$issue" ]; then
+                gh issue close "$issue" --comment "Green again: \`$short\` ($COMMIT_TITLE) in $RUN_URL"
+                echo "main-red: closed #$issue ($WORKFLOW green at $short)"
+              else
+                echo "main-red: $WORKFLOW green at $short; no open issue"
+              fi
+              ;;
+            *)
+              echo "main-red: $WORKFLOW ended $CONCLUSION at $short; nothing to report"
+              ;;
+          esac

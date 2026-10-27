@@ -22,9 +22,9 @@ interchangeable. These are design decisions, taken before any feature that uses 
 - Running a session (a retro, a town hall) is Workshop mode. A session is an activity, never a tab kind or a
   stored thing; "Session" and "Collaborate" never name the mode, and neither does its old name, "Facilitate".
 - "Workshop" names the mode; a start's template group is never called Workshops (Workshop mode's is **Ideation**,
-  Draw's **Exercises**). The template catalogue's **Workshops** category and the community's **Workshops**
-  category stay: they say what a template is for, as **Planning** does beside Plan mode, and most of their
-  templates open in Workshop mode.
+  Draw's **Exercises**). The template catalogue's **Workshops** category
+  stays: it says what a template is for, as **Planning** does beside Plan mode, and most of its templates open in
+  Workshop mode.
 
 ### Kind
 
@@ -222,22 +222,6 @@ The words for folders of pages read together ([Wikis](../032-wikis/README.md)).
 | **orphan page**      | A page no other page of its wiki links to                                 | lost page, unlinked page                |
 | **broken link**      | A link whose target LiveDoc cannot find                                   | dead link, 404                          |
 | **wiki health**      | A wiki's orphan pages, broken links and pages missing from its entry page | lint, audit, report                     |
-
-## Community
-
-The words for the public gallery of published documents ([Community](../025-community/community.md)).
-
-| Term               | Means                                                                                       | Never called                          |
-| ------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------- |
-| **Community**      | The public gallery of published documents; the app at `/community`                          | Gallery, Showcase or Feed as its name |
-| **post**           | One document published to Community (`CommunityPost`); a document has at most one           | listing (in code), entry, submission  |
-| **author**         | The signed-in owner who published a post, shown by their display identity                   | creator, poster, publisher            |
-| **category**       | The one coarse subject of a post, from a closed set (`architecture`, `flows`, ...)          | type, kind (that is a tab's), section |
-| **tag**            | A normalised free-form word on a post, up to five                                           | label, keyword, topic                 |
-| **community link** | The view-role share link a post owns: never listed, never expires, no room, no comments     | public link, gallery link             |
-| **community key**  | The random per-browser key the Community app sends for likes and reports; never an owner id | voter id, device id                   |
-
-- **Edit Listing** names the act of changing a post's details in copy; the thing is still a post.
 
 ## Animation
 

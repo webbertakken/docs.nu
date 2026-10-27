@@ -1,7 +1,6 @@
 import { DOCUMENT_FORMAT } from '@livedoc/api-schema';
 import { identityConfigOf } from '../auth/identity-config';
 import { aiConfigured } from '../ai-provider';
-import { communityEnabled } from '../community-enabled';
 import { emailEnabled } from '../email/client';
 import { emailTransportKind } from '../email/transport';
 import { driveMode } from '../drive/config';
@@ -70,8 +69,6 @@ export function handleCapabilities(ctx: RouteContext): Response {
     // docs/specs/022-drive-mirror/drive-mirror.md: which Drive token path the app takes;
     // 'off' hides the Drive entry.
     driveMode: driveMode(env),
-    // docs/specs/025-community/community.md "Turning the Community off": false hides the Community from every app.
-    communityEnabled: communityEnabled(env),
     ...cliCapabilities(ctx),
   });
 }
