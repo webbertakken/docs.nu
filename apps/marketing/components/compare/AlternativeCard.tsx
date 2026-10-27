@@ -15,7 +15,7 @@ export function AlternativeCard({ alt }: { alt: Alternative }) {
   const look = COMPETITOR_LOOK[alt.slug];
   return (
     <a
-      href={`/alternatives/${alt.slug}`}
+      href={`/about/alternatives/${alt.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-700"
     >
       <span

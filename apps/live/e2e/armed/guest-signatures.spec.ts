@@ -35,8 +35,8 @@ test.describe('a first-time guest with signatures enforced', () => {
   test('creates a document after arriving on /', async ({ page, pageErrors }) => {
     const api = recordApi(page);
     await page.goto('/');
-    await page.waitForURL(/\/new/);
-    await page.getByText('New Document', { exact: false }).waitFor();
+    // The front door lands on Explorer Home (docs/specs/013-workspace/explorer-home.md "Route").
+    await page.waitForURL(/\/explorer\/home/);
     // Landing signs the guest before anything else; the wizard then starts from that page's identity.
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem('livedoc:v2:self-sig')))

@@ -7,6 +7,10 @@ brings, in one screen: "what was I working on?" and "what happened while I was a
 ## Route
 
 - Home lives at `/explorer/home`. `/explorer`, and any Explorer URL that names no view, lands on it.
+- **The site's front door is Home** ([Purpose](../001-project-vision/purpose.md#the-product-comes-first)). Opening
+  `/` sends the reader on to `/explorer/home` before any page is served (the live worker's `302`; the live app's own
+  `/` page does the same where no worker is in front), so every Explorer view keeps one address under `/explorer`
+  and one shell. The query string goes along.
 - The **Timeline** ([Timeline](timeline.md)) lives at `/explorer/timeline`, with a sidebar row of its own under the
   Inbox ([Explorer structure](explorer-structure.md)). What Happened's **See Timeline** link also opens it; its
   breadcrumb is its own (**Timeline**).

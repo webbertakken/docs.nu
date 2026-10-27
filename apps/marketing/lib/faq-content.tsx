@@ -508,8 +508,8 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             a one-time authorisation, it can find, read, create and edit the documents in your
             account, including writing articles, building slide decks and designing logos. Its
             changes appear live for anyone on the tab, outlined so you can see them and undo them.{' '}
-            <a href="/ai">Build with AI</a> walks you through connecting Claude, ChatGPT, Cursor and
-            more.
+            <a href="/about/ai">Build with AI</a> walks you through connecting Claude, ChatGPT,
+            Cursor and more.
           </>
         ),
         aText:
@@ -694,8 +694,8 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         q: 'Is LiveDoc up right now?',
         a: (
           <>
-            The <a href="/status">status page</a> lists every part of the service and notes any
-            incident we are working on. If it loads, the site is up.
+            The <a href="/about/status">status page</a> lists every part of the service and notes
+            any incident we are working on. If it loads, the site is up.
           </>
         ),
         aText:

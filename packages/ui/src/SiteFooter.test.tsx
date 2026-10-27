@@ -29,7 +29,7 @@ describe('SiteFooter', () => {
       'GitHub',
     ]);
     expect(footerNav).toContain('href="/help/policies/report-a-vulnerability/"');
-    expect(footerNav).toContain('href="/licences"');
+    expect(footerNav).toContain('href="/about/licences"');
   });
 
   it('gives an icon to the key links only', () => {

@@ -4,14 +4,14 @@ import sitemap from './sitemap';
 
 describe('sitemap', () => {
   it('lists the licences page as a low-priority transparency page', () => {
-    const entry = sitemap().find((e) => e.url === 'https://docs.nu/licences');
+    const entry = sitemap().find((e) => e.url === 'https://docs.nu/about/licences');
     expect(entry).toMatchObject({ changeFrequency: 'monthly', priority: 0.2 });
   });
 });
 
 describe('sitemap: Build with AI', () => {
   it('lists /ai (docs/specs/019-marketing/build-with-ai.md "Metadata")', () => {
-    const entry = sitemap().find((e) => e.url === 'https://docs.nu/ai');
+    const entry = sitemap().find((e) => e.url === 'https://docs.nu/about/ai');
     expect(entry).toMatchObject({ changeFrequency: 'monthly', priority: 0.8 });
   });
 });

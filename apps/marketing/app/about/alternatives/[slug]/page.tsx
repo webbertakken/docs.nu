@@ -46,7 +46,7 @@ export async function generateMetadata({
   return pageMetadata({
     title: alt.title,
     description: alt.description,
-    path: `/alternatives/${slug}`,
+    path: `/about/alternatives/${slug}`,
     modifiedTime: ALTERNATIVES_LAST_UPDATED,
   });
 }
@@ -86,14 +86,14 @@ export default async function AlternativePage({ params }: { params: Promise<{ sl
       <JsonLd data={faqJsonLd} />
       <BreadcrumbJsonLd
         trail={[
-          { name: 'Product Comparison', path: '/alternatives' },
-          { name: `${alt.name} alternative`, path: `/alternatives/${slug}` },
+          { name: 'Product Comparison', path: '/about/alternatives' },
+          { name: `${alt.name} alternative`, path: `/about/alternatives/${slug}` },
         ]}
       />
       <Header surface="Compare" />
       <Breadcrumb
         items={[
-          { label: 'Product Comparison', href: '/alternatives' },
+          { label: 'Product Comparison', href: '/about/alternatives' },
           { label: `${alt.name} alternative` },
         ]}
       />

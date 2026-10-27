@@ -7,7 +7,7 @@
     "build": "wrangler deploy --dry-run --outdir dist",
     "deploy": "wrangler deploy",
     "deploy:check": "wrangler deploy --dry-run",
-    "dev": "wrangler dev --env local --port 4000 --inspector-port 9231",
+    "dev": "wrangler dev --env local --port 4000 --inspector-port 9231 --local-upstream localhost:4000",
     "lint": "oxlint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

@@ -17,7 +17,7 @@ import { CodeSnippet } from './CodeSnippet';
 import { StepText } from './StepText';
 
 // Pick your tool (docs/specs/019-marketing/build-with-ai.md "The page" 3): a tab per client, grouped, its steps in
-// the panel beside. The choice mirrors into the URL hash so `/ai#cursor` opens on Cursor. Every panel is in the
+// the panel beside. The choice mirrors into the URL hash so `/about/ai#cursor` opens on Cursor. Every panel is in the
 // HTML (inactive ones `hidden`), so the instructions are indexable and the first one reads before hydration.
 // Tabs follow the WAI-ARIA pattern: roving tabIndex, arrows / Home / End move and select.
 

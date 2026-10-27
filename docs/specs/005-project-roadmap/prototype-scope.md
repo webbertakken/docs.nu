@@ -6,7 +6,7 @@ The frontend-only prototype phase ended once the API app landed. This spec captu
 
 Eight apps, all deployable to Cloudflare Workers (with Static Assets for the five Next.js apps):
 
-- **marketing**: static landing site at `/`.
+- **marketing**: static landing site under `/about` (`/` is the Explorer).
 - **live**: the diagram editor (clean routes, no `/live` prefix). Statically exported Next.js.
 - **telemetry**: public anonymous-events dashboard at `/telemetry`. Statically exported Next.js. Reads aggregate counts from the api worker's D1 events table. See [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md).
 - **help**: the help centre at `/help`. Statically exported Next.js with MDX articles.

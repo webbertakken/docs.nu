@@ -218,7 +218,7 @@ RDP commit and uniform Catmull-Rom stay.
   - simplify-js: BSD-2-Clause.
   - 1eurofilter (npm): BSD-3-Clause.
   - Graphics Gems `FitCurves.c`: permissive EULA (use in any product, no credit required).
-  - Google ink-stroke-modeler and the ink-stroke-modeler-ts port: Apache-2.0, compatible with an MIT codebase when the licence and NOTICE travel with it. Any adopted package appears on `/licences` through `packages/licences`.
+  - Google ink-stroke-modeler and the ink-stroke-modeler-ts port: Apache-2.0, compatible with an MIT codebase when the licence and NOTICE travel with it. Any adopted package appears on `/about/licences` through `packages/licences`.
 
 ## Sources
 

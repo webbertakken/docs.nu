@@ -39,7 +39,7 @@ export type LicencesManifest = {
 export const LICENCES_SCHEMA_VERSION = 1;
 
 // Where the page fetches a text: `${TEXTS_URL_PREFIX}${hash}.txt`.
-export const TEXTS_URL_PREFIX = '/licences/texts/';
+export const TEXTS_URL_PREFIX = '/about/licences/texts/';
 
 // A text box shows this many lines before it scrolls (blueprint D1).
 export const TEXT_BOX_MAX_LINES = 24;

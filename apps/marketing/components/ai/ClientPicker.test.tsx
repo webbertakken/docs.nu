@@ -37,7 +37,7 @@ describe('ClientPicker', () => {
 
   it('opens on the client a link names, in its first render', () => {
     wide(true);
-    window.history.replaceState(null, '', '/ai#cursor');
+    window.history.replaceState(null, '', '/about/ai#cursor');
     vi.stubGlobal('requestAnimationFrame', () => 0);
     render(<ClientPicker />);
     expect(screen.getByRole('tab', { name: /Cursor/ }).getAttribute('aria-selected')).toBe('true');

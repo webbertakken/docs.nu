@@ -15,7 +15,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
         aria-label="Breadcrumb"
         className="mx-auto flex min-w-0 max-w-6xl flex-wrap items-center gap-2 px-6 py-2.5 text-sm text-slate-500 dark:text-slate-400"
       >
-        <BreadcrumbTrail items={items} rootLabel="Home" />
+        <BreadcrumbTrail items={items} rootLabel="Home" rootHref="/about" />
       </nav>
     </div>
   );

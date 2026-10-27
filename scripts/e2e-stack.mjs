@@ -495,6 +495,13 @@ function startLiveServer() {
       res.end();
       return;
     }
+    // And its front door: `/` lands on Home, query kept.
+    if (pathname === '/') {
+      const search = new URL(req.url, 'http://localhost').search;
+      res.writeHead(302, { Location: `${EXPLORER_LANDING_PATH}${search}` });
+      res.end();
+      return;
+    }
     // Cloudflare's assets layer (`html_handling` defaults to
     // "auto-trailing-slash") answers `/new/` — whose file is `new.html`, not
     // `new/index.html` — with a redirect to `/new`, query intact. Without

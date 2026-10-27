@@ -34,7 +34,7 @@ describe('ExplorerHeaderMenu', () => {
     const open = vi.spyOn(window, 'open').mockReturnValue(null);
     openMenu();
     fireEvent.click(within(screen.getByRole('menu')).getByRole('menuitem', { name: 'Licences' }));
-    expect(open).toHaveBeenCalledWith('/licences', '_blank', 'noopener,noreferrer');
+    expect(open).toHaveBeenCalledWith('/about/licences', '_blank', 'noopener,noreferrer');
     expect(screen.queryByRole('menu')).toBeNull();
   });
 });

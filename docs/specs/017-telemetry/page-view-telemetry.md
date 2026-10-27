@@ -39,7 +39,7 @@ router stays pure routing.
 ## The event
 
 A page view is an ordinary [Telemetry + public transparency dashboard](telemetry.md) event: **`Page` · `View` · `<path>`**. The
-`type` is the normalised page path, e.g. `/`, `/alternatives/miro`,
+`type` is the normalised page path, e.g. `/`, `/about/alternatives/miro`,
 `/help/canvas/the-canvas`, `/explorer/recent`, `/document`.
 
 Carrying it as an event rather than a new table or endpoint means it rides the

@@ -182,7 +182,7 @@ nothing. To run it:
    `CONSENT_BASE_URL` (in `apps/mcp/wrangler.toml`) to your live app's origin and
    `NEXT_PUBLIC_MCP_ORIGIN` (live and marketing build env) to the MCP origin, so the
    consent page posts the minted token only to your trusted host and the Build
-   with AI page (`/ai`) gives AI tools your address, not the hosted one.
+   with AI page (`/about/ai`) gives AI tools your address, not the hosted one.
 
 3. **Deploy after the api worker** (it reaches api over a service binding). The
    deploy workflow already orders `mcp` after `api`. Tokens minted via the MCP
@@ -326,7 +326,8 @@ Both default to "no limit" when unset, blank, `0`, or non-numeric, which is the 
 
 Add a custom-domain route to the router worker (`apps/router/wrangler.toml`) and point your DNS at Cloudflare. The router stitches all paths under one hostname:
 
-- `/` → marketing
+- `/` → live editor, which lands it on Explorer Home
+- `/about`, `/about/*` → marketing (its old root addresses, `/faq` and the rest, redirect there)
 - `/document/*`, `/explorer/*`, `/new`, `/join`, `/sign-in`, `/get-started`, `/embed` → live editor (clean routes; `/live/*` carries only its `_next` assets)
 - `/telemetry` → telemetry dashboard
 - `/help` → help centre

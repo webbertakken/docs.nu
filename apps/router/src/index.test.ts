@@ -114,21 +114,64 @@ describe('production dispatch (service bindings)', () => {
   it('serves the licences page and its texts from marketing', async () => {
     // docs/specs/002-project-scope/third-party-licences.md
     const { env, marketing } = makeEnv();
-    await dispatch('/licences', env);
-    await dispatch('/licences/texts/0123456789abcdef.txt', env);
+    await dispatch('/about/licences', env);
+    await dispatch('/about/licences/texts/0123456789abcdef.txt', env);
     expect(marketing.urls).toEqual([
-      'https://docs.nu/licences',
-      'https://docs.nu/licences/texts/0123456789abcdef.txt',
+      'https://docs.nu/about/licences',
+      'https://docs.nu/about/licences/texts/0123456789abcdef.txt',
     ]);
   });
 
-  it('everything else lands on marketing', async () => {
+  it('hands the front door to the live app (docs/specs/001-project-vision/purpose.md)', async () => {
     const { env, marketing, live } = makeEnv();
     await dispatch('/', env);
-    await dispatch('/faq', env);
-    await dispatch('/alternatives/xmind', env);
-    expect(marketing.urls).toHaveLength(3);
+    await dispatch('/?s=abc', env);
+    expect(live.urls).toEqual(['https://docs.nu/', 'https://docs.nu/?s=abc']);
+    expect(marketing.urls).toEqual([]);
+  });
+
+  it('serves the marketing site under /about, and everything else from marketing', async () => {
+    const { env, marketing, live } = makeEnv();
+    await dispatch('/about', env);
+    await dispatch('/about/faq', env);
+    await dispatch('/about/alternatives/xmind', env);
+    await dispatch('/_next/static/chunk.js', env);
+    await dispatch('/robots.txt', env);
+    await dispatch('/no-such-page', env);
+    expect(marketing.urls).toHaveLength(6);
     expect(live.urls).toHaveLength(0);
+  });
+});
+
+describe("marketing's addresses from before /about", () => {
+  it.each([
+    ['/faq', 'https://docs.nu/about/faq'],
+    ['/ai', 'https://docs.nu/about/ai'],
+    ['/features/sharing', 'https://docs.nu/about/features/sharing'],
+    ['/alternatives/xmind?ref=x', 'https://docs.nu/about/alternatives/xmind?ref=x'],
+    ['/security', 'https://docs.nu/about/security'],
+    ['/status', 'https://docs.nu/about/status'],
+    ['/licences/texts/a.txt', 'https://docs.nu/about/licences/texts/a.txt'],
+    ['/privacy', 'https://docs.nu/about/privacy'],
+    ['/terms', 'https://docs.nu/about/terms'],
+  ])('redirects %s permanently under /about', async (path, location) => {
+    const { env, marketing } = makeEnv();
+    const res = await dispatch(path, env);
+    expect(res.status).toBe(308);
+    expect(res.headers.get('location')).toBe(location);
+    expect(marketing.urls).toEqual([]);
+  });
+
+  it('covers every marketing page outside /about', async () => {
+    // A page the marketing app serves outside app/about/ would never be reached by an old link's
+    // redirect, nor kept out of the front door; the move is whole or it is wrong.
+    const marketingApp = fileURLToPath(new URL('../../marketing/app', import.meta.url).href);
+    const routes = readdirSync(marketingApp).filter(
+      (entry) =>
+        statSync(`${marketingApp}/${entry}`).isDirectory() &&
+        readdirSync(`${marketingApp}/${entry}`).some((file) => /^page\.tsx$/.test(file)),
+    );
+    expect(routes).toEqual(['about']);
   });
 });
 
@@ -191,14 +234,14 @@ describe('bare help-article paths', () => {
 
   it('leaves marketing and live routes alone', async () => {
     for (const path of [
-      '/',
-      '/faq',
-      '/alternatives',
-      '/privacy',
-      '/terms',
-      '/security',
+      '/about',
+      '/about/faq',
+      '/about/alternatives',
+      '/about/privacy',
+      '/about/terms',
+      '/about/security',
       '/.well-known/security.txt',
-      '/features',
+      '/about/features',
     ]) {
       const { env, marketing } = makeEnv();
       const res = await dispatch(path, env);
@@ -212,13 +255,13 @@ describe('bare help-article paths', () => {
 
   it('covers every help category the registry declares', async () => {
     // The list in index.ts is hand-kept; this is what stops it drifting when
-    // the help centre grows a category. `explorer` is the one exclusion: the
-    // live app owns that segment.
+    // the help centre grows a category. `explorer` and `about` are the two exclusions: the
+    // live app owns the one, marketing the other.
     const { categories } = await import('@livedoc/help-registry');
     expect(categories.length).toBeGreaterThan(15);
     const missed: string[] = [];
     for (const category of categories) {
-      if (category.slug === 'explorer') continue;
+      if (category.slug === 'explorer' || category.slug === 'about') continue;
       const { env } = makeEnv();
       const res = await dispatch(`/${category.slug}/an-article/`, env);
       if (res.status !== 308) missed.push(category.slug);
@@ -236,7 +279,7 @@ describe('preview noindex header', () => {
 
   it('marks a marketing response noindex on a preview', async () => {
     const { env } = makeEnv();
-    const res = await dispatch('/faq', preview(env));
+    const res = await dispatch('/about/faq', preview(env));
     expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
   });
 
@@ -257,19 +300,19 @@ describe('preview noindex header', () => {
 
   it('leaves production untouched', async () => {
     const { env } = makeEnv();
-    const res = await dispatch('/faq', env);
+    const res = await dispatch('/about/faq', env);
     expect(res.headers.get('X-Robots-Tag')).toBeNull();
   });
 
   it('leaves any other environment name untouched', async () => {
     const { env } = makeEnv();
-    const res = await dispatch('/faq', { ...env, DEPLOY_ENV: 'staging' });
+    const res = await dispatch('/about/faq', { ...env, DEPLOY_ENV: 'staging' });
     expect(res.headers.get('X-Robots-Tag')).toBeNull();
   });
 
   it('keeps the response body and status intact', async () => {
     const { env } = makeEnv();
-    const res = await dispatch('/faq', preview(env));
+    const res = await dispatch('/about/faq', preview(env));
     expect(res.status).toBe(200);
     await expect(res.text()).resolves.toBe('ok');
   });
@@ -304,7 +347,7 @@ describe('the caching rules', () => {
       HELP: answering('<html></html>', html),
       TELEMETRY: answering('<html></html>', html),
     };
-    for (const page of ['/', '/explorer/unsorted', '/help/canvas/', '/telemetry']) {
+    for (const page of ['/', '/about', '/explorer/unsorted', '/help/canvas/', '/telemetry']) {
       expect((await dispatch(page, env)).headers.get('Cache-Control'), page).toBe('no-store');
     }
     const assets: Env = {
