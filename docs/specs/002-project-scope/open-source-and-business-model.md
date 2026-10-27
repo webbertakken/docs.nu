@@ -9,7 +9,7 @@ exist to pay for hosting; they never buy features.
 The codebase is licensed under **MIT** (see `LICENSE` at the repo root). Permissive on purpose: anyone may self-host,
 modify, embed, or build derivative works, commercial or not. No copyleft.
 
-The third-party work the apps ship is credited on the generated `/licences` page ([Third-party licences](third-party-licences.md)).
+The third-party work the apps ship is credited on the generated `/about/licences` page ([Third-party licences](third-party-licences.md)).
 
 ## Distribution model
 

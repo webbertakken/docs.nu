@@ -2,7 +2,7 @@
 // (docs/specs/002-project-scope/third-party-licences.md). Runs in the marketing
 // build, locally and in CI alike:
 //   node packages/licences/scripts/generate.ts --out apps/marketing
-// Writes <out>/generated/licences.json and <out>/public/licences/texts/*.txt.
+// Writes <out>/generated/licences.json and <out>/public/about/licences/texts/*.txt.
 import { spawnSync } from 'node:child_process';
 import {
   mkdirSync,
@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { decodeAnalyzeData } from '../src/analyze-data.ts';
 import { LICENCE_APPS, type LicenceApp } from '../src/apps.ts';
 import { collectWorks, type AppBundle, type Collected, type FileReader } from '../src/collect.ts';
+import { LICENCES_PAGE_SEGMENTS } from '../src/contract.ts';
 import { EMBEDDED_WORKS } from '../src/embedded-works.ts';
 import { LicencesError } from '../src/errors.ts';
 import { buildManifest, serialiseManifest } from '../src/manifest.ts';
@@ -170,7 +171,7 @@ function main() {
   });
   for (const entry of unused) log('licences.table.unused', entry);
 
-  const textsDir = join(out, 'public', 'licences', 'texts');
+  const textsDir = join(out, 'public', ...LICENCES_PAGE_SEGMENTS, 'texts');
   rmSync(textsDir, { recursive: true, force: true });
   mkdirSync(textsDir, { recursive: true });
   for (const [hash, text] of texts) writeFileSync(join(textsDir, `${hash}.txt`), text);

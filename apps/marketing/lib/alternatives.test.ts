@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ALTERNATIVES, ALTERNATIVE_SLUGS, getAlternative } from './alternatives';
 
-// `ALTERNATIVES` drives the dynamic `/alternatives/<slug>` route's
+// `ALTERNATIVES` drives the dynamic `/about/alternatives/<slug>` route's
 // `generateStaticParams`, every page's per-slug metadata, the
 // /alternatives index list, and the sitemap entries. A drift in
 // the data (a duplicated slug, an entry missing required copy, a

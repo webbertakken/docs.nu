@@ -56,7 +56,6 @@ function TeamRow({
   return (
     <SidebarRow
       icon={<TeamIcon />}
-      tone="indigo"
       label={t.name}
       textLabel={t.name}
       selected={selected.kind === 'team' && selected.id === t.id}

@@ -12,8 +12,7 @@ import {
   type LensContext,
   type LensSubject,
 } from '@livedoc/explorer-lens';
-import { LensField, LensFieldStill } from './LensField';
-import { requestBarFocus, takeBarFocus } from './lens-focus-handoff';
+import { LensField } from './LensField';
 import type { ExplorerLens } from './useExplorerLens';
 
 afterEach(cleanup);
@@ -26,22 +25,15 @@ function Harness({
   initial = '',
   context = aggregate,
   subjects = [],
-  home = false,
-  size,
-  trailing,
 }: {
   initial?: string;
   context?: LensContext;
   subjects?: LensSubject[];
-  /** A view with no lens of its own (Home): typing opens Search results. */
-  home?: boolean;
-  size?: 'bar' | 'hero';
-  trailing?: React.ReactNode;
 }) {
   const [input, setInputState] = useState(initial);
   const [caret, setCaret] = useState<number | null>(null);
   const lens: ExplorerLens = {
-    view: home ? null : context.view,
+    view: context.view,
     context,
     input,
     caret,
@@ -56,7 +48,7 @@ function Harness({
   };
   return (
     <>
-      <LensField lens={lens} subjects={subjects} size={size} trailing={trailing} />
+      <LensField lens={lens} subjects={subjects} />
       <output data-testid="lens">{input}</output>
     </>
   );
@@ -163,61 +155,5 @@ describe('LensField', () => {
         ', not applied: The breadcrumb sets the space here, so Space filters don’t apply.',
       ),
     ).toBeTruthy();
-  });
-});
-
-// Home's hero (explorer-filters.md "The field"): the same field drawn large, New document inside its end, and the
-// typing handed to the header's field on Search results.
-describe('LensField in the hero', () => {
-  afterEach(() => {
-    takeBarFocus();
-  });
-
-  it('draws large, with its trailing control inside the field', () => {
-    render(<Harness home size="hero" trailing={<button type="button">New document</button>} />);
-    const box = field().parentElement!;
-    expect(box.className).toContain('h-[60px]');
-    expect(box.contains(screen.getByRole('button', { name: 'New document' }))).toBe(true);
-    expect(field().dataset.lensInput).toBe('hero');
-  });
-
-  it('asks the header field to take over when a word opens Search results', () => {
-    render(<Harness home size="hero" />);
-    type('plan');
-    expect(takeBarFocus()).toBe(true);
-  });
-
-  it('asks nothing for a view with a lens of its own, or for spaces alone', () => {
-    render(<Harness size="hero" />);
-    type('plan');
-    expect(takeBarFocus()).toBe(false);
-    cleanup();
-    render(<Harness home size="hero" />);
-    type('   ');
-    expect(takeBarFocus()).toBe(false);
-  });
-
-  it('focuses the header field that mounts after the hand-off, caret after the words', () => {
-    requestBarFocus();
-    render(<Harness initial="plan" />);
-    expect(document.activeElement).toBe(field());
-    const input = field() as HTMLInputElement;
-    expect(input.selectionStart).toBe(input.value.length);
-  });
-
-  it('leaves the focus where it is when nothing was handed off', () => {
-    render(<Harness initial="plan" />);
-    expect(document.activeElement).not.toBe(field());
-  });
-});
-
-describe('LensFieldStill', () => {
-  it('draws the field with nothing live in it: no combobox, hidden from assistive technology', () => {
-    const { container } = render(<LensFieldStill size="hero" trailing={<span>New</span>} />);
-    expect(screen.queryByRole('combobox')).toBeNull();
-    const still = container.querySelector('[data-lens-still]')!;
-    expect(still.getAttribute('aria-hidden')).toBe('true');
-    expect(still.textContent).toContain('Search or filter documents');
-    expect(still.firstElementChild!.className).toContain('h-[60px]');
   });
 });

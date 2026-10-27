@@ -26,7 +26,7 @@ export type AiClientStep = {
 };
 
 export type AiClient = {
-  /** Stable, also the URL hash that opens this tab (`/ai#cursor`). */
+  /** Stable, also the URL hash that opens this tab (`/about/ai#cursor`). */
   id: string;
   name: string;
   group: AiClientGroup;

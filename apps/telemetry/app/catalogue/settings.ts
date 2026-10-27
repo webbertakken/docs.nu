@@ -136,7 +136,7 @@ export const APPEARANCE_SETTINGS = settingsStack('Appearance Settings', 'How the
     'HomeBannerOn',
     'HomeBannerOff',
     'Home Banner',
-    'The greeting and large search at the top of Explorer Home, closed from its corner or switched in Settings.',
+    'The greeting and large search that once opened Explorer Home. Retired with the banner in October 2026; no longer recorded.',
   ),
   toggle(
     'UI',

@@ -1,6 +1,6 @@
 // Home's first run (docs/specs/013-workspace/explorer-home.md "First run"), pure: when a person has nothing yet, the
-// copy the page speaks with, and where its searches lead. The starts themselves (template picks) are
-// first-run-starts.ts, kept apart so the hero, on every Home, never loads the template catalogue.
+// copy the welcome speaks with. The starts themselves (template picks) are first-run-starts.ts, kept apart so a
+// returning person's Home never loads the template catalogue.
 
 /** Nothing yet: once the lists have loaded, no document of their own, shared, in a team or in this browser. A list
  * that failed to load says nothing, so it is never read as an empty account. */
@@ -22,29 +22,10 @@ export function isFirstRun(input: {
   );
 }
 
-/** The wizard, its template search opened on the words; the wizard alone for none. */
-export function welcomeSearchHref(words: string): string {
-  const q = words.trim();
-  return q ? `/new?q=${encodeURIComponent(q)}` : '/new';
-}
-
-/** The field's Start Blank: the wizard asks which mode, then opens that mode's blank with its start closed
- *  (new-document-route.md "Start Blank after a mode"). */
-export const WELCOME_START_BLANK_HREF = '/new?start=blank';
-
 /** The wizard, for Browse All Templates. */
 export const WELCOME_ALL_TEMPLATES_HREF = '/new';
 
 export const WELCOME_COPY = {
-  greeting: 'Welcome to LiveDoc.',
-  question: 'What are you making first?',
-  lead: 'Pick a starting point, or search the templates. Whatever you make lands here, ready to pick up again.',
-  pillFree: 'Free and open source',
-  pillGuest: 'No sign-up to start',
-  pillSignedIn: 'Saved to your account',
-  searchPlaceholder: 'Search templates',
-  searchLabel: 'Search templates',
-  startBlank: 'Start Blank',
   blanksTitle: 'Start Blank',
   popularTitle: 'Popular Templates',
   allTemplates: 'Browse All Templates',

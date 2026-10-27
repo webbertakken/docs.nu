@@ -24,16 +24,10 @@ Scope, by file:
 | `apps/live/app/explorer/entry-path.ts`                                  | `ENTRY_PATH`, `ARRIVED_ON_HOME`, `ARRIVED_ON_TIMELINE`: where the page load began       |
 | `apps/live/lib/explorer-landing.ts`                                     | `EXPLORER_LANDING_PATH`, the one landing path                                           |
 | `apps/live/components/panels/home/HomePane.tsx`                         | One column of two sections; the error state; the landing telemetry                      |
-| `apps/live/components/panels/home/HomeHero.tsx`                         | The hero: menu button, Help, pills, greeting, lead, the large lens field, fanned sheets |
-| `apps/live/components/panels/home/useHeroPresence.ts`                   | The hero's fold: mounted and open as Home comes and goes, over the `long` token         |
 | `apps/live/app/explorer/home/first-run.ts`                              | Pure: `isFirstRun`, the welcome's copy, its search and blank hrefs                      |
 | `apps/live/app/explorer/home/first-run-starts.ts`                       | The welcome's picks from the template catalogue (lazy readers only)                     |
-| `apps/live/app/explorer/home/useFirstRun.ts`                            | First run from the Explorer's lists; the hero's remembered answer while they load       |
+| `apps/live/app/explorer/home/useFirstRun.ts`                            | First run from the Explorer's lists, never guessed while they load                      |
 | `apps/live/components/panels/home/HomeWelcome.tsx`                      | The first run's sections: Start Blank, Popular Templates, Already Have Work? (lazy)     |
-| `apps/live/components/panels/home/WelcomeSearch.tsx`                    | The first run's hero field: search templates in the wizard, Start Blank                 |
-| `apps/live/components/panels/home/HeroTemplateFan.tsx`                  | The first run's fanned template previews (lazy)                                         |
-| `apps/live/app/explorer/home/hero-model.ts`                             | Pure: the greeting by hour, the pills' copy, the fanned sheets' documents               |
-| `apps/live/app/explorer/lens/lens-focus-handoff.ts`                     | The hero field asks the header field to take the focus on Search results                |
 | `apps/live/components/panels/home/JumpBackIn.tsx`                       | The section: heading row, See More, the grid or the strip, the empty state              |
 | `apps/live/components/panels/home/JumpBackInStrip.tsx`                  | The phone's strip, its fade and its See More tile                                       |
 | `apps/live/components/panels/home/JumpBackInTile.tsx`                   | One document's tile (the strip) and the See More tile                                   |
@@ -74,10 +68,6 @@ Scope, by file:
 | Grid          | `JumpBackIn` wide branch                         | Desktop and tablet: Most Used cards, then Recent cards        |
 | Card          | `JumpBackInCard`                                 | A wide-screen document: large (most used) or compact (recent) |
 | Quiet line    | `jumpBackInLine(item, group, now)`               | "Used on N days" / "Used 2 hours ago" under a card's name     |
-| Hero          | `HomeHero`                                       | Home's full-width header band                                 |
-| Greeting      | `heroGreeting(hour)`                             | Good morning / afternoon / evening, the `h1`                  |
-| Pill          | `heroPills(...)`                                 | The documents and Inbox status links                          |
-| Sheets        | `heroSheets(documents)`                          | The three most recently saved documents, fanned               |
 | Strip         | `JumpBackInStrip`                                | The phone's sideways row, alternating, ending in See More     |
 | Phone order   | `phoneOrder(set)`                                | Most Used, recent, alternating, then the rest                 |
 | Tile          | `JumpBackInTile`, `SeeMoreTile`                  | One document's thumbnail and name; the strip's last tile      |
@@ -336,39 +326,17 @@ Component props:
 
 ## Presentation and UX
 
-- Hero (`HomeHero`), rendered by `ExplorerShell` between the header and `main` when `selected.kind === 'home'`: a
-  `section` named by its `h1`, full width, `border-b border-slate-200`, ground `bg-sky-50/70` under a dotted grid
-  (`radial-gradient(#cfe0f1 1px, transparent 1px)` at 22 px; dark: `bg-slate-900`, dots `#1c2752`, and a 900 × 520
-  radial `rgba(37,99,235,0.30)` glow centred on the top edge). Inner box `max-w-7xl px-4 sm:px-6 pt-6 pb-12
-lg:pb-14`, a `flex flex-wrap items-center gap-10`; left column `flex-[999_1_32rem] min-w-0 flex-col gap-5`, right
-  column `hidden lg:block flex-[1_1_22rem] h-72 relative` (`aria-hidden`).
-  - Top row: the menu button (`sm:hidden`, 40 px, the pane header's hamburger) then the pills (`flex flex-wrap gap-2`),
-    then Help at the end (`HelpArticleLink` for `timeline`, the pane header's button classes).
-  - Pill: `inline-flex h-8 items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 text-[13px]
-font-medium text-slate-700` (dark `border-slate-700 bg-slate-800 text-slate-200`), a 7 px dot
-    (`bg-emerald-500`, `bg-sky-500`), hover `border-slate-300`.
-  - Greeting `h1`: `text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold leading-[1.02] tracking-[-0.04em]
-text-[#17153a] dark:text-white max-w-3xl`.
-  - Lead: `text-[17px] leading-relaxed text-slate-600 dark:text-slate-300 max-w-xl`.
-  - Search: `LensField size="hero"` inside `max-w-2xl`: `h-[60px] rounded-[18px] border-2 border-sky-200 bg-white
-pl-[18px] pr-2 shadow-[0_0_0_6px_rgba(125,211,252,0.22),0_18px_40px_-20px_rgba(2,132,199,0.45)]`, focus
-    `border-sky-400`; dark `border-sky-400/40 bg-slate-800 shadow-[0_0_0_6px_rgba(56,189,248,0.12)]`; text 16 px;
-    the search glyph 18 px. `trailing`: New Document, `h-11 rounded-xl px-[18px] text-[15px] font-semibold` on the
-    solid brand fill (`SOLID_BRAND` light, `SOLID_BRAND_DARK_CONTROL` dark) with the plus glyph.
-  - Sheets: three `DocumentThumbnail`s in white 6 px framed sheets, `rounded-2xl`, `shadow-[0_14px_34px_-14px_
-rgba(15,23,42,0.35)]`: back left `left-[6%] top-12 w-[58%] h-40 -rotate-[8deg]`, back right `right-[2%] top-8
-w-[58%] h-40 rotate-[7deg]`, front `left-[20%] top-20 w-[62%] h-44` with a sky shadow. Dark: frames
-    `border-slate-700 bg-slate-800`.
-- First run (`useFirstRun`): `HomePane` renders `HomeWelcome` (`next/dynamic`, `ssr: false`, `GridSkeleton` while it
-  loads) in place of both sections. Start Blank `ul grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3`, cards
-  `CARD_SURFACE rounded-[18px] p-2 pb-3` with a 96 px `TemplatePicture`, title `text-sm font-semibold`, description
-  `line-clamp-2 text-xs`; Popular Templates `grid-cols-2 lg:grid-cols-4 gap-4`, 128 px pictures, title `text-[15px]`,
-  Browse All Templates as the section's quiet link; Already Have Work? `grid sm:grid-cols-2 gap-4`: the sign-in card
-  (`bg-[#0b1230] rounded-[20px] p-5`, the prism, a 180 px sky glow, a white `Sign In` button) and the import card
-  (`PANEL_SURFACE rounded-[20px] p-5` round the Explorer's own Import From). The hero, on `heroFirstRun`: static pills
-  (`PILL`, no link), the welcome greeting and lead, `WelcomeSearch` in the hero field's look (`HERO_FIELD_LOOK`),
-  `HeroTemplateFan` (`next/dynamic`) in the sheets' places. The remembered answer lives in `localStorage`
-  (`livedoc:v2:home-has-documents`: `{ ownerId, has }`), written once the lists load.
+- Page header: Home takes the Explorer's `PaneHeader` like every view (title **Home**, Help for `timeline`, New
+  Document, the phone's menu button); the shell draws the header's `LensField` on Home too.
+- First run (`useFirstRun`): `HomePane` renders `HomeWelcome` (`React.lazy`, `GridSkeleton` while it loads) in place
+  of both sections, `flex flex-col gap-7`. Start Blank `ul grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3`;
+  Popular Templates (`WELCOME_TEMPLATES_MAX` = 4) `grid grid-cols-2 md:grid-cols-4 gap-3`, Browse All Templates as the
+  section's quiet link. Each start (`StartTile`) is a link: the `TemplatePicture` in an `h-20 w-full rounded-md p-1`
+  box on `CARD_SURFACE`, the title `mt-1 h-4 text-xs truncate`, the description `h-4 text-[11px] truncate` muted, and
+  the description as its `Tooltip`. Already Have Work? `grid sm:grid-cols-2 gap-3`: the sign-in card and the import
+  card, each `PANEL_SURFACE rounded-lg p-4`, a `text-sm font-semibold` title, a `text-xs` muted line; the sign-in card's
+  `Sign In` is `h-8 rounded-md bg-brand-700 px-3 text-xs font-semibold text-white` (dark `bg-brand-600`), the import
+  card holds the Explorer's own Import From.
 - Body: one column, `flex flex-col gap-10` (40 px between sections); each section a `section` wrapper
   (`data-home-section="jump-back-in"` / `"what-happened"`).
 - Heading row (`SECTION_HEADER`): `flex items-baseline justify-between gap-4`, 16 px above the section's body, no
@@ -425,8 +393,6 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
   `aria-expanded`), a sibling of the link rather than inside it; Down or Up Arrow on it opens the menu, which takes
   focus to its first item and gives it back on close (`useRowMenu`, `DocumentEntryMenu`). Under a fine pointer it
   shows on the card's hover or keyboard focus; on touch it always shows.
-- Hero: a `section aria-labelledby` the greeting `h1`; the pills are links named by their words; the sheets are
-  `aria-hidden`; the lens field keeps its combobox; New Document is a button named "New Document".
 - See More: a link named "See More" in the heading row (wide) or as the tile after the list (narrow), never both.
 - Summary: `button aria-expanded aria-controls=<list id>`; the list `ul id` follows it. Avatars `aria-hidden`; the
   sentence names everyone.
@@ -439,8 +405,7 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
 ## Web Experience
 
 - LCP: the first screen is one api read; the largest element is a heading or the skeleton, both painted at once.
-- CLS 0: the hero renders whole with the shell (its text needs no read; the sheets keep their boxes while
-  thumbnails load); headings render with the skeletons; Jump Back In, its skeleton and its empty state share
+- CLS 0: the page header renders whole with the shell (its text needs no read); headings render with the skeletons; Jump Back In, its skeleton and its empty state share
   `JUMP_BACK_IN_MIN_HEIGHT` at each breakpoint (cards are a fixed height); the strip, its skeleton and its empty state share `h-28`; What
   happened is last on the page; thumbnails keep their box (`DocumentThumbnail`); the fade and the chevron change
   opacity / transform only. Expanding a group is a user-initiated change.
@@ -474,9 +439,6 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
 | ⋯ menu: button beside the link, right-click, rename in place, gone, unloaded, strip | `apps/live/components/panels/home/JumpBackInMenu.test.tsx`                           |
 | Menu props by id: lists, bound actions, shared dismiss, history, gone               | `apps/live/app/explorer/useDocumentEntryFor.test.tsx`                                |
 | Display headings: the heading row and its link, per section, no rule                | `apps/live/components/panels/home/HomePane.test.tsx`                                 |
-| Greeting by hour, pills' copy, the sheets' documents                                | `apps/live/app/explorer/home/hero-model.test.ts`                                     |
-| Hero: pills open their views, New Document, Help, sheets hidden, one lens field     | `apps/live/components/panels/home/HomeHero.test.tsx`                                 |
-| The hero field hands the focus to the header field on Search results                | `apps/live/app/explorer/lens/lens-focus-handoff.test.ts`                             |
 | Entries: one-person links, summary disclosure, telemetry, See Timeline              | `apps/live/components/panels/home/WhatHappened.test.tsx`                             |
 | One column, two sections, no Timeline, the error state                              | `apps/live/components/panels/home/HomePane.test.tsx`                                 |
 | Routes, titles, crumbs (Recent under Home), the landing 302                         | `routes.test.ts`, `view-titles.test.ts`, `apps/live/src/worker.test.ts`              |
@@ -485,20 +447,18 @@ tracking-[0.08em] text-slate-500 pt-3`), entries in a `ul` with 4 px between.
 
 ## Constants and configuration
 
-| Constant                  | Value                | Where            | Provenance                         | Safe range     |
-| ------------------------- | -------------------- | ---------------- | ---------------------------------- | -------------- |
-| `HOME_WIDE_QUERY`         | `(min-width: 768px)` | `JumpBackIn.tsx` | Spec (`md:`: desktop and tablet)   | fixed          |
-| `STRIP_FADE_EPSILON_PX`   | 1                    | `home-model.ts`  | Sub-pixel scroll widths            | 1 to 2         |
-| `SUMMARY_NAMES_MAX`       | 3                    | `home-copy.ts`   | Spec ("Priya, Sam and Lee")        | 2 to 4         |
-| `AVATAR_STACK_MAX`        | 3                    | `HomeAvatar.tsx` | `D99`                              | 2 to 5         |
-| Large card thumbnail      | 128 px high          | `home-styles.ts` | Spec ("128 px high")               | 96 to 160 px   |
-| Compact card thumbnail    | 64 × 44 px           | `home-styles.ts` | Spec ("64 × 44")                   | fixed          |
-| `JUMP_BACK_IN_MIN_HEIGHT` | see `home-styles.ts` | `home-styles.ts` | `D168`: both groups' rows          | fixed          |
-| Section gap               | 40 px (`gap-10`)     | `HomePane.tsx`   | Spec ("about 40 px")               | 32 to 48 px    |
-| Greeting bands            | 5-11, 12-17, else    | `hero-model.ts`  | Spec                               | fixed          |
-| `HERO_SHEETS`             | 3                    | `hero-model.ts`  | Spec ("three most recently saved") | fixed          |
-| Strip thumbnail           | 128 × 80 px          | `home-styles.ts` | `D100`: "small", 16:10             | 96 to 160 wide |
+| Constant                  | Value                | Where            | Provenance                       | Safe range     |
+| ------------------------- | -------------------- | ---------------- | -------------------------------- | -------------- |
+| `HOME_WIDE_QUERY`         | `(min-width: 768px)` | `JumpBackIn.tsx` | Spec (`md:`: desktop and tablet) | fixed          |
+| `STRIP_FADE_EPSILON_PX`   | 1                    | `home-model.ts`  | Sub-pixel scroll widths          | 1 to 2         |
+| `SUMMARY_NAMES_MAX`       | 3                    | `home-copy.ts`   | Spec ("Priya, Sam and Lee")      | 2 to 4         |
+| `AVATAR_STACK_MAX`        | 3                    | `HomeAvatar.tsx` | `D99`                            | 2 to 5         |
+| Large card thumbnail      | 128 px high          | `home-styles.ts` | Spec ("128 px high")             | 96 to 160 px   |
+| Compact card thumbnail    | 64 × 44 px           | `home-styles.ts` | Spec ("64 × 44")                 | fixed          |
+| `JUMP_BACK_IN_MIN_HEIGHT` | see `home-styles.ts` | `home-styles.ts` | `D168`: both groups' rows        | fixed          |
+| Section gap               | 40 px (`gap-10`)     | `HomePane.tsx`   | Spec ("about 40 px")             | 32 to 48 px    |
+| Strip thumbnail           | 128 × 80 px          | `home-styles.ts` | `D100`: "small", 16:10           | 96 to 160 wide |
 
 ## Defaults ledger
 
-D94 to D104, D128 to D132, D140 and D168 to D170 in [DEFAULTS.md](DEFAULTS.md); D96, D97, D98 and D101 are retired there.
+D94 to D104, D128 to D132, D140 and D168 to D170 in [DEFAULTS.md](DEFAULTS.md); D96, D97, D98, D101 and D169 are retired there.

@@ -48,7 +48,7 @@ export type FeatureProps = {
   /** Optional animated mini-illustration rendered above the text. */
   art?: ReactNode;
   /**
-   * Optional sub-section label. On a `/features/<id>` detail page, a section
+   * Optional sub-section label. On a `/about/features/<id>` detail page, a section
    * whose items carry `group` values renders its grid broken into captioned
    * sub-sections (grouping related items) instead of one long grid, so the
    * larger categories stay scannable. Sections without groups render flat.

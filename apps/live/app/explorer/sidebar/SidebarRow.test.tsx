@@ -27,25 +27,19 @@ const gutterOf = (el: HTMLElement) => el.querySelector('[data-tree-toggle]');
 
 describe('SidebarRow', () => {
   // docs/specs/013-workspace/explorer-structure.md "Look".
-  it('carries its icon on a tile in its tone, and a bare icon without one', () => {
-    row({ tone: 'violet' });
-    const tile = screen.getByRole('treeitem').querySelector('[data-sidebar-tile]')!;
-    expect(tile.getAttribute('data-sidebar-tile')).toBe('violet');
-    expect(tile.className).toContain('bg-violet-100');
-    expect(tile.querySelector('[data-testid="icon"]')).not.toBeNull();
-    cleanup();
+  it('draws a small row with its icon bare', () => {
     row();
-    expect(screen.getByRole('treeitem').querySelector('[data-sidebar-tile]')).toBeNull();
+    const item = screen.getByRole('treeitem');
+    expect(item.querySelector('[data-sidebar-tile]')).toBeNull();
+    expect(item.querySelector('[data-tree-activate]')!.className).toMatch(/\btext-xs\b/);
+    expect(item.querySelector('[data-testid="icon"]')).not.toBeNull();
   });
 
-  it('raises the current row into a white pill with a solid sky tile', () => {
-    row({ tone: 'sky', selected: true });
-    const line = screen.getByRole('treeitem').querySelector('[data-tree-row]')!;
-    expect(line.className).toContain('bg-white');
-    expect(line.className).toContain('border-sky-200');
-    expect(screen.getByRole('treeitem').querySelector('[data-sidebar-tile]')!.className).toContain(
-      'bg-sky-600',
-    );
+  it('marks the current row with a faint brand wash and brand ink', () => {
+    row({ selected: true });
+    const item = screen.getByRole('treeitem');
+    expect(item.querySelector('[data-tree-row]')!.className).toContain('bg-brand-50');
+    expect(item.querySelector('[data-tree-activate]')!.className).toContain('text-brand-700');
   });
 
   it('keeps a transparent edge at rest, so selecting moves nothing', () => {

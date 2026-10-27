@@ -80,6 +80,11 @@ export default {
     if (url.pathname === '/explorer' || url.pathname === '/explorer/') {
       return Response.redirect(`${url.origin}${EXPLORER_LANDING_PATH}`, 302);
     }
+    // The site's front door (docs/specs/001-project-vision/purpose.md "The product comes first"): the
+    // router hands `/` to this worker, which lands it on Home the same way, its query kept.
+    if (url.pathname === '/') {
+      return Response.redirect(`${url.origin}${EXPLORER_LANDING_PATH}${url.search}`, 302);
+    }
     // `/document` (and the editor's address before the rename, see ../lib/legacy-editor-path) shares one HTML file. We
     // rewrite the request rather than redirect so the browser URL
     // stays `/document/<id>` (that's the whole point of the path

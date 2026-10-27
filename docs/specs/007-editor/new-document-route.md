@@ -7,7 +7,7 @@ want to create a document" end-to-end.
 > **Routing note (later change, [Router app](../016-platform/router-app.md)):** the `/live` URL prefix was
 > removed — the live app serves at clean routes. So today the editor is
 > `/document/<id>` (not `/live/document/<id>`), `/new` is `/new`, and
-> there is no bare `/live` entry point (`/` is the marketing home). The
+> there is no bare `/live` entry point (`/` is the Explorer's front door, Home). The
 > historical `/live...` URLs below describe the pre-cleanup scheme; map
 > each to its `/live`-stripped form. The placeholder-rewrite mechanism
 > and the `/new` split itself are unchanged.

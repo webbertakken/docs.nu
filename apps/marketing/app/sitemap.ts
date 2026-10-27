@@ -41,20 +41,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // No trailing slash, to match the homepage canonical / og:url /
       // JSON-LD (Next emits the root URL slash-less under trailingSlash:
       // false) and the slash-less subpage convention below.
-      url: base,
+      url: `${base}/about`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: `${base}/faq`,
+      url: `${base}/about/faq`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     // Build with AI (docs/specs/019-marketing/build-with-ai.md): the MCP setup page, a header link on every page.
     {
-      url: `${base}/ai`,
+      url: `${base}/about/ai`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
@@ -65,7 +65,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // moves with product releases, like the landing page. (There is no
     // /features hub index page; the landing page is the feature overview.)
     ...LANDING_SECTION_IDS.map((id) => ({
-      url: `${base}/features/${id}`,
+      url: `${base}/about/features/${id}`,
       lastModified: now,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
@@ -88,7 +88,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.4,
     },
     {
-      url: `${base}/status`,
+      url: `${base}/about/status`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.4,
@@ -96,7 +96,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Third-party licences (docs/specs/002-project-scope/third-party-licences.md):
     // a transparency page, regenerated every build (blueprint D13).
     {
-      url: `${base}/licences`,
+      url: `${base}/about/licences`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.2,
@@ -105,13 +105,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ALTERNATIVES list the route + metadata use, so adding a competitor
     // updates the sitemap automatically.
     {
-      url: `${base}/alternatives`,
+      url: `${base}/about/alternatives`,
       lastModified: ALTERNATIVES_LAST_UPDATED,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     ...ALTERNATIVE_SLUGS.map((slug) => ({
-      url: `${base}/alternatives/${slug}`,
+      url: `${base}/about/alternatives/${slug}`,
       lastModified: ALTERNATIVES_LAST_UPDATED,
       changeFrequency: 'monthly' as const,
       priority: 0.8,

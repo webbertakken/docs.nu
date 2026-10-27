@@ -63,7 +63,7 @@ reach a deployed artefact, and nothing else.
 
 ## The page
 
-- **One page, at `/licences`,** served by marketing (which already answers every path no other app
+- **One page, at `/about/licences`,** served by marketing (which already answers every path no other app
   claims). One page rather than one per app: most works ship in several apps, the router serves them
   all under one origin, and a visitor looking for "what is in LiveDoc" should not need to know
   the app boundaries. Each entry names the apps that ship it.

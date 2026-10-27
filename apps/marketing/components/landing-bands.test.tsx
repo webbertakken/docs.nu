@@ -31,7 +31,7 @@ describe('the closing band', () => {
     render(<StartDrawingCta surface="Feature" />);
     expect(screen.getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual([
       '/new?via=Feature.Closing',
-      '/#templates',
+      '/about#templates',
     ]);
     expect(screen.queryByRole('list', { name: 'Or start blank' })).toBeNull();
   });

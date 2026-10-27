@@ -4,7 +4,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import type { LicencesManifest } from '../src/contract.ts';
+import { LICENCES_PAGE_SEGMENTS, type LicencesManifest } from '../src/contract.ts';
 import { LicencesError } from '../src/errors.ts';
 import { checkExport, textFingerprint } from '../src/verify-export.ts';
 import { log, logFailure } from './log.ts';
@@ -30,11 +30,12 @@ try {
   const manifest = JSON.parse(
     readFileSync(join(appDir, 'generated', 'licences.json'), 'utf8'),
   ) as LicencesManifest;
-  const htmlBytes = sizeOf(join(appDir, 'out', 'licences.html'));
-  const textsDir = join(appDir, 'out', 'licences', 'texts');
+  // Next exports `app/about/licences/page.tsx` as `out/about/licences.html`.
+  const pageHtml = `${join(appDir, 'out', ...LICENCES_PAGE_SEGMENTS)}.html`;
+  const htmlBytes = sizeOf(pageHtml);
+  const textsDir = join(appDir, 'out', ...LICENCES_PAGE_SEGMENTS, 'texts');
   const exportedTexts = listed(textsDir);
-  const html =
-    htmlBytes === undefined ? '' : readFileSync(join(appDir, 'out', 'licences.html'), 'utf8');
+  const html = htmlBytes === undefined ? '' : readFileSync(pageHtml, 'utf8');
   const inlinedTexts = exportedTexts.flatMap((file) => {
     const fingerprint = textFingerprint(readFileSync(join(textsDir, file), 'utf8'));
     return fingerprint && html.includes(fingerprint) ? [file.replace(/\.txt$/, '')] : [];

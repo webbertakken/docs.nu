@@ -93,7 +93,7 @@ const LIVE_PORT = Number(process.env.E2E_LIVE_PORT ?? 4002);
 const API_PORT = Number(process.env.E2E_API_PORT ?? 8787);
 // The other sites, for the audits that open them (docs/specs/004-interface-design/blueprints/
 // optical-alignment.md, "Ink audit"). Help and telemetry sit under their basePath on the
-// live origin, as the router mounts them; marketing owns "/" in production, so it gets its own port.
+// live origin, as the router mounts them; marketing owns "/about" and its root files ("/_next") in production, so it gets its own port.
 const SITES = [
   { prefix: '/help', dir: path.join(ROOT, 'apps', 'help', 'out') },
   { prefix: '/telemetry', dir: path.join(ROOT, 'apps', 'telemetry', 'out') },
@@ -492,6 +492,13 @@ function startLiveServer() {
     // Match the worker's /explorer → Home redirect, from the same constant.
     if (pathname === '/explorer' || pathname === '/explorer/') {
       res.writeHead(302, { Location: EXPLORER_LANDING_PATH });
+      res.end();
+      return;
+    }
+    // And its front door: `/` lands on Home, query kept.
+    if (pathname === '/') {
+      const search = new URL(req.url, 'http://localhost').search;
+      res.writeHead(302, { Location: `${EXPLORER_LANDING_PATH}${search}` });
       res.end();
       return;
     }
