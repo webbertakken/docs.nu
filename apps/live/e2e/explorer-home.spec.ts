@@ -283,9 +283,9 @@ test('with fewer than eight, only what exists shows, and nothing shifts', async 
 
   const list = jumpBackIn(page);
   await expect(list).toHaveCount(1);
-  // Jump Back In keeps both groups' height at lg: a label and a row of each. What Happened never moves.
+  // Jump Back In keeps both groups' height: a label and a row of tiles each (D168). What Happened never moves.
   const groups = page.locator('[data-jump-back-in-group]').first().locator('..');
-  expect(Math.round((await groups.boundingBox())!.height)).toBe(330);
+  expect(Math.round((await groups.boundingBox())!.height)).toBe(296);
   expect(await layoutShift(page)).toBe(0);
   expectNoPageErrors(pageErrors);
 });
