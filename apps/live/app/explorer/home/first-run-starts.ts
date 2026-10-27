@@ -12,7 +12,7 @@ import {
 import { EDITOR_MODES } from '@livedoc/document';
 
 /** How many Popular templates the welcome shows. */
-export const WELCOME_TEMPLATES_MAX = 8;
+export const WELCOME_TEMPLATES_MAX = 4;
 
 /** Start Blank: each mode's blank, in mode order. */
 export const WELCOME_BLANKS: readonly TemplateKind[] = EDITOR_MODES.map(

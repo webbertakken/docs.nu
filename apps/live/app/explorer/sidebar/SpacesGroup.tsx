@@ -63,7 +63,6 @@ export function SpacesGroup({
     >
       <SidebarRow
         icon={<MyDocumentsIcon />}
-        tone="sky"
         label={SIDEBAR_LABELS.myDocuments}
         textLabel={SIDEBAR_LABELS.myDocuments}
         selected={selected.kind === 'all'}
@@ -101,7 +100,6 @@ export function SpacesGroup({
       {has('invites') ? (
         <SidebarRow
           icon={<InviteIcon />}
-          tone="rose"
           label={SIDEBAR_LABELS.invites}
           textLabel={SIDEBAR_LABELS.invites}
           selected={selected.kind === 'invites'}

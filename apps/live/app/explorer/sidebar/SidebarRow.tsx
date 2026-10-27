@@ -4,30 +4,27 @@ import { useId, type HTMLAttributes, type ReactNode } from 'react';
 import { CountBadge } from '@livedoc/ui';
 import { TreeChevronIcon } from '@/components/primitives/explorer-icons';
 import { DROP_TARGET_RING } from '@/components/panels/useDocumentDropTarget';
-import {
-  SIDEBAR_CURRENT,
-  SIDEBAR_RESTING,
-  SIDEBAR_TILE,
-  SIDEBAR_TILE_CURRENT,
-  SIDEBAR_TONES,
-  type SidebarTone,
-} from './sidebar-tones';
 
 // One sidebar row (docs/specs/013-workspace/explorer-structure.md): a `treeitem` whose own line
 // is [indent][chevron gutter][icon][label][badge][trailing], with its child
 // rows in a `group` beneath while expanded. The gutter is reserved on every
 // row, so every icon at a level sits on one column whether or not its row
 // can expand. On a touch screen the chevron moves to the row's end instead
-// and no row reserves a gutter, so the icons sit under the group's title. A row with a `tone` carries its icon on a
-// tinted tile, and the current row is a raised pill (explorer-structure.md "Look"). Keyboard handling lives on the sidebar's `nav`
+// and no row reserves a gutter, so the icons sit under the group's title. Small rows with a bare icon; the current
+// row is a faint brand wash (explorer-structure.md "Look"). Keyboard handling lives on the sidebar's `nav`
 // (useTreeNavigation), which finds the parts by their data attributes.
+
+/** The current row: a faint brand wash. */
+const CURRENT_ROW = 'border-transparent bg-brand-50 dark:bg-brand-500/15';
+
+/** Every other row: a transparent edge (so a drop target's edge moves nothing) and a soft hover wash. */
+const RESTING_ROW = 'border-transparent hover:bg-slate-100 dark:hover:bg-slate-700';
 
 // Indent per tree level.
 const INDENT_STEP = 16;
 
 export function SidebarRow({
   icon,
-  tone,
   label,
   textLabel,
   selected,
@@ -48,8 +45,6 @@ export function SidebarRow({
   children,
 }: {
   icon: ReactNode;
-  // The tile's tone, for a top-level Overview or Spaces row; without one the icon stands bare.
-  tone?: SidebarTone;
   label: ReactNode;
   // The row's name as plain text: its accessible name and its typeahead key.
   textLabel: string;
@@ -111,9 +106,9 @@ export function SidebarRow({
       <div
         data-tree-row
         {...rowProps}
-        className={`group flex items-center gap-1 rounded-xl border px-1 transition-colors [li:focus-visible>&]:ring-2 [li:focus-visible>&]:ring-brand-500 ${
+        className={`group flex items-center gap-1 rounded-md border px-1 transition-colors [li:focus-visible>&]:ring-2 [li:focus-visible>&]:ring-brand-500 ${
           highlighted ? `${DROP_TARGET_RING} ` : ''
-        }${rowClassName ?? (selected ? SIDEBAR_CURRENT : SIDEBAR_RESTING)}`}
+        }${rowClassName ?? (selected ? CURRENT_ROW : RESTING_ROW)}`}
         style={{ paddingLeft: depth * INDENT_STEP + 4 }}
       >
         <span
@@ -134,30 +129,15 @@ export function SidebarRow({
         <span
           data-tree-activate
           onClick={renaming ? undefined : onActivate}
-          className={`flex min-w-0 flex-1 items-center gap-2.5 text-left text-sm leading-5 pointer-coarse:text-[15px] ${
-            tone ? 'py-1.5 pointer-coarse:py-2.5' : 'py-2 pointer-coarse:py-3'
-          } ${renaming ? '' : 'cursor-pointer'} ${
+          className={`flex min-w-0 flex-1 items-center gap-1.5 py-1 text-left text-xs pointer-coarse:gap-2.5 pointer-coarse:py-3 pointer-coarse:text-[15px] pointer-coarse:leading-5 ${
+            renaming ? '' : 'cursor-pointer'
+          } ${
             selected
-              ? 'font-semibold text-sky-900 dark:text-white'
-              : 'font-medium text-slate-700 dark:text-slate-200'
+              ? 'font-semibold text-brand-700 dark:text-brand-300'
+              : 'text-slate-700 dark:text-slate-200'
           }`}
         >
-          {tone ? (
-            <span
-              data-sidebar-tile={tone}
-              className={`${SIDEBAR_TILE} ${selected ? SIDEBAR_TILE_CURRENT : SIDEBAR_TONES[tone]}`}
-            >
-              {icon}
-            </span>
-          ) : (
-            <span
-              className={`shrink-0 pointer-coarse:[&_svg]:size-[17px] ${
-                selected ? 'text-sky-600 dark:text-sky-300' : 'text-slate-400'
-              }`}
-            >
-              {icon}
-            </span>
-          )}
+          <span className="shrink-0 text-slate-400 pointer-coarse:[&_svg]:size-[17px]">{icon}</span>
           <span className="min-w-0 flex-1 truncate">{label}</span>
           {badge !== undefined ? <CountBadge count={badge} className="ml-1" /> : null}
         </span>

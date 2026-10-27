@@ -325,13 +325,15 @@ Component props:
 
 - Page header: Home takes the Explorer's `PaneHeader` like every view (title **Home**, Help for `timeline`, New
   Document, the phone's menu button); the shell draws the header's `LensField` on Home too.
-- First run (`useFirstRun`): `HomePane` renders `HomeWelcome` (`next/dynamic`, `ssr: false`, `GridSkeleton` while it
-  loads) in place of both sections. Start Blank `ul grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3`, cards
-  `CARD_SURFACE rounded-[18px] p-2 pb-3` with a 96 px `TemplatePicture`, title `text-sm font-semibold`, description
-  `line-clamp-2 text-xs`; Popular Templates `grid-cols-2 lg:grid-cols-4 gap-4`, 128 px pictures, title `text-[15px]`,
-  Browse All Templates as the section's quiet link; Already Have Work? `grid sm:grid-cols-2 gap-4`: the sign-in card
-  (`bg-[#0b1230] rounded-[20px] p-5`, the prism, a 180 px sky glow, a white `Sign In` button) and the import card
-  (`PANEL_SURFACE rounded-[20px] p-5` round the Explorer's own Import From).
+- First run (`useFirstRun`): `HomePane` renders `HomeWelcome` (`React.lazy`, `GridSkeleton` while it loads) in place
+  of both sections, `flex flex-col gap-7`. Start Blank `ul grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3`;
+  Popular Templates (`WELCOME_TEMPLATES_MAX` = 4) `grid grid-cols-2 md:grid-cols-4 gap-3`, Browse All Templates as the
+  section's quiet link. Each start (`StartTile`) is a link: the `TemplatePicture` in an `h-20 w-full rounded-md p-1`
+  box on `CARD_SURFACE`, the title `mt-1 h-4 text-xs truncate`, the description `h-4 text-[11px] truncate` muted, and
+  the description as its `Tooltip`. Already Have Work? `grid sm:grid-cols-2 gap-3`: the sign-in card and the import
+  card, each `PANEL_SURFACE rounded-lg p-4`, a `text-sm font-semibold` title, a `text-xs` muted line; the sign-in card's
+  `Sign In` is `h-8 rounded-md bg-brand-700 px-3 text-xs font-semibold text-white` (dark `bg-brand-600`), the import
+  card holds the Explorer's own Import From.
 - Body: one column, `flex flex-col gap-7` (28 px between sections); each section a `section` wrapper
   (`data-home-section="jump-back-in"` / `"what-happened"`).
 - Heading row (`SECTION_HEADER`): `flex items-baseline justify-between gap-4 border-b border-slate-200 pb-2` (dark

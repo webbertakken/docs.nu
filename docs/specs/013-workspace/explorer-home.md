@@ -35,7 +35,8 @@ Home is drawn like every other Explorer page: the header's search field
 
 ## First run
 
-A person with **nothing yet** gets a small welcome in the pane instead of a Home that waits for history. "Nothing
+A person with **nothing yet** gets a small welcome in the pane instead of a Home that waits for history, drawn in
+Home's own quiet look: section headings with a rule, and small tiles like Jump Back In's. "Nothing
 yet" means, once the Explorer's lists have loaded: no document of their own, none shared with them, none in any
 team they belong to, and none stored only in this browser. Until the lists load, Home's body is the ordinary Home
 (its skeletons); it never guesses. A list that failed to load says nothing about them, so it is never "nothing yet":
@@ -45,14 +46,16 @@ The page header stays as it is (**Home**, Help, **New Document**). Under it, Hom
 Jump Back In and What Happened:
 
 - **Start Blank**: the five blanks, one per mode (Blank Diagram, Blank Whiteboard, Blank Session, Blank
-  Illustration, Blank Plan), each a card with its preview, title and one-line description. Activating one makes
-  that blank at once (`/new?template=<kind>`).
-- **Popular Templates**: the first eight non-blank templates of the shared Popular list, as large cards with their
-  previews, titles and descriptions; activating one makes it at once. A quiet **Browse All Templates** link in the
+  Illustration, Blank Plan), five across from the `md` breakpoint (two on a phone, three from `sm`). Each is a tile:
+  its preview (80 px high, on a hairline-bordered card), its title under it, and its one-line description as a quiet
+  line and as its tooltip. Activating one makes that blank at once (`/new?template=<kind>`).
+- **Popular Templates**: the first four non-blank templates of the shared Popular list, one row of the same tiles
+  four across (two on a phone); activating one makes it at once. A quiet **Browse All Templates** link in the
   heading row opens the wizard (`/new`).
-- **Already Have Work?**: up to two cards side by side.
+- **Already Have Work?**: up to two plain cards side by side (a white, hairline-bordered card; the raised surface in
+  dark mode), each a small title, one quiet line and its control.
   - For a guest on a deployment with sign-in: **Nothing here yet? Sign in**: "If you have used LiveDoc before,
-    sign in and your documents come back with you." with a **Sign In** button. A signed-out person who expected
+    sign in and your documents come back with you." with a small brand **Sign In** button. A signed-out person who expected
     their work finds the way back first.
   - **Bring It With You**: "Import boards from Miro, draw.io, Excalidraw or Microsoft Whiteboard; each becomes its own
     document." with the Explorer's own **Import From** control, filing into My Documents as it does there.

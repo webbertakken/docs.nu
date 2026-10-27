@@ -1,14 +1,14 @@
 'use client';
 
 // Home's first run (docs/specs/013-workspace/explorer-home.md "First run"): for a person with nothing yet, three
-// sections in place of Jump Back In and What Happened. Start Blank (each mode's blank), Popular Templates (the shared
-// Popular list's first eight), and Already Have Work? (the way back for someone signed out, and the Explorer's own
+// sections in place of Jump Back In and What Happened, drawn as small tiles. Start Blank (each mode's blank), Popular
+// Templates (the shared Popular list's first four), and Already Have Work? (the way back for someone signed out, and the Explorer's own
 // imports). Each start makes its document at once through /new. Loaded only for a first run (HomePane), so the
 // template previews never weigh on anyone else's Home.
 
 import { useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
-import { BrandMark } from '@livedoc/ui';
+import { Tooltip } from '@livedoc/ui';
 import type { TemplateKind } from '@livedoc/templates';
 import { track } from '@/lib/telemetry';
 import { useAuthHrefs } from '@/components/chrome/auth-shared';
@@ -22,6 +22,9 @@ import {
 } from '@/app/explorer/home/first-run-starts';
 import { HomeSection } from './HomeSection';
 import { CARD_SURFACE, FOCUS_RING, MUTED, PANEL_SURFACE } from './home-styles';
+
+/** A start's preview: the column's width and 80 px high, as Jump Back In's thumbnails. */
+const PREVIEW = 'h-20 w-full';
 import { assignAppLocation } from '@/lib/app-location';
 
 export function HomeWelcome({
@@ -38,12 +41,12 @@ export function HomeWelcome({
   }, []);
   const haveWork = offerSignIn || Boolean(importToolbar);
   return (
-    <div className="flex flex-col gap-10" data-home-welcome="">
+    <div className="flex flex-col gap-7" data-home-welcome="">
       <HomeSection id="start-blank" title={WELCOME_COPY.blanksTitle} busy={false}>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
           {WELCOME_BLANKS.map((kind) => (
             <li key={kind} className="min-w-0">
-              <StartCard kind={kind} size="blank" />
+              <StartTile kind={kind} blank />
             </li>
           ))}
         </ul>
@@ -60,10 +63,10 @@ export function HomeWelcome({
           onActivate: () => track('Home', 'Selected', 'Welcome.AllTemplates'),
         }}
       >
-        <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {WELCOME_POPULAR.map((kind) => (
             <li key={kind} className="min-w-0">
-              <StartCard kind={kind} size="template" />
+              <StartTile kind={kind} blank={false} />
             </li>
           ))}
         </ul>
@@ -71,15 +74,15 @@ export function HomeWelcome({
 
       {haveWork ? (
         <HomeSection id="have-work" title={WELCOME_COPY.haveWorkTitle} busy={false}>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {offerSignIn ? <SignInCard /> : null}
             {importToolbar ? (
-              <div className={`flex flex-col gap-3 rounded-[20px] p-5 ${PANEL_SURFACE}`}>
-                <h3 className="text-base font-bold text-[#17153a] dark:text-slate-100">
+              <div className={`flex flex-col gap-2 rounded-lg p-4 ${PANEL_SURFACE}`}>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {WELCOME_COPY.importTitle}
                 </h3>
-                <p className={`text-sm leading-relaxed ${MUTED}`}>{WELCOME_COPY.importLine}</p>
-                <div className="mt-auto">{importToolbar}</div>
+                <p className={`text-xs leading-relaxed ${MUTED}`}>{WELCOME_COPY.importLine}</p>
+                <div className="mt-auto pt-1">{importToolbar}</div>
               </div>
             ) : null}
           </div>
@@ -89,52 +92,45 @@ export function HomeWelcome({
   );
 }
 
-/** One start: a blank (a smaller card, five across) or a template (a large card, four across). */
-function StartCard({ kind, size }: { kind: TemplateKind; size: 'blank' | 'template' }) {
+/** One start, drawn as Jump Back In draws a document: its preview with its name under it and a quiet line. */
+function StartTile({ kind, blank }: { kind: TemplateKind; blank: boolean }) {
   const t = templateOf(kind);
-  const blank = size === 'blank';
   return (
-    <a
-      href={welcomeStartHref(kind)}
-      data-welcome-start={kind}
-      onClick={() => track('Home', 'Selected', blank ? 'Welcome.Blank' : 'Welcome.Template')}
-      className={`flex h-full min-w-0 flex-col gap-2.5 rounded-[18px] p-2 pb-3 ${CARD_SURFACE} ${FOCUS_RING}`}
-    >
-      <span aria-hidden className={`block w-full ${blank ? 'h-24' : 'h-32'}`}>
-        <TemplatePicture kind={kind} />
-      </span>
-      <span className="flex min-w-0 flex-col gap-0.5 px-1">
+    <Tooltip label={t.description}>
+      <a
+        href={welcomeStartHref(kind)}
+        data-welcome-start={kind}
+        onClick={() => track('Home', 'Selected', blank ? 'Welcome.Blank' : 'Welcome.Template')}
+        className={`group block min-w-0 rounded-md ${FOCUS_RING}`}
+      >
         <span
-          className={`truncate font-semibold text-[#17153a] dark:text-slate-100 ${
-            blank ? 'text-sm' : 'text-[15px]'
-          }`}
+          aria-hidden
+          className={`block overflow-hidden rounded-md p-1 ${PREVIEW} ${CARD_SURFACE}`}
         >
+          <TemplatePicture kind={kind} />
+        </span>
+        <span className="mt-1 block h-4 truncate text-xs leading-4 text-slate-700 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-slate-100">
           {t.title}
         </span>
-        <span className={`line-clamp-2 text-xs leading-[18px] ${MUTED}`}>{t.description}</span>
-      </span>
-    </a>
+        <span className={`block h-4 truncate text-[11px] leading-4 ${MUTED}`}>{t.description}</span>
+      </a>
+    </Tooltip>
   );
 }
 
-/** The way back for someone who was signed out: a deep navy card, the sidebar nudge's look at full size. */
+/** The way back for someone who was signed out: a plain card with a brand Sign In button. */
 function SignInCard() {
   const { signInHref } = useAuthHrefs();
   return (
-    <div className="relative flex flex-col gap-3 overflow-hidden rounded-[20px] bg-[#0b1230] p-5 dark:ring-1 dark:ring-sky-400/30">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 size-[180px] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.45),transparent_70%)]"
-      />
-      <h3 className="relative flex items-center gap-2.5 text-base font-bold text-white">
-        <BrandMark className="size-6 shrink-0" />
+    <div className={`flex flex-col gap-2 rounded-lg p-4 ${PANEL_SURFACE}`}>
+      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
         {WELCOME_COPY.signInTitle}
       </h3>
-      <p className="relative text-sm leading-relaxed text-[#a9b8d0]">{WELCOME_COPY.signInLine}</p>
+      <p className={`text-xs leading-relaxed ${MUTED}`}>{WELCOME_COPY.signInLine}</p>
       <Link
         href={signInHref}
         onClick={() => track('Home', 'Selected', 'Welcome.SignIn')}
-        className="relative mt-auto inline-flex h-10 items-center self-start rounded-xl bg-white px-4 text-sm font-semibold text-[#0b1230] transition hover:bg-sky-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+        className={`mt-auto inline-flex h-8 items-center self-start rounded-md bg-brand-700 px-3 text-xs font-semibold text-white transition hover:bg-brand-800 dark:bg-brand-600 dark:hover:bg-brand-700 ${FOCUS_RING}`}
       >
         {WELCOME_COPY.signIn}
       </Link>
