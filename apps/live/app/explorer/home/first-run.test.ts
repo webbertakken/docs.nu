@@ -50,7 +50,8 @@ describe('the starts', () => {
     ]);
   });
 
-  it('offers the first eight Popular templates, none of them a blank', () => {
+  it('offers the first four Popular templates, none of them a blank', () => {
+    expect(WELCOME_TEMPLATES_MAX).toBe(4);
     expect(WELCOME_POPULAR).toHaveLength(WELCOME_TEMPLATES_MAX);
     expect(WELCOME_POPULAR.some(isBlankTemplate)).toBe(false);
     expect(WELCOME_POPULAR.slice(0, 3)).toEqual(['mindmap', 'flowchart', 'kanban']);
