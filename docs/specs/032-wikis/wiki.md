@@ -138,7 +138,8 @@ A healthy wiki shows nothing: no counts, no panel entry point beyond the menu.
 - **In a wiki**, the Explorer's search field searches that wiki: page names, titles and text, and the outlines of
   its other documents. Each result shows the page, its section path and the matching line with the words marked;
   titles rank above text.
-- **Everywhere**, Search results match page text as well as names, across every document the reader can open. The
+- **Everywhere**, Search results match page text as well as names, across every document the reader can open
+  ([Content search](../013-workspace/content-search.md)). The
   lens gains a **Wiki** dimension: `wiki:<name>` narrows to one wiki, `wiki:any` to every wiki the reader can open
   ([Explorer filters](../013-workspace/explorer-filters.md)).
 - **From the command line and the MCP server**, `livedoc search <words> [--wiki <wiki>|--all-wikis]` prints

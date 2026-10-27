@@ -1,7 +1,8 @@
 # Items
 
 An **item** is a unit of tracked work or thought that belongs to a document: a task, a bug, a retro note, an
-idea. Items are stored apart from the canvas, in the document's **item store**, and the canvas only frames them:
+idea. Items are stored apart from the canvas, in the document's **item store** (in the document's room,
+[Document storage](../006-document/document-storage.md)), and the canvas only frames them:
 a [Plan board](plan-board.md) shows many items arranged by their fields, and a Plan card shows one. The same item
 can sit on several boards at once (a sprint board and a roadmap), and editing it anywhere changes it everywhere.
 

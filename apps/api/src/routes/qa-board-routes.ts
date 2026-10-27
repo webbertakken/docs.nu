@@ -1,3 +1,4 @@
+import { documentRoom } from '../room-client';
 // POST /api/documents/<id>/tabs/<tabId>/qa — one action on a Q&A board
 // (docs/specs/012-collaboration/qa-board.md).
 //
@@ -81,7 +82,7 @@ export async function handleQaBoardRoute(ctx: RouteContext): Promise<Response | 
 
   // Hand the write to the document's room, which runs board writes one at a
   // time and broadcasts each result in order (DocumentRoom.handleQaWrite).
-  const stub = env.DOCUMENT_ROOM.get(env.DOCUMENT_ROOM.idFromName(id));
+  const stub = documentRoom(env, id);
   const res = await stub.fetch('https://room/qa', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -3,7 +3,8 @@
 A **Sheet** is a spreadsheet on the canvas: one tab of a workbook, as a person knows it from Google Sheets or
 Microsoft Excel. It is placed from Plan mode's **Sheet** palette category (under the **Spreadsheets** heading), moved and resized like a
 [Plan board](../026-plan/plan-board.md), and maximised like one. Its cells are not stored on the canvas: the
-element frames one sheet of the document's [sheet store](sheet-store.md), and the [formulas](formulas.md) in its
+element frames one sheet of the document's [sheet store](sheet-store.md) (in the document's room,
+[Document storage](../006-document/document-storage.md)), and the [formulas](formulas.md) in its
 cells are worked out in every browser that shows it.
 
 ## Domain language

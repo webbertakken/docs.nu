@@ -158,8 +158,9 @@ Coming back to a tab that has been open a while re-reads the list
 
 ## 2. Data model: the collaboration index
 
-Two index tables in D1, written by the api worker **in the same batch
-as the tab row**, so they can never drift from the blob they mirror.
+Index tables in D1, pushed by each document's room from its outbox ([Document storage](../006-document/document-storage.md#the-outbox)):
+a tab's rows are replaced whenever the tab changes, at most about a minute later, so they never drift for long from
+the tab they mirror.
 The tab JSON stays the source of truth ([Assigned actions](../012-collaboration/assigned-actions.md) §1); the index is a
 projection of it that SQL can filter.
 
@@ -192,15 +193,14 @@ CREATE TABLE collab_threads (
 );
 ```
 
-- **Keyed by tab, not document.** A tab can belong to several documents
-  ([Tab ↔ document many-to-many](../006-document/tab-document-many-to-many.md)); the document is resolved at read time through
-  `document_tabs`, which is also what makes deletion free: a tab's rows
-  die with it (FK cascade), and a document's tabs die with the document.
+- **Keyed by document and tab, carrying the tab's name.** The tabs live in each document's room, out of D1's
+  reach, so a row says everything the read needs. A document's rows die with it (FK cascade from `documents`);
+  a tab's go on the document's next push. A shared tab is indexed once per holder, each under its own document.
 - **One row per action, one per thread.** An ordinary element carries at most
   one action and an Action panel a list ([The Action Panel](../012-collaboration/action-panel.md)), so `collab_actions` is keyed
   `(tab_id, element_id, action_id)` (migration 0053); an element has one
   thread. Either way a save is a full replace of the
-  tab's rows: `DELETE … WHERE tab_id = ?` for each table, then one
+  tab's rows: `DELETE … WHERE document_id = ? AND tab_id = ?` for each table, then one
   `INSERT` per element that carries the thing. Idempotent, and it
   handles an action being deleted, moved, completed, or reassigned
   with no diffing. On a typical tab (no actions, no threads) that is
@@ -216,21 +216,11 @@ CREATE TABLE collab_threads (
 
 ### 2.1 Where the writes happen
 
-Every path that writes `tabs.data` contributes the index statements to
-its own batch, all via one helper (`collabIndexStatements` in
-`apps/api/src/db/collab-index.ts`), so a fifth write path cannot forget
-by accident without also forgetting to write the tab:
-
-| Path                                                                                                         | Where                      | How                                          |
-| ------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------------------------------------- |
-| tab autosave `PUT …/tabs/:tabId`                                                                             | `upsertTab`                | statements appended to the tab's batch       |
-| view-role comment `POST …/comments`                                                                          | `upsertTab`                | same                                         |
-| delete-own comment `DELETE …/comments/:id`                                                                   | `upsertTab`                | same                                         |
-| create (`POST /documents`, templates, import)                                                                | `seedTabs`                 | same, per tab                                |
-| duplicate / copy from a share link                                                                           | `copyDocument`             | `INSERT … SELECT` from the source tab's rows |
-| MCP `update_document` / `add_tab` ([MCP server](../015-api/mcp-server.md))                                   | goes through the tab `PUT` | covered                                      |
-| tab / document delete, account delete                                                                        | FK cascade from `tabs`     | nothing to do                                |
-| tab link into another document ([Tab ↔ document many-to-many](../006-document/tab-document-many-to-many.md)) | rows are per tab           | nothing to do                                |
+Every write to a tab in a room, whatever its path (the autosave, a comment through the api, a create, a copy, an
+agent's changeset, a Q&A board write, a shared tab's copy taken in), keys the tab in the room's outbox from a
+trigger, in the same transaction as the write; the drain replaces that tab's rows in one D1 batch
+(`onTabCollabChanged`, the one function that writes these tables).
+A tab removed from the document, and every tab of a purged document, drops its rows the same way or by cascade.
 
 The rows are derived by a pure function over the tab's elements
 (`collabIndexRowsFromElements` in `packages/document`, shared with the browser's read of documents in This Browser, §2.6), which reuses the element-label rule
@@ -273,25 +263,15 @@ current id; extending them is a separate change.
 
 ### 2.3 Backfill
 
-Existing tabs have no index rows until they are saved again. On the
-first `GET /api/activity` for an owner (no `collab_index_state` row),
-the worker seeds the index off the response path (`waitUntil`) from
-the tabs of every document the reader can see (owned, joined-team,
-shared-with), cheaply pre-filtered in SQL to tabs whose JSON contains
-a `commentThread` or `action` key, capped at 300 tabs (logged when
-hit), and stamps `backfilled_at`. The write is the same full-replace
-per tab as a save, guarded on the tab's `rev` still being the one the
-backfill read: a save landing between the read and the write has already
-indexed the newer blob in its own batch, so that tab's older rows are
-skipped rather than written over it. The
-same state row moves with the owner on migration so the seed does not
-run twice against the new id.
+None: every document's first drain after its move into its room
+([Moving content into rooms](../006-document/document-storage-move.md)) indexes every tab it holds, and
+`collab_index_state` goes with the move.
 
 ### 2.4 Plan cards
 
-Plan cards are items in the document's item store ([Items](../026-plan/items.md), table `items`),
-not element JSON, so they need no blob projection: the read filters
-`items` directly. Two pieces make that cheap and correct:
+Plan cards are items in the document's item store ([Items](../026-plan/items.md)), in the document's room.
+The room's outbox pushes the open, assigned cards and the boards that place them to `inbox_cards` in D1, and the
+read filters that table; the rules below are what the push keeps. Two pieces make that cheap and correct:
 
 - **An expression index on the assignee.** Migration 0073 adds
   `CREATE INDEX items_assignee ON items (json_extract(fields, '$.assignee.id'))`.
@@ -349,8 +329,8 @@ this shipped. The backfill's pre-filter matches `"planBoard":` too.
 ### 2.5 Card comment threads
 
 A Plan card's comments live in its item (`fields.comments`, [Items](../026-plan/items.md) "Comments"), not in tab
-JSON, so like §2.4 they need no projection: the read filters `items` directly, in the documents the reader can
-open (§4). A card's thread is listed when:
+JSON; like §2.4, the room pushes each card's open thread to D1 (`collab_threads` under the tab key `~cards`), and
+the read filters those rows in the documents the reader can open (§4). A card's thread is listed when:
 
 - it holds at least one comment and is not resolved;
 - the card is neither archived nor in the Trash;

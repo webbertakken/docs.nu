@@ -281,29 +281,29 @@ days, into the Trash with `reason: 'empty'` (`trashEmptyDocuments`, at most
 
 ### Tab save
 
-The whole-tab autosave (`PUT /api/documents/<id>/tabs/<tabId>`, about every 600 ms while someone edits) reads
-only what it needs of the document, in one query (`getDocumentForSave`: owner, team, name, the owner's participant
-name and colour, and the tab count), where it ran the full document read (the row with its share-code
-subqueries, then the owner's participant and the tab summaries) as two sequential round trips. The stored
-tab, the changesets the editor had not seen and the realtime room's ledger are then read together; the ledger is
-merged after the changesets, as before. A denied save still answers 403.
+The whole-tab autosave (`PUT /api/documents/<id>/tabs/<tabId>`, about every 600 ms while someone edits) runs in the
+document's room ([Document storage](../006-document/document-storage.md)): one call from the Worker, then the stored
+tab, the changesets the editor had not seen and the room's ledger are read in the room, the ledger merged after the
+changesets as before, and the body, its order row, its stats, its image references and the outbox key are written in
+one transaction, with no D1 round trip on the save's path.
+The Timeline's edit event is written to D1 after the answer. A denied save still answers 403.
 
 ### Tab size
 
-A tab is stored as one text value in one D1 row (`tabs.data`, the tab's
-JSON without its id and name), and Cloudflare D1 caps a string, a BLOB and a
-row at **2,000,000 bytes** ([D1 limits](https://developers.cloudflare.com/d1/platform/limits/)).
+A tab is stored as one text value in one row of its room's SQLite (`tabs.data`, the tab's JSON without its id and
+name), and a Durable Object's SQLite caps a string, a BLOB and a row at **2,000,000 bytes**, as D1 did
+([Durable Object limits](https://developers.cloudflare.com/durable-objects/platform/limits/)).
 Local `wrangler dev` does not enforce it, so the api enforces it itself:
 
-- `D1_MAX_ROW_BYTES` = 2,000,000. `MAX_TAB_BYTES` = `D1_MAX_ROW_BYTES` less
-  `D1_ROW_HEADROOM_BYTES` (8 KiB) = 1,991,808 bytes of UTF-8 JSON. The
+- `SQLITE_ROW_MAX_BYTES` = 2,000,000. `MAX_TAB_BYTES` = `SQLITE_ROW_MAX_BYTES` less
+  `SQLITE_ROW_HEADROOM_BYTES` (8 KiB) = 1,991,808 bytes of UTF-8 JSON. The
   headroom covers the row's other columns (the tab id, a UUID; the name, at
   most 60 characters, so at most 240 bytes; `updated_at`; SQLite's record
   header) many times over, so a tab under the cap always fits its row.
 - Both numbers live in `@livedoc/api-schema`, so the editor checks the same
   cap the worker does and the two cannot drift.
 - **Every write of a tab's data** is checked against it, at the storage layer
-  (`upsertTab`, `seedTabs`, `swapTabData`), so no route can store what D1
+  (`upsertTab`, `seedTabs`, `swapTabData`), so no route can store what the room's SQLite
   would refuse: document create, the tab save, a comment added or deleted
   through the api, and a Q&A board write. A tab over the cap is refused with
   the named 413 (`payload_too_large`) and nothing is written; the worker logs
@@ -348,13 +348,13 @@ Self-host: every limiter is optional. When a binding is absent its check short-c
 
 ## Realtime model
 
-The `DocumentRoom` Durable Object (`apps/api/src/document-room.ts`) is the realtime hub for one document id. Clients connect via the `/ws` endpoint and immediately send a `hello`; the room broadcasts a `presence` snapshot whenever the set changes.
+The `DocumentRoom` Durable Object (`apps/api/src/document-room/document-room.ts`) is the realtime hub for one document id. Clients connect via the `/ws` endpoint and immediately send a `hello`; the room broadcasts a `presence` snapshot whenever the set changes.
 
 **Hibernation.** The room uses the Workers WebSocket Hibernation API (`state.acceptWebSocket` + class-level `webSocketMessage` / `webSocketClose` / `webSocketError` handlers) rather than in-memory `ws.accept()`, so the runtime can evict an idle room from memory between messages while every client's socket stays open — an open-but-quiet session no longer bills DO duration. All per-session state that matters (the server-assigned ephemeral presence id, the `X-Verified-Role` trust-boundary role, and the `hello` presence including the remembered `tab-focus` tab) survives eviction in each socket's serialized attachment; only the per-session rate-cap window is in-memory and deliberately resets on a wake.
 
 **Access is gated at the upgrade.** Browsers can't set headers on a WebSocket upgrade, so what admits a socket rides its URL, and a URL is logged (edge logs, Logpush, `wrangler tail`). The editor therefore sends only a one-time ticket, `?t=`, minted over REST moments before (above): single-use, document-scoped and a minute long, so a logged one is already spent. The upgrade still accepts the legacy legs an editor from before 2026-10-17 sends, owner id / its signature / share code / share password as `?o=` / `?os=` / `?s=` / `?p=`, and logs `[room-upgrade] legacy leg admitted` (with `leg: owner | share`) each time one admits a socket; once that line has gone quiet, the legacy legs are removed and the ticket is the only way in. The api worker resolves a role there — the ticket's server-resolved role (see `POST /room-ticket` above; consuming a ticket also satisfies the password gate, since the mint already enforced it), else `edit` for the owner (PERSONAL documents only, and never for an account id, which a signed-in owner presents through the ticket instead — a team document's owner id is visible to every teammate, so it is not accepted as a bare `?o=`; team owners ride the ticket), else the link's role for a valid share code for _this_ document, otherwise none — and **refuses the upgrade outright unless a role resolved** (and, for a password-protected non-ticket non-owner, unless the password matches via a constant-time compare). Team membership is ONLY honoured via the ticket: member ids are account ids deliberately visible to teammates, so a bare `?o=` matching a member must not grant edit (a removed member could otherwise keep joining the room). The resolved role is forwarded to the DO as the `X-Verified-Role` header; the DO re-stamps it onto presence in the `hello` handler, ignoring any role the client typed into its own payload, so that header is the trust boundary. Three more headers ride with it, set on every path so a client can never supply them: `X-Verified-Owner` (`1` when the upgrade resolved as the document's owner, else `0`: from the ticket's `owner` bit, or the legacy bare-`?o=` owner leg; a bit, never an id, which the facilitator baton needs so the owner can always take it back), `X-Verified-Tab-Scope` (a tab-scoped link's tab, empty otherwise) and `X-Verified-Share-Code` (the code that admitted a share visitor, empty otherwise). A room ticket carries the scope and the code from the mint. The DO pins them on the session and confines a scoped session to its tab, live and in catch-up ([Tab-scoped share links](../013-workspace/tab-scoped-share-links.md)).
 
-Edits and presence propagate as `op` messages. The room is **not** a stateless relay: it classifies every op, orders the ones that change the document, rewrites a few fields on the way through, keeps a small amount of collaboration state in its own storage, and performs one kind of document write in D1 itself. D1 stays the system of record for document content ([Realtime conflict resolution](../012-collaboration/realtime-conflict-resolution.md), [Collaboration race hardening](../012-collaboration/collab-race-hardening.md)).
+Edits and presence propagate as `op` messages. The room is **not** a stateless relay: it classifies every op, orders the ones that change the document, rewrites a few fields on the way through, keeps a small amount of collaboration state in its own storage, and stores the document's content in its own SQLite, the system of record for document content ([Document storage](../006-document/document-storage.md), [Realtime conflict resolution](../012-collaboration/realtime-conflict-resolution.md), [Collaboration race hardening](../012-collaboration/collab-race-hardening.md)).
 
 ### Op classes
 
@@ -411,7 +411,7 @@ Mutations are totally ordered by the single-threaded DO: a monotonic `seq` withi
 
 ### What the room stores
 
-Durable Object storage, never D1, and none of it a copy of the document:
+The document's content, in the room's SQLite ([Document storage](../006-document/document-storage.md#what-the-room-holds)), and in its key-value storage:
 
 - **`order-state`**: `{ epoch, seq }`, written on every mutation.
 - **The collaboration ledger** (`RoomLedgerStore`, `room-ledger-store.ts`; entries defined by the pure `collab-ledger.ts` in `@livedoc/document`): for every `el-delta` and `vote` it sequences, the latest state of each answer, idea, checklist tick, comment and the round's dots, one key per element (plus the tab's vote), tagged with the `seq` that set it. An entry that would pass the storage value limit stops growing. The api reads it back to merge a tab save (see the tab `PUT` above).
@@ -420,11 +420,12 @@ Durable Object storage, never D1, and none of it a copy of the document:
 
 Per-session state (presence id, verified role, owner bit, tab scope, admitting share code, presence) lives in each socket's serialized attachment, so it survives hibernation; only the rate-cap windows and the catch-up log reset on a wake.
 
-The room's other parts each have a module beside `document-room.ts`: the session attachment and the verified upgrade headers (`room-session.ts`), the role gate on client ops (`room-op-gate.ts`, the [Share roles](../013-workspace/share-roles.md) level ladder), the worker-only internal endpoints (`room-internal.ts`) and the presence roster each socket is sent (`room-roster.ts`).
+The room's other parts each have a module beside `document-room/document-room.ts`: the session attachment and the verified upgrade headers (`room-session.ts`), the role gate on client ops (`room-op-gate.ts`, the [Share roles](../013-workspace/share-roles.md) level ladder), the worker-only internal endpoints (`room-internal.ts`) and the presence roster each socket is sent (`room-roster.ts`).
 
 ### What the room writes to D1
 
-- **Q&A board writes.** `POST /api/documents/:id/tabs/:tabId/qa` hands each board action to the room's internal `POST /qa`; `handleQaWrite` runs them one at a time through an in-memory queue and calls `writeQaAction` (`qa-board-write.ts`), which reads the tab row, applies `applyQaAction`, bumps `qaRev` and compare-and-swaps the row. The result goes out as a sequenced `qa` system op. This is the one document write that happens inside the room.
+- **The outbox.** The listing's content summary, the Inbox rows, the cards assigned to someone, the placed images and the search text, pushed from the room's alarm ([Document storage](../006-document/document-storage.md#the-outbox)).
+- **Q&A board writes.** `POST /api/documents/:id/tabs/:tabId/qa` hands each board action to the room's internal `POST /qa`; `handleQaWrite` runs them one at a time through an in-memory queue and calls `writeQaAction` (`qa-board-write.ts`), which reads the tab row, applies `applyQaAction`, bumps `qaRev` and compare-and-swaps the row. The result goes out as a sequenced `qa` system op.
 - **One telemetry row**: the room counts a multiplayer session once (`Document·Used·Multiplayer`, `reportServerEvent`) into the telemetry events table, when `TELEMETRY_ENABLED` is on ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)).
 
 Every other document write is a REST call from a client (see the persistence boundary below).
@@ -450,7 +451,7 @@ The api worker reaches the DO through its stub (`env.DOCUMENT_ROOM.get(...).fetc
 
 ### The persistence boundary
 
-D1 holds the document; the room holds ordering and collaboration state. Tab content reaches D1 through `PUT /api/documents/:id/tabs/:tabId`, fired by each editor's debounced autosave with the editor's whole copy of the tab. D1 keeps the last save of a tab, with the room ledger and `qaRev` merged in as described on that row. Each editor's copy already folds in the ops it has received, so the last save normally carries everyone's work; an element edit that reached the saver only after its snapshot can be missing from D1 until a later save carries it, while live peers still hold it.
+The room holds the document, its ordering and its collaboration state. Tab content reaches the room through `PUT /api/documents/:id/tabs/:tabId`, fired by each editor's debounced autosave with the editor's whole copy of the tab. The room keeps the last save of a tab, with the room ledger and `qaRev` merged in as described on that row. Each editor's copy already folds in the ops it has received, so the last save normally carries everyone's work; an element edit that reached the saver only after its snapshot can be missing from the stored tab until a later save carries it, while live peers still hold it.
 
 A tab `PUT` is not relayed to the room; it is the editor's autosave and nothing else's. Every other writer of tab content (the MCP server, the CLI, an API-token script) writes a [changeset](../024-agents/agent-changesets.md), which the api records in D1 and relays to the room, and which every later editor save re-applies unless that editor has seen it. The comment and Q&A endpoints also tell the room about their writes.
 
@@ -461,9 +462,9 @@ Every tab the api receives (document create, tab save) runs the stored-tab migra
 The schema starts at `0001_init.sql` and evolves migration-by-migration; the migration files double as commit history of the shape. Today, in broad strokes:
 
 - **`documents`** — id, owner, name, share flag, folder fk, timestamps. The original `data` JSON column was dropped in migration 0006 once tabs moved to their own rows.
-- **`tabs`** — one row per tab keyed on `(id)`: the body only, in a `data` JSON blob (elements + per-tab settings — theme, background, lock). No column points at a document, so nothing cascades from `documents`; the delete paths drop a tab once no document links it. See [13-per-tab-storage.md](../006-document/per-tab-storage.md) for why.
-- **`document_tabs`** — the many-to-many link: `(document_id, tab_id)` with the tab's `order_index` and `folder` in that document, cascading from both sides. See [Tab ↔ document many-to-many](../006-document/tab-document-many-to-many.md).
-- **`image_refs`** (migration 0050) — `(tab_id, image_id)`: which gallery images each tab places, a projection of `tabs.data` written in the same batch as every body write, with no foreign keys. Read by image retention, the usage map and share-visitor image reads; `image_refs_backfill` tracks the one-off indexing of older tabs. See [Images, Reference index](../009-elements/images.md#reference-index).
+- **The content** — tabs, tab order and folders, tab stats, image references, changesets, items and sheets — lives in each document's room, not in D1 ([Document storage](../006-document/document-storage.md#what-the-room-holds)); D1's former content tables stay until every document has moved ([Moving content into rooms](../006-document/document-storage-move.md)).
+- **`documents.content_summary`** — the listing's view of the content, pushed by the room ([Document storage](../006-document/document-storage.md#the-content-summary)).
+- **`document_images`**, **`collab_threads`**, **`collab_actions`**, **`inbox_cards`**, **`content_search`** — the cross-document indexes each room's outbox feeds ([Document storage](../006-document/document-storage.md#the-outbox), [Content search](../013-workspace/content-search.md)).
 - **`participants`** — id, name, color. Volatile presence/status state stays on the wire.
 - **`share_links`** — code → documentId + role. Multiple links per document are supported; revoking a link is a row delete.
 - **`folders`** — id, owner, name, optional self-referential `parent_id`. Documents reference a folder via `documents.folder_id`. Both FKs `ON DELETE SET NULL` so deleting a folder promotes its children. Cycle prevention is enforced in the API layer (D1 can't declaratively).

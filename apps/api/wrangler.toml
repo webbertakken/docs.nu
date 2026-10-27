@@ -112,12 +112,18 @@ type = "ratelimit"
 namespace_id = "7002"
 simple = { limit = 120, period = 60 }
 
-# Durable Object for per-document realtime (presence + broadcast). One
-# instance per document id; clients connect via WebSocket through the
+# A document's room (docs/specs/006-document/document-storage.md): one SQLite-backed Durable Object per document
+# id, holding its content and relaying its realtime traffic; clients connect via WebSocket through the
 # `/api/documents/<id>/ws` endpoint.
 [[durable_objects.bindings]]
 name = "DOCUMENT_ROOM"
 class_name = "DocumentRoom"
+
+# The key-value room each document had before (docs/specs/006-document/document-storage-move.md): it hands its
+# storage to the document's new room once, and goes with the release that drops D1's content tables.
+[[durable_objects.bindings]]
+name = "LEGACY_DOCUMENT_ROOM"
+class_name = "LegacyDocumentRoom"
 
 [[migrations]]
 tag = "v1"
@@ -128,6 +134,16 @@ new_classes = ["DiagramRoom"]
 [[migrations]]
 tag = "v2"
 renamed_classes = [{ from = "DiagramRoom", to = "DocumentRoom" }]
+
+# A class cannot change its storage backend, so the key-value rooms step aside under a new name, keeping their
+# storage, and a SQLite-backed class takes the old one (docs/specs/006-document/blueprints/document-storage-move.md).
+[[migrations]]
+tag = "v3"
+renamed_classes = [{ from = "DocumentRoom", to = "LegacyDocumentRoom" }]
+
+[[migrations]]
+tag = "v4"
+new_sqlite_classes = ["DocumentRoom"]
 
 # Scheduled jobs the worker handles via the `scheduled` export. One
 # entry per cron; each fires the same handler with `event.cron` set
