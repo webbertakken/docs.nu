@@ -13,113 +13,32 @@ brings, in one screen: "what was I working on?" and "what happened while I was a
 
 ## Layout
 
-Home reads as the front page of the person's work, in the marketing site's visual language: the dotted
-backdrop, a heavy display heading, pills with a coloured dot, the glowing search field and fanned sheets
-([Design principles](../004-interface-design/design-principles.md)).
+Home is drawn like every other Explorer page: the header's search field
+([Explorer filters](explorer-filters.md#the-field)), the sidebar, and beside it the pane.
 
-- **The hero** opens the page ([The hero](#the-hero)): a full-width band under the Explorer header, above the
-  sidebar and the sections. It is Home's page header; Home has no other.
-- **One column** under it, beside the sidebar, at every width: **Jump Back In**, then **What Happened**. It scrolls
-  with the page.
-- **Display headings** set the sections apart. Each section opens with its heading row: the title (about 24 px,
-  extra bold, tight tracking) and the section's quiet link at the right end (**See More**, **See Timeline**). No rule
-  runs under the row. Generous space (about 40 px) separates one section from the next.
-- Jump Back In's documents are **cards** ([Jump Back In](#jump-back-in)); What Happened's days sit in **one panel**
-  (a white, rounded, hairline-bordered surface; the raised surface in dark mode).
+- **The page header** opens the pane, as on every Explorer page ([Explorer structure](explorer-structure.md)): the
+  title **Home** (the page's `h1`), its Help link ([Contextual help links](../018-help/contextual-help-links.md)),
+  **New Document**, and, on a phone, the menu button that opens the
+  [mobile drawer](explorer-structure.md#mobile-drawer). There is no banner above it.
+- **One column** under it, at every width: **Jump Back In**, then **What Happened**. It scrolls with the page.
+- Each section opens with its heading row: the title and the section's quiet link at the right end (**See More**,
+  **See Timeline**).
+- Jump Back In's documents are **cards** ([Jump Back In](#jump-back-in)); What Happened's days sit in **one
+  panel** (a white, rounded, hairline-bordered surface; the raised surface in dark mode).
 - Home has no import, no folder and no view switch.
 - The person's own history (what they created, updated or opened) is not on Home: Jump Back In holds what they
   reach for, and the full record is the Timeline's.
 
-## The hero
-
-A band the page's full width, under the Explorer header and above the sidebar and Home's sections, on Home only. Its
-ground is the marketing hero's: a soft sky wash under a dotted grid, a hairline under it. In dark mode it is the
-[Midnight](../004-interface-design/color-scheme.md#explorer-midnight) ground with a soft blue glow from the top.
-Its content sits in the Explorer's content width.
-
-Top to bottom, left column:
-
-- **Status pills**, two, each a link with a coloured dot:
-  - the person's documents: "1 document" / "N documents" (My Documents, the person's own space, this browser's
-    documents in This Browser not counted), opening **My Documents**; a green dot;
-  - the Inbox: "Inbox is clear" when no open action is assigned to the person, else "N open in your Inbox", the
-    sidebar's Inbox count ([Inbox](inbox.md)), opening the **Inbox**; a sky dot.
-  - A pill is drawn once its count is known: never "0 documents" while the lists load or after the list failed to, nor "Inbox is clear" for an
-    Inbox that has not loaded or failed to.
-- **The greeting**, the page's `h1`: "Good morning.", "Good afternoon." or "Good evening." by the reader's local
-  hour (5 to 11 morning, 12 to 17 afternoon, else evening), then "What are we picking up?". Large display type
-  (about 56 px on a desktop, 36 px on a phone), extra bold, tight tracking. The tab's title stays **Home**.
-- **The lead**: "Jump back into what you use most, or see what changed while you were away."
-- **The search field**: the Explorer's lens field ([Explorer filters](explorer-filters.md#the-field)) drawn large
-  (60 px high, a 2 px sky edge and a soft sky glow), with **New Document** as a solid button inside its right end.
-  On Home it is the only lens field: the header's is not drawn, so the page never shows two. Typing in it opens
-  Search results, as the header's field does from Home, and the header's field there takes the focus with the caret
-  after what was typed, so the typing carries on uninterrupted.
-
-The right column, on a wide screen only (`lg` and up), shows **fanned sheets**: the snapshot thumbnails of the
-person's three most recently saved documents of My Documents, the newest in front and the two behind turned out to
-either side, each on a white sheet with a soft shadow. They are decoration (hidden from assistive technology, not
-links): Jump Back In is the way in. With fewer than three, fewer sheets; with none, the column is empty and the text
-keeps its width.
-
-**It comes and goes with Home.** Leaving Home for another Explorer page folds the hero away (its height to nothing as
-it fades), and the page under it slides up; returning to Home unfolds it again. Each runs over the `long` motion token
-(250 ms), driven by the reader's own navigation ([Motion](../004-interface-design/motion.md) "Layout stability").
-Landing on Home from outside the Explorer shows it at once, with no animation. Under reduced motion it appears and
-goes at once. While folding away it takes no focus.
-
-The hero's top right holds Home's **Help** link ([Contextual help links](../018-help/contextual-help-links.md)). On a
-phone (below `sm`) its top left holds the menu button that opens the [mobile drawer](explorer-structure.md#mobile-drawer).
-
-## Hiding the banner
-
-Next to Help, wherever the hero puts it (a phone's row, the pills' row, the wide top right), sits a **close** (an ×
-button the size of Help, named and tooltipped "Hide Home Banner"). Pressing it hides the hero for good, as the
-synced `homeBanner` preference set to `false`
-([User preferences](../007-editor/user-preferences.md)), on every device the person signs in on. It folds away as it
-does on leaving Home. **Settings > Documents > Explorer > Show Home Banner** turns it back on. Either flip reports
-`UI / Toggled / HomeBannerOff` or `HomeBannerOn` before the preference is written.
-
-With the banner hidden, Home is drawn like every other Explorer page:
-
-- the **header's search field** is drawn on Home too ([Explorer filters](explorer-filters.md#the-field)), so the page
-  still has exactly one lens field;
-- Home takes the ordinary **page header** (the title "Home", its Help link, New Document and, on a phone, the menu
-  button), so it keeps its `h1`;
-- Jump Back In and What Happened, or a first run's sections, follow as before.
-
-One reading, `homeBannerShown` (`apps/live/lib/home-banner.ts`), decides all three, so Home never shows two fields or
-none. The banner's first-run words and template search go with it; the first run's sections under it stay.
-
 ## First run
 
-A person with **nothing yet** gets a Home that starts them off instead of one that waits for history. "Nothing yet"
-means, once the Explorer's lists have loaded: no document of their own, none shared with them, none in any team
-they belong to, and none stored only in this browser. Until the lists load, Home's body is the ordinary Home (its
-skeletons); it never guesses. A list that failed to load says nothing about them, so it is never "nothing yet": Home
-stays the ordinary Home, and the browser's remembered answer is left as it was. The moment they have a document, Home
-is the ordinary Home again.
+A person with **nothing yet** gets a small welcome in the pane instead of a Home that waits for history. "Nothing
+yet" means, once the Explorer's lists have loaded: no document of their own, none shared with them, none in any
+team they belong to, and none stored only in this browser. Until the lists load, Home's body is the ordinary Home
+(its skeletons); it never guesses. A list that failed to load says nothing about them, so it is never "nothing yet":
+Home stays the ordinary Home. The moment they have a document, Home is the ordinary Home again.
 
-The hero's words can't wait on the lists without a flash, so the hero draws the answer this browser last saw: it
-remembers, per person, whether they had anything, and until the lists land it greets them by that. A person this
-browser has never seen is greeted as new, which a newcomer is; before a guest's identity resolves, the browser's
-last answer stands for whoever is here. Only a first run fetches the welcome's template previews.
-
-The hero speaks to a beginning:
-
-- **Pills** say what is true of every start and are not links: "Free and open source" (green dot) and, for a guest,
-  "No sign-up to start" (sky dot); for someone signed in, "Saved to your account".
-- **The greeting** is "Welcome to LiveDoc. What are you making first?".
-- **The lead** is "Pick a starting point, or search the templates. Whatever you make lands here, ready to pick up
-  again."
-- **The field searches templates**, not documents (there are none): its placeholder is "Search templates", and
-  Enter opens the New Document wizard with the words in its template search (`/new?q=`). Inside its right end,
-  **Start Blank** asks which mode, then makes that mode's blank with its start closed (`/new?start=blank`,
-  [Start Blank after a mode](../007-editor/new-document-route.md#start-blank-after-a-mode)).
-- **The fanned sheets** show three template previews (Flowchart in front, Mind Map and Kanban Board behind), the
-  marketing hero's fan, so the page shows what can be made.
-
-Under it, beside the sidebar, Home holds three sections in place of Jump Back In and What Happened:
+The page header stays as it is (**Home**, Help, **New Document**). Under it, Home holds these sections in place of
+Jump Back In and What Happened:
 
 - **Start Blank**: the five blanks, one per mode (Blank Diagram, Blank Whiteboard, Blank Session, Blank
   Illustration, Blank Plan), each a card with its preview, title and one-line description. Activating one makes
@@ -375,9 +294,9 @@ One-liners on the closed vocabulary ([Telemetry](../017-telemetry/telemetry.md))
 - `Home·Opened·Group`: a summary entry expanded.
 - `Home·Loaded·Retry`: a failed read retried.
 - `Home·Opened·Welcome`: the first-run Home shown.
-- `Home·Selected·Welcome.Blank` / `Welcome.Template` / `Welcome.AllTemplates` / `Welcome.Search` /
-  `Welcome.StartBlank` / `Welcome.SignIn`: a start taken from it (a blank card, a template card, Browse All
-  Templates, a template search, the field's Start Blank, Sign In).
+- `Home·Selected·Welcome.Blank` / `Welcome.Template` / `Welcome.AllTemplates` / `Welcome.SignIn`: a start taken
+  from it (a blank card, a template card, Browse All Templates, Sign In). `Welcome.Search` and `Welcome.StartBlank`
+  belonged to the banner's template field and are no longer recorded.
 
 ## Help
 

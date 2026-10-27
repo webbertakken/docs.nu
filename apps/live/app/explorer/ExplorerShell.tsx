@@ -27,9 +27,6 @@ import { AreaErrorBoundary } from '@/components/primitives/AreaErrorBoundary';
 import { ExplorerProvider, useExplorer } from './ExplorerContext';
 import { ExplorerSidebar } from './sidebar/ExplorerSidebar';
 import { SectionsDrawer } from './SectionsDrawer';
-import { HomeHero } from '@/components/panels/home/HomeHero';
-import { useHeroPresence } from '@/components/panels/home/useHeroPresence';
-import { homeBannerShown } from '@/lib/home-banner';
 import { useExplorerState } from './useExplorerState';
 import { teamFolderPath } from './routes';
 import { searchPanelSources } from '@/components/panels/search-panel-sources';
@@ -144,10 +141,6 @@ function ShellChrome({ children }: { children: ReactNode }) {
   const surface = explorerSurfaceFlags(useExplorerSurface());
   // Navigating to another section clears a crashed pane's notice.
   const pathname = usePathname();
-  // Home's hero folds away when the reader leaves Home and unfolds when they return; hidden by its close, Home
-  // opens on the header's field and its own page header instead (explorer-home.md "Hiding the banner").
-  const heroOnHome = selected.kind === 'home' && homeBannerShown(prefs);
-  const hero = useHeroPresence(heroOnHome);
   // Cmd/Ctrl+K and Cmd/Ctrl+. open search here as in the editor (docs/specs/007-editor/command-palette.md).
   useSearchShortcut(() => setSearchOpen(true));
 
@@ -185,25 +178,21 @@ function ShellChrome({ children }: { children: ReactNode }) {
             <Brand href="/" size="md" assemble />
             <ProductNav current="explorer" showOnMobile />
           </div>
-          {/* While Home shows its hero the field sits there instead (docs/specs/013-workspace/explorer-filters.md "The
-              field"). */}
-          {heroOnHome ? null : (
-            <div className="order-last w-full pb-2 pr-4 sm:order-none sm:ml-auto sm:w-auto sm:pb-0 sm:pr-0 lg:col-start-2 lg:ml-0">
-              <LensField lens={lens} subjects={lensResult.subjects} />
-              {/* Counts what the lens left once typing settles; the team library counts its own. */}
-              <LensAnnouncer
-                input={lens.input}
-                shown={lensResult.shown}
-                total={lensResult.total}
-                muted={lens.view === null || selected.kind === 'team'}
-              />
-            </div>
-          )}
+          <div className="order-last w-full pb-2 pr-4 sm:order-none sm:ml-auto sm:w-auto sm:pb-0 sm:pr-0 lg:col-start-2 lg:ml-0">
+            <LensField lens={lens} subjects={lensResult.subjects} />
+            {/* Counts what the lens left once typing settles; the team library counts its own. */}
+            <LensAnnouncer
+              input={lens.input}
+              shown={lensResult.shown}
+              total={lensResult.total}
+              muted={lens.view === null || selected.kind === 'team'}
+            />
+          </div>
           <div className="flex h-14 items-stretch lg:col-start-3 lg:justify-self-end">
             <AuthControls onOpenAccount={() => openSettingsOn('account')} />
           </div>
         </header>
-      ) : heroOnHome ? null : (
+      ) : (
         // A workspace frame keeps the Explorer's field in a slim bar of its own (WB61): no brand, product nav or
         // account.
         <div className="sticky top-0 z-[var(--z-chrome)] flex h-12 shrink-0 items-center border-b border-slate-200 bg-white/85 px-4 backdrop-blur dark:border-slate-700 dark:bg-slate-900/85">
@@ -218,23 +207,6 @@ function ShellChrome({ children }: { children: ReactNode }) {
           </div>
         </div>
       )}
-
-      {/* Home's front-page band (docs/specs/013-workspace/explorer-home.md "The hero"), above the sidebar. */}
-      {hero.mounted ? (
-        <div
-          data-home-hero-fold={hero.open ? 'open' : 'closed'}
-          // Folded, it takes no focus and says nothing: the page it folds away from is gone.
-          inert={!hero.open}
-          aria-hidden={!hero.open || undefined}
-          className={`grid transition-[grid-template-rows,opacity] duration-long ease-out ${
-            hero.open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-          }`}
-        >
-          <div className="min-h-0 overflow-hidden">
-            <HomeHero active={heroOnHome} />
-          </div>
-        </div>
-      ) : null}
 
       <main
         className={`mx-auto flex w-full max-w-7xl flex-1 gap-8 px-4 pt-8 sm:px-6 ${

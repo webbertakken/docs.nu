@@ -2,10 +2,10 @@
 
 import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// docs/specs/013-workspace/explorer-home.md "First run": read from the Explorer's lists; the hero draws the answer
-// this browser last saw until they land; a newcomer is taken as new.
+// docs/specs/013-workspace/explorer-home.md "First run": read from the Explorer's lists, and never guessed while
+// they load or after one failed.
 
 const { host } = vi.hoisted(() => ({ host: { signIn: true } }));
 vi.mock('@/lib/auth-config', () => ({
@@ -15,8 +15,6 @@ vi.mock('@/lib/auth-config', () => ({
 import { ExplorerProvider } from '../ExplorerContext';
 import type { ExplorerStateValue } from '../useExplorerState';
 import { useFirstRun } from './useFirstRun';
-
-const KEY = 'livedoc:v2:home-has-documents';
 
 function wrap(over: Partial<Record<string, unknown>> = {}) {
   const value = {
@@ -37,30 +35,24 @@ function wrap(over: Partial<Record<string, unknown>> = {}) {
 
 beforeEach(() => {
   host.signIn = true;
-  localStorage.clear();
 });
-afterEach(() => localStorage.clear());
 
 describe('useFirstRun', () => {
   it('is never a first run outside the Explorer', () => {
     const { result } = renderHook(() => useFirstRun());
-    expect(result.current).toEqual({
-      firstRun: false,
-      heroFirstRun: false,
-      signedIn: false,
-      offerSignIn: false,
-    });
+    expect(result.current).toEqual({ firstRun: false, offerSignIn: false });
   });
 
   it('is a first run with nothing loaded, offering a guest the way back', () => {
     const { result } = renderHook(() => useFirstRun(), { wrapper: wrap() });
-    expect(result.current).toMatchObject({ firstRun: true, heroFirstRun: true, offerSignIn: true });
+    expect(result.current).toEqual({ firstRun: true, offerSignIn: true });
   });
 
   it('offers no sign-in to someone signed in, or where sign-in is off', () => {
     expect(
-      renderHook(() => useFirstRun(), { wrapper: wrap({ accountId: 'user_1' }) }).result.current,
-    ).toMatchObject({ signedIn: true, offerSignIn: false });
+      renderHook(() => useFirstRun(), { wrapper: wrap({ accountId: 'user_1' }) }).result.current
+        .offerSignIn,
+    ).toBe(false);
     host.signIn = false;
     expect(renderHook(() => useFirstRun(), { wrapper: wrap() }).result.current.offerSignIn).toBe(
       false,
@@ -71,53 +63,21 @@ describe('useFirstRun', () => {
     const { result } = renderHook(() => useFirstRun(), {
       wrapper: wrap({ documents: [{ id: 'a' }] }),
     });
-    expect(result.current).toMatchObject({ firstRun: false, heroFirstRun: false });
+    expect(result.current.firstRun).toBe(false);
   });
 
-  it('is no first run when a list failed to load, and remembers nothing from it', () => {
+  it('is not a first run while the lists load', () => {
+    const { result } = renderHook(() => useFirstRun(), { wrapper: wrap({ loading: true }) });
+    expect(result.current.firstRun).toBe(false);
+  });
+
+  it('is no first run when a list failed to load', () => {
     for (const failedReads of [
       { documents: true, shared: false },
       { documents: false, shared: true },
     ]) {
       const { result } = renderHook(() => useFirstRun(), { wrapper: wrap({ failedReads }) });
-      expect(result.current).toMatchObject({ firstRun: false, heroFirstRun: false });
+      expect(result.current.firstRun).toBe(false);
     }
-    expect(localStorage.getItem(KEY)).toBeNull();
-  });
-
-  it('remembers the answer for this person once the lists land', () => {
-    renderHook(() => useFirstRun(), { wrapper: wrap({ documents: [{ id: 'a' }] }) });
-    expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual({ ownerId: 'me', has: true });
-  });
-
-  it('while loading, the hero takes a newcomer as new and a returning person as returning', () => {
-    const loading = wrap({ loading: true });
-    expect(renderHook(() => useFirstRun(), { wrapper: loading }).result.current).toMatchObject({
-      firstRun: false,
-      heroFirstRun: true,
-    });
-    localStorage.setItem(KEY, JSON.stringify({ ownerId: 'me', has: true }));
-    expect(renderHook(() => useFirstRun(), { wrapper: loading }).result.current.heroFirstRun).toBe(
-      false,
-    );
-    // Someone else's memory says nothing about this person.
-    localStorage.setItem(KEY, JSON.stringify({ ownerId: 'other', has: true }));
-    expect(renderHook(() => useFirstRun(), { wrapper: loading }).result.current.heroFirstRun).toBe(
-      true,
-    );
-  });
-
-  it("before the id resolves, takes this browser's last answer for whoever is here", () => {
-    localStorage.setItem(KEY, JSON.stringify({ ownerId: 'someone', has: true }));
-    const { result } = renderHook(() => useFirstRun(), {
-      wrapper: wrap({ loading: true, ownerId: null }),
-    });
-    expect(result.current.heroFirstRun).toBe(false);
-  });
-
-  it('reads an unreadable memory as none', () => {
-    localStorage.setItem(KEY, '{nope');
-    const { result } = renderHook(() => useFirstRun(), { wrapper: wrap({ loading: true }) });
-    expect(result.current.heroFirstRun).toBe(true);
   });
 });
