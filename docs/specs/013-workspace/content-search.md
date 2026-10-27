@@ -1,9 +1,13 @@
 # Content search
 
-The Explorer's free text finds a document by what it holds as well as by its name.
+Search finds a document by what it holds as well as by its name.
 Names match in the browser ([Explorer filters](explorer-filters.md#matching)); content matches in the api Worker,
 in a D1 full-text index each document's room keeps current ([Document storage](../006-document/document-storage.md)).
 Both forgive a typo and ignore case and accents.
+
+This spec is the api's side: what is indexed, who finds what, how it matches and ranks, and what it answers.
+How matches are shown belongs to the search's own presentation (the Ctrl K search, specified separately), which
+reads this answer.
 
 ## Words
 
@@ -47,30 +51,17 @@ Image pixels, file bytes, links' targets and stroke shapes are not searched.
 
 ## Ranking
 
-- Documents matched by name come first, in the name matcher's order.
-- Documents matched by content only follow, best first: by how well the tab's text fits the query (`bm25`), then by
-  how many of the query's trigrams it holds, then newest saved first.
+- Content matches come best first: by how well the tab's text fits the query (`bm25`), then by how many of the
+  query's trigrams it holds, then newest saved first.
 - A query of short words only ranks its content matches newest saved first.
+- How content matches sit beside name matches is the presentation's.
 
-## What a row shows
+## What it answers
 
-- A document matched by content only shows, under its name, the tab it was found in and a line of its text around
-  the match, the matched stretches marked: "In Sprint 12 · …the **retrospective** notes for the kanban…".
-- A document matched by name shows as the lens shows it today, with no content line.
-- The line is at most about 160 characters, cut at word boundaries with an ellipsis.
-
-## States
-
-| State   | Shows                                                                                                      |
-| ------- | ---------------------------------------------------------------------------------------------------------- |
-| Typing  | Name matches at once; content matches join under them when they arrive                                     |
-| Loading | Name matches, and a quiet line under them: "Searching inside documents…"                                   |
-| Failed  | Name matches, and a quiet line under them: "Couldn’t search inside documents." with **Try again**          |
-| None    | No content line when nothing matched by content; the lens's own Filtered empty when nothing matched at all |
-
-- Content search waits until typing pauses for 300 ms, and runs only when the free text holds a letter or digit.
-- A newer query cancels an older one; an answer for an old query is never shown.
-- The live region counts both kinds together, once the content answer has arrived.
+- Per matched document: the document, the tab it was found in and its name (none for the document's items), and a
+  line of the tab's text around the match, at most about 160 characters, cut at word boundaries with an ellipsis,
+  with the matched stretches given as ranges, never as markup.
+- An answer for a query that is no longer current is the caller's to discard.
 
 ## Freshness
 
@@ -79,15 +70,12 @@ The index trails a write by up to about a minute, the outbox's pace; a document 
 ## Limits and abuse
 
 - A query is at most 512 characters, as the lens is; only its first 32 distinct trigrams are matched.
-- Each person may search at most 120 times a minute; past it the api answers 429 and the Explorer keeps the name
-  matches.
+- Each person may search at most 120 times a minute; past it the api answers 429, and name matching still works.
 - The index stores no text the reader could not already read in the document.
 
 ## Telemetry
 
-- The lens's `Explorer / Selected / Text` already counts a search ([Explorer filters](explorer-filters.md#telemetry)).
-- Opening a document from a content match emits `Explorer / Opened / ContentMatch` once, never the query or an id
-  ([Telemetry](../017-telemetry/telemetry.md)); it says whether finding by content is used.
+None in the api; what the presentation counts is its own ([Telemetry](../017-telemetry/telemetry.md)).
 
 ## Not part of it
 
