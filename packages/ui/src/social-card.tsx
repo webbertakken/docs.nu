@@ -88,7 +88,8 @@ export function renderSocialCard(opts?: SocialCardOptions) {
           <img src={MARK_DATA_URI} width={64} height={64} alt="" />
           <div style={{ display: 'flex' }}>
             <span style={{ color: '#0284c7' }}>Live</span>
-            <span>Doc</span>
+            {/* next/og sets a gap between two spans; this closes it, so the wordmark reads as one word. */}
+            <span style={{ marginLeft: -5 }}>Doc</span>
           </div>
         </div>
 

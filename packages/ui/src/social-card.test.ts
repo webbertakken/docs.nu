@@ -42,8 +42,12 @@ describe('renderSocialCard', () => {
   const html = renderToStaticMarkup(card);
   const text = () => textOf(card).replace(/\u00a0/g, ' ');
 
-  it('sets the wordmark as Live in the accent, then Doc', () => {
-    expect(html).toMatch(/<span style="color:#0284c7">Live<\/span><span>Doc<\/span>/);
+  // The card's renderer (next/og) sets a gap between two spans; Doc's margin closes it, so the two read as one
+  // word, as wide as plain "LiveDoc" (measured: 150px either way at 44px).
+  it('sets the wordmark as Live in the accent, then Doc, closed up into one word', () => {
+    expect(html).toMatch(
+      /<span style="color:#0284c7">Live<\/span><span style="margin-left:-5px">Doc<\/span>/,
+    );
   });
 
   it('speaks of documents, not diagrams or drawing', () => {
