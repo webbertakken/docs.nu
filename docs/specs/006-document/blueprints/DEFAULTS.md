@@ -26,3 +26,4 @@ One row per default applied where a spec is silent or qualitative.
 | D20 | document-storage-move | The sweep's pace                                                   | 25 documents a minute, 6 at once, failures retried at most hourly                                                    |
 | D21 | document-storage-move | What a request answers while its move fails                        | 503 `content_moving` with `Retry-After: 5`                                                                           |
 | D22 | document-storage-move | The operator tool's form                                           | A Node script over `wrangler d1 execute --json`, refusing any statement but `SELECT`                                 |
+| D23 | document-storage-move | How a room knows whose legacy room to ask                          | Every worker-to-room call carries `X-Document-Id`, set by the one stub helper in `room-client.ts`                    |

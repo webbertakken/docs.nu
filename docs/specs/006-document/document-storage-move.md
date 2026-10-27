@@ -20,8 +20,21 @@ Modelled on upstream's migrate tool (`b0f6444618`: snapshot, plan, apply, verify
 - The rooms so far are key-value Durable Objects, and a Durable Object class cannot change its storage backend.
 - The release renames the old class aside as the legacy room and makes a new SQLite-backed class `DocumentRoom`,
   under the same binding, so every caller keeps its name.
-- The legacy room class ships in that release only to hand over its storage; the release that drops D1's content
-  tables deletes it.
+- The class change ships in a release of its own, before any content moves, and hands over each room's state.
+- The legacy room class ships only to hand over its storage; the release that drops D1's content tables deletes it.
+
+## Handing over room state
+
+- A room takes over its legacy room's state on its first request after the class change, before answering it: every
+  key the legacy room stores (the order state, the ledger, the live poll, the baton, selections, agent presence),
+  verbatim, then the room's ordering, baton, poll and agents are restored from them.
+- The worker names the document on every call it makes to a room, so the room knows whose legacy room to ask.
+- A handed-over room records that it has, and never asks again; a new document's room finds nothing to take.
+- Once the state is stored, the room asks its legacy room to delete its storage; a failure is logged and left.
+- A handover that fails leaves the room as it was and answers 503 with a retry; the next request tries again.
+- Collaboration carries on through the handover: a reconnecting editor finds the same epoch and order, the ledger
+  still merges into the next save, and a running poll keeps its answers.
+- Content stays in D1 throughout; this release changes where room state lives and nothing else.
 
 ## A move
 
@@ -30,8 +43,7 @@ Modelled on upstream's migrate tool (`b0f6444618`: snapshot, plan, apply, verify
 - **One at a time per document.** The room holds every other request until its move has finished.
 - **What it copies**: from D1, the document's tabs, tab order and folders, tab stats, image references, changesets
   and their parts, items, sheets, cells and sheet references, and the document row's slide deck, item catalogue and
-  counters; from the legacy room, every key it stores (the order state, the ledger, the live poll, the baton,
-  selections, agent presence), verbatim.
+  counters. The room state was handed over already (above).
 - **In one transaction, verified inside it.** The room writes all of it, then reads back what it now holds and
   counts and hashes it with the same function it hashed the D1 rows with.
   Two sides that differ undo the transaction: the room stays unmoved and the move record says `mismatch`.
@@ -42,7 +54,6 @@ Modelled on upstream's migrate tool (`b0f6444618`: snapshot, plan, apply, verify
   write would.
 - **Shared tabs.** Two documents that held the same tab in D1 each take a copy, list each other as holders, and are
   in step from then on ([Tab ↔ document many-to-many](tab-document-many-to-many.md)).
-- **Legacy state.** Once the move is recorded, the room asks its legacy room to delete its storage.
 
 ## The sweep
 
@@ -67,8 +78,8 @@ A command run on the operator's machine, reading D1 through wrangler, never writ
 - After it, the previous Worker version can be restored; it reads D1's content tables, which the move never wrote,
   so every document shows its content as it was at the move. Edits made in rooms after the move are not in D1, so a
   rollback after people have edited loses those edits unless they are copied back first.
-- The legacy room's storage is kept until its document's move is recorded, so a rollback before a move loses no
-  room state either.
+- The class change's release cannot be rolled back: Cloudflare does not roll back a deployment that applied a
+  Durable Object migration. A fault there is fixed forward; content, still in D1 then, is never at risk.
 
 ## Dropping D1's content tables
 

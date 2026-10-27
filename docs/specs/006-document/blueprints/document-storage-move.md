@@ -45,7 +45,26 @@ new_sqlite_classes = ["DocumentRoom"]
 - `LegacyDocumentRoom` exports `exportState(cursor: string | null): Promise<{ entries: [string, unknown][];
 next: string | null }>` (pages of `LEGACY_PAGE_KEYS` keys by `storage.list({ startAfter, limit })`) and
   `clear(): Promise<void>` (`deleteAlarm`, `deleteAll`); its `fetch` answers 410 `room_moved`.
-- A preview deploy runs v1 to v4 on fresh namespaces, which proves the sequence is accepted before production does.
+- A preview deploy runs v1 to v4 on fresh namespaces, which proves the sequence is accepted before production does;
+  a preview already deployed with v1 and v2 proves v3 and v4 over existing namespaces.
+- The class change ships in its own release (the foundation), with the handover below and no content change.
+  A Worker rollback across it is refused by Cloudflare (a Durable Object lifecycle change), so faults are fixed
+  forward.
+
+### Room state handover (`legacy-handover.ts`)
+
+- Every worker-to-room call goes through `documentRoom(env, id)` (`room-client.ts`), whose stub adds
+  `X-Document-Id: <id>` to every `fetch`; a guard test fails on any `DOCUMENT_ROOM.get(` outside it.
+- `DocumentRoom.fetch` first runs `ensureHandedOver(documentId)` under `blockConcurrencyWhile`, once per instance
+  (an in-memory flag), before any routing.
+- `takeLegacyState(storage, legacy)`: when the key-value key `legacy-handover` is present, nothing; otherwise page
+  `exportState` to the end, `put` every entry (pages of at most `HANDOVER_PUT_KEYS`, the key-value batch limit),
+  then `put('legacy-handover', { at, keys })`; answers the count taken.
+- After a take of one or more keys, the room re-restores `epoch`/`seq`, the baton, the poll and agent presence from
+  storage and re-arms its alarm; then `legacy.clear()`, a failure logged and left.
+- No `X-Document-Id` (a test double's request): no handover, logged once per instance.
+- A failure before the marker is written: 503 `room_unavailable`, `Retry-After: 5`; the in-memory flag stays unset
+  so the next request tries again. Entries already put are overwritten by the retry, verbatim, so it is idempotent.
 
 ### Move states (per document)
 
@@ -75,16 +94,14 @@ throws or its hashes differ). `moved` is terminal.
    id; the tabs' bodies in groups of at most `MOVE_READ_BYTES` (lengths first, `length(data)`); `agent_changesets`
    and parts for the id; `items`, `sheets`, `sheet_cells`, `sheet_refs` for its tabs and id; for each tab, the other
    documents whose `document_tabs` hold it (the holders).
-2. Read the legacy room: every page of `exportState`.
-3. `d1Hash = contentHashOf(read)`; `d1Tabs = read.tabs.length`.
-4. In one transaction: ensure the schema; write every row verbatim; recompute `tab_stats` (`tabStatsOfData`, dated
+2. `d1Hash = contentHashOf(read)`; `d1Tabs = read.tabs.length`.
+3. In one transaction: ensure the schema; write every row verbatim; recompute `tab_stats` (`tabStatsOfData`, dated
    by the tab's `updated_at`), `image_refs` (`imageRefIdsFromData`) and `plan_board_statuses` from each body; write
-   `tab_shares` from the holders; write the legacy entries through `ctx.storage.kv.put`; read the room's own rows
+   `tab_shares` from the holders; read the room's own rows
    back into `MovableContent`; `roomHash = contentHashOf(back)`; throw `move_mismatch` when `roomHash !== d1Hash` or
-   the counts differ; put `content-move = { movedAt, d1Hash, roomHash, d1Tabs, roomTabs, legacyKeys }`.
-5. After commit: upsert `content_moves` (`moved`); the outbox holds a `summary`, `images`, `cards`, `items` and every
+   the counts differ; put `content-move = { movedAt, d1Hash, roomHash, d1Tabs, roomTabs }`.
+4. After commit: upsert `content_moves` (`moved`); the outbox holds a `summary`, `images`, `cards`, `items` and every
    `tab` key (its triggers fired on the inserts), so the first drain fills D1's indexes.
-6. `legacy.clear()`; a failure is logged and left: the legacy class is deleted whole in the drop release.
 
 On a throw: no room change (M2); upsert `content_moves` with `failed` or `mismatch`, `attempts + 1`, `tried_at`,
 `error` (the error's name, never content); the request that triggered the gate answers 503 `content_moving` with
@@ -147,10 +164,10 @@ m.document_id = d.id WHERE m.status IS NOT 'moved');`
 
 - RPC `DocumentRoom.move(documentId: string): Promise<MoveOutcome>` with
   `MoveOutcome = { status: 'moved' | 'failed' | 'mismatch'; d1Hash: string | null; roomHash: string | null;
-d1Tabs: number | null; roomTabs: number | null; legacyKeys: number; born: boolean }`.
+d1Tabs: number | null; roomTabs: number | null; born: boolean }`.
 - D1 migration (with the storage blueprint's): `content_moves (document_id TEXT PRIMARY KEY REFERENCES documents (id)
 ON DELETE CASCADE, status TEXT NOT NULL CHECK (status IN ('moved', 'failed', 'mismatch')), d1_tabs INTEGER,
-room_tabs INTEGER, d1_hash TEXT, room_hash TEXT, legacy_keys INTEGER NOT NULL DEFAULT 0, attempts INTEGER NOT NULL
+room_tabs INTEGER, d1_hash TEXT, room_hash TEXT, attempts INTEGER NOT NULL
 DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 - The wire to the editor is unchanged; 503 `content_moving` is a new named answer on every document route, listed in
   the OpenAPI manifest's shared responses.
@@ -163,19 +180,19 @@ DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 
 ## Errors and edge cases
 
-| Case                                 | Handling                                                                   |
-| ------------------------------------ | -------------------------------------------------------------------------- |
-| D1 read fails mid-move               | throw before the transaction; `failed`; 503                                |
-| Legacy room unreachable              | `failed`; retried; content not moved without its ledger                    |
-| Hashes or counts differ              | transaction undone; `mismatch`; `[content-move] mismatch` with both hashes |
-| Record upsert fails after commit     | room moved; next sweep heals the record from `content-move`                |
-| A tab in two documents               | each room copies it and lists the other as holder                          |
-| A document with no tabs              | moves: `document` row only, `d1Tabs = 0`                                   |
-| A document in the Trash              | moves like any other                                                       |
-| A request during a move              | waits (M1), then answers from the moved room                               |
-| A document purged before it moved    | its room stays `empty`; the record cascades away                           |
-| A tab body over the 2 MB row cap     | cannot exist: D1 refused it with the same cap                              |
-| Legacy key over the SQLite value cap | cannot exist: key-value values were capped at 128 KiB                      |
+| Case                                  | Handling                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| D1 read fails mid-move                | throw before the transaction; `failed`; 503                                |
+| Legacy room unreachable at a handover | 503 `room_unavailable`; the next request tries again; content is untouched |
+| Hashes or counts differ               | transaction undone; `mismatch`; `[content-move] mismatch` with both hashes |
+| Record upsert fails after commit      | room moved; next sweep heals the record from `content-move`                |
+| A tab in two documents                | each room copies it and lists the other as holder                          |
+| A document with no tabs               | moves: `document` row only, `d1Tabs = 0`                                   |
+| A document in the Trash               | moves like any other                                                       |
+| A request during a move               | waits (M1), then answers from the moved room                               |
+| A document purged before it moved     | its room stays `empty`; the record cascades away                           |
+| A tab body over the 2 MB row cap      | cannot exist: D1 refused it with the same cap                              |
+| Legacy key over the SQLite value cap  | cannot exist: key-value values were capped at 128 KiB                      |
 
 ## Security and trust
 
@@ -192,13 +209,16 @@ DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 
 ## Observability
 
-| Fingerprint                                                                      | When                        |
-| -------------------------------------------------------------------------------- | --------------------------- |
-| `[content-move] moved id=<id> tabs=<n> keys=<k> hash=<h8>`                       | a move commits              |
-| `[content-move] mismatch id=<id> d1=<h8> room=<h8> d1Tabs=<n> roomTabs=<m>`      | hashes or counts differ     |
-| `[content-move] failed id=<id> stage=<read\|legacy\|write\|record> error=<name>` | any other failure           |
-| `[content-move] sweep found=<n> moved=<m> failed=<f>`                            | a sweep run that found work |
-| `[content-move] legacy clear failed id=<id>`                                     | after a commit              |
+| Fingerprint                                                                 | When                               |
+| --------------------------------------------------------------------------- | ---------------------------------- |
+| `[content-move] moved id=<id> tabs=<n> keys=<k> hash=<h8>`                  | a move commits                     |
+| `[content-move] mismatch id=<id> d1=<h8> room=<h8> d1Tabs=<n> roomTabs=<m>` | hashes or counts differ            |
+| `[content-move] failed id=<id> stage=<read\|write\|record> error=<name>`    | any other failure                  |
+| `[content-move] sweep found=<n> moved=<m> failed=<f>`                       | a sweep run that found work        |
+| `[legacy-handover] took id=<id> keys=<n>`                                   | a room takes its legacy state      |
+| `[legacy-handover] failed id=<id> error=<name>`                             | a handover fails before its marker |
+| `[legacy-handover] clear failed id=<id>`                                    | after a handover                   |
+| `[legacy-handover] no document id`                                          | a call without `X-Document-Id`     |
 
 ## Testing
 
@@ -211,22 +231,25 @@ DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 | G1 no D1 row: no move, room stays empty                     | `content-move.test.ts`                             |
 | Hash identical in Node and in the room for the same rows    | `content-hash.test.ts`                             |
 | Shared tab moves into both holders                          | `content-move.test.ts`                             |
-| Legacy state carried verbatim, then cleared                 | `content-move.test.ts`                             |
+| Legacy state taken verbatim once, restored, then cleared    | `legacy-handover.test.ts`                          |
+| Every room call names its document                          | `room-client.test.ts` (guard)                      |
+| Handover failure answers 503 and retries                    | `legacy-handover.test.ts`                          |
 | Sweep order, batch, retry gap, idle                         | `content-move-sweep.test.ts`                       |
 | Tool refuses a non-SELECT; verify pass and fail tables      | `scripts/content-move.test.ts`                     |
 | Drop guard fails with an unmoved document                   | `migrations` test on node:sqlite                   |
 
 ## Constants and configuration
 
-| Constant           | Value     | Provenance                                | Safe range              |
-| ------------------ | --------- | ----------------------------------------- | ----------------------- |
-| `MOVE_SWEEP_BATCH` | 25        | well under a cron run's subrequest budget | 1 to 50                 |
-| `MOVE_CONCURRENCY` | 6         | Workers' open connections                 | 1 to 6                  |
-| `MOVE_TIMEOUT_MS`  | 20,000    | a large document's read and write         | 5,000 to 30,000         |
-| `MOVE_RETRY_MS`    | 3,600,000 | spec: at most once an hour                | 600,000 and up          |
-| `MOVE_READ_BYTES`  | 8,000,000 | four tab caps per D1 read                 | 2,000,000 to 20,000,000 |
-| `LEGACY_PAGE_KEYS` | 512       | under the key-value list's practical page | 128 to 1,000            |
-| Retry-After        | 5 s       | a move takes well under a second          | 1 to 30                 |
+| Constant            | Value     | Provenance                                | Safe range              |
+| ------------------- | --------- | ----------------------------------------- | ----------------------- |
+| `MOVE_SWEEP_BATCH`  | 25        | well under a cron run's subrequest budget | 1 to 50                 |
+| `MOVE_CONCURRENCY`  | 6         | Workers' open connections                 | 1 to 6                  |
+| `MOVE_TIMEOUT_MS`   | 20,000    | a large document's read and write         | 5,000 to 30,000         |
+| `MOVE_RETRY_MS`     | 3,600,000 | spec: at most once an hour                | 600,000 and up          |
+| `MOVE_READ_BYTES`   | 8,000,000 | four tab caps per D1 read                 | 2,000,000 to 20,000,000 |
+| `LEGACY_PAGE_KEYS`  | 512       | under the key-value list's practical page | 128 to 1,000            |
+| `HANDOVER_PUT_KEYS` | 128       | the key-value `put` batch limit           | fixed                   |
+| Retry-After         | 5 s       | a move takes well under a second          | 1 to 30                 |
 
 ## Defaults ledger
 
