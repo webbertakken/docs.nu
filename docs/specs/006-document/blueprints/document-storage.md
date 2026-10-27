@@ -5,7 +5,7 @@ Derived from [Document storage](../document-storage.md),
 [One live service](../../003-system-architecture/one-live-service.md).
 The move of existing documents has its own blueprint ([Moving content into rooms](document-storage-move.md)); content
 search has its own ([Content search](../../013-workspace/blueprints/content-search.md)).
-Ported by hand from upstream `77e511638f`, `8be9a0be46` and `packages/index-app/src/outbox.ts`; names below are
+Ported by hand from upstream `77e511638f`, `8be9a0be46` and its index-app outbox kit; names below are
 LiveDoc's.
 
 ## Domain and naming
@@ -125,7 +125,7 @@ present, else `empty: false`.
 | purge                                   | `purge(id)`                                     | `void`                                                |
 | shared tabs                             | `sharedTabCopy`, `shareJoined`, `receiveShares` | (below)                                               |
 
-### Shared tabs (`document-room/tab-shares.ts`)
+### Shared tabs (`document-room/tab-shares.ts` (planned))
 
 - Tables: `tab_shares (tab_id TEXT NOT NULL REFERENCES tabs (id) ON DELETE CASCADE, document_id TEXT NOT NULL,
 PRIMARY KEY (tab_id, document_id)) WITHOUT ROWID`; `share_outbox (id INTEGER PRIMARY KEY, kind TEXT NOT NULL CHECK
