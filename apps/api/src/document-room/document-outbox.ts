@@ -8,6 +8,12 @@
 // full replace of what it derives, so D1's rows are safe to drop and refill.
 
 import { collabIndexRowsFromElements, type Element } from '@livedoc/document';
+import { tabSearchText } from '@livedoc/document-views';
+import { itemsSearchText } from '@livedoc/items';
+import { sheetSearchInputs } from '@livedoc/sheets';
+import { contentSearchStatements, ITEMS_SEARCH_KEY } from '../db/content-search';
+import { listItems } from '../db/items';
+import { listSheets } from '../db/sheets';
 import { documentImageIds } from '../db/image-refs';
 import { imageGrantPlacementStatements } from '../db/image-grants';
 import { formLinkShown } from '../forms/form-link-shown';
@@ -255,9 +261,42 @@ function goneTabStatements(
   ];
 }
 
-// Every part of a tab unit, in batch order. Content search adds the tab's search row here
-// (docs/specs/013-workspace/blueprints/content-search.md).
-const TAB_UNIT_PARTS = [collabStatements, formLinkStatements, goneTabStatements] as const;
+// The tab's content search row (docs/specs/013-workspace/blueprints/content-search.md "Writing the index"): its
+// text with the inputs of the sheets it references, or a delete when it has gone or holds no text.
+function searchStatements(
+  env: DocumentEnv,
+  documentId: string,
+  tabId: string,
+  tab: StoredTab | null,
+  body: Record<string, unknown>,
+  sheetInputs: readonly string[],
+): D1PreparedStatement[] {
+  if (!tab) return contentSearchStatements(env, documentId, tabId, '', null);
+  const text = tabSearchText({ ...body, name: tab.name }, sheetInputs);
+  return contentSearchStatements(env, documentId, tabId, tab.name, text);
+}
+
+// Every part of a tab unit, in batch order.
+const TAB_UNIT_PARTS = [
+  collabStatements,
+  formLinkStatements,
+  goneTabStatements,
+  searchStatements,
+] as const;
+
+// The sheets a tab references (sheet_refs), as the search text reads them.
+async function referencedSheetInputs(
+  env: DocumentEnv,
+  documentId: string,
+  tabId: string,
+): Promise<string[]> {
+  const refs = await env.DOCUMENT_DB.prepare('SELECT sheet_id FROM sheet_refs WHERE tab_id = ?')
+    .bind(tabId)
+    .all<{ sheet_id: string }>();
+  const ids = (refs.results ?? []).map((r) => r.sheet_id);
+  if (ids.length === 0) return [];
+  return sheetSearchInputs(await listSheets(env, documentId, { ids }));
+}
 
 async function tabStatements(
   env: DocumentEnv,
@@ -272,7 +311,17 @@ async function tabStatements(
     .first<StoredTab>();
   // One body at a time: a drain after a 200-tab import holds one tab in memory, never the document.
   const body = tab ? parseBody(tab.data) : {};
-  return TAB_UNIT_PARTS.flatMap((part) => part(env, documentId, tabId, tab, body));
+  const sheetInputs = tab ? await referencedSheetInputs(env, documentId, tabId) : [];
+  return TAB_UNIT_PARTS.flatMap((part) => part(env, documentId, tabId, tab, body, sheetInputs));
+}
+
+// The cards' content search row, under ITEMS_SEARCH_KEY; no cards deletes it.
+async function itemsSearchStatements(
+  env: DocumentEnv,
+  documentId: string,
+): Promise<D1PreparedStatement[]> {
+  const text = itemsSearchText(await listItems(env, documentId));
+  return contentSearchStatements(env, documentId, ITEMS_SEARCH_KEY, '', text);
 }
 
 // ---------- The drain -------------------------------------------------------------------------------------
@@ -291,7 +340,7 @@ function unitsOf(env: DocumentEnv, documentId: string, rows: OutboxRow[], now: n
         ...(kinds.has('summary') ? await summaryStatements(env, documentId) : []),
         ...(kinds.has('images') ? await imagesStatements(env, documentId, now) : []),
         ...(kinds.has('cards') ? await cardsStatements(env, documentId) : []),
-        // `items`: the items' search text, content search's (docs/specs/013-workspace/blueprints/content-search.md).
+        ...(kinds.has('items') ? await itemsSearchStatements(env, documentId) : []),
       ],
     });
   }
