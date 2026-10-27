@@ -1,4 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
+import { DOCUMENT_ID_HEADER } from '../room-client';
+import { json } from '../responses';
+import { takeLegacyState } from './legacy-handover';
 import {
   ACCESS_CHANGED_CLOSE,
   WORKBENCH_ENDED_CLOSE,
@@ -242,20 +245,77 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     // Restore before any request can observe `epoch`/`seq`. A wake re-runs
     // the constructor, so without this gate a socket could be handed the
     // freshly-minted field values above and defeat the whole point.
-    void state.blockConcurrencyWhile(async () => {
-      const saved = await state.storage.get<{ epoch: string; seq: number }>(ORDER_STATE_KEY);
-      if (saved) {
-        this.epoch = saved.epoch;
-        this.seq = saved.seq;
-      } else {
-        // First instantiation for this document: adopt the random epoch above.
-        await state.storage.put(ORDER_STATE_KEY, { epoch: this.epoch, seq: this.seq });
+    void state.blockConcurrencyWhile(() => this.restoreState());
+  }
+
+  // The room's durable state into memory: on every wake, and again after a legacy handover replaced it.
+  private async restoreState(): Promise<void> {
+    const saved = await this.state.storage.get<{ epoch: string; seq: number }>(ORDER_STATE_KEY);
+    if (saved) {
+      this.epoch = saved.epoch;
+      this.seq = saved.seq;
+    } else {
+      // First instantiation for this document: adopt the random epoch above.
+      await this.state.storage.put(ORDER_STATE_KEY, { epoch: this.epoch, seq: this.seq });
+    }
+    await this.baton.restore();
+    await this.poll.restore();
+    for (const r of await this.agents.restore()) agentPresenceLog('expired', r);
+    this.armAlarm();
+  }
+
+  // Whether this instance has taken its legacy room's state (legacy-handover.ts); the marker in storage decides
+  // across instances, this only saves the read.
+  private handedOver = false;
+  private missingIdLogged = false;
+
+  // The key-value room this document had before keeps its order state, ledger, poll, baton, selections and agent
+  // presence; the first request after the class change takes them over before it is answered
+  // (docs/specs/006-document/document-storage-move.md "Handing over room state"). Null to carry on, or the
+  // answer when the handover failed.
+  private async ensureHandedOver(request: Request): Promise<Response | null> {
+    if (this.handedOver) return null;
+    const legacyRooms = this.env?.LEGACY_DOCUMENT_ROOM;
+    if (!legacyRooms) {
+      this.handedOver = true;
+      return null;
+    }
+    const documentId = request.headers.get(DOCUMENT_ID_HEADER);
+    if (!documentId) {
+      if (!this.missingIdLogged)
+        console.warn('[legacy-handover] no document id', new URL(request.url).pathname);
+      this.missingIdLogged = true;
+      return null;
+    }
+    const legacy = legacyRooms.get(legacyRooms.idFromName(documentId));
+    let outcome: { taken: number | null } | { error: unknown } = { taken: null };
+    // A throw inside blockConcurrencyWhile resets the object, dropping every socket, so it is caught inside.
+    await this.state.blockConcurrencyWhile(async () => {
+      if (this.handedOver) return;
+      try {
+        const taken = await takeLegacyState(this.state.storage, legacy, Date.now());
+        if (taken !== null && taken > 0) await this.restoreState();
+        this.handedOver = true;
+        outcome = { taken };
+      } catch (error) {
+        outcome = { error };
       }
-      await this.baton.restore();
-      await this.poll.restore();
-      for (const r of await this.agents.restore()) agentPresenceLog('expired', r);
-      this.armAlarm();
     });
+    const result = outcome as { taken: number | null } | { error: unknown };
+    if ('error' in result) {
+      const name = result.error instanceof Error ? result.error.message : String(result.error);
+      console.error(`[legacy-handover] failed id=${documentId} error=${name}`);
+      return json({ error: 'room_unavailable' }, { status: 503, headers: { 'Retry-After': '5' } });
+    }
+    if (result.taken !== null) {
+      console.log(`[legacy-handover] took id=${documentId} keys=${result.taken}`);
+      this.state.waitUntil(
+        legacy.clear().catch((err: unknown) => {
+          console.error(`[legacy-handover] clear failed id=${documentId}`, err);
+        }),
+      );
+    }
+    return null;
   }
 
   // Record the seq we just handed out. Not awaited: the DO output gate holds
@@ -266,6 +326,8 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   }
 
   override async fetch(request: Request): Promise<Response> {
+    const handover = await this.ensureHandedOver(request);
+    if (handover) return handover;
     const url = new URL(request.url);
     const internal = await answerInternal(this.internal, request, url);
     if (internal) return internal;

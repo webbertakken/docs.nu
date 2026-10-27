@@ -21,8 +21,29 @@ import type { Env } from './types';
 
 // Every server-stored document has a room (docs/specs/024-agents/agent-changesets.md "Rooms for
 // personal documents"): an agent is a second writer even on a document nobody else can open.
-function roomStubFor(env: Env, documentId: string): DurableObjectStub {
-  return env.DOCUMENT_ROOM.get(env.DOCUMENT_ROOM.idFromName(documentId));
+/** Names the document on every worker-to-room call, so a room knows whose legacy state to take over
+ *  (docs/specs/006-document/blueprints/document-storage-move.md "Room state handover"). */
+export const DOCUMENT_ID_HEADER = 'X-Document-Id';
+
+/** A document's room, as every worker-to-room call reaches it: the one place that stubs DOCUMENT_ROOM, and every
+ *  `fetch` through it carries the document's id. */
+export function documentRoom(
+  env: Env,
+  documentId: string,
+): { fetch(input: Request | string, init?: RequestInit): Promise<Response> } {
+  const stub = env.DOCUMENT_ROOM.get(env.DOCUMENT_ROOM.idFromName(documentId));
+  return {
+    fetch(input, init) {
+      if (typeof input !== 'string') {
+        const request = new Request(input, init);
+        request.headers.set(DOCUMENT_ID_HEADER, documentId);
+        return stub.fetch(request);
+      }
+      const headers = new Headers(init?.headers);
+      headers.set(DOCUMENT_ID_HEADER, documentId);
+      return stub.fetch(input, { ...init, headers });
+    },
+  };
 }
 
 // A room call that gives up after `ms`: the api never waits on a room longer than that.
@@ -39,7 +60,7 @@ export async function roomFetch(
   });
   try {
     return await Promise.race([
-      roomStubFor(env, documentId).fetch(`https://room${path}`, init),
+      documentRoom(env, documentId).fetch(`https://room${path}`, init),
       timeout,
     ]);
   } finally {
@@ -68,7 +89,7 @@ async function broadcastOp(
   ordered = false,
 ): Promise<void> {
   try {
-    await roomStubFor(env, documentId).fetch('https://room/broadcast', mutationInit(op, ordered));
+    await documentRoom(env, documentId).fetch('https://room/broadcast', mutationInit(op, ordered));
   } catch (err) {
     console.warn(`[room-broadcast] ${label} did not reach the room`, documentId, err);
   }
@@ -113,7 +134,7 @@ export async function fetchRoomLedger(
   if (!cursor) return null;
   try {
     const query = `tab=${encodeURIComponent(tabId)}&epoch=${encodeURIComponent(cursor.epoch)}`;
-    const res = await roomStubFor(env, documentId).fetch(`https://room/ledger?${query}`);
+    const res = await documentRoom(env, documentId).fetch(`https://room/ledger?${query}`);
     if (!res.ok) return null;
     const ledger = (await res.json()) as TabLedger;
     if (!ledger || typeof ledger !== 'object' || !ledger.elements) return null;

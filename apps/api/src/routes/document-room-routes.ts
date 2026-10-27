@@ -1,3 +1,4 @@
+import { documentRoom } from '../room-client';
 // /api/documents/<id>/room-ticket + /ws — realtime-room admission
 // (docs/specs/015-api/api.md), split out of documents.ts the same way the share family
 // owns document-share-routes.ts: the one-time WS ticket mint and the
@@ -90,7 +91,7 @@ export async function handleDocumentRoomRoutes(ctx: RouteContext): Promise<Respo
 
   if (segments.length === 4 && segments[3] === 'ws') {
     const id = segments[2]!;
-    const stub = env.DOCUMENT_ROOM.get(env.DOCUMENT_ROOM.idFromName(id));
+    const stub = documentRoom(env, id);
     // Browsers can't put custom headers on a WebSocket upgrade,
     // so the client passes a one-time ticket / share code / owner id
     // as query params (`?t=...&s=...&o=...`). We resolve role here and
