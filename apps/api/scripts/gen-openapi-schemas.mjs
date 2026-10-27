@@ -100,6 +100,7 @@ export const ROOT_TYPES = [
   'ActivityCard',
   'ActivityCardThread',
   'HomeResponse',
+  'ContentSearchDTO',
   'ImageSummary',
   'SharedWithItem',
   'ParticipantRecord',

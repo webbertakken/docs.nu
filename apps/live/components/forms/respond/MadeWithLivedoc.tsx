@@ -7,7 +7,7 @@ import { Brand } from '@livedoc/ui';
 export function MadeWithLivedoc() {
   return (
     <a
-      href="/"
+      href="/about"
       aria-label="Made with LiveDoc"
       className="inline-flex items-center gap-1.5 rounded-md text-[13px] text-slate-500 transition hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
     >

@@ -131,6 +131,7 @@ export const API_ROUTE_RESOURCES: ReadonlySet<string> = new Set([
   'timeline',
   'activity',
   'home',
+  'search',
   'preferences',
   'migrate',
   'guest-id',

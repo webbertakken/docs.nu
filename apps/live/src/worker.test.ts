@@ -42,6 +42,16 @@ describe('live worker editor route', () => {
       expect(res.headers.get('Location')).toBe('https://docs.nu/explorer/home');
     }
   });
+
+  it('lands the front door on Home, query kept (docs/specs/013-workspace/explorer-home.md)', async () => {
+    const { env: e, seen } = env();
+    const bare = await worker.fetch(new Request('https://docs.nu/'), e);
+    expect(bare.status).toBe(302);
+    expect(bare.headers.get('Location')).toBe('https://docs.nu/explorer/home');
+    const tagged = await worker.fetch(new Request('https://docs.nu/?utm_source=x'), e);
+    expect(tagged.headers.get('Location')).toBe('https://docs.nu/explorer/home?utm_source=x');
+    expect(seen).toEqual([]);
+  });
 });
 
 describe('live worker security headers', () => {

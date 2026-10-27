@@ -660,18 +660,19 @@ export const EXACT: Readonly<Record<string, string>> = {
   'Home|Selected|Welcome.Blank':
     'Someone with no documents yet started a blank from the first-run Home.',
   'Home|Selected|Welcome.Search':
-    'Someone with no documents yet searched the templates from the field at the top of the first-run Home.',
+    'Someone with no documents yet searched the templates from the field at the top of the first-run Home. The banner was retired in October 2026; no longer recorded.',
   'Home|Selected|Welcome.SignIn':
     'Someone signed out with no documents followed Sign In from the first-run Home, to find their work.',
   'Home|Selected|Welcome.StartBlank':
-    'Someone with no documents yet started a blank diagram from the field at the top of the first-run Home.',
+    'Someone with no documents yet started a blank diagram from the field at the top of the first-run Home. The banner was retired in October 2026; no longer recorded.',
   'Home|Selected|Welcome.Template':
     'Someone with no documents yet started a popular template from the first-run Home.',
   'Home|Selected|Hero.Documents':
-    'Someone followed the documents pill at the top of Home to My Documents.',
-  'Home|Selected|Hero.Inbox': 'Someone followed the Inbox pill at the top of Home to their Inbox.',
+    'Someone followed the documents pill at the top of Home to My Documents. The banner was retired in October 2026; no longer recorded.',
+  'Home|Selected|Hero.Inbox':
+    'Someone followed the Inbox pill at the top of Home to their Inbox. The banner was retired in October 2026; no longer recorded.',
   'Home|Selected|Hero.NewDocument':
-    'Someone started a new document from the New document button in the search field at the top of Home.',
+    'Someone started a new document from the New document button in the search field at the top of Home. The banner was retired in October 2026; no longer recorded.',
   'Home|Selected|JumpBackIn.MostUsed':
     "Someone opened a document from Home's Jump Back In that was among the ones they used on the most days.",
   'Home|Selected|JumpBackIn.Recent':
@@ -1712,9 +1713,9 @@ export const EXACT: Readonly<Record<string, string>> = {
     'Someone turned Button Labels back on in Settings > Appearance, naming the bottom-right buttons beside their icons on a wide desktop.',
   'UI|Toggled|MinimapOn': 'Someone turned on the minimap, in Settings > Editor.',
   'UI|Toggled|HomeBannerOff':
-    "Someone hid Explorer Home's banner, from its close button or Settings > Documents. Home then opens on its page header.",
+    "Someone hid Explorer Home's banner, from its close button or Settings > Documents. The banner was retired in October 2026; no longer recorded.",
   'UI|Toggled|HomeBannerOn':
-    "Someone turned Explorer Home's banner back on, in Settings > Documents.",
+    "Someone turned Explorer Home's banner back on, in Settings > Documents. The banner was retired in October 2026; no longer recorded.",
   'UI|Toggled|NotificationsOff':
     'Someone turned off in-editor toast notifications, in Settings > Notifications.',
   'UI|Toggled|NotificationsOn':

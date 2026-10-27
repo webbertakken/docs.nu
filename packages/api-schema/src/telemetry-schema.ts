@@ -104,11 +104,11 @@ export const TELEMETRY_CATEGORIES = [
   // `type` 'Landing' | 'Nav' (the page the Explorer opened on, or a later visit) and 'Group' (a
   // What happened summary expanded); 'Selected' with 'JumpBackIn.MostUsed' | 'JumpBackIn.Recent'
   // (a document opened from Jump back in, by the half it belongs to), 'JumpBackIn.SeeMore' (See
-  // more followed to the Recent page) | 'WhatHappened' | 'Hero.Documents' | 'Hero.Inbox' (a hero
-  // status pill followed) | 'Hero.NewDocument' (the hero's New document) | 'Welcome.Blank' | 'Welcome.Template' |
-  // 'Welcome.AllTemplates' | 'Welcome.Search' | 'Welcome.StartBlank' | 'Welcome.SignIn' (a start taken from the
-  // first-run Home); 'Opened' with 'Welcome' (the first-run Home shown); 'Loaded' with 'Retry' (a failed read
-  // retried). Never a document name or a person.
+  // more followed to the Recent page) | 'WhatHappened' | 'Welcome.Blank' | 'Welcome.Template' |
+  // 'Welcome.AllTemplates' | 'Welcome.SignIn' (a start taken from the first-run Home); 'Opened' with 'Welcome' (the
+  // first-run Home shown); 'Loaded' with 'Retry' (a failed read retried). 'Hero.Documents' | 'Hero.Inbox' |
+  // 'Hero.NewDocument' | 'Welcome.Search' | 'Welcome.StartBlank' belonged to the retired banner and are no longer
+  // sent. Never a document name or a person.
   'Home',
   // Inbox (docs/specs/013-workspace/inbox.md): the Explorer's cross-document inbox of open
   // actions, Plan cards + comment threads. 'Opened' once per visit; 'Selected' with

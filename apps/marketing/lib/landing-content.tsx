@@ -155,7 +155,7 @@ export type LandingSection = {
  * The feature categories, in the order the landing page tells them: collaborate,
  * then each way of working on a tab (Diagram, Draw, Pages mode's infographics, its
  * slide decks and its documents, Plan's boards, then its sheets and forms). `page.tsx` renders one beat per entry and
- * alternates its background by index; `/features/<id>` renders each one's cards.
+ * alternates its background by index; `/about/features/<id>` renders each one's cards.
  */
 export const LANDING_SECTIONS: LandingSection[] = [
   {
@@ -1358,14 +1358,14 @@ export const LANDING_SECTIONS: LandingSection[] = [
 ];
 
 /**
- * The section ids, in render order. The `/features/<id>` detail route's
+ * The section ids, in render order. The `/about/features/<id>` detail route's
  * `generateStaticParams` and the sitemap both map over this, so adding a
  * section to `LANDING_SECTIONS` automatically gives it a page + a sitemap
  * entry with no second list to keep in sync.
  */
 export const LANDING_SECTION_IDS = LANDING_SECTIONS.map((section) => section.id);
 
-/** Look up a single section by id (the `/features/<id>` page's source). */
+/** Look up a single section by id (the `/about/features/<id>` page's source). */
 export function getLandingSection(id: string): LandingSection | undefined {
   return LANDING_SECTIONS.find((section) => section.id === id);
 }

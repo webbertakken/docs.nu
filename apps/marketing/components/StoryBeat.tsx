@@ -76,7 +76,7 @@ export function StoryBeat({ section, index }: { section: LandingSection; index: 
             ))}
           </ul>
 
-          <CtaLink href={`/features/${section.id}`} className="group mt-8">
+          <CtaLink href={`/about/features/${section.id}`} className="group mt-8">
             {section.cta}
             <ChevronRightIcon
               size={16}

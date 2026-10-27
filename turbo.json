@@ -50,9 +50,15 @@
         "!$TURBO_ROOT$/**/playwright-report/**",
         "!$TURBO_ROOT$/**/next-env.d.ts",
         "!$TURBO_ROOT$/apps/marketing/generated/**",
-        "!$TURBO_ROOT$/apps/marketing/public/licences/**"
+        "!$TURBO_ROOT$/apps/marketing/public/about/licences/**"
       ],
-      "outputs": [".next/**", "!.next/cache/**", "out/**", "generated/**", "public/licences/**"]
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "out/**",
+        "generated/**",
+        "public/about/licences/**"
+      ]
     },
     "dev": {
       "cache": false,

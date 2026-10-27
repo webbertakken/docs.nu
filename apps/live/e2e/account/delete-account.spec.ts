@@ -41,13 +41,10 @@ test('deleting the account removes it, signs out, and frees the address', async 
   await confirm.getByLabel(/to confirm/).fill(dana.email);
   await deleteButton.click();
 
-  // Deleted, the page leaves for the landing page on its own, with a fresh load (SettingsAccountRows'
+  // Deleted, the page leaves for the front door (Explorer Home) on its own, with a fresh load (SettingsAccountRows'
   // onDeleted). Wait for that navigation to land: a goto issued while it is in flight is interrupted by it, which
   // is how this spec failed on CI's slower runners while passing on a fast machine.
-  await page.waitForURL((url) => url.pathname === '/', { waitUntil: 'load' });
-  // In this stack the editor serves `/`, and its index forwards to `/new` once it hydrates (app/page.tsx). Wait for
-  // that second navigation too, or the goto below races it.
-  await page.waitForURL((url) => url.pathname === '/new', { waitUntil: 'load' });
+  await page.waitForURL((url) => url.pathname === '/explorer/home', { waitUntil: 'load' });
 
   // Signed out, and the session is gone at the api, not only in this page.
   await expect.poll(() => sessionOf(context)).toBeNull();

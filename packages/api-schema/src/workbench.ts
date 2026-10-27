@@ -300,6 +300,7 @@ const WORKSPACE_ROUTES: readonly RouteShape[] = [
     'favourites',
     'tags',
     'home',
+    'search',
     'timeline',
     'activity',
     'trash',

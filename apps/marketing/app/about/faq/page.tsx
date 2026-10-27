@@ -15,7 +15,7 @@ const FAQ_DESCRIPTION =
 export const metadata = pageMetadata({
   title: FAQ_TITLE,
   description: FAQ_DESCRIPTION,
-  path: '/faq',
+  path: '/about/faq',
 });
 
 // FAQPage JSON-LD: unlocks Google's expandable-FAQ rich result for this page. Built from the same
@@ -39,7 +39,7 @@ export default function FaqPage() {
   return (
     <>
       <JsonLd data={FAQ_JSON_LD} />
-      <BreadcrumbJsonLd name="FAQ" path="/faq" />
+      <BreadcrumbJsonLd name="FAQ" path="/about/faq" />
       <Header surface="Faq" />
       <main className="pb-20 sm:pb-24">
         <FaqBrowser

@@ -7,7 +7,7 @@ for directory listings, app stores, launch posts, and social, plus media
 - [`docs/specs/`](../README.md) is the product source of truth (what to build).
 - [`docs/`](../..) is developer- and user-facing documentation (how to run,
   host, contribute).
-- `apps/marketing` is the live landing **site** at `/` (see
+- `apps/marketing` is the live landing **site** at `/about` (see
   [16-marketing-site](marketing-site.md)); `marketing/` is the **off-site**
   copy and assets used to list and promote the product elsewhere.
 

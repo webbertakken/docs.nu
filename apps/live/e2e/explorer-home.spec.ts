@@ -14,7 +14,7 @@ import {
 } from './home-seed';
 
 // Explorer Home (docs/specs/013-workspace/explorer-home.md), end to end against the real build and
-// api worker, as a guest, in dark mode: the Explorer lands on Home, its hero then one column of Jump
+// api worker, as a guest, in dark mode: the Explorer lands on Home, its page header then one column of Jump
 // back in and What Happened, each opened by a display heading; Jump Back In is a Within reach set (4
 // most used cards under Most Used, 4 recent under Recent, none twice), or a phone strip that
 // alternates, holds eight and ends in See More; See More opens Recent, under Home; nothing shifts as
@@ -58,14 +58,11 @@ test('the Explorer lands on Home: Jump Back In, then What Happened, no Timeline'
 
   await page.goto('/explorer');
   await expect(page).toHaveURL(/\/explorer\/home\/?$/);
-  // The hero is Home's header: the greeting is the page's heading; the field and New Document sit in it.
-  const hero = page.getByRole('region', { name: /What are we picking up\?$/ });
-  await expect(hero.getByRole('heading', { level: 1 })).toHaveText(
-    /^Good (morning|afternoon|evening)\. What are we picking up\?$/,
-  );
-  await expect(hero.getByRole('combobox', { name: 'Filter documents' })).toBeVisible();
+  // Home takes the ordinary page header, with no banner: its title is the page's heading, New Document beside it, and
+  // the header's field is the one search field.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Home');
   await expect(page.getByRole('combobox', { name: 'Filter documents' })).toHaveCount(1);
-  await expect(hero.getByRole('button', { name: 'New Document' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'New Document' }).first()).toBeVisible();
   await expect(page).toHaveTitle('Home | LiveDoc');
 
   const jump = page.getByRole('region', { name: 'Jump Back In' });
@@ -301,9 +298,7 @@ test('a document stored only in this browser joins Jump Back In with its pill', 
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/explorer/home');
   // Nothing yet: the first run's starts (explorer-home.md "First run"), not an empty Jump Back In.
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Welcome to LiveDoc. What are you making first?',
-  );
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Home');
   await expect(page.getByRole('region', { name: 'Start Blank' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Blank Diagram/ })).toHaveAttribute(
     'href',

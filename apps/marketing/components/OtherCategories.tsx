@@ -18,7 +18,7 @@ export function OtherCategories({ currentId }: { currentId: string }) {
           {others.map((section) => (
             <li key={section.id}>
               <a
-                href={`/features/${section.id}`}
+                href={`/about/features/${section.id}`}
                 className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-300 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-500/60 dark:hover:text-brand-200"
               >
                 {section.label}

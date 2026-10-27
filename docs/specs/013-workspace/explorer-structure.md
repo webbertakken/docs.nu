@@ -21,9 +21,9 @@ document **lives**, and which **views** compute lists of documents from wherever
 The sidebar holds navigation only. It carries no greeting, no search field, no New button and no pins:
 
 - **Search** lives in the top bar: the lens field of [Explorer filters](explorer-filters.md#the-field), left of the
-  account control, searches and filters the documents of the current view. On Home it sits in the
-  [hero](explorer-home.md#the-hero) instead. The bottom bar's Search opens the app-wide search panel.
-- **New folder** and **New Document** live in the page header of the view they create in (Home's hero on Home).
+  account control, searches and filters the documents of the current view, Home included. The bottom bar's Search
+  opens the app-wide search panel.
+- **New folder** and **New Document** live in the page header of the view they create in, Home's included.
 - The account is reached from the header's account menu.
 
 ## Look

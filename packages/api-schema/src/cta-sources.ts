@@ -168,13 +168,18 @@ export function ctaSourceFromSearch(search: string): CtaSource | null {
  * Which surface a normalised page-view path (docs/specs/017-telemetry/page-view-telemetry.md) belongs to, or null for
  * a page that isn't a CTA surface (the editor, the Explorer, ...). The
  * dashboard reads the funnel's first step, page views, through this.
+ *
+ * The marketing pages live under `/about` (docs/specs/016-platform/router-app.md); a view recorded before
+ * they moved there carries the bare address (`/`, `/faq`), and reads as the same surface.
  */
 export function ctaSurfaceOfPath(path: string): CtaSurface | null {
-  if (path === '/') return 'Home';
-  const [first] = path.split('/').filter(Boolean);
+  const segments = path.split('/').filter(Boolean);
+  const marketing = segments[0] === 'about' ? segments.slice(1) : segments;
+  const [first, second] = marketing;
+  if (first === undefined) return 'Home';
   switch (first) {
     case 'features':
-      return path === '/features' ? null : 'Feature';
+      return second === undefined ? null : 'Feature';
     case 'alternatives':
       return 'Compare';
     case 'faq':

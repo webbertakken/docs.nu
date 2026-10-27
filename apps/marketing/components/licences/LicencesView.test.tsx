@@ -85,8 +85,8 @@ describe('LicencesView', () => {
   });
 
   it('links every text as plain text and holds none inline', () => {
-    expect(html).toContain('href="/licences/texts/aaaaaaaaaaaaaaaa.txt"');
-    expect(html).toContain('href="/licences/texts/bbbbbbbbbbbbbbbb.txt"');
+    expect(html).toContain('href="/about/licences/texts/aaaaaaaaaaaaaaaa.txt"');
+    expect(html).toContain('href="/about/licences/texts/bbbbbbbbbbbbbbbb.txt"');
     expect(html).not.toContain('Permission is hereby granted');
   });
 

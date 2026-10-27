@@ -13,3 +13,4 @@ export { commentHosts, threadListingLines } from './comments';
 export { selectionReference } from './selection-reference';
 export { pagesView } from './pages';
 export { elementFindTexts } from './find';
+export { tabSearchText } from './search-text';

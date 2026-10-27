@@ -3,7 +3,7 @@
 // Explorer Home (docs/specs/013-workspace/explorer-home.md; blueprint
 // docs/specs/013-workspace/blueprints/explorer-home-view.md). One column at every width: Jump back
 // in, then What Happened, each its own section opened by a display heading, generous space between
-// them. The hero above it is the shell's (HomeHero).
+// them, under the ordinary page header.
 
 import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { track } from '@/lib/telemetry';

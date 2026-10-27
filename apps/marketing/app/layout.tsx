@@ -40,11 +40,11 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: {
-    canonical: '/',
+    canonical: '/about',
   },
   openGraph: {
     type: 'website',
-    url: '/',
+    url: '/about',
     siteName: SITE_NAME,
     title: TITLE,
     description: DESCRIPTION,
