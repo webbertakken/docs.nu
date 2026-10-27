@@ -3,6 +3,7 @@
 
 export * from './item';
 export * from './card-text';
+export * from './search-text';
 export * from './item-types';
 export * from './glyphs';
 export * from './type-catalogue';

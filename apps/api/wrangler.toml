@@ -219,6 +219,14 @@ simple = { limit = 10, period = 60 }
 # docs/specs/013-workspace/explorer-home.md): one read answers a whole screen, and a healthy client
 # reads on mount, on return to the tab and after its own writes, a handful a minute. 60 / 60s bounds a
 # looping client. Separate namespace. Absent binding → allow (self-host).
+# Per-person limiter for content search (GET /api/search/content, docs/specs/013-workspace/content-search.md): a
+# search runs as typing pauses, so 120 / 60s is a person typing fast for a minute. Absent binding → allow (self-host).
+[[unsafe.bindings]]
+name = "SEARCH_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7015"
+simple = { limit = 120, period = 60 }
+
 [[unsafe.bindings]]
 name = "HOME_RATE_LIMITER"
 type = "ratelimit"

@@ -663,6 +663,7 @@ export {
 // (docs/specs/013-workspace/default-folders.md).
 export * from './placement-defaults';
 // Explorer Home: opens, Jump back in and What happened (docs/specs/013-workspace/explorer-home.md).
+export * from './content-search';
 export * from './home';
 export * from './drag-preview';
 export * from './article-caret';

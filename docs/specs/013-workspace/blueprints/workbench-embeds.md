@@ -349,7 +349,7 @@ ON t.id = s.token_id WHERE s.secret_hash = ?`. No row → `unknown`; token revok
 
 Everything else is `confined`, among it: `documents/:doc` `DELETE`, `copy`, `folder`, `shared-tabs`, `share*`,
 `thumbnail`, `tabs/:tabId/link`, `tabs/:tabId/presence` (an agent's door), `documents` (the library),
-`folders`, `shared`, `favourites`, `home`, `timeline`, `activity`, `trash`, `placement-defaults`, `tokens`, `teams`,
+`folders`, `shared`, `favourites`, `home`, `search`, `timeline`, `activity`, `trash`, `placement-defaults`, `tokens`, `teams`,
 `account`, `migrate`, `guest-id`, `ai`, `drive`, `oauth`, every write to `preferences`, `participants`,
 `custom-themes`, `shape-libraries`, `images/:id` `DELETE`, `images/usage`, `GET images`, and every
 `workbench/*` route but the one above. `/ws` carries no bearer and is decided by its ticket. `events`, `unfurl` and
@@ -613,15 +613,15 @@ is a person's editor and every route re-gates it with the owner's identity at th
 
 `WORKSPACE_ROUTES` (`:p` any one segment, `**` any rest, including none):
 
-| Method                 | Path under `/api`                                                                                                                   |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| GET                    | `capabilities`, `openapi.json`, `templates/**`, `icons`, `schema/**`, `preferences`, `participants/:owner` (the owner only)         |
-| GET                    | `share/**` (the person opening a link shared with them)                                                                             |
-| GET, POST, PUT, DELETE | `documents/**` but `documents/:p/tabs/:p/presence`                                                                                  |
-| GET, POST, PUT, DELETE | `folders/**`, `shared/**`, `favourites/**`, `tags/**`, `home/**`, `timeline/**`, `activity/**`, `trash/**`, `placement-defaults/**` |
-| GET, POST, PUT, DELETE | `images/**`, `custom-themes/**`, `shape-libraries/**`                                                                               |
-| GET                    | `teams`, `teams/:p`, `teams/:p/library`, `teams/:p/members`                                                                         |
-| DELETE                 | `workbench/sessions/current`                                                                                                        |
+| Method                 | Path under `/api`                                                                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET                    | `capabilities`, `openapi.json`, `templates/**`, `icons`, `schema/**`, `preferences`, `participants/:owner` (the owner only)                      |
+| GET                    | `share/**` (the person opening a link shared with them)                                                                                          |
+| GET, POST, PUT, DELETE | `documents/**` but `documents/:p/tabs/:p/presence`                                                                                               |
+| GET, POST, PUT, DELETE | `folders/**`, `shared/**`, `favourites/**`, `tags/**`, `home/**`, `search/**`, `timeline/**`, `activity/**`, `trash/**`, `placement-defaults/**` |
+| GET, POST, PUT, DELETE | `images/**`, `custom-themes/**`, `shape-libraries/**`                                                                                            |
+| GET                    | `teams`, `teams/:p`, `teams/:p/library`, `teams/:p/members`                                                                                      |
+| DELETE                 | `workbench/sessions/current`                                                                                                                     |
 
 Everything else is `confined`, among it (Never the account): `account`, `migrate`, `guest-id`, `tokens/**`,
 `workbench/**` but the one above, every write to `participants` and `preferences`, `ai/**`, `oauth/**`, `drive/**`,
