@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { sqliteD1 } from '../src/test-sqlite-d1';
-import { assertSelect, inlineId, planOf, verifyOf, type Query } from './content-move-core';
+import { sqliteD1 } from '../test-sqlite-d1';
+import { assertSelect, inlineId, planOf, verifyOf, type Query } from './content-move-plan';
 
 function d1() {
   const { sql } = sqliteD1();

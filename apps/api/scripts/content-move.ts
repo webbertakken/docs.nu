@@ -14,7 +14,7 @@ import {
   verifyOf,
   type PlannedDocument,
   type Query,
-} from './content-move-core';
+} from '../src/document-room/content-move-plan';
 
 function usage(message: string): never {
   throw new Error(

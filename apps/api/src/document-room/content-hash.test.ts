@@ -37,7 +37,7 @@ function seedD1(sql: DatabaseSync, doc = DOC, other = 'doc-2') {
 function read(sql: DatabaseSync, head: 'documents' | 'document', id = DOC): MovableRows {
   const rows: MovableRows = {};
   for (const { table, sql: q } of movableSelects(head)) {
-    rows[table] = sql.prepare(q).all(id) as Record<string, unknown>[];
+    rows[table] = sql.prepare(q).all(id);
   }
   return rows;
 }
@@ -74,8 +74,7 @@ describe('the content hash', () => {
     const room = new DatabaseSync(':memory:');
     room.exec('PRAGMA foreign_keys = ON');
     migrateDocumentSchema((q) => {
-      if (/^\s*SELECT/i.test(q))
-        return { toArray: () => room.prepare(q).all() as Record<string, unknown>[] };
+      if (/^\s*SELECT/i.test(q)) return { toArray: () => room.prepare(q).all() };
       room.exec(q);
       return { toArray: () => [] };
     });

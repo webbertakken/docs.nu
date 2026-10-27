@@ -135,7 +135,7 @@ lower-case hex.
 
 ### The operator tool (`apps/api/scripts/content-move.ts`, Node type stripping)
 
-The shell parses arguments and runs wrangler; the pure core (`apps/api/scripts/content-move-core.ts`: `assertSelect`,
+The shell parses arguments and runs wrangler; the pure core (`apps/api/src/document-room/content-move-plan.ts`: `assertSelect`,
 `inlineId`, `planOf`, `verifyOf`) does the rest, so tests run it over node:sqlite. One wrangler call per document
 carries all of its SELECTs. A document purged since the plan verifies as `gone`. Run from `apps/api` as
 `node --import ../../scripts/ts-source-hooks.mjs scripts/content-move.ts plan --remote --out plan.json`.
@@ -235,7 +235,7 @@ DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 | Every room call names its document                          | `room-client.test.ts` (guard)                      |
 | Handover failure answers 503 and retries                    | `legacy-handover.test.ts`                          |
 | Sweep order, batch, retry gap, idle                         | `content-move-sweep.test.ts`                       |
-| Tool refuses a non-SELECT; verify pass and fail tables      | `scripts/content-move.test.ts`                     |
+| Tool refuses a non-SELECT; verify pass and fail tables      | `document-room/content-move-plan.test.ts`          |
 | Drop guard fails with an unmoved document                   | `migrations` test on node:sqlite                   |
 
 ## Constants and configuration

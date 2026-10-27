@@ -4,12 +4,7 @@
 //
 // The pure core: the shell (content-move.ts) hands it a query function over wrangler; tests hand it node:sqlite.
 
-import {
-  canonicalContent,
-  contentHashOf,
-  movableSelects,
-  type MovableRows,
-} from '../src/document-room/content-hash';
+import { canonicalContent, contentHashOf, movableSelects, type MovableRows } from './content-hash';
 
 /** Runs SELECT statements in one call and answers each one's rows, in order. */
 export type Query = (statements: string[]) => Promise<Record<string, unknown>[][]>;
