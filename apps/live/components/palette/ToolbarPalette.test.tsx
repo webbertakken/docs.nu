@@ -123,23 +123,24 @@ const planTiles = (id: string) => {
 };
 
 describe('ToolbarPalette', () => {
-  it("shows Diagram's categories on the strip, with the selection mode and Search, and no category picker", () => {
+  // docs/specs/007-editor/toolbar-layout.md "Decided in review": Diagram keeps the category picker.
+  it("shows Diagram's category picker on Popular and its tiles, with the selection mode and Search, and no category bar", () => {
     show();
     expect(screen.getByRole('button', { name: 'Selection mode' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Search elements' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Palette category' }).textContent).toContain(
+      'Popular',
+    );
+    expect(document.querySelector('[data-category-bar-button]')).toBeNull();
+    // Popular's tiles sit on the strip itself.
+    expect(within(strip()).getByRole('button', { name: 'Add Square' })).toBeTruthy();
+    expect(within(strip()).getByRole('button', { name: 'Add Entity' })).toBeTruthy();
+  });
+
+  it("shows Workshop's categories on the strip, and no category picker", () => {
+    show({ mode: 'workshop' });
     expect(screen.queryByRole('button', { name: 'Palette category' })).toBeNull();
-    // No Popular, Write and Draw apart, Build as Diagrams and Layout, every name one word.
-    expect(barNames()).toEqual([
-      'Shapes',
-      'Write',
-      'Draw',
-      'Diagrams',
-      'Concepts',
-      'Layout',
-      'Icons',
-      'Tech',
-      'Media',
-    ]);
+    expect(barNames()[0]).toBe('Shapes');
     // No tiles of their own on the strip: they are in the flyouts.
     expect(within(strip()).queryByRole('button', { name: 'Add Square' })).toBeNull();
   });
@@ -151,7 +152,7 @@ describe('ToolbarPalette', () => {
   });
 
   it("reaches the same add-handler as the Palette from a category's flyout, and closes it", () => {
-    const { h } = show();
+    const { h } = show({ mode: 'workshop' });
     fireEvent.click(within(openFlyout('Shapes')).getByRole('button', { name: 'Add Square' }));
     expect(h.onAddShape).toHaveBeenCalledWith('square', expect.anything());
     expect(flyout()).toBeNull();
@@ -351,10 +352,11 @@ describe('ToolbarPalette', () => {
   // Workshop mode (docs/specs/012-collaboration/workshop-mode.md "The palette").
   it('offers Stickers, Data, Ask and Session in Workshop, not in Diagram, and Icons in both', () => {
     show();
-    for (const name of ['Ask', 'Session', 'Stickers', 'Data'])
-      expect(barNames()).not.toContain(name);
-    expect(barNames()).toContain('Icons');
-    expect(barNames()).toContain('Tech');
+    fireEvent.click(screen.getByRole('button', { name: 'Palette category' }));
+    const offered = (id: string) => document.querySelector(`[data-option-id="${id}"]`) !== null;
+    for (const id of ['stickers', 'data', ...COLLAB_IDS]) expect(offered(id), id).toBe(false);
+    expect(offered('icons')).toBe(true);
+    expect(offered('technology')).toBe(true);
     cleanup();
     show({ mode: 'workshop' });
     expect(barNames()).toEqual([

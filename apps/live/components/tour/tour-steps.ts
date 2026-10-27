@@ -91,8 +91,9 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: 'categories',
     title: 'Palette Categories',
-    body: 'Rest on a category to see what is in it. Click to add, or drag onto the canvas.',
-    touchBody: 'Tap a category to see what is in it. Tap to add, or drag onto the canvas.',
+    body: 'Pick a category to see its elements on the strip. Click one to add it, or drag it onto the canvas.',
+    touchBody:
+      'Pick a category to see its elements on the strip. Tap one to add it, or drag it onto the canvas.',
     target: 'palette-category-menu',
     alsoHighlight: 'palette-category',
     boardSkip: true,

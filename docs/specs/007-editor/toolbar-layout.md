@@ -6,15 +6,16 @@ Status: shipped
 
 The editor's one panel layout, on every device (see "One layout" for the retired Floating
 layout). The Palette is a single horizontal strip pinned to the top centre of the canvas, the way
-Excalidraw's tool bar works. In Diagram, Workshop and Pages the strip is the **category bar**
-(below): the mode's categories, each opening a flyout of its tiles. Plan keeps the category picker
+Excalidraw's tool bar works. In Workshop and Pages the strip is the **category bar**
+(below): the mode's categories, each opening a flyout of its tiles. Diagram and Plan keep the category picker
 and one category's tiles:
 
 ```
  ☰ ⬡|✎   ┌──────────────────────────────────────────────────────────────────────┐
- │        │ [↖ ▾] │ Shapes Write Draw │ Diagrams Concepts Layout │ Icons … │ [🔍] │   Diagram, Workshop, Pages
+ │        │ [↖ ▾] │ Shapes Write Draw │ Diagrams Concepts Layout │ Icons … │ [🔍] │   Workshop, Pages
  ▼        └──────────────────────────────────────────────────────────────────────┘
  ☰ ⬡|✎   ┌──────────────────────────────────────────────────────┐
+          │ [↖ ▾] │ [Popular ▾] │ □ ○ ◇ T → ▤ … │ [⋯ ▾] │ [🔍] │                  Diagram
           │ [↖ ▾] │ [Cards ▾] │ □ ◇ ○ → ─ ✎ A ▤ … │ [⋯ ▾] │ [🔍] │                  Plan
           └──────────────────────────────────────────────────────┘
  Explorer            (Undo/Redo, Layers, zoom: the bottom-right cluster)
@@ -28,21 +29,21 @@ and one category's tiles:
 - **Left: the selection mode.** The canvas-tool picker (Select / Hand /
   Eraser / Format / Laser / Spotlight / Isometric / Zen (Avatar only while in it), [Tile grids for the palette dropdowns](../004-interface-design/dropdown-tile-grid.md))
   as a compact icon trigger, opening the banded tile grid.
-- **Then, in Diagram, Workshop and Pages, the category bar** ("The category bar").
-- **Then, in Plan, the category picker.** The same banded category grid ([Palette top-level categories and bands](../010-palette/palette-top-level-categories.md)),
+- **Then, in Workshop and Pages, the category bar** ("The category bar").
+- **Then, in Diagram and Plan, the category picker.** The same banded category grid ([Palette top-level categories and bands](../010-palette/palette-top-level-categories.md)),
   as a compact trigger showing the current category's glyph and name. It
   sits directly before the tiles it chooses, so it reads as their label.
-- **Then the current category's first twelve tiles** (Plan; fewer on a narrow window, see "Decided in review"), icon-only, each with its
+- **Then the current category's first twelve tiles** (Diagram and Plan; fewer on a narrow window, see "Decided in review"), icon-only, each with its
   hover card, shortcut letter, drag-to-place, theme tint and pressed state. They
   are the Palette's tiles (`palette-tile-defs`, arranged by the mode's palette layout, [Editor modes](editor-modes.md#the-palette-per-mode)),
   rendered by the shared `PaletteTile`, so the strip and its popovers stay alike.
-- **Right: More (⋯ ▾)** (Plan), when the category has more than the strip shows.
+- **Right: More (⋯ ▾)** (Diagram and Plan), when the category has more than the strip shows.
 - **Far right: Search** (a magnifier), in every mode's strip but an event-storming board's (see
   "Search: every element type"). Draw mode shows its dock instead of the strip, so it has none.
 
 ## The category bar
 
-Diagram, Workshop and Pages show their **categories** on the strip rather than one category's tiles, the way
+Workshop and Pages show their **categories** on the strip rather than one category's tiles, the way
 the Icons category always showed its groups: the strip is a short row of named places, and each holds its tiles in
 a flyout. Finding a tile is one look along the bar, not a trip through a picker, and the strip never changes width
 under the pointer as a category is switched.
@@ -258,7 +259,7 @@ A strip shows one category at a time, so finding an element means knowing which 
 
 ## More: the rest of the category
 
-Plan's strip only: the category bar has no More, since every category's whole body is its flyout.
+The picker's strip only (Diagram, Plan): the category bar has no More, since every category's whole body is its flyout.
 
 A strip has room for about a dozen tiles. Shapes fits; Icons (~180),
 Stickers and Technology do not. More opens the current
@@ -510,8 +511,11 @@ their bottom-row buttons. What changes to fit the width:
 
 ## Decided in review
 
-- **The strip opens on the mode's landing every time** (Plan's)
+- **The strip opens on the mode's landing every time** (Diagram's Popular, Plan's Cards)
   ([Editor modes](editor-modes.md#the-palette-per-mode)). It does not remember the last category across documents.
+- **Diagram keeps the category picker**, not the category bar: Popular and its twelve tiles, one press from the
+  canvas, with the rest one pick away. The named bar made Diagram's strip read busier than the quiet row of
+  glyphs it replaced, and Diagram is where most people draw.
 - **Twelve tiles is enough** on desktop (raised from ten, which cut Shapes and
   Popular short). Below that, the strip shows as many as fit, **measured**
   rather than estimated (`useStripTileLimit`): its own chrome (the pickers,

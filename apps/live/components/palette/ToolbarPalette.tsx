@@ -206,8 +206,8 @@ export function ToolbarPalette(props: Props) {
   // A Dashboard opens on its Popular (palette-layouts DASHBOARD) and offers no selection modes: its page covers the
   // canvas, so there is nothing for a mode to act on (docs/specs/026-plan/plan-tabs.md).
   const dashboardTab = usePlanTabKind() === 'dashboard';
-  // Diagram shows its categories on the strip, each opening a flyout of its tiles, rather than one category's tiles
-  // (docs/specs/007-editor/toolbar-layout.md "The category bar"). Not on an event-storming board, whose
+  // Workshop and Pages show their categories on the strip, each opening a flyout of its tiles, rather than one
+  // category's tiles (docs/specs/007-editor/toolbar-layout.md "The category bar"). Not on an event-storming board, whose
   // notation is the palette, nor for a Participant, whose palette is one category.
   const categoryBar =
     CATEGORY_BAR_MODES.has(editorMode) && !esBoard && !participant && !dashboardTab;
