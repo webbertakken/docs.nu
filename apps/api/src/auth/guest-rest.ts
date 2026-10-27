@@ -44,6 +44,8 @@ export const OWNER_SCOPED_SEGMENTS = new Set([
   'tags',
   // Explorer Home: the person's opens, own history and others' actions, keyed on the owner.
   'home',
+  // Content search: matches and lines of documents' text, keyed on the owner (docs/specs/013-workspace/content-search.md).
+  'search',
   // The Trash lists deleted documents' names and restores / purges them.
   'trash',
   // A person's default folders (docs/specs/013-workspace/default-folders.md).
