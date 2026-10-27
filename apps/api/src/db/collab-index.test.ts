@@ -1,19 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Element } from '@livedoc/document';
 import type { Env } from '../types';
-import {
-  collabIndexCopyStatements,
-  collabIndexStatements,
-  readActivity,
-  recordOwnerAlias,
-} from './collab-index';
+import { readActivity, recordOwnerAlias } from './collab-index';
 
-// The statements a tab write contributes to the collaboration index
-// (docs/specs/013-workspace/inbox.md §2.1), and the read's row -> DTO mapping (§3, §4). A fake
-// D1 binding records SQL + binds; the SQL itself needs a live D1 to
-// prove, so these pin the CONTRACT every write path relies on: a full
-// replace per tab, the FK-safe ordering, and the dedupe/drop rules on
-// read.
+// The Inbox read's row -> DTO mapping (docs/specs/013-workspace/inbox.md §3, §4) and the alias record (§2.2). A fake
+// D1 binding records SQL + binds; the rows the rooms push are document-outbox.test.ts's.
 
 type Bound = { sql: string; args: unknown[] };
 
@@ -36,113 +26,6 @@ function fakeEnv(results: unknown[][] = []) {
   } as unknown as Env;
   return { env, batches };
 }
-
-const shape = (id: string, extra: Record<string, unknown>): Element =>
-  ({
-    id,
-    type: 'shape',
-    shape: 'square',
-    x: 0,
-    y: 0,
-    width: 1,
-    height: 1,
-    label: id,
-    ...extra,
-  }) as never;
-
-describe('collabIndexStatements', () => {
-  it('always clears the tab first, even with nothing to insert', () => {
-    const { env } = fakeEnv();
-    const stmts = collabIndexStatements(env, 'tab-1', []) as unknown as Bound[];
-    expect(stmts.map((s) => s.sql)).toEqual([
-      'DELETE FROM collab_actions WHERE tab_id = ?',
-      'DELETE FROM collab_threads WHERE tab_id = ?',
-      'DELETE FROM plan_board_statuses WHERE tab_id = ?',
-    ]);
-    expect(stmts.every((s) => s.args[0] === 'tab-1')).toBe(true);
-  });
-
-  it('inserts one row per action and per thread after the deletes', () => {
-    const { env } = fakeEnv();
-    const stmts = collabIndexStatements(env, 'tab-1', [
-      shape('s1', {
-        action: {
-          id: 'a1',
-          name: 'Confirm',
-          description: 'd',
-          assignee: { userId: 'u2', name: 'Priya' },
-          teamId: null,
-          assignerId: 'u1',
-          assignerName: 'Sam',
-          status: 'open',
-          createdAt: 1,
-          updatedAt: 2,
-        },
-        commentThread: {
-          resolved: false,
-          comments: [
-            {
-              id: 'c1',
-              text: 'hi',
-              createdAt: 5,
-              authorName: 'A',
-              authorColor: '#a',
-              authorId: 'u1',
-            },
-          ],
-        },
-      }),
-    ]) as unknown as Bound[];
-    expect(stmts).toHaveLength(5);
-    expect(stmts[3]!.sql).toMatch(/INSERT INTO collab_actions/);
-    expect(stmts[3]!.args).toEqual([
-      'tab-1',
-      's1',
-      'a1',
-      's1',
-      'Confirm',
-      'd',
-      'open',
-      'u2',
-      null,
-      'Priya',
-      'u1',
-      'Sam',
-      null,
-      1,
-      2,
-    ]);
-    expect(stmts[4]!.sql).toMatch(/INSERT INTO collab_threads/);
-    expect(stmts[4]!.args).toEqual([
-      'tab-1',
-      's1',
-      's1',
-      0,
-      1,
-      '["u1"]',
-      '[]',
-      'hi',
-      'A',
-      '#a',
-      5,
-      5,
-    ]);
-  });
-});
-
-describe('collabIndexCopyStatements', () => {
-  it('copies every table from the source tab under the new id', () => {
-    const { env } = fakeEnv();
-    const stmts = collabIndexCopyStatements(env, 'old', 'new') as unknown as Bound[];
-    expect(stmts).toHaveLength(3);
-    for (const s of stmts) {
-      expect(s.sql).toMatch(
-        /INSERT INTO (collab_\w+|plan_board_statuses)[\s\S]*SELECT \?1[\s\S]*WHERE tab_id = \?2/,
-      );
-      expect(s.args).toEqual(['new', 'old']);
-    }
-  });
-});
 
 describe('readActivity', () => {
   const place = {
@@ -185,12 +68,12 @@ describe('readActivity', () => {
     expect(batches[0]![0]!.sql).toMatch(/FROM collab_actions/);
     expect(batches[0]![1]!.sql).toMatch(/JOIN collab_threads ct/);
     // Cards also bind the reader's hashed person ids (docs/specs/013-workspace/inbox.md §2.4).
-    expect(batches[0]![2]!.sql).toMatch(/FROM items i/);
+    expect(batches[0]![2]!.sql).toMatch(/FROM inbox_cards ic/);
     expect(JSON.parse(batches[0]![2]!.args[3] as string)).toEqual([
       expect.stringMatching(/^[0-9a-f]{24}$/),
     ]);
     // A card's comment threads read the item store too (§2.5), with no ids of their own to bind.
-    expect(batches[0]![3]!.sql).toMatch(/\$\.comments\.resolved/);
+    expect(batches[0]![3]!.sql).toMatch(/tab_id = '~cards'/);
     expect(batches[0]![3]!.args).toHaveLength(3);
     // Forms with unseen responses (docs/specs/030-forms/forms.md "Hearing about responses").
     expect(batches[0]![4]!.sql).toMatch(/CROSS JOIN form_links l/);
@@ -235,17 +118,26 @@ describe('readActivity', () => {
     ]);
   });
 
-  it('keeps one row per element, preferring own > team > shared', async () => {
+  it('keeps one row per element of a document, preferring own > team > shared', async () => {
     const { env } = fakeEnv([
       [
-        actionRow({ via: 'shared', share_code: 'abc', document_id: 'd-shared' }),
-        actionRow({ via: 'own', document_id: 'd-own' }),
-        actionRow({ via: 'team', document_id: 'd-team', document_team_id: 'tm' }),
+        actionRow({ via: 'shared', share_code: 'abc', document_id: 'd1' }),
+        actionRow({ via: 'own', document_id: 'd1' }),
+        actionRow({ via: 'team', document_id: 'd1', document_team_id: 'tm' }),
       ],
       [],
     ]);
     const { actions } = await readActivity(env, 'me', { limit: 10 });
-    expect(actions.map((a) => a.documentId)).toEqual(['d-own']);
+    expect(actions.map((a) => `${a.documentId}:${a.via}`)).toEqual(['d1:own']);
+  });
+
+  it("keeps each holder's row of a shared tab: a tab is indexed once per document", async () => {
+    const { env } = fakeEnv([
+      [actionRow({ via: 'own', document_id: 'd1' }), actionRow({ via: 'own', document_id: 'd2' })],
+      [],
+    ]);
+    const { actions } = await readActivity(env, 'me', { limit: 10 });
+    expect(actions.map((a) => a.documentId)).toEqual(['d1', 'd2']);
   });
 
   it('drops a shared row whose link has lapsed (nowhere to open it)', async () => {
@@ -305,7 +197,7 @@ describe('readActivity', () => {
 });
 
 describe('recordOwnerAlias', () => {
-  it('carries the old id’s aliases and backfill stamp onto the new id, then records the old id', async () => {
+  it('carries the old id’s aliases onto the new id, then records the old id', async () => {
     const { env, batches } = fakeEnv();
     await recordOwnerAlias(env, 'user_1', 'guest-1');
     const sqls = batches[0]!.map((s) => s.sql.replace(/\s+/g, ' '));
@@ -313,7 +205,6 @@ describe('recordOwnerAlias', () => {
     expect(sqls[1]).toBe('DELETE FROM owner_aliases WHERE owner_id = ?');
     expect(sqls[2]).toMatch(/INSERT OR IGNORE INTO owner_aliases .*VALUES/);
     expect(batches[0]![2]!.args.slice(0, 2)).toEqual(['user_1', 'guest-1']);
-    expect(sqls[3]).toMatch(/INSERT OR IGNORE INTO collab_index_state/);
-    expect(sqls[4]).toBe('DELETE FROM collab_index_state WHERE owner_id = ?');
+    expect(sqls).toHaveLength(3);
   });
 });

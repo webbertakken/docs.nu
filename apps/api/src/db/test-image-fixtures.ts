@@ -18,12 +18,9 @@ export const YOUNG = CUTOFF + DAY;
 
 type Bucket = { delete: ReturnType<typeof vi.fn> };
 
-export function setup(opts: { before0050?: boolean } = {}): SqliteD1 & { bucket: Bucket } {
+export function setup(): SqliteD1 & { bucket: Bucket } {
   const bucket: Bucket = { delete: vi.fn(async () => {}) };
-  const db = sqliteD1(
-    { IMAGES: bucket } as unknown as Partial<Env>,
-    opts.before0050 ? { before: '0050' } : {},
-  );
+  const db = sqliteD1({ IMAGES: bucket } as unknown as Partial<Env>);
   return { ...db, bucket };
 }
 

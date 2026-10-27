@@ -5,6 +5,11 @@ Derived from [Images](../images.md), sections [Reference index](../images.md#ref
 rows of [API endpoints](../images.md#api-endpoints). The spec decides; this file only adds engineering precision.
 Defaults applied where the spec is silent are ledgered in [DEFAULTS.md](DEFAULTS.md) and cited as `Dn`.
 
+**Gap, being re-derived (plan 0006, phase B3):** the index now lives in each document's room and its outbox pushes
+the document's whole set to D1's `document_images` ([Document storage](../../006-document/blueprints/document-storage.md));
+the backfill below is gone, and the sweep pauses while any document has not pushed (`content_summary IS NULL`).
+Sections still describing the D1-era backfill are superseded by that blueprint until this one is re-derived.
+
 Scope, by file (all under `apps/api/`):
 
 | File                                   | Role                                                                           |
@@ -12,7 +17,6 @@ Scope, by file (all under `apps/api/`):
 | `migrations/0050_image_refs.sql`       | `image_refs`, `image_refs_image_idx`, `image_refs_backfill` and its single row |
 | `src/image-refs/extract.ts`            | The JavaScript extractor: what a reference is                                  |
 | `src/db/image-refs.ts`                 | Every statement on `image_refs` / `image_refs_backfill`; the SQL extractor     |
-| `src/image-refs/backfill.ts`           | One backfill run                                                               |
 | `src/image-refs/retention.ts`          | The daily image job: backfill, then sweep                                      |
 | `src/db/image-retention.ts`            | The sweep and its tripwire                                                     |
 | `src/db/images.ts`                     | The usage map and the share-read check, reading the index                      |
@@ -211,7 +215,7 @@ export async function nextCorruptTabMentioningImages(
 export async function isImageRefIndexComplete(env: Env): Promise<boolean>;
 export function resetImageRefIndexMemo(): void;
 
-// src/image-refs/backfill.ts
+// the D1-era backfill (removed)
 export type ImageRefsBackfillResult = { state: 'settling' | 'running' | 'complete' };
 export async function runImageRefsBackfill(
   env: Env,
@@ -337,7 +341,6 @@ bodies inside D1; the run stops after 60 s of wall clock, inside the cron's limi
 | Each writer maintains the index (I1), routes included        | `src/db/image-refs-writers.test.ts`             |
 | Deleting a tab / document / account prunes; shared tab keeps | `src/db/image-refs-writers.test.ts`             |
 | No unknown writer of `tabs`, code or migration               | `src/image-refs/writer-census.test.ts`          |
-| Backfill states, pages, chase, corrupt body, idempotence     | `src/image-refs/backfill.test.ts`               |
 | Backfill before sweep; failures logged                       | `src/image-refs/retention.test.ts`              |
 | Sweep gate, live vs dangling, tripwire, re-check (I2 to I4)  | `src/db/image-retention.test.ts`                |
 | Usage and share read from the index, lazy index              | `src/db/images.test.ts`                         |

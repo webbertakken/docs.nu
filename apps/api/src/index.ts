@@ -3,7 +3,6 @@ import {
   isLegacyDocumentsPath,
   toLegacyResponse,
 } from './legacy-documents-alias';
-import { runTabStatsBackfill } from './tab-stats-backfill';
 import { getAccountSession } from './auth/session-token';
 import { requireAccount } from './auth/account-gate';
 import { handleAuth } from './routes/auth';
@@ -17,7 +16,6 @@ import { runTimelineExpirySweep } from './timeline';
 import { runImageRetention } from './image-refs/retention';
 import {
   deleteOldEvents,
-  deleteOldChangesets,
   deleteOldNotifyEmailClaims,
   deleteOldTimelineEvents,
   purgeExpiredTrash,
@@ -26,7 +24,6 @@ import {
 } from './db';
 import {
   apiRouteLabel,
-  CHANGESET_RETENTION_MS,
   bearerTokenOf,
   errorTypeToken,
   isAccountIdShape,
@@ -88,7 +85,6 @@ import { workbenchRefusal } from './auth/workbench-confinement';
 import { sweepWorkbench } from './db/workbench';
 import { withServerRelease } from './server-release-header';
 import type { Env } from './types';
-import { runSheetExpiry } from './sheet-sweep';
 
 export { DocumentRoom, LegacyDocumentRoom };
 
@@ -541,16 +537,6 @@ const worker = {
         now - TIMELINE_RETENTION_MS,
         deleteOldDocumentOpens,
       );
-      // docs/specs/024-agents/agent-changesets.md "Revert": a changeset can be reverted while its
-      // record exists, as long as the Trash keeps a document (CS28).
-      scheduleSweep(
-        ctx,
-        env,
-        'changesets',
-        'rows',
-        now - CHANGESET_RETENTION_MS,
-        deleteOldChangesets,
-      );
       // docs/specs/012-collaboration/assigned-actions.md §4: a notify-email claim past its dedupe window
       // decides nothing any more.
       scheduleSweep(
@@ -560,10 +546,6 @@ const worker = {
         'rows',
         now - NOTIFY_EMAIL_DEDUPE_MS,
         deleteOldNotifyEmailClaims,
-      );
-      // docs/specs/029-sheets/sheet-store.md "Deleting a sheet": delete sheets unreferenced for 30 days.
-      ctx.waitUntil(
-        runSheetExpiry(env).catch((err) => console.error('[sheets] sheets.expired failed', err)),
       );
       // docs/specs/014-identity/transactional-email.md: send any due onboarding emails (welcome catch-up + week 1 / 2).
       // No-op when RESEND_API_KEY is unset.
@@ -604,13 +586,6 @@ const worker = {
       // docs/specs/009-elements/images.md "Retention": advance the reference-index backfill,
       // then reap unused images. runImageRetention logs its own outcome.
       ctx.waitUntil(runImageRetention(env, now));
-      // docs/specs/013-workspace/explorer-details-view.md "Counting the existing tabs": count the
-      // tabs written before tab stats existed, a bounded number a run. Logs its own outcome.
-      ctx.waitUntil(
-        runTabStatsBackfill(env)
-          .then(() => undefined)
-          .catch((err) => console.error('tab-stats: backfill failed', err)),
-      );
       // docs/specs/013-workspace/blueprints/workbench-embeds.md "Retention": spent tickets and requests,
       // sessions past their grace, pairings of tokens no longer live.
       ctx.waitUntil(

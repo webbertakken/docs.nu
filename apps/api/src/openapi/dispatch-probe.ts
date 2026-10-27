@@ -28,6 +28,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import worker from '../index';
+import { withTestDocumentRooms } from '../test-document-room';
 import type { Env } from '../types';
 
 const PROBE_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
@@ -176,7 +177,8 @@ export async function probeDispatch(
   const env = {
     DB: trap('DB'),
     IMAGES: trap('IMAGES'),
-    DOCUMENT_ROOM: trap('DOCUMENT_ROOM'),
+    // A room's own SQLite: the room runs the document routes against it (document-route.ts).
+    DOCUMENT_DB: trap('DOCUMENT_DB'),
     TELEMETRY_ENABLED: 'true',
     OPENAI_API_KEY: 'probe-key',
     // The Drive mirror in broker mode (docs/specs/022-drive-mirror/drive-mirror.md).
@@ -184,6 +186,9 @@ export async function probeDispatch(
     GOOGLE_CLIENT_SECRET: 'probe-secret',
     DRIVE_TOKEN_KEY: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
   } as unknown as Env;
+  // Requests under /api/documents/:id/ are handed to the document's room, which answers with the same handlers
+  // against its SQLite (the DOCUMENT_DB trap); its relays reach no room.
+  withTestDocumentRooms(env);
   const pending: Promise<unknown>[] = [];
   const executionCtx = {
     waitUntil: (p: Promise<unknown>) => pending.push(p.catch(() => undefined)),

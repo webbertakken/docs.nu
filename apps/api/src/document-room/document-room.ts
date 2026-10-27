@@ -45,6 +45,12 @@ import type { FacilitatorState } from '../facilitator';
 import { RoomFacilitator } from '../room-facilitator';
 
 import { writeQaAction, type QaWriteRequest } from '../qa-board-write';
+import { RoomContent } from './room-content';
+import type { Item } from '@livedoc/items';
+import type { ContentSummary } from '../db/content-summary';
+import type { DocumentCopy, DocumentOutline } from './document-content';
+import type { CreateOutcome, DocumentSeed } from './document-create';
+import type { RouteIdentity } from './document-route';
 import {
   newSessionAttachment,
   readSessionAttachment,
@@ -191,6 +197,8 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   private readonly internal: InternalRoom;
   // A Participant's content and answers (docs/specs/013-workspace/share-roles.md), see room-participant.ts.
   private participantWrites: RoomParticipantWrites;
+  // The document's content in this room's SQLite (room-content.ts).
+  private readonly content: RoomContent;
 
   // The worker env is optional so unit tests can build a room from a fake state alone; without it the telemetry
   // emit (Document·Used·Multiplayer) is skipped.
@@ -198,8 +206,9 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     super(state, env);
     this.state = state;
     this.ledger = new RoomLedgerStore(state.storage);
+    this.content = new RoomContent(state, env, this, () => this.armAlarm());
     this.participantWrites = new RoomParticipantWrites({
-      env,
+      env: this.content.env,
       enqueue: (step) => this.queueTabWrite(step),
       sequence: (from, op, except) => this.sequenceMutation(from, op, except),
       sendTo: (ws, payload) => this.sendTo(ws, payload),
@@ -596,7 +605,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   // /broadcast's is. The broadcast happens INSIDE the queued step, so peers
   // receive board states in rev order.
   async handleQaWrite(request: Request): Promise<Response> {
-    const env = this.env;
+    const env = this.content.env;
     if (!env) return new Response('no env', { status: 503 });
     let req: QaWriteRequest;
     try {
@@ -941,12 +950,14 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     return null;
   }
 
-  // The room's one alarm, at the earliest of the facilitator grace deadline and every agent presence expiry, or
-  // none when there is neither (agent-presence I5, PR29).
+  // The room's one alarm, at the earliest of the facilitator grace deadline, every agent presence expiry and the
+  // outbox's drain, or none when there is none of them (agent-presence I5, PR29; document-storage "The outbox").
   private armAlarm(): void {
-    const deadlines = [this.baton.deadline(), this.agents.nextExpiry() ?? undefined].filter(
-      (d): d is number => d !== undefined,
-    );
+    const deadlines = [
+      this.baton.deadline(),
+      this.agents.nextExpiry() ?? undefined,
+      this.content.deadline() ?? undefined,
+    ].filter((d): d is number => d !== undefined);
     if (deadlines.length === 0) void this.state.storage.deleteAlarm();
     else void this.state.storage.setAlarm(Math.min(...deadlines));
   }
@@ -957,6 +968,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     for (const r of expired) agentPresenceLog('expired', r);
     if (expired.length > 0) this.broadcastPresence();
     this.baton.alarm();
+    await this.content.alarm(Date.now());
     this.armAlarm();
   }
 
@@ -1072,5 +1084,59 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         this.opRates.delete(ws);
       }
     }
+  }
+
+  // ---------- RPC: what the worker asks of this document (document-client.ts, document-rpc.ts) ----------
+
+  async route(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
+    return this.content.rpc(documentId).route(documentId, request, identity);
+  }
+
+  async create(documentId: string, seed: DocumentSeed): Promise<CreateOutcome> {
+    return this.content.rpc(documentId).create(documentId, seed);
+  }
+
+  async outline(documentId: string): Promise<DocumentOutline> {
+    return this.content.rpc(documentId).outline(documentId);
+  }
+
+  async hasTab(documentId: string, tabId: string): Promise<boolean> {
+    return this.content.rpc(documentId).hasTab(documentId, tabId);
+  }
+
+  async placesImage(
+    documentId: string,
+    imageId: string,
+    onlyTabId: string | null,
+  ): Promise<boolean> {
+    return this.content.rpc(documentId).placesImage(documentId, imageId, onlyTabId);
+  }
+
+  async image(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
+    return this.content.rpc(documentId).image(documentId, request, identity);
+  }
+
+  async exportCopy(
+    documentId: string,
+    onlyTabId: string | null,
+    redactAuthorsFor: string | null,
+  ): Promise<DocumentCopy | null> {
+    return this.content.rpc(documentId).exportCopy(documentId, onlyTabId, redactAuthorsFor);
+  }
+
+  async importCopy(documentId: string, copy: DocumentCopy): Promise<ContentSummary> {
+    return this.content.rpc(documentId).importCopy(documentId, copy);
+  }
+
+  async item(documentId: string, itemId: string): Promise<Item | null> {
+    return this.content.rpc(documentId).item(documentId, itemId);
+  }
+
+  async respondToForm(
+    documentId: string,
+    request: Request,
+    identity: RouteIdentity,
+  ): Promise<Response> {
+    return this.content.rpc(documentId).respondToForm(documentId, request, identity);
   }
 }

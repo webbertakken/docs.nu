@@ -55,7 +55,9 @@ A later change appends a step and never edits one. `hasDocumentSchema(exec)` rea
 
 ### The outbox
 
-Kinds and keys (`outbox (id INTEGER PRIMARY KEY, kind TEXT NOT NULL, key TEXT NOT NULL, UNIQUE (kind, key))`):
+Kinds and keys (`outbox (id INTEGER PRIMARY KEY, document_id TEXT NOT NULL, kind TEXT NOT NULL, key TEXT NOT NULL,
+UNIQUE (document_id, kind, key))`; `document_id` is the room's one document, kept as a column like every content
+table's so the content modules' SQL, and the tests' shared tables, stay keyed by document):
 
 | Kind      | Key        | Written by triggers on                                                                                  | Drain pushes                                                |
 | --------- | ---------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -107,9 +109,11 @@ present, else `empty: false`.
   `env` widened to `DocumentEnv` and runs `handleDocumentRequest(ctx)`, the existing handler tree.
 - `RouteIdentity = { sessionAccountId, verifiedAccountId, accountEmail, sessionAuthTime, owner, token, workbench }`,
   the fields of LiveDoc's `RouteContext`.
-- Create: the worker writes the D1 row in its batch, then calls `room.create(id, seed)`, which stores the tabs, items,
-  sheets and deck and answers the first `ContentSummary`; the worker writes it to `documents.content_summary`.
-  A room failure deletes the D1 row again and answers 503 `room_unavailable`.
+- Create (D11): the worker validates the whole request, then calls `room.create(id, seed)` (`DocumentSeed`,
+  `document-create.ts`), which stores the document row, tabs, items, sheets and deck and answers the first
+  `ContentSummary` (or the refusal a store made, as `{ ok: false, status, body }`); then the worker writes the D1 row
+  with `content_summary`. A genuine create whose room fails, refuses or whose D1 write fails purges the room again;
+  a room failure answers 503 `room_unavailable`. A re-commit of the caller's own id never purges.
 - Copy (`POST /api/documents/:id/copy`): source room `exportCopy(id)` → worker writes the new D1 row → target room
   `importCopy(newId, copy)` (`remapTabLinks` on the way) → summary as for create.
 
@@ -143,6 +147,8 @@ PRIMARY KEY (tab_id, document_id)) WITHOUT ROWID`; `share_outbox (id INTEGER PRI
   `from` or with `from === id`; 403 unless the caller `ownsDocument` both; 404 when `from` or the tab is missing;
   answers `{ tab: TabSummaryDTO }`; a repeat answers the stored tab.
 - Leave on `deleteTabRow` and on `purge` (before `deleteAll`).
+- A target that already holds an unrelated tab with that id is refused 409 `tab_id_taken`: tab ids are unique per
+  document only ([Offline Mode](../offline-mode.md)).
 - `GET /api/documents/:id/shared-tabs` counts from `tab_shares` (`sharedTabsSummary`).
 
 ### Purge
@@ -161,8 +167,8 @@ attempts INTEGER NOT NULL DEFAULT 0, last_attempt_at INTEGER)` rows in the remov
 
 `maintain(now)` from the alarm, at most once per `UPKEEP_INTERVAL_MS` (stored `upkeep_at` key): delete changesets
 older than `CHANGESET_RETENTION_DAYS` (the `agent_changeset_parts` cascade); delete sheets unreferenced longer than
-the sheet store's 30 days (`sheet-sweep.ts` moved into the room). Removed from the worker: `sheet-sweep` and
-changeset retention crons, `tab-stats-backfill.ts`, `image-refs/backfill.ts`, `collab-index/backfill.ts`.
+the sheet store's 30 days (`sheet-sweep.ts` moved into the room). Removed from the worker: the sheet expiry and
+changeset retention crons, and the tab stats, image reference and collaboration index backfills.
 
 ## Interfaces and contracts
 
@@ -224,7 +230,8 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 | Case                                             | Handling                                                               |
 | ------------------------------------------------ | ---------------------------------------------------------------------- |
 | Room RPC throws or times out on a document route | 503 `room_unavailable`, `[room-route] failed id=<id> error=<name>`     |
-| Create: D1 row written, room fails               | D1 row deleted; 503 `room_unavailable`                                 |
+| Create: room fails or refuses                    | room purged; 503 `room_unavailable`, or the refusal                    |
+| Create: room stored, D1 insert fails             | room purged; the error answers 500                                     |
 | Copy: target import fails                        | new D1 row deleted; 503; the source is untouched                       |
 | Drain unit fails                                 | its keys stay; retry at `now + FLUSH_RETRY_MS`; `[outbox] unit failed` |
 | Drain after the D1 row is gone                   | G2 writes nothing; keys deleted                                        |

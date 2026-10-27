@@ -1,21 +1,16 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { DatabaseSync } from 'node:sqlite';
-import { migrateFrom, sqliteD1 } from '../test-sqlite-d1';
+import { sqliteD1 } from '../test-sqlite-d1';
 import { imageRefIdsFromData } from '../image-refs/extract';
 import {
+  documentImageIds,
+  documentPlacesImage,
   imageRefIndexDocumentStatement,
-  imageRefIndexOwnerStatement,
-  imageRefIndexPageStatement,
-  isImageRefIndexComplete,
-  readImageRefsBackfill,
-  resetImageRefIndexMemo,
-  restartImageRefsBackfill,
 } from './image-refs';
 
-// The SQL extractor (backfill + lazy indexing) and the JavaScript one (every
-// save) must agree on what a reference is (docs/specs/009-elements/images.md,
-// "Reference index"): one that the SQL side misses is an image the sweep
-// would reap for a tab that was only ever backfilled.
+// The SQL extractor (indexing stored bodies, as a move into a room does) and the JavaScript one (every save) must
+// agree on what a reference is (docs/specs/009-elements/images.md, "Reference index"): one the SQL side misses is
+// an image the document's push leaves out of document_images, which the sweep would reap.
 
 const pageFill = (imageId: unknown) => ({ kind: 'image', imageId });
 const img = (imageId: unknown, extra: Record<string, unknown> = {}) => ({
@@ -25,8 +20,7 @@ const img = (imageId: unknown, extra: Record<string, unknown> = {}) => ({
   ...extra,
 });
 
-// Valid JSON bodies only: a corrupt body never reaches the SQL extractor as
-// data (the backfill hands it to the text scan).
+// Valid JSON bodies only; a corrupt body is its own case below.
 const CORPUS: Record<string, unknown> = {
   plain: { elements: [img('a'), img('b')] },
   duplicate: { elements: [img('a'), img('a')] },
@@ -61,10 +55,26 @@ const CORPUS: Record<string, unknown> = {
   pagesObject: { pages: { p: { background: { fill: pageFill('obj') } } } },
 };
 
-function tabRow(sql: DatabaseSync, id: string, data: string) {
+function documentRow(sql: DatabaseSync, id: string) {
+  sql
+    .prepare(
+      "INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at) VALUES (?, 'me', ?, 0, 0, 0)",
+    )
+    .run(id, id);
+}
+
+// A tab of document `documentId` (made on first use).
+function tabRow(sql: DatabaseSync, id: string, data: string, documentId = 'D') {
+  if (!sql.prepare('SELECT 1 FROM document WHERE id = ?').get(documentId))
+    documentRow(sql, documentId);
   sql
     .prepare('INSERT INTO tabs (id, name, data, updated_at) VALUES (?, ?, ?, 0)')
     .run(id, id, data);
+  sql
+    .prepare(
+      'INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES (?, ?, 0, 0)',
+    )
+    .run(documentId, id);
 }
 
 function refsByTab(sql: DatabaseSync): Record<string, string[]> {
@@ -77,8 +87,6 @@ function refsByTab(sql: DatabaseSync): Record<string, string[]> {
   return out;
 }
 
-afterEach(() => resetImageRefIndexMemo());
-
 describe('the SQL extractor', () => {
   it('finds exactly what the JavaScript extractor finds', async () => {
     const { env, sql } = sqliteD1();
@@ -89,7 +97,7 @@ describe('the SQL extractor', () => {
       const ids = imageRefIdsFromData(data).sort();
       if (ids.length > 0) expected[name] = ids;
     }
-    await imageRefIndexPageStatement(env, 0, 1_000_000).run();
+    await imageRefIndexDocumentStatement(env, 'D').run();
     expect(refsByTab(sql)).toEqual(expected);
     // The corpus exercises both sides, not just empties.
     expect(Object.keys(expected).sort()).toEqual([
@@ -108,80 +116,32 @@ describe('the SQL extractor', () => {
     const { env, sql } = sqliteD1();
     tabRow(sql, 'bad', '{"elements":[{"type":"image","imageId":"a"}');
     tabRow(sql, 'good', JSON.stringify({ elements: [img('b')] }));
-    await imageRefIndexPageStatement(env, 0, 10).run();
+    await imageRefIndexDocumentStatement(env, 'D').run();
     expect(refsByTab(sql)).toEqual({ good: ['b'] });
   });
 
-  it('pages by rowid range, bounds inclusive of the upper end only', async () => {
+  it("scopes to the document's own tabs", async () => {
     const { env, sql } = sqliteD1();
-    for (const n of [1, 2, 3]) tabRow(sql, `t${n}`, JSON.stringify({ elements: [img(`i${n}`)] }));
-    await imageRefIndexPageStatement(env, 1, 2).run();
-    expect(refsByTab(sql)).toEqual({ t2: ['i2'] });
-  });
-
-  it("scopes to an owner's or a document's tabs", async () => {
-    const { env, sql } = sqliteD1();
-    for (const [d, owner] of [
-      ['A', 'me'],
-      ['B', 'other'],
-    ]) {
-      sql
-        .prepare(
-          'INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at) VALUES (?, ?, ?, 0, 0, 0)',
-        )
-        .run(d!, owner!, d!);
-    }
-    tabRow(sql, 'ta', JSON.stringify({ elements: [img('ia')] }));
-    tabRow(sql, 'tb', JSON.stringify({ elements: [img('ib')] }));
-    sql.exec(
-      "INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES ('A', 'ta', 0, 0), ('B', 'tb', 0, 0)",
-    );
-    await imageRefIndexOwnerStatement(env, 'me').run();
-    expect(refsByTab(sql)).toEqual({ ta: ['ia'] });
+    tabRow(sql, 'ta', JSON.stringify({ elements: [img('ia')] }), 'A');
+    tabRow(sql, 'tb', JSON.stringify({ elements: [img('ib')] }), 'B');
     await imageRefIndexDocumentStatement(env, 'B').run();
-    expect(refsByTab(sql)).toEqual({ ta: ['ia'], tb: ['ib'] });
+    expect(refsByTab(sql)).toEqual({ tb: ['ib'] });
   });
 });
 
-describe('migration 0050', () => {
-  it('starts complete on a database with no tabs', async () => {
-    const { env } = sqliteD1();
-    expect(await readImageRefsBackfill(env)).toMatchObject({ cursor: 0 });
-    expect(await isImageRefIndexComplete(env)).toBe(true);
-  });
-
-  it('starts incomplete, with nothing indexed, on a database with tabs', async () => {
-    const { env, sql } = sqliteD1({}, { before: '0050' });
-    tabRow(sql, 't1', JSON.stringify({ elements: [img('a')] }));
-    migrateFrom(sql, '0050');
-    expect(await readImageRefsBackfill(env)).toMatchObject({ cursor: 0, completed_at: null });
-    expect(await isImageRefIndexComplete(env)).toBe(false);
-    expect(refsByTab(sql)).toEqual({});
-  });
-});
-
-describe('isImageRefIndexComplete', () => {
-  it('treats a missing state row as incomplete', async () => {
+describe('what the room answers of its images', () => {
+  it('lists every image the document places, once, and says where', async () => {
     const { env, sql } = sqliteD1();
-    sql.exec('DELETE FROM image_refs_backfill');
-    expect(await isImageRefIndexComplete(env)).toBe(false);
-  });
-
-  it('remembers completion without asking again', async () => {
-    const { env, sql } = sqliteD1();
-    expect(await isImageRefIndexComplete(env)).toBe(true);
-    sql.exec('DELETE FROM image_refs_backfill');
-    expect(await isImageRefIndexComplete(env)).toBe(true);
-  });
-
-  it('reads incomplete after a restart', async () => {
-    const { env } = sqliteD1();
-    await restartImageRefsBackfill(env, 5);
-    expect(await readImageRefsBackfill(env)).toEqual({
-      created_at: 5,
-      cursor: 0,
-      completed_at: null,
-    });
-    expect(await isImageRefIndexComplete(env)).toBe(false);
+    tabRow(sql, 't1', '{}');
+    tabRow(sql, 't2', '{}');
+    sql.exec(
+      `INSERT INTO image_refs (tab_id, image_id) VALUES ('t1', 'a'), ('t1', 'b'), ('t2', 'a')`,
+    );
+    expect(await documentImageIds(env, 'D')).toEqual(['a', 'b']);
+    expect(await documentPlacesImage(env, 'D', 'b', null)).toBe(true);
+    expect(await documentPlacesImage(env, 'D', 'b', 't2')).toBe(false);
+    expect(await documentPlacesImage(env, 'D', 'a', 't2')).toBe(true);
+    expect(await documentPlacesImage(env, 'D', 'zz', null)).toBe(false);
+    expect(await documentPlacesImage(env, 'other', 'a', null)).toBe(false);
   });
 });

@@ -22,7 +22,7 @@ import {
   missingDocument,
   ownsDocument,
   requireOwner,
-  type RouteContext,
+  type DocumentRouteContext,
   readBody,
 } from './context';
 
@@ -31,7 +31,7 @@ import {
 const isIdOrNull = (v: unknown): v is string | null | undefined =>
   v === undefined || v === null || typeof v === 'string';
 
-export async function handleDocumentPlacement(ctx: RouteContext): Promise<Response | null> {
+export async function handleDocumentPlacement(ctx: DocumentRouteContext): Promise<Response | null> {
   const { request, env, segments } = ctx;
   // /api/documents/<id>/folder — placement (docs/specs/013-workspace/folders.md + docs/specs/013-workspace/team-shared-documents.md). Body:
   // { folderId, teamId? }. A team document is managed by every joined

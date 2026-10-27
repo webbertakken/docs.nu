@@ -14,11 +14,11 @@ import {
   type ApplySuccess,
 } from '@livedoc/edit-operations';
 import { rewriteCommentAuthors } from '../comments';
-import { lastChangesetRev, tabIdsHeldElsewhere } from '../db';
+import { lastChangesetRev } from '../db';
 import { capStoredName } from '../names';
 import { personTagFor } from '../person-tag';
 import { readRoomSelections, type RoomSelection } from '../room-client';
-import type { DocumentDTO, Env } from '../types';
+import type { DocumentDTO, DocumentEnv } from '../types';
 import { makeTemplateSheets } from './template-sheets';
 import type { ChangesetBody } from './request';
 import { afterChangeset } from './after';
@@ -40,7 +40,7 @@ export const SUBMIT_ATTEMPTS = 2;
 const TAB_ID_MAX = 128;
 
 type SubmitArgs = {
-  env: Env;
+  env: DocumentEnv;
   document: DocumentDTO;
   tabId: string;
   request: ParsedChangeset;
@@ -68,10 +68,9 @@ export async function submitChangeset(args: SubmitArgs): Promise<SubmitResult> {
       args.tokenId ? readSelections(env, document.id, tabId, args.author.id) : null,
     ]);
     if (!stored) {
+      // A replace makes the tab; a room's tabs are its own, so the id is this document's to take
+      // (docs/specs/006-document/offline-mode.md).
       if (request.body.kind !== 'replace') return { status: 404, body: { error: 'not_found' } };
-      if ((await tabIdsHeldElsewhere(env, document.id, [tabId])).size > 0) {
-        return refusal(409, 'tab_id_taken', 'another document holds a tab with this id');
-      }
     }
     const compiled = compile(args, stored, selections);
     if ('errors' in compiled) return rejected(args, stored, compiled.errors, where);
@@ -203,7 +202,7 @@ export function writtenFooter(
 
 // The selections on the tab, the agent owner's own marked by their person tag.
 async function readSelections(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId: string,
   ownerId: string,

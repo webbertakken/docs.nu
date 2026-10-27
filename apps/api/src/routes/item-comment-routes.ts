@@ -10,7 +10,7 @@ import type { Item, ItemPerson } from '@livedoc/items';
 import { forbidden, json, methodNotAllowed, noContent } from '../responses';
 import { recordCommentResolved, retractComments } from '../timeline';
 import { afterCommentPosted, newComment } from './comment-routes';
-import { gateEdit, readBody, type RouteContext } from './context';
+import { gateEdit, readBody, type DocumentRouteContext } from './context';
 import { itemCaller, type ItemCaller } from './item-route-kit';
 import { writeItem } from './item-routes';
 
@@ -38,7 +38,11 @@ function commentWrite(change: ItemCommentChange): (item: Item, by: ItemPerson) =
 // The caller as the canvas's comment helpers know them (the document and their owner id).
 const asCommenter = (caller: ItemCaller) => ({ doc: caller.doc!, owner: caller.owner });
 
-async function add(ctx: RouteContext, documentId: string, itemId: string): Promise<Response> {
+async function add(
+  ctx: DocumentRouteContext,
+  documentId: string,
+  itemId: string,
+): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'participate');
   if (caller instanceof Response) return caller;
   const body = await readBody(ctx);
@@ -64,7 +68,7 @@ async function add(ctx: RouteContext, documentId: string, itemId: string): Promi
 
 // Delete-own for anyone who may comment; any comment for an editor (on the canvas, through the tab save).
 async function remove(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   itemId: string,
   commentId: string,
@@ -96,7 +100,7 @@ async function remove(
 }
 
 async function setResolved(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   itemId: string,
   verb: Verb,
@@ -131,7 +135,7 @@ async function setResolved(
 
 // POST .../comments (add), DELETE .../comments/:commentId, POST .../comments/resolve and .../comments/reopen.
 export async function handleItemCommentRoutes(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   itemId: string,
 ): Promise<Response | null> {

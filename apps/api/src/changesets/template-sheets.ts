@@ -14,7 +14,7 @@ import {
 } from '@livedoc/sheets';
 import { hasTemplateSheets } from '@livedoc/templates';
 import { materialiseTemplateSheets } from '@livedoc/templates/template-sheets';
-import type { Env } from '../types';
+import type { DocumentEnv } from '../types';
 import {
   documentSheetTotals,
   insertSheetStatements,
@@ -24,7 +24,7 @@ import {
 import { changesetLog } from './log';
 
 export async function makeTemplateSheets(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tab: Tab,
   by: SheetPerson,
@@ -56,7 +56,7 @@ export async function makeTemplateSheets(
       changesetLog('warn', '[changeset] template sheet skipped', { documentId, full });
       continue;
     }
-    await env.DB.batch(insertSheetStatements(env, documentId, sheet, now));
+    await env.DOCUMENT_DB.batch(insertSheetStatements(env, documentId, sheet, now));
     totals = { ...totals, sheets: totals.sheets + 1, cells: totals.cells + sheet.cells.length };
     madeIds.add(id);
   }

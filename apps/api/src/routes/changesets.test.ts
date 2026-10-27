@@ -168,7 +168,7 @@ describe('submitting a changeset', () => {
     expect(records(db)[0]).toMatchObject({ token_id: null, removed: 1 });
   });
 
-  it("creates a tab with a replace on an id the document lacks, and refuses another document's tab", async () => {
+  it('creates a tab with a replace on an id the document lacks', async () => {
     quiet();
     const { db, room: r } = await setUp();
     const res = await call(
@@ -188,21 +188,6 @@ describe('submitting a changeset', () => {
       op: { tab?: { name: string } };
     };
     expect(relay.op.tab).toMatchObject({ name: 'Detail' });
-
-    await call(db, 'POST', '/api/documents', {
-      id: 'E',
-      name: 'Other',
-      tabs: [{ id: 'theirs', name: 'T', elements: [] }],
-    });
-    const taken = await call(
-      db,
-      'POST',
-      '/api/documents/D/tabs/theirs/changesets',
-      { replace: { elements: [] } },
-      { token: true },
-    );
-    expect(taken.status).toBe(409);
-    expect(await taken.json()).toMatchObject({ error: 'tab_id_taken' });
   });
 
   it('writes nothing on any refusal, and says why', async () => {

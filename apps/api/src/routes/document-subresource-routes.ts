@@ -9,13 +9,10 @@ import {
   deleteFormLinksForTab,
   deleteShareLinksForTab,
   deleteTabRow,
-  documentsContainingTab,
   getDocument,
   getDocumentForSave,
   getParticipant,
   getTab,
-  linkTabToDocument,
-  tabLinkedToOwnedDocument,
 } from '../db';
 import { conflict, forbidden, json, noContent, notFound } from '../responses';
 import { recordVisitorOpened, retractTabComments } from '../timeline';
@@ -45,7 +42,7 @@ import {
   ownsDocument,
   requireOwner,
   shareCodeOf,
-  type RouteContext,
+  type DocumentRouteContext,
 } from './context';
 import { answerTabView, parseViewQuery } from './document-views-route';
 import { pauseFormsFeeding } from '../forms/form-tab';
@@ -53,7 +50,9 @@ import { pauseFormsFeeding } from '../forms/form-tab';
 // Tab-content sub-resource routes for /api/documents/<id>/...,
 // split out of documents.ts. Returns a Response when it handles the path, or
 // null to let the main dispatcher fall through to the remaining routes.
-export async function handleDocumentSubresources(ctx: RouteContext): Promise<Response | null> {
+export async function handleDocumentSubresources(
+  ctx: DocumentRouteContext,
+): Promise<Response | null> {
   const { request, env, segments } = ctx;
   // Agent changesets (docs/specs/024-agents/agent-changesets.md).
   const changesets = await handleChangesetRoutes(ctx);
@@ -200,12 +199,12 @@ export async function handleDocumentSubresources(ctx: RouteContext): Promise<Res
       // §4.17). The editor is let through: its saves and deletes race, so adding a tab and deleting
       // the other in one save can reach here first.
       if (ctx.token && existing.tabs.length <= 1) return conflict('last_tab');
+      // The links scoped to it die with it (docs/specs/013-workspace/tab-scoped-share-links.md), before it, so no
+      // request finds a live link to a tab that has gone; their holders leave the editor as on a revoke.
+      const revoked = await deleteShareLinksForTab(env, id, tabId);
       const removed = await deleteTabRow(env, id, tabId);
       // Its comments' words leave this document's feed with it (docs/specs/013-workspace/timeline.md §4.3).
       if (removed) ctx.waitUntil?.(retractTabComments(env, id, removed));
-      // The links scoped to it die with it (docs/specs/013-workspace/tab-scoped-share-links.md), and their
-      // holders leave the editor as on a revoke.
-      const revoked = await deleteShareLinksForTab(env, id, tabId);
       for (const code of revoked) {
         ctx.waitUntil?.(broadcastShareOp(env, id, { kind: 'share-revoked', code }));
       }
@@ -267,22 +266,20 @@ export async function handleDocumentSubresources(ctx: RouteContext): Promise<Res
     // SAME resolved owner, so a forged identity satisfies it with the victim's
     // own documents.
     if (!(await ownsDocument(ctx, existing))) return forbidden();
-    // The tab must already live in at least one of the caller's
-    // owned documents. One JOIN answers that (LIMIT 1 on the first
-    // owned match). On the failure path we fall back to listing the
-    // containing documents once, purely to tell "tab doesn't exist
-    // anywhere" (404) apart from "exists but you don't own it" (403).
-    if (!(await tabLinkedToOwnedDocument(env, tabId, owner))) {
-      const sourceIds = await documentsContainingTab(env, tabId);
-      return sourceIds.length === 0 ? notFound() : forbidden();
-    }
-    await linkTabToDocument(env, id, tabId);
-    // Return the tab summary the client uses to render the
-    // new pill in its TabBar without re-fetching the whole
-    // document. Pulled fresh so the order_index reflects the
-    // append we just performed.
+    // A tab this document already holds: linking it again changes nothing.
     const tab = await getTab(env, id, tabId);
-    return tab ? json({ tab }) : notFound();
+    if (tab) return json({ tab });
+    // A tab of another document lives in that document's room: taking a copy that stays in step is the shared
+    // tabs' join (docs/specs/006-document/tab-document-many-to-many.md "Joining"), which this route does not do
+    // yet. Refused by name, never half done.
+    console.warn('[tab-link] refused', { documentId: id, tabId, reason: 'shared_tabs_pending' });
+    return json(
+      {
+        error: 'tab_link_unavailable',
+        message: 'Adding a tab from another document is not available.',
+      },
+      { status: 501 },
+    );
   }
 
   // /api/documents/<id>/share* — the share-link family lives in

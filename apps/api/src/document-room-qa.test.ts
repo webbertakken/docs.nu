@@ -35,6 +35,7 @@ vi.mock('./db', async (orig) => ({
 }));
 
 import { DocumentRoom } from './document-room/document-room';
+import { roomSqlStorage } from './test-document-room';
 
 const board = (notes: QaNote[], rev: number) =>
   JSON.stringify({
@@ -60,7 +61,9 @@ function newRoom() {
   const state = {
     acceptWebSocket: (ws: WebSocket) => void sockets.push(ws),
     getWebSockets: () => [...sockets],
+    id: { equals: () => true },
     storage: {
+      ...roomSqlStorage(),
       get: (k: string) => Promise.resolve(kv.get(k)),
       put: (k: string, v: unknown) => Promise.resolve(void kv.set(k, v)),
       delete: (k: string) => Promise.resolve(kv.delete(k)),
