@@ -81,6 +81,10 @@ bound to the work tree's git branch ([Branch binding](../027-repositories/branch
 `document merge` and `document discard` list, merge and discard them; `link clean` and `unlink` join the link
 commands ([Repository link](../027-repositories/repository-link.md#commands)).
 
+**Local copies** (specified, not built). `link init` takes `--dir <d>` (where the link's files live) and `--binding
+none|branches` (`none` keeps a folder inside a git work tree a local copy); `sync --take file|livedoc <path>` settles a
+file document changed in both places ([Local copy](../027-repositories/local-copy.md)).
+
 **Files.** `-f <file>` holds edit operations, a graph, Mermaid, or elements, told apart by their content; a file
 that is none of them is refused.
 
