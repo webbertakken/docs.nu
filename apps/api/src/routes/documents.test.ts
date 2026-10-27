@@ -13,7 +13,7 @@ import type { DocumentDTO } from '../types';
 //     edit paths)
 //   - success with no body           -> 204
 // These cases pin that mapping across one representative route per
-// guard shape, so the requireOwner / requireOwnedDocument
+// guard shape, so the requireOwner / requireManagedDocument
 // extraction can't silently swap a 403 for a 404
 // (which would leak existence) or drop a missingAuth (which would let
 // an unauthenticated caller through).
