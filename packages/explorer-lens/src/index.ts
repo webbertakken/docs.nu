@@ -5,6 +5,7 @@ export * from './dimensions';
 export * from './labels';
 export * from './match';
 export * from './parse';
+export * from './search-fold';
 export * from './serialise';
 export * from './suggest';
 export * from './telemetry';

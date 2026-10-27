@@ -2111,6 +2111,19 @@ export const ROUTE_MANIFEST: RouteSpec[] = [
     statuses: [200, 400, 401, 429],
   },
 
+  // ---- Content search (docs/specs/013-workspace/content-search.md) ----
+  {
+    method: 'GET',
+    path: '/search/content',
+    segment: 'search',
+    tag: 'Documents',
+    summary:
+      'Documents the caller may open whose content matches `q` (tab text, comments, articles, forms, sheet inputs, cards), best first, one per document, at most 50, each with the tab it was found in and a line of its text with the matched stretches as ranges. Words of 3 or more characters forgive a typo; shorter words must start a word. 400 without `q`; 429 past 120 a minute; 503 `search_unavailable`.',
+    auth: 'guest-or-session',
+    responseSchema: { $ref: '#/components/schemas/ContentSearchDTO' },
+    statuses: [200, 400, 429, 503],
+  },
+
   // ---- Account ----
   {
     method: 'DELETE',

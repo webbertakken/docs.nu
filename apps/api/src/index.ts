@@ -72,6 +72,7 @@ import { handleTags } from './routes/tags';
 import { handlePlacementDefaults } from './routes/placement-defaults';
 import { handleTimeline } from './routes/timeline';
 import { handleActivity } from './routes/activity';
+import { handleContentSearch } from './routes/content-search-route';
 import { handleHome } from './routes/home';
 import { handlePreferences } from './routes/preferences';
 import { handleShare } from './routes/share';
@@ -445,6 +446,8 @@ async function routeApiRequest(
         return await handleActivity(ctx);
       case 'home':
         return await handleHome(ctx);
+      case 'search':
+        return await handleContentSearch(ctx);
       case 'preferences':
         return await handlePreferences(ctx);
       case 'migrate':

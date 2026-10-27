@@ -74,6 +74,9 @@ importers:
       '@livedoc/edit-operations':
         specifier: workspace:*
         version: link:../../packages/edit-operations
+      '@livedoc/explorer-lens':
+        specifier: workspace:*
+        version: link:../../packages/explorer-lens
       '@livedoc/forms':
         specifier: workspace:*
         version: link:../../packages/forms

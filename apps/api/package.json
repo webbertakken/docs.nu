@@ -23,6 +23,7 @@
     "@livedoc/document": "workspace:*",
     "@livedoc/document-views": "workspace:*",
     "@livedoc/edit-operations": "workspace:*",
+    "@livedoc/explorer-lens": "workspace:*",
     "@livedoc/forms": "workspace:*",
     "@livedoc/icons": "workspace:*",
     "@livedoc/items": "workspace:*",

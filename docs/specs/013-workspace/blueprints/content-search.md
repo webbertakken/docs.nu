@@ -7,14 +7,14 @@ Name matching is the fuzzy title matcher's ([Explorer filters](explorer-filters.
 
 ## Domain and naming
 
-| Term            | Identifier                                                                                                                              | Never            |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| Search text     | `tabSearchText(tab, sheets)` (`@livedoc/document-views` `search-text.ts`); `itemsSearchText(items)` (`@livedoc/items` `search-text.ts`) | index text, blob |
-| Index row       | D1 `content_search` row, key `(document_id, tab_id)`; items under `tab_id = '~items'` (`ITEMS_SEARCH_KEY`)                              | doc row          |
-| Full-text index | D1 `content_search_fts` (FTS5, external content `content_search`)                                                                       | search table     |
-| Folded text     | `foldSearchText(text)` = `foldText` then every run of non letter or digit to one space, trimmed (`@livedoc/explorer-lens`)              | normalised       |
-| Query           | `ContentQuery = { long: { word: string; trigrams: string[] }[]; short: string[] }` from `compileContentQuery(q)`                        | search params    |
-| Content match   | `ContentMatch = { documentId; tabId: string \| null; tabName: string \| null; snippet: { text: string; marks: [number, number][] } }`   | hit, result      |
+| Term            | Identifier                                                                                                                                                                        | Never            |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Search text     | `tabSearchText(tab, sheets)` (`@livedoc/document-views` `search-text.ts`); `itemsSearchText(items)` (`@livedoc/items` `search-text.ts`)                                           | index text, blob |
+| Index row       | D1 `content_search` row, key `(document_id, tab_id)`; items under `tab_id = '~items'` (`ITEMS_SEARCH_KEY`)                                                                        | doc row          |
+| Full-text index | D1 `content_search_fts` (FTS5, external content `content_search`)                                                                                                                 | search table     |
+| Folded text     | `foldSearchText(text)` = `foldText` then every run of non letter or digit to one space, trimmed; query words by `searchQueryWords(q)` (`@livedoc/explorer-lens` `search-fold.ts`) | normalised       |
+| Query           | `ContentQuery = { long: { word: string; trigrams: string[] }[]; short: string[] }` from `compileContentQuery(q)`                                                                  | search params    |
+| Content match   | `ContentMatch = { documentId; tabId: string \| null; tabName: string \| null; snippet: { text: string; marks: [number, number][] } }`                                             | hit, result      |
 
 ## Behaviour and state
 
@@ -33,16 +33,19 @@ WHERE content_search.text IS NOT excluded.text OR content_search.tab_name IS NOT
 DELETE` writes the `'delete'` command row, `AFTER UPDATE OF text` does both. A purge's cascade from `documents`
   fires the delete trigger.
 
-### `tabSearchText(tab, sheets)`
+### `tabSearchText(tab, sheetInputs)`
 
-Lines joined with `\n`, in order: `tab.name`; for each element in reading order (`readingOrder`, document-views)
-`elementFindTexts(el)`; each article's text (its blocks' text runs) in `tab.articles` order; each page's title in
-`tab.pages`; the form's title, each question's text and each choice (`tab.form`); for each sheet the tab references,
-each cell's `input` that is not a formula (a formula's result is never stored), row-major. Empty strings skipped.
+Lines joined with `\n`, in order: `tab.name`; for each element in the tab's element order `elementFindTexts(el)`; each
+article's text (a paragraph's or list's runs joined, a code block's text) in `tab.articles` order; each page's `name`;
+the form's heading, description, each section's title and description, each question's prompt, help and options;
+then `sheetInputs`, the caller's list of the inputs of the cells of the sheets the tab references that are not
+formulas, row-major. Empty strings skipped; a malformed body reads as nothing. The cards' text,
+`itemsSearchText(items)`, is each live card's (not in the Trash, not archived) title, description, rich description
+and comments.
 
 ### Reading (`GET /api/search/content?q=<text>`)
 
-1. Identity: the reader as the lists resolve it (`resolveOwner`, account ids, joined teams); no caller: 401.
+1. Identity: the reader as the lists resolve it (`resolveOwner`, account ids, joined teams); no caller: 400 (`missingAuth`, as every route).
 2. `SEARCH_RATE_LIMITER.limit({ key: owner })`; refused: 429 `rate_limited`.
 3. `q` cut to `SEARCH_QUERY_MAX_CHARS`; `compileContentQuery(q)`: words from `compileTitleQuery([q]).words`; a word of
    3 or more characters is long, its trigrams every 3-character window, deduplicated across the query and capped at
@@ -52,18 +55,20 @@ each cell's `input` that is not a formula (a formula's result is never stored), 
      `?2` now): own, joined teams', shared with the reader, live only, with `scope_tab_id` for a tab-scoped link.
    - `hits`: `content_search_fts MATCH ?` (the trigrams quoted and joined with `OR`), joined to `content_search`
      and `visible` (`v.scope_tab_id IS NULL OR v.scope_tab_id = s.tab_id`, and `s.tab_id <> '~items'` when scoped),
-     ordered by `bm25(content_search_fts)`, at most `SEARCH_CANDIDATES` rows, with
-     `snippet(content_search_fts, 0, char(1), char(2), '…', SNIPPET_TOKENS)`.
+     ordered by `bm25(content_search_fts)`, at most `SEARCH_CANDIDATES` rows; no `snippet()` (below).
    - Keep a hit when, for every long word, at least `SEARCH_MIN_TRIGRAM_SHARE` of its trigrams occur in
      `folded` (`instr`), and every short word starts a word of `' ' || folded`.
    - `matched` = the count of all query trigrams in `folded`.
    - One row per document: `ROW_NUMBER() OVER (PARTITION BY document_id ORDER BY rank, matched DESC)`.
    - Order: `rank`, then `matched DESC`, then `documents.saved_at DESC`; at most `SEARCH_RESULTS_MAX`.
 5. Short words only: the same `visible` join over `content_search` with every short word a word start, ordered by
-   `saved_at DESC`, at most `SEARCH_RESULTS_MAX`; the snippet is cut from `text` around the first word start
-   (`snippetAround`).
-6. Each snippet: the sentinels become `marks` (offsets into the text without them), adjacent marks merged, then
-   `trimSnippet` cuts to at most `SNIPPET_MAX_CHARS` at word boundaries with `…`.
+   `saved_at DESC`, at most `SEARCH_RESULTS_MAX`.
+6. Each answered row's snippet is cut from its `text` in the Worker (`snippetAround`): every word of the text whose
+   folded form answers a query word (a short word starts it; a long word has at least the minimum share of its
+   trigrams in it) is marked, whole for a long word, the typed start for a short one; `trimSnippet` then cuts to at
+   most `SNIPPET_MAX_CHARS` around the first mark, at word boundaries, with `…`. SQLite's `snippet()` would mark
+   trigram fragments and walk every candidate's text: over 2,000 rows of 8 KB a search took 547 ms with it in the
+   candidates and 21 ms without.
 7. Answer 200 `{ matches: ContentMatch[] }`; `tabId` and `tabName` null for the `~items` row.
 
 ### Presentation
@@ -74,9 +79,9 @@ request fires and what it counts.
 ## Interfaces and contracts
 
 - `GET /api/search/content?q=` → `ContentSearchDTO = { matches: ContentMatchDTO[] }` in `@livedoc/api-schema`;
-  400 `invalid_request` when `q` is missing; 401 without a caller; 429 `rate_limited`; 503 `search_unavailable` when
-  the statement fails. Listed in the OpenAPI manifest; read-only tokens may call it.
-- D1 migration (with the storage blueprint's):
+  400 when `q` is missing or there is no caller; 429 `rate_limited`; 503 `search_unavailable` when
+  the statement fails. A missing caller is 400 (`missingAuth`, as every route). Listed in the OpenAPI manifest; read-only tokens may call it.
+- D1 migration `0104_content_search.sql`:
 
 ```sql
 CREATE TABLE content_search (
@@ -129,8 +134,10 @@ CREATE VIRTUAL TABLE content_search_fts USING fts5(
 
 ## Performance and limits
 
-- Budget (`content-search.test.ts`, node:sqlite with FTS5 trigram): 20,000 rows of 8 KB from 1,000 owners, a reader
-  with 200 documents, a 3-word query: under 50 ms; a 1-word short query: under 20 ms.
+- Measured (node:sqlite with FTS5 trigram, a throwaway bench): 20,000 rows of 8 KB from 1,000 owners, a reader with
+  200 documents, every row holding the query's words: a 3-word query 55 ms, a typo'd word 53 ms, a short word 7 ms;
+  over 2,000 rows, 26 ms, 28 ms and 7 ms. The OR of trigrams matches every row holding any of them, so the cost grows
+  with the whole index, not the reader's share of it; docs.nu holds 16 KB.
 - Index size: the trigram index is about 3 to 4 times the text; at the cap, a tab adds at most about 160 KB.
 - A drain rewrites a tab's row only when its text changed (the upsert's `WHERE`).
 
@@ -154,8 +161,7 @@ CREATE VIRTUAL TABLE content_search_fts USING fts5(
 | One row per document; ranking order                           | `content-search.test.ts`               |
 | Snippet marks and trim                                        | `content-snippet.test.ts`              |
 | Index triggers and cascade                                    | `content-search-index.test.ts`         |
-| Route: 400, 401, 429, 503                                     | `content-search-route.test.ts`         |
-| Budget                                                        | `content-search.test.ts`               |
+| Route: 400, 429, 503, 404                                     | `content-search-route.test.ts`         |
 
 ## Constants and configuration
 
@@ -167,7 +173,6 @@ CREATE VIRTUAL TABLE content_search_fts USING fts5(
 | `SEARCH_MIN_TRIGRAM_SHARE` | 0.5      | spec ("at least half")                         | 0.3 to 0.8       |
 | `SEARCH_RESULTS_MAX`       | 50       | spec                                           | 10 to 200        |
 | `SEARCH_CANDIDATES`        | 500      | ten times the results, before the share filter | 100 to 2,000     |
-| `SNIPPET_TOKENS`           | 160      | trigram tokens are about one character each    | 64 to 256        |
 | `SNIPPET_MAX_CHARS`        | 160      | spec ("about 160 characters")                  | 80 to 240        |
 | Rate limit                 | 120/60 s | spec                                           | 30 to 600        |
 

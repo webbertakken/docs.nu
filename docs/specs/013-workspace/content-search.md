@@ -66,6 +66,7 @@ Image pixels, file bytes, links' targets and stroke shapes are not searched.
 ## Freshness
 
 The index trails a write by up to about a minute, the outbox's pace; a document is always found by its name at once.
+The index and its read ship ahead of the content move and hold nothing until the rooms feed them.
 
 ## Limits and abuse
 
