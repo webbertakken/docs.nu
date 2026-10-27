@@ -179,7 +179,7 @@
 - [x] Presentation and UX
 - [x] Accessibility
 - [x] Observability
-- [ ] Testing
+- [x] Testing
 - [x] Constants and configuration
 - [x] Defaults ledger
 

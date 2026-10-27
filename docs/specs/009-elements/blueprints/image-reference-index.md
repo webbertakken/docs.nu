@@ -14,7 +14,7 @@ Scope, by file (all under `apps/api/`):
 | --------------------------------------- | -------------------------------------------------------------------------------- |
 | `src/document-room/document-schema.ts`  | The room's `image_refs`, `image_refs_image_idx` and the `images` outbox triggers |
 | `src/image-refs/extract.ts`             | The JavaScript extractor: what a reference is                                    |
-| `src/db/image-refs.ts`                  | Every statement on the room's `image_refs`; the SQL extractor; the room's reads  |
+| `src/db/image-refs.ts`                  | Every statement on the room's `image_refs`; the room's reads                     |
 | `src/document-room/document-outbox.ts`  | `imagesStatements`: the document's whole set to D1, then its placement grants    |
 | `migrations/0108_document_images.sql`   | D1's `document_images` and `document_images_image`                               |
 | `src/db/image-grants.ts`                | `image_grants` writers and the serving predicate                                 |
@@ -24,6 +24,7 @@ Scope, by file (all under `apps/api/`):
 | `src/routes/images.ts`                  | The byte endpoint's share check: D1's serving right and the room's place         |
 | `src/db/tabs.ts`                        | `tabWriteStatements`, `seedTabs`, `swapTabData` carry index statements           |
 | `src/document-room/document-content.ts` | `importDocumentCopy` carries index statements                                    |
+| `src/document-room/content-move.ts`     | The move into a room carries index statements                                    |
 | `src/index.ts`                          | `scheduled()` hands the daily run to `runImageRetention`                         |
 | `src/image-refs/writer-census.test.ts`  | Fails when SQL writing `tabs` appears outside the known writers                  |
 
@@ -56,6 +57,7 @@ Each writer appends statements to the room batch that writes the body, so the in
 | `tabWriteStatements` (`upsertTab`, `upsertTabAtRev`) | `imageRefReplaceStatements(env, id, imageRefIds(tab.elements, tab.pages))`                             |
 | `seedTabs`                                           | the same, per seeded tab                                                                               |
 | `importDocumentCopy`                                 | per copied tab: `imageRefAddStatements(env, id, imageRefIdsFromData(data))`                            |
+| the move (`content-move.ts`)                         | per moved tab: `imageRefAddStatements(env, tabId, imageRefIdsFromData(data))`                          |
 | `swapTabData`                                        | `[UPDATE tabs … WHERE data = ?, ...imageRefAddStatements(nextData ids)]`; result 0's `changes` decides |
 | `deleteTabRow`                                       | none: `DELETE FROM tabs` cascades the tab's references (`REFERENCES tabs (id) ON DELETE CASCADE`)      |
 | the room's purge                                     | none: the room deletes its whole storage                                                               |
@@ -68,19 +70,11 @@ Each writer appends statements to the room batch that writes the body, so the in
 
 A save whose image set is unchanged deletes nothing and inserts nothing, so it keys nothing in the outbox.
 
-### Extraction in SQL
+### The move
 
-`walkSql(tabWhere, array, typeAt, kind, idAt)` selects `(tab_id, image_id)` over `tabs t` filtered by `tabWhere`,
-joined to `json_each(<source>, array) e`, keeping rows where `e.type = 'object'`, the value at `typeAt` is `kind`,
-the value at `idAt` is text of length 1 to `IMAGE_REF_ID_MAX_LENGTH` and does not start with `data:`. `<source>` is a
-`CASE` giving `'{}'` when `t.data` lacks `"imageId"` (`instr`), is not valid JSON, or has no array at `array`, else
-`t.data`; the `CASE` stops a corrupt body failing the statement and keeps `json_each` off image-free tabs.
-
-`imageRefIndexDocumentStatement(env, documentId)` is one `INSERT OR IGNORE INTO image_refs` of two walks, with
-`tabWhere = t.id IN (SELECT tab_id FROM document_tabs WHERE document_id = ?1)`: elements (`$.elements`, `$.type`,
-`image`, `$.imageId`) `UNION ALL` page fills (`$.pages`, `$.background.fill.kind`, `image`,
-`$.background.fill.imageId`). It indexes a document from stored bodies; the parity test holds it to the JavaScript
-extractor.
+The move into a room (`document-room/content-move.ts`, [move blueprint](../../006-document/blueprints/document-storage-move.md))
+indexes each moved body as it writes it: `imageRefAddStatements(env, tabId, imageRefIdsFromData(data))`, in the
+move's transaction. There is no SQL extractor: every reference comes from the one JavaScript extractor.
 
 ### The push to D1
 
@@ -194,10 +188,6 @@ export function imageRefAddStatements(
   tabId: string,
   ids: string[],
 ): D1PreparedStatement[];
-export function imageRefIndexDocumentStatement(
-  env: DocumentEnv,
-  documentId: string,
-): D1PreparedStatement;
 export async function documentImageIds(env: DocumentEnv, documentId: string): Promise<string[]>;
 export async function documentPlacesImage(
   env: DocumentEnv,
@@ -281,7 +271,6 @@ Neither table is owner-keyed, so neither account deletion nor owner migration li
 | Two elements place the same image                      | One row (primary key); `imageRefIds` is distinct                           |
 | `elements` is an object, or missing                    | No references, on both extractors                                          |
 | Corrupt body through `imageRefIdsFromData`             | Text scan; every id after `"imageId"` counts, image or not (over-keeps)    |
-| Corrupt body in the SQL walk                           | No references from it; the statement does not fail                         |
 | Swap loses its compare                                 | Add-only statements may add references the stored body lacks: over-keeps   |
 | Tab deleted                                            | Its references cascade; the `images` key pushes the smaller set            |
 | Two tabs place the same image, one goes                | The image stays in the placed set (`DISTINCT` over the rest)               |
@@ -339,11 +328,11 @@ JSON_CHUNK_BYTES)` inserts and one grant statement, at most once a minute per do
 | Rule                                                         | Test                                                                          |
 | ------------------------------------------------------------ | ----------------------------------------------------------------------------- |
 | What a reference is                                          | `src/image-refs/extract.test.ts`                                              |
-| SQL extraction equals the JavaScript extractor               | `src/db/image-refs.test.ts` "the SQL extractor"                               |
 | The room's placed images and place check                     | `src/db/image-refs.test.ts`, `src/db/images.test.ts`                          |
 | Each writer maintains the index (I1), routes included        | `src/db/image-refs-writers.test.ts`                                           |
 | Deleting a tab / document / account drops its references     | `src/db/image-refs-writers.test.ts`                                           |
 | No unknown writer of `tabs`, code or migration               | `src/image-refs/writer-census.test.ts`                                        |
+| The move indexes each moved body                             | `src/document-room/content-move.test.ts`                                      |
 | The `images` key on reference and link changes               | `src/document-room/document-outbox-keys.test.ts`                              |
 | The push lands, and writes nothing once the row is gone (G2) | `src/db/image-retention.test.ts`, `src/document-room/document-outbox.test.ts` |
 | Sweep gate, pushed vs removed, tripwire, re-check (I3, I4)   | `src/db/image-retention.test.ts`                                              |
