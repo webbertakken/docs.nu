@@ -179,7 +179,7 @@ changeset retention crons, `tab-stats-backfill.ts`, `image-refs/backfill.ts`, `c
 - Every RPC first checks `documentId` against the id the room stores (`document.id`), or adopts it on `create`,
   `importCopy` and the move; a mismatch throws `room_id_mismatch` (a programming error, logged).
 - The editor's, the MCP server's and the CLI's wire is unchanged, except the link route's `{ from }`.
-- D1 migrations (numbers: the next free after the Community removal's):
+- D1 migrations, from `0104` (after `0103_drop_community.sql`):
   1. `documents.content_summary TEXT NULL`.
   2. `collab_threads`, `collab_actions` rebuilt keyed `(document_id, tab_id, ...)`, `document_id` FK to
      `documents` `ON DELETE CASCADE`, `tab_name TEXT NOT NULL`, no FK to `tabs`; rows not carried (the first drain
