@@ -348,7 +348,7 @@ Self-host: every limiter is optional. When a binding is absent its check short-c
 
 ## Realtime model
 
-The `DocumentRoom` Durable Object (`apps/api/src/document-room.ts`) is the realtime hub for one document id. Clients connect via the `/ws` endpoint and immediately send a `hello`; the room broadcasts a `presence` snapshot whenever the set changes.
+The `DocumentRoom` Durable Object (`apps/api/src/document-room/document-room.ts`) is the realtime hub for one document id. Clients connect via the `/ws` endpoint and immediately send a `hello`; the room broadcasts a `presence` snapshot whenever the set changes.
 
 **Hibernation.** The room uses the Workers WebSocket Hibernation API (`state.acceptWebSocket` + class-level `webSocketMessage` / `webSocketClose` / `webSocketError` handlers) rather than in-memory `ws.accept()`, so the runtime can evict an idle room from memory between messages while every client's socket stays open — an open-but-quiet session no longer bills DO duration. All per-session state that matters (the server-assigned ephemeral presence id, the `X-Verified-Role` trust-boundary role, and the `hello` presence including the remembered `tab-focus` tab) survives eviction in each socket's serialized attachment; only the per-session rate-cap window is in-memory and deliberately resets on a wake.
 
@@ -420,7 +420,7 @@ The document's content, in the room's SQLite ([Document storage](../006-document
 
 Per-session state (presence id, verified role, owner bit, tab scope, admitting share code, presence) lives in each socket's serialized attachment, so it survives hibernation; only the rate-cap windows and the catch-up log reset on a wake.
 
-The room's other parts each have a module beside `document-room.ts`: the session attachment and the verified upgrade headers (`room-session.ts`), the role gate on client ops (`room-op-gate.ts`, the [Share roles](../013-workspace/share-roles.md) level ladder), the worker-only internal endpoints (`room-internal.ts`) and the presence roster each socket is sent (`room-roster.ts`).
+The room's other parts each have a module beside `document-room/document-room.ts`: the session attachment and the verified upgrade headers (`room-session.ts`), the role gate on client ops (`room-op-gate.ts`, the [Share roles](../013-workspace/share-roles.md) level ladder), the worker-only internal endpoints (`room-internal.ts`) and the presence roster each socket is sent (`room-roster.ts`).
 
 ### What the room writes to D1
 

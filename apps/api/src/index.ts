@@ -42,7 +42,8 @@ import { verifyOwnerId } from './auth/owner-signature';
 import { guestSignatureEnforced, OWNER_SCOPED_SEGMENTS } from './auth/guest-rest';
 import { handleTokens } from './routes/tokens';
 import { handleOauthExchange } from './routes/oauth';
-import { DocumentRoom } from './document-room';
+import { DocumentRoom } from './document-room/document-room';
+import { LegacyDocumentRoom } from './document-room/legacy-document-room';
 import { CORS_HEADERS, forbidden, json, notFound, payloadTooLarge, rateLimited } from './responses';
 import { insertTelemetryEvents } from './db/telemetry';
 import { deleteOldDocumentOpens } from './db/document-opens';
@@ -88,7 +89,7 @@ import { withServerRelease } from './server-release-header';
 import type { Env } from './types';
 import { runSheetExpiry } from './sheet-sweep';
 
-export { DocumentRoom };
+export { DocumentRoom, LegacyDocumentRoom };
 
 // Per-owner write rate limit (security audit item). Returns true
 // when the caller is over the configured cap (wrangler.toml's

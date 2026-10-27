@@ -28,7 +28,11 @@ export type {
 // wire format (purely a server-side capability handle).
 export type Env = {
   DB: D1Database;
-  DOCUMENT_ROOM: DurableObjectNamespace;
+  DOCUMENT_ROOM: DurableObjectNamespace<import('./document-room/document-room').DocumentRoom>;
+  // The key-value rooms from before the content moved (docs/specs/006-document/document-storage-move.md).
+  LEGACY_DOCUMENT_ROOM: DurableObjectNamespace<
+    import('./document-room/legacy-document-room').LegacyDocumentRoom
+  >;
   // The live build id: the deploy's commit, the same one baked into the editor build as
   // NEXT_PUBLIC_BUILD_ID (docs/specs/016-platform/stale-builds.md). Unset (local dev, a self-host that
   // sets neither) leaves it off the server release signal.
