@@ -1,14 +1,21 @@
 name: Deploy Production
 
-# Production deploy. Manual only. Trigger from the Actions tab (or `gh
-# workflow run deploy.yml`) once CI on `main` is green and you're ready to
-# ship.
-# It is intentionally NOT chained to CI: a green build does not deploy on its
-# own.
+# Production deploy. Every merge to `main` ships: when CI passes on a push to
+# `main`, this deploys exactly the commit CI checked. A red CI run deploys
+# nothing. The manual trigger stays for a redeploy (Actions tab, or
+# `gh workflow run deploy.yml --ref main`), which builds the current `main`.
+#
+# Automatic deploys run only in webbertakken/livedoc, which holds docs.nu's
+# secrets; a fork deploys by hand, or widens the guard below once its own
+# secrets are set.
 #
 # The steps live in `deploy-reusable.yml`. This file is only the trigger and
 # the production-shaped inputs.
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -21,10 +28,50 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # CI on `main` runs once per commit and never cancels an older run, so two
+  # quick merges can finish out of order. Only the commit still at the tip of
+  # `main` deploys; an older one stands down, and the newer commit's own CI
+  # run deploys it. A pull request's CI never deploys production.
+  latest:
+    name: Latest on main
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.repository == 'webbertakken/livedoc' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    outputs:
+      current: ${{ steps.tip.outputs.current }}
+    steps:
+      - id: tip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PASSED: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          tip=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
+          if [ "$tip" = "$PASSED" ]; then
+            echo "deploy: $PASSED is the tip of main; deploying"
+            echo current=true >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy: $PASSED passed CI but main is at $tip; its own CI run deploys it"
+            echo current=false >> "$GITHUB_OUTPUT"
+          fi
+
   deploy:
     name: Production
+    needs: latest
+    # A dispatch deploys on demand (the gate above is skipped then); a CI run
+    # deploys only the commit the gate found at the tip of `main`.
+    if: >-
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+      needs.latest.outputs.current == 'true')
     uses: ./.github/workflows/deploy-reusable.yml
     with:
+      # The commit CI passed; empty on a dispatch, which takes the current `main`.
+      ref: ${{ github.event.workflow_run.head_sha || '' }}
       # Empty: the top-level wrangler.toml config, docs.nu's workers and its
       # D1 / R2 / KV.
       wrangler_env: ''
