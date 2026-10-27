@@ -8,75 +8,77 @@ writes are the engine's ([sheets-engine](sheets-engine.md#writes-storets)); this
 
 | Spec term    | Identifier                                                              |
 | ------------ | ----------------------------------------------------------------------- |
-| sheet store  | D1 tables `sheets` + `sheet_cells`; editor `sheet-store-client.ts`      |
+| sheet store  | room tables `sheets` + `sheet_cells`; editor `sheet-store-client.ts`    |
 | sheet        | `Sheet` (engine), wire `SheetDto` (`packages/api-schema/src/sheets.ts`) |
 | cell write   | `SheetWrite` `{ kind: 'cells' }`                                        |
 | layout write | `SheetWrite` `{ kind: 'layout' }`                                       |
 | sheet rev    | `sheets.rev`, `SheetDto.rev`                                            |
 | room op      | `SheetsRoomOp` kind `sheets`; presence `sheet-presence`                 |
 
-## Data and persistence: D1
+## Data and persistence: the room
 
-Migration `apps/api/migrations/0078_sheets.sql`:
+A document's sheets live in its room ([Document storage](../../006-document/blueprints/document-storage.md)), in
+the room schema's tables (`apps/api/src/document-room/document-schema.ts`, `DOCUMENT_SCHEMA_STEPS`). Every module
+below takes `DocumentEnv` and reads and writes `env.DOCUMENT_DB`, the room's SQLite; D1 holds no sheet, cell or
+sheet reference. D1's `sheets`, `sheet_cells` and `sheet_refs` (migrations 0078 and 0079) are content tables the
+move reads and then drops ([Moving content into rooms](../../006-document/blueprints/document-storage-move.md)).
 
 ```sql
-CREATE TABLE sheets (
-  document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-  id TEXT NOT NULL,
-  tab_id TEXT NOT NULL,
-  title TEXT NOT NULL,
-  layout TEXT NOT NULL,                -- JSON SheetLayout
-  rev INTEGER NOT NULL,
-  cell_count INTEGER NOT NULL DEFAULT 0,
-  cell_bytes INTEGER NOT NULL DEFAULT 0,
-  unframed_since INTEGER,              -- renamed unreferenced_since by 0079
-  write_nonce TEXT,                    -- the write that last moved rev: guards that write's own statements
-  created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
-  updated_by TEXT NOT NULL,            -- JSON SheetPerson
+CREATE TABLE IF NOT EXISTS sheets (
+  document_id              TEXT    NOT NULL REFERENCES document (id) ON DELETE CASCADE,
+  id                       TEXT    NOT NULL,
+  tab_id                   TEXT    NOT NULL,
+  title                    TEXT    NOT NULL,
+  layout                   TEXT    NOT NULL,  -- JSON SheetLayout
+  rev                      INTEGER NOT NULL,
+  cell_count               INTEGER NOT NULL DEFAULT 0,
+  cell_bytes               INTEGER NOT NULL DEFAULT 0,
+  unreferenced_since       INTEGER,
+  write_nonce              TEXT,              -- the write that last moved rev: guards that write's own statements
+  created_at               INTEGER NOT NULL,
+  updated_at               INTEGER NOT NULL,
+  updated_by               TEXT    NOT NULL,  -- JSON SheetPerson
+  delete_when_unreferenced INTEGER,           -- 1: deleted with its element; gone once unreferenced
   PRIMARY KEY (document_id, id)
 );
-CREATE INDEX sheets_tab ON sheets(document_id, tab_id);
-CREATE TABLE sheet_cells (
+CREATE INDEX IF NOT EXISTS sheets_tab ON sheets (document_id, tab_id);
+CREATE INDEX IF NOT EXISTS sheets_unreferenced ON sheets (unreferenced_since) WHERE unreferenced_since IS NOT NULL;
+CREATE TABLE IF NOT EXISTS sheet_cells (
   document_id TEXT NOT NULL,
-  sheet_id TEXT NOT NULL,
-  row_id TEXT NOT NULL,
-  col_id TEXT NOT NULL,
-  input TEXT,                          -- JSON CellInput, NULL when the cell holds only a format
-  format TEXT,                         -- JSON CellFormat, NULL when none
+  sheet_id    TEXT NOT NULL,
+  row_id      TEXT NOT NULL,
+  col_id      TEXT NOT NULL,
+  input       TEXT,                           -- JSON CellInput, NULL when the cell holds only a format
+  format      TEXT,                           -- JSON CellFormat, NULL when none
   PRIMARY KEY (document_id, sheet_id, row_id, col_id),
-  FOREIGN KEY (document_id, sheet_id) REFERENCES sheets(document_id, id) ON DELETE CASCADE
+  FOREIGN KEY (document_id, sheet_id) REFERENCES sheets (document_id, id) ON DELETE CASCADE
 );
-```
-
-Migration `apps/api/migrations/0079_sheet_refs.sql` (Deleting a sheet):
-
-```sql
-ALTER TABLE sheets RENAME COLUMN unframed_since TO unreferenced_since;
-ALTER TABLE sheets ADD COLUMN delete_when_unreferenced INTEGER;  -- 1: deleted with its element; gone once unreferenced
-CREATE TABLE sheet_refs (
-  tab_id TEXT NOT NULL REFERENCES tabs(id) ON DELETE CASCADE,
-  sheet_id TEXT NOT NULL,             -- a planSheet.sheetId or planSheet.copyOf on the tab
+CREATE TABLE IF NOT EXISTS sheet_refs (
+  tab_id   TEXT NOT NULL REFERENCES tabs (id) ON DELETE CASCADE,
+  sheet_id TEXT NOT NULL,                     -- a planSheet.sheetId or planSheet.copyOf on the tab
   PRIMARY KEY (tab_id, sheet_id)
 );
-CREATE INDEX sheet_refs_sheet ON sheet_refs(sheet_id);
-CREATE INDEX sheets_unreferenced ON sheets(unreferenced_since) WHERE unreferenced_since IS NOT NULL;
-CREATE TRIGGER sheet_refs_removed AFTER DELETE ON sheet_refs ...  -- settle step 1 then 2, for OLD.sheet_id
-CREATE TRIGGER sheet_refs_added AFTER INSERT ON sheet_refs ...    -- settle step 3, for NEW.sheet_id
+CREATE INDEX IF NOT EXISTS sheet_refs_sheet ON sheet_refs (sheet_id);
+CREATE TRIGGER IF NOT EXISTS sheet_refs_removed AFTER DELETE ON sheet_refs ...  -- settle step 1 then 2, for OLD.sheet_id
+CREATE TRIGGER IF NOT EXISTS sheet_refs_added AFTER INSERT ON sheet_refs ...    -- settle step 3, for NEW.sheet_id
 ```
 
-The triggers find the sheet's document through `document_tabs` for the row's tab, and stamp
-`CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER)` (milliseconds, SQLite's clock).
+A room holds one document, so the triggers find the sheet by `sheet_id` alone, and stamp
+`CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER)` (milliseconds, SQLite's clock). A change to a cell keys
+its sheet's tab in the room's outbox (`tab`, the tab id), so the tab's search text follows its cells.
 
 - Field classification: `title`, `input`, `format` are user content (never logged); `updated_by` is display
   identity (a hashed id, `itemPersonId`); the rest is structural.
-- Hard delete of a document cascades both tables; `documentRemovalStatements` needs nothing new.
+- Purging a document deletes its room's storage, sheets included; nothing in D1 names a sheet.
 - `apps/api/src/db/sheets.ts`: `listSheets(env, docId, { tabId?, ids? })` (sheets then their cells, two queries),
-  `readSheetHead(env, docId, id)` (the row without cells), `readCells(env, docId, sheetId, keys)`,
-  `insertSheetStatements`, `cellWriteStatements(env, docId, sheetId, applied)`, `layoutWriteStatement(..., rev)`,
-  `deleteSheetStatement`, `copySheetsStatements(env, sourceId, newId, onlyTabIds?)`, `sheetCounts(env, docId)`;
-  re-exported from `db/index.ts`. Row ↔ `Sheet` in the same file (`sheetFromRows`).
+  `listSheetHeads(env, docId, tabId?)`, `readSheetHead(env, docId, id)` (the row without cells),
+  `readCells(env, docId, sheetId, keys)`, `insertSheetStatements(env, docId, sheet, now)`,
+  `cellWriteStatements(env, docId, sheetId, nonce, cells)`, `headWriteStatement(env, docId, sheetId, fromRev, nonce,
+now, by, { layout?, title? })`, `deleteSheetStatement`, `copySheetStatements(env, docId, fromId, to, now)` (one
+  sheet, the copy route), `documentSheetTotals(env, docId)`; re-exported from `db/index.ts`. A document's copy carries
+  its sheets through the room's `exportCopy` and `importCopy` (Interfaces and contracts, below). Row ↔ `Sheet` in the same file (`headFromRow`, `headToJson`).
 - **Cell writes by `json_each`**: the changed cells go as one JSON parameter per statement, so a 5,000-cell
-  write is a handful of statements whatever D1's 100-parameter cap. From the engine's landed write the api builds
+  write is a handful of statements whatever the 100-parameter cap. From the engine's landed write the api builds
   `sets` (cells whose input is set; `{ r, c, i }`), `fmts` (format patches, `{ r, c, fp }` with `null` keys
   clearing, or `fp: null` to clear all) and `clears` (inputs cleared; `{ r, c }`):
 
@@ -101,7 +103,7 @@ The triggers find the sheet's document through `document_tabs` for the row's tab
 
   Rows or columns deleted remove their cells with `DELETE ... AND row_id IN (SELECT value FROM json_each(?3))`.
 
-- Every write is one D1 `batch`: `UPDATE sheets SET rev = rev + 1, write_nonce = ?, updated_at = ?, updated_by = ?
+- Every write is one room `batch` (`env.DOCUMENT_DB`, one transaction): `UPDATE sheets SET rev = rev + 1, write_nonce = ?, updated_at = ?, updated_by = ?
 [, layout = ?] [, title = ?] WHERE document_id = ? AND id = ? AND rev = ? RETURNING rev`, then the cell statements,
   then the
   recount `UPDATE sheets SET cell_count = (SELECT COUNT(*) ...), cell_bytes = (SELECT COALESCE(SUM(length(input)) +
@@ -145,7 +147,11 @@ string; restore?: true }`. `copyOf` copies another sheet of the document server-
   `sheet-route-kit.ts` (`sheetCaller`, `rejected`, `relaySheet`, `writer` reuse from item-route-kit), dispatched from
   `document-subresource-routes.ts` beside `handleItemRoutes`.
 - `POST /documents` create body accepts `sheets?: SheetCreate[]` (sync to cloud, duplicate), read before anything is
-  written (`readSeedSheets`) and seeded after the tabs (`seedSheets`), in batches.
+  written (`readSeedSheets`, in the worker's `document-collection-route.ts`) and seeded after the tabs
+  (`seedSheets`), in batches, inside the room's `create` (`document-create.ts`).
+- `POST /documents/:id/copy` (`copyDocument`): the source room's `exportDocumentCopy` reads the copied tabs' sheets,
+  their cells and their `sheet_refs` rows; the target room's `importDocumentCopy` inserts them, each sheet under its
+  tab's new id, the references last so the triggers find the sheets referenced (`document-content.ts`).
 
 ## Live: room op
 
@@ -262,14 +268,14 @@ REFERENCED`.
        Each is bounded by the document's sheets (`DOCUMENT_SHEETS_MAX`, the `sheets` primary key prefix), and is one
        index probe that matches nothing for a document without sheets.
   - `sheetRefCopyStatement(env, fromTabId, toTabId)`: `INSERT INTO sheet_refs SELECT ?2, sheet_id FROM sheet_refs
-WHERE tab_id = ?1` (a copied document's tabs, without a parse).
+WHERE tab_id = ?1`. No caller: a copy now carries its references as rows (below).
 - **Where it runs**: `tabWriteStatements` (every editor save and every changeset) appends
   `sheetRefReplaceStatements` after the tabs and `document_tabs` upserts (the FK and the triggers read them). The
   settling runs in the triggers, per reference added or removed, so a write whose references are unchanged settles
   nothing. `seedTabs`
-  appends `sheetRefReplaceStatements` per tab (its sheets are seeded after). The document copy appends
-  `sheetRefCopyStatement` per tab. `deleteTabRow` runs `sheetSettleStatements` after unlinking: the link the triggers
-  find the document by is gone first (the tab's rows go by the FK cascade, or stop counting through the join). `swapTabData` changes no element, so it
+  appends `sheetRefReplaceStatements` per tab (its sheets are seeded after). The document copy
+  (`importDocumentCopy`) inserts the exported `sheet_refs` rows under the tabs' new ids, after the sheets.
+  `deleteTabRow` runs `sheetSettleStatements` after unlinking: the link goes first and the tab's references follow by the FK cascade, so it settles the whole document. `swapTabData` changes no element, so it
   adds nothing. A create stores `unreferenced_since = CASE WHEN REFERENCED THEN NULL ELSE now END`, so a sheet whose
   element never reaches the api expires too.
 - **Delete when unreferenced**: `DELETE /sheets/:sheetId?whenUnreferenced=true` runs one batch: `UPDATE sheets SET
@@ -280,12 +286,16 @@ id = ? AND NOT REFERENCED RETURNING id`. A row returned relays `{ deleted: true 
 - **Restore**: `SheetCreate.restore?: true` (the editor's undo). When the id is stored on the same tab, the create
   sets `delete_when_unreferenced = NULL` and answers 200 with the stored sheet; otherwise it creates as usual. A
   restore takes up to `SHEET_CELLS_MAX` cells in one request (as a seed does).
-- **Expiry** (`apps/api/src/sheet-sweep.ts` `runSheetExpiry`, from the daily `scheduled` handler): repeatedly reads
+- **Expiry** is the room's upkeep ([Document storage blueprint](../../006-document/blueprints/document-storage.md),
+  "Upkeep"), over the room's own SQLite. **Not built yet** (plan 0006, phase B5): the daily D1 cron that ran it was
+  removed with the move, so until the upkeep lands no sheet expires; a sheet stays marked `unreferenced_since` and
+  is deleted on the first upkeep run past its 30 days. `runSheetExpiry(env: DocumentEnv, now)`
+  (`apps/api/src/sheet-sweep.ts`) is the upkeep's step, unscheduled until then: it repeatedly reads
   `SELECT document_id, id, cell_count FROM sheets WHERE unreferenced_since < ?cutoff ORDER BY unreferenced_since
 LIMIT SHEET_EXPIRY_BATCH` (the partial index), deletes them in one batch (cells by cascade), taking sheets in
   order while the batch holds at most `SHEET_EXPIRY_BATCH_CELLS` cells (always at least one), and stops when none are
-  left or the cells deleted reach `SHEET_EXPIRY_CELLS_MAX`; the rest waits a day. Cost follows what expired, not
-  how many tabs or sheets exist. Logs `[sheets] sheets.expired { sheets, cells, more }`.
+  left or the cells deleted reach `SHEET_EXPIRY_CELLS_MAX`; the rest waits for the next upkeep. Cost follows what
+  expired, not how many tabs or sheets exist. Logs `[sheets] sheets.expired { sheets, cells, more }`.
 - **Editor**:
   - `apps/live/lib/sheet-references.ts` `sheetsDeletedWith(tabs, activeTabId, targetIds)`: the sheet ids of the
     targets' Sheet elements (not a copy not yet made: it has no sheet) that no element outside the targets, on any
@@ -359,6 +369,7 @@ LIMIT SHEET_EXPIRY_BATCH` (the partial index), deletes them in one batch (cells 
 | Restored title now taken on the tab                            | `uniqueSheetTitle` (the next free title) before the restore is sent                                                                           |
 | Delete before any Sheet has drawn                              | No dialog; the sheet waits as a Cut's                                                                                                         |
 | A sheet whose element never reached the api                    | Noted at create (`sheetNoteUnreferencedStatement`), so it expires                                                                             |
+| Unreferenced past 30 days while the upkeep is unbuilt          | Kept: nothing expires until plan 0006 phase B5 lands the room's upkeep                                                                        |
 | Agent change past a sheet or document cap                      | `capsRefusal` before any part is sent: the cap's code, "none of it was written"                                                               |
 | Agent change whose later part the api refuses                  | The landed parts kept and reported as a `partly` line, then the refusal                                                                       |
 | add_sheet onto a tab not in Plan                               | `tab_not_plan` after one tab read (`tabTakesPlanOnly`), before any sheet is made; the read also tints a design                                |
@@ -388,7 +399,8 @@ LIMIT SHEET_EXPIRY_BATCH` (the partial index), deletes them in one batch (cells 
 
 - GET of a full sheet: 50,000 cells × typical 40 bytes ≈ 2 MB JSON (worst 4 MB by the bytes cap), one per sheet on
   the tab, only when a tab with a sheet opens. The tab's sheets come in one request.
-- A write is one D1 batch of at most 6 statements, independent of its cell count.
+- A write is one room batch of at most 6 statements, independent of its cell count, with no D1 round trip; the
+  listing hears of it through the outbox (the cell triggers key the tab).
 - Every statement that names cells by key matches them as `(row_id, col_id)` pairs (`cellsNamedBy`), so the primary
   key seeks each named cell; matched on the joined `row_id || ':' || col_id`, each read every cell of the sheet
   (up to `SHEET_CELLS_MAX`). `apps/api/src/db/sheets-plans.test.ts` pins the plan.
@@ -397,7 +409,7 @@ LIMIT SHEET_EXPIRY_BATCH` (the partial index), deletes them in one batch (cells 
 - Deleting a sheet adds one statement to every tab write (two when the tab has a Sheet): measured on the test
   harness's SQLite, 0.055 ms a write with no sheets and 0.066 ms at `DOCUMENT_SHEETS_MAX`, flat in the number of
   sheets; the settling triggers run only for references added or removed. It rides the write's existing batch (no
-  extra D1 round trip). The daily expiry reads only expired rows by the partial index.
+  extra round trip). The upkeep's expiry, once built, reads only expired rows by the partial index.
 
 ## Observability
 
@@ -417,7 +429,7 @@ inputs, formats or titles.
 | Template starts: build, materialise, create, changeset, editor  | `packages/sheets/src/template-starts.test.ts`, `packages/templates/src/template-sheets.test.ts`, `apps/api/src/routes/sheet-routes.test.ts`, `apps/api/src/changesets/submit.test.ts`, `apps/live/components/sheets/useSheetModel.test.tsx`   |
 | Reference index: sheetId and copyOf, marks, clears, settles     | `apps/api/src/db/sheet-refs.test.ts`                                                                                                                                                                                                          |
 | Delete when unreferenced, now or on the last reference; restore | `apps/api/src/routes/sheet-routes.test.ts` ("deleting with the element")                                                                                                                                                                      |
-| Expiry deletes past 30 days, bounded by cells                   | `apps/api/src/sheet-sweep.test.ts`                                                                                                                                                                                                            |
+| Expiry deletes past 30 days, bounded by cells                   | `apps/api/src/sheet-sweep.test.ts` (`runSheetExpiry` alone; its upkeep is unbuilt)                                                                                                                                                            |
 | Which sheets a delete takes (duplicates, copies, other tabs)    | `apps/live/lib/sheet-references.test.ts`                                                                                                                                                                                                      |
 | Confirm, cancel, Cut skips, release, undo restores              | `apps/live/hooks/sheets/useSheetDeleteGuard.test.tsx`, `hooks/canvas/useElementSelectionActions.test.ts`, `components/sheets/sheet-store-client.test.ts`, `components/sheets/useSheetModel.test.tsx`, `hooks/sheets/useSheetsBridge.test.tsx` |
 | Offline restore keeps a stored sheet; delete query              | `apps/live/lib/offline/offline-sheets.test.ts`, `lib/api/sheets.test.ts`                                                                                                                                                                      |
@@ -433,15 +445,15 @@ inputs, formats or titles.
 
 ## Constants and configuration
 
-| Constant                    | Value  | Provenance / safe range                                   |
-| --------------------------- | ------ | --------------------------------------------------------- |
-| `SHEET_WRITE_RETRIES`       | 3      | As items                                                  |
-| `SHEET_REFETCH_DEBOUNCE_MS` | 400    | As items                                                  |
-| `SHEET_RELAY_BYTES_MAX`     | 262144 | Default (D5); well under a WebSocket frame's 1 MB         |
-| `SHEET_UNFRAMED_DAYS`       | 30     | Spec                                                      |
-| `SHEET_EXPIRY_BATCH`        | 25     | Default (D6); expired sheets read per query               |
-| `SHEET_EXPIRY_BATCH_CELLS`  | 100000 | Default (D6); cells one D1 batch deletes, 2 full sheets   |
-| `SHEET_EXPIRY_CELLS_MAX`    | 500000 | Default (D6); cells one daily run deletes, 10 full sheets |
-| `SHEET_IDS_PER_GET_MAX`     | 50     | Default (D7)                                              |
-| `AGENT_READ_CELLS_MAX`      | 5000   | Default (D8); a read an agent can hold                    |
-| `SHEET_READ_CHARS_MAX`      | 100000 | Default; about 25,000 tokens of cells a read answers      |
+| Constant                    | Value  | Provenance / safe range                                    |
+| --------------------------- | ------ | ---------------------------------------------------------- |
+| `SHEET_WRITE_RETRIES`       | 3      | As items                                                   |
+| `SHEET_REFETCH_DEBOUNCE_MS` | 400    | As items                                                   |
+| `SHEET_RELAY_BYTES_MAX`     | 262144 | Default (D5); well under a WebSocket frame's 1 MB          |
+| `SHEET_UNFRAMED_DAYS`       | 30     | Spec                                                       |
+| `SHEET_EXPIRY_BATCH`        | 25     | Default (D6); expired sheets read per query                |
+| `SHEET_EXPIRY_BATCH_CELLS`  | 100000 | Default (D6); cells one room batch deletes, 2 full sheets  |
+| `SHEET_EXPIRY_CELLS_MAX`    | 500000 | Default (D6); cells one upkeep run deletes, 10 full sheets |
+| `SHEET_IDS_PER_GET_MAX`     | 50     | Default (D7)                                               |
+| `AGENT_READ_CELLS_MAX`      | 5000   | Default (D8); a read an agent can hold                     |
+| `SHEET_READ_CHARS_MAX`      | 100000 | Default; about 25,000 tokens of cells a read answers       |
