@@ -671,7 +671,9 @@ and the dialog stays as the one complete, browsable index of them.
   switches in the data model). The panel's other rows nest beneath the
   switch (`parent`) and are offered only while it is on, the way power
   user mode's rows follow that mode: a setting for a panel you have
-  turned off has nothing to act on. The Map's switch keeps its stored key
+  turned off has nothing to act on. A switch that only summarises its rows
+  (`summarisesChildren`: **Show Me on Every Element**) gates nothing; its rows
+  stay offered while it is off. The Map's switch keeps its stored key
   (`showMinimap`) and its telemetry tokens, only its label changed. A parent's sub-categories follow it directly in the catalogue. In the
   list the parent is an **accordion**: its sub-categories sit indented beneath
   it only while it is expanded, so they do not take up the list all the time.

@@ -195,6 +195,9 @@ type RowBase = {
   // directly beneath that row, indented, in a group named after it
   // (docs/specs/007-editor/power-user-mode.md#in-settings).
   parent?: string;
+  // A switch that speaks for its nested rows (on while any is on) rather than enabling them: they stay offered
+  // while it is off, each one a way to turn its own setting on (Show Me on Every Element).
+  summarisesChildren?: boolean;
   // A setting with no effect on a phone-sized viewport, holding the note that
   // says so there. The row stays visible (so Settings reads the same on every
   // device) but greyed and inert on a phone, and the stored value is left
@@ -476,6 +479,7 @@ function elementToursSwitch(
 ): SettingsToggleRowSpec {
   return {
     ...tourSwitch('elementToursSeen', row, ELEMENT_TOURS_SECTION),
+    summarisesChildren: true,
     read: (p) => ELEMENT_TOUR_KINDS.some((k) => !elementTourSeen(p, k)),
     write: (p, v) => (v ? offerEveryElementTour(p) : answerEveryElementTour(p)),
   };
@@ -1847,7 +1851,8 @@ function hiddenInWorkbench(category: SettingsCategorySpec): boolean {
 
 // A row nested under a switch (`parent`) is offered only while that switch is
 // on, when the live preferences are known. One rule for every nested row, so
-// a new panel's rows follow its Enable switch with no extra wiring.
+// a new panel's rows follow its Enable switch with no extra wiring; a switch
+// that only summarises its rows (`summarisesChildren`) gates nothing.
 function parentSwitchOn(
   category: SettingsCategorySpec,
   row: SettingsRowSpec,
@@ -1855,7 +1860,9 @@ function parentSwitchOn(
 ): boolean {
   if (!row.parent || !preferences) return true;
   const parent = category.rows.find((r) => r.key === row.parent);
-  return parent?.kind !== 'toggle' || parent.read(preferences);
+  return (
+    parent?.kind !== 'toggle' || parent.summarisesChildren === true || parent.read(preferences)
+  );
 }
 
 // A category's name as a path from the top level: "Panels › Layers" for a

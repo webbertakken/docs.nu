@@ -83,7 +83,9 @@ the next time you select that element, a small Show Me toolbar beside it offers 
 **Show Me on Every Element**, one switch over them all ("Every element’s Show Me at once": on while any kind is opted
 in and still offered; on opts every kind in and forgets every answer, off answers every kind), with one switch per
 toured kind nested beneath it, named for the element alone: **Sankey Diagram** ("The next time you select a Sankey
-diagram.", linking the Sankey Diagram article). Every switch reads off until the person turns it on. On means "offer
+diagram.", linking the Sankey Diagram article). Every switch reads off until the person turns it on. The switch over
+them all only summarises its rows (`summarisesChildren`), so, unlike an enable switch, it never hides them: each
+element's switch is offered, and found by the Settings search, while it is off. On means "offer
 it": switching one on opts its kind in and forgets its answer, so the offer shows the next time such an element is
 selected; off answers it. The accordion opens on its own when Settings is opened on one of its rows (a search result) or
 on the section. Power user mode's readout lists the switch over them all as **Show Me on Every Element**.

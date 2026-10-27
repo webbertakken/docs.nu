@@ -419,6 +419,19 @@ describe('settings catalogue', () => {
     }
   });
 
+  // docs/specs/007-editor/element-tours.md "Settings": each element's switch is an opt-in route of its own.
+  it('offers each element tour switch while Show Me on Every Element reads off', () => {
+    const ctx = { emailEnabled: true, signedIn: true, preferences: {} };
+    const tours = visibleCategories(false, ctx).find((c) => c.id === 'tours')!;
+    const keys = tours.rows.map((r) => r.key);
+    expect(keys).toContain('elementToursSeen');
+    expect(keys).toContain('elementTour-flowchart');
+    // An enable switch still gates its rows: the Layers panel off leaves its rows out.
+    const panels = visibleCategories(false, { ...ctx, preferences: { layersPanelEnabled: false } });
+    const layers = panels.find((c) => c.id === 'layers');
+    expect(layers?.rows.filter((r) => r.parent).length ?? 0).toBe(0);
+  });
+
   it('hides the AI category until the worker advertises the capability', () => {
     const ctx = { emailEnabled: true, signedIn: true };
     expect(visibleCategories(false, ctx).map((c) => c.id)).not.toContain('ai');
