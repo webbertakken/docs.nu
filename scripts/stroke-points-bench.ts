@@ -24,8 +24,8 @@ const POINTS = 66_000;
 const BOARD = { width: 12_000, height: 8_000 };
 const VIEWPORT = { x: 4_000, y: 3_000, width: 1_920, height: 1_080 };
 const RUNS = 15;
-// Cloudflare D1's row cap: one tab is one row.
-const D1_MAX_ROW_BYTES = 2_000_000;
+// A document room's SQLite row cap: one tab is one row.
+const SQLITE_ROW_MAX_BYTES = 2_000_000;
 
 // Deterministic pseudo-random numbers (mulberry32), so every run draws the same board.
 function random(seed: number): () => number {
@@ -188,7 +188,7 @@ function drawPacked(text: string, visibleOnly: boolean): number {
 }
 
 const kb = (bytes: number) => `${(bytes / 1024).toFixed(0)} KB`;
-const share = (bytes: number) => `${((bytes / D1_MAX_ROW_BYTES) * 100).toFixed(0)}%`;
+const share = (bytes: number) => `${((bytes / SQLITE_ROW_MAX_BYTES) * 100).toFixed(0)}%`;
 const ms = (n: number) => `${n.toFixed(1)} ms`;
 
 function main() {

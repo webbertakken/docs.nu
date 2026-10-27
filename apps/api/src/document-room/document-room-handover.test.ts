@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DOCUMENT_ID_HEADER } from '../room-client';
+import { DOCUMENT_ID_HEADER } from './document-client';
 import { DocumentRoom } from './document-room';
+import { roomSqlStorage } from '../test-document-room';
 import { LEGACY_HANDOVER_KEY } from './legacy-handover';
+import { RoomIdMismatchError } from './room-content';
 
 // The first request a SQLite room answers takes over its legacy room's state
 // (docs/specs/006-document/blueprints/document-storage-move.md "Room state handover").
@@ -10,6 +12,7 @@ function makeState() {
   const store = new Map<string, unknown>();
   let gate: Promise<unknown> = Promise.resolve();
   const waits: Promise<unknown>[] = [];
+  const sqlite = roomSqlStorage();
   const state = {
     store,
     waits,
@@ -30,6 +33,8 @@ function makeState() {
       setAlarm: async () => {},
       deleteAlarm: async () => {},
       deleteAll: async () => store.clear(),
+      sql: sqlite.sql,
+      transactionSync: sqlite.transactionSync,
     },
     blockConcurrencyWhile: (fn: () => Promise<unknown>) => {
       gate = gate.then(fn);
@@ -123,5 +128,53 @@ describe('the room state handover', () => {
     expect(legacy.asked).toBe(0);
     await ask();
     expect(legacy.asked).toBe(1);
+  });
+
+  it('takes the legacy state before any RPC, keyed by the document the RPC names', async () => {
+    const { r, state, legacy } = room([['order-state', { epoch: 'rpc-epoch', seq: 3 }]]);
+    await state.gate;
+    await r.hasTab('doc-1', 't1');
+    expect(legacy.named).toEqual(['doc-1']);
+    expect(r.epoch).toBe('rpc-epoch');
+    expect(state.store.get(LEGACY_HANDOVER_KEY)).toMatchObject({ keys: 1 });
+    await r.outline('doc-1');
+    expect(legacy.asked).toBe(1);
+  });
+
+  it('refuses an RPC when the handover fails, and takes it on the next', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { r, state, legacy } = room([['order-state', { epoch: 'e', seq: 1 }]], {
+      failFirst: true,
+    });
+    await state.gate;
+    await expect(r.hasTab('doc-1', 't1')).rejects.toThrow('room_unavailable');
+    expect(error).toHaveBeenCalledWith(
+      '[legacy-handover] failed id=doc-1 error=legacy unreachable',
+    );
+    await expect(r.hasTab('doc-1', 't1')).resolves.toBe(false);
+    expect(legacy.asked).toBe(2);
+    error.mockRestore();
+  });
+
+  it('checks the fetch header and the RPC against one bound id', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { r, legacy, ask } = room([]);
+    await ask();
+    await expect(r.hasTab('doc-2', 't1')).rejects.toBeInstanceOf(RoomIdMismatchError);
+    const res = await ask({ [DOCUMENT_ID_HEADER]: 'doc-3' });
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ error: 'room_id_mismatch' });
+    expect(legacy.named).toEqual(['doc-1']);
+    error.mockRestore();
+  });
+
+  it('binds before it hands over, so a wrong id never takes another legacy room', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { r, state, legacy } = room([['order-state', { epoch: 'e', seq: 1 }]]);
+    await state.gate;
+    await r.hasTab('doc-1', 't1');
+    await expect(r.outline('doc-2')).rejects.toBeInstanceOf(RoomIdMismatchError);
+    expect(legacy.named).toEqual(['doc-1']);
+    error.mockRestore();
   });
 });

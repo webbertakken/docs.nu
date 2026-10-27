@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { DOCUMENT_ID_HEADER } from '../room-client';
+import { DOCUMENT_ID_HEADER } from './document-client';
 import { json } from '../responses';
 import { takeLegacyState } from './legacy-handover';
 import {
@@ -45,7 +45,7 @@ import type { FacilitatorState } from '../facilitator';
 import { RoomFacilitator } from '../room-facilitator';
 
 import { writeQaAction, type QaWriteRequest } from '../qa-board-write';
-import { RoomContent } from './room-content';
+import { RoomContent, RoomIdMismatchError, RoomNotReadyError } from './room-content';
 import type { Item } from '@livedoc/items';
 import type { ContentSummary } from '../db/content-summary';
 import type { DocumentCopy, DocumentOutline } from './document-content';
@@ -206,7 +206,10 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     super(state, env);
     this.state = state;
     this.ledger = new RoomLedgerStore(state.storage);
-    this.content = new RoomContent(state, env, this, () => this.armAlarm());
+    this.content = new RoomContent(state, env, this, {
+      armAlarm: () => this.armAlarm(),
+      prepare: (documentId) => this.prepareForRpc(documentId),
+    });
     this.participantWrites = new RoomParticipantWrites({
       env: this.content.env,
       enqueue: (step) => this.queueTabWrite(step),
@@ -280,21 +283,49 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
 
   // The key-value room this document had before keeps its order state, ledger, poll, baton, selections and agent
   // presence; the first request after the class change takes them over before it is answered
-  // (docs/specs/006-document/document-storage-move.md "Handing over room state"). Null to carry on, or the
-  // answer when the handover failed.
+  // (docs/specs/006-document/document-storage-move.md "Handing over room state"). A fetch names its document in
+  // X-Document-Id; an RPC names it as its first argument (RoomContent.rpc runs this first). Both bind the room to
+  // that id before anything is taken. Null to carry on, or the answer when the room cannot serve this document.
   private async ensureHandedOver(request: Request): Promise<Response | null> {
-    if (this.handedOver) return null;
-    const legacyRooms = this.env?.LEGACY_DOCUMENT_ROOM;
-    if (!legacyRooms) {
-      this.handedOver = true;
-      return null;
-    }
     const documentId = request.headers.get(DOCUMENT_ID_HEADER);
+    if (documentId) {
+      try {
+        this.content.bind(documentId);
+      } catch (error) {
+        if (error instanceof RoomIdMismatchError) {
+          return json({ error: 'room_id_mismatch' }, { status: 409 });
+        }
+        throw error;
+      }
+    }
+    if (this.handedOver) return null;
     if (!documentId) {
-      if (!this.missingIdLogged)
+      if (this.env?.LEGACY_DOCUMENT_ROOM && !this.missingIdLogged)
         console.warn('[legacy-handover] no document id', new URL(request.url).pathname);
       this.missingIdLogged = true;
       return null;
+    }
+    const failed = await this.handOver(documentId);
+    if (failed) {
+      return json({ error: 'room_unavailable' }, { status: 503, headers: { 'Retry-After': '5' } });
+    }
+    return null;
+  }
+
+  // RoomContent's gate before every RPC, after it bound the room to `documentId`.
+  private async prepareForRpc(documentId: string): Promise<void> {
+    if (this.handedOver) return;
+    const failed = await this.handOver(documentId);
+    if (failed) throw new RoomNotReadyError(documentId, 'handover');
+  }
+
+  // Take the legacy room's state once; true when it failed (logged), so the caller refuses and the next request
+  // tries again.
+  private async handOver(documentId: string): Promise<boolean> {
+    const legacyRooms = this.env?.LEGACY_DOCUMENT_ROOM;
+    if (!legacyRooms) {
+      this.handedOver = true;
+      return false;
     }
     const legacy = legacyRooms.get(legacyRooms.idFromName(documentId));
     let outcome: { taken: number | null } | { error: unknown } = { taken: null };
@@ -314,7 +345,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     if ('error' in result) {
       const name = result.error instanceof Error ? result.error.message : String(result.error);
       console.error(`[legacy-handover] failed id=${documentId} error=${name}`);
-      return json({ error: 'room_unavailable' }, { status: 503, headers: { 'Retry-After': '5' } });
+      return true;
     }
     if (result.taken !== null) {
       console.log(`[legacy-handover] took id=${documentId} keys=${result.taken}`);
@@ -324,7 +355,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         }),
       );
     }
-    return null;
+    return false;
   }
 
   // Record the seq we just handed out. Not awaited: the DO output gate holds
@@ -1089,19 +1120,19 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   // ---------- RPC: what the worker asks of this document (document-client.ts, document-rpc.ts) ----------
 
   async route(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
-    return this.content.rpc(documentId).route(documentId, request, identity);
+    return (await this.content.rpc(documentId)).route(documentId, request, identity);
   }
 
   async create(documentId: string, seed: DocumentSeed): Promise<CreateOutcome> {
-    return this.content.rpc(documentId).create(documentId, seed);
+    return (await this.content.rpc(documentId)).create(documentId, seed);
   }
 
   async outline(documentId: string): Promise<DocumentOutline> {
-    return this.content.rpc(documentId).outline(documentId);
+    return (await this.content.rpc(documentId)).outline(documentId);
   }
 
   async hasTab(documentId: string, tabId: string): Promise<boolean> {
-    return this.content.rpc(documentId).hasTab(documentId, tabId);
+    return (await this.content.rpc(documentId)).hasTab(documentId, tabId);
   }
 
   async placesImage(
@@ -1109,11 +1140,11 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     imageId: string,
     onlyTabId: string | null,
   ): Promise<boolean> {
-    return this.content.rpc(documentId).placesImage(documentId, imageId, onlyTabId);
+    return (await this.content.rpc(documentId)).placesImage(documentId, imageId, onlyTabId);
   }
 
   async image(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
-    return this.content.rpc(documentId).image(documentId, request, identity);
+    return (await this.content.rpc(documentId)).image(documentId, request, identity);
   }
 
   async exportCopy(
@@ -1121,15 +1152,15 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     onlyTabId: string | null,
     redactAuthorsFor: string | null,
   ): Promise<DocumentCopy | null> {
-    return this.content.rpc(documentId).exportCopy(documentId, onlyTabId, redactAuthorsFor);
+    return (await this.content.rpc(documentId)).exportCopy(documentId, onlyTabId, redactAuthorsFor);
   }
 
   async importCopy(documentId: string, copy: DocumentCopy): Promise<ContentSummary> {
-    return this.content.rpc(documentId).importCopy(documentId, copy);
+    return (await this.content.rpc(documentId)).importCopy(documentId, copy);
   }
 
   async item(documentId: string, itemId: string): Promise<Item | null> {
-    return this.content.rpc(documentId).item(documentId, itemId);
+    return (await this.content.rpc(documentId)).item(documentId, itemId);
   }
 
   async respondToForm(
@@ -1137,6 +1168,6 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     request: Request,
     identity: RouteIdentity,
   ): Promise<Response> {
-    return this.content.rpc(documentId).respondToForm(documentId, request, identity);
+    return (await this.content.rpc(documentId)).respondToForm(documentId, request, identity);
   }
 }

@@ -1,4 +1,4 @@
-import { documentRoom } from '../room-client';
+import { documentRoom } from '../document-room/document-client';
 // POST /api/documents/<id>/tabs/<tabId>/qa — one action on a Q&A board
 // (docs/specs/012-collaboration/qa-board.md).
 //

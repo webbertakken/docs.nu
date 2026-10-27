@@ -27,14 +27,30 @@ export class RoomIdMismatchError extends Error {
   }
 }
 
+// A room that cannot serve its document yet (its legacy handover or its move failed); the worker answers it as
+// 503 `room_unavailable`, and the next call tries again.
+export class RoomNotReadyError extends Error {
+  constructor(documentId: string, step: 'handover' | 'move') {
+    super(`room_unavailable id=${documentId} step=${step}`);
+    this.name = 'RoomNotReadyError';
+  }
+}
+
 type RoomState = Pick<DurableObjectState, 'storage' | 'id' | 'waitUntil'>;
+
+// What the room hands its content half: the one alarm, and the gate every RPC passes before it is answered (the
+// legacy handover, then the move), after the room is bound to the RPC's document.
+export type RoomContentHooks = {
+  armAlarm: () => void;
+  prepare: (documentId: string) => Promise<void>;
+};
 
 export class RoomContent {
   // The env the document's handlers run with here; undefined for a unit test's room built without bindings or
   // without SQLite storage.
   readonly env: DocumentEnv | undefined;
   private readonly state: RoomState;
-  private readonly armAlarm: () => void;
+  private readonly hooks: RoomContentHooks;
   private documentId: string | null = null;
   private schemaReady: boolean;
   // Whether this instance has run the schema steps (a wake after a release may find an older version).
@@ -43,9 +59,9 @@ export class RoomContent {
   private lastFlushAt = 0;
   private draining = false;
 
-  constructor(state: RoomState, env: Env | undefined, room: DocumentRoom, armAlarm: () => void) {
+  constructor(state: RoomState, env: Env | undefined, room: DocumentRoom, hooks: RoomContentHooks) {
     this.state = state;
-    this.armAlarm = armAlarm;
+    this.hooks = hooks;
     const sql = state.storage.sql as SqlStorage | undefined;
     this.schemaReady = sql ? hasDocumentSchema((q) => sql.exec(q)) : false;
     if (!env || !sql) {
@@ -82,9 +98,11 @@ export class RoomContent {
     }
   }
 
-  // The RPC surface, bound to `documentId`.
-  rpc(documentId: string): DocumentRoomRpc {
+  // The RPC surface, bound to `documentId`, once the room is ready to serve it: the only way in for an RPC, so none
+  // skips the gate.
+  async rpc(documentId: string): Promise<DocumentRoomRpc> {
     this.bind(documentId);
+    await this.hooks.prepare(documentId);
     if (!this.env) throw new Error('room has no content store');
     return documentRpc(this.env, (p) => this.state.waitUntil(p));
   }
@@ -143,7 +161,7 @@ export class RoomContent {
   private noteWrite(): void {
     if (this.draining || this.flushAt !== null || !this.schemaReady || !this.owesD1()) return;
     this.flushAt = nextFlushAt(Date.now(), this.lastFlushAt);
-    this.armAlarm();
+    this.hooks.armAlarm();
   }
 }
 

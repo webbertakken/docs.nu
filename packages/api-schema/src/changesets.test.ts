@@ -56,7 +56,7 @@ describe('the tab ETag', () => {
 });
 
 describe('limits', () => {
-  it('keeps every part inside one D1 row and the relay inside the room frame', () => {
+  it('keeps every part inside one room SQLite row and the relay inside the room frame', () => {
     expect(CHANGESET_PART_MAX_BYTES).toBe(MAX_TAB_BYTES);
     expect(CHANGESET_RELAY_MAX_BYTES).toBeLessThan(256 * 1024);
   });
