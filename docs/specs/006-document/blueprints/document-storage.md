@@ -315,10 +315,10 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 | `ROOM_PURGE_RETRY_MS`       | 3,600,000  | upstream index purge ("once an hour")        | 600,000 and up       |
 | `UPKEEP_INTERVAL_MS`        | 86,400,000 | the daily crons it replaces                  | 3,600,000 and up     |
 | `SQLITE_ROW_MAX_BYTES`      | 2,000,000  | Durable Object SQLite limit                  | fixed                |
-| `SQLITE_ROW_HEADROOM_BYTES` | 8,192      | today's `D1_ROW_HEADROOM_BYTES`              | fixed                |
+| `SQLITE_ROW_HEADROOM_BYTES` | 8,192      | the tab row's other columns and header       | fixed                |
 
-`SQLITE_ROW_MAX_BYTES` and `SQLITE_ROW_HEADROOM_BYTES` replace `D1_MAX_ROW_BYTES` and `D1_ROW_HEADROOM_BYTES` in
-`@livedoc/api-schema`; `MAX_TAB_BYTES` keeps its value.
+`SQLITE_ROW_MAX_BYTES` and `SQLITE_ROW_HEADROOM_BYTES` live in `@livedoc/api-schema` (`tab-size.ts`); `MAX_TAB_BYTES`
+is their difference, 1,991,808.
 `wrangler.toml`: the class migration is the move blueprint's; no new binding here.
 
 ## Defaults ledger
