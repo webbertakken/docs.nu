@@ -124,8 +124,6 @@ export type ContentSummary = {
   the shared list); `docStatsSql(idSql)` answers `$.stats`. `rowToSummary` maps the count through `isEmptyCount`,
   so an unknown summary is never `empty`. The empty clean-up reads `$.hasContent`, and image retention pauses on any
   `content_summary IS NULL`.
-- `readContentSummary(raw)` parses a whole D1 value, answering `null` (warned `[content-summary] unreadable`) for
-  absent or unreadable; no production read needs the whole value, so its callers are its tests.
 
 ### Routing
 
@@ -367,7 +365,6 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 | `[documents] create discarded { documentId, why }`                      | a create purged again   |
 | `[documents] create seed refused { documentId, status }`                | a seed store refused    |
 | `[documents] copy import failed { sourceId, newId, error }`             | a copy's import threw   |
-| `[content-summary] unreadable <value>`                                  | a summary not readable  |
 | `[room-upkeep] id=<id> changesets=<n> sheets=<m>`                       | each upkeep run (B5)    |
 
 ## Testing

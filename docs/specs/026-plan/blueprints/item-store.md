@@ -247,8 +247,7 @@ CREATE INDEX IF NOT EXISTS items_open_threads ON items (document_id)
 saved_at = MAX(saved_at, ?) WHERE id = ? RETURNING items_rev`, then the row write guarded by `rev = ?` (update) or
   `INSERT` (create). A lost `rev` race retries up to `ITEM_WRITE_RETRIES` from a fresh read, then `409 item_busy`.
 - `apps/api/src/db/items.ts`: `getItemStoreHead`, `getItemsRev`, `listItems`, `readItem`, `readItems`,
-  `insertItems`, `updateItemAtRev`, `updateItemsAtRev`, `deleteItemRow`, `copyItemsStatements` (no caller: the copy
-  goes through the room); `itemFromRow`: row ↔ `Item`.
+  `insertItems`, `updateItemAtRev`, `updateItemsAtRev`, `deleteItemRow`; `itemFromRow`: row ↔ `Item`.
 
 ## Interfaces and contracts: REST
 

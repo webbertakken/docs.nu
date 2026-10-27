@@ -153,20 +153,20 @@ CREATE TABLE IF NOT EXISTS tab_stats (
 
 ## Errors and edge cases
 
-| Case                                 | Handling                                                  |
-| ------------------------------------ | --------------------------------------------------------- |
-| Document with no tabs                | `stats: null`, cells `–`                                  |
-| Some tabs not yet counted            | `stats: null` until the move counts them                  |
-| No summary pushed yet                | `stats: null` (`content_summary IS NULL`)                 |
-| Write since the last drain           | The previous stats, up to about a minute                  |
-| Event-storming board                 | Mode Diagram (`opensInOf`)                                |
-| Legacy mode `infographic`            | Pages (`opensInOf` reads through `parseEditorMode`)       |
-| Corrupt tab body in a copy           | Counted empty (`tabStatsOfData`), its bytes measured      |
-| Unreadable `$.stats` in a summary    | `stats: null`, warned                                     |
-| Shared row                           | No `stats`: `–`; no Created: `–` "Not known" (`D153`)     |
-| Offline row                          | Counted in the browser, the first tab's mode (`D152`)     |
-| Unknown stored sort or view mode     | Defaults                                                  |
-| Folder row in Type, Comments, Access | Type "Folder", the others empty; sorted by name for those |
+| Case                                 | Handling                                                     |
+| ------------------------------------ | ------------------------------------------------------------ |
+| Document with no tabs                | `stats: null`, cells `–`                                     |
+| Some tabs not yet counted            | `stats: null` until the move counts them                     |
+| No summary pushed yet                | `stats: null` (`content_summary IS NULL`)                    |
+| Write since the last drain           | The previous stats, up to about a minute                     |
+| Event-storming board                 | Mode Diagram (`opensInOf`)                                   |
+| Legacy mode `infographic`            | Pages (`opensInOf` reads through `parseEditorMode`)          |
+| Corrupt tab body in a copy or move   | Counted empty (`tabStatsOfData`), its bytes measured, warned |
+| Unreadable `$.stats` in a summary    | `stats: null`, warned                                        |
+| Shared row                           | No `stats`: `–`; no Created: `–` "Not known" (`D153`)        |
+| Offline row                          | Counted in the browser, the first tab's mode (`D152`)        |
+| Unknown stored sort or view mode     | Defaults                                                     |
+| Folder row in Type, Comments, Access | Type "Folder", the others empty; sorted by name for those    |
 
 ## Security and trust
 
@@ -230,11 +230,12 @@ CREATE TABLE IF NOT EXISTS tab_stats (
 
 ## Observability
 
-| Fingerprint                                 | Where                                           |
-| ------------------------------------------- | ----------------------------------------------- |
-| `tab-stats: unreadable doc_stats`           | Stats in a room or a summary that did not parse |
-| `[outbox] unit failed id=<id> unit=summary` | The summary push failed; retried                |
-| `[explorer-drop] …`                         | Drops on Details folder rows                    |
+| Fingerprint                                                   | Where                                           |
+| ------------------------------------------------------------- | ----------------------------------------------- |
+| `tab-stats: unreadable doc_stats`                             | Stats in a room or a summary that did not parse |
+| `[tab-stats] corrupt body id=<id> tab=<tab> counted as empty` | A copy or a move met a body that is not JSON    |
+| `[outbox] unit failed id=<id> unit=summary`                   | The summary push failed; retried                |
+| `[explorer-drop] …`                                           | Drops on Details folder rows                    |
 
 ## Testing
 

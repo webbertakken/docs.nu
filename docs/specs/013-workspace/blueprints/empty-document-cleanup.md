@@ -200,18 +200,18 @@ each room, once per drain over that document's own tabs (the `CASE` stops at the
 
 ## Testing
 
-| Rule                                                       | Test                                                           |
-| ---------------------------------------------------------- | -------------------------------------------------------------- |
-| Empty / not empty (X1 to X5b) through the push, stale, cap | `apps/api/src/db/empty-document-sweep.test.ts`                 |
-| The room builds `hasContent` (C7, X1)                      | `apps/api/src/document-room/content-summary.test.ts`           |
-| An unknown summary is never moved (C8, X5d)                | None yet: no test arranges a `documents` row without a summary |
-| Reason on the list; restore clears it and restarts stale   | `apps/api/src/db/empty-document-sweep.test.ts`                 |
-| Cron: moves, logs, never purges what it moved (C1)         | `apps/api/src/scheduled-trash.test.ts`                         |
-| MCP `list_trash` carries `reason`                          | `apps/mcp/src/tools.test.ts`                                   |
-| Local rows are `deleted`                                   | `apps/live/lib/offline/offline-trash.test.ts`                  |
-| Row lead and card lead copy                                | `apps/live/lib/trash-groups.test.ts`                           |
-| OpenAPI parity                                             | `apps/api/src/openapi/*.test.ts`                               |
-| Help registry keywords                                     | `apps/help` registry tests                                     |
+| Rule                                                       | Test                                                                                                |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Empty / not empty (X1 to X5b) through the push, stale, cap | `apps/api/src/db/empty-document-sweep.test.ts`                                                      |
+| The room builds `hasContent` (C7, X1)                      | `apps/api/src/document-room/content-summary.test.ts`                                                |
+| An unknown summary is never moved (C8, X5d)                | `apps/api/src/scheduled-trash.test.ts` "keeps a document whose room has not pushed its summary yet" |
+| Reason on the list; restore clears it and restarts stale   | `apps/api/src/db/empty-document-sweep.test.ts`                                                      |
+| Cron: moves, logs, never purges what it moved (C1)         | `apps/api/src/scheduled-trash.test.ts`                                                              |
+| MCP `list_trash` carries `reason`                          | `apps/mcp/src/tools.test.ts`                                                                        |
+| Local rows are `deleted`                                   | `apps/live/lib/offline/offline-trash.test.ts`                                                       |
+| Row lead and card lead copy                                | `apps/live/lib/trash-groups.test.ts`                                                                |
+| OpenAPI parity                                             | `apps/api/src/openapi/*.test.ts`                                                                    |
+| Help registry keywords                                     | `apps/help` registry tests                                                                          |
 
 ## Constants and configuration
 

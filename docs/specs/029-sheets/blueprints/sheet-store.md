@@ -268,8 +268,6 @@ REFERENCED`;
 REFERENCED`.
        Each is bounded by the document's sheets (`DOCUMENT_SHEETS_MAX`, the `sheets` primary key prefix), and is one
        index probe that matches nothing for a document without sheets.
-  - `sheetRefCopyStatement(env, fromTabId, toTabId)`: `INSERT INTO sheet_refs SELECT ?2, sheet_id FROM sheet_refs
-WHERE tab_id = ?1`. No caller: a copy now carries its references as rows (below).
 - **Where it runs**: `tabWriteStatements` (every editor save and every changeset) appends
   `sheetRefReplaceStatements` after the tabs and `document_tabs` upserts (the FK and the triggers read them). The
   settling runs in the triggers, per reference added or removed, so a write whose references are unchanged settles
