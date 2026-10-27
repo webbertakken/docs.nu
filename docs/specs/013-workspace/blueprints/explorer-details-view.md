@@ -5,12 +5,15 @@ Derived from [Explorer Details view](../explorer-details-view.md) and the Previe
 The spec decides; this file adds engineering precision. Defaults are ledgered in
 [DEFAULTS.md](DEFAULTS.md) as `D145` to `D153`.
 
+**Gap, being re-derived (plan 0006, phase B3):** tab stats live in each document's room and reach the lists through
+its content summary (`documents.content_summary`, [Document storage](../../006-document/blueprints/document-storage.md));
+the D1 tab stats backfill is gone.
+
 | File                                                          | Role                                                                                    |
 | ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `apps/api/migrations/0084_tab_stats.sql`                      | The `tab_stats` table                                                                   |
 | `packages/document/src/tab-stats.ts`                          | `tabStatsOf`, `TabStats`: one counting rule for the api and the browser                 |
 | `apps/api/src/db/tab-stats.ts`                                | `tabStatsOfData`, `tabStatsStatement`, `documentStatsSql`, `readDocumentStats`          |
-| `apps/api/src/tab-stats-backfill.ts`                          | `runTabStatsBackfill`: the cron's bounded count of tabs without stats                   |
 | `apps/api/src/db/tabs.ts`, `apps/api/src/db/documents.ts`     | Every tab write batches `tabStatsStatement`; the summary projection selects `doc_stats` |
 | `apps/api/src/participant-write.ts`, `qa-board-write.ts`      | Hand `swapTabData` the next body's stats                                                |
 | `packages/api-schema/src/index.ts`                            | `DocumentStats`, `DocumentSummary.stats`                                                |
@@ -247,7 +250,6 @@ CREATE TABLE tab_stats (
 | Warm-up per kind                                               | `packages/ui/src/hint/hint-registry.test.ts`                  |
 | Every write path leaves a matching stats row                   | `apps/api/src/db/tab-stats-writers.test.ts`                   |
 | Document stats sum, latest mode, null when uncounted           | `apps/api/src/db/tab-stats.test.ts`                           |
-| Backfill counts, keeps a racing write, logs, stops             | `apps/api/src/tab-stats-backfill.test.ts`                     |
 | Preview delay, warm-up, focus                                  | `packages/ui/src/hint/useHint.test.tsx`                       |
 | Sort: natural direction, toggle, folders first, `–` last       | `apps/live/app/explorer/details/details-columns.test.ts`      |
 | Formats                                                        | `apps/live/app/explorer/details/details-format.test.ts`       |

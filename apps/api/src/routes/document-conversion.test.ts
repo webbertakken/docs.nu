@@ -53,6 +53,14 @@ const db = vi.hoisted(() => ({
   seedTabs: vi.fn(async () => {}),
 }));
 vi.mock('../db', () => db);
+// A create's content is its room's (docs/specs/006-document/blueprints/document-storage.md "Routing").
+const { createDocumentContent } = vi.hoisted(() => ({
+  createDocumentContent: vi.fn(async () => ({
+    ok: true,
+    summary: { v: 1, tabs: 0, firstTabCount: null, tabCounts: {}, stats: null, hasContent: false },
+  })),
+}));
+vi.mock('../document-room/document-create', () => ({ createDocumentContent }));
 vi.mock('../db/timeline', () => ({ markTimelineEventsDeletedBySource: vi.fn(async () => {}) }));
 vi.mock('../auth/document-access', () => ({
   canReadDocument: vi.fn(async () => true),

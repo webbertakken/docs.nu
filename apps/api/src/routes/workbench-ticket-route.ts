@@ -3,6 +3,7 @@
 // (the document scope) or in the person's whole workspace (the workspace scope). An origin the token is not paired
 // with for the asked scope answers 428 with the pairing URL; the person approves it once in their own browser.
 
+import { documentRoom } from '../document-room/document-client';
 import {
   capWorkbenchRole,
   pairingCoversScope,
@@ -20,7 +21,6 @@ import {
   generateWorkbenchTicket,
   hashWorkbenchSecret,
 } from '../auth/workbench-session';
-import { documentLinksTab } from '../db/tabs';
 import {
   findWorkbenchPairing,
   insertWorkbenchTicket,
@@ -148,7 +148,7 @@ export async function mintWorkbenchTicket(ctx: RouteContext): Promise<Response> 
   const { documentId, tabId } = asked;
   const access = await ownerDocumentAccess(ctx.env, documentId, ownerId);
   if (access instanceof Response) return refused('not_found', asked.scope, access);
-  if (tabId !== null && !(await documentLinksTab(ctx.env, documentId, tabId)))
+  if (tabId !== null && !(await documentRoom(ctx.env, documentId).hasTab(tabId)))
     return refused('not_found', asked.scope, notFound());
 
   const minted = await insertTicket(ctx, pairing, ownerId, {

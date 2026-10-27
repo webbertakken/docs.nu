@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../types';
+import { withTestDocumentRooms } from '../test-document-room';
 
 // `passwordGate` is the route-side helper that translates a
 // password-protected document + visitor-supplied password into one of
@@ -72,6 +73,8 @@ import { getDocumentTabImageSvg, getDocumentThumbnailSvg } from '../thumbnail';
 import type { RouteContext } from './context';
 
 const FAKE_ENV = {} as Env;
+// The live image is drawn by the document's room (document-image-request.ts), here over the same env.
+withTestDocumentRooms(FAKE_ENV);
 
 const getDocumentMock = vi.mocked(getDocument);
 const getShareLinkMock = vi.mocked(getShareLink);

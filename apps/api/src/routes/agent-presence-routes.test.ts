@@ -145,8 +145,14 @@ describe('PUT presence', () => {
     expect(await (await call({ body: {} })).json()).toEqual({ error: 'agent_presence_full' });
     put.mockRejectedValueOnce(new roomClient.RoomUnavailableError('down'));
     expect(await (await call({ body: {} })).json()).toEqual({ error: 'room_unavailable' });
+    // Any other throw is the room's failure, answered 503 as one (document-route.ts).
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     put.mockRejectedValueOnce(new Error('bug'));
-    await expect(call({ body: {} })).rejects.toThrow('bug');
+    expect((await call({ body: {} })).status).toBe(503);
+    expect(error).toHaveBeenCalledWith(
+      expect.stringMatching(/^\[room-route\] failed id=d1 /),
+      expect.any(Error),
+    );
   });
 });
 
@@ -156,8 +162,10 @@ describe('DELETE presence', () => {
     expect(del).toHaveBeenCalledWith(sql.env, 'd1', 'tok_1', 'gone');
     del.mockRejectedValueOnce(new roomClient.RoomUnavailableError('down'));
     expect((await call({ method: 'DELETE' })).status).toBe(503);
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     del.mockRejectedValueOnce(new Error('bug'));
-    await expect(call({ method: 'DELETE' })).rejects.toThrow('bug');
+    expect((await call({ method: 'DELETE' })).status).toBe(503);
+    expect(error).toHaveBeenCalled();
   });
 
   it('leaves other methods to the rest of the routes', async () => {

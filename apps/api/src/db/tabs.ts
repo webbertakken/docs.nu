@@ -15,42 +15,23 @@ function assertTabDataFits(tabId: string, data: string, write: string): void {
   throw new TabTooLargeError(tabId, bytes, write);
 }
 import type { SharedTabsSummary } from '@livedoc/api-schema';
-import type { Env, TabDTO } from '../types';
+import type { DocumentEnv, TabDTO } from '../types';
 import { imageRefIds, imageRefIdsFromData } from '../image-refs/extract';
 import { tabStatsOf, tabStatsStatement, type TabStats } from './tab-stats';
-import { imageGrantLinkStatement, imageGrantPlacementStatements } from './image-grants';
-import { collabIndexStatements } from './collab-index';
+import { planBoardIndexStatements } from './plan-board-index';
 import { sheetRefIds, sheetRefReplaceStatements, sheetSettleStatements } from './sheet-refs';
-import {
-  imageRefAddStatements,
-  imageRefPruneTabStatement,
-  imageRefReplaceStatements,
-} from './image-refs';
+import { imageRefAddStatements, imageRefReplaceStatements } from './image-refs';
 
-// Whether `tabId` is a tab that exists but is not one of `documentId`'s: a save must never adopt it. A save
-// upserts by tab id, so without this a tab id seen elsewhere (a share link) could
-// overwrite that tab and link it into the caller's own document. Linking an existing tab has its own route.
-export async function tabBelongsElsewhere(
-  env: Env,
-  tabId: string,
+export async function getTab(
+  env: DocumentEnv,
   documentId: string,
-): Promise<boolean> {
-  const row = await env.DB.prepare(
-    `SELECT 1 AS found FROM tabs t
-      WHERE t.id = ?
-        AND NOT EXISTS (SELECT 1 FROM document_tabs dt WHERE dt.tab_id = t.id AND dt.document_id = ?)`,
-  )
-    .bind(tabId, documentId)
-    .first<{ found: number }>();
-  return row !== null;
-}
-
-export async function getTab(env: Env, documentId: string, tabId: string): Promise<TabDTO | null> {
+  tabId: string,
+): Promise<TabDTO | null> {
   // Resolve via the document_tabs link table (docs/specs/006-document/tab-document-many-to-many.md) so a
   // linked tab surfaces from every document that contains it. The link
   // also carries the per-document order_index, so the returned summary's
   // position is correct for whichever document the caller asked about.
-  const row = await env.DB.prepare(
+  const row = await env.DOCUMENT_DB.prepare(
     `SELECT t.id, dt.document_id, t.name, dt.order_index, t.data, t.updated_at, t.rev, dt.folder
        FROM tabs t
        JOIN document_tabs dt ON dt.tab_id = t.id
@@ -63,8 +44,8 @@ export async function getTab(env: Env, documentId: string, tabId: string): Promi
 
 // The document's tabs that hold a comment thread, in tab order (agent-presence PR21): the thread listing reads them
 // one at a time rather than every body at once.
-export async function tabIdsWithComments(env: Env, documentId: string): Promise<string[]> {
-  const { results } = await env.DB.prepare(
+export async function tabIdsWithComments(env: DocumentEnv, documentId: string): Promise<string[]> {
+  const { results } = await env.DOCUMENT_DB.prepare(
     `SELECT dt.tab_id FROM document_tabs dt JOIN tabs t ON t.id = dt.tab_id
       WHERE dt.document_id = ?
         AND (instr(t.data, '"commentThread"') > 0 OR instr(t.data, '"cellComments"') > 0)
@@ -78,12 +59,12 @@ export async function tabIdsWithComments(env: Env, documentId: string): Promise<
 // A page of the document's tabs that hold a Plan board, in tab order, bodies included: the plan route
 // (docs/specs/026-plan/plan-agents.md "Cost") never parses a tab without a board.
 export async function tabBodiesWithBoards(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   offset: number,
   limit: number,
 ): Promise<TabDTO[]> {
-  const { results } = await env.DB.prepare(
+  const { results } = await env.DOCUMENT_DB.prepare(
     `SELECT t.id, dt.document_id, t.name, dt.order_index, t.data, t.updated_at, t.rev, dt.folder
        FROM tabs t
        JOIN document_tabs dt ON dt.tab_id = t.id
@@ -99,12 +80,12 @@ export async function tabBodiesWithBoards(
 // A page of a document's tabs in order, bodies included: `overview` reads a document this way so it
 // never holds more than `limit` bodies at once (docs/specs/024-agents/blueprints/document-views.md, VW47).
 export async function tabBodiesInOrder(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   offset: number,
   limit: number,
 ): Promise<TabDTO[]> {
-  const { results } = await env.DB.prepare(
+  const { results } = await env.DOCUMENT_DB.prepare(
     `SELECT t.id, dt.document_id, t.name, dt.order_index, t.data, t.updated_at, t.rev, dt.folder
        FROM tabs t
        JOIN document_tabs dt ON dt.tab_id = t.id
@@ -117,39 +98,16 @@ export async function tabBodiesInOrder(
   return results.map(rowToTab);
 }
 
-// The raw `tabs.data` JSON for a document's first tab (lowest
-// order_index in the document_tabs link), or null when the document has
-// no tabs. Used by the SVG snapshot render-cache (docs/specs/006-document/document-snapshots.md), which needs
-// only the element body — never the full TabDTO hydration — so this
-// reads the single `data` column rather than going through getTab.
-// The `empty` column of a document list (docs/specs/006-document/document-snapshots.md): the element
-// count of the document's first tab, or of `scopeTabSql`'s tab when that is not null. Reads the
-// count each tab write binds (migration 0059), never a tab body. NULL = no tab, -1 = not yet known.
-export function firstTabCountSql(documentIdSql: string, scopeTabSql: string | null = null): string {
-  const scope = scopeTabSql ? ` AND (${scopeTabSql} IS NULL OR dt.tab_id = ${scopeTabSql})` : '';
-  return `(SELECT COALESCE(t.element_count, -1)
-             FROM document_tabs dt
-             JOIN tabs t ON t.id = dt.tab_id
-            WHERE dt.document_id = ${documentIdSql}${scope}
-            ORDER BY dt.order_index ASC
-            LIMIT 1) AS first_tab_count`;
-}
-
-// No tab, or a counted tab with no elements. A count not yet known is not empty: its thumbnail is asked for.
-export function isEmptyCount(firstTabCount: number | null | undefined): boolean {
-  return firstTabCount == null || firstTabCount === 0;
-}
-
 // A stored tab body with its id and its element count (null until known, migration 0059).
 export type StoredTabBody = { id: string; data: string; elementCount: number | null };
 
 // The document's first tab, or `tabId`'s tab when given, as the snapshot renderer reads it.
 export async function getTabBody(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId: string | null = null,
 ): Promise<StoredTabBody | null> {
-  const row = await env.DB.prepare(
+  const row = await env.DOCUMENT_DB.prepare(
     `SELECT t.id, t.data, t.element_count
        FROM document_tabs dt
        JOIN tabs t ON t.id = dt.tab_id
@@ -164,7 +122,7 @@ export async function getTabBody(
 
 // How much the document's first tab has to draw (drawnCount): its stored count, or a parse of its body while the count is
 // not yet known (migration 0059). Zero with no tab or an unreadable body. Needs no snapshot store, unlike a render.
-export async function firstTabElementCount(env: Env, documentId: string): Promise<number> {
+export async function firstTabElementCount(env: DocumentEnv, documentId: string): Promise<number> {
   const body = await getTabBody(env, documentId);
   if (!body) return 0;
   if (body.elementCount !== null) return body.elementCount;
@@ -177,8 +135,14 @@ export async function firstTabElementCount(env: Env, documentId: string): Promis
 
 // The lazy backfill (migration 0059): a reader that has parsed a body whose count is still unknown
 // records it. Only ever fills a null, so it can never undo a write's own count.
-export async function stampTabElementCount(env: Env, tabId: string, count: number): Promise<void> {
-  await env.DB.prepare('UPDATE tabs SET element_count = ? WHERE id = ? AND element_count IS NULL')
+export async function stampTabElementCount(
+  env: DocumentEnv,
+  tabId: string,
+  count: number,
+): Promise<void> {
+  await env.DOCUMENT_DB.prepare(
+    'UPDATE tabs SET element_count = ? WHERE id = ? AND element_count IS NULL',
+  )
     .bind(count, tabId)
     .run();
 }
@@ -191,11 +155,11 @@ export async function stampTabElementCount(env: Env, tabId: string, count: numbe
 // (docs/specs/013-workspace/live-image-share.md); mirrors getFirstTabData but keyed by tab id instead of the
 // lowest order_index.
 export async function getTabData(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId: string,
 ): Promise<string | null> {
-  const row = await env.DB.prepare(
+  const row = await env.DOCUMENT_DB.prepare(
     `SELECT t.data
        FROM document_tabs dt
        JOIN tabs t ON t.id = dt.tab_id
@@ -220,7 +184,7 @@ type TabRevWrite = { advance: true } | { expected: number };
 // batch as the blob they mirror so they can never drift. Exported so a changeset batches its
 // record beside the write: a lost compare-and-swap then aborts the whole batch.
 export function tabWriteStatements(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   input: Tab,
   orderIndex: number,
@@ -236,7 +200,7 @@ export function tabWriteStatements(
   const advance = 'advance' in revision;
   const insertRev = advance ? 1 : revision.expected + 1;
   return [
-    env.DB.prepare(
+    env.DOCUMENT_DB.prepare(
       `INSERT INTO tabs (id, name, data, updated_at, element_count, rev)
        VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
@@ -247,7 +211,7 @@ export function tabWriteStatements(
          rev = ${advance ? 'tabs.rev + 1' : 'excluded.rev'}
        RETURNING rev`,
     ).bind(id, name, data, now, drawnCount(tab), insertRev),
-    env.DB.prepare(
+    env.DOCUMENT_DB.prepare(
       `INSERT INTO document_tabs (document_id, tab_id, order_index, added_at)
        VALUES (?, ?, ?, ?)
        ON CONFLICT (document_id, tab_id) DO UPDATE SET order_index = excluded.order_index`,
@@ -256,16 +220,13 @@ export function tabWriteStatements(
     // just stored, after the tabs upsert, which the row's FK needs.
     tabStatsStatement(env, id, tabStatsOf(rest, data), now),
     // The Explorer's "Updated X ago" line. Pure metadata write — no element JSON.
-    env.DB.prepare('UPDATE documents SET saved_at = ? WHERE id = ?').bind(now, documentId),
-    // The collaboration index (docs/specs/013-workspace/inbox.md §2.1), after the tabs
-    // upsert, which the rows' FK needs.
-    ...collabIndexStatements(env, id, tab.elements),
+    env.DOCUMENT_DB.prepare('UPDATE document SET saved_at = ? WHERE id = ?').bind(now, documentId),
+    // The Plan boards' column statuses (docs/specs/013-workspace/inbox.md §2.4), after the tabs upsert, which the
+    // rows' FK needs. The Inbox's own rows go to D1 from the outbox (document-outbox.ts).
+    ...planBoardIndexStatements(env, id, tab.elements),
     // The image reference index (docs/specs/009-elements/images.md, "Reference index"): a reference
     // this batch missed is an image the retention sweep reaps.
     ...imageRefReplaceStatements(env, id, imageRefIds(tab.elements, tab.pages)),
-    // Placement grants (docs/specs/009-elements/images.md, "Placement grants"), after the
-    // document_tabs upsert above, which they read.
-    ...imageGrantPlacementStatements(env, id, imageRefIds(tab.elements, tab.pages), now),
     // The sheet reference index (docs/specs/029-sheets/sheet-store.md "Deleting a sheet"), after the tabs and
     // document_tabs upserts, which the rows' FK and the settling triggers (migration 0079) read. A write whose
     // references are unchanged touches no row, so the triggers cost it nothing.
@@ -289,12 +250,12 @@ export function isTabRevStale(err: unknown): boolean {
 // Full upsert for a single tab, advancing its revision from whatever is stored. One batch: the
 // extra serial D1 hops were once the largest latency item on a save. Answers the new revision.
 export async function upsertTab(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   input: Tab,
   orderIndex: number,
 ): Promise<number> {
-  const results = await env.DB.batch(
+  const results = await env.DOCUMENT_DB.batch(
     tabWriteStatements(env, documentId, input, orderIndex, { advance: true }),
   );
   return revFromBatch(results);
@@ -303,13 +264,13 @@ export async function upsertTab(
 // A tab write at the revision the caller read: lands as `expectedRev + 1`, or throws
 // `tab_rev_stale` (isTabRevStale) and writes nothing when the tab moved since (CS3, CS4).
 export async function upsertTabAtRev(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   input: Tab,
   orderIndex: number,
   expectedRev: number,
 ): Promise<number> {
-  const results = await env.DB.batch(
+  const results = await env.DOCUMENT_DB.batch(
     tabWriteStatements(env, documentId, input, orderIndex, { expected: expectedRev }),
   );
   return revFromBatch(results);
@@ -317,8 +278,12 @@ export async function upsertTabAtRev(
 
 // A tab rename (docs/specs/024-agents/agent-changesets.md "Whole-tab saves and tab renames"): the
 // name column only, advancing the revision (CS42). Answers the new revision, or null for no tab.
-export async function renameTab(env: Env, tabId: string, name: string): Promise<number | null> {
-  const row = await env.DB.prepare(
+export async function renameTab(
+  env: DocumentEnv,
+  tabId: string,
+  name: string,
+): Promise<number | null> {
+  const row = await env.DOCUMENT_DB.prepare(
     'UPDATE tabs SET name = ?, rev = rev + 1, updated_at = ? WHERE id = ? RETURNING rev',
   )
     .bind(name, Date.now(), tabId)
@@ -335,7 +300,7 @@ export async function renameTab(env: Env, tabId: string, name: string): Promise<
 // `savedAt`: the document's last-modified date after seeding, its own when a create carried one
 // (docs/specs/015-api/api.md "Document dates"); absent, now.
 export async function seedTabs(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabs: Tab[],
   savedAt?: number,
@@ -351,7 +316,7 @@ export async function seedTabs(
     const { id, name, ...rest } = tab;
     const data = JSON.stringify(rest);
     return [
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `INSERT INTO tabs (id, name, data, updated_at, element_count, rev)
          VALUES (?, ?, ?, ?, ?, 1)
          ON CONFLICT(id) DO UPDATE SET
@@ -361,7 +326,7 @@ export async function seedTabs(
            element_count = excluded.element_count,
            rev = tabs.rev + 1`,
       ).bind(id, name, data, now, drawnCount(tab)),
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `INSERT INTO document_tabs (document_id, tab_id, order_index, added_at)
          VALUES (?, ?, ?, ?)
          ON CONFLICT (document_id, tab_id) DO UPDATE SET order_index = excluded.order_index`,
@@ -370,7 +335,7 @@ export async function seedTabs(
     ];
   });
   stmts.push(
-    env.DB.prepare('UPDATE documents SET saved_at = ? WHERE id = ?').bind(
+    env.DOCUMENT_DB.prepare('UPDATE document SET saved_at = ? WHERE id = ?').bind(
       savedAt ?? now,
       documentId,
     ),
@@ -378,35 +343,12 @@ export async function seedTabs(
   // Index rows for every seeded tab (docs/specs/013-workspace/inbox.md §2.1): a JSON import or a
   // copy from a share link can carry actions and threads in on create.
   for (const tab of capped) {
-    stmts.push(...collabIndexStatements(env, tab.id, tab.elements));
+    stmts.push(...planBoardIndexStatements(env, tab.id, tab.elements));
     stmts.push(...imageRefReplaceStatements(env, tab.id, imageRefIds(tab.elements, tab.pages)));
-    stmts.push(
-      ...imageGrantPlacementStatements(env, tab.id, imageRefIds(tab.elements, tab.pages), now),
-    );
     // A seed's sheets come after its tabs (routes/documents.ts), so they find these references on create.
     stmts.push(...sheetRefReplaceStatements(env, tab.id, sheetRefIds(tab.elements)));
   }
-  await env.DB.batch(stmts);
-}
-
-// Which of `tabIds` already name a tab that is NOT in `documentId`: a create
-// seeding one of those would write into a tab another document holds, so the
-// create re-mints it (docs/specs/006-document/offline-mode.md, "Shared tabs fork").
-// A tab already in this document is a retried create and keeps its id.
-export async function tabIdsHeldElsewhere(
-  env: Env,
-  documentId: string,
-  tabIds: string[],
-): Promise<Set<string>> {
-  if (tabIds.length === 0) return new Set();
-  const rows = await env.DB.prepare(
-    `SELECT id FROM tabs
-      WHERE id IN (SELECT value FROM json_each(?))
-        AND NOT EXISTS (SELECT 1 FROM document_tabs dt WHERE dt.document_id = ? AND dt.tab_id = tabs.id)`,
-  )
-    .bind(JSON.stringify(tabIds), documentId)
-    .all<{ id: string }>();
-  return new Set((rows.results ?? []).map((r) => r.id));
+  await env.DOCUMENT_DB.batch(stmts);
 }
 
 // Remove the tab from this document (drops the `document_tabs` link
@@ -420,100 +362,38 @@ export async function tabIdsHeldElsewhere(
 // by the unlink itself so a comment written a moment before cannot slip between a read and the
 // delete: the caller retracts the tab's comment events from this document's feed with it.
 export async function deleteTabRow(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId: string,
 ): Promise<string | null> {
-  const unlinked = await env.DB.prepare(
+  const unlinked = await env.DOCUMENT_DB.prepare(
     `DELETE FROM document_tabs WHERE document_id = ? AND tab_id = ?
       RETURNING (SELECT t.data FROM tabs t WHERE t.id = document_tabs.tab_id) AS data`,
   )
     .bind(documentId, tabId)
     .first<{ data: string | null }>();
-  const remaining = await env.DB.prepare('SELECT COUNT(*) AS n FROM document_tabs WHERE tab_id = ?')
-    .bind(tabId)
-    .first<{ n: number }>();
-  if ((remaining?.n ?? 0) === 0) {
-    // image_refs has no FK to cascade from `tabs`, so its rows go explicitly.
-    await env.DB.batch([
-      imageRefPruneTabStatement(env, tabId),
-      env.DB.prepare('DELETE FROM tabs WHERE id = ?').bind(tabId),
-    ]);
-  }
+  // A room's tab is its document's alone (shared tabs are copies, one per holder), so the body goes with the
+  // link, and its stats, image and sheet references and changesets with it by cascade.
+  await env.DOCUMENT_DB.prepare(
+    'DELETE FROM tabs WHERE id = ? AND NOT EXISTS (SELECT 1 FROM document_tabs WHERE tab_id = ?)',
+  )
+    .bind(tabId, tabId)
+    .run();
   // The tab's references are gone (by the FK cascade, or by the unlink the reference join reads), with the link
   // the triggers would find the document by, so the document's sheets settle here.
-  await env.DB.batch(sheetSettleStatements(env, documentId, Date.now()));
+  await env.DOCUMENT_DB.batch(sheetSettleStatements(env, documentId, Date.now()));
   return unlinked?.data ?? null;
-}
-
-// Link an existing tab into another document (docs/specs/006-document/tab-document-many-to-many.md). Inserts a
-// `document_tabs` row at the end of the target document's order,
-// idempotent on conflict so re-linking the same pair returns 200
-// without double-counting. The `tabs` row itself is untouched: the
-// tab body lives in one place and edits propagate to every document
-// that references it. Returns true when a fresh link was created,
-// false when the link already existed (idempotent path).
-export async function linkTabToDocument(
-  env: Env,
-  documentId: string,
-  tabId: string,
-): Promise<boolean> {
-  const existing = await env.DB.prepare(
-    'SELECT 1 AS present FROM document_tabs WHERE document_id = ? AND tab_id = ?',
-  )
-    .bind(documentId, tabId)
-    .first<{ present: number }>();
-  if (existing) return false;
-  const count = await env.DB.prepare(
-    'SELECT COUNT(*) AS n FROM document_tabs WHERE document_id = ?',
-  )
-    .bind(documentId)
-    .first<{ n: number }>();
-  const orderIndex = count?.n ?? 0;
-  const now = Date.now();
-  await env.DB.prepare(
-    `INSERT INTO document_tabs (document_id, tab_id, order_index, added_at)
-     VALUES (?, ?, ?, ?)
-     ON CONFLICT (document_id, tab_id) DO NOTHING`,
-  )
-    .bind(documentId, tabId, orderIndex, now)
-    .run();
-  await env.DB.prepare('UPDATE documents SET saved_at = ? WHERE id = ?')
-    .bind(now, documentId)
-    .run();
-  // Placement grants (docs/specs/009-elements/images.md): the new holder serves what the tab showed.
-  await imageGrantLinkStatement(env, documentId, tabId, now).run();
-  return true;
-}
-
-// The link endpoint's authorisation check in one query: is this tab
-// linked into at least one document owned by `ownerId`? Replaces the
-// old "list every containing document id, then getDocument() each in a
-// loop" pattern (N full document hydrations to read one column). The
-// JOIN + LIMIT 1 stops at the first owned match.
-export async function tabLinkedToOwnedDocument(
-  env: Env,
-  tabId: string,
-  ownerId: string,
-): Promise<boolean> {
-  const row = await env.DB.prepare(
-    `SELECT 1 AS present
-       FROM document_tabs dt
-       JOIN documents d ON d.id = dt.document_id
-      WHERE dt.tab_id = ? AND d.owner_id = ? AND d.trashed_at IS NULL
-      LIMIT 1`,
-  )
-    .bind(tabId, ownerId)
-    .first<{ present: number }>();
-  return row !== null;
 }
 
 // How many of this document's tabs are shared (also linked into another
 // document), and across how many other documents: what deleting or taking the
 // document offline leaves behind (docs/specs/006-document/tab-document-many-to-many.md,
 // "Shared-tab notice").
-export async function sharedTabsSummary(env: Env, documentId: string): Promise<SharedTabsSummary> {
-  const row = await env.DB.prepare(
+export async function sharedTabsSummary(
+  env: DocumentEnv,
+  documentId: string,
+): Promise<SharedTabsSummary> {
+  const row = await env.DOCUMENT_DB.prepare(
     `SELECT COUNT(DISTINCT dt.tab_id) AS tabs, COUNT(DISTINCT o.document_id) AS documents
        FROM document_tabs dt
        JOIN document_tabs o ON o.tab_id = dt.tab_id AND o.document_id <> dt.document_id
@@ -522,17 +402,6 @@ export async function sharedTabsSummary(env: Env, documentId: string): Promise<S
     .bind(documentId)
     .first<SharedTabsSummary>();
   return { tabs: row?.tabs ?? 0, documents: row?.documents ?? 0 };
-}
-
-// Look up every document id that links the given tab. Used by the
-// link endpoint's auth check (caller must own at least one of
-// them) and would also drive a future "this tab is shared with N
-// documents" indicator.
-export async function documentsContainingTab(env: Env, tabId: string): Promise<string[]> {
-  const rows = await env.DB.prepare('SELECT document_id FROM document_tabs WHERE tab_id = ?')
-    .bind(tabId)
-    .all<{ document_id: string }>();
-  return (rows.results ?? []).map((r) => r.document_id);
 }
 
 // One position in a reorder request: the tab id plus its per-document
@@ -570,7 +439,7 @@ export function normalizeReorderEntry(entry: ReorderEntry): { id: string; folder
 // docs/specs/006-document/per-tab-storage.md "Risk"). Empty / whitespace folder names normalise to NULL
 // so a blank folder can never persist.
 export async function reorderTabs(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   entries: ReorderEntry[],
 ): Promise<void> {
@@ -580,12 +449,12 @@ export async function reorderTabs(
   // leaves its place in every other document, and its body, untouched.
   const batch = entries.map((entry, idx) => {
     const { id: tabId, folder } = normalizeReorderEntry(entry);
-    return env.DB.prepare(
+    return env.DOCUMENT_DB.prepare(
       'UPDATE document_tabs SET order_index = ?, folder = ? WHERE document_id = ? AND tab_id = ?',
     ).bind(idx, folder, documentId, tabId);
   });
-  if (batch.length > 0) await env.DB.batch(batch);
-  await env.DB.prepare('UPDATE documents SET saved_at = ? WHERE id = ?')
+  if (batch.length > 0) await env.DOCUMENT_DB.batch(batch);
+  await env.DOCUMENT_DB.prepare('UPDATE document SET saved_at = ? WHERE id = ?')
     .bind(now, documentId)
     .run();
 }
@@ -602,7 +471,7 @@ export async function reorderTabs(
 // image reference index is only ever ADDED to here: the swap can lose to a
 // concurrent save, and a delete would then drop references the winner wrote.
 export async function swapTabData(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId: string,
   expectedData: string,
@@ -613,17 +482,16 @@ export async function swapTabData(
 ): Promise<boolean> {
   assertTabDataFits(tabId, nextData, 'swapTabData');
   const now = Date.now();
-  const [res] = await env.DB.batch([
-    env.DB.prepare(
+  const [res] = await env.DOCUMENT_DB.batch([
+    env.DOCUMENT_DB.prepare(
       'UPDATE tabs SET data = ?, updated_at = ?, element_count = ?, rev = rev + 1 WHERE id = ? AND data = ?',
     ).bind(nextData, now, nextStats.elementCount, tabId, expectedData),
     // Only if the swap above won: then the tab stores exactly `nextData`.
     tabStatsStatement(env, tabId, nextStats, now, nextData),
     ...imageRefAddStatements(env, tabId, imageRefIdsFromData(nextData)),
-    ...imageGrantPlacementStatements(env, tabId, imageRefIdsFromData(nextData), now),
   ]);
   if ((res?.meta?.changes ?? 0) === 0) return false;
-  await env.DB.prepare('UPDATE documents SET saved_at = ? WHERE id = ?')
+  await env.DOCUMENT_DB.prepare('UPDATE document SET saved_at = ? WHERE id = ?')
     .bind(now, documentId)
     .run();
   return true;
@@ -632,11 +500,11 @@ export async function swapTabData(
 // Does the document link this tab? A workbench ticket naming a tab the document lacks is refused
 // (docs/specs/013-workspace/blueprints/workbench-embeds.md "The ticket mint").
 export async function documentLinksTab(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId: string,
 ): Promise<boolean> {
-  const row = await env.DB.prepare(
+  const row = await env.DOCUMENT_DB.prepare(
     'SELECT 1 AS present FROM document_tabs WHERE document_id = ? AND tab_id = ?',
   )
     .bind(documentId, tabId)

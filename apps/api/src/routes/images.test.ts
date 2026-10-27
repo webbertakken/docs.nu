@@ -11,7 +11,7 @@ import type { Env } from '../types';
 const { db, canReadDocument, resolveDocumentGrant } = vi.hoisted(() => ({
   db: {
     deleteImage: vi.fn(),
-    documentServesImage: vi.fn(),
+    documentMayServeImage: vi.fn(),
     findImageBySha: vi.fn(),
     getDocumentMeta: vi.fn(),
     getImage: vi.fn(),
@@ -24,6 +24,9 @@ const { db, canReadDocument, resolveDocumentGrant } = vi.hoisted(() => ({
   resolveDocumentGrant: vi.fn(),
 }));
 vi.mock('../db', () => db);
+// Whether the document places the image is its room's to say (the placesImage RPC).
+const { documentPlacesImage } = vi.hoisted(() => ({ documentPlacesImage: vi.fn() }));
+vi.mock('../db/image-refs', () => ({ documentPlacesImage }));
 vi.mock('../auth/document-access', () => ({
   canReadDocument,
   canEditDocument: vi.fn(),
@@ -156,7 +159,8 @@ describe('handleImages', () => {
     db.getImage.mockResolvedValue({ id: 'i1', ownerId: 'someone-else' });
     db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'someone-else' });
     canReadDocument.mockResolvedValue(true);
-    db.documentServesImage.mockResolvedValue(true);
+    db.documentMayServeImage.mockResolvedValue(true);
+    documentPlacesImage.mockResolvedValue(true);
     const ctx = makeCtx('GET', '/api/images/i1?d=d1');
     (ctx.env.IMAGES as unknown as ReturnType<typeof imagesBinding>).get.mockResolvedValue({
       body: 'bytes',
@@ -172,7 +176,8 @@ describe('handleImages', () => {
     db.getImage.mockResolvedValue({ id: 'i1', ownerId: 'victim' });
     db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'reader' });
     canReadDocument.mockResolvedValue(true);
-    db.documentServesImage.mockResolvedValue(false);
+    documentPlacesImage.mockResolvedValue(true);
+    db.documentMayServeImage.mockResolvedValue(false);
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const ctx = makeCtx('GET', '/api/images/i1?d=d1');
     const res = await handleImages(ctx);
@@ -192,10 +197,11 @@ describe('handleImages', () => {
     db.getImage.mockResolvedValue({ id: 'i1', ownerId: 'someone-else' });
     db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'someone-else' });
     resolveDocumentGrant.mockResolvedValue({ role: 'view', tabScope: 't2' });
-    db.documentServesImage.mockResolvedValue(false);
+    db.documentMayServeImage.mockResolvedValue(true);
+    documentPlacesImage.mockResolvedValue(false);
     const res = await handleImages(makeCtx('GET', '/api/images/i1?d=d1'));
     expect(res.status).toBe(404);
-    expect(db.documentServesImage).toHaveBeenCalledWith(expect.anything(), 'd1', 'i1', 't2');
+    expect(documentPlacesImage).toHaveBeenCalledWith(expect.anything(), 'd1', 'i1', 't2');
   });
 
   // docs/specs/013-workspace/workbench-embeds.md: a workbench session reads images through its own document
@@ -225,7 +231,8 @@ describe('handleImages', () => {
       db.getImage.mockResolvedValue({ id: 'i1', ownerId: 'owner-1' });
       db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'owner-1' });
       canReadDocument.mockResolvedValue(true);
-      db.documentServesImage.mockResolvedValue(true);
+      db.documentMayServeImage.mockResolvedValue(true);
+      documentPlacesImage.mockResolvedValue(true);
       const ctx = session('/api/images/i1?d=d1');
       (ctx.env.IMAGES as unknown as ReturnType<typeof imagesBinding>).get.mockResolvedValue({
         body: 'bytes',

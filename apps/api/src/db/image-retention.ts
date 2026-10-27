@@ -1,8 +1,7 @@
 // The daily unused-image sweep (docs/specs/009-elements/images.md, "Retention"),
-// reading only the image reference index (db/image-refs.ts).
+// reading only the placed images each document's room pushes to D1 (document_images).
 
 import type { Env } from '../types';
-import { isImageRefIndexComplete } from './image-refs';
 
 // Page size of the daily sweep: R2 delete() takes at most 1000 keys.
 export const IMAGE_SWEEP_PAGE = 1000;
@@ -26,25 +25,28 @@ export function sweepTripped(old: number, unused: number): boolean {
   return unused > IMAGE_SWEEP_TRIPWIRE_MIN && unused / old > IMAGE_SWEEP_TRIPWIRE_RATIO;
 }
 
-// Store-wide, whoever owns the tab. Joining `tabs` is what keeps a dangling
-// reference (its tab deleted by a path that didn't prune) from counting.
-const LIVE_REFERENCE = `EXISTS (SELECT 1 FROM image_refs r JOIN tabs t ON t.id = r.tab_id
-                         WHERE r.image_id = images.id)`;
+// Store-wide, whoever owns the document. A purged document's rows went with it (FK cascade).
+const LIVE_REFERENCE = `EXISTS (SELECT 1 FROM document_images r WHERE r.image_id = images.id)`;
 
 // Daily retention sweep (docs/specs/009-elements/images.md "Retention"). Deletes images that are
 // BOTH older than `cutoff` AND referenced by no tab, reading only the index.
 // Returns the number of images deleted.
 //
-// Keeps bytes whenever in doubt: a no-op without R2, paused until the index
-// backfill completes, and slowed by the tripwire to one capped page, oldest
+// Keeps bytes whenever in doubt: a no-op without R2, paused while any document
+// has not pushed its images, and slowed by the tripwire to one capped page, oldest
 // first. Each page is deleted from D1 by a statement that re-checks the
 // reference at that instant, then from R2, so an image placed after it was
 // counted survives.
 export async function deleteOldUnusedImages(env: Env, cutoff: number): Promise<number> {
   if (!env.IMAGES) return 0;
   const bucket = env.IMAGES;
-  if (!(await isImageRefIndexComplete(env))) {
-    console.log('image sweep: paused, reference index backfill incomplete');
+  // A document whose room has never pushed (one not yet moved into its room) has an unknown image set, so the
+  // sweep waits until every document has (docs/specs/006-document/document-storage.md "The content summary").
+  const unknown = await env.DB.prepare(
+    'SELECT COUNT(*) AS n FROM documents WHERE content_summary IS NULL',
+  ).first<{ n: number }>();
+  if ((unknown?.n ?? 0) > 0) {
+    console.log(`image sweep: paused, ${unknown?.n} documents have not pushed their images`);
     return 0;
   }
 
@@ -107,9 +109,6 @@ async function reapPage(env: Env, bucket: R2Bucket, ids: string[]): Promise<numb
   const goneIds = gone.results.map((r) => r.id);
   if (goneIds.length === 0) return 0;
   // Their references can only be dangling ones now; drop them with the image.
-  await env.DB.prepare('DELETE FROM image_refs WHERE image_id IN (SELECT value FROM json_each(?))')
-    .bind(JSON.stringify(goneIds))
-    .run();
   try {
     await bucket.delete(goneIds);
   } catch (err) {

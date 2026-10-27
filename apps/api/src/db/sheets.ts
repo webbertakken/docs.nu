@@ -11,7 +11,7 @@ import {
   type SheetLayout,
   type SheetPerson,
 } from '@livedoc/sheets';
-import type { Env } from '../types';
+import type { DocumentEnv } from '../types';
 import { sheetNoteUnreferencedStatement } from './sheet-refs';
 
 type SheetRow = {
@@ -85,11 +85,11 @@ function headToJson(head: SheetHead, cells: CellRow[]): SheetJson {
 }
 
 export async function readSheetHead(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
 ): Promise<SheetHead | null> {
-  const row = await env.DB.prepare(
+  const row = await env.DOCUMENT_DB.prepare(
     `SELECT ${HEAD_COLUMNS} FROM sheets WHERE document_id = ? AND id = ?`,
   )
     .bind(documentId, sheetId)
@@ -99,11 +99,11 @@ export async function readSheetHead(
 
 // The heads of a tab's sheets (titles, for uniqueness and references), or of the whole document.
 export async function listSheetHeads(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId?: string,
 ): Promise<SheetHead[]> {
-  const rows = await env.DB.prepare(
+  const rows = await env.DOCUMENT_DB.prepare(
     `SELECT ${HEAD_COLUMNS} FROM sheets WHERE document_id = ?${tabId ? ' AND tab_id = ?' : ''} ORDER BY created_at, id`,
   )
     .bind(...(tabId ? [documentId, tabId] : [documentId]))
@@ -113,13 +113,13 @@ export async function listSheetHeads(
 
 // Whole sheets, cells included: a tab's, named ones, or the document's.
 export async function listSheets(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   scope: { tabId?: string; ids?: readonly string[] } = {},
 ): Promise<SheetJson[]> {
   let heads: SheetHead[];
   if (scope.ids) {
-    const rows = await env.DB.prepare(
+    const rows = await env.DOCUMENT_DB.prepare(
       `SELECT ${HEAD_COLUMNS} FROM sheets WHERE document_id = ? AND id IN (SELECT value FROM json_each(?)) ORDER BY created_at, id`,
     )
       .bind(documentId, JSON.stringify(scope.ids))
@@ -129,7 +129,7 @@ export async function listSheets(
     heads = await listSheetHeads(env, documentId, scope.tabId);
   }
   if (heads.length === 0) return [];
-  const cells = await env.DB.prepare(
+  const cells = await env.DOCUMENT_DB.prepare(
     `SELECT sheet_id, row_id, col_id, input, format FROM sheet_cells
       WHERE document_id = ? AND sheet_id IN (SELECT value FROM json_each(?))`,
   )
@@ -143,11 +143,11 @@ export async function listSheets(
 
 // A sheet's formula cells only: what a deletion needs to shrink ranges (store.ts "shrinkFormulas").
 export async function readFormulaCells(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
 ): Promise<SheetJson['cells']> {
-  const rows = await env.DB.prepare(
+  const rows = await env.DOCUMENT_DB.prepare(
     `SELECT sheet_id, row_id, col_id, input, format FROM sheet_cells
       WHERE document_id = ? AND sheet_id = ? AND input LIKE '{"f":%'`,
   )
@@ -170,13 +170,13 @@ export function cellsNamedBy(param: string): string {
 
 // The stored state of named cells (missing ones come back as just their ids), for a write's answer.
 export async function readCells(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
   keys: readonly string[],
 ): Promise<SheetJson['cells']> {
   if (keys.length === 0) return [];
-  const rows = await env.DB.prepare(
+  const rows = await env.DOCUMENT_DB.prepare(
     `SELECT sheet_id, row_id, col_id, input, format FROM sheet_cells
       WHERE document_id = ? AND sheet_id = ? AND ${cellsNamedBy('?')}`,
   )
@@ -197,11 +197,11 @@ export async function readCells(
 
 // The rows of a sheet holding any cell (a form's response goes under the last of them).
 export async function usedSheetRows(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
 ): Promise<Set<string>> {
-  const rows = await env.DB.prepare(
+  const rows = await env.DOCUMENT_DB.prepare(
     `SELECT DISTINCT row_id FROM sheet_cells WHERE document_id = ? AND sheet_id = ?`,
   )
     .bind(documentId, sheetId)
@@ -211,12 +211,12 @@ export async function usedSheetRows(
 
 // How many of `keys` exist, and their stored bytes, for an exact cap check near the limit.
 export async function existingCells(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
   keys: readonly string[],
 ): Promise<{ count: number; bytes: number }> {
-  const row = await env.DB.prepare(
+  const row = await env.DOCUMENT_DB.prepare(
     `SELECT COUNT(*) AS n, COALESCE(SUM(COALESCE(length(input), 0) + COALESCE(length(format), 0)), 0) AS b
        FROM sheet_cells
       WHERE document_id = ? AND sheet_id = ? AND ${cellsNamedBy('?')}`,
@@ -227,10 +227,10 @@ export async function existingCells(
 }
 
 export async function documentSheetTotals(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
 ): Promise<{ sheets: number; cells: number }> {
-  const row = await env.DB.prepare(
+  const row = await env.DOCUMENT_DB.prepare(
     `SELECT COUNT(*) AS n, COALESCE(SUM(cell_count), 0) AS c FROM sheets WHERE document_id = ?`,
   )
     .bind(documentId)
@@ -246,7 +246,7 @@ const LANDED = `EXISTS (SELECT 1 FROM sheets WHERE document_id = ?1 AND id = ?2 
 // The statements that store `cells` (the landed write's cell changes) under the rev guard: inputs set, format
 // patches (a null key clears it, RFC 7396), inputs cleared, then cells left with nothing removed.
 export function cellWriteStatements(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
   nonce: string,
@@ -264,7 +264,7 @@ export function cellWriteStatements(
   const out: D1PreparedStatement[] = [];
   if (sets.length)
     out.push(
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `INSERT INTO sheet_cells (document_id, sheet_id, row_id, col_id, input)
          SELECT ?1, ?2, j.value ->> 'r', j.value ->> 'c', j.value ->> 'i' FROM json_each(?3) j WHERE ${LANDED}
          ON CONFLICT (document_id, sheet_id, row_id, col_id) DO UPDATE SET input = excluded.input`,
@@ -274,11 +274,11 @@ export function cellWriteStatements(
     // Rows first (a format may land on an empty cell), then the patch on the stored format, so a null key in the
     // patch clears that key on a cell that has it.
     out.push(
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `INSERT OR IGNORE INTO sheet_cells (document_id, sheet_id, row_id, col_id)
          SELECT ?1, ?2, j.value ->> 'r', j.value ->> 'c' FROM json_each(?3) j WHERE ${LANDED}`,
       ).bind(documentId, sheetId, JSON.stringify(fmts), nonce),
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `UPDATE sheet_cells SET format = (
            SELECT CASE WHEN j.value ->> 'fp' IS NULL THEN NULL
                        ELSE json_patch(COALESCE(sheet_cells.format, '{}'), j.value ->> 'fp') END
@@ -292,7 +292,7 @@ export function cellWriteStatements(
   }
   if (clears.length)
     out.push(
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `UPDATE sheet_cells SET input = NULL
           WHERE document_id = ?1 AND sheet_id = ?2 AND ${cellsNamedBy('?3')}
             AND ${LANDED}`,
@@ -301,7 +301,7 @@ export function cellWriteStatements(
   const touched = cells.map((ch) => cellKey(ch.r, ch.c));
   if (touched.length)
     out.push(
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `DELETE FROM sheet_cells
           WHERE document_id = ?1 AND sheet_id = ?2 AND input IS NULL AND (format IS NULL OR format = '{}')
             AND ${cellsNamedBy('?3')} AND ${LANDED}`,
@@ -312,7 +312,7 @@ export function cellWriteStatements(
 
 // Deleted rows' or columns' cells.
 export function axisDeleteStatement(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
   nonce: string,
@@ -320,7 +320,7 @@ export function axisDeleteStatement(
   ids: readonly string[],
 ): D1PreparedStatement {
   const col = axis === 'r' ? 'row_id' : 'col_id';
-  return env.DB.prepare(
+  return env.DOCUMENT_DB.prepare(
     `DELETE FROM sheet_cells WHERE document_id = ?1 AND sheet_id = ?2 AND ${col} IN (SELECT value FROM json_each(?3))
        AND ${LANDED}`,
   ).bind(documentId, sheetId, JSON.stringify(ids), nonce);
@@ -328,7 +328,7 @@ export function axisDeleteStatement(
 
 // The head's rev raise (and new layout or title), guarded by the rev the write was made against.
 export function headWriteStatement(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
   fromRev: number,
@@ -337,7 +337,7 @@ export function headWriteStatement(
   by: SheetPerson,
   change: { layout?: SheetLayout; title?: string },
 ): D1PreparedStatement {
-  return env.DB.prepare(
+  return env.DOCUMENT_DB.prepare(
     `UPDATE sheets SET rev = rev + 1, write_nonce = ?, updated_at = ?, updated_by = ?${change.layout ? ', layout = ?' : ''}${
       change.title !== undefined ? ', title = ?' : ''
     }
@@ -358,24 +358,24 @@ export function headWriteStatement(
 // document, so the Explorer's "Updated" line and its snapshot (docs/specs/006-document/document-snapshots.md: a Sheet
 // draws its cells) follow them.
 export function documentSavedStatement(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
   nonce: string,
   now: number,
 ): D1PreparedStatement {
-  return env.DB.prepare(
-    `UPDATE documents SET saved_at = MAX(saved_at, ?3) WHERE id = ?1 AND ${LANDED}`,
+  return env.DOCUMENT_DB.prepare(
+    `UPDATE document SET saved_at = MAX(saved_at, ?3) WHERE id = ?1 AND ${LANDED}`,
   ).bind(documentId, sheetId, now, nonce);
 }
 
 // Keep cell_count and cell_bytes exact after a write.
 export function recountStatement(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
 ): D1PreparedStatement {
-  return env.DB.prepare(
+  return env.DOCUMENT_DB.prepare(
     `UPDATE sheets SET
        cell_count = (SELECT COUNT(*) FROM sheet_cells WHERE document_id = ?1 AND sheet_id = ?2),
        cell_bytes = (SELECT COALESCE(SUM(COALESCE(length(input), 0) + COALESCE(length(format), 0)), 0)
@@ -404,12 +404,12 @@ function byteChunks<T>(items: readonly T[], max: number): string[] {
 }
 
 export function insertSheetStatements(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheet: SheetJson,
   now: number,
 ): D1PreparedStatement[] {
-  const head = env.DB.prepare(
+  const head = env.DOCUMENT_DB.prepare(
     `INSERT INTO sheets (document_id, id, tab_id, title, layout, rev, created_at, updated_at, updated_by)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).bind(
@@ -430,7 +430,7 @@ export function insertSheetStatements(
     1_000_000,
   ))
     out.push(
-      env.DB.prepare(
+      env.DOCUMENT_DB.prepare(
         `INSERT INTO sheet_cells (document_id, sheet_id, row_id, col_id, input, format)
          SELECT ?1, ?2, j.value ->> 'r', j.value ->> 'c', j.value -> 'i', j.value -> 'f' FROM json_each(?3) j`,
       ).bind(documentId, sheet.id, chunk),
@@ -442,18 +442,18 @@ export function insertSheetStatements(
 
 // A copy of one of the document's sheets, cells and all, under a new id and title.
 export function copySheetStatements(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   fromId: string,
   to: { id: string; tabId: string; title: string; by: SheetPerson },
   now: number,
 ): D1PreparedStatement[] {
   return [
-    env.DB.prepare(
+    env.DOCUMENT_DB.prepare(
       `INSERT INTO sheets (document_id, id, tab_id, title, layout, rev, cell_count, cell_bytes, created_at, updated_at, updated_by)
        SELECT document_id, ?, ?, ?, layout, 0, cell_count, cell_bytes, ?, ?, ? FROM sheets WHERE document_id = ? AND id = ?`,
     ).bind(to.id, to.tabId, to.title, now, now, JSON.stringify(to.by), documentId, fromId),
-    env.DB.prepare(
+    env.DOCUMENT_DB.prepare(
       `INSERT INTO sheet_cells (document_id, sheet_id, row_id, col_id, input, format)
        SELECT document_id, ?, row_id, col_id, input, format FROM sheet_cells WHERE document_id = ? AND sheet_id = ?`,
     ).bind(to.id, documentId, fromId),
@@ -462,11 +462,11 @@ export function copySheetStatements(
 }
 
 export function deleteSheetStatement(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   sheetId: string,
 ): D1PreparedStatement {
-  return env.DB.prepare(`DELETE FROM sheets WHERE document_id = ? AND id = ?`).bind(
+  return env.DOCUMENT_DB.prepare(`DELETE FROM sheets WHERE document_id = ? AND id = ?`).bind(
     documentId,
     sheetId,
   );
@@ -475,19 +475,19 @@ export function deleteSheetStatement(
 // A document copy's sheets (copyDocument): each source tab's sheets under the copy's id for that tab; the sheet
 // ids stay, so the copy's Sheet elements still frame them.
 export function copySheetsStatements(
-  env: Env,
+  env: DocumentEnv,
   sourceId: string,
   newId: string,
   tabIdMap: ReadonlyMap<string, string>,
   now: number,
 ): D1PreparedStatement[] {
   return [...tabIdMap].flatMap(([oldTab, newTab]) => [
-    env.DB.prepare(
+    env.DOCUMENT_DB.prepare(
       `INSERT INTO sheets (document_id, id, tab_id, title, layout, rev, cell_count, cell_bytes, created_at, updated_at, updated_by)
        SELECT ?, id, ?, title, layout, 0, cell_count, cell_bytes, created_at, ?, updated_by
          FROM sheets WHERE document_id = ? AND tab_id = ?`,
     ).bind(newId, newTab, now, sourceId, oldTab),
-    env.DB.prepare(
+    env.DOCUMENT_DB.prepare(
       `INSERT INTO sheet_cells (document_id, sheet_id, row_id, col_id, input, format)
        SELECT ?, c.sheet_id, c.row_id, c.col_id, c.input, c.format
          FROM sheet_cells c JOIN sheets s ON s.document_id = c.document_id AND s.id = c.sheet_id

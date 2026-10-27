@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { migrateFrom, sqliteD1 } from '../test-sqlite-d1';
-import { resetImageRefIndexMemo } from './image-refs';
+import { sqliteD1 } from '../test-sqlite-d1';
 import {
   deleteOldUnusedImages,
   IMAGE_SWEEP_PAGE,
@@ -24,11 +23,10 @@ import {
 } from './test-image-fixtures';
 
 // The daily unused-image sweep (docs/specs/009-elements/images.md,
-// "Retention"): reads only the image reference index, and keeps bytes
+// "Retention"): reads only the placed images the rooms push (document_images), and keeps bytes
 // whenever in doubt. Proven against a real SQLite with every migration.
 
 afterEach(() => {
-  resetImageRefIndexMemo();
   vi.restoreAllMocks();
 });
 
@@ -50,16 +48,19 @@ describe('deleteOldUnusedImages', () => {
     expect(imageIds(sql)).toEqual(['old']);
   });
 
-  it('deletes nothing while the index backfill is incomplete', async () => {
-    const db = setup({ before0050: true });
-    db.sql.exec("INSERT INTO tabs (id, name, data, updated_at) VALUES ('t', 't', '{}', 0)");
-    migrateFrom(db.sql, '0050');
+  it('deletes nothing while a document has not pushed its images (not yet in its room)', async () => {
+    const db = setup();
+    liveDoc(db.sql, 'A');
     images(db.sql, OLD, 'old');
+    await db.flush();
+    db.sql.exec("UPDATE documents SET content_summary = NULL WHERE id = 'A'");
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
     expect(await deleteOldUnusedImages(db.env, CUTOFF)).toBe(0);
     expect(imageIds(db.sql)).toEqual(['old']);
     expect(db.bucket.delete).not.toHaveBeenCalled();
-    expect(log).toHaveBeenCalledWith('image sweep: paused, reference index backfill incomplete');
+    expect(log).toHaveBeenCalledWith(
+      'image sweep: paused, 1 documents have not pushed their images',
+    );
   });
 
   it('reaps old unreferenced images only, D1 then R2', async () => {
@@ -76,18 +77,16 @@ describe('deleteOldUnusedImages', () => {
     expect(db.bucket.delete).toHaveBeenCalledWith(['old-unused']);
   });
 
-  it('counts a tab no document links (kept conservatively) but not a dangling reference', async () => {
+  it("reaps a removed tab's image once its document's push lands", async () => {
     const db = setup();
     liveDoc(db.sql, 'A');
-    images(db.sql, OLD, 'on-orphan-tab', 'on-deleted-tab');
-    await upsertTab(db.env, 'A', tabWith('orphan', 'on-orphan-tab'), 0);
-    await upsertTab(db.env, 'A', tabWith('gone', 'on-deleted-tab'), 1);
-    db.sql.exec("DELETE FROM document_tabs WHERE tab_id = 'orphan'");
-    // A tab removed by a path that didn't prune: its row dangles.
+    images(db.sql, OLD, 'kept', 'on-removed-tab');
+    await upsertTab(db.env, 'A', tabWith('t1', 'kept'), 0);
+    await upsertTab(db.env, 'A', tabWith('gone', 'on-removed-tab'), 1);
     db.sql.exec("DELETE FROM tabs WHERE id = 'gone'");
+    expect(refsFor(db.sql, 'on-removed-tab')).toBe(0);
     expect(await deleteOldUnusedImages(db.env, CUTOFF)).toBe(1);
-    expect(imageIds(db.sql)).toEqual(['on-orphan-tab']);
-    expect(refsFor(db.sql, 'on-deleted-tab')).toBe(0);
+    expect(imageIds(db.sql)).toEqual(['kept']);
   });
 
   it('reaps the images of a deleted document', async () => {
@@ -104,12 +103,12 @@ describe('deleteOldUnusedImages', () => {
     const db = setup();
     liveDoc(db.sql, 'A');
     images(db.sql, OLD, 'late');
+    await db.flush();
     const prepare = db.env.DB.prepare.bind(db.env.DB);
-    // Place the image in the instant between the page read and the delete.
+    // A push placing the image lands in the instant between the page read and the delete.
     vi.spyOn(db.env.DB, 'prepare').mockImplementation((query: string) => {
       if (query.startsWith('DELETE FROM images')) {
-        db.sql.exec("INSERT INTO tabs (id, name, data, updated_at) VALUES ('t', 't', '{}', 0)");
-        db.sql.exec("INSERT INTO image_refs (tab_id, image_id) VALUES ('t', 'late')");
+        db.sql.exec("INSERT INTO document_images (document_id, image_id) VALUES ('A', 'late')");
       }
       return prepare(query);
     });
@@ -135,8 +134,8 @@ describe('deleteOldUnusedImages', () => {
     // Unused images far outnumber the one in use, as after a large Trash purge.
     liveDoc(db.sql, 'A');
     images(db.sql, OLD, 'used');
-    db.sql.exec("INSERT INTO tabs (id, name, data, updated_at) VALUES ('t', 't', '{}', 0)");
-    db.sql.exec("INSERT INTO image_refs (tab_id, image_id) VALUES ('t', 'used')");
+    await db.flush();
+    db.sql.exec("INSERT INTO document_images (document_id, image_id) VALUES ('A', 'used')");
     const ancient = ids('ancient', 5);
     images(db.sql, OLD - DAY, ...ancient);
     images(db.sql, OLD, ...ids('later', IMAGE_SWEEP_TRIPPED_MAX));
@@ -158,8 +157,10 @@ describe('deleteOldUnusedImages', () => {
     const unused = ids('unused', IMAGE_SWEEP_PAGE + 1);
     const used = ids('used', IMAGE_SWEEP_PAGE + 2);
     images(db.sql, OLD, ...unused, ...used);
-    db.sql.exec("INSERT INTO tabs (id, name, data, updated_at) VALUES ('t', 't', '{}', 0)");
-    const ref = db.sql.prepare("INSERT INTO image_refs (tab_id, image_id) VALUES ('t', ?)");
+    await db.flush();
+    const ref = db.sql.prepare(
+      "INSERT INTO document_images (document_id, image_id) VALUES ('A', ?)",
+    );
     for (const id of used) ref.run(id);
     expect(await deleteOldUnusedImages(db.env, CUTOFF)).toBe(IMAGE_SWEEP_PAGE + 1);
     expect(db.bucket.delete).toHaveBeenCalledTimes(2);
@@ -168,11 +169,14 @@ describe('deleteOldUnusedImages', () => {
 
   it('stops cleanly after an exactly full last page', async () => {
     const db = setup();
+    liveDoc(db.sql, 'A');
     const unused = ids('unused', IMAGE_SWEEP_PAGE);
     const used = ids('used', IMAGE_SWEEP_PAGE);
     images(db.sql, OLD, ...unused, ...used);
-    db.sql.exec("INSERT INTO tabs (id, name, data, updated_at) VALUES ('t', 't', '{}', 0)");
-    const ref = db.sql.prepare("INSERT INTO image_refs (tab_id, image_id) VALUES ('t', ?)");
+    await db.flush();
+    const ref = db.sql.prepare(
+      "INSERT INTO document_images (document_id, image_id) VALUES ('A', ?)",
+    );
     for (const id of used) ref.run(id);
     expect(await deleteOldUnusedImages(db.env, CUTOFF)).toBe(IMAGE_SWEEP_PAGE);
     expect(db.bucket.delete).toHaveBeenCalledTimes(1);

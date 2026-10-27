@@ -18,7 +18,7 @@ import {
 import { documentImageSvg } from '../document-image';
 import { json, notFound, pngImage } from '../responses';
 import { shareCardPng } from '../share-card-png';
-import type { RouteContext } from './context';
+import type { DocumentRouteContext, RouteContext } from './context';
 
 // A link's card changes only when its document is saved, and a chat app keeps its own copy for far longer, so a
 // few minutes fresh and an hour stale costs nothing in accuracy.
@@ -52,11 +52,13 @@ export function isSharePreviewPath(segments: readonly string[]): boolean {
   );
 }
 
-// Null for every path this module does not own, so the share router falls through to its own answers.
+// The card's text (`/card`), answered in the worker; null for every other path, so the share router falls through
+// to its own answers. The card's image (`/image.png`) is drawn by the document's room (shareCardImage).
 export async function handleSharePreview(ctx: RouteContext): Promise<Response | null> {
   const { request, segments } = ctx;
-  if (!isSharePreviewPath(segments) || request.method !== 'GET') return null;
-  return segments[3] === 'card' ? shareCard(ctx, segments[2]!) : shareCardImage(ctx, segments[2]!);
+  if (!isSharePreviewPath(segments) || segments[3] !== 'card' || request.method !== 'GET')
+    return null;
+  return shareCard(ctx, segments[2]!);
 }
 
 async function shareCard(ctx: RouteContext, code: string): Promise<Response> {
@@ -77,7 +79,7 @@ function brandCard(url: URL): Response {
   });
 }
 
-async function shareCardImage(ctx: RouteContext, code: string): Promise<Response> {
+export async function shareCardImage(ctx: DocumentRouteContext, code: string): Promise<Response> {
   const { env, url } = ctx;
   const subject = await previewSubject(env, code);
   if (!subject) return notFound();

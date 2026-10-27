@@ -2,9 +2,10 @@
 // read (docs/specs/009-elements/images.md).
 
 import { sha256Hex } from '@livedoc/api-schema';
+import { documentRoom } from '../document-room/document-client';
 import {
   deleteImage,
-  documentServesImage,
+  documentMayServeImage,
   findImageBySha,
   getDocumentMeta,
   getImage,
@@ -302,7 +303,10 @@ export async function handleImages(ctx: RouteContext): Promise<Response> {
           if (grant) {
             // Placed by the document AND servable by it (docs/specs/009-elements/images.md,
             // "Placement grants"): an id pasted into an unrelated document serves nothing.
-            allowed = await documentServesImage(env, d, imageId, grant.tabScope);
+            // The place is the room's to say, the serving right D1's; both must hold.
+            allowed =
+              (await documentMayServeImage(env, d, imageId)) &&
+              (await documentRoom(env, d).placesImage(imageId, grant.tabScope));
             if (!allowed) {
               console.warn('[images] not servable by document', { documentId: d, imageId });
             }

@@ -15,7 +15,10 @@ import { documentTrashed, forbidden, json, notFound, svgImage } from '../respons
 import { reportServerEvent } from '../server-telemetry';
 import { shareGrantOf, sharePasswordStatus, type SharePasswordAttempt } from '../auth/share-access';
 import { redactDocumentForReader, redactDocumentForScope } from '../redact-document';
-import { sharePasswordOf, type RouteContext } from './context';
+import { sharePasswordOf, type DocumentRouteContext, type RouteContext } from './context';
+import { askRoom, documentRoom } from '../document-room/document-client';
+import { isDocumentImagePath } from '../document-room/document-image-request';
+import { identityOf } from '../document-room/document-route';
 import { handleSharePreview } from './share-preview';
 
 // Resolve a share code to its document + role. Used by visitors
@@ -27,8 +30,13 @@ export async function handleShare(ctx: RouteContext): Promise<Response> {
   // /api/share/<code>/image.svg — live image (docs/specs/013-workspace/live-image-share.md + docs/specs/006-document/document-snapshots.md): the
   // document's cached SVG snapshot, served public-by-share-code so a bare
   // <img> in a README / wiki / Notion can embed it with no auth header.
-  if (segments.length === 4 && segments[3] === 'image.svg' && request.method === 'GET') {
-    return handleShareImage(ctx, segments[2]!);
+  // Drawn from the document's content, so answered by its room (document-image-request.ts).
+  if (isDocumentImagePath(segments) && request.method === 'GET') {
+    const link = await getShareLink(env, segments[2]!);
+    if (!link) return notFound();
+    return askRoom(request, () =>
+      documentRoom(env, link.documentId).image(request, identityOf(ctx)),
+    );
   }
   // /api/share/<code>/card and /image.png: what a link preview reads (docs/specs/013-workspace/share-link-previews.md).
   const preview = await handleSharePreview(ctx);
@@ -138,7 +146,7 @@ const SHARE_IMAGE_CACHE = 'public, max-age=30, stale-while-revalidate=300';
 //     supply the password, so serving one would bypass the gate. The
 //     Share dialog hides the live-image option while a password is set,
 //     and this is the matching server-side enforcement.
-async function handleShareImage(ctx: RouteContext, code: string): Promise<Response> {
+export async function handleShareImage(ctx: DocumentRouteContext, code: string): Promise<Response> {
   const { env, request } = ctx;
   const link = await getShareLink(env, code);
   if (!link) return notFound();

@@ -2,26 +2,26 @@
 // tab's id, name, kind and theme, and a Sheet tab's sheet ids in canvas order, read from the stored JSON in SQL so no tab
 // body leaves the database. A tab-scoped grant reads its own tab only.
 import type { PlanTabOutline } from '@livedoc/api-schema';
-import type { Env } from '../types';
+import type { DocumentEnv } from '../types';
 
 type OutlineRow = { id: string; name: string; kind: string | null; theme: string | null };
 type SheetRow = { tab_id: string; sheet_id: string };
 
 export async function tabOutlines(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   onlyTab: string | null,
 ): Promise<PlanTabOutline[]> {
   const scope = onlyTab === null ? '' : ' AND t.id = ?';
   const binds = onlyTab === null ? [documentId] : [documentId, onlyTab];
-  const [tabs, sheets] = await env.DB.batch([
-    env.DB.prepare(
+  const [tabs, sheets] = await env.DOCUMENT_DB.batch([
+    env.DOCUMENT_DB.prepare(
       `SELECT t.id, t.name, json_extract(t.data, '$.kind') AS kind, json_extract(t.data, '$.theme') AS theme
          FROM tabs t JOIN document_tabs dt ON dt.tab_id = t.id
         WHERE dt.document_id = ?${scope}
         ORDER BY dt.order_index, t.id`,
     ).bind(...binds),
-    env.DB.prepare(
+    env.DOCUMENT_DB.prepare(
       `SELECT t.id AS tab_id, json_extract(e.value, '$.planSheet.sheetId') AS sheet_id
          FROM tabs t JOIN document_tabs dt ON dt.tab_id = t.id, json_each(t.data, '$.elements') e
         WHERE dt.document_id = ?${scope}

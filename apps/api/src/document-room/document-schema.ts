@@ -183,23 +183,145 @@ BEGIN
 END;
 `;
 
+// What the room owes D1 (document-outbox.ts, blueprint "The outbox"): one key per changed thing, written by the
+// triggers below in the transaction of the write it records (R3), so no write path can forget the listing. A key
+// is re-keyed by DELETE then INSERT, so a key written again during a drain gets a new id and stays for the next one.
+// `document_id` is the room's one document; it is a column so the content modules' store-of-many SQL runs unchanged.
+//   summary ''      documents.content_summary and saved_at
+//   tab     tab id  the tab's Inbox rows, its form links' heading, its search text; its links when it has gone
+//   cards   ''      inbox_cards and the cards' threads
+//   items   ''      the items' search text
+//   images  ''      document_images and the placement grants
+const OUTBOX = `
+CREATE TABLE IF NOT EXISTS outbox (
+  id          INTEGER PRIMARY KEY,
+  document_id TEXT    NOT NULL,
+  kind        TEXT    NOT NULL CHECK (kind IN ('summary', 'tab', 'cards', 'items', 'images')),
+  key         TEXT    NOT NULL,
+  UNIQUE (document_id, kind, key)
+);
+${outboxTrigger('outbox_document_insert', 'AFTER INSERT ON document', "SELECT NEW.id, 'summary', ''")}
+${outboxTrigger('outbox_document_update', 'AFTER UPDATE ON document', "SELECT NEW.id, 'summary', ''")}
+${outboxTrigger(
+  'outbox_link_insert',
+  'AFTER INSERT ON document_tabs',
+  `SELECT NEW.document_id, 'tab', NEW.tab_id
+   UNION ALL SELECT NEW.document_id, 'summary', ''
+   UNION ALL SELECT NEW.document_id, 'images', ''`,
+)}
+${outboxTrigger(
+  'outbox_link_delete',
+  'AFTER DELETE ON document_tabs',
+  `SELECT OLD.document_id, 'tab', OLD.tab_id
+   UNION ALL SELECT OLD.document_id, 'summary', ''
+   UNION ALL SELECT OLD.document_id, 'images', ''`,
+)}
+${outboxTrigger(
+  'outbox_link_update',
+  'AFTER UPDATE ON document_tabs',
+  "SELECT NEW.document_id, 'summary', ''",
+)}
+${outboxTrigger(
+  'outbox_tab_update',
+  'AFTER UPDATE ON tabs',
+  `SELECT document_id, 'tab', NEW.id FROM document_tabs WHERE tab_id = NEW.id
+   UNION ALL SELECT document_id, 'summary', '' FROM document_tabs WHERE tab_id = NEW.id`,
+)}
+${outboxTrigger(
+  'outbox_stats_insert',
+  'AFTER INSERT ON tab_stats',
+  "SELECT document_id, 'summary', '' FROM document_tabs WHERE tab_id = NEW.tab_id",
+)}
+${outboxTrigger(
+  'outbox_stats_update',
+  'AFTER UPDATE ON tab_stats',
+  "SELECT document_id, 'summary', '' FROM document_tabs WHERE tab_id = NEW.tab_id",
+)}
+${outboxTrigger(
+  'outbox_image_insert',
+  'AFTER INSERT ON image_refs',
+  "SELECT document_id, 'images', '' FROM document_tabs WHERE tab_id = NEW.tab_id",
+)}
+${outboxTrigger(
+  'outbox_image_delete',
+  'AFTER DELETE ON image_refs',
+  "SELECT document_id, 'images', '' FROM document_tabs WHERE tab_id = OLD.tab_id",
+)}
+${outboxTrigger(
+  'outbox_item_insert',
+  'AFTER INSERT ON items',
+  "SELECT NEW.document_id, 'cards', '' UNION ALL SELECT NEW.document_id, 'items', ''",
+)}
+${outboxTrigger(
+  'outbox_item_update',
+  'AFTER UPDATE ON items',
+  "SELECT NEW.document_id, 'cards', '' UNION ALL SELECT NEW.document_id, 'items', ''",
+)}
+${outboxTrigger(
+  'outbox_item_delete',
+  'AFTER DELETE ON items',
+  "SELECT OLD.document_id, 'cards', '' UNION ALL SELECT OLD.document_id, 'items', ''",
+)}
+${outboxTrigger(
+  'outbox_board_insert',
+  'AFTER INSERT ON plan_board_statuses',
+  "SELECT document_id, 'cards', '' FROM document_tabs WHERE tab_id = NEW.tab_id",
+)}
+${outboxTrigger(
+  'outbox_board_update',
+  'AFTER UPDATE ON plan_board_statuses',
+  "SELECT document_id, 'cards', '' FROM document_tabs WHERE tab_id = NEW.tab_id",
+)}
+${outboxTrigger(
+  'outbox_board_delete',
+  'AFTER DELETE ON plan_board_statuses',
+  "SELECT document_id, 'cards', '' FROM document_tabs WHERE tab_id = OLD.tab_id",
+)}
+${outboxTrigger(
+  'outbox_cell_insert',
+  'AFTER INSERT ON sheet_cells',
+  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = NEW.document_id AND id = NEW.sheet_id",
+)}
+${outboxTrigger(
+  'outbox_cell_update',
+  'AFTER UPDATE ON sheet_cells',
+  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = NEW.document_id AND id = NEW.sheet_id",
+)}
+${outboxTrigger(
+  'outbox_cell_delete',
+  'AFTER DELETE ON sheet_cells',
+  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = OLD.document_id AND id = OLD.sheet_id",
+)}
+`;
+
+// A trigger that re-keys every (document_id, kind, key) row `keys` selects.
+function outboxTrigger(name: string, on: string, keys: string): string {
+  return `CREATE TRIGGER IF NOT EXISTS ${name} ${on}
+BEGIN
+  DELETE FROM outbox WHERE (document_id, kind, key) IN (${keys});
+  INSERT INTO outbox (document_id, kind, key) ${keys};
+END;`;
+}
+
 /** Every step the room's schema has taken, in order; a change appends one and never edits a shipped step. */
-export const DOCUMENT_SCHEMA_STEPS: readonly string[] = [STEP_1];
+export const DOCUMENT_SCHEMA_STEPS: readonly string[] = [STEP_1 + OUTBOX];
 
 export const DOCUMENT_SCHEMA_VERSION = DOCUMENT_SCHEMA_STEPS.length;
 
 type Exec = (query: string) => { toArray(): Record<string, unknown>[] };
 
-/** Bring a room's SQLite up to DOCUMENT_SCHEMA_VERSION. Idempotent; runs inside the caller's transaction. */
-export function migrateDocumentSchema(exec: Exec): void {
+/** Bring a room's SQLite up to DOCUMENT_SCHEMA_VERSION. Idempotent; runs inside the caller's transaction. Answers
+ * the version it found and the one it left. */
+export function migrateDocumentSchema(exec: Exec): { from: number; to: number } {
   exec('CREATE TABLE IF NOT EXISTS _document_schema (version INTEGER NOT NULL)');
   const row = exec('SELECT version FROM _document_schema LIMIT 1').toArray()[0];
   const at = typeof row?.version === 'number' ? row.version : 0;
-  if (at >= DOCUMENT_SCHEMA_STEPS.length) return;
+  if (at >= DOCUMENT_SCHEMA_STEPS.length) return { from: at, to: at };
   for (let step = at; step < DOCUMENT_SCHEMA_STEPS.length; step++)
     exec(DOCUMENT_SCHEMA_STEPS[step]!);
   exec('DELETE FROM _document_schema');
   exec(`INSERT INTO _document_schema (version) VALUES (${DOCUMENT_SCHEMA_STEPS.length})`);
+  return { from: at, to: DOCUMENT_SCHEMA_STEPS.length };
 }
 
 /** Whether a room's SQLite holds a schema at all: a read that writes nothing. */

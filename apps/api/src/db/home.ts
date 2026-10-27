@@ -15,7 +15,7 @@ import {
 import { WHAT_HAPPENED_EVENT_TYPES, type WhatHappenedRow } from '../home/what-happened';
 import type { Env } from '../types';
 import { VISIBLE_DOCUMENTS_CTES } from './document-visibility';
-import { firstTabCountSql, isEmptyCount } from './tabs';
+import { firstTabCountSql, isEmptyCount } from './content-summary';
 import { DAY_MS } from '@livedoc/items';
 
 // Where each document lives and what its thumbnail needs. A shared document's team and folder

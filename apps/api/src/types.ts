@@ -24,6 +24,11 @@ export type {
   ClientMessage,
 } from '@livedoc/api-schema';
 
+// What a content module runs with (docs/specs/006-document/blueprints/document-storage.md): the worker's bindings
+// and the document's own SQLite as `DOCUMENT_DB`, inside the document's room. The worker's Env has no DOCUMENT_DB,
+// so a content module called from the worker does not compile.
+export type DocumentEnv = Env & { DOCUMENT_DB: D1Database };
+
 // Worker bindings injected by Cloudflare at runtime. Not part of the
 // wire format (purely a server-side capability handle).
 export type Env = {

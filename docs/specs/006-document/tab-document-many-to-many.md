@@ -39,7 +39,9 @@ A **holder** is a document holding a shared tab; a **shared tab** is a tab with 
   A copy taken in updates the tab's stats, image references and outbox as a local write does.
 - **No echo.** A holder taking a copy sends it on only to holders the sender did not list; that is also how a holder
   that joined a moment ago hears of a write made by one that has not yet heard of it.
-- **Joining.** Add to Document runs in the target's room: it reads the tab and its holders from the document it was
+- **Joining.** Tab ids are unique per document only, so Add to Document refuses a target that already holds an
+  unrelated tab with that id (409 `tab_id_taken`).
+  Add to Document runs in the target's room: it reads the tab and its holders from the document it was
   added from, stores the copy at the end of the target's tab order, then has the source record the join.
   The source lists the target, tells the other holders, and sends the target the tab again if it changed meanwhile.
 - **Leaving.** Removing the tab from one document tells the other holders and drops nothing of theirs.

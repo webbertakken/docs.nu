@@ -13,7 +13,7 @@ import {
   type ItemTally,
 } from '@livedoc/items';
 import { badRequest, json } from '../responses';
-import { readBody, type RouteContext } from './context';
+import { readBody, type DocumentRouteContext } from './context';
 import { forCaller, itemCaller, itemNotFound, writer } from './item-route-kit';
 import { writeItemsWithRetry } from './item-write-loop';
 
@@ -43,7 +43,7 @@ function readTallies(raw: unknown): ItemTally[] | Response {
   return out;
 }
 
-export async function tally(ctx: RouteContext, documentId: string): Promise<Response> {
+export async function tally(ctx: DocumentRouteContext, documentId: string): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'edit');
   if (caller instanceof Response) return caller;
   const body = await readBody(ctx);

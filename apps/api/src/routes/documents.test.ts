@@ -100,6 +100,18 @@ vi.mock('../thumbnail', () => ({ getDocumentThumbnailSvg, getDocumentTabImageSvg
 // The share password (docs/specs/013-workspace/share-password.md): met unless a case says otherwise.
 const { sharePasswordOk } = vi.hoisted(() => ({ sharePasswordOk: vi.fn(async () => true) }));
 vi.mock('../auth/share-access', () => ({ sharePasswordOk }));
+// A create's content is its room's (docs/specs/006-document/blueprints/document-storage.md "Routing"): these cases
+// pin what the worker hands it and the D1 row it writes after.
+const { createDocumentContent } = vi.hoisted(() => ({ createDocumentContent: vi.fn() }));
+vi.mock('../document-room/document-create', () => ({ createDocumentContent }));
+const SUMMARY = {
+  v: 1,
+  tabs: 0,
+  firstTabCount: null,
+  tabCounts: {},
+  stats: null,
+  hasContent: false,
+};
 
 import type { RouteContext } from './context';
 import { handleDocuments } from './documents';
@@ -128,6 +140,8 @@ function fakeDocument(ownerId: string, teamId: string | null = null): DocumentDT
 }
 
 beforeEach(() => {
+  createDocumentContent.mockReset();
+  createDocumentContent.mockResolvedValue({ ok: true, summary: SUMMARY });
   for (const fn of Object.values(db)) fn.mockReset();
   db.setDocumentFolder.mockResolvedValue(true);
   db.getDocumentForSave.mockImplementation(async (...args: unknown[]) => {
@@ -667,10 +681,10 @@ describe('POST /documents carrying an Offline Mode sync (docs/specs/006-document
     );
   const stored = () => db.upsertDocumentMeta.mock.calls[0]![1] as Record<string, unknown>;
 
-  it('stores the deck it was sent', async () => {
+  it('stores the deck it was sent, in the room', async () => {
     db.getDocument.mockResolvedValue(null);
     await create({ presentation: '{"decks":[]}' });
-    expect(stored().presentation).toBe('{"decks":[]}');
+    expect(createDocumentContent.mock.calls[0]![2]).toMatchObject({ presentation: '{"decks":[]}' });
   });
 
   it("keeps a folder that is the caller's own personal folder", async () => {

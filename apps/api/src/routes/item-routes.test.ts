@@ -188,9 +188,12 @@ describe('creating items', () => {
   // A seed or sync of many keyed cards reads the store once per attempt: whether a named key is free comes from
   // that read, not a query per card (it was one `item_key` query each).
   it('names keys without a query per card', async () => {
-    const db = sql.env.DB as unknown as { prepare: (q: string) => unknown };
+    // The item store is the room's (DOCUMENT_DB).
+    const db = sql.env.DOCUMENT_DB as unknown as { prepare: (q: string) => unknown };
     const prepare = db.prepare.bind(db);
     const statementsFor = async (n: number, from: number) => {
+      // What the room owed D1 from before lands first, so only this write's statements are counted.
+      await sql.flush();
       let count = 0;
       db.prepare = (q: string) => {
         count += 1;
@@ -571,7 +574,7 @@ describe('documents and items', () => {
     expect(await db.listItems(sql.env, 'd2')).toHaveLength(1);
   });
 
-  it('copies items with a document and cascades them on delete', async () => {
+  it('copies items with a document and goes with its room', async () => {
     await add({ title: 'A' });
     await call({
       path: '/items',
@@ -587,7 +590,7 @@ describe('documents and items', () => {
       'A',
       'B',
     ]);
-    sql.sql.exec("DELETE FROM documents WHERE id = 'd1'");
+    await db.deleteDocument(sql.env, 'd1');
     expect(await db.listItems(sql.env, 'd1')).toEqual([]);
   });
 });

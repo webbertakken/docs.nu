@@ -83,12 +83,15 @@ describe('a document list says which documents are empty', () => {
 
   it('keeps the count in the write itself: no trigger re-parses the body', () => {
     const { sql } = setUp();
-    // The one trigger on tabs is the revision guard (docs/specs/024-agents/agent-changesets.md,
-    // CS3), which compares two integers and never reads the body.
+    // The triggers on tabs are the revision guard (docs/specs/024-agents/agent-changesets.md, CS3), which compares
+    // two integers, and the outbox's key (docs/specs/006-document/document-storage.md "The outbox"): neither reads
+    // the body.
     const triggers = sql
-      .prepare("SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'tabs'")
+      .prepare(
+        "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'tabs' ORDER BY name",
+      )
       .all();
-    expect(triggers.map((t) => t.name)).toEqual(['tabs_rev_advances']);
+    expect(triggers.map((t) => t.name)).toEqual(['outbox_tab_update', 'tabs_rev_advances']);
     for (const t of triggers) expect(String(t.sql)).not.toMatch(/json|\bdata\b\s*[,)=]/i);
   });
 
@@ -127,7 +130,7 @@ describe('a document list says which documents are empty', () => {
 });
 
 describe('migration 0059 adds the count without reading a body', () => {
-  it('leaves every stored tab unknown, which reads as not empty until it is stamped', async () => {
+  it('leaves every stored tab unknown, which a list reads as not empty', async () => {
     const { env, sql } = sqliteD1({}, { before: '0059' });
     sql.exec(`INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at)
               VALUES ('old-blank', '${OWNER}', 'a', 0, 1, 1), ('old-drawn', '${OWNER}', 'b', 0, 1, 1),
@@ -150,9 +153,6 @@ describe('migration 0059 adds the count without reading a body', () => {
       'old-drawn': false,
       'old-odd': false,
     });
-    // The thumbnail route, having parsed the first tab, stamps what it found.
-    await stampTabElementCount(env, 'ob', 0);
-    expect((await emptiness(env))['old-blank']).toBe(true);
   });
 });
 

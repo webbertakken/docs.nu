@@ -3,7 +3,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { sqliteD1 } from '../test-sqlite-d1';
 import { runTimelineExpirySweep } from '../timeline/expiry-sweep';
 import { readActivity } from './collab-index';
-import { tabLinkedToOwnedDocument, upsertTab } from './tabs';
+import { upsertTab } from './tabs';
 import { countUnseen, readTimeline } from './timeline';
 import { restoreDocument, trashDocument } from './trash';
 
@@ -87,8 +87,12 @@ describe('Activity, while a document is in the Trash', () => {
     const db = sqliteD1();
     liveDoc(db.sql, 'A');
     await upsertTab(db.env, 'A', { id: 't1', name: 't1', elements: [] }, 0);
+    await db.flush();
+    // The action as the room's push left it (docs/specs/013-workspace/inbox.md §2.1).
     insert(db.sql, 'collab_actions', {
+      document_id: 'A',
       tab_id: 't1',
+      tab_name: 't1',
       element_id: 'e1',
       action_id: 'a1',
       element_label: 'Box',
@@ -104,19 +108,6 @@ describe('Activity, while a document is in the Trash', () => {
     await trashDocument(db.env, 'A', T0);
 
     expect((await readActivity(db.env, 'owner', { limit: 10 })).actions).toEqual([]);
-  });
-});
-
-describe('linking a tab, while its only owned document is in the Trash', () => {
-  it('is refused', async () => {
-    const db = sqliteD1();
-    liveDoc(db.sql, 'A');
-    await upsertTab(db.env, 'A', { id: 't1', name: 't1', elements: [] }, 0);
-    expect(await tabLinkedToOwnedDocument(db.env, 't1', 'owner')).toBe(true);
-
-    await trashDocument(db.env, 'A', T0);
-
-    expect(await tabLinkedToOwnedDocument(db.env, 't1', 'owner')).toBe(false);
   });
 });
 
