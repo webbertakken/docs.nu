@@ -32,6 +32,14 @@ describe('SiteFooter', () => {
     expect(footerNav).toContain('href="/about/licences"');
   });
 
+  // docs/specs/004-interface-design/menus.md "Product switcher": Home, Help and Telemetry left the apps menu for the
+  // footer links.
+  it('carries Home, the Help Centre and Telemetry, which the apps menu no longer lists', () => {
+    expect(labels.slice(0, 1)).toEqual(['Home']);
+    expect(footerNav).toMatch(/<a href="\/about"[^>]*>(?:<svg[\s\S]*?<\/svg>)?Home<\/a>/);
+    expect(labels).toEqual(expect.arrayContaining(['Help Centre', 'Telemetry']));
+  });
+
   it('gives an icon to the key links only', () => {
     const withIcon = [...footerNav.matchAll(/<a [^>]*><svg[\s\S]*?<\/svg>([^<]+)<\/a>/g)].map(
       (m) => m[1],

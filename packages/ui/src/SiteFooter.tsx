@@ -27,6 +27,9 @@ const COLUMNS: { title: string; links: (FooterLink | typeof GITHUB)[] }[] = [
   {
     title: 'Product',
     links: [
+      // Home, Help Centre and Telemetry are footer links, not apps-menu rows
+      // (docs/specs/004-interface-design/menus.md "Product switcher").
+      { href: '/about', label: 'Home' },
       { href: '/new', label: 'New Document', icon: lucideGlyph(lucidePenTool, ICON_SIZE) },
       {
         href: '/about/ai',
