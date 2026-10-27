@@ -1,6 +1,7 @@
 import {
   lucideCircle,
   lucideCircleHelp,
+  lucideFilePlus,
   lucideFolder,
   lucidePanelsTopLeft,
   lucideShare2,
@@ -29,6 +30,7 @@ const KIND_PRIMS: Partial<Record<SearchResultItem['kind'], readonly IconPrim[]>>
   tab: lucidePanelsTopLeft,
   palette: lucideSquarePlus,
   command: lucideZap,
+  template: lucideFilePlus,
   setting: lucideSlidersHorizontal,
   help: lucideCircleHelp,
 };

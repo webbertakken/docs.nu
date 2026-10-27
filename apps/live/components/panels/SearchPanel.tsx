@@ -15,6 +15,9 @@ import {
   type SearchResultItem,
 } from '@/lib/search';
 import { titleCaseType, track } from '@/lib/telemetry';
+import { assignAppLocation } from '@/lib/app-location';
+import { SEARCH_TEMPLATES } from './search-templates';
+import { templateCreateHref } from '@livedoc/templates';
 import { SearchResultIcon } from './search-panel-icons';
 import { useModalGuard } from '@/hooks/ui/useModalGuard';
 import type {
@@ -183,6 +186,7 @@ export function SearchPanel({
         currentTabId,
         paletteItems,
         commandItems,
+        templates: SEARCH_TEMPLATES,
         helpItems,
         settingItems,
       }),
@@ -221,6 +225,14 @@ export function SearchPanel({
       window.open(item.href, '_blank', 'noopener,noreferrer');
       track('UI', 'Opened', item.leaf);
       onClose();
+      return;
+    }
+    // A template makes its document at once, through /new (new-document-route.md), from the editor and the Explorer
+    // alike.
+    if (item.kind === 'template') {
+      track('Search', 'Selected', 'Template');
+      onClose();
+      assignAppLocation(templateCreateHref(item.id));
       return;
     }
     if (item.kind === 'setting' && onSelectSetting) {
@@ -407,6 +419,11 @@ export function SearchPanel({
                         {(item.kind === 'folder' || item.kind === 'document') && item.team ? (
                           <span className="shrink-0 text-[10px] text-slate-500 dark:text-slate-400">
                             in {item.team.name}
+                          </span>
+                        ) : null}
+                        {item.kind === 'template' ? (
+                          <span className="shrink-0 text-[10px] text-slate-500 dark:text-slate-400">
+                            new document
                           </span>
                         ) : null}
                         {item.kind === 'tab' && item.isCurrent ? (

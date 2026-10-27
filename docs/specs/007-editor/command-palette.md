@@ -17,6 +17,24 @@ the registry from selection/document verbs to the whole app surface.
   Search button. As in the editor, the chords stand down when the Keyboard Shortcuts setting is
   off, while focus is in a text field (the Explorer's filter box included), and while a dialog is open.
 
+## One search
+
+Ctrl K (Cmd K on a Mac) opens **one search** everywhere: in the Explorer, and over an open document in the editor.
+It is the Search panel, the same panel on both surfaces, and it finds, in one list:
+
+- **Documents**, by their titles, matched fuzzily as the Explorer's lens matches them (`@livedoc/explorer-lens`
+  `matchTitle`): yours, those shared with you, and your teams'. Content search joins them as the document content index
+  lands ([Content search](../013-workspace/content-search.md)).
+- **Templates to start from**, matched as the New Document wizard matches them; picking one makes that document at
+  once ([Canvas and palette](../008-canvas/canvas-and-palette.md#search-panel) "Templates").
+- **In the editor, its actions**: the command registry below, and the editor's navigation (tabs, elements, Add to
+  canvas).
+- Folders, teams, settings and help, as the panel already lists them.
+
+The Explorer's top-bar field stays the **lens**: it filters the view in hand, its filter tokens (`kind:`, `space:`,
+`template:` and the rest, [Explorer filters](../013-workspace/explorer-filters.md)) keep working there, and typing
+plain words in it on Home opens Search results. Ctrl K is the one way to search everything from anywhere.
+
 ## Registry expansion
 
 New commands join `buildEditorCommands`, each mapping 1:1 to an existing
