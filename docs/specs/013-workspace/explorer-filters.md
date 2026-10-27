@@ -108,8 +108,8 @@ general diagram tab's environment.
 - A dimension may hold **several values**: they combine with **or** (`template:retrospective,kanban` lists both
   families). Dimensions combine with **and**.
 - Text matches the document's **name**: every word must appear in it, ignoring case and accents.
-- Text also matches what a document holds, in the api, and those documents join the list under the name matches
-  ([Content search](content-search.md)).
+- Text also matches what a document holds, in the api ([Content search](content-search.md)); how those matches
+  show is the search's presentation.
 - The empty lens matches everything.
 
 ## Token grammar

@@ -66,19 +66,10 @@ each cell's `input` that is not a formula (a formula's result is never stored), 
    `trimSnippet` cuts to at most `SNIPPET_MAX_CHARS` at word boundaries with `…`.
 7. Answer 200 `{ matches: ContentMatch[] }`; `tabId` and `tabName` null for the `~items` row.
 
-### The Explorer
+### Presentation
 
-- `useContentSearch(q)` (`apps/live/components/explorer/`): fires when the lens's free text holds a letter or digit,
-  `CONTENT_SEARCH_DEBOUNCE_MS` after the last change, aborting the previous request (`AbortController`); keeps the
-  answer only when its query is the current one.
-- The lens's text test becomes `titleMatches || contentMatchIds.has(id)` on every view with a lens; the view's own
-  scope still applies (a content match outside the view's documents is dropped).
-- Order with free text: name matches by the title matcher's score, then content-only matches in the answer's order.
-- A content-only row renders `ContentMatchLine` under the name: "In {tabName} · " then the snippet, marks as
-  `<mark>`; for the items row, "In cards · ".
-- States: `Loading` line "Searching inside documents…" (`role="status"`), `Failed` line "Couldn’t search inside
-  documents." with a **Try again** button, nothing when there is no content match.
-- Opening a row whose match was content-only fires `track('Explorer', 'Opened', 'ContentMatch')`.
+Not here: the Ctrl K search's own spec and blueprint read `ContentSearchDTO` and decide how matches show, when the
+request fires and what it counts.
 
 ## Interfaces and contracts
 
@@ -125,7 +116,6 @@ CREATE VIRTUAL TABLE content_search_fts USING fts5(
 | FTS statement fails                           | 503 `search_unavailable`, `[content-search] failed error=<name>` |
 | A reader's link lapses between write and read | `visible` drops it                                               |
 | Tab-scoped reader                             | only that tab's row; never `~items`                              |
-| Answer arrives after the lens changed         | discarded                                                        |
 | This Browser documents                        | never sent; name matching only                                   |
 | Text past the cap                             | not found; nothing signalled                                     |
 
@@ -144,19 +134,6 @@ CREATE VIRTUAL TABLE content_search_fts USING fts5(
 - Index size: the trigram index is about 3 to 4 times the text; at the cap, a tab adds at most about 160 KB.
 - A drain rewrites a tab's row only when its text changed (the upsert's `WHERE`).
 
-## Accessibility
-
-- Marks are `<mark>` with the theme's highlight token, contrast at least 4.5:1 in light and dark.
-- The loading and failed lines are `role="status"`; **Try again** is a real button with focus ring.
-- The lens's live region announces the combined count once the content answer lands.
-
-## Web experience
-
-- The request is off the typing path (debounced, aborted); name matches render first, so INP is the title
-  matcher's.
-- Content rows are appended under existing rows, never inserted above them, so the list does not shift what the
-  reader is looking at (CLS).
-
 ## Observability
 
 | Fingerprint                                                          | When                 |
@@ -167,34 +144,32 @@ CREATE VIRTUAL TABLE content_search_fts USING fts5(
 
 ## Testing
 
-| Rule                                                          | Test                                                    |
-| ------------------------------------------------------------- | ------------------------------------------------------- |
-| Search text covers every listed source, in order              | `search-text.test.ts` (document-views)                  |
-| Items text                                                    | `search-text.test.ts` (items)                           |
-| Substring, accent folding, typo by trigram share, short words | `content-search.test.ts`                                |
-| Every word satisfied in one tab                               | `content-search.test.ts`                                |
-| Access: own, team, shared, scoped tab, trashed, lapsed link   | `content-search.test.ts`                                |
-| One row per document; ranking order                           | `content-search.test.ts`                                |
-| Snippet marks and trim                                        | `content-snippet.test.ts`                               |
-| Index triggers and cascade                                    | `content-search-index.test.ts`                          |
-| Route: 400, 401, 429, 503                                     | `content-search-route.test.ts`                          |
-| Explorer merge, order, states, stale answers, telemetry       | `useContentSearch.test.ts`, `ContentMatchLine.test.tsx` |
-| Budget                                                        | `content-search.test.ts`                                |
+| Rule                                                          | Test                                   |
+| ------------------------------------------------------------- | -------------------------------------- |
+| Search text covers every listed source, in order              | `search-text.test.ts` (document-views) |
+| Items text                                                    | `search-text.test.ts` (items)          |
+| Substring, accent folding, typo by trigram share, short words | `content-search.test.ts`               |
+| Every word satisfied in one tab                               | `content-search.test.ts`               |
+| Access: own, team, shared, scoped tab, trashed, lapsed link   | `content-search.test.ts`               |
+| One row per document; ranking order                           | `content-search.test.ts`               |
+| Snippet marks and trim                                        | `content-snippet.test.ts`              |
+| Index triggers and cascade                                    | `content-search-index.test.ts`         |
+| Route: 400, 401, 429, 503                                     | `content-search-route.test.ts`         |
+| Budget                                                        | `content-search.test.ts`               |
 
 ## Constants and configuration
 
-| Constant                     | Value    | Provenance                                     | Safe range       |
-| ---------------------------- | -------- | ---------------------------------------------- | ---------------- |
-| `SEARCH_TEXT_MAX_CHARS`      | 32,768   | spec                                           | 4,096 to 262,144 |
-| `SEARCH_QUERY_MAX_CHARS`     | 512      | the lens's cap                                 | fixed            |
-| `SEARCH_TRIGRAMS_MAX`        | 32       | spec                                           | 8 to 64          |
-| `SEARCH_MIN_TRIGRAM_SHARE`   | 0.5      | spec ("at least half")                         | 0.3 to 0.8       |
-| `SEARCH_RESULTS_MAX`         | 50       | spec                                           | 10 to 200        |
-| `SEARCH_CANDIDATES`          | 500      | ten times the results, before the share filter | 100 to 2,000     |
-| `SNIPPET_TOKENS`             | 160      | trigram tokens are about one character each    | 64 to 256        |
-| `SNIPPET_MAX_CHARS`          | 160      | spec ("about 160 characters")                  | 80 to 240        |
-| `CONTENT_SEARCH_DEBOUNCE_MS` | 300      | spec                                           | 150 to 600       |
-| Rate limit                   | 120/60 s | spec                                           | 30 to 600        |
+| Constant                   | Value    | Provenance                                     | Safe range       |
+| -------------------------- | -------- | ---------------------------------------------- | ---------------- |
+| `SEARCH_TEXT_MAX_CHARS`    | 32,768   | spec                                           | 4,096 to 262,144 |
+| `SEARCH_QUERY_MAX_CHARS`   | 512      | the lens's cap                                 | fixed            |
+| `SEARCH_TRIGRAMS_MAX`      | 32       | spec                                           | 8 to 64          |
+| `SEARCH_MIN_TRIGRAM_SHARE` | 0.5      | spec ("at least half")                         | 0.3 to 0.8       |
+| `SEARCH_RESULTS_MAX`       | 50       | spec                                           | 10 to 200        |
+| `SEARCH_CANDIDATES`        | 500      | ten times the results, before the share filter | 100 to 2,000     |
+| `SNIPPET_TOKENS`           | 160      | trigram tokens are about one character each    | 64 to 256        |
+| `SNIPPET_MAX_CHARS`        | 160      | spec ("about 160 characters")                  | 80 to 240        |
+| Rate limit                 | 120/60 s | spec                                           | 30 to 600        |
 
 ## Defaults ledger
 
