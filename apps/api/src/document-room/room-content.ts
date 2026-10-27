@@ -4,7 +4,10 @@
 // deadline and runs the drain when it is due.
 
 import type { DocumentRoom } from './document-room';
+import { markBorn, moveIntoRoom, storedMove, type MoveOutcome } from './content-move';
 import { DocumentDb } from './document-db';
+import { json } from '../responses';
+import { RETRY_AFTER_S } from './document-route';
 import { drainOutbox } from './document-outbox';
 import { documentRpc, type DocumentRoomRpc } from './document-rpc';
 import { hasDocumentSchema, migrateDocumentSchema } from './document-schema';
@@ -28,15 +31,23 @@ export class RoomIdMismatchError extends Error {
 }
 
 // A room that cannot serve its document yet (its legacy handover or its move failed); the worker answers it as
-// 503 `room_unavailable`, and the next call tries again.
+// 503 `room_unavailable` or `content_moving`, and the next call tries again.
 export class RoomNotReadyError extends Error {
+  readonly step: 'handover' | 'move';
   constructor(documentId: string, step: 'handover' | 'move') {
     super(`room_unavailable id=${documentId} step=${step}`);
     this.name = 'RoomNotReadyError';
+    this.step = step;
+  }
+
+  // The answer to a request that met it: 503, named for the step, retried after a few seconds.
+  response(): Response {
+    const error = this.step === 'move' ? 'content_moving' : 'room_unavailable';
+    return json({ error }, { status: 503, headers: { 'Retry-After': String(RETRY_AFTER_S) } });
   }
 }
 
-type RoomState = Pick<DurableObjectState, 'storage' | 'id' | 'waitUntil'>;
+type RoomState = Pick<DurableObjectState, 'storage' | 'id' | 'waitUntil' | 'blockConcurrencyWhile'>;
 
 // What the room hands its content half: the one alarm, and the gate every RPC passes before it is answered (the
 // legacy handover, then the move), after the room is bound to the RPC's document.
@@ -52,6 +63,9 @@ export class RoomContent {
   private readonly state: RoomState;
   private readonly hooks: RoomContentHooks;
   private documentId: string | null = null;
+  private db: DocumentDb | undefined;
+  // Whether this instance knows its content is moved (the key-value record decides across instances).
+  private moved = false;
   private schemaReady: boolean;
   // Whether this instance has run the schema steps (a wake after a release may find an older version).
   private migrated = false;
@@ -68,12 +82,14 @@ export class RoomContent {
       this.env = undefined;
       return;
     }
+    // (`db` below is kept for the move, which writes through it inside its own transaction.)
     const db = new DocumentDb(sql, {
       transaction: (fn) => state.storage.transactionSync(fn),
       ensureSchema: () => this.ensureSchema(),
       hasSchema: () => this.schemaReady,
       onWrite: () => this.noteWrite(),
     });
+    this.db = db;
     this.env = {
       ...env,
       DOCUMENT_DB: db.asD1(),
@@ -100,11 +116,71 @@ export class RoomContent {
 
   // The RPC surface, bound to `documentId`, once the room is ready to serve it: the only way in for an RPC, so none
   // skips the gate.
-  async rpc(documentId: string): Promise<DocumentRoomRpc> {
+  async rpc(documentId: string, born = false): Promise<DocumentRoomRpc> {
     this.bind(documentId);
     await this.hooks.prepare(documentId);
+    await this.ensureMoved(documentId, born);
     if (!this.env) throw new Error('room has no content store');
     return documentRpc(this.env, (p) => this.state.waitUntil(p));
+  }
+
+  // The move gate (docs/specs/006-document/blueprints/document-storage-move.md, M1): before any content is served,
+  // the room holds its document's content. A created or copied document is born moved (M4); any other moves now,
+  // other requests waiting; a document D1 has no row for stays empty (G1). A failed move throws, answered 503
+  // `content_moving`, and the next request tries again.
+  async ensureMoved(documentId: string, born: boolean): Promise<void> {
+    if (this.moved) return;
+    const outcome = await this.moveOnce(documentId, born);
+    if (outcome && outcome.status !== 'moved') throw new RoomNotReadyError(documentId, 'move');
+  }
+
+  // The `move` RPC (the sweep's): the room's move outcome, moving now when it has not; null for G1.
+  async move(documentId: string): Promise<MoveOutcome | null> {
+    return this.moveOnce(documentId, false);
+  }
+
+  private async moveOnce(documentId: string, born: boolean): Promise<MoveOutcome | null> {
+    const db = this.db;
+    const env = this.env;
+    // A unit test's room without SQLite or bindings has no D1 to move from.
+    if (!db || !env) {
+      this.moved = true;
+      return null;
+    }
+    const kv = this.state.storage.kv;
+    let result: { outcome: MoveOutcome | null } | { error: unknown } = { outcome: null };
+    // A throw inside blockConcurrencyWhile resets the object, so it is caught inside.
+    await this.state.blockConcurrencyWhile(async () => {
+      try {
+        const now = Date.now();
+        const stored = storedMove(kv);
+        if (born && !stored) {
+          result = { outcome: markBorn(kv, now) };
+          return;
+        }
+        const room = {
+          env,
+          db,
+          kv,
+          transaction: <T>(fn: () => T): T => this.state.storage.transactionSync(fn),
+          ensureSchema: () => this.ensureSchema(),
+        };
+        result = { outcome: await moveIntoRoom(room, documentId, now) };
+      } catch (error) {
+        result = { error };
+      }
+    });
+    const settled = result as { outcome: MoveOutcome | null } | { error: unknown };
+    if ('error' in settled) {
+      const name = settled.error instanceof Error ? settled.error.name : typeof settled.error;
+      console.error(
+        `[content-move] failed id=${documentId} stage=gate error=${name}`,
+        settled.error,
+      );
+      throw new RoomNotReadyError(documentId, 'move');
+    }
+    if (settled.outcome?.status === 'moved') this.moved = true;
+    return settled.outcome;
   }
 
   // The drain's deadline, for the room's one alarm; null with nothing owed.

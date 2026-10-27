@@ -69,6 +69,9 @@ export function answerDocumentRequest(
   return handleDocumentRequest(documentRouteContext(env, request, identity, waitUntil));
 }
 
+/** Seconds a document request refused with 503 waits before it tries again. */
+export const RETRY_AFTER_S = 5;
+
 // What a document request answers when its room throws or cannot be reached: 503 `room_unavailable`, logged with
 // the path (blueprint "Errors and edge cases", D16).
 export function roomUnavailable(request: Request, error: unknown): Response {
@@ -78,6 +81,6 @@ export function roomUnavailable(request: Request, error: unknown): Response {
   console.error(`[room-route] failed id=${id} path=${url.pathname} error=${name}`, error);
   return json(
     { error: 'room_unavailable', message: 'The document is not available right now.' },
-    { status: 503 },
+    { status: 503, headers: { 'Retry-After': String(RETRY_AFTER_S) } },
   );
 }

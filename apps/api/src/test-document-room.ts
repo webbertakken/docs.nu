@@ -109,6 +109,7 @@ export function testDocumentRoom(env?: Env): {
   sql.exec('PRAGMA foreign_keys = ON');
   const kv = new Map<string, unknown>();
   let alarm: number | null = null;
+  let gate: Promise<unknown> = Promise.resolve();
   const id = {
     name: 'room',
     toString: () => 'room',
@@ -130,6 +131,15 @@ export function testDocumentRoom(env?: Env): {
         .all() as { name: string }[])
         sql.exec(`DROP TABLE IF EXISTS "${name}"`);
     },
+    // The synchronous key-value API of a SQLite-backed room, over the same keys.
+    kv: {
+      get: (key: string) => kv.get(key),
+      put: (key: string, value: unknown) => {
+        kv.set(key, value);
+      },
+      delete: (key: string) => kv.delete(key),
+      list: () => kv.entries(),
+    },
     getAlarm: async () => alarm,
     setAlarm: async (at: number) => {
       alarm = at;
@@ -142,7 +152,12 @@ export function testDocumentRoom(env?: Env): {
     id,
     storage,
     waitUntil: () => {},
-    blockConcurrencyWhile: async (fn: () => Promise<unknown>) => fn(),
+    // As a Durable Object: one callback at a time, the next waiting for the one before.
+    blockConcurrencyWhile: (fn: () => Promise<unknown>) => {
+      const run = gate.then(fn);
+      gate = run.catch(() => undefined);
+      return run;
+    },
     getWebSockets: () => [],
     acceptWebSocket: () => {},
   } as unknown as DurableObjectState;

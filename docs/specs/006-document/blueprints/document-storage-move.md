@@ -7,17 +7,17 @@ document migration door (the room writes a moved document in one transaction).
 
 ## Domain and naming
 
-| Term            | Identifier                                                                             | Never             |
-| --------------- | -------------------------------------------------------------------------------------- | ----------------- |
-| Move            | `moveIntoRoom()` (`document-room/content-move.ts` (planned)); RPC `DocumentRoom.move`  | migrate, import   |
-| Moved           | room key-value `content-move` present (`MoveOutcome`)                                  | migrated, synced  |
-| Move gate       | `ensureMoved()`, first thing in every RPC and `fetch`                                  | lock              |
-| Content hash    | `contentHashOf(content: MovableContent): Promise<string>` (`content-hash.ts`)          | checksum          |
-| Movable content | `MovableContent`, the rows a move copies, in canonical order                           | snapshot, payload |
-| Move record     | D1 `content_moves` row                                                                 | migration log     |
-| Legacy room     | class `LegacyDocumentRoom`, binding `LEGACY_DOCUMENT_ROOM` (`legacy-document-room.ts`) | old room          |
-| Sweep           | `sweepContentMoves(env, now)` (`content-move-sweep.ts`), cron `* * * * *`              | backfill          |
-| Operator tool   | `apps/api/scripts/content-move.ts`, commands `plan` and `verify`                       | migrator          |
+| Term            | Identifier                                                                                | Never             |
+| --------------- | ----------------------------------------------------------------------------------------- | ----------------- |
+| Move            | `moveIntoRoom()` (`document-room/content-move.ts`); RPC `DocumentRoom.move`               | migrate, import   |
+| Moved           | room key-value `content-move` present (`MoveOutcome`)                                     | migrated, synced  |
+| Move gate       | `RoomContent.ensureMoved()`, after the handover, before every RPC and `fetch` is answered | lock              |
+| Content hash    | `contentHashOf(content: MovableContent): Promise<string>` (`content-hash.ts`)             | checksum          |
+| Movable content | `MovableContent`, the rows a move copies, in canonical order                              | snapshot, payload |
+| Move record     | D1 `content_moves` row                                                                    | migration log     |
+| Legacy room     | class `LegacyDocumentRoom`, binding `LEGACY_DOCUMENT_ROOM` (`legacy-document-room.ts`)    | old room          |
+| Sweep           | `sweepContentMoves(env, now)` (`content-move-sweep.ts`), cron `* * * * *`                 | backfill          |
+| Operator tool   | `apps/api/scripts/content-move.ts`, commands `plan` and `verify`                          | migrator          |
 
 ## Behaviour and state
 
@@ -53,10 +53,13 @@ next: string | null }>` (pages of `LEGACY_PAGE_KEYS` keys by `storage.list({ sta
 
 ### Room state handover (`legacy-handover.ts`)
 
-- Every worker-to-room call goes through `documentRoom(env, id)` (`room-client.ts`), whose stub adds
-  `X-Document-Id: <id>` to every `fetch`; a guard test fails on any `DOCUMENT_ROOM.get(` outside it.
-- `DocumentRoom.fetch` first runs `ensureHandedOver(documentId)` under `blockConcurrencyWhile`, once per instance
-  (an in-memory flag), before any routing.
+- Every worker-to-room call goes through `documentRoom(env, id)` (`document-room/document-client.ts`): its RPCs carry
+  the id as their first argument and its `fetch` adds `X-Document-Id: <id>`; a guard test fails on any stub made
+  outside it.
+- Both bind the room to that id first (`RoomContent.bind`, one id per room, `room_id_mismatch` otherwise: a thrown
+  `RoomIdMismatchError` for an RPC, 409 for a fetch). Then, once per instance (an in-memory flag), the handover runs
+  under `blockConcurrencyWhile`: `DocumentRoom.fetch` through `ensureReady`, every RPC through `RoomContent.rpc`, the
+  only way an RPC reaches the content, so none skips it.
 - `takeLegacyState(storage, legacy)`: when the key-value key `legacy-handover` is present, nothing; otherwise page
   `exportState` to the end, `put` every entry (pages of at most `HANDOVER_PUT_KEYS`, the key-value batch limit),
   then `put('legacy-handover', { at, keys })`; answers the count taken.
@@ -82,7 +85,8 @@ throws or its hashes differ). `moved` is terminal.
 - **Invariant M2**: a move writes the room in one `transactionSync`, its key-value part through the synchronous
   `ctx.storage.kv` inside it; the hash check runs inside the same transaction and throws on a difference.
 - **Invariant M3**: a move never writes D1's content tables; it writes only `content_moves`.
-- **Invariant M4**: `create` and `importCopy` set `content-move` to `{ born: true }`: a new document is moved.
+- **Invariant M4**: `create` (unless it re-commits a document D1 already holds, which moves first) and `importCopy`
+  set `content-move` to a born outcome (`markBorn`) in the gate: a new document is moved.
 - **Guard G1**: the gate moves only when D1 holds a `documents` row for the id (trashed or not); otherwise it answers
   as an absent document, and the room stays `empty`.
 - **Create order**: the worker calls `room.create` before it inserts the D1 row (so G1 never sees a row whose room
@@ -90,7 +94,7 @@ throws or its hashes differ). `moved` is terminal.
 
 ### A move (`moveIntoRoom(env, documentId)`)
 
-1. Read D1 (`readMovableContent`): the `documents` row's deck, item catalogue and counters; `document_tabs` for the
+1. Read D1 (`readD1`): the `documents` row's deck, item catalogue and counters; `document_tabs` for the
    id; the tabs' bodies in groups of at most `MOVE_READ_BYTES` (lengths first, `length(data)`); `agent_changesets`
    and parts for the id; `items`, `sheets`, `sheet_cells`, `sheet_refs` for its tabs and id; for each tab, the other
    documents whose `document_tabs` hold it (the holders).
@@ -98,8 +102,10 @@ throws or its hashes differ). `moved` is terminal.
 3. In one transaction: ensure the schema; write every row verbatim; recompute `tab_stats` (`tabStatsOfData`, dated
    by the tab's `updated_at`), `image_refs` (`imageRefIdsFromData`) and `plan_board_statuses` from each body; write
    `tab_shares` from the holders; read the room's own rows
-   back into `MovableContent`; `roomHash = contentHashOf(back)`; throw `move_mismatch` when `roomHash !== d1Hash` or
-   the counts differ; put `content-move = { movedAt, d1Hash, roomHash, d1Tabs, roomTabs }`.
+   back into `MovableContent`; throw `MoveMismatchError` when its `canonicalJson` differs from D1's or the counts
+   differ (the hash itself is asynchronous, so the transaction compares the text it is taken over: equal texts hash
+   equally, and `roomHash` is then `d1Hash`; on a difference the room's hash is taken after the rollback); put
+   `content-move`, the `MoveOutcome`.
 4. After commit: upsert `content_moves` (`moved`); the outbox holds a `summary`, `images`, `cards`, `items` and every
    `tab` key (its triggers fired on the inserts), so the first drain fills D1's indexes.
 
@@ -164,13 +170,16 @@ m.document_id = d.id WHERE m.status IS NOT 'moved');`
 
 - RPC `DocumentRoom.move(documentId: string): Promise<MoveOutcome>` with
   `MoveOutcome = { status: 'moved' | 'failed' | 'mismatch'; d1Hash: string | null; roomHash: string | null;
-d1Tabs: number | null; roomTabs: number | null; born: boolean }`.
+d1Tabs: number | null; roomTabs: number | null; born: boolean; movedAt: number | null; error: string | null }`;
+  null when D1 holds no row for the document (G1). The client's `documentRoom(env, id).move()`.
 - D1 migration (with the storage blueprint's): `content_moves (document_id TEXT PRIMARY KEY REFERENCES documents (id)
-ON DELETE CASCADE, status TEXT NOT NULL CHECK (status IN ('moved', 'failed', 'mismatch')), d1_tabs INTEGER,
+ON DELETE CASCADE, status TEXT NOT NULL CHECK (status IN ('moved', 'failed', 'mismatch')), born INTEGER NOT NULL DEFAULT 0, d1_tabs INTEGER,
 room_tabs INTEGER, d1_hash TEXT, room_hash TEXT, attempts INTEGER NOT NULL
-DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
-- The wire to the editor is unchanged; 503 `content_moving` is a new named answer on every document route, listed in
-  the OpenAPI manifest's shared responses.
+DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)` (`0111_content_moves.sql`), indexed on
+  `(status, tried_at)` for the sweep. `born = 1` marks a document created or copied in its room; the tool's `verify`
+  passes it once `moved`, since D1 never held its content.
+- The wire to the editor is unchanged; 503 `content_moving` (`Retry-After: 5`) is a new named answer on every
+  document route, listed beside `room_unavailable` in the API app spec's storage section.
 
 ## Data and persistence
 
@@ -209,34 +218,34 @@ DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 
 ## Observability
 
-| Fingerprint                                                                 | When                               |
-| --------------------------------------------------------------------------- | ---------------------------------- |
-| `[content-move] moved id=<id> tabs=<n> keys=<k> hash=<h8>`                  | a move commits                     |
-| `[content-move] mismatch id=<id> d1=<h8> room=<h8> d1Tabs=<n> roomTabs=<m>` | hashes or counts differ            |
-| `[content-move] failed id=<id> stage=<read\|write\|record> error=<name>`    | any other failure                  |
-| `[content-move] sweep found=<n> moved=<m> failed=<f>`                       | a sweep run that found work        |
-| `[legacy-handover] took id=<id> keys=<n>`                                   | a room takes its legacy state      |
-| `[legacy-handover] failed id=<id> error=<name>`                             | a handover fails before its marker |
-| `[legacy-handover] clear failed id=<id>`                                    | after a handover                   |
-| `[legacy-handover] no document id`                                          | a call without `X-Document-Id`     |
+| Fingerprint                                                                           | When                               |
+| ------------------------------------------------------------------------------------- | ---------------------------------- |
+| `[content-move] moved id=<id> tabs=<n> keys=<k> hash=<h8>`                            | a move commits                     |
+| `[content-move] mismatch id=<id> d1=<h8> room=<h8> d1Tabs=<n> roomTabs=<m>`           | hashes or counts differ            |
+| `[content-move] failed id=<id> stage=<read\|write\|record\|gate\|sweep> error=<name>` | any other failure                  |
+| `[content-move] sweep found=<n> moved=<m> failed=<f>`                                 | a sweep run that found work        |
+| `[legacy-handover] took id=<id> keys=<n>`                                             | a room takes its legacy state      |
+| `[legacy-handover] failed id=<id> error=<name>`                                       | a handover fails before its marker |
+| `[legacy-handover] clear failed id=<id>`                                              | after a handover                   |
+| `[legacy-handover] no document id`                                                    | a call without `X-Document-Id`     |
 
 ## Testing
 
-| Rule                                                        | Test                                               |
-| ----------------------------------------------------------- | -------------------------------------------------- |
-| M1 no content served before moved; concurrent requests wait | `content-move.test.ts`                             |
-| M2 a mismatch or throw leaves the room unchanged            | `content-move.test.ts`                             |
-| M3 D1 content tables unchanged after a move                 | `content-move.test.ts` (row hash before and after) |
-| M4 created and copied documents are born moved              | `content-move.test.ts`                             |
-| G1 no D1 row: no move, room stays empty                     | `content-move.test.ts`                             |
-| Hash identical in Node and in the room for the same rows    | `content-hash.test.ts`                             |
-| Shared tab moves into both holders                          | `content-move.test.ts`                             |
-| Legacy state taken verbatim once, restored, then cleared    | `legacy-handover.test.ts`                          |
-| Every room call names its document                          | `room-client.test.ts` (guard)                      |
-| Handover failure answers 503 and retries                    | `legacy-handover.test.ts`                          |
-| Sweep order, batch, retry gap, idle                         | `content-move-sweep.test.ts`                       |
-| Tool refuses a non-SELECT; verify pass and fail tables      | `document-room/content-move-plan.test.ts`          |
-| Drop guard fails with an unmoved document                   | `migrations` test on node:sqlite                   |
+| Rule                                                        | Test                                                                |
+| ----------------------------------------------------------- | ------------------------------------------------------------------- |
+| M1 no content served before moved; concurrent requests wait | `content-move.test.ts`                                              |
+| M2 a mismatch or throw leaves the room unchanged            | `content-move.test.ts`                                              |
+| M3 D1 content tables unchanged after a move                 | `content-move.test.ts` (row hash before and after)                  |
+| M4 created and copied documents are born moved              | `content-move.test.ts`                                              |
+| G1 no D1 row: no move, room stays empty                     | `content-move.test.ts`                                              |
+| Hash identical in Node and in the room for the same rows    | `content-hash.test.ts`                                              |
+| Shared tab moves into both holders                          | `content-move.test.ts`                                              |
+| Legacy state taken verbatim once, restored, then cleared    | `legacy-handover.test.ts`                                           |
+| Every room call names its document; every RPC hands over    | `document-client.test.ts` (guard), `document-room-handover.test.ts` |
+| Handover failure answers 503 and retries                    | `legacy-handover.test.ts`                                           |
+| Sweep order, batch, retry gap, idle, the cron               | `content-move-sweep.test.ts`                                        |
+| Tool refuses a non-SELECT; verify pass and fail tables      | `document-room/content-move-plan.test.ts`                           |
+| Drop guard fails with an unmoved document                   | `migrations` test on node:sqlite                                    |
 
 ## Constants and configuration
 
