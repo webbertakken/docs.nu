@@ -71,11 +71,12 @@ describe('JumpBackIn, desktop and tablet', () => {
     expect(screen.getByRole('heading', { level: 3, name: 'Most Used' })).toBeTruthy();
     const first = within(used).getAllByRole('link')[0]!;
     expect(first.getAttribute('href')).toBe('/document/m1');
-    expect(first.dataset.jumpBackInCard).toBe('large');
-    expect(within(recent).getAllByRole('link')[0]!.dataset.jumpBackInCard).toBe('compact');
+    // Each a thumbnail tile, four across, as before the front-page restyle.
+    expect(used.className).toContain('grid-cols-4');
+    expect(recent.className).toContain('grid-cols-4');
   });
 
-  it("says why each document is there, as the card's description", () => {
+  it("says why each document is there, as the tile's description", () => {
     const now = Date.now();
     renderIt({
       mostUsed: [item('m1', { useDays: 1 }), item('m2', { useDays: 14 })],
@@ -110,8 +111,7 @@ describe('JumpBackIn, desktop and tablet', () => {
       />,
     );
     const box = container.querySelector('[data-jump-back-in-group="mostUsed"]')!.parentElement!;
-    expect(box.className).toContain('min-h-[38.625rem]');
-    expect(box.className).toContain('lg:min-h-[20.625rem]');
+    expect(box.className).toContain('min-h-[18.5rem]');
   });
 
   it('tracks which half a document was opened from', () => {
@@ -155,11 +155,11 @@ describe('JumpBackIn, desktop and tablet', () => {
     expect(screen.queryByRole('list')).toBeNull();
     // Nothing to see more of.
     expect(screen.queryByRole('link', { name: 'See More' })).toBeNull();
-    // In place of one most used card: its size, in the first column, no group labels.
+    // In place of the first tiles: a tile's height, from the first column, no group labels.
     const slot = screen.getByText('No documents yet').closest('[data-empty-state]')!.parentElement!;
-    expect(slot.className).toContain('h-[12.5rem]');
+    expect(slot.className).toContain('h-[7.25rem]');
     expect(slot.className).toContain('border-dashed');
-    expect(slot.parentElement!.className).toContain('lg:grid-cols-4');
+    expect(slot.parentElement!.className).toContain('grid-cols-4');
     expect(screen.queryByText('Most Used')).toBeNull();
   });
 });

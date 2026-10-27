@@ -3,11 +3,9 @@
 // technology; the busy section says it is loading.
 
 import {
-  COMPACT_CARD,
+  GRID,
+  GRID_THUMB,
   JUMP_BACK_IN_MIN_HEIGHT,
-  LARGE_CARD,
-  MOST_USED_GRID,
-  RECENT_GRID,
   SKELETON,
   STRIP_HEIGHT,
   STRIP_THUMB,
@@ -18,37 +16,38 @@ const GROUP_ITEMS = 4;
 const STRIP_ITEMS = 4;
 const ENTRY_ROWS = 3;
 
-function TileSkeleton({ thumb }: { thumb: string }) {
+function TileSkeleton({ thumb, line = false }: { thumb: string; line?: boolean }) {
   return (
     <>
       <div className={`${thumb} ${SKELETON}`} />
       <div className="mt-1 h-4 py-0.5">
         <div className={`h-3 w-3/4 ${SKELETON}`} />
       </div>
+      {line ? (
+        <div className="h-4 py-1">
+          <div className={`h-2 w-1/2 ${SKELETON}`} />
+        </div>
+      ) : null}
     </>
   );
 }
 
-/** Jump Back In on a wide screen: both groups' labels and cards, in their reserved height. */
+/** Jump Back In on a wide screen: both groups' labels and tiles, in their reserved height. */
 export function GridSkeleton() {
   return (
     <div aria-hidden className={`flex flex-col gap-4 ${JUMP_BACK_IN_MIN_HEIGHT}`}>
-      <div>
-        <div className={`mb-2.5 h-4 w-20 ${SKELETON}`} />
-        <div className={MOST_USED_GRID}>
-          {Array.from({ length: GROUP_ITEMS }, (_, i) => (
-            <div key={i} className={`${LARGE_CARD} rounded-[18px] ${SKELETON}`} />
-          ))}
+      {['w-20', 'w-16'].map((labelWidth) => (
+        <div key={labelWidth}>
+          <div className={`mb-2 h-4 ${labelWidth} ${SKELETON}`} />
+          <div className={GRID}>
+            {Array.from({ length: GROUP_ITEMS }, (_, i) => (
+              <div key={i} className="min-w-0">
+                <TileSkeleton thumb={GRID_THUMB} line />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-      <div>
-        <div className={`mb-2.5 h-4 w-16 ${SKELETON}`} />
-        <div className={RECENT_GRID}>
-          {Array.from({ length: GROUP_ITEMS }, (_, i) => (
-            <div key={i} className={`${COMPACT_CARD} rounded-[14px] ${SKELETON}`} />
-          ))}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

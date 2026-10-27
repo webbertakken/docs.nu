@@ -14,7 +14,7 @@ import { groupsByDay } from '@/app/explorer/home/home-model';
 import { WhatHappenedSkeleton } from './HomeSkeletons';
 import { ActionEntry, SummaryEntry } from './WhatHappenedEntry';
 import { HomeSection } from './HomeSection';
-import { WHAT_HAPPENED_PANEL } from './home-styles';
+import { MUTED } from './home-styles';
 
 export function WhatHappened({
   groups,
@@ -52,13 +52,10 @@ export function WhatHappened({
       {loading ? (
         <WhatHappenedSkeleton />
       ) : (
-        <div className={`flex flex-col gap-3 ${WHAT_HAPPENED_PANEL}`}>
+        <div className="flex flex-col gap-3">
           {days.map((day) => (
             <div key={day.day}>
-              <h3
-                id={`home-day-${day.day}`}
-                className="mb-1 px-2 pt-3 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
-              >
+              <h3 id={`home-day-${day.day}`} className={`mb-1 px-2 text-xs font-medium ${MUTED}`}>
                 {day.label}
               </h3>
               <ul className="flex flex-col gap-1">

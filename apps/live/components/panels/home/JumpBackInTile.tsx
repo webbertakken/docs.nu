@@ -2,11 +2,12 @@
 
 // One document of Jump Back In (docs/specs/013-workspace/explorer-home.md "Jump Back In"): its
 // snapshot thumbnail with its name below, one link named by the document (plus This Browser for one
-// stored here), the full name as its tooltip. Grid and strip draw the same tile at their own size.
-// Which half of the set it came from is tracked, never shown (Calm by default). The strip ends in
+// stored here), the full name as its tooltip. Grid and strip draw the same tile at their own size; the grid adds the
+// quiet line that says why it is here ("Used on 3 days"), which describes the link. The strip ends in
 // the See More tile, the same size as a thumbnail. A document's tile carries its ⋯ menu (JumpBackInMenu) when the
 // Explorer has it.
 
+import { useId } from 'react';
 import { ChevronRightIcon, Tooltip } from '@livedoc/ui';
 import { DocumentThumbnail } from '@/components/panels/DocumentThumbnail';
 import { ThisBrowserPill, THIS_BROWSER_LABEL } from '@/components/primitives/ThisBrowserPill';
@@ -15,7 +16,7 @@ import type { DocumentEntryProps } from '@/app/explorer/explorer-view-props';
 import { HOME_COPY } from '@/app/explorer/home/home-copy';
 import type { JumpBackInGroup, JumpBackInItem } from '@/app/explorer/home/home-model';
 import { InAppLink } from './HomeSection';
-import { FOCUS_RING, STRIP_THUMB } from './home-styles';
+import { FOCUS_RING, MUTED, STRIP_THUMB } from './home-styles';
 import { JumpBackInMenu, JumpBackInRename } from './JumpBackInMenu';
 
 const THUMB_BOX =
@@ -26,6 +27,7 @@ export function JumpBackInTile({
   item,
   group,
   thumbClassName,
+  line,
   entry = null,
 }: {
   ownerId: string;
@@ -33,11 +35,14 @@ export function JumpBackInTile({
   group: JumpBackInGroup;
   /** The thumbnail's size: the grid's share of the width, or the strip's 128 × 80. */
   thumbClassName: string;
+  /** Why it is here, under its name (the grid's tiles); the strip's tiles carry none. */
+  line?: string;
   /** The document's Explorer menu, or null when the Explorer has not loaded it (no ⋯). */
   entry?: DocumentEntryProps | null;
 }) {
   // The Explorer's own name once it has the document, so a rename from the menu shows at once.
   const name = entry?.document.name ?? item.name;
+  const lineId = useId();
   if (entry?.renaming) {
     return (
       <div className="min-w-0">
@@ -54,8 +59,11 @@ export function JumpBackInTile({
         </span>
         <JumpBackInRename
           entry={entry}
-          className="mt-1 block h-5 w-full min-w-0 rounded border border-brand-300 bg-white px-1 py-0 text-xs text-slate-900 dark:border-brand-500/50 dark:bg-slate-900 dark:text-slate-100"
+          className="mt-1 block h-4 w-full min-w-0 rounded border border-brand-300 bg-white px-1 py-0 text-xs leading-[14px] text-slate-900 dark:border-brand-500/50 dark:bg-slate-900 dark:text-slate-100"
         />
+        {line ? (
+          <span className={`block h-4 truncate text-[11px] leading-4 ${MUTED}`}>{line}</span>
+        ) : null}
       </div>
     );
   }
@@ -65,6 +73,7 @@ export function JumpBackInTile({
         <a
           href={item.href}
           aria-label={item.localOnly ? `${name}, ${THIS_BROWSER_LABEL}` : name}
+          aria-describedby={line ? lineId : undefined}
           onClick={() =>
             group === 'mostUsed'
               ? track('Home', 'Selected', 'JumpBackIn.MostUsed')
@@ -91,6 +100,11 @@ export function JumpBackInTile({
           <span className="mt-1 block h-4 truncate text-xs leading-4 text-slate-700 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-slate-100">
             {name}
           </span>
+          {line ? (
+            <span id={lineId} className={`block h-4 truncate text-[11px] leading-4 ${MUTED}`}>
+              {line}
+            </span>
+          ) : null}
         </a>
       </Tooltip>
     </JumpBackInMenu>

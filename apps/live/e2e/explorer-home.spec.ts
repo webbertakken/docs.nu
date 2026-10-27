@@ -15,8 +15,8 @@ import {
 
 // Explorer Home (docs/specs/013-workspace/explorer-home.md), end to end against the real build and
 // api worker, as a guest, in dark mode: the Explorer lands on Home, its page header then one column of Jump
-// back in and What Happened, each opened by a display heading; Jump Back In is a Within reach set (4
-// most used cards under Most Used, 4 recent under Recent, none twice), or a phone strip that
+// back in and What Happened, each opened by a heading with a rule; Jump Back In is a Within reach set (4
+// most used thumbnails under Most Used, 4 recent under Recent, none twice), or a phone strip that
 // alternates, holds eight and ends in See More; See More opens Recent, under Home; nothing shifts as
 // Home lands.
 
@@ -108,7 +108,7 @@ test('the Explorer lands on Home: Jump Back In, then What Happened, no Timeline'
   expectNoPageErrors(pageErrors);
 });
 
-test('each section opens with a display heading and no rule, in dark and light', async ({
+test('each section opens with a heading and a rule under it, in dark and light', async ({
   page,
   baseURL,
   pageErrors,
@@ -136,8 +136,9 @@ test('each section opens with a display heading and no rule, in dark and light',
         const s = getComputedStyle(el);
         return { width: s.borderBottomWidth, style: s.borderBottomStyle };
       });
-      // Every element carries the base style's solid border at no width; a rule would have width.
-      expect(style.width, `${scheme} ${name} has no rule`).toBe('0px');
+      // A hairline rule under the heading row.
+      expect(style.width, `${scheme} ${name} has a rule`).toBe('1px');
+      expect(style.style).toBe('solid');
       // The row spans the section; the link sits at its right end.
       const section = page.getByRole('region', { name });
       expect(Math.round((await row.boundingBox())!.width)).toBe(
@@ -147,14 +148,14 @@ test('each section opens with a display heading and no rule, in dark and light',
       const rowBox = await row.boundingBox();
       expect(Math.round(linkBox!.x + linkBox!.width)).toBe(Math.round(rowBox!.x + rowBox!.width));
       expect(await heading.evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize))).toBe(
-        24,
+        16,
       );
     }
   }
   expectNoPageErrors(pageErrors);
 });
 
-test('Jump Back In is 4 most used cards, then 4 recent, none twice', async ({
+test('Jump Back In is 4 most used thumbnails, then 4 recent, none twice', async ({
   page,
   baseURL,
   pageErrors,
@@ -282,9 +283,9 @@ test('with fewer than eight, only what exists shows, and nothing shifts', async 
 
   const list = jumpBackIn(page);
   await expect(list).toHaveCount(1);
-  // Jump Back In keeps both groups' height at lg: a label and a row of each. What Happened never moves.
+  // Jump Back In keeps both groups' height: a label and a row of tiles each (D168). What Happened never moves.
   const groups = page.locator('[data-jump-back-in-group]').first().locator('..');
-  expect(Math.round((await groups.boundingBox())!.height)).toBe(330);
+  expect(Math.round((await groups.boundingBox())!.height)).toBe(296);
   expect(await layoutShift(page)).toBe(0);
   expectNoPageErrors(pageErrors);
 });

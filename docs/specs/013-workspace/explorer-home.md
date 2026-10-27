@@ -25,10 +25,10 @@ Home is drawn like every other Explorer page: the header's search field
   **New Document**, and, on a phone, the menu button that opens the
   [mobile drawer](explorer-structure.md#mobile-drawer). There is no banner above it.
 - **One column** under it, at every width: **Jump Back In**, then **What Happened**. It scrolls with the page.
-- Each section opens with its heading row: the title and the section's quiet link at the right end (**See More**,
-  **See Timeline**).
-- Jump Back In's documents are **cards** ([Jump Back In](#jump-back-in)); What Happened's days sit in **one
-  panel** (a white, rounded, hairline-bordered surface; the raised surface in dark mode).
+- Each section opens with its heading row: the title (16 px, semibold) and the section's quiet link at the right end
+  (**See More**, **See Timeline**), a hairline rule under the row.
+- Jump Back In's documents are **thumbnails** ([Jump Back In](#jump-back-in)); What Happened's days are a plain
+  list under small day labels, straight on the page.
 - Home has no import, no folder and no view switch.
 - The person's own history (what they created, updated or opened) is not on Home: Jump Back In holds what they
   reach for, and the full record is the Timeline's.
@@ -85,32 +85,31 @@ the **4 most used** and the **4 most recent**, no document twice.
 - A document stored only in this browser ([Offline Mode](../006-document/offline-mode.md)) takes part with this
   browser's own record of its opens and edits ([Opens](#opens)), and carries the **This Browser** pill on its
   thumbnail, as every other row and card of one does.
-- Each document is a **card**: its snapshot thumbnail, its name, and one quiet line that says why it is there.
-  The full name is its accessible name, and no tooltip repeats the name written under the picture; the quiet line is
-  its description. Activating a card opens the
-  document.
+- Each document is a **tile**: its snapshot thumbnail, its name under it, and on a desktop or tablet one quiet line
+  under the name that says why it is there. The full name is its accessible name and its tooltip (a long name is cut
+  short under the picture); the quiet line is its description. Activating a tile opens the document.
   - A most used document's line counts its use days: "Used on 1 day", "Used on N days".
   - A recent document's line says when the person last used it: "Used 2 hours ago", "Used yesterday" (the
     Explorer's relative time).
-- **Each card has the document's ⋯ menu**, the same menu its row and card carry everywhere else in the Explorer
+- **Each tile has the document's ⋯ menu**, the same menu its row and card carry everywhere else in the Explorer
   (Rename, Duplicate, Move, Favourite, History, Delete and the rest; a document shared with you gets the
-  shared-with-you menu), so it can be changed from Home without opening it. A ⋯ button opens it: at the top right of
-  a large card's thumbnail, at the right end of a compact card, and at the top right of a phone tile's thumbnail. A
-  right-click anywhere on the card opens it too. Under a mouse the button shows while the card is hovered or has
-  keyboard focus; on touch it always shows. It is a button beside the card's link, never inside it.
-  - The menu opens **beside the card**, out of its way, never over it: to the card's right with its top level with
-    the card's, or to its left when the right has no room. Only when neither side has room (a phone, a narrow
+  shared-with-you menu), so it can be changed from Home without opening it. A ⋯ button at the top right of the tile's
+  thumbnail opens it. A right-click anywhere on the tile opens it too. Under a mouse the button shows while the tile
+  is hovered or has keyboard focus; on touch it always shows. It is a button beside the tile's link, never inside it.
+  - The menu opens **beside the tile**, out of its way, never over it: to the tile's right with its top level with
+    the tile's, or to its left when the right has no room. Only when neither side has room (a phone, a narrow
     window) does it hang below the ⋯ as other menus do. Either way it stays inside the window. The ⋯ and a
     right-click open it in the same place.
-  - **Rename** edits the name in place on the card, as on an Explorer card; while renaming, the card does not open.
+  - **Rename** edits the name in place on the tile, as on an Explorer card; while renaming, the tile does not open.
   - What changes shows at once: a renamed document shows its new name, and a document moved to the Trash or taken
     off Shared With Me leaves Jump Back In (and comes back if the move is undone).
   - The menu is the Explorer's own, so it offers each document what the Explorer does and nothing more
     ([Share roles](share-roles.md)): your own and your team's documents get the full menu, and one
     shared with you gets the shared-with-you menu.
   - A document the Explorer has not loaded (a team library the sidebar has not read yet) has no ⋯: a menu that
-    guesses is worse than none, and the card still opens on click.
-- **Two labelled groups** on a desktop or tablet: a small uppercase label, **Most Used** then **Recent**, over each.
+    guesses is worse than none, and the tile still opens on click.
+- **Two labelled groups** on a desktop or tablet: a small uppercase label (10 px), **Most Used** then **Recent**,
+  over each.
   The documents are one list of links named **Jump Back In**; each group's label is its own list's name.
 - **See More** opens the **Recent** page: a quiet link at the end of the section's heading row on a desktop or
   tablet, the strip's last tile on a phone. It shows only once Jump Back In has a document: not while it loads, and
@@ -121,11 +120,9 @@ the **4 most used** and the **4 most recent**, no document twice.
 
 ### Desktop and tablet
 
-- **Most Used** first: up to 4 large cards (a white, rounded, hairline-bordered card; the thumbnail 128 px high
-  inside it, the name in semibold and the quiet line under it), most used first from the left.
-- **Recent** under it: up to 4 compact cards (a 64 × 44 thumbnail beside the name and the quiet line), newest first.
-- Four across from the `lg` breakpoint; two across below it. Nothing scrolls sideways.
-- A card lifts a little on hover (a sky edge and a soft sky shadow), within the motion budget.
+- A grid of thumbnail tiles, **four across**: **Most Used** first, most used first from the left, then **Recent**
+  under it, newest first. Each thumbnail is the column's width and 80 px high, on a hairline-bordered white ground,
+  its edge darkening on hover. Nothing scrolls sideways.
 
 ### Phone
 
@@ -141,8 +138,8 @@ the **4 most used** and the **4 most recent**, no document twice.
 - Only the documents that exist are drawn: no empty boxes. A short group leaves the rest of its row blank; a group
   with no document at all is not drawn, label included.
 - Jump Back In keeps both groups' height whatever lands in it, so nothing below moves when Home loads.
-- With **no document at all** it looks as if it held one: a single slot the size and place of one most used card
-  (the first column, a dashed edge), holding the empty state ("No documents yet", "The documents you use most and last
+- With **no document at all** it looks as if it held one: a single slot the height of one tile, two columns wide
+  (from the first column, a dashed edge), holding the empty state ("No documents yet", "The documents you use most and last
   will gather here."), and no group labels. Only then is Jump Back In shorter than its reserved height: What Happened
   sits under the one row.
 - On a phone with no document at all, the strip holds the small [empty state](../004-interface-design/empty-states.md)'s
@@ -281,9 +278,9 @@ else on it.
 
 | State                 | What shows                                                                                                     |
 | --------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Loading               | Each section's skeleton: both groups' cards (the phone's strip), three entry rows in the panel                 |
+| Loading               | Each section's skeleton: both groups' tiles (the phone's strip), three entry rows                              |
 | Jump Back In, partial | What exists, no empty boxes (see [Fewer than 8 documents](#fewer-than-8-documents))                            |
-| Jump Back In, empty   | One card-sized slot: empty state "No documents yet": "The documents you use most and last will gather here."   |
+| Jump Back In, empty   | One tile-high slot: empty state "No documents yet": "The documents you use most and last will gather here."    |
 | What Happened, empty  | The section is left out: no heading, no link, no empty state. It is the page's last section, so nothing moves. |
 | Read failed           | "Home could not load. Check your connection and try again." with **Try again**, in place of the body           |
 
