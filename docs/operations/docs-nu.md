@@ -74,7 +74,7 @@ It passes (exit 0) when every document is moved, every hash matches the plan and
 ### Rollback
 
 - Before the deploy: nothing has moved; nothing to undo.
-- After it: the previous `docs-nu-api` version can be restored (`pnpm exec wrangler rollback` from `apps/api`, or the dashboard's Deployments). It reads D1's content tables, which the move never wrote, so every document shows its content as it was when it moved. Edits made in rooms since are not in D1 and are lost unless copied back first.
+- After it: the previous `docs-nu-api` version can be restored (`pnpm exec wrangler rollback` from `apps/api`, or the dashboard's Deployments). It reads D1's content tables, which the move never wrote, so every document shows its content as it was when it moved. Edits made in rooms since are not in D1 and are lost unless copied back first. Documents created since live only in their rooms and read as empty.
 - Before restoring it, put the Inbox index back in the shape the previous version writes, or its tab saves with a comment or an action fail. Migration `0106` rebuilt it; this restores the old tables empty and lets the previous version seed them again on each owner's next read:
 
   ```sql
