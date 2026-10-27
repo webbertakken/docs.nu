@@ -42,11 +42,11 @@ export async function deleteOldUnusedImages(env: Env, cutoff: number): Promise<n
   const bucket = env.IMAGES;
   // A document whose room has never pushed (one not yet moved into its room) has an unknown image set, so the
   // sweep waits until every document has (docs/specs/006-document/document-storage.md "The content summary").
-  const unknown = await env.DB.prepare(
+  const { n: unknown } = (await env.DB.prepare(
     'SELECT COUNT(*) AS n FROM documents WHERE content_summary IS NULL',
-  ).first<{ n: number }>();
-  if ((unknown?.n ?? 0) > 0) {
-    console.log(`image sweep: paused, ${unknown?.n} documents have not pushed their images`);
+  ).first<{ n: number }>())!;
+  if (unknown > 0) {
+    console.log(`image sweep: paused, ${unknown} documents have not pushed their images`);
     return 0;
   }
 
