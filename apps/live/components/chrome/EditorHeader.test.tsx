@@ -220,3 +220,71 @@ describe('EditorHeader with a long name', () => {
     expect(actions?.className).toContain('shrink-0');
   });
 });
+
+// docs/specs/007-editor/live-app.md "The top bar's middle": the share-state icon, then the name.
+describe("EditorHeader top bar's middle", () => {
+  const middle = (props: Partial<Parameters<typeof EditorHeader>[0]> = {}) =>
+    render(
+      <EditorHeader
+        documentName="Payments architecture"
+        showShare
+        shareable={false}
+        onOpenShare={() => {}}
+        onRename={() => {}}
+        {...props}
+      />,
+    ).container.querySelector<HTMLElement>('[data-title-bar-middle]')!;
+
+  it('puts the share-state icon before the name, at every width', () => {
+    const box = middle();
+    const icon = box.querySelector<HTMLElement>('[data-share-state-icon]')!;
+    expect(icon.dataset.shareStateIcon).toBe('private');
+    const name = screen.getByRole('button', { name: 'Payments architecture' });
+    expect(icon.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // Never hidden on a phone: no ancestor inside the middle hides it below `sm`.
+    for (let el: HTMLElement | null = icon; el && el !== box; el = el.parentElement)
+      expect(el.className).not.toMatch(/(^|\s)hidden(\s|$)/);
+  });
+
+  it.each([
+    [{ shareable: true }, 'shared', 'Shared'],
+    [{ teamDocument: true }, 'team', 'Team'],
+    [{ offline: true }, 'offline', 'This Browser'],
+  ] as const)('shows the state %o as %s', (props, state, label) => {
+    const box = middle(props);
+    expect(box.querySelector<HTMLElement>('[data-share-state-icon]')!.dataset.shareStateIcon).toBe(
+      state,
+    );
+    expect(screen.getByRole('button', { name: label })).toBeTruthy();
+  });
+
+  it('opens Share from the icon for someone who may share', () => {
+    const onOpenShare = vi.fn();
+    middle({ onOpenShare });
+    fireEvent.click(screen.getByRole('button', { name: 'Private' }));
+    expect(onOpenShare).toHaveBeenCalledOnce();
+  });
+
+  it('leaves the icon a named, focusable anchor for someone who may not share', () => {
+    middle({ showShare: false });
+    expect(screen.queryByRole('button', { name: 'Private' })).toBeNull();
+    const icon = screen.getByLabelText('Private');
+    expect(icon.tabIndex).toBe(0);
+  });
+
+  it('renames in place from the name, and only reads it out when the role may not rename', () => {
+    const onRename = vi.fn();
+    middle({ onRename });
+    fireEvent.click(screen.getByRole('button', { name: 'Payments architecture' }));
+    const field = screen.getByDisplayValue('Payments architecture');
+    // The icon stays while renaming.
+    expect(document.querySelector('[data-share-state-icon]')).not.toBeNull();
+    fireEvent.change(field, { target: { value: 'Payments' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    expect(onRename).toHaveBeenCalledWith('Payments');
+    cleanup();
+    middle({ readOnly: true });
+    expect(screen.queryByRole('button', { name: 'Payments architecture' })).toBeNull();
+    expect(screen.getByText('Payments architecture')).toBeTruthy();
+  });
+});

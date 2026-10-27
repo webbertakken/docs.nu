@@ -270,9 +270,10 @@ export function VisibilityLegend({
   align = 'center',
 }: {
   current: ShareState;
-  // Centred under the pill (the header), or laid out by a host that places it (`floating`: the Explorer's card portals
-  // it over the panel, whose scroll would clip it).
-  align?: 'center' | 'floating';
+  // Centred under the pill (the header), under the top bar's share-state icon (`title`: from its left edge on a phone,
+  // where the icon sits beside the brand, centred from `sm` up), or laid out by a host that places it (`floating`: the
+  // Explorer's card portals it over the panel, whose scroll would clip it).
+  align?: 'center' | 'title' | 'floating';
   // Opens Share; absent where the reader may not change who can see the document.
   onManage?: () => void;
 }) {
@@ -285,7 +286,11 @@ export function VisibilityLegend({
       aria-hidden
       data-visibility-legend=""
       className={`w-[20rem] max-w-[calc(100vw-2rem)] pt-2 text-left ${
-        align === 'floating' ? '' : 'absolute top-full z-10 left-1/2 -translate-x-1/2'
+        align === 'floating'
+          ? ''
+          : align === 'title'
+            ? 'absolute top-full z-10 -left-2 sm:left-1/2 sm:-translate-x-1/2'
+            : 'absolute top-full z-10 left-1/2 -translate-x-1/2'
       }`}
     >
       <div className="animate-dialog-in overflow-hidden rounded-xl border border-slate-200 bg-white pb-3 shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/50">
