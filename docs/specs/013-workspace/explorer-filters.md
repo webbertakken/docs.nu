@@ -107,8 +107,49 @@ general diagram tab's environment.
 
 - A dimension may hold **several values**: they combine with **or** (`template:retrospective,kanban` lists both
   families). Dimensions combine with **and**.
-- Text matches the document's **name**: every word must appear in it, ignoring case and accents.
+- Text matches the document's **name**, ignoring case and accents: every word must match it. A word matches by
+  the best of these, best first:
+  1. **As typed**: the word appears in the name ("notes" finds "Meeting notes"), at the start of one of the name's
+     words before inside one.
+  2. **Word starts**: the word is spelled by the starts of the name's words, in order, at least two letters from
+     each ("meetnot" finds "Meeting notes").
+  3. **Letters in order**: the initials of the name's words ("mn"), else the word's letters in order inside one of
+     the name's words, from its first letter ("mtg nts" finds "Meeting notes").
+  4. **A typo**: the word starts one of the name's words with one typo when it has 4 to 7 letters, or two when it
+     has 8 or more ("meetnig" finds "Meeting notes"). A typo is a letter added, dropped or changed, or two
+     neighbouring letters swapped. A word under 4 letters is never forgiven a typo.
+- A word, in the text or in a name, is a run of letters and digits; anything else separates words, so "q3-plan"
+  is the two words "q3" and "plan".
+- Only names are matched. Searching inside documents comes later in the same field, folding text the same way;
+  there, a name match ranks above a match in content only.
 - The empty lens matches everything.
+
+### Order
+
+- With text in the lens, the matching documents list **best match first**: the closer each word matched, the
+  higher the document. Documents that match equally well keep the view's own order, newest first.
+- Without text, the order is the view's own, whatever chips are set.
+- **Recent** takes its 12 newest matches and orders those best first.
+- The **Details** view keeps the column the reader sorted by: the lens narrows it and never reorders it.
+
+### Highlight
+
+- In every document view, the characters each word matched are **marked** in the name: tinted, bold and
+  underlined, never shown by colour alone.
+- A screen reader reads the plain name, once.
+
+### Titles elsewhere
+
+The same matching finds a document by its name everywhere a name is searched, so a name found in one place is found
+in all of them:
+
+- The search panel's **Documents**, **Shared with You** and the team documents under **Teams**, best first before
+  each group's cap of 8. A team document found only by its team's name follows those found by their own.
+- **Add to Document**'s filter, best first.
+
+Folders, teams, tabs, elements, commands, settings and help keep their own matching: they are not document names.
+The Move dialogs pick a folder and filter nothing. The search panel and Add to Document order by match but do not
+mark the name.
 
 ## Token grammar
 

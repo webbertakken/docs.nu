@@ -8,19 +8,22 @@ the routes and the telemetry emit, consuming the module unchanged.
 
 Scope, by file (all under `packages/explorer-lens/src/`):
 
-| File                                        | Role                                                                                                      |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `packages/explorer-lens/src/dimensions.ts`  | The catalogue: dimensions, values, labels, telemetry types, constants                                     |
-| `packages/explorer-lens/src/types.ts`       | `Lens`, `LensTerm`, `LensIssue`, `WordProblem`, `LensContext`, `LensSubject`, `LensSuggestion`            |
-| `packages/explorer-lens/src/parse.ts`       | `parseLens`, `readWord`, `orderValues`, `tokenKeyOf`, `normaliseInput`, `emptyLens`                       |
-| `packages/explorer-lens/src/serialise.ts`   | `serialiseLens`, `tokenOf`, `setDimension`, `setDimensionValues`, `toggleDimensionValue`, `removeTerm`    |
-| `packages/explorer-lens/src/match.ts`       | `documentSubject`, `sharedSubject`, `compileLens`, `matchesLens`, `applyLens`, `editedCutoff`, `foldText` |
-| `packages/explorer-lens/src/suggest.ts`     | `suggestTokens`, `acceptSuggestion`                                                                       |
-| `packages/explorer-lens/src/view-models.ts` | `lensChips`, `lensPills`, `issueMessage`, `announceResults`                                               |
-| `packages/explorer-lens/src/labels.ts`      | `valueLabel`, `valueOptions`: one source of labels for chips, pills and suggestions                       |
-| `packages/explorer-lens/src/url.ts`         | `readLensQuery`, `withLensQuery`, `carryLensQuery`                                                        |
-| `packages/explorer-lens/src/telemetry.ts`   | `selectedFacets`                                                                                          |
-| `packages/explorer-lens/src/index.ts`       | The public surface (re-exports only)                                                                      |
+| File                                          | Role                                                                                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/explorer-lens/src/dimensions.ts`    | The catalogue: dimensions, values, labels, telemetry types, constants                                                           |
+| `packages/explorer-lens/src/types.ts`         | `Lens`, `LensTerm`, `LensIssue`, `WordProblem`, `LensContext`, `LensSubject`, `LensSuggestion`                                  |
+| `packages/explorer-lens/src/parse.ts`         | `parseLens`, `readWord`, `orderValues`, `tokenKeyOf`, `normaliseInput`, `emptyLens`                                             |
+| `packages/explorer-lens/src/serialise.ts`     | `serialiseLens`, `tokenOf`, `setDimension`, `setDimensionValues`, `toggleDimensionValue`, `removeTerm`                          |
+| `packages/explorer-lens/src/match.ts`         | `documentSubject`, `sharedSubject`, `compileLensScore`, `compileLens`, `matchesLens`, `rankByLens`, `applyLens`, `editedCutoff` |
+| `packages/explorer-lens/src/title-match.ts`   | `compileTitleQuery`, `scoreTitle`, `matchTitle`, `rankByTitle`, `byScore`: the title matcher every document-name search shares  |
+| `packages/explorer-lens/src/title-fold.ts`    | `foldText`, `foldedTitle`, `letterBit`: a title folded once and cached                                                          |
+| `packages/explorer-lens/src/typo-distance.ts` | `allowedTypos`, `typoDistance`: the banded typo count                                                                           |
+| `packages/explorer-lens/src/suggest.ts`       | `suggestTokens`, `acceptSuggestion`                                                                                             |
+| `packages/explorer-lens/src/view-models.ts`   | `lensChips`, `lensPills`, `issueMessage`, `announceResults`                                                                     |
+| `packages/explorer-lens/src/labels.ts`        | `valueLabel`, `valueOptions`: one source of labels for chips, pills and suggestions                                             |
+| `packages/explorer-lens/src/url.ts`           | `readLensQuery`, `withLensQuery`, `carryLensQuery`                                                                              |
+| `packages/explorer-lens/src/telemetry.ts`     | `selectedFacets`                                                                                                                |
+| `packages/explorer-lens/src/index.ts`         | The public surface (re-exports only)                                                                                            |
 
 ## Domain and naming
 
@@ -33,6 +36,11 @@ Scope, by file (all under `packages/explorer-lens/src/`):
 | Token           | `LensTerm` with `kind: 'token'`                           | A word `<key>:<values>` naming one or several values of one dimension                   |
 | Value list      | `LensTerm.values`, `LENS_VALUE_SEPARATOR`                 | A token's values, comma-separated; they combine with or                                 |
 | Text            | `LensTerm` with `kind: 'text'`, `Lens.text`               | Every other word                                                                        |
+| Title query     | `TitleQuery`, `compileTitleQuery`                         | The text words folded and split once, each with its typo allowance                      |
+| Title word      | `FoldedTitle.wordStarts` / `wordEnds`                     | A run of letters and digits in a folded name                                            |
+| Match tier      | `TitleMatchTier`, `TITLE_MATCH_TIERS`                     | How a word matched: `substring`, `word-prefixes`, `subsequence`, `typo`, best first     |
+| Match score     | `scoreTitle`, `TitleMatch.score`                          | A name's match quality, lower first; the sum of its words' tier scores                  |
+| Match ranges    | `TitleMatch.ranges`, `TitleRange`                         | The matched characters as half-open offsets into the name as written                    |
 | Pending         | `LensTerm` with `kind: 'pending'`                         | A token-shaped word with a dimension key under the caret                                |
 | Term state      | `TokenState`: `applied`, `inert`                          | Whether a token narrows the list; `inert` is a Space token on a scoped view             |
 | Issue           | `LensIssue`, `LensIssueReason`                            | A named report about one term                                                           |
@@ -102,7 +110,7 @@ except the cut tail, which is always reported; repeating a dimension and listing
 `parseLens` is pure and total (never throws).
 
 `matchesLens(subject, lens, now)` is true when, for every set dimension, the subject's value is one of its values
-(or), across dimensions (and), and every text word, folded (`D42`), is a substring of the folded name. A subject value
+(or), across dimensions (and), and every text word matches the name ([Title matching](#title-matching)). A subject value
 `null` (unknown) is in no list. `made-by` asks `madeByAi === true`. `edited` compares
 `savedAt ≥ min(editedCutoff(v, now))` over its values, the widest of them:
 
@@ -119,6 +127,43 @@ this browser included, as the spec decides); `people` is `me` when `ownerId === 
 `isMadeByAiSource(source)` (`ai` or `mcp`, never `cli`); `opensIn`, `kind` (from `tabKind`) and `template` (from `templateFamily`) are the summary's values
 when in their lists, else `null`, so the general diagram tab reads as no kind. `sharedSubject(item)`:
 `space: 'shared'`, `people: 'others'`, `madeByAi`, `opensIn`, `kind` and `template` all `null`.
+
+### Title matching
+
+`compileTitleQuery(words)` folds each text word (`D42`), splits it on every run of characters that are neither
+letter nor digit (`/[^\p{L}\p{N}]+/u`), drops empties, and gives each word its typo allowance and its letter bits.
+A name is folded once (`foldedTitle`, cached): the folded string, its **title words** (runs of `[\p{L}\p{N}]`,
+their starts and ends) with each word's letter bits, and `origin`, the offset in the name as written of every folded
+character (null when the name folds to its own length, so offsets carry over, `D171`).
+
+A query word matches by the first tier that holds, scored from the tier's index:
+
+| Tier          | Identifier      | Holds when                                                                                                                                                                        | Score                             |
+| ------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Substring     | `substring`     | The folded name contains the word                                                                                                                                                 | 0 at a title-word start, else 0.5 |
+| Word prefixes | `word-prefixes` | The word splits into starts of successive title words (words may be skipped), each ≥ `WORD_PREFIX_MIN_LENGTH` letters (`D177`); longest start tried first, failed states memoised | 1                                 |
+| Subsequence   | `subsequence`   | The word is the initials of successive title words (2), else its letters lie in order inside one title word from that word's first letter (2.5, `D172`)                           | 2 or 2.5                          |
+| Typo          | `typo`          | `allowedTypos(length)` > 0 and a title word has a start within that many typos (`typoDistance`, `D176`)                                                                           | 3 for one typo, 3.5 for two       |
+
+- The weaker match within a tier drops by `TITLE_TIER_STEP_DOWN` (0.5), always less than one tier.
+- A name's score is the sum of its words' scores (`D173`); one word missing makes it no match (`null`).
+- `typoDistance(word, text, start, end, limit)` is optimal string alignment (insert, delete, substitute, swap two
+  neighbours: one typo each) against every start of the title word up to `word.length + limit` letters, worked out
+  only within `limit` of the diagonal (Ukkonen's band), on three reused `Int32Array` rows; a row with no cell
+  within `limit` ends it. Between equal counts, the start nearest the word's length wins; between title words, the
+  fewest typos, then the earliest.
+- Before the table: a title word shorter than `word.length − limit` is skipped, and so is one lacking more than
+  `limit` of the word's letters by bits (`letterBit`: a to z one bit each, every other character one of six shared
+  bits, so a shared bit never rules out a real match).
+- `scoreTitle(query, name)` is the hot path and records no positions; `matchTitle(query, name)` also returns
+  `ranges`: the matched folded offsets mapped through `origin` to the name as written, sorted, merged when they touch.
+- `rankByTitle(items, query, titleOf)` and `rankByLens(items, lens, now, subjectOf, limit?)` keep the matches and
+  sort by score, ties by input order (`byScore`); a query with no words keeps every item in order. `rankByLens`
+  takes the first `limit` matches in input order before sorting. `applyLens` is `rankByLens` over subjects.
+
+Invariants: a query with no words scores 0 and highlights nothing; a match scores in `[0, 3.5 × words]`; a name
+matched by substring always outranks the same name matched by a weaker tier; `scoreTitle` and `matchTitle` agree
+on the score.
 
 Serialising: `serialiseLens(lens)` writes one token per set dimension, `<key>:<v1>,<v2>…` in canonical value order,
 in `LENS_DIMENSIONS` order, then the text words, joined by one space.
@@ -240,7 +285,10 @@ row with `documentSubject` / `sharedSubject` and keeps its row on the subject (`
 ## Security and trust
 
 - `q` arrives from any link: untrusted. It is length-capped before scanning, never evaluated, never turned into a
-  regular expression (matching is `String.includes` on folded text) and rendered as text.
+  regular expression (matching compares folded characters) and rendered as text.
+- A hostile name or word cannot blow up matching: the word-prefixes search memoises its failed states
+  (`O(letters × title words)`), the typo table is banded and capped at `TYPO_MAX_TARGET` columns, and the fold cache
+  is bounded by `TITLE_CACHE_LIMIT`.
 - A `space:team:<id>` token applies only for a team in `context.teams`, the reader's own; a link cannot probe whether
   another team exists, since every unknown id reads the same `unknown_team`.
 - Labels show team **names** from the reader's own list; ids never reach a label, a message or telemetry.
@@ -249,8 +297,19 @@ row with `documentSubject` / `sharedSubject` and keeps its row on the subject (`
 ## Performance and limits
 
 - Parse is linear in the input, bounded by 512 characters (at most 256 words).
-- `applyLens` compiles the lens once (cutoff, folded words) and folds each name once: `O(N × w)` for `N` subjects and
-  `w` words. Budget: 5 000 subjects and 8 words under 5 ms on a mid-range laptop, well inside a 200 ms INP.
+- `applyLens` and `rankByLens` compile the lens once (cutoff, title query) and read each name's cached fold:
+  `O(N × w × t)` for `N` subjects, `w` words and `t` title words, plus `O(N log N)` to sort the matches.
+- **Budget: 10 000 titles filtered and ranked within one 16 ms frame on a mid-range laptop.** A mid-range laptop runs
+  this work at most twice as slow as a developer's machine, so the speed test holds the median of five keystrokes
+  under `cpuBudgetMs(8)` for six queries (substring, initials, a two-typo word, word prefixes, three words, no match)
+  over a seeded corpus of 10 000 titles. Measured on an Intel i7-14700K under load (Node 24, warm): 1.1 to 5.2 ms per
+  query, the worst a 13-letter word with two typos; Chromium: see [Performance](#performance).
+- The first keystroke on a list also folds every name once: about 17 to 23 ms per 10 000 titles on the same machine.
+  The rows narrow a beat behind the field (a deferred value), so typing never waits on it; the cache keeps
+  `TITLE_CACHE_LIMIT` names and starts over when full.
+- uFuzzy matches faster (0.2 to 1.2 ms) but has no word-prefix or initials tier, no accent folding and no second typo;
+  fuse.js takes 11 to 30 ms; fzf, fuzzysort and microfuzz forgive no typo. One hand-rolled matcher keeps the tiers,
+  the highlight ranges and the folding the content search will share.
 - `suggestTokens` runs at most 8 short-circuiting `some` passes: `≤ 8 × N` predicate calls per keystroke.
 
 ## Presentation and UX
@@ -302,27 +361,36 @@ Never the words of the lens or a team id.
 Every test is pure, `< 10 ms`; coverage of `packages/explorer-lens/src` is 100 % (lines, branches, functions,
 statements), enforced in the package's `vitest.config.ts`.
 
-| Rule                                                         | Test                                             |
-| ------------------------------------------------------------ | ------------------------------------------------ |
-| Catalogue, labels, telemetry types closed and complete       | `packages/explorer-lens/src/dimensions.test.ts`  |
-| Grammar, comma lists, repeats, every rejection, pending, cut | `packages/explorer-lens/src/parse.test.ts`       |
-| Canonical comma form, round trip, chip writes and toggles    | `packages/explorer-lens/src/serialise.test.ts`   |
-| Or within, and across, unknowns, cutoffs, text folding       | `packages/explorer-lens/src/match.test.ts`       |
-| Dimensions, values, comma lists, marking alone, cap, accept  | `packages/explorer-lens/src/suggest.test.ts`     |
-| Chips, pills, names, messages, announcement                  | `packages/explorer-lens/src/view-models.test.ts` |
-| `q` read, write, removal, carry-over                         | `packages/explorer-lens/src/url.test.ts`         |
-| Selected facets only when a value is gained                  | `packages/explorer-lens/src/telemetry.test.ts`   |
-| The public surface                                           | `packages/explorer-lens/src/index.test.ts`       |
+| Rule                                                                 | Test                                               |
+| -------------------------------------------------------------------- | -------------------------------------------------- |
+| Catalogue, labels, telemetry types closed and complete               | `packages/explorer-lens/src/dimensions.test.ts`    |
+| Grammar, comma lists, repeats, every rejection, pending, cut         | `packages/explorer-lens/src/parse.test.ts`         |
+| Canonical comma form, round trip, chip writes and toggles            | `packages/explorer-lens/src/serialise.test.ts`     |
+| Or within, and across, unknowns, cutoffs, ranking, Recent's limit    | `packages/explorer-lens/src/match.test.ts`         |
+| Every tier and its score, ranges, merging, ranking, the frame budget | `packages/explorer-lens/src/title-match.test.ts`   |
+| Folding, origins, letter bits, the cache and its limit               | `packages/explorer-lens/src/title-fold.test.ts`    |
+| Typo allowance, each edit kind, band, limit, short targets           | `packages/explorer-lens/src/typo-distance.test.ts` |
+| Dimensions, values, comma lists, marking alone, cap, accept          | `packages/explorer-lens/src/suggest.test.ts`       |
+| Chips, pills, names, messages, announcement                          | `packages/explorer-lens/src/view-models.test.ts`   |
+| `q` read, write, removal, carry-over                                 | `packages/explorer-lens/src/url.test.ts`           |
+| Selected facets only when a value is gained                          | `packages/explorer-lens/src/telemetry.test.ts`     |
+| The public surface                                                   | `packages/explorer-lens/src/index.test.ts`         |
 
 ## Constants and configuration
 
-| Constant                | Value | Provenance and safe range                                                                                                                       |
-| ----------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LENS_MAX_INPUT_LENGTH` | 512   | Every dimension with every fixed value takes under 200 characters; 512 leaves room for words and stays under 2 KB percent-encoded. 256 to 1 024 |
-| `LENS_MAX_SUGGESTIONS`  | 8     | The longest fixed list is 5; 8 shows a page of teams without scrolling (`D52`). 6 to 12                                                         |
-| `LENS_SETTLE_MS`        | 400   | "Once typing settles": past a typing gap, inside a second (`D49`). 250 to 800                                                                   |
-| `LENS_VALUE_SEPARATOR`  | `,`   | The spec's comma list; no value or team id holds a comma. Fixed                                                                                 |
-| `LENS_QUERY_PARAM`      | `q`   | The spec's URL parameter                                                                                                                        |
+| Constant                   | Value  | Provenance and safe range                                                                                                                       |
+| -------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LENS_MAX_INPUT_LENGTH`    | 512    | Every dimension with every fixed value takes under 200 characters; 512 leaves room for words and stays under 2 KB percent-encoded. 256 to 1 024 |
+| `LENS_MAX_SUGGESTIONS`     | 8      | The longest fixed list is 5; 8 shows a page of teams without scrolling (`D52`). 6 to 12                                                         |
+| `LENS_SETTLE_MS`           | 400    | "Once typing settles": past a typing gap, inside a second (`D49`). 250 to 800                                                                   |
+| `LENS_VALUE_SEPARATOR`     | `,`    | The spec's comma list; no value or team id holds a comma. Fixed                                                                                 |
+| `LENS_QUERY_PARAM`         | `q`    | The spec's URL parameter                                                                                                                        |
+| `TYPO_MIN_WORD_LENGTH`     | 4      | The spec's "4 to 7 letters": one typo in a shorter word matches too much. Fixed by the spec                                                     |
+| `TWO_TYPO_MIN_WORD_LENGTH` | 8      | The spec's "8 or more". Fixed by the spec                                                                                                       |
+| `WORD_PREFIX_MIN_LENGTH`   | 2      | One letter per word is the initials tier's (`D172`). 2 to 3                                                                                     |
+| `TITLE_TIER_STEP_DOWN`     | 0.5    | Less than the step of 1 between tiers, so a weaker match never leaves its tier. Above 0, under 1                                                |
+| `TYPO_MAX_TARGET`          | 64     | Longer than any word worth a typo; bounds the table's rows. 32 to 128                                                                           |
+| `TITLE_CACHE_LIMIT`        | 50 000 | Five times the budget's 10 000 titles; about 10 MB at most. 20 000 to 100 000                                                                   |
 
 No environment variable or binding.
 
@@ -341,6 +409,7 @@ The lens on `/explorer`, over `@livedoc/explorer-lens`. Files:
 | `apps/live/app/explorer/lens/LensChips.tsx`            | `LensChips`: the chip row, its listboxes, Clear, the issue lines                                           |
 | `apps/live/app/explorer/lens/PaneLensBar.tsx`          | `PaneLensBar`: the chip row of the current view, wired to the lens                                         |
 | `apps/live/app/explorer/lens/LensStates.tsx`           | `LensAnnouncer`, `LensIssues`, `FilteredEmpty`, `LoadFailed`                                               |
+| `apps/live/app/explorer/lens/TitleHighlight.tsx`       | `TitleHighlightProvider`, `HighlightedTitle`: the lens's words marked in each listed name                  |
 | `apps/live/app/explorer/search/page.tsx`               | `/explorer/search`, Search results                                                                         |
 | `apps/live/app/explorer/RetiredViewRedirect.tsx`       | `RETIRED_VIEW_TARGETS`, `RetiredViewRedirect`: `/explorer/unsorted`, `/dynamic`, `/generated`, `/activity` |
 | `apps/live/app/explorer/ViewInfo.tsx`                  | The info note This Browser shows under its breadcrumb                                                      |
@@ -368,10 +437,16 @@ The lens on `/explorer`, over `@livedoc/explorer-lens`. Files:
 | `folder`     | Unset: subfolders and documents in the folder. Set: every document in the folder's subtree (`scopeDocuments`)                                          |
 | `team`       | The team library at the open spot; set: every document in the spot's subtree                                                                           |
 | `offline`    | Every document in This Browser                                                                                                                         |
-| `recent`     | Own, team and shared rows not hidden from Recent, newest first; the first `RECENT_LIMIT` (12) after the lens                                           |
+| `recent`     | Own, team and shared rows not hidden from Recent, newest first; the first `RECENT_LIMIT` (12) matches, then ranked                                     |
 | `favourites` | Starred own and team rows                                                                                                                              |
 | `search`     | Own, team and shared rows, newest first, no cap                                                                                                        |
 | `shared`     | Shared With Me                                                                                                                                         |
+
+**Order.** `narrowRows(rows, lens, viewerId, now, limit?)` is `rankByLens` over `lensSubjectOf`: with text, best
+match first, ties in the base list's order (newest first); without text, the base list's order. Recent passes
+`RECENT_LIMIT`, so it ranks its 12 newest matches. Shared With Me renders `shared` rows in `paneContent.documents`
+order. The team library narrows through `LibraryLens.narrow`, the same `narrowRows`. The Details view sorts what it
+is given by its column (`sortDetailsEntries`), so the lens never reorders it (`D174`).
 
 The subjects suggestions mark against are the rows a set lens would reach: a scoped view's whole scope, the team
 sweep's rows of the open team, and on a view with no lens the `search` list. `lensSubjectOf(row, viewerId)`: a
@@ -438,7 +513,9 @@ removePill(tokens: string, draft: string, dimension: LensDimension, context: Len
 chooseChipValue(input: string, dimension: LensDimension, value: string | null, context: LensContext): string;
 lensSubjectOf(row: LensRow, viewerId: string): LensSubject;
 isLensSet(lens: Lens): boolean;
-narrowRows<R extends LensRow>(rows: readonly R[], lens: Lens, viewerId: string, now: number): R[];
+narrowRows<R extends LensRow>(rows: readonly R[], lens: Lens, viewerId: string, now: number, limit?: number): R[];
+TitleHighlightProvider(props: { text: readonly string[]; children: ReactNode }): JSX.Element; // PaneLensResult.text
+HighlightedTitle(props: { name: string }): JSX.Element;
 scopeDocuments<D>(folderId: string | null, childrenByParent, documentsByFolder): D[]; // newest first
 trackLensChange(previous: Lens, next: Lens): void;
 type ExplorerLens = {
@@ -484,6 +561,12 @@ type LibraryLens = { active: boolean; input: string; issues: readonly LensIssue[
   card's meta row, and on the floating panel's document rows as the sparkle alone with the words for assistive
   technology (`D89`).
 - **Page header:** wraps on a phone, so the actions take a second line instead of squeezing the title to nothing.
+- **Highlight:** `ExplorerPane` wraps the pane in `TitleHighlightProvider` with `lensResult.text`, the words the shown
+  rows were narrowed by (the deferred lens), so marks never run ahead of the rows. `HighlightedTitle` renders the
+  name in the list row, the card, the Details row and the Shared With Me row: plain text when the provider is absent,
+  the lens has no text or `matchTitle` returns no ranges; else each range as a `mark` (`rounded-[2px] bg-brand-100
+font-semibold text-inherit underline decoration-brand-600 decoration-2 underline-offset-2`, dark
+  `bg-brand-500/25 decoration-brand-300`), the text between unchanged (`D175`).
 
 ### Accessibility
 
@@ -495,6 +578,19 @@ suggestion `name`. Pills: "Filter <label>" (plus ", not applied: <message>" for 
 on open, with `option`s carrying `aria-selected` and an `aria-activedescendant` moved by Up / Down / Home / End, Enter
 and Space toggling, Escape and Tab closing back to the chip; the Made by AI chip a toggle with `aria-pressed`. Focus
 rings `ring-2` / `outline-2` in brand. No animation beyond the house `motion-safe` transitions.
+
+A marked name renders the plain name once in an `sr-only` span and the marked copy in an `aria-hidden` span, so the
+link's accessible name is the plain name and a screen reader never reads it in pieces. A mark differs by weight and
+underline as well as tint (WCAG 1.4.1); the text keeps its own colour on the tint, `slate-900` on `brand-100` and
+`slate-100` on `brand-500/25` over `slate-800`, both above 4.5:1.
+
+### Performance
+
+The matcher in Chromium (Playwright, about:blank, the package bundled), 10 000 seeded titles, median of nine warm
+runs per query on an Intel i7-14700K: 1.0 to 3.7 ms unthrottled; 1.8 to 7.7 ms (worst run 9.9 ms) with the CPU
+throttled 2x, the mid-range laptop the budget names, inside one 16 ms frame. Throttled 4x, a low-end device, the
+two-typo and word-prefix queries take 17 to 24 ms; the rows narrow from the deferred lens, so the field still
+answers every keystroke at once.
 
 ### Observability
 
@@ -515,6 +611,10 @@ list=documents|shared')`. Never a word of the lens or an id.
 | Field: combobox, suggestions, keys, pills, Backspace       | `apps/live/app/explorer/lens/LensField.test.tsx`                       |
 | Chips: group, listbox semantics, toggle, Clear, issues     | `apps/live/app/explorer/lens/LensChips.test.tsx`                       |
 | States copy and the announcer's settle                     | `apps/live/app/explorer/lens/LensStates.test.tsx`                      |
+| Ranking, ties, no-text order, Recent's limit               | `apps/live/app/explorer/lens/pane-lens.test.ts`                        |
+| Marks, plain name for screen readers, not colour alone     | `apps/live/app/explorer/lens/TitleHighlight.test.tsx`                  |
+| The search panel's document groups share the title matcher | `apps/live/lib/search.test.ts`                                         |
+| Add to Document's filter shares the title matcher          | `apps/live/components/dialogs/TabOrganiseDialogs.test.tsx`             |
 | The Made by AI badge                                       | `apps/live/components/primitives/MadeByAiPill.test.tsx`                |
 | Routes, retired views, titles                              | `apps/live/app/explorer/routes.test.ts`, `view-titles.test.ts`         |
 | The panel's My Documents: folders then documents           | `apps/live/components/panels/explorer-tree/PanelExplorerTree.test.tsx` |
@@ -524,4 +624,4 @@ list=documents|shared')`. Never a word of the lens or an id.
 
 ## Defaults ledger
 
-D41 to D44, D46 to D54, D56 to D58 and D81 to D93 in [DEFAULTS.md](DEFAULTS.md).
+D41 to D44, D46 to D54, D56 to D58, D81 to D93 and D171 to D178 in [DEFAULTS.md](DEFAULTS.md).
