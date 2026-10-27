@@ -114,3 +114,21 @@ describe("the room's drain", () => {
     expect(owed()).toBe(0);
   });
 });
+
+describe('a purged room', () => {
+  it('forgets its document, so a create of the same id starts from an empty room', async () => {
+    const { room, alarms } = setup();
+    await room.create(D, seed('a'));
+    const purge = await room.fetch(
+      new Request('https://room.invalid/purge', {
+        method: 'POST',
+        headers: { 'X-Document-Id': D },
+      }),
+    );
+    expect(purge.ok).toBe(true);
+    expect(alarms()).toBeNull();
+    const again = await room.create(D, seed('b'));
+    expect(again).toMatchObject({ ok: true });
+    expect((await room.outline(D)).tabs.map((t) => t.id)).toEqual(['b']);
+  });
+});

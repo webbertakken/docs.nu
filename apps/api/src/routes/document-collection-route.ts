@@ -10,7 +10,7 @@
 import { documentRoom } from '../document-room/document-client';
 import type { CreateOutcome } from '../document-room/document-create';
 import { identityOf, roomUnavailable } from '../document-room/document-route';
-import { purgeRooms } from '../room-purge-client';
+import { purgeOwed, purgeRooms } from '../room-purge-client';
 import { readSeedItems } from './item-routes';
 import { readSeedSheets } from './sheet-routes';
 import {
@@ -282,6 +282,14 @@ export async function handleDocumentCollection(ctx: RouteContext): Promise<Respo
         console.warn('[documents] create discarded', { documentId, why });
         await purgeRooms(env, [documentId]);
       };
+      // A room still owing the purge of an earlier document of this id (taken offline, now synced back) is purged
+      // first, so that debt never wipes the new content; unreached, the create waits for a retry.
+      if (!clash && (await purgeOwed(env, documentId))) {
+        const settled = await purgeRooms(env, [documentId]);
+        if (settled.rooms === 0 || settled.unreached > 0) {
+          return roomUnavailable(request, new Error('room_purge_owed'));
+        }
+      }
       let made: CreateOutcome;
       try {
         made = await room.create({

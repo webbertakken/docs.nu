@@ -602,6 +602,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     await this.ledger.settled();
     await this.state.storage.deleteAlarm();
     await this.state.storage.deleteAll();
+    this.content.forget();
     console.info('[room] purged');
   }
 

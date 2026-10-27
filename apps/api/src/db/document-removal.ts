@@ -1,7 +1,9 @@
 // Removing documents from D1 (docs/specs/006-document/document-storage.md "Purging and copying"). A document's
-// content lives in its room, which the caller purges after this batch (purgeRooms); a shared tab's other holders
-// keep their own copies (docs/specs/006-document/tab-document-many-to-many.md). D1's derived rows (the Inbox's
-// index, the placed images, the cards) cascade from `documents`.
+// content lives in its room, which the caller purges after this batch (purgeRooms); the batch leaves a purge
+// tombstone (`room_purges`) per document until its room confirms, so a room that cannot be reached is tried again
+// and its document cannot be opened meanwhile. A shared tab's other holders keep their own copies
+// (docs/specs/006-document/tab-document-many-to-many.md). D1's derived rows (the Inbox's index, the placed images,
+// the cards) cascade from `documents`.
 
 import type { Env } from '../types';
 import { imageGrantRemovalStatement } from './image-grants';
@@ -23,6 +25,7 @@ function selectorWhere(selector: DocumentSelector): { where: string; value: stri
 export function documentRemovalStatements(
   env: Env,
   selector: DocumentSelector,
+  requestedAt: number,
 ): D1PreparedStatement[] {
   const { where, value } = selectorWhere(selector);
   const doomed = `SELECT id FROM documents WHERE ${where}`;
@@ -36,6 +39,11 @@ export function documentRemovalStatements(
     env.DB.prepare(
       `DELETE FROM drive_items WHERE item_kind = 'document' AND ld_id IN (${doomed})`,
     ).bind(value),
+    // The purge each room still owes, before the rows that name the documents go.
+    env.DB.prepare(
+      `INSERT INTO room_purges (document_id, requested_at) SELECT id, ? FROM documents WHERE ${where}
+       ON CONFLICT (document_id) DO NOTHING`,
+    ).bind(requestedAt, value),
     env.DB.prepare(`DELETE FROM documents WHERE ${where}`).bind(value),
   ];
 }

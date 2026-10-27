@@ -4,6 +4,12 @@ import { makeTestRouteContext } from '../routes/test-route-context';
 import type { DocumentEnv, Env } from '../types';
 import { documentRouteContext, identityOf, type RouteIdentity } from './document-route';
 
+// No document here owes its room a purge (G3 is room-purge.test.ts's).
+vi.mock('../room-purge-client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../room-purge-client')>()),
+  purgeOwed: vi.fn(async () => false),
+}));
+
 // Routing (docs/specs/006-document/blueprints/document-storage.md "Routing"): every path under /api/documents/:id/
 // that is not the room's admission or the copy is handed to the document's room with the caller the worker
 // resolved, and the room rebuilds the same RouteContext from it.

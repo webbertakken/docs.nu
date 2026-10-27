@@ -286,10 +286,10 @@ id = ? AND NOT REFERENCED RETURNING id`. A row returned relays `{ deleted: true 
   sets `delete_when_unreferenced = NULL` and answers 200 with the stored sheet; otherwise it creates as usual. A
   restore takes up to `SHEET_CELLS_MAX` cells in one request (as a seed does).
 - **Expiry** is the room's upkeep ([Document storage blueprint](../../006-document/blueprints/document-storage.md),
-  "Upkeep"), over the room's own SQLite. **Not built yet** (plan 0006, phase B5): the daily D1 cron that ran it was
-  removed with the move, so until the upkeep lands no sheet expires; a sheet stays marked `unreferenced_since` and
-  is deleted on the first upkeep run past its 30 days. `runSheetExpiry(env: DocumentEnv, now)`
-  (`apps/api/src/sheet-sweep.ts`) is the upkeep's step, unscheduled until then: it repeatedly reads
+  "Upkeep"), over the room's own SQLite, at most once a day per room (`maintainRoom`,
+  `apps/api/src/document-room/room-upkeep.ts`); a sheet marked `unreferenced_since` is deleted on the first upkeep
+  run past its 30 days, and an idle room is woken for it then. `runSheetExpiry(env: DocumentEnv, now)`
+  (`apps/api/src/sheet-sweep.ts`) is the upkeep's step: it repeatedly reads
   `SELECT document_id, id, cell_count FROM sheets WHERE unreferenced_since < ?cutoff ORDER BY unreferenced_since
 LIMIT SHEET_EXPIRY_BATCH` (the partial index), deletes them in one batch (cells by cascade), taking sheets in
   order while the batch holds at most `SHEET_EXPIRY_BATCH_CELLS` cells (always at least one), and stops when none are
@@ -368,7 +368,6 @@ LIMIT SHEET_EXPIRY_BATCH` (the partial index), deletes them in one batch (cells 
 | Restored title now taken on the tab                            | `uniqueSheetTitle` (the next free title) before the restore is sent                                                                           |
 | Delete before any Sheet has drawn                              | No dialog; the sheet waits as a Cut's                                                                                                         |
 | A sheet whose element never reached the api                    | Noted at create (`sheetNoteUnreferencedStatement`), so it expires                                                                             |
-| Unreferenced past 30 days while the upkeep is unbuilt          | Kept: nothing expires until plan 0006 phase B5 lands the room's upkeep                                                                        |
 | Agent change past a sheet or document cap                      | `capsRefusal` before any part is sent: the cap's code, "none of it was written"                                                               |
 | Agent change whose later part the api refuses                  | The landed parts kept and reported as a `partly` line, then the refusal                                                                       |
 | add_sheet onto a tab not in Plan                               | `tab_not_plan` after one tab read (`tabTakesPlanOnly`), before any sheet is made; the read also tints a design                                |

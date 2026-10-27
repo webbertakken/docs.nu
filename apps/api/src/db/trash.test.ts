@@ -5,11 +5,12 @@ import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import { DAY, T0, liveDoc, insert, team } from './test-trash-fixtures';
 import type { Env } from '../types';
 import { deleteAccount } from './account';
-import { purgeRooms } from '../room-purge-client';
+import { purgeRooms, ROOM_PURGE_MAX_PER_RUN } from '../room-purge-client';
 
 // The rooms are another worker's storage; here only whether they are asked to purge is pinned.
-vi.mock('../room-purge-client', () => ({
-  purgeRooms: vi.fn(() => Promise.resolve({ rooms: 0, unreached: 0 })),
+vi.mock('../room-purge-client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../room-purge-client')>()),
+  purgeRooms: vi.fn(() => Promise.resolve({ rooms: 0, unreached: 0, deferred: 0 })),
 }));
 import {
   getDocument,
@@ -312,7 +313,9 @@ describe('purgeDocuments', () => {
     expect(del).toHaveBeenCalledWith(['thumb/A', 'og/A']);
     // Its room's storage: the content, and the ledger's comment and idea text (docs/specs/015-api/api.md "Purging a
     // room").
-    expect(vi.mocked(purgeRooms)).toHaveBeenCalledWith(db.env, ['A']);
+    expect(vi.mocked(purgeRooms)).toHaveBeenCalledWith(db.env, ['A'], {
+      left: ROOM_PURGE_MAX_PER_RUN,
+    });
   });
 
   it('never purges a live document', async () => {

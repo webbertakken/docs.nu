@@ -426,7 +426,7 @@ export async function upgradeDocumentSharePassword(
 // purgeDocuments (docs/specs/013-workspace/trash.md). A tab another document
 // still holds survives either.
 export async function deleteDocument(env: Env, id: string): Promise<void> {
-  await env.DB.batch(documentRemovalStatements(env, { column: 'id', value: id }));
+  await env.DB.batch(documentRemovalStatements(env, { column: 'id', value: id }, Date.now()));
   // The room's storage too: an Offline document keeps nothing on the server. Best effort.
   await purgeRooms(env, [id]);
   // Drop the cached SVG snapshot (docs/specs/006-document/document-snapshots.md) alongside the row so a
@@ -511,7 +511,7 @@ export async function copyDocument(
     summary = await documentRoom(env, newId).importCopy(content);
   } catch (error) {
     console.warn('[documents] copy import failed', { sourceId, newId, error: String(error) });
-    await env.DB.batch(documentRemovalStatements(env, { column: 'id', value: newId }));
+    await env.DB.batch(documentRemovalStatements(env, { column: 'id', value: newId }, Date.now()));
     await purgeRooms(env, [newId]);
     throw error;
   }

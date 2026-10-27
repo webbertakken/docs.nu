@@ -222,7 +222,7 @@ describe('removal', () => {
     image(db.sql, 'bob-img', 'user_bob');
     await upsertTab(db.env, 'D', tabWith('t1', 'bob-img'), 0);
     await db.flush();
-    await db.env.DB.batch(documentRemovalStatements(db.env, { column: 'id', value: 'D' }));
+    await db.env.DB.batch(documentRemovalStatements(db.env, { column: 'id', value: 'D' }, 1));
     expect(grants(db.sql)).toEqual([]);
   });
 });

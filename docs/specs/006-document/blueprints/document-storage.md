@@ -223,36 +223,47 @@ to_document TEXT NOT NULL, member TEXT NOT NULL DEFAULT '', UNIQUE (kind, tab_id
 
 ### Purge
 
-Built: `purgeRooms(env, ids)` (`room-purge-client.ts`) runs after the D1 removal batch of every purge (the Trash's
-purge, Take Offline, deleting an account, a discarded create or copy): `POST /purge` to each room through
-`roomFetch`, `ROOM_PURGE_CONCURRENCY` at once, `ROOM_PURGE_TIMEOUT_MS` each, best effort; an unreached room is logged
-`[room-purge] did not reach the room` and counted (`[room-purge] purged { rooms, unreached }`). The room's purge closes
-every socket (`DOCUMENT_TRASHED_CLOSE`), settles the ledger, `deleteAlarm`, `deleteAll` (the content with it) and
-logs `[room] purged`.
-
-Not built yet (plan 0006, phase B5): the tombstones, so until then an unreached room keeps its storage, with no D1 row
-that can open it.
-
-- `purgeDocuments(env, ids)` (D1) writes `room_purges (document_id TEXT PRIMARY KEY, requested_at INTEGER NOT NULL,
-attempts INTEGER NOT NULL DEFAULT 0, last_attempt_at INTEGER)` rows in the removal batch (the table exists,
-  migration `0109_room_purges.sql`; nothing writes it yet), then purges each room as above; a confirmed purge deletes
-  its row.
-- The daily cron retries at most `ROOM_PURGE_MAX_PER_RUN` rows whose `last_attempt_at` is older than
-  `ROOM_PURGE_RETRY_MS`.
-- **Guard G3**: the worker answers 404 for a document id with a `room_purges` row, before reaching the room.
-- The room's purge leaves every shared tab first (sends now, not queued), once shared tabs exist.
+- **Tombstones**: `documentRemovalStatements(env, selector, requestedAt)` (every purge: the Trash's purge, Take
+  Offline, deleting an account, a copy whose import failed) writes `room_purges (document_id TEXT PRIMARY KEY,
+requested_at INTEGER NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, last_attempt_at INTEGER)` rows (migration
+  `0109_room_purges.sql`) in the removal batch, before the `documents` delete.
+- `purgeRooms(env, ids, budget = roomCallBudget())` (`room-purge-client.ts`) runs after the batch: `POST /purge` to
+  each room through `roomFetch`, `ROOM_PURGE_CONCURRENCY` at once, `ROOM_PURGE_TIMEOUT_MS` each, for at most
+  `budget.left` ids (the budget shared by one invocation, `ROOM_PURGE_MAX_PER_RUN` by default); a confirmed purge
+  deletes its tombstone, an unreached room's gets `attempts + 1` and `last_attempt_at` (`[room-purge] did not reach
+the room`), ids past the budget keep theirs untouched; logs `[room-purge] purged { rooms, unreached, deferred }`. A
+  failed tombstone write is logged `[room-purge] tombstones not settled` and costs only a repeat purge. A discarded
+  create has no D1 row and so no tombstone.
+- **Retry**: the daily cron runs `retryRoomPurges(env, now, budget)` (the oldest tombstones never tried or tried at
+  least `ROOM_PURGE_RETRY_MS` ago, as many as the budget holds; `[room-purge] retried { rooms, unreached }`), then
+  `purgeExpiredTrash(env, now, { roomCalls: budget })` with the same budget: one run makes at most
+  `ROOM_PURGE_MAX_PER_RUN` room calls beside its D1 calls, inside the 1,000 subrequests a Worker invocation may make
+  to Cloudflare services on the Free plan (10,000 on Paid). A 2,000-document Trash run purges every D1 row and calls
+  300 rooms; the other 1,700 keep their tombstones for the next runs.
+- **Guard G3**: `handleDocuments` answers 404 for a document id with a `room_purges` row (`purgeOwed`) before
+  reaching the room, logged `[room-purge] refused a purged document`.
+- **A create of a tombstoned id** (a document taken offline, then synced back under its id) purges the room first and
+  answers 503 `room_unavailable` while it cannot, so the debt never wipes the new content.
+- The room's purge (`DocumentRoom.purge`): leaves every shared tab (`RoomContent.leaveShares`), closes every socket
+  (`DOCUMENT_TRASHED_CLOSE`), settles the ledger, `deleteAlarm`, `deleteAll` (the content with it), forgets the
+  document in memory (`RoomContent.forget`, so a create of the same id starts empty) and logs `[room] purged`.
 
 ### Upkeep
 
-Not built yet (plan 0006, phase B5). The D1 crons for sheet expiry and changeset retention were removed with the
-move, so until the upkeep lands no unreferenced sheet expires and no changeset ages out; nothing is lost, only kept
-longer. The tab stats, image reference and collaboration index backfills are removed for good (the move indexes
-each document as it lands).
+`maintainRoom(env, documentId, now)` (`room-upkeep.ts`) from the room's alarm: deletes changesets older than
+`CHANGESET_RETENTION_MS` (`deleteOldChangesets`, the `agent_changeset_parts` cascade) and sheets unreferenced longer
+than `SHEET_UNREFERENCED_DAYS` (`runSheetExpiry`, `sheet-sweep.ts`), logs `[room-upkeep] id=<id> changesets=<n>
+sheets=<m> next=<t|none>`, and answers the next run: a millisecond past the moment the oldest changeset or
+unreferenced sheet left ages out (now, when the sheet expiry stopped at its cap), never sooner than
+`UPKEEP_INTERVAL_MS` from now; none when nothing is left to age.
 
-`maintain(now)` from the alarm, at most once per `UPKEEP_INTERVAL_MS` (stored `upkeep_at` key): delete changesets
-older than `CHANGESET_RETENTION_DAYS` (the `agent_changeset_parts` cascade); delete sheets unreferenced longer than
-the sheet store's 30 days (`runSheetExpiry(env: DocumentEnv, now)`, `sheet-sweep.ts`, already typed on the room's
-SQLite and unscheduled until then).
+- Scheduling (`RoomContent`): a write with no upkeep scheduled schedules one at `upkeepAfterWrite(now, lastRun,
+FLUSH_IDLE_MS) = max(now + FLUSH_IDLE_MS, lastRun + UPKEEP_INTERVAL_MS)`; the key-value store keeps the last run
+  (`upkeep-at`, written before the run, so its own writes schedule no other) and the next (`upkeep-due`, read on a
+  wake), so an evicted idle room is still woken for it. A run that throws logs `[room-upkeep] failed id=<id>` and is
+  tried `UPKEEP_INTERVAL_MS` later.
+- The tab stats, image reference and collaboration index backfills are removed for good (the move indexes each
+  document as it lands).
 
 ## Interfaces and contracts
 
@@ -338,7 +349,10 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 | Share send to a holder that is gone              | `gone`: holder deleted, `[tab-shares] holder gone`                                         |
 | Two holders write in the same millisecond        | the larger `sha256(data)` wins in both                                                     |
 | Link with `from` holding the tab in its Trash    | allowed: a trashed document still holds its tabs                                           |
-| Room purge unreached                             | D1 rows gone; `[room-purge] did not reach the room`; tombstone and retry once B5 lands     |
+| Room purge unreached                             | D1 rows gone; `[room-purge] did not reach the room`; tombstone kept (G3), retried daily    |
+| Purge run past its room budget                   | D1 rows gone; rooms past the budget keep their tombstones for the next runs                |
+| Create of an id whose room owes a purge          | room purged first; 503 `room_unavailable` while it cannot be reached                       |
+| Upkeep throws                                    | `[room-upkeep] failed id=<id>`; tried again a day later                                    |
 | Stray id wakes a room                            | `empty`; nothing stored (R1)                                                               |
 | Summary missing (never pushed)                   | listing `empty: false`; clean-up keeps it                                                  |
 | Alarm fires with nothing due                     | re-arms from the remaining deadlines, or none                                              |
@@ -365,6 +379,8 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
   parameters, 100 KB of SQL) are met by `json_each` chunks.
 - The save path makes no D1 round trip; D1 reads per list page are unchanged in count (the subqueries over `tabs` and
   `tab_stats` become `json_extract`s of the row's own `content_summary`: `firstTabCountSql`, `docStatsSql`).
+- G3 adds one primary-key read of `room_purges` to every request under `/api/documents/:id/`, before the room.
+- A daily purge run makes at most `ROOM_PURGE_MAX_PER_RUN` room calls ("Purge").
 
 ## Observability
 
@@ -381,35 +397,40 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 | `[tab-link] refused { documentId, tabId, from, reason: tab_id_taken }` | 409 on a link           |
 | `[tab-link] join not recorded { documentId, tabId, from, error }`      | `shareJoined` failed    |
 | `[room-purge] did not reach the room { documentId, error }`            | a room purge failed     |
-| `[room-purge] purged { rooms, unreached }` / `[room] purged`           | each purge call / room  |
+| `[room-purge] purged { rooms, unreached, deferred }` / `[room] purged` | each purge call / room  |
+| `[room-purge] retried { rooms, unreached }`                            | the daily retry         |
+| `[room-purge] tombstones not settled { reached, unreached, error }`    | a tombstone write fails |
+| `[room-purge] refused a purged document { documentId }`                | G3                      |
 | `[documents] create discarded { documentId, why }`                     | a create purged again   |
 | `[documents] create seed refused { documentId, status }`               | a seed store refused    |
 | `[documents] copy import failed { sourceId, newId, error }`            | a copy's import threw   |
-| `[room-upkeep] id=<id> changesets=<n> sheets=<m>`                      | each upkeep run (B5)    |
+| `[room-upkeep] id=<id> changesets=<n> sheets=<m> next=<t\|none>`       | each upkeep run         |
+| `[room-upkeep] failed id=<id>`                                         | an upkeep run throws    |
 
 ## Testing
 
-| Rule                                                              | Test                                                                         |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| R1 schema on first write only                                     | `document-schema.test.ts`, `document-db.test.ts`                             |
-| R2 a throw undoes the call                                        | `document-db.test.ts` (batch rollback)                                       |
-| R3 every write path keys the outbox                               | `document-outbox-keys.test.ts`, one case per table                           |
-| Drain bounds, retry, re-keyed key survives a drain                | `document-outbox.test.ts`                                                    |
-| Drain pace: idle, once a minute, retry after a failed unit        | `room-content.test.ts`                                                       |
-| G2 no write after purge                                           | `document-outbox.test.ts`                                                    |
-| Summary: counts per tab, stats, unknown counts                    | `content-summary.test.ts`                                                    |
-| Routing hands every `/api/documents/:id/` path to the room        | `document-route.test.ts`                                                     |
-| One client per document: `X-Document-Id`, ids bound, sole stub    | `document-client.test.ts`                                                    |
-| `askRoom` answers 503 `room_unavailable` on a throw               | `document-client.test.ts`, `document-route.test.ts`                          |
-| Bind before the handover; mismatch refused; handover gate         | `document-room-handover.test.ts`                                             |
-| Access checks unchanged per route                                 | existing route tests, run through the room harness (`test-document-room.ts`) |
-| Shared tabs: join, write, later wins, no echo, leave, gone, purge | `tab-shares.test.ts`                                                         |
-| Link route answers 400/403/404/409/200                            | `tab-link-route.test.ts`                                                     |
-| The move lists D1's other holders                                 | `content-move.test.ts` "moves a tab two documents hold"                      |
-| G3 tombstoned id answers 404                                      | `room-purge.test.ts` (B5, not built yet)                                     |
-| Upkeep deletes old changesets and sheets                          | `document-room-upkeep.test.ts` (B5, not built yet)                           |
-| Budgets                                                           | `document-room-store.test.ts`                                                |
-| Inbox reads the pushed rows                                       | `collab-index.test.ts`, `activity-cards.test.ts`                             |
+| Rule                                                                    | Test                                                                         |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| R1 schema on first write only                                           | `document-schema.test.ts`, `document-db.test.ts`                             |
+| R2 a throw undoes the call                                              | `document-db.test.ts` (batch rollback)                                       |
+| R3 every write path keys the outbox                                     | `document-outbox-keys.test.ts`, one case per table                           |
+| Drain bounds, retry, re-keyed key survives a drain                      | `document-outbox.test.ts`                                                    |
+| Drain pace: idle, once a minute, retry after a failed unit              | `room-content.test.ts`                                                       |
+| G2 no write after purge                                                 | `document-outbox.test.ts`                                                    |
+| Summary: counts per tab, stats, unknown counts                          | `content-summary.test.ts`                                                    |
+| Routing hands every `/api/documents/:id/` path to the room              | `document-route.test.ts`                                                     |
+| One client per document: `X-Document-Id`, ids bound, sole stub          | `document-client.test.ts`                                                    |
+| `askRoom` answers 503 `room_unavailable` on a throw                     | `document-client.test.ts`, `document-route.test.ts`                          |
+| Bind before the handover; mismatch refused; handover gate               | `document-room-handover.test.ts`                                             |
+| Access checks unchanged per route                                       | existing route tests, run through the room harness (`test-document-room.ts`) |
+| Shared tabs: join, write, later wins, no echo, leave, gone, purge       | `tab-shares.test.ts`                                                         |
+| Link route answers 400/403/404/409/200                                  | `tab-link-route.test.ts`                                                     |
+| The move lists D1's other holders                                       | `content-move.test.ts` "moves a tab two documents hold"                      |
+| Tombstones, G3, retry, the run's room budget, create of a tombstoned id | `room-purge.test.ts`, `room-purge-client.test.ts`                            |
+| A purged room forgets its document                                      | `room-content.test.ts` "a purged room"                                       |
+| Upkeep deletes old changesets and sheets, once a day, wakes idle        | `document-room-upkeep.test.ts`                                               |
+| Budgets                                                                 | `document-room-store.test.ts`                                                |
+| Inbox reads the pushed rows                                             | `collab-index.test.ts`, `activity-cards.test.ts`                             |
 
 The harnesses, neither a `.test.ts` file:
 
@@ -435,14 +456,14 @@ The harnesses, neither a `.test.ts` file:
 | `SHARE_DRAIN_MAX`           | 50         | upstream tab-shares                          | 10 to 100            |
 | `ROOM_PURGE_CONCURRENCY`    | 10         | `purgeRooms` (`room-purge-client.ts`)        | 1 to 20              |
 | `ROOM_PURGE_TIMEOUT_MS`     | 3,000      | `purgeRooms` (`room-purge-client.ts`)        | 1,000 to 10,000      |
-| `ROOM_PURGE_MAX_PER_RUN`    | 300        | upstream index purge                         | 50 to 1,000          |
+| `ROOM_PURGE_MAX_PER_RUN`    | 300        | upstream index purge; subrequest limit       | 50 to 600            |
 | `ROOM_PURGE_RETRY_MS`       | 3,600,000  | upstream index purge ("once an hour")        | 600,000 and up       |
 | `UPKEEP_INTERVAL_MS`        | 86,400,000 | the daily crons it replaces                  | 3,600,000 and up     |
 | `SQLITE_ROW_MAX_BYTES`      | 2,000,000  | Durable Object SQLite limit                  | fixed                |
 | `SQLITE_ROW_HEADROOM_BYTES` | 8,192      | the tab row's other columns and header       | fixed                |
 
-`ROOM_PURGE_MAX_PER_RUN`, `ROOM_PURGE_RETRY_MS` and `UPKEEP_INTERVAL_MS` (B5) are not in the code yet; the rest are,
-the drain's pace in `room-content.ts`, its bounds in `document-outbox.ts` and `SHARE_DRAIN_MAX` in `tab-shares.ts`.
+All are in the code: the drain's pace in `room-content.ts`, its bounds in `document-outbox.ts`, `SHARE_DRAIN_MAX` in
+`tab-shares.ts`, the purge's in `room-purge-client.ts` and `UPKEEP_INTERVAL_MS` in `room-upkeep.ts`.
 `SQLITE_ROW_MAX_BYTES` and `SQLITE_ROW_HEADROOM_BYTES` live in `@livedoc/api-schema` (`tab-size.ts`); `MAX_TAB_BYTES`
 is their difference, 1,991,808.
 `wrangler.toml`: the class migration is the move blueprint's; no new binding here.

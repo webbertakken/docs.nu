@@ -12,6 +12,13 @@ import { documentRoom } from './document-client';
 import { drainOutbox, pooled, PUSH_CONCURRENCY } from './document-outbox';
 import { documentRpc, type DocumentRoomRpc } from './document-rpc';
 import { hasDocumentSchema, migrateDocumentSchema } from './document-schema';
+import {
+  maintainRoom,
+  UPKEEP_AT_KEY,
+  UPKEEP_DUE_KEY,
+  UPKEEP_INTERVAL_MS,
+  upkeepAfterWrite,
+} from './room-upkeep';
 import { allShares, drainShares } from './tab-shares';
 import type { DocumentEnv, Env } from '../types';
 
@@ -75,6 +82,8 @@ export class RoomContent {
   // The next send to the other holders of its shared tabs (tab-shares.ts): on idle, not held to the D1 drain's once
   // a minute, since it is a call to another room rather than a D1 write.
   private shareAt: number | null = null;
+  // The next upkeep (room-upkeep.ts), kept in the key-value store too so an evicted room still runs it.
+  private upkeepAt: number | null = null;
   private lastFlushAt = 0;
   private draining = false;
 
@@ -106,6 +115,8 @@ export class RoomContent {
       if (typeof row?.id === 'string') this.documentId = row.id;
       if (this.owesD1()) this.flushAt = Date.now();
       if (this.owesShares()) this.shareAt = Date.now();
+      const due = state.storage.kv?.get(UPKEEP_DUE_KEY);
+      if (typeof due === 'number') this.upkeepAt = due;
     }
   }
 
@@ -191,7 +202,7 @@ export class RoomContent {
 
   // The earliest of the drains' deadlines, for the room's one alarm; null with nothing owed.
   deadline(): number | null {
-    const due = [this.flushAt, this.shareAt].filter((d): d is number => d !== null);
+    const due = [this.flushAt, this.shareAt, this.upkeepAt].filter((d): d is number => d !== null);
     return due.length > 0 ? Math.min(...due) : null;
   }
 
@@ -199,6 +210,34 @@ export class RoomContent {
   async alarm(now: number): Promise<void> {
     await this.drainD1(now);
     await this.sendShares(now);
+    await this.upkeep(now);
+  }
+
+  // At most once per UPKEEP_INTERVAL_MS (its last run recorded before it starts, so its own writes schedule no
+  // other); next when the oldest thing left would age out. A failed run is tried again a day later.
+  private async upkeep(now: number): Promise<void> {
+    if (this.upkeepAt === null || this.upkeepAt > now) return;
+    this.upkeepAt = null;
+    const env = this.env;
+    const documentId = this.documentId;
+    const kv = this.state.storage.kv;
+    if (!env || !documentId || !this.schemaReady || !kv) return;
+    kv.put(UPKEEP_AT_KEY, now);
+    let next: number | null;
+    try {
+      next = (await maintainRoom(env, documentId, now)).nextAt;
+    } catch (error) {
+      console.error(`[room-upkeep] failed id=${documentId}`, error);
+      next = now + UPKEEP_INTERVAL_MS;
+    }
+    this.scheduleUpkeep(next);
+  }
+
+  private scheduleUpkeep(at: number | null): void {
+    this.upkeepAt = at;
+    const kv = this.state.storage.kv;
+    if (at === null) kv?.delete(UPKEEP_DUE_KEY);
+    else kv?.put(UPKEEP_DUE_KEY, at);
   }
 
   // A failed unit retries a minute later; keys left by a drain bounded at DRAIN_TABS go straight after.
@@ -273,6 +312,19 @@ export class RoomContent {
     );
   }
 
+  // After the room's storage was deleted (a purge): this instance forgets the document it held, so a later create of
+  // the same id (a document synced back from This Browser) starts from an empty room, schema and move record alike.
+  forget(): void {
+    this.documentId = null;
+    this.schemaReady = false;
+    this.migrated = false;
+    this.moved = false;
+    this.flushAt = null;
+    this.shareAt = null;
+    this.upkeepAt = null;
+    this.lastFlushAt = 0;
+  }
+
   private owesD1(): boolean {
     const sql = this.state.storage.sql;
     return sql.exec('SELECT 1 FROM outbox LIMIT 1').toArray().length > 0;
@@ -308,6 +360,14 @@ export class RoomContent {
     }
     if (this.shareAt === null && this.owesShares()) {
       this.shareAt = Date.now() + FLUSH_IDLE_MS;
+      armed = true;
+    }
+    const kv = this.state.storage.kv;
+    if (this.upkeepAt === null && this.documentId !== null && kv) {
+      const last = kv.get(UPKEEP_AT_KEY);
+      this.scheduleUpkeep(
+        upkeepAfterWrite(Date.now(), typeof last === 'number' ? last : 0, FLUSH_IDLE_MS),
+      );
       armed = true;
     }
     if (armed) this.hooks.armAlarm();

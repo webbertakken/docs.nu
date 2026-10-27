@@ -82,7 +82,7 @@ export async function deleteAccount(
   // Link-aware (docs/specs/006-document/tab-document-many-to-many.md): a tab
   // shared into a document someone else owns stays there.
   const removal = await env.DB.batch(
-    documentRemovalStatements(env, { column: 'owner_id', value: ownerId }),
+    documentRemovalStatements(env, { column: 'owner_id', value: ownerId }, Date.now()),
   );
   const documentsRes = removal[removal.length - 1]!;
   // Their rooms' storage goes with them (the ledger keeps comment and idea text). Best effort.

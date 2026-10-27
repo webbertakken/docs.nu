@@ -162,8 +162,10 @@ room`; open sessions still stop at their next save (I5).
 - **E8** A tab shared with another document: untouched by the trash, kept by the purge (the other document's
   room holds its own copy of the tab).
 - **E12** A room unreachable at the purge: the D1 rows are gone (the purge stands), the room keeps its storage,
-  logged `[room-purge] did not reach the room`; the retry is the purge tombstones' (plan 0006, phase B5, not built
-  yet), so until then the room's storage stays unreached, with no D1 row that can open it.
+  logged `[room-purge] did not reach the room`; its `room_purges` tombstone (written in the removal batch) keeps the
+  document unopenable (404) and the daily cron retries it ([Document storage blueprint](../../006-document/blueprints/document-storage.md#purge)).
+- **E13** A purge run naming more rooms than `ROOM_PURGE_MAX_PER_RUN` (300): the D1 rows go for all of them, the
+  rooms past the budget are not called and keep their tombstones for the next daily runs.
 - **E9** A purge backlog over one run's cap: oldest first, the rest the next day.
 - **E10** A page-session tombstone for a restored document: cleared by `unmarkDocumentDeleted`.
 - **E11** An owner re-creating (POST) a trashed id, e.g. a stale client: 410, nothing written.

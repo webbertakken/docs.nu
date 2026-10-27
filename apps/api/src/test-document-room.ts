@@ -108,6 +108,7 @@ export function testDocumentRoom(
   room: DocumentRoom;
   sql: DatabaseSync;
   alarms: () => number | null;
+  kv: Map<string, unknown>;
 } {
   const sql = new DatabaseSync(':memory:');
   sql.exec('PRAGMA foreign_keys = ON');
@@ -172,7 +173,7 @@ export function testDocumentRoom(
     getWebSockets: () => [],
     acceptWebSocket: () => {},
   } as unknown as DurableObjectState;
-  return { room: new DocumentRoom(state, env), sql, alarms: () => alarm };
+  return { room: new DocumentRoom(state, env), sql, alarms: () => alarm, kv };
 }
 
 // The SQLite half of a room's storage, for a test that builds its own fake DurableObjectState.

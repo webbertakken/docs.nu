@@ -3,6 +3,12 @@ import { DOCUMENT_CONVERSION_HEADER } from '@livedoc/api-schema';
 import { makeTestRouteContext } from './test-route-context';
 import type { DocumentDTO } from '../types';
 
+// No document here owes its room a purge (G3 is room-purge.test.ts's).
+vi.mock('../room-purge-client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../room-purge-client')>()),
+  purgeOwed: vi.fn(async () => false),
+}));
+
 // Offline Mode conversions must be recorded as themselves (docs/specs/006-document/offline-mode.md + docs/specs/013-workspace/timeline.md).
 //
 // Both conversions reuse ordinary endpoints — "take offline" is a plain

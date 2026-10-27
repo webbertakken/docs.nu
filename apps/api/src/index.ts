@@ -79,6 +79,7 @@ import { handleTeams } from './routes/teams';
 import { handleShared } from './routes/shared';
 import { handleTelemetry } from './routes/telemetry';
 import { handleTrash } from './routes/trash';
+import { retryRoomPurges, roomCallBudget } from './room-purge-client';
 import { handleDrive } from './routes/drive';
 import { handleWorkbench } from './routes/workbench';
 import { resolveWorkbenchSession } from './auth/workbench-session';
@@ -569,12 +570,18 @@ const worker = {
           .then((count) => console.log(`timeline expiry sweep: emitted ${count} events`))
           .catch((err) => console.error('timeline expiry sweep failed', err)),
       );
-      // docs/specs/013-workspace/trash.md: purge what has been in the Trash for
-      // 30 days, oldest first, capped per run (TRASH_PURGE_MAX_BATCHES).
+      // docs/specs/013-workspace/trash.md: the purges rooms still owe first, then what has been in the Trash for
+      // 30 days, oldest first, capped per run (TRASH_PURGE_MAX_BATCHES). One budget of room calls for both, so the
+      // run stays inside the invocation's subrequests (room-purge-client.ts); what it leaves keeps its tombstone.
       ctx.waitUntil(
-        purgeExpiredTrash(env, now)
-          .then((count) => console.log(`trash sweep: purged ${count} documents`))
-          .catch((err) => console.error('trash sweep failed', err)),
+        (async () => {
+          const roomCalls = roomCallBudget();
+          await retryRoomPurges(env, now, roomCalls).catch((err: unknown) =>
+            console.error('[room-purge] retry failed', err),
+          );
+          const count = await purgeExpiredTrash(env, now, { roomCalls });
+          console.log(`trash sweep: purged ${count} documents`);
+        })().catch((err) => console.error('trash sweep failed', err)),
       );
       // docs/specs/013-workspace/empty-document-cleanup.md: move documents empty and
       // unsaved for 30 days to the Trash, stamped `now`, so the purge above
