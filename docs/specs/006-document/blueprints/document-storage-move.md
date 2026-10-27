@@ -17,7 +17,7 @@ document migration door (the room writes a moved document in one transaction).
 | Move record     | D1 `content_moves` row                                                                 | migration log     |
 | Legacy room     | class `LegacyDocumentRoom`, binding `LEGACY_DOCUMENT_ROOM` (`legacy-document-room.ts`) | old room          |
 | Sweep           | `sweepContentMoves(env, now)` (`content-move-sweep.ts`), cron `* * * * *`              | backfill          |
-| Operator tool   | `apps/api/scripts/content-move.ts` (planned), commands `plan` and `verify`             | migrator          |
+| Operator tool   | `apps/api/scripts/content-move.ts`, commands `plan` and `verify`                       | migrator          |
 
 ## Behaviour and state
 
@@ -116,7 +116,12 @@ lower-case hex.
 - Each id: `room.move(id)`, `MOVE_CONCURRENCY` at once, each bounded by `MOVE_TIMEOUT_MS`.
 - No rows: return at once without logging.
 
-### The operator tool (`apps/api/scripts/content-move.ts` (planned), Node type stripping)
+### The operator tool (`apps/api/scripts/content-move.ts`, Node type stripping)
+
+The shell parses arguments and runs wrangler; the pure core (`apps/api/scripts/content-move-core.ts`: `assertSelect`,
+`inlineId`, `planOf`, `verifyOf`) does the rest, so tests run it over node:sqlite. One wrangler call per document
+carries all of its SELECTs. A document purged since the plan verifies as `gone`. Run from `apps/api` as
+`node --import ../../scripts/ts-source-hooks.mjs scripts/content-move.ts plan --remote --out plan.json`.
 
 - `plan (--local | --remote) [--out <file>]`: for every `documents` row, the same reads as step 1 through
   `wrangler d1 execute DB --json --command <SELECT>`; prints `id, tabs, bytes, hash` and writes the JSON plan.
@@ -208,7 +213,7 @@ DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 | Shared tab moves into both holders                          | `content-move.test.ts`                             |
 | Legacy state carried verbatim, then cleared                 | `content-move.test.ts`                             |
 | Sweep order, batch, retry gap, idle                         | `content-move-sweep.test.ts`                       |
-| Tool refuses a non-SELECT; verify pass and fail tables      | `scripts/content-move.test.ts` (planned)           |
+| Tool refuses a non-SELECT; verify pass and fail tables      | `scripts/content-move.test.ts`                     |
 | Drop guard fails with an unmoved document                   | `migrations` test on node:sqlite                   |
 
 ## Constants and configuration
