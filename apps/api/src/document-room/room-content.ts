@@ -381,12 +381,32 @@ function localNamespace(
   own: DurableObjectId,
   room: DocumentRoom,
 ): Env['DOCUMENT_ROOM'] {
+  const self = inProcessRoom(room);
   // A unit test builds a room without bindings; its own id is still answered.
   return new Proxy(real ?? ({} as Env['DOCUMENT_ROOM']), {
     get: (target, prop, receiver) => {
       if (prop === 'get') {
         return (id: DurableObjectId, opts?: DurableObjectNamespaceGetDurableObjectOptions) =>
-          id.equals(own) ? room : target.get(id, opts);
+          id.equals(own) ? self : target.get(id, opts);
+      }
+      const value: unknown = Reflect.get(target, prop, receiver);
+      return typeof value === 'function'
+        ? (value as (...a: unknown[]) => unknown).bind(target)
+        : value;
+    },
+  });
+}
+
+// The room as its own stub: a stub's fetch takes (input, init), the class's fetch one Request, so callers that pass a
+// URL and an init (documentRoom().fetch, every relay) reach it with their method, headers and body intact.
+export function inProcessRoom<T extends { fetch(request: Request): Promise<Response> }>(
+  room: T,
+): T {
+  return new Proxy(room, {
+    get: (target, prop, receiver) => {
+      if (prop === 'fetch') {
+        return (input: Request | string, init?: RequestInit) =>
+          target.fetch(new Request(input, init));
       }
       const value: unknown = Reflect.get(target, prop, receiver);
       return typeof value === 'function'

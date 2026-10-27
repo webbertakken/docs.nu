@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { testDocumentRoom } from '../test-document-room';
 import { sqliteD1 } from '../test-sqlite-d1';
 import type { DocumentSeed } from './document-create';
-import { FLUSH_IDLE_MS, FLUSH_MIN_GAP_MS, FLUSH_RETRY_MS, nextFlushAt } from './room-content';
+import {
+  FLUSH_IDLE_MS,
+  FLUSH_MIN_GAP_MS,
+  FLUSH_RETRY_MS,
+  inProcessRoom,
+  nextFlushAt,
+} from './room-content';
 
 // The drain's pace (docs/specs/006-document/blueprints/document-storage.md "The outbox"): on idle after a write, at
 // most once a minute, a minute after a failure, straight after a drain that left keys.
@@ -130,5 +136,30 @@ describe('a purged room', () => {
     const again = await room.create(D, seed('b'));
     expect(again).toMatchObject({ ok: true });
     expect((await room.outline(D)).tabs.map((t) => t.id)).toEqual(['b']);
+  });
+});
+
+describe('inProcessRoom', () => {
+  it("hands the room's own fetch one Request, keeping method, headers and body", async () => {
+    const seen: Request[] = [];
+    const room = {
+      tag: 'r',
+      async fetch(request: Request) {
+        seen.push(request);
+        return new Response(this.tag);
+      },
+    };
+    const self = inProcessRoom(room);
+    const res = await self.fetch(
+      // A stub's two-argument call, as documentRoom().fetch makes it.
+      ...([
+        'https://room/mutation',
+        { method: 'POST', headers: { 'X-Document-Id': 'd' }, body: '{"op":1}' },
+      ] as unknown as [Request]),
+    );
+    expect(await res.text()).toBe('r');
+    expect(seen[0]!.method).toBe('POST');
+    expect(seen[0]!.headers.get('X-Document-Id')).toBe('d');
+    expect(await seen[0]!.text()).toBe('{"op":1}');
   });
 });

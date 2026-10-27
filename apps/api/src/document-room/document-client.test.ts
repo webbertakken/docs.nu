@@ -40,27 +40,6 @@ describe('documentRoom', () => {
     expect(seen[1]!.get('Upgrade')).toBe('websocket');
   });
 
-  it('hands a room answering in-process one Request, as its own fetch takes', async () => {
-    // room-content.ts answers the room's own id with the class itself, not a stub: its fetch(request) has one
-    // parameter, so a string and an init would arrive as a string with no headers.
-    const seen: Request[] = [];
-    const { env } = envWith({
-      fetch: async (request: Request) => {
-        seen.push(request);
-        return new Response('ok');
-      },
-    });
-    await documentRoom(env, 'doc-9').fetch('https://room/mutation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: '{"op":1}',
-    });
-    expect(seen[0]).toBeInstanceOf(Request);
-    expect(seen[0]!.headers.get(DOCUMENT_ID_HEADER)).toBe('doc-9');
-    expect(seen[0]!.method).toBe('POST');
-    expect(await seen[0]!.text()).toBe('{"op":1}');
-  });
-
   it('fills the document id into every RPC', async () => {
     const calls: unknown[][] = [];
     const record =
