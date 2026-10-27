@@ -2,14 +2,14 @@
 
 Every pull request gets its own complete, isolated copy of the platform, at `https://<branch>.preview.docs.nu`, for as long as it is open. A change is _running_ somewhere before anyone decides to merge it, and a D1 migration runs against a real remote database before it reaches the one holding people's documents.
 
-Production stays as it is: manual, `workflow_dispatch`-only ([Deployment](deployment.md)). There is no staging environment; a preview per pull request takes its place.
+Production deploys every merge to `main` once its CI passes ([Deployment](deployment.md)). There is no staging environment; a preview per pull request takes its place, so a change runs somewhere real before the merge that ships it.
 
 ## A preview
 
 |               | Production       | Preview of pull request `n`                                       |
 | ------------- | ---------------- | ----------------------------------------------------------------- |
 | Address       | `docs.nu`        | `https://<branch>.preview.docs.nu`, and its router on workers.dev |
-| Trigger       | Manual           | Every push to the pull request                                    |
+| Trigger       | Every merge      | Every push to the pull request                                    |
 | Workflow      | `deploy.yml`     | `preview.yml`                                                     |
 | Worker names  | `docs-nu-<app>`  | `docs-nu-pr-<n>-<app>`                                            |
 | D1            | `docs-nu`        | `docs-nu-pr-<n>`, migrated on every deploy                        |
