@@ -134,49 +134,56 @@ export function EditorHeader({
           assemble
         />
       </div>
-      {/* min-w-0 down to the name, so a long name truncates instead of pushing Share and Sign in off a phone. */}
+      {/* The top bar's middle (docs/specs/007-editor/live-app.md "The top bar's middle"): the share-state icon, then the
+          name, then the role pill. min-w-0 down to the name, so a long name truncates instead of pushing Share and Sign
+          in off a phone; the icon never shrinks. */}
       <div className="flex min-w-0 flex-1 items-center justify-start sm:justify-center">
-        {hideTitle ? null : editing && !readOnly ? (
-          <NameEditor
-            initial={documentName}
-            onCommit={(v) => {
-              onRename(v.trim() || documentName);
-              setEditing(false);
-            }}
-            onCancel={() => setEditing(false)}
-            className="rounded border border-slate-300 bg-white px-2 py-0.5 text-sm text-slate-800 outline-none focus:border-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-          />
-        ) : (
-          <div className="flex min-w-0 items-center gap-1">
-            {readOnly ? (
-              <span className="truncate px-2 py-0.5 text-sm text-slate-600 dark:text-slate-200">
-                {documentName}
-              </span>
-            ) : (
-              <HoverCard
-                title="Rename document"
-                description="Click to edit the name."
-                className="min-w-0"
-              >
-                <button
-                  type="button"
-                  onClick={() => setEditing(true)}
-                  // 44px tall on a touch screen; padding, not a pad, since `truncate` clips a ::before.
-                  className="truncate rounded px-2 py-0.5 text-sm text-slate-600 transition pointer-coarse:py-3 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
-                >
+        {hideTitle ? null : (
+          <div data-title-bar-middle="" className="flex min-w-0 items-center gap-1.5">
+            <SharedBadge
+              look="icon"
+              shareable={shareable}
+              team={teamDocument}
+              offline={offline}
+              onManage={showShare ? onOpenShare : undefined}
+            />
+            {/* Its own box: a rename ended from the keyboard hands focus to the first control here, the name
+                (refocus-after-field), never the icon. */}
+            <span className="flex min-w-0">
+              {editing && !readOnly ? (
+                <NameEditor
+                  initial={documentName}
+                  onCommit={(v) => {
+                    onRename(v.trim() || documentName);
+                    setEditing(false);
+                  }}
+                  onCancel={() => setEditing(false)}
+                  className="rounded border border-slate-300 bg-white px-2 py-0.5 text-sm text-slate-800 outline-none focus:border-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                />
+              ) : readOnly ? (
+                <span className="truncate px-1 py-0.5 text-sm text-slate-600 dark:text-slate-200">
                   {documentName}
-                </button>
-              </HoverCard>
-            )}
-            <span className="hidden sm:contents">
-              <SharedBadge
-                shareable={shareable}
-                team={teamDocument}
-                offline={offline}
-                onManage={showShare ? onOpenShare : undefined}
-              />
-              {rolePill ? <span className="ml-1 inline-flex">{rolePill}</span> : null}
+                </span>
+              ) : (
+                <HoverCard
+                  title="Rename document"
+                  description="Click to edit the name."
+                  className="min-w-0"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setEditing(true)}
+                    // 44px tall on a touch screen; padding, not a pad, since `truncate` clips a ::before.
+                    className="truncate rounded px-1 py-0.5 text-sm text-slate-600 transition pointer-coarse:py-3 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
+                  >
+                    {documentName}
+                  </button>
+                </HoverCard>
+              )}
             </span>
+            {rolePill && !(editing && !readOnly) ? (
+              <span className="ml-0.5 hidden sm:inline-flex">{rolePill}</span>
+            ) : null}
           </div>
         )}
       </div>

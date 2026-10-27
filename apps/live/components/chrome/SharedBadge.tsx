@@ -3,7 +3,14 @@
 import { useEffect, useId, useRef, useState, type HTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
 import { Chip } from '@livedoc/ui';
-import { SHARE_STATE_META, STATE_CHIP_HEIGHT_PX, StateDot, type ShareState } from './share-states';
+import {
+  SHARE_STATE_META,
+  STATE_CHIP_HEIGHT_PX,
+  STATE_ICON_TONE,
+  StateDot,
+  StateIcon,
+  type ShareState,
+} from './share-states';
 import { VisibilityLegend } from './VisibilityLegend';
 
 // The visibility pill rendered beside the document title, split out of
@@ -36,13 +43,33 @@ function ShareStateChip({
   );
 }
 
+/** The top bar's share-state icon: the state's glyph on a 28 px round in its tone. */
+function ShareStateRound({
+  state,
+  className = '',
+  ...rest
+}: { state: ShareState; className?: string } & HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <span
+      data-share-state-icon={state}
+      className={`grid size-7 shrink-0 place-items-center rounded-full [&_svg]:block ${STATE_ICON_TONE[state]} ${className}`}
+      {...rest}
+    >
+      <StateIcon state={state} />
+    </span>
+  );
+}
+
 export function SharedBadge({
   shareable,
   team,
   offline,
   onManage,
   portal = false,
+  look = 'chip',
 }: {
+  // The labelled chip, or the top bar's round icon before the document's name (live-app.md "The top bar's middle").
+  look?: 'chip' | 'icon';
   // Its legend opens over everything, right-aligned under the pill (the Explorer's card: the panel's scroll would
   // clip a legend drawn inside it).
   portal?: boolean;
@@ -101,8 +128,16 @@ export function SharedBadge({
           // touch-target: the 19px chip gets a finger's 44px on a touch screen.
           className="relative touch-target flex cursor-pointer rounded-full transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
-          <ShareStateChip state={state} />
+          {look === 'icon' ? <ShareStateRound state={state} /> : <ShareStateChip state={state} />}
         </button>
+      ) : look === 'icon' ? (
+        <ShareStateRound
+          state={state}
+          tabIndex={0}
+          aria-label={meta.label}
+          aria-describedby={descriptionId}
+          className="relative touch-target focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+        />
       ) : (
         <ShareStateChip
           state={state}
@@ -119,7 +154,13 @@ export function SharedBadge({
           creates its own stacking context and doesn't clip overflow (the
           AuthControls menu relies on the same), so no portal is needed. */}
       {/* Every visibility state with its meaning, the current one marked (VisibilityLegend). */}
-      {open && !portal ? <VisibilityLegend current={state} onManage={manage} /> : null}
+      {open && !portal ? (
+        <VisibilityLegend
+          current={state}
+          onManage={manage}
+          align={look === 'icon' ? 'title' : 'center'}
+        />
+      ) : null}
       {open && portal && at
         ? createPortal(
             <div

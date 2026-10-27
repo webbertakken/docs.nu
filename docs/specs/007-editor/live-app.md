@@ -45,19 +45,43 @@ Three regions stacked vertically, filling the viewport:
 └────────────────────────────────────────────────────┘
 ```
 
-- **Header:** brand wordmark (a link to the Explorer home, [Brand mark](../004-interface-design/brand-mark.md#links)), document-name field (click to rename), and the Share button. The private/shared/team badge sits next to the title (Team when the document lives in a team library and has no share links, [Team shared documents](../013-workspace/team-shared-documents.md)), followed by the [role pill](#role-pill). (The full-page `/explorer` library is reached from the AuthControls menu and the **Explorer** link in the marketing site header, and the header logo opens its Home.) The editor header carries no product menu: the product's surfaces (Home, Explorer, Help) are links in the Explorer panel's footer ([The editor's Explorer](../013-workspace/explorer-structure.md#the-editors-explorer)); the other apps' headers keep the menu.
+- **Header:** brand wordmark (a link to the Explorer home, [Brand mark](../004-interface-design/brand-mark.md#links)) on the left, the [top bar's middle](#the-top-bars-middle) (the document's share-state icon and its name, then the [role pill](#role-pill)), and the Share button and account on the right. (The full-page `/explorer` library is reached from the AuthControls menu and the **Explorer** link in the marketing site header, and the header logo opens its Home.) The editor header carries no product menu: the product's surfaces (Home, Explorer, Help) are links in the Explorer panel's footer ([The editor's Explorer](../013-workspace/explorer-structure.md#the-editors-explorer)); the other apps' headers keep the menu.
 - **Canvas:** owns most of the viewport. See [09-canvas-and-palette.md](../008-canvas/canvas-and-palette.md) for the full surface — shapes, arrows, marquee, multi-select, the Palette strip, plus the context panels.
 - **Tab bar (status bar):** horizontal row of tabs with `+` to add. Click to switch, double-click to rename, drag to reorder. When the tabs run past the bar it scrolls sideways, the edge with more tabs beyond it fading out (`scroll-edge-fade`, as the strip's rails do) rather than clipping a label mid-word, and **the active tab is always in view**: switching to a tab, or adding one, scrolls the row the least distance that shows all of it, and **Add tab** with it when it is the last tab (smoothly, or at once under reduced motion). Its right-hand cluster (`ChromeControls`, shared with the Explorer's bottom bar) holds **Search**, **Settings**, and the appearance toggle. In the editor each shows a text label beside its icon from `sm` up ("Search", "Settings", and the appearance in force: "Light" / "Dark" / "System") and is icon-only on a phone; the Explorer's bar stays icon-only. **Button Labels** in Settings › Appearance (`dockButtonNames`, on by default) turns those labels off on a desktop too, as Minimal chrome does; a phone never shows them, whatever it says. There is no keyboard-shortcuts button: the shortcut reference and the per-device on/off switch live in Settings' **Keyboard** category ([User preferences](user-preferences.md)), which the "Keyboard shortcuts" search command opens directly.
+
+## The top bar's middle
+
+The middle of the top bar says where you are, in the Explorer and the editor alike.
+
+- **No document open** (the Explorer): the search field ([Explorer filters](../013-workspace/explorer-filters.md#the-field)),
+  centred between the brand and the account on a desktop, its own row under the header on a phone.
+- **A document open** (the editor): the document's **share-state icon**, then its **name**, centred between the brand
+  and the right-hand actions from `sm` up and left-aligned beside the brand on a phone. A long name is cut short with
+  an ellipsis; the icon never is.
+  - **The icon** says who can open the document, one state at a time: **Private** (a lock: only you), **Shared** (a
+    link: anyone with a link), **Team** (people: the document lives in a team library and has no share links,
+    [Team shared documents](../013-workspace/team-shared-documents.md)) and **This Browser** (an app window: saved only
+    in this browser, [Offline mode](../006-document/offline-mode.md)). It is a 28 px round button in the state's tone
+    (slate, emerald, brand, amber), named by its state, its target 44 px on a touch screen.
+  - **Pointing at or focusing the icon** shows the [visibility legend](../013-workspace/share-roles.md) under it:
+    every state with its meaning, the current one marked, as the badge it replaces did.
+  - **Activating the icon opens Share** (the share dialog) for anyone who may share the document. For anyone who may
+    not, it opens nothing: it stays the legend's anchor, still focusable and named.
+  - **Activating the name renames it in place** for anyone who may rename the document (the owner and an Editor); the
+    name becomes a field, Enter or a click away keeps the new name (an empty one keeps the old), Escape cancels. For a
+    Participant or a Viewer the name is plain text and does nothing.
+  - The **role pill** follows the name from `sm` up ([Role pill](#role-pill)).
+- The icon shows at every width: the share state is never hidden on a phone.
 
 ## Role pill
 
 The **role pill** says whether you are editing, participating in or viewing this document. Everyone sees it, owner included.
 
-- **Where.** In the title bar, after the visibility badge. From `sm` up, like the visibility badge: a phone's title
+- **Where.** In the top bar's middle, after the document's name. From `sm` up: a phone's title
   bar has no room. Under [Minimal chrome](power-user-mode.md#minimal-chrome) it becomes an icon at the start of the
   status bar instead.
 - **What it reads.** "Editing" (emerald), "Participating" (teal) or "Viewing" (amber).
-- **Level with the visibility badge.** Both are 19 px pills centred on the title's line: neither sits higher or lower.
+- **Level with the name.** The 19 px pill is centred on the title's line, as the share-state icon is: neither sits higher or lower.
 - **Who owns the document** is disclosed progressively: a Tooltip on the pill reads "Owned by <name>" ("Owned by you"
   for the owner), and the pill's accessible name carries the same words after its role. There is no separate owner
   badge. With no known owner (the owner has never joined the room), the pill has no Tooltip.
