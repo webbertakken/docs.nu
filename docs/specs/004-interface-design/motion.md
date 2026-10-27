@@ -167,11 +167,12 @@ Three kinds of content motion were compared against the 250ms budget, and the op
   settling by about 550ms, and the funnel bars take 250ms.
 - **Template-preview hover stories** keep their own pace, 420–1600ms per beat. Compressed into
   250ms, a story becomes a blip.
-- **The logo's hover turn** keeps its own pace ([Brand mark](./brand-mark.md)). The prism opens
-  over 700ms, turns at 60 degrees a second for as long as the pointer stays, and settles home over
-  450ms when it leaves; the wordmark's gleam crosses once in 900ms. Squeezed into 150ms, a slow
-  turn becomes a twitch. It runs on a frame loop only while moving, and reduced motion holds it
-  still.
+- **The logo's motions** keep their own pace ([Brand mark](./brand-mark.md)). The assembly takes about 1.7
+  seconds once per page load; the stack fans open over 700ms, holds while the pointer stays and closes over 450ms;
+  the wordmark's gleam crosses once in 900ms; a press takes 90ms in and 300ms back; the homepage's every-kind cycle
+  shows each kind for 1.6 seconds. Squeezed into 150ms, each becomes a twitch. The assembly and the every-kind cycle
+  are content stylesheets (`packages/ui/src/brand-motion.css`, `apps/marketing/app/hero-kinds.css`); the fan and the
+  press run in script only while moving. Reduced motion holds them still.
 
 ## Enforcement
 

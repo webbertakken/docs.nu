@@ -3,16 +3,23 @@
 import { useId, useMemo, useRef, useState } from 'react';
 import {
   BRAND_DETAIL,
-  BRAND_FACES,
   BRAND_GRADIENTS,
   BRAND_MARK_VIEWBOX,
-  type BrandFace,
+  BRAND_SHEETS,
+  PAGE_FOLD,
+  PAGE_OUTLINE,
+  SHEET,
+  SHEET_EDGE,
+  SHEET_OUTLINE,
+  lineD,
+  sheetTransform,
   type BrandMarkVariant,
 } from './brand-mark-geometry';
 import { prismPalette } from './brand-prism';
-import { prismFrame } from './brand-prism-motion';
+import { useBrandAssembled } from './useBrandAssembled';
+import { useBrandFan, type BrandFanTargets } from './useBrandFan';
+import { useBrandPress } from './useBrandPress';
 import { useBrandShimmer } from './useBrandShimmer';
-import { useBrandSpin, type BrandSpinTargets } from './useBrandSpin';
 
 type BrandSize = 'sm' | 'md' | 'lg';
 
@@ -29,6 +36,9 @@ type BrandProps = {
   // header (the logo mark stays for orientation). Marketing surfaces leave
   // this unset so the wordmark always shows.
   wordmarkClassName?: string;
+  // The site and editor headers' logo builds itself as the page loads, once per load
+  // (docs/specs/004-interface-design/brand-mark.md "Size and motion"; brand-motion.css).
+  assemble?: boolean;
 };
 
 // Type size, and the gap between the mark and the wordmark at that size.
@@ -38,7 +48,7 @@ const sizeClasses: Record<BrandSize, string> = {
   lg: 'gap-3 text-2xl font-semibold tracking-tight',
 };
 
-// The cube is a solid, so it reads smaller than a line icon at the same box;
+// The stack is a solid, so it reads smaller than a line icon at the same box;
 // it sits a size up from the text so it holds its own beside the wordmark.
 const markClasses: Record<BrandSize, string> = {
   sm: 'size-5',
@@ -79,24 +89,39 @@ export function Brand({
   className = '',
   accentColor,
   wordmarkClassName = '',
+  assemble = false,
 }: BrandProps) {
-  // Pointing at the logo (or reaching it by keyboard) opens and turns the prism.
+  // Pointing at the logo (or reaching it by keyboard) fans the stack open.
   // Each start also counts a hover, which runs the wordmark's gleam once.
-  const [spinning, setSpinning] = useState(false);
+  const [fanning, setFanning] = useState(false);
   const [hovers, setHovers] = useState(0);
   const shimmer = useRef<HTMLSpanElement>(null);
   useBrandShimmer(hovers, shimmer);
+  useBrandAssembled(assemble);
+  const pressHandlers = useBrandPress();
   const start = () => {
-    if (spinning) return;
-    setSpinning(true);
+    if (fanning) return;
+    setFanning(true);
     setHovers((n) => n + 1);
   };
-  const spinHandlers = {
+  const fanHandlers = {
     onPointerEnter: (e: React.PointerEvent) => e.pointerType !== 'touch' && start(),
-    onPointerLeave: () => setSpinning(false),
+    onPointerLeave: (e: React.PointerEvent<HTMLElement>) => {
+      setFanning(false);
+      pressHandlers.onPointerLeave(e);
+    },
     onFocus: (e: React.FocusEvent<HTMLElement>) =>
       e.currentTarget.matches(':focus-visible') && start(),
-    onBlur: () => setSpinning(false),
+    onBlur: (e: React.FocusEvent<HTMLElement>) => {
+      setFanning(false);
+      pressHandlers.onBlur(e);
+    },
+    onPointerDown: pressHandlers.onPointerDown,
+    onPointerUp: pressHandlers.onPointerUp,
+    onPointerCancel: pressHandlers.onPointerCancel,
+    onKeyDown: pressHandlers.onKeyDown,
+    onKeyUp: pressHandlers.onKeyUp,
+    'data-assemble': assemble ? '' : undefined,
   };
   const classes =
     `inline-flex items-center ${sizeClasses[size]} text-slate-900 dark:text-slate-100 ${className}`.trim();
@@ -105,7 +130,7 @@ export function Brand({
       <BrandMark
         className={`${markClasses[size]} shrink-0`}
         accentColor={accentColor}
-        spinning={spinning}
+        fanning={fanning}
       />
       {/* A logotype: WCAG 1.4.3 sets text that is part of a logo no contrast minimum, and the
           contrast audits skip it by this mark. */}
@@ -120,7 +145,7 @@ export function Brand({
         >
           Live
         </span>
-        Doc
+        <span>Doc</span>
         <span ref={shimmer} aria-hidden="true" className={SHIMMER_CLASS} style={SHIMMER_STYLE}>
           <span>Live</span>Doc
         </span>
@@ -137,14 +162,14 @@ export function Brand({
         aria-label="LiveDoc"
         className={classes}
         onClick={scrollTopIfHere}
-        {...spinHandlers}
+        {...fanHandlers}
       >
         {content}
       </a>
     );
   }
   return (
-    <span className={classes} {...spinHandlers}>
+    <span className={classes} {...fanHandlers}>
       {content}
     </span>
   );
@@ -154,54 +179,88 @@ export function Brand({
 // one by the page's `.dark` class; a theme change crossfades the stop colours.
 const STOP_CLASS =
   '[stop-color:var(--ldm-l)] dark:[stop-color:var(--ldm-d)] transition-[stop-color] duration-micro ease-out motion-reduce:transition-none';
-const BLEND_CLASS = 'mix-blend-multiply dark:mix-blend-screen';
-// The face layers' opacity per tone: in colour each layer shows as drawn; in
-// mono a side wears the artwork's left or right face opacity.
-const MONO_OPACITY = Object.fromEntries(BRAND_FACES.map((f) => [f.key, f.monoOpacity])) as Record<
-  BrandFace['key'],
-  number
->;
-const LAYER_OPACITY = {
-  colour: { left: 1, right: 1 },
-  mono: { left: MONO_OPACITY.left, right: MONO_OPACITY.rearRight },
-} as const;
+// The highlight ink (text lines, grid cells, back edges) picks its scheme the same way.
+const INK_CLASS = '[--ldm-n:var(--ldm-nl)] dark:[--ldm-n:var(--ldm-nd)]';
+const INK_STYLE: React.CSSProperties = { stroke: 'var(--ldm-n)' };
 
-// The resting pose: identical to the artwork's paths.
-const REST = prismFrame({ turn: 0, open: 0 });
-
-// The Living Prism (docs/specs/004-interface-design/brand-mark.md): a glass
-// cube over the brand palette, or tinted from `accentColor`, following the
-// page's light / dark scheme. `full` adds the inner diagram, sheen and pulse
-// for 48px and up. `tone="mono"` draws it in currentColor for a solid tile.
-// While `spinning`, the prism opens and turns in 3D (useBrandSpin).
+// The Page Stack (docs/specs/004-interface-design/brand-mark.md): three glass
+// sheets over the brand palette, or tinted from `accentColor`, following the
+// page's light / dark scheme. `full` adds finer lines, the grid cells and the
+// sheen for 48px and up. `tone="mono"` draws it in currentColor for a solid
+// tile, the lines cut out. While `fanning`, the stack fans open (useBrandFan).
 export function BrandMark({
   className,
   style,
   accentColor,
   variant = 'compact',
   tone = 'colour',
-  spinning = false,
+  fanning = false,
+  pageContent,
 }: {
   className?: string;
   style?: React.CSSProperties;
   accentColor?: string;
   variant?: BrandMarkVariant;
   tone?: 'colour' | 'mono';
-  spinning?: boolean;
+  fanning?: boolean;
+  // Drawn on the page in place of its text lines: the homepage's every-kind cycle.
+  pageContent?: React.ReactNode;
 }) {
-  // Gradient ids are document-global, so each instance prefixes its own.
+  // Ids are document-global, so each instance prefixes its own.
   const uid = `ldm${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const light = useMemo(() => prismPalette('light', accentColor), [accentColor]);
   const dark = useMemo(() => prismPalette('dark', accentColor), [accentColor]);
-  const targets = useRef<BrandSpinTargets>({ top: null, bottom: null, left: [], right: [] });
-  const layerOpacity = LAYER_OPACITY[tone];
-  useBrandSpin(spinning, targets, layerOpacity);
+  const targets = useRef<BrandFanTargets>([]);
+  useBrandFan(fanning, targets);
 
   const mono = tone === 'mono';
-  const full = !mono && variant === 'full';
-  const fill = (gradient: string) => (mono ? 'currentColor' : `url(#${uid}-${gradient})`);
-  const blend = mono ? undefined : BLEND_CLASS;
-  const { nodes, sheen, pulse } = BRAND_DETAIL;
+  const full = variant === 'full';
+  const detail = full ? BRAND_DETAIL.full : BRAND_DETAIL.compact;
+  const lines = (stroke?: string) =>
+    detail.lines.map((l) => (
+      <path
+        key={l.v}
+        data-line=""
+        d={lineD(l)}
+        strokeWidth={l.width}
+        strokeLinecap="round"
+        fill="none"
+        stroke={stroke}
+        style={stroke ? undefined : INK_STYLE}
+      />
+    ));
+  const cells = (stroke?: string) =>
+    full
+      ? BRAND_DETAIL.full.cells.map((c) => (
+          <rect
+            key={c.y}
+            x={c.x}
+            y={c.y}
+            width={c.size}
+            height={c.size}
+            rx={c.radius}
+            data-cell=""
+            strokeWidth={2}
+            fill="none"
+            stroke={stroke}
+            style={stroke ? undefined : INK_STYLE}
+          />
+        ))
+      : null;
+  const mask = (key: string, outline: string, cut: React.ReactNode) => (
+    <mask
+      id={`${uid}-${key}`}
+      maskUnits="userSpaceOnUse"
+      x={-10}
+      y={-10}
+      width={SHEET.width + 20}
+      height={SHEET.height + 20}
+    >
+      <path d={outline} fill="#ffffff" />
+      {cut}
+    </mask>
+  );
+
   return (
     <svg
       viewBox={BRAND_MARK_VIEWBOX}
@@ -209,131 +268,117 @@ export function BrandMark({
       style={style}
       aria-hidden="true"
     >
-      {!mono && (
-        <defs>
-          {BRAND_GRADIENTS.map(({ key, vector: v, stops }) => (
-            <linearGradient
-              key={key}
-              id={`${uid}-${key}`}
-              x1={`${v.x1}%`}
-              y1={`${v.y1}%`}
-              x2={`${v.x2}%`}
-              y2={`${v.y2}%`}
-            >
-              {stops.map(([stop, offset, opacity]) => (
-                <stop
-                  key={offset}
-                  offset={`${offset}%`}
-                  stopOpacity={opacity}
-                  className={STOP_CLASS}
-                  style={{ '--ldm-l': light[stop], '--ldm-d': dark[stop] } as React.CSSProperties}
-                />
-              ))}
-            </linearGradient>
-          ))}
-          {full && (
-            <>
+      <defs>
+        {mono ? (
+          <>
+            {mask('page-cut', PAGE_OUTLINE, lines('#000000'))}
+            {mask('sheet-cut', SHEET_OUTLINE, cells('#000000'))}
+          </>
+        ) : (
+          <>
+            {BRAND_GRADIENTS.map(({ key, vector: v, stops }) => (
+              <linearGradient
+                key={key}
+                id={`${uid}-${key}`}
+                x1={`${v.x1}%`}
+                y1={`${v.y1}%`}
+                x2={`${v.x2}%`}
+                y2={`${v.y2}%`}
+              >
+                {stops.map(([stop, offset, opacity]) => (
+                  <stop
+                    key={offset}
+                    offset={`${offset}%`}
+                    stopOpacity={opacity}
+                    className={STOP_CLASS}
+                    style={{ '--ldm-l': light[stop], '--ldm-d': dark[stop] } as React.CSSProperties}
+                  />
+                ))}
+              </linearGradient>
+            ))}
+            {full && (
               <linearGradient id={`${uid}-sheen`} x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#ffffff" stopOpacity={0.45} />
                 <stop offset="100%" stopColor="#ffffff" stopOpacity={0.05} />
               </linearGradient>
-              <filter id={`${uid}-glow`} x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </>
-          )}
-        </defs>
-      )}
-      {/* Back to front, as the artwork: the lid, every side's right-lit layer,
-          the inner diagram, every side's left-lit layer, the bottom fold. */}
-      <path
-        ref={(el) => {
-          targets.current.top = el;
+            )}
+          </>
+        )}
+      </defs>
+      <g
+        data-mark-art=""
+        className={mono ? undefined : INK_CLASS}
+        style={{
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          ...(mono ? {} : { '--ldm-nl': light.highlight, '--ldm-nd': dark.highlight }),
         }}
-        d={REST.top}
-        fill={fill('backTop')}
-        opacity={mono ? MONO_OPACITY.top : undefined}
-      />
-      {REST.sides.map((side, i) => (
-        <path
-          key={`r${i}`}
-          ref={(el) => {
-            targets.current.right[i] = el;
-          }}
-          d={side.d}
-          fill={fill('backRight')}
-          opacity={side.right * layerOpacity.right}
-          className={blend}
-        />
-      ))}
-      {full && (
-        <g
-          opacity={nodes.opacity}
-          className="[--ldm-n:var(--ldm-nl)] dark:[--ldm-n:var(--ldm-nd)]"
-          style={{ '--ldm-nl': light.highlight, '--ldm-nd': dark.highlight } as React.CSSProperties}
-        >
-          <path
-            d={nodes.link}
-            fill="none"
-            style={{ stroke: 'var(--ldm-n)' }}
-            strokeWidth={2.5}
-            strokeDasharray="4 4"
-          />
-          {nodes.circles.map((c) => (
-            <circle
-              key={c.cx}
-              {...c}
-              style={{ fill: 'var(--ldm-n)' }}
-              filter={`url(#${uid}-glow)`}
-            />
-          ))}
-        </g>
-      )}
-      {REST.sides.map((side, i) => (
-        <path
-          key={`l${i}`}
-          ref={(el) => {
-            targets.current.left[i] = el;
-          }}
-          d={side.d}
-          fill={fill('frontLeft')}
-          opacity={side.left * layerOpacity.left}
-        />
-      ))}
-      <path
-        ref={(el) => {
-          targets.current.bottom = el;
-        }}
-        d={REST.bottom}
-        fill={fill('frontBottom')}
-        opacity={mono ? MONO_OPACITY.bottom : undefined}
-        className={blend}
-      />
-      {full &&
-        sheen.map((s) => (
-          <path
-            key={s.d}
-            d={s.d}
-            stroke={`url(#${uid}-sheen)`}
-            strokeWidth={s.width}
-            strokeLinecap="round"
-            fill="none"
-            opacity={s.opacity}
-          />
-        ))}
-      {full &&
-        pulse.map((p) => (
-          <circle
-            key={p.cx}
-            cx={p.cx}
-            cy={p.cy}
-            r={p.r}
-            fill="#ffffff"
-            opacity={p.opacity}
-            filter={p.glow ? `url(#${uid}-glow)` : undefined}
-          />
-        ))}
+      >
+        {BRAND_SHEETS.map(({ key, step, gradient, monoOpacity }, i) => {
+          const page = key === 'page';
+          return (
+            <g key={key} data-sheet-motion={key}>
+              <g
+                data-sheet={key}
+                ref={(el) => {
+                  targets.current[i] = el;
+                }}
+                transform={sheetTransform(step)}
+              >
+                {mono ? (
+                  <path
+                    d={page ? PAGE_OUTLINE : SHEET_OUTLINE}
+                    fill="currentColor"
+                    opacity={monoOpacity}
+                    mask={
+                      key === 'plain'
+                        ? undefined
+                        : `url(#${uid}-${page ? 'page-cut' : 'sheet-cut'})`
+                    }
+                  />
+                ) : (
+                  <path d={page ? PAGE_OUTLINE : SHEET_OUTLINE} fill={`url(#${uid}-${gradient})`} />
+                )}
+                {!mono && !page && (
+                  <path
+                    d={SHEET_EDGE}
+                    strokeOpacity={detail.edge.opacity}
+                    strokeWidth={detail.edge.width}
+                    fill="none"
+                    style={INK_STYLE}
+                  />
+                )}
+                {!mono && key === 'sheet' && full && (
+                  <g opacity={BRAND_DETAIL.full.cellOpacity}>{cells()}</g>
+                )}
+                {!mono && page && (pageContent ?? <g opacity={detail.lineOpacity}>{lines()}</g>)}
+                {page && (
+                  <path
+                    data-fold=""
+                    d={PAGE_FOLD}
+                    fill={mono ? 'currentColor' : `url(#${uid}-fold)`}
+                    opacity={mono ? 0.5 : undefined}
+                  />
+                )}
+                {!mono &&
+                  page &&
+                  full &&
+                  BRAND_DETAIL.full.sheen.map((sh) => (
+                    <path
+                      key={sh.d}
+                      d={sh.d}
+                      stroke={`url(#${uid}-sheen)`}
+                      strokeWidth={sh.width}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
+                  ))}
+              </g>
+            </g>
+          );
+        })}
+      </g>
     </svg>
   );
 }

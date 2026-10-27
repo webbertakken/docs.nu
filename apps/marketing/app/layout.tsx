@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import './globals.css';
 import {
   APPEARANCE_BOOT_SCRIPT,
+  BRAND_APPLE_WEB_APP,
   BRAND_ICONS,
   DARK_READER_LOCK,
   JsonLd,
@@ -62,6 +63,7 @@ export const metadata: Metadata = {
   // opaque iOS tile from app/apple-icon.tsx. Shared with telemetry + the
   // editor; see BRAND_ICONS in @livedoc/ui for why each entry is there.
   icons: BRAND_ICONS,
+  appleWebApp: BRAND_APPLE_WEB_APP,
   other: DARK_READER_LOCK,
 };
 

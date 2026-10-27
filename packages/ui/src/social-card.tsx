@@ -72,7 +72,7 @@ export function renderSocialCard(opts?: SocialCardOptions) {
           justifyContent: 'space-between',
         }}
       >
-        {/* The brand lockup: the full Living Prism mark, then the wordmark with
+        {/* The brand lockup: the full Page Stack mark, then the wordmark with
             "live" in the sky-600 accent the marketing Brand uses. */}
         <div
           style={{

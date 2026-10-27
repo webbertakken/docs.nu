@@ -1,13 +1,13 @@
 import { hexToRgb, rgbToHex } from '@livedoc/document';
 
-// The Living Prism's colours (docs/specs/004-interface-design/brand-mark.md).
-// Six stops, light to dark; each face of the mark is a gradient over them.
+// The Page Stack's colours (docs/specs/004-interface-design/brand-mark.md).
+// Six stops, light to dark; each sheet of the mark is a gradient over them.
 export const PRISM_STOPS = ['light', 'vivid', 'primary', 'deep', 'dark', 'highlight'] as const;
 export type PrismStop = (typeof PRISM_STOPS)[number];
 export type PrismPalette = Record<PrismStop, string>;
 export type PrismScheme = 'light' | 'dark';
 
-// The brand palettes, as drawn in the Living Prism source artwork. `vivid` is
+// The brand palettes: sky into blue into deep indigo. `vivid` is
 // the anchor a theme accent replaces; every other stop is placed relative to it.
 export const PRISM_PALETTES: Record<PrismScheme, PrismPalette> = {
   light: {
@@ -28,9 +28,9 @@ export const PRISM_PALETTES: Record<PrismScheme, PrismPalette> = {
   },
 };
 
-// How far (OKLCH lightness, 0..1) an accent may pull the cube lighter or darker
+// How far (OKLCH lightness, 0..1) an accent may pull the stack lighter or darker
 // than the brand. Small enough that a near-black (#0f172a) or pale (#86efac)
-// theme stroke still gives a cube that reads on both header surfaces; 0 would
+// theme stroke still gives a stack that reads on both header surfaces; 0 would
 // ignore the accent's lightness entirely. Safe range 0..0.15.
 const PRISM_LIGHTNESS_PULL = 0.08;
 

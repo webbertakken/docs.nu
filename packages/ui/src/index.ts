@@ -7,6 +7,7 @@ export {
   type SocialCardOptions,
 } from './social-card';
 export { brandLogoSvg } from './brand-logo-svg';
+export { BRAND_KINDS, type BrandKind, type BrandKindShape } from './brand-kinds';
 export { PRISM_PALETTES, prismPalette, type PrismPalette, type PrismScheme } from './brand-prism';
 export { ProductNav, ProductNavLinks, type ProductNavKey } from './ProductNav';
 export { START_BLANK_HREF, StartBlankLink } from './StartBlankLink';
@@ -111,6 +112,7 @@ export {
   SITE_PITCH,
   SITE_TITLE,
   sentencePitch,
+  BRAND_APPLE_WEB_APP,
   BRAND_ICONS,
   PUBLIC_VIEWPORT,
   DARK_READER_LOCK,

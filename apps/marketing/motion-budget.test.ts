@@ -12,6 +12,7 @@ const CONTENT_STYLESHEETS = [
   'app/hero-mode-animations.css',
   // The hero fan's swap: a card dealt out and in, paced as an illustration.
   'app/hero-fan.css',
+  'app/hero-kinds.css',
   // Each hero scene's own keyframes, one stylesheet per scene.
   ...readdirSync(fileURLToPath(new URL('app/hero-scenes/', import.meta.url)))
     .filter((f) => f.endsWith('.css'))

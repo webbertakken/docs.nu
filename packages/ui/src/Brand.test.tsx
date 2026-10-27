@@ -2,6 +2,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Brand, BrandMark } from './Brand';
+import { BRAND_SHEETS, sheetTransform } from './brand-mark-geometry';
 import { PRISM_PALETTES, prismPalette } from './brand-prism';
 
 const stops = (container: HTMLElement) =>
@@ -49,6 +50,7 @@ describe('BrandMark', () => {
     const { container } = render(<BrandMark />);
     const all = stops(container);
     expect(all.length).toBe(9);
+    expect(container.querySelectorAll('linearGradient').length).toBe(4);
     expect(all.map((s) => s.light)).toContain(PRISM_PALETTES.light.vivid);
     expect(all.map((s) => s.dark)).toContain(PRISM_PALETTES.dark.vivid);
   });
@@ -62,42 +64,40 @@ describe('BrandMark', () => {
     );
     const ids = [...container.querySelectorAll('linearGradient')].map((g) => g.id);
     expect(new Set(ids).size).toBe(ids.length);
-    for (const path of container.querySelectorAll('path[fill^="url"]')) {
+    for (const path of container.querySelectorAll('[fill^="url"]')) {
       const ref = path.getAttribute('fill')!.slice(5, -1);
       expect(ids).toContain(ref);
     }
   });
 
-  it('adds the inner diagram, sheen and pulse only in full', () => {
-    expect(render(<BrandMark />).container.querySelectorAll('circle').length).toBe(0);
-    expect(render(<BrandMark variant="full" />).container.querySelectorAll('circle').length).toBe(
-      5,
-    );
+  it('draws two bold lines in compact, and finer lines, grid cells and sheen in full', () => {
+    const compact = render(<BrandMark />).container;
+    expect(compact.querySelectorAll('[data-line]').length).toBe(2);
+    expect(compact.querySelectorAll('rect').length).toBe(0);
+    const full = render(<BrandMark variant="full" />).container;
+    expect(full.querySelectorAll('[data-line]').length).toBe(4);
+    expect(full.querySelectorAll('rect').length).toBe(3);
+    expect(full.querySelector('[stroke*="-sheen)"]')).not.toBeNull();
   });
 
-  it('draws one colour at per-face opacity in mono, for a solid tile', () => {
+  it('draws one colour at per-sheet opacity in mono, for a solid tile', () => {
     const { container } = render(<BrandMark tone="mono" />);
     expect(container.querySelector('linearGradient')).toBeNull();
-    const shown = [...container.querySelectorAll('path')].filter(
-      (p) => p.getAttribute('d') && p.getAttribute('opacity') !== '0',
+    const sheets = [...container.querySelectorAll('[data-sheet] > path:first-child')];
+    expect(sheets.map((p) => p.getAttribute('opacity'))).toEqual(
+      BRAND_SHEETS.map((s) => String(s.monoOpacity)),
     );
-    expect(shown.map((p) => p.getAttribute('opacity'))).toEqual(['0.45', '0.7', '0.9', '0.6']);
-    for (const p of shown) expect(p.getAttribute('fill')).toBe('currentColor');
+    for (const p of sheets) expect(p.getAttribute('fill')).toBe('currentColor');
+    expect(container.querySelectorAll('mask').length).toBe(2);
   });
 
-  it('rests on the artwork: the lid, the two front sides and the fold', () => {
+  it('rests on the stack: the sheet, the plain sheet and the page, each in its place', () => {
     const { container } = render(<BrandMark />);
-    const shown = [...container.querySelectorAll('path')].filter(
-      (p) => p.getAttribute('d') && p.getAttribute('opacity') !== '0',
+    const groups = [...container.querySelectorAll('[data-sheet]')];
+    expect(groups.map((g) => g.getAttribute('data-sheet'))).toEqual(['sheet', 'plain', 'page']);
+    expect(groups.map((g) => g.getAttribute('transform'))).toEqual(
+      BRAND_SHEETS.map((s) => sheetTransform(s.step)),
     );
-    expect(
-      shown.map((p) =>
-        p
-          .getAttribute('fill')!
-          .replace(/^url\(#[^-]+-/, '')
-          .replace(')', ''),
-      ),
-    ).toEqual(['backTop', 'backRight', 'frontLeft', 'frontBottom']);
   });
 
   it('is decorative', () => {
@@ -109,8 +109,8 @@ describe('BrandMark', () => {
   });
 });
 
-describe('the hover turn', () => {
-  it('opens and turns the prism while pointed at, and settles home after', async () => {
+describe('the hover fan', () => {
+  it('fans the stack open while pointed at, and closes it after', async () => {
     const { act, fireEvent } = await import('@testing-library/react');
     const frames: FrameRequestCallback[] = [];
     const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
@@ -120,19 +120,19 @@ describe('the hover turn', () => {
     vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
     window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as never;
     const { container } = render(<Brand href="/" />);
-    const top = () => container.querySelector('path')!.getAttribute('d');
-    const rest = top();
+    const page = () => container.querySelector('[data-sheet="page"]')!.getAttribute('transform');
+    const rest = page();
     const step = (ms: number) =>
       act(() => frames.splice(0).forEach((cb) => cb(performance.now() + ms)));
 
     fireEvent.pointerEnter(container.querySelector('a')!, { pointerType: 'mouse' });
     step(1000);
-    expect(top()).not.toBe(rest);
+    expect(page()).not.toBe(rest);
 
     fireEvent.pointerLeave(container.querySelector('a')!);
     step(0);
     step(5000);
-    expect(top()).toBe(rest);
+    expect(page()).toBe(rest);
     raf.mockRestore();
   });
 
@@ -224,5 +224,111 @@ describe('sizes', () => {
     const { container } = render(<Brand size="lg" />);
     expect(container.firstElementChild!.className).toContain('gap-3 text-2xl');
     expect(container.querySelector('svg')!.getAttribute('class')).toContain('size-10');
+  });
+});
+
+// docs/specs/004-interface-design/blueprints/brand-motion.md "Structure": each sheet is a screen-space motion group
+// around the isometric sheet group, so the assembly, the press and the fan never write the same property.
+describe('the motion structure', () => {
+  it('wraps each sheet in a motion group, inside one art group', () => {
+    const { container } = render(<BrandMark />);
+    const art = container.querySelector('[data-mark-art]')!;
+    const groups = [...art.querySelectorAll('[data-sheet-motion]')];
+    expect(groups.map((g) => g.getAttribute('data-sheet-motion'))).toEqual([
+      'sheet',
+      'plain',
+      'page',
+    ]);
+    for (const g of groups) {
+      expect(g.getAttribute('transform')).toBeNull();
+      expect(g.firstElementChild!.getAttribute('data-sheet')).toBe(
+        g.getAttribute('data-sheet-motion'),
+      );
+    }
+  });
+
+  it('marks the fold, the lines and the cells for the assembly', () => {
+    const { container } = render(<BrandMark variant="full" />);
+    expect(container.querySelectorAll('[data-fold]').length).toBe(1);
+    expect(container.querySelectorAll('[data-line]').length).toBe(4);
+    expect(container.querySelectorAll('[data-cell]').length).toBe(3);
+  });
+
+  it('draws the given page content instead of the text lines', () => {
+    const { container } = render(<BrandMark variant="full" pageContent={<circle data-x="" />} />);
+    expect(container.querySelector('[data-sheet="page"] [data-x]')).not.toBeNull();
+    expect(container.querySelectorAll('[data-line]').length).toBe(0);
+  });
+});
+
+// docs/specs/004-interface-design/brand-mark.md "Size and motion": assemble, as a page loads.
+describe('the assembly', () => {
+  it('marks a header logo to assemble, and leaves others alone', () => {
+    expect(render(<Brand assemble />).container.querySelector('[data-assemble]')).not.toBeNull();
+    expect(render(<Brand />).container.querySelector('[data-assemble]')).toBeNull();
+  });
+
+  it('wraps Doc in its own span so it can arrive after Live', () => {
+    const { container } = render(<Brand />);
+    const parts = [...container.querySelectorAll('[data-logotype] > span:not([aria-hidden])')];
+    expect(parts.map((p) => p.textContent)).toEqual(['Live', 'Doc']);
+  });
+});
+
+// docs/specs/004-interface-design/brand-mark.md "Size and motion": press, on clicking.
+describe('the press', () => {
+  const animated = () => {
+    const calls: { el: Element; frames: Keyframe[]; options: KeyframeAnimationOptions }[] = [];
+    const animate = vi.fn(function (
+      this: Element,
+      frames: Keyframe[],
+      options: KeyframeAnimationOptions,
+    ) {
+      calls.push({ el: this, frames, options });
+      return { cancel: () => {}, finished: Promise.resolve() } as unknown as Animation;
+    });
+    Object.assign(Element.prototype, { animate, getAnimations: () => [] });
+    return calls;
+  };
+
+  it('draws the sheets toward the page and the art a touch smaller, then eases back', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as never;
+    const calls = animated();
+    const { container } = render(<Brand href="/somewhere-else/" />);
+    const link = container.querySelector('a')!;
+    fireEvent.pointerDown(link, { pointerType: 'mouse', button: 0 });
+    const pressed = calls.map(
+      (c) =>
+        c.el.getAttribute('data-sheet-motion') ??
+        (c.el.hasAttribute('data-mark-art') ? 'art' : '?'),
+    );
+    expect(pressed.sort()).toEqual(['art', 'plain', 'sheet']);
+    expect(calls.every((c) => c.options.duration === 90)).toBe(true);
+    fireEvent.pointerUp(link);
+    const released = calls.slice(3);
+    expect(released).toHaveLength(3);
+    expect(released.every((c) => c.options.duration === 300)).toBe(true);
+    // No overshoot: every release ends where the mark rests.
+    for (const c of released) expect(c.frames.at(-1)).toMatchObject({ transform: 'none' });
+  });
+
+  it('only dims under reduced motion', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as never;
+    const calls = animated();
+    const { container } = render(<Brand href="/somewhere-else/" />);
+    fireEvent.pointerDown(container.querySelector('a')!, { pointerType: 'mouse', button: 0 });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.frames.at(-1)).toMatchObject({ opacity: 0.8 });
+  });
+
+  it('presses from the keyboard with Enter or Space', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as never;
+    const calls = animated();
+    const { container } = render(<Brand href="/somewhere-else/" />);
+    fireEvent.keyDown(container.querySelector('a')!, { key: 'Enter' });
+    expect(calls).toHaveLength(3);
   });
 });

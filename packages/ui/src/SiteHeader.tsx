@@ -72,7 +72,7 @@ export function SiteHeader({
           {/* The bar's controls are under 44px tall; on a touch screen each tap area reaches to 44px
               vertically (touch-target-y, touch-targets.md), never sideways into a neighbour's. */}
           <div className="flex shrink-0 items-center gap-2.5">
-            <Brand href="/" size="md" className="relative touch-target-y" />
+            <Brand href="/" size="md" className="relative touch-target-y" assemble />
             {productNav ? <ProductNav current={productNav} showOnMobile /> : null}
           </div>
           {center ? (

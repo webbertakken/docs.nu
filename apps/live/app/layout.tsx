@@ -16,6 +16,7 @@ import { BRAND_OG_IMAGE, BRAND_TWITTER_IMAGE } from '@livedoc/ui/seo';
 import { SITE_NAME } from '@livedoc/ui/site';
 import {
   APPEARANCE_BOOT_SCRIPT,
+  BRAND_APPLE_WEB_APP,
   BRAND_ICONS,
   DARK_READER_LOCK,
   RANDOM_UUID_BOOT_SCRIPT,
@@ -86,6 +87,7 @@ export const metadata: Metadata = {
   // the marketing worker serves, all literal origin-root hrefs (same
   // pattern as the manifest above). Shared as BRAND_ICONS.
   icons: BRAND_ICONS,
+  appleWebApp: BRAND_APPLE_WEB_APP,
   robots: {
     index: false,
     follow: false,
