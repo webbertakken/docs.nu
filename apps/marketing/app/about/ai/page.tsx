@@ -23,7 +23,7 @@ export const metadata = pageMetadata({
   title: 'Build with AI · LiveDoc',
   description:
     'Connect Claude, ChatGPT, Cursor, VS Code or any MCP client to LiveDoc in a minute, then ask your AI for diagrams, boards, sheets and decks.',
-  path: '/ai',
+  path: '/about/ai',
 });
 
 const ArrowIcon = lucideGlyph(lucideArrowRight, 16);
@@ -54,7 +54,7 @@ function SectionHead({
 export default function BuildWithAiPage() {
   return (
     <>
-      <BreadcrumbJsonLd name="Build with AI" path="/ai" />
+      <BreadcrumbJsonLd name="Build with AI" path="/about/ai" />
       <Header surface="Ai" />
       <main>
         {/* Hero: what it is, the one address, and the picture of it working. */}

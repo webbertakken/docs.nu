@@ -11,7 +11,7 @@ const SparklesIcon = lucideGlyph(lucideSparkles, 14);
 export function BuildWithAiLink({ current = false }: { current?: boolean }) {
   return (
     <a
-      href="/ai"
+      href="/about/ai"
       aria-current={current ? 'page' : undefined}
       className={buttonClassName({
         variant: 'ghost',

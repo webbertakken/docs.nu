@@ -48,7 +48,7 @@ describe('LicenceTexts', () => {
     const height = box().style.height;
     expect(box().getAttribute('aria-busy')).toBe('true');
     await toggleOpen();
-    expect(fetchMock).toHaveBeenCalledWith('/licences/texts/aaaaaaaaaaaaaaaa.txt');
+    expect(fetchMock).toHaveBeenCalledWith('/about/licences/texts/aaaaaaaaaaaaaaaa.txt');
     expect(box().textContent).toBe('MIT licence');
     expect(box().getAttribute('aria-busy')).toBe('false');
     expect(box().style.height).toBe(height);
@@ -95,6 +95,6 @@ describe('LicenceTexts', () => {
       mount(true);
     });
     const link = screen.getByRole('link', { name: 'Plain text of LICENSE for react' });
-    expect(link.getAttribute('href')).toBe('/licences/texts/aaaaaaaaaaaaaaaa.txt');
+    expect(link.getAttribute('href')).toBe('/about/licences/texts/aaaaaaaaaaaaaaaa.txt');
   });
 });

@@ -29,12 +29,12 @@ const COLUMNS: { title: string; links: (FooterLink | typeof GITHUB)[] }[] = [
     links: [
       { href: '/new', label: 'New Document', icon: lucideGlyph(lucidePenTool, ICON_SIZE) },
       {
-        href: '/ai',
+        href: '/about/ai',
         label: 'AI & MCP',
         icon: lucideGlyph(lucideSparkles, ICON_SIZE),
       },
-      { href: '/alternatives', label: 'Product Comparison' },
-      { href: '/faq', label: 'FAQ' },
+      { href: '/about/alternatives', label: 'Product Comparison' },
+      { href: '/about/faq', label: 'FAQ' },
     ],
   },
   {
@@ -42,7 +42,7 @@ const COLUMNS: { title: string; links: (FooterLink | typeof GITHUB)[] }[] = [
     links: [
       { href: '/help/', label: 'Help Centre', icon: lucideGlyph(lucideBookOpen, ICON_SIZE) },
       { href: '/help/about/what-is-livedoc/', label: 'About' },
-      { href: '/status', label: 'Status' },
+      { href: '/about/status', label: 'Status' },
       { href: '/telemetry', label: 'Telemetry' },
     ],
   },
@@ -55,7 +55,7 @@ const COLUMNS: { title: string; links: (FooterLink | typeof GITHUB)[] }[] = [
       // Vulnerability disclosure (docs/specs/002-project-scope/vulnerability-disclosure.md).
       { href: '/help/policies/report-a-vulnerability/', label: 'Report a Vulnerability' },
       // Third-party licences (docs/specs/002-project-scope/third-party-licences.md).
-      { href: '/licences', label: 'Licences' },
+      { href: '/about/licences', label: 'Licences' },
     ],
   },
   {

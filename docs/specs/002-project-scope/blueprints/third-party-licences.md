@@ -25,11 +25,11 @@ silent are ledgered in [DEFAULTS.md](DEFAULTS.md) and cited as `Dn`.
 | `packages/licences/scripts/verify.ts`                                     | Post-build check of the exported page                                 |
 | `packages/licences/scripts/log.ts`                                        | The fingerprinted log lines                                           |
 | `apps/marketing/lib/licences-manifest.ts`                                 | Loads and checks `generated/licences.json` at build time              |
-| `apps/marketing/app/licences/page.tsx`                                    | The `/licences` route                                                 |
+| `apps/marketing/app/about/licences/page.tsx`                              | The `/about/licences` route                                           |
 | `apps/marketing/components/licences/LicencesView.tsx`                     | Server-rendered sections and entries                                  |
 | `apps/marketing/components/licences/LicenceTexts.tsx`                     | Client: lazy texts in fixed-height boxes                              |
 | `apps/marketing/app/licences.css`                                         | The entries' short `lic-*` classes, imported by `globals.css`         |
-| `apps/marketing/app/sitemap.ts`                                           | Lists `/licences`                                                     |
+| `apps/marketing/app/sitemap.ts`                                           | Lists `/about/licences`                                               |
 | `packages/ui/src/SiteFooter.tsx`                                          | "Licences" footer link; legal strip at AA contrast                    |
 | `packages/ui/src/ShareRail.tsx`                                           | Its "Share" label at AA contrast (found by the page's axe run)        |
 | `apps/live/components/panels/ExplorerHeaderMenu.tsx`                      | "Licences" row beside GitHub                                          |
@@ -96,7 +96,7 @@ The generator is a pure pipeline around two IO edges:
    - Licence id: see "Interfaces and contracts"; then `isLicenceAllowed`, else `LicenceNotAllowed`.
 4. **Assemble** (pure). `buildManifest(collected)` groups works by side, merges the same work's apps,
    deduplicates texts by hash, sorts, and reports unused overrides and embedded works.
-5. **Write** (IO). Removes and rewrites `<out>/public/licences/texts/`, writes one `<hash>.txt` per
+5. **Write** (IO). Removes and rewrites `<out>/public/about/licences/texts/`, writes one `<hash>.txt` per
    text and `<out>/generated/licences.json`.
 
 Invariants: every hash a `WorkEntry` names has a written text; every work has at least one text;
@@ -182,7 +182,7 @@ number }`) and `output_files` (`{ filename: string }`); a source's full path is 
 ## Data and persistence
 
 Nothing persists outside the build. Generated, gitignored and rebuilt every marketing build:
-`apps/marketing/generated/licences.json`, `apps/marketing/public/licences/texts/*.txt` and each Next
+`apps/marketing/generated/licences.json`, `apps/marketing/public/about/licences/texts/*.txt` and each Next
 app's `.next-analyze/`. Committed: `packages/licences/texts/*.txt`, each listed in `TEXT_SOURCES`
 with its upstream URL pinned to a tag or commit and its sha256. No schema migration: the manifest
 carries `schemaVersion: 1`, and the page refuses any other (`LicencesManifestInvalid`).
@@ -234,13 +234,13 @@ copy in the same box.
 - Page weight measured: 173.8 KB raw, 20.3 KB gzipped for 54 works. A static export ships the
   server-rendered entries twice (HTML and RSC payload), so repeated chrome is short `lic-*`
   classes (per-element utilities made it 353 KB) and no per-entry SVG (D16).
-- Budget: `LICENCES_HTML_BYTES_PER_WORK` (D14) times the works listed, on the exported `licences.html`, checked by
+- Budget: `LICENCES_HTML_BYTES_PER_WORK` (D14) times the works listed, on the exported `about/licences.html`, checked by
   `verify.ts`, which also refuses any text whose fingerprint (`textFingerprint`: its first long line HTML leaves
   unescaped) appears in the page: an inlined text is caught directly, whatever the size.
 
 ## Presentation and UX
 
-Route `/licences`, the shared `SiteHeader` without a funnel surface (D15) and marketing's `Footer`,
+Route `/about/licences`, the shared `SiteHeader` without a funnel surface (D15) and marketing's `Footer`,
 content column `max-w-3xl`.
 
 - Title (h1): "Open-source licences".
@@ -320,9 +320,9 @@ Every line is `[licences] <fingerprint> key=value …` on stdout (errors on stde
 | Manifest missing or invalid fails the page                     | `apps/marketing/lib/licences-manifest.test.ts`    |
 | Footer link; AA small print                                    | `packages/ui/src/SiteFooter.test.tsx`             |
 | Share rail label at AA                                         | `packages/ui/src/ShareRail.test.tsx`              |
-| Sitemap lists `/licences`                                      | `apps/marketing/app/sitemap.test.ts`              |
-| Explorer ⋯ row opens `/licences` in a new tab                  | `ExplorerHeaderMenu.test.tsx`                     |
-| `/licences` and its texts reach marketing                      | `apps/router/src/index.test.ts`                   |
+| Sitemap lists `/about/licences`                                | `apps/marketing/app/sitemap.test.ts`              |
+| Explorer ⋯ row opens `/about/licences` in a new tab            | `ExplorerHeaderMenu.test.tsx`                     |
+| `/about/licences` and its texts reach marketing                | `apps/router/src/index.test.ts`                   |
 
 ## Constants and configuration
 
@@ -331,7 +331,7 @@ Every line is `[licences] <fingerprint> key=value …` on stdout (errors on stde
 | `BINARY_ASSET_EXTENSIONS`      | `wasm`, `ttf`, `otf`, `woff`, `woff2` | Spec: binaries the bundler cannot see into                | add, never remove   |
 | `NEXT_ANALYZE_DISTDIR`         | `.next-analyze`                       | Keeps the analysis off `.next` and `.next-dev`            | any ignored dir     |
 | `TEXT_HASH_LENGTH`             | 16 hex                                | D3: 64 bits, no collision at thousands of texts           | 12 to 64            |
-| `TEXTS_URL_PREFIX`             | `/licences/texts/`                    | Under the page's own path on marketing                    | fixed               |
+| `TEXTS_URL_PREFIX`             | `/about/licences/texts/`              | Under the page's own path on marketing                    | fixed               |
 | `TEXT_BOX_MAX_LINES`           | 24                                    | D1: a licence's opening fits; long ones scroll            | 12 to 40            |
 | `TEXT_BOX_LINE_HEIGHT_REM`     | 1.25                                  | D2: Tailwind `text-xs leading-5`                          | tied to the class   |
 | `LICENCES_HTML_BYTES_PER_WORK` | 4,820                                 | D14: 1.5 times the 173.5 KB first measured, per work (54) | measured × 1.3 to 2 |

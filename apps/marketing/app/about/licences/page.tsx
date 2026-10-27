@@ -8,7 +8,7 @@ export const metadata = pageMetadata({
   title: 'Open-source licences · LiveDoc',
   description:
     'The open-source projects LiveDoc ships, with their licences and notices, generated from what each app actually bundles.',
-  path: '/licences',
+  path: '/about/licences',
 });
 
 // Third-party licences (docs/specs/002-project-scope/third-party-licences.md).
@@ -18,7 +18,7 @@ export default function LicencesPage() {
   const manifest = loadLicencesManifest();
   return (
     <>
-      <BreadcrumbJsonLd name="Licences" path="/licences" />
+      <BreadcrumbJsonLd name="Licences" path="/about/licences" />
       <SiteHeader productNav="home" />
       <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
         <LicencesView manifest={manifest} />

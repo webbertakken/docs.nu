@@ -29,10 +29,10 @@ Measured 2026-10-11 (gzip level 9), before and after the changes that set these 
 
 Then the document page's own first load (measured 2026-10-11 the same way, on top of the above):
 
-| Page                          | Before    | After     |
-| ----------------------------- | --------- | --------- |
-| Editor: `/document/<id>`      | 1,489 KiB | 1,240 KiB |
-| Marketing: a `/features` page | 221 KiB   | 207 KiB   |
+| Page                                | Before    | After     |
+| ----------------------------------- | --------- | --------- |
+| Editor: `/document/<id>`            | 1,489 KiB | 1,240 KiB |
+| Marketing: a `/about/features` page | 221 KiB   | 207 KiB   |
 
 ## Rules
 

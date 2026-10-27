@@ -20,7 +20,7 @@ export const metadata = pageMetadata({
   title: 'How LiveDoc compares · alternatives',
   description:
     'Honest, side-by-side comparisons of LiveDoc with Miro, FigJam, Lucidchart, draw.io, Google Slides and more, including where each is the better pick.',
-  path: '/alternatives',
+  path: '/about/alternatives',
   modifiedTime: ALTERNATIVES_LAST_UPDATED,
 });
 
@@ -42,7 +42,7 @@ const ITEM_LIST_JSON_LD = {
   itemListElement: ALTERNATIVES.map((alt, i) => ({
     '@type': 'ListItem',
     position: i + 1,
-    url: `${SITE_URL}/alternatives/${alt.slug}`,
+    url: `${SITE_URL}/about/alternatives/${alt.slug}`,
     name: `LiveDoc vs ${alt.name}`,
   })),
 };
@@ -51,7 +51,7 @@ export default function AlternativesIndexPage() {
   return (
     <>
       <JsonLd data={ITEM_LIST_JSON_LD} />
-      <BreadcrumbJsonLd name="Product Comparison" path="/alternatives" />
+      <BreadcrumbJsonLd name="Product Comparison" path="/about/alternatives" />
       <Header surface="Compare" />
       <Breadcrumb items={[{ label: 'Product Comparison' }]} />
       <main className="pb-20 sm:pb-24">

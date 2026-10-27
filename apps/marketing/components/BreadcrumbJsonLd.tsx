@@ -25,9 +25,9 @@ type BreadcrumbJsonLdProps = {
 export function BreadcrumbJsonLd({ name, path, trail }: BreadcrumbJsonLdProps) {
   const crumbs: Crumb[] = trail ?? (name && path ? [{ name, path }] : []);
   const json = breadcrumbJsonLd([
-    // Home uses the slash-less canonical origin to match the homepage's own
+    // Home is the landing page, at /about, matching its own
     // canonical / og:url (see app/sitemap.ts).
-    { name: 'Home', url: SITE_URL },
+    { name: 'Home', url: `${SITE_URL}/about` },
     ...crumbs.map((c) => ({ name: c.name, url: `${SITE_URL}${c.path}` })),
   ]);
   return <JsonLd data={json} />;

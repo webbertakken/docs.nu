@@ -34,8 +34,8 @@ const HELP_PATH = '/help';
 // The live app's top-level page route segments. These serve at CLEAN
 // URLs (no `/live` prefix) — the live worker's `out/` files are already
 // `/live`-free — so the router forwards them to the live worker AS-IS,
-// no strip. Marketing owns every other first segment (`/`,
-// `/alternatives`, `/faq`, ...) and there's no overlap with this set.
+// no strip, and so is the front door (`/`). Marketing owns every other first segment (
+// `/about`, its assets and root files) and there's no overlap with this set.
 // `/live/*` still exists ONLY for the bundled `_next` assets (the live
 // app's `assetPrefix`), which ARE stripped in production — see isLivePath.
 // The set is shared from api-schema so the telemetry dashboard's per-app
@@ -52,10 +52,10 @@ const LIVE_ROOT_ASSETS = new Set(['/icon.svg']);
 // the first segment. Those 404'd into marketing; they redirect now.
 //
 // The list is pinned to the registry's own categories by index.test.ts, so a
-// new category cannot quietly stop redirecting. `explorer` is deliberately
-// absent: the live app owns that segment (it is matched first either way).
+// new category cannot quietly stop redirecting. `explorer` and `about` are
+// deliberately absent: the live app owns the one (it is matched first either
+// way), the marketing site the other.
 const HELP_CATEGORY_SEGMENTS = new Set([
-  'about',
   'account-and-data',
   'canvas',
   'collaboration',
@@ -76,7 +76,26 @@ const HELP_CATEGORY_SEGMENTS = new Set([
   'user-interface',
 ]);
 
+// Marketing's pages moved under `/about` when the Explorer took `/` (docs/specs/001-project-vision/purpose.md):
+// these were their first segments at the root. Each answers a permanent redirect to the same path under
+// `/about`, so shared links and search results still land. index.test.ts pins that the marketing app
+// serves no page outside `app/about/`.
+const MARKETING_PATH = '/about';
+const MARKETING_MOVED_SEGMENTS = new Set([
+  'ai',
+  'alternatives',
+  'faq',
+  'features',
+  'licences',
+  'privacy',
+  'security',
+  'status',
+  'terms',
+]);
+
+// The front door (`/`) is the live app's: its worker sends it on to Explorer Home.
 function isLivePageRoute(pathname: string): boolean {
+  if (pathname === '/') return true;
   if (LIVE_ROOT_ASSETS.has(pathname)) return true;
   const first = pathname.split('/')[1] ?? '';
   return LIVE_ROUTE_SEGMENTS.has(first);
@@ -219,6 +238,10 @@ async function route(request: Request, env: Env): Promise<Response> {
   // is unambiguous, and these are links people have already shared.
   if (HELP_CATEGORY_SEGMENTS.has(url.pathname.split('/')[1] ?? '')) {
     url.pathname = `${HELP_PATH}${url.pathname}`;
+    return Response.redirect(url.toString(), 308);
+  }
+  if (MARKETING_MOVED_SEGMENTS.has(url.pathname.split('/')[1] ?? '')) {
+    url.pathname = `${MARKETING_PATH}${url.pathname}`;
     return Response.redirect(url.toString(), 308);
   }
   return forward(request, url, env.MARKETING, env.MARKETING_ORIGIN);

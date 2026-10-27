@@ -12,7 +12,7 @@ describe('featureAnchor (docs/specs/019-marketing/marketing-site.md)', () => {
 
   it('builds the badge link', () => {
     expect(featureHref('collaboration', 'Live presence')).toBe(
-      '/features/collaboration#live-presence',
+      '/about/features/collaboration#live-presence',
     );
   });
 

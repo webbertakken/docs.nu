@@ -29,7 +29,7 @@ const rules = readFileSync(fileURLToPath(new URL('../public/_redirects', import.
 describe('retired feature pages', () => {
   it('redirects every retired category, with and without a trailing slash, permanently', () => {
     for (const id of RETIRED) {
-      for (const from of [`/features/${id}`, `/features/${id}/`]) {
+      for (const from of [`/about/features/${id}`, `/about/features/${id}/`]) {
         const rule = rules.find(([source]) => source === from);
         expect(rule, from).toBeDefined();
         expect(rule![2]).toBe('301');
@@ -38,12 +38,12 @@ describe('retired feature pages', () => {
   });
 
   it('sends each one to a live page', () => {
-    const live = new Set(['/', ...LANDING_SECTION_IDS.map((id) => `/features/${id}`)]);
+    const live = new Set(['/about', ...LANDING_SECTION_IDS.map((id) => `/about/features/${id}`)]);
     for (const [, to] of rules) expect(live.has(to!), to).toBe(true);
   });
 
   it('never redirects a live category', () => {
     const sources = new Set(rules.map(([source]) => source!.replace(/\/$/, '')));
-    for (const id of LANDING_SECTION_IDS) expect(sources.has(`/features/${id}`)).toBe(false);
+    for (const id of LANDING_SECTION_IDS) expect(sources.has(`/about/features/${id}`)).toBe(false);
   });
 });

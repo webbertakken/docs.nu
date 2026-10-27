@@ -49,21 +49,21 @@ describe('SiteHeader: Build with AI', () => {
     expect(plain).not.toContain('Build with AI');
   });
 
-  it('puts the link to /ai left of Start Blank, desktop only', () => {
+  it('puts the link to /about/ai left of Start Blank, desktop only', () => {
     const html = renderToStaticMarkup(
       <SiteHeader ctaSurface="Home" buildWithAi="link" shareRail={false} />,
     );
-    const link = html.match(/<a [^>]*href="\/ai"[^>]*>/)?.[0];
+    const link = html.match(/<a [^>]*href="\/about\/ai"[^>]*>/)?.[0];
     expect(link).toContain('max-lg:hidden');
     expect(link).not.toContain('aria-current');
-    expect(html.indexOf('href="/ai"')).toBeLessThan(html.indexOf('Start Blank'));
+    expect(html.indexOf('href="/about/ai"')).toBeLessThan(html.indexOf('Start Blank'));
   });
 
-  it('marks it current on /ai itself', () => {
+  it('marks it current on /about/ai itself', () => {
     const html = renderToStaticMarkup(
       <SiteHeader ctaSurface="Ai" buildWithAi="current" shareRail={false} />,
     );
-    expect(html).toMatch(/<a [^>]*href="\/ai"[^>]*aria-current="page"/);
+    expect(html).toMatch(/<a [^>]*href="\/about\/ai"[^>]*aria-current="page"/);
     expect(html).toContain('href="/new?via=Ai.Header"');
   });
 });

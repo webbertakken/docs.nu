@@ -53,7 +53,7 @@ export function StartDrawingCta({ surface }: { surface: 'Home' | 'Feature' }) {
             <ChevronRightIcon size={16} aria-hidden />
           </a>
           <a
-            href="/#templates"
+            href="/about#templates"
             className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <span className="text-optical-centre">Browse templates</span>

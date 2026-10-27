@@ -1,25 +1,18 @@
 'use client';
 
-import { useLayoutEffect } from 'react';
+import { useEffect } from 'react';
+import { useAppNavigation } from '@/hooks/navigation/useAppNavigation';
+import { EXPLORER_LANDING_PATH } from '@/lib/explorer-landing';
 
-// Hard cutover (docs/specs/007-editor/new-document-route.md): `/live` no longer hosts the editor. The
-// canonical owner URL is `/document/<id>`; `/new` owns the
-// welcome / create-new flow. Anyone landing on bare `/live` gets
-// redirected to `/new` so they start in the right place.
-//
-// Visitor `?s=<code>` URLs are exempt — that scheme stays a query
-// param because the code is the lookup key, not a path id — so we
-// forward those into the editor (which still reads `?s=` via the
-// path under `/document/placeholder` thanks to the worker rewrite).
-export default function LiveIndex() {
-  useLayoutEffect(() => {
-    const url = new URL(window.location.href);
-    const shareCode = url.searchParams.get('s');
-    if (shareCode) {
-      window.location.replace(`${window.location.origin}/document/shared?s=${shareCode}`);
-      return;
-    }
-    window.location.replace(`${window.location.origin}/new`);
-  }, []);
+// The site's front door (docs/specs/001-project-vision/purpose.md "The product comes first",
+// docs/specs/013-workspace/explorer-home.md "Route"): `/` lands on Explorer Home. In production the live
+// worker 302s this path before any HTML is served (src/worker.ts); this client replace is the
+// dev-server / direct-asset fallback, and keeps the query string as the worker does.
+export default function FrontDoor() {
+  // Full page loads once a newer build is live (docs/specs/016-platform/stale-builds.md).
+  const router = useAppNavigation();
+  useEffect(() => {
+    router.replace(`${EXPLORER_LANDING_PATH}${window.location.search}`);
+  }, [router]);
   return null;
 }

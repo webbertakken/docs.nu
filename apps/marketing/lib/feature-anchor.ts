@@ -13,5 +13,5 @@ export function featureAnchor(title: string): string {
 }
 
 export function featureHref(sectionId: string, title: string): string {
-  return `/features/${sectionId}#${featureAnchor(title)}`;
+  return `/about/features/${sectionId}#${featureAnchor(title)}`;
 }

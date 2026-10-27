@@ -2,19 +2,19 @@
 
 Status: shipped
 
-`/ai` is the marketing page that gets a visitor from "I use an AI tool" to "my AI just made a diagram in LiveDoc" in the fewest possible steps. It is the front door to the [MCP server](../015-api/mcp-server.md): one address, one approval, then a prompt. The [help article](../../../apps/help/app/account-and-data/connect-ai-mcp/ai-clients/page.mdx) stays the reference; this page is the guided path, and links to it for everything past the first connection.
+`/about/ai` is the marketing page that gets a visitor from "I use an AI tool" to "my AI just made a diagram in LiveDoc" in the fewest possible steps. It is the front door to the [MCP server](../015-api/mcp-server.md): one address, one approval, then a prompt. The [help article](../../../apps/help/app/account-and-data/connect-ai-mcp/ai-clients/page.mdx) stays the reference; this page is the guided path, and links to it for everything past the first connection.
 
 ## Entry points
 
-- **The site header's Build with AI link** (`BuildWithAiLink` in `packages/ui`, shown by `SiteHeader` when a surface passes `buildWithAi`). Every marketing page's header (`components/Header.tsx`) shows it, to the left of Start Blank. It is a quiet ghost link with a sparkles glyph, so the CTA pair stays the loudest thing in the bar. Desktop only (from `lg`): below that the bar is already full with Brand, the apps menu and the CTA pair. On `/ai` itself it carries `aria-current="page"` and a brand tint. The help centre and telemetry headers do not show it.
-- **The footer's AI & MCP link** (`SiteFooter`) opens `/ai`.
-- **The FAQ's** "Can I connect my own AI assistant" answer links to `/ai` for setup. (Feature cards stay links to their help article, as every feature card is.)
+- **The site header's Build with AI link** (`BuildWithAiLink` in `packages/ui`, shown by `SiteHeader` when a surface passes `buildWithAi`). Every marketing page's header (`components/Header.tsx`) shows it, to the left of Start Blank. It is a quiet ghost link with a sparkles glyph, so the CTA pair stays the loudest thing in the bar. Desktop only (from `lg`): below that the bar is already full with Brand, the apps menu and the CTA pair. On `/about/ai` itself it carries `aria-current="page"` and a brand tint. The help centre and telemetry headers do not show it.
+- **The footer's AI & MCP link** (`SiteFooter`) opens `/about/ai`.
+- **The FAQ's** "Can I connect my own AI assistant" answer links to `/about/ai` for setup. (Feature cards stay links to their help article, as every feature card is.)
 
 ## The page, top to bottom
 
 1. **Hero.** Eyebrow "Build with AI", headline "Your AI, building in LiveDoc", a lede saying it works with the AI tool you already use, then the **address card**: `https://mcp.docs.nu/mcp` in a monospace field with a Copy button (the one thing every tool needs). Beside it on wide screens, a chat illustration (`AiChatArt`): a request bubble, a tool-call chip naming the LiveDoc tool, and the shared `DiagramBuildAnimation` drawing the result with its cursor labelled "AI". Reduced motion shows the finished picture.
 2. **Three steps** (`#how-it-works`), one row: **Add LiveDoc** (paste the address into your tool), **Approve** (a LiveDoc page opens: sign in or create a free account, check where access goes, Connect), **Ask** (request a diagram, board, sheet or deck; it lands in your account).
-3. **Pick your tool** (`#connect`): a tab list of clients, grouped Chat apps, Coding agents, Editors, Anything else. Selecting one shows its steps. The choice is mirrored into the URL hash (`/ai#cursor`) with `history.replaceState`, and a hash on arrival selects that client, so a link can open straight onto one tool. Every panel is in the HTML (inactive ones `hidden`), so the instructions are indexable and work before hydration (the first client shows until then).
+3. **Pick your tool** (`#connect`): a tab list of clients, grouped Chat apps, Coding agents, Editors, Anything else. Selecting one shows its steps. The choice is mirrored into the URL hash (`/about/ai#cursor`) with `history.replaceState`, and a hash on arrival selects that client, so a link can open straight onto one tool. Every panel is in the HTML (inactive ones `hidden`), so the instructions are indexable and work before hydration (the first client shows until then).
 4. **Try it** (`#prompts`): starter prompts, each a card with a Copy button, each mapped to a shipped MCP tool.
 5. **What it can do**: a grid of the MCP's capabilities in plain words (diagrams from a description or Mermaid, templates and Plan boards, Sheets, slides, articles and logos, find and read with a picture, share links, live changes on an open canvas with Undo).
 6. **In your control**: account needed (free), the approval page shows where access goes, Read-only access, revoke from Settings › Account › API Tokens, six-month tokens, LiveDoc runs no AI model of its own.
@@ -41,7 +41,7 @@ Third-party menu names drift, so a client whose menus are known to move (ChatGPT
 ## Behaviour
 
 - **Copy** buttons use `navigator.clipboard.writeText` and `useCopiedFlash`: the label turns to "Copied" with a check for two seconds and a polite live region beside the button (never inside it, where a button's children are not read as a region) announces it. A button's accessible name starts with the words it shows ("Copy prompt: Map a codebase"), so it can be named by voice. A blocked clipboard leaves the button as it was; the text is always selectable. A command's `$ ` prompt is drawn by CSS, so selecting and copying the block by hand never takes it along.
-- **Tabs** follow the WAI-ARIA tabs pattern: `role="tablist"`, roving `tabIndex`, the arrow keys (either pair) and Home/End move and select, each tab `aria-controls` its panel. The list's `aria-orientation` follows its layout: vertical down the side from `lg`, horizontal across the top below it. Its group headings cannot sit in a tablist, so each tab is `aria-describedby` its group's heading. A link to `/ai#<client>` opens on that client in the hydrating render, before paint; the static HTML itself shows the first client until the page's script runs.
+- **Tabs** follow the WAI-ARIA tabs pattern: `role="tablist"`, roving `tabIndex`, the arrow keys (either pair) and Home/End move and select, each tab `aria-controls` its panel. The list's `aria-orientation` follows its layout: vertical down the side from `lg`, horizontal across the top below it. Its group headings cannot sit in a tablist, so each tab is `aria-describedby` its group's heading. A link to `/about/ai#<client>` opens on that client in the hydrating render, before paint; the static HTML itself shows the first client until the page's script runs.
 - **One-click links** (`cursor:`, `vscode:`) open the editor app when it is installed; the manual config sits right under each, so nothing depends on the link.
 
 ## Share roles
@@ -50,11 +50,11 @@ The page is public marketing, outside any document, so Editor, Participant and V
 
 ## Funnel and telemetry
 
-`/ai` is its own [landing-funnel](landing-funnel.md) surface, `Ai`, with the shared header slots, so the dashboard counts its page views and any header CTA a visitor takes from it. The Build with AI link and the page's buttons lead to `/ai`, a third-party tool or `/get-started/`, never `/new`, so they carry no `via` source. As on every marketing page, nothing else is tracked (copies included).
+`/about/ai` is its own [landing-funnel](landing-funnel.md) surface, `Ai`, with the shared header slots, so the dashboard counts its page views and any header CTA a visitor takes from it. The Build with AI link and the page's buttons lead to `/about/ai`, a third-party tool or `/get-started/`, never `/new`, so they carry no `via` source. As on every marketing page, nothing else is tracked (copies included).
 
 ## Metadata
 
-`pageMetadata` with path `/ai`, a 50 to 160 character description, a `BreadcrumbList` (Home → Build with AI), and an `/ai` entry in `app/sitemap.ts`.
+`pageMetadata` with path `/about/ai`, a 50 to 160 character description, a `BreadcrumbList` (Home → Build with AI), and an `/about/ai` entry in `app/sitemap.ts`.
 
 ## Performance
 

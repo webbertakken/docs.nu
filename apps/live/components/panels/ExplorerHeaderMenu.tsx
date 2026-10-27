@@ -128,7 +128,7 @@ export function ExplorerHeaderMenu({
           icon={<ScaleIcon />}
           label="Licences"
           onClick={run(() => {
-            window.open('/licences', '_blank', 'noopener,noreferrer');
+            window.open('/about/licences', '_blank', 'noopener,noreferrer');
           })}
         />,
         actions.onOpenSettings ? (

@@ -164,6 +164,16 @@ describe('ctaSourceFromSearch', () => {
 
 describe('ctaSurfaceOfPath', () => {
   it('maps each public page onto its surface', () => {
+    expect(ctaSurfaceOfPath('/about')).toBe('Home');
+    expect(ctaSurfaceOfPath('/about/features/present')).toBe('Feature');
+    expect(ctaSurfaceOfPath('/about/alternatives/miro')).toBe('Compare');
+    expect(ctaSurfaceOfPath('/about/faq')).toBe('Faq');
+    expect(ctaSurfaceOfPath('/about/ai')).toBe('Ai');
+    expect(ctaSurfaceOfPath('/about/status')).toBe('Status');
+  });
+
+  it("reads a marketing page's view from before the move under /about", () => {
+    // Page views recorded before the Explorer took `/` carry the bare address.
     expect(ctaSurfaceOfPath('/')).toBe('Home');
     expect(ctaSurfaceOfPath('/features/present')).toBe('Feature');
     expect(ctaSurfaceOfPath('/alternatives')).toBe('Compare');
@@ -181,7 +191,9 @@ describe('ctaSurfaceOfPath', () => {
     expect(ctaSurfaceOfPath('/document')).toBeNull();
     expect(ctaSurfaceOfPath('/explorer/recent')).toBeNull();
     expect(ctaSurfaceOfPath('/features')).toBeNull();
+    expect(ctaSurfaceOfPath('/about/features')).toBeNull();
     expect(ctaSurfaceOfPath('/terms')).toBeNull();
+    expect(ctaSurfaceOfPath('/about/terms')).toBeNull();
   });
 });
 

@@ -39,7 +39,7 @@ export async function generateMetadata({
   return pageMetadata({
     title: `${section.label}: ${section.title} | LiveDoc`,
     description: section.metaDescription,
-    path: `/features/${slug}`,
+    path: `/about/features/${slug}`,
     // This route ships its own per-category opengraph-image / twitter-image.
     ownOgImage: true,
   });
@@ -60,7 +60,7 @@ export default async function FeatureCategoryPage({
 
   return (
     <>
-      <BreadcrumbJsonLd name={section.label} path={`/features/${slug}`} />
+      <BreadcrumbJsonLd name={section.label} path={`/about/features/${slug}`} />
       <Header surface="Feature" />
       <main>
         <Breadcrumb items={[{ label: section.label }]} />

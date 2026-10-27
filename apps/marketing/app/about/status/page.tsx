@@ -10,7 +10,7 @@ const STATUS_DESCRIPTION =
 export const metadata = pageMetadata({
   title: STATUS_TITLE,
   description: STATUS_DESCRIPTION,
-  path: '/status',
+  path: '/about/status',
 });
 
 // Lightweight first-party status page. v1 is intentionally a static
@@ -83,7 +83,7 @@ const COMPONENTS: Component[] = [
 export default function StatusPage() {
   return (
     <>
-      <BreadcrumbJsonLd name="Status" path="/status" />
+      <BreadcrumbJsonLd name="Status" path="/about/status" />
       <Header surface="Status" />
       <main className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-100">
