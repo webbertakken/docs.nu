@@ -17,7 +17,7 @@ Scope, by file. "(planned)" marks a file that does not exist yet; "new" a symbol
 
 | File                                                                               | Role                                                                                                                                                  |
 | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/text-merge/` (planned, `@livediagram/text-merge`)                        | Pure: `mergeText`, `editsBetween`, `editDistance`, `nearestBase`, `similarity`. Shared by the CLI now and `sync --resolve` and the branch merge later |
+| `packages/text-merge/` (planned, `@livedoc/text-merge`)                        | Pure: `mergeText`, `editsBetween`, `editDistance`, `nearestBase`, `similarity`. Shared by the CLI now and `sync --resolve` and the branch merge later |
 | `apps/cli/src/link/link-file.ts`                                                   | `LinkFile.git` (new: `binding`, `branch`, `commit`), `LinkFile.mirror.ignore` (new); `[git]` and `ignore` parsed and validated                        |
 | `apps/cli/src/link/binding.ts` (planned)                                           | `LinkBinding`, `bindingOf(io, link)`: `local-copy` (with why) or `branches`                                                                           |
 | `apps/cli/src/link/native/records.ts` (planned)                                    | `RECORDS_DIR`, `SyncRecord`, `recordPathOf`, `recordText`, `readRecords`, `writeRecord`, `removeRecord`                                               |
@@ -239,7 +239,7 @@ A missing file with no pair is `deleted`. An unrecorded entry with no pair is `l
 file differs is a lost stretch (the spec's baseless merge), each a margin note; the file is then written with
 LiveDoc's text.
 
-### The text merge (`@livediagram/text-merge`)
+### The text merge (`@livedoc/text-merge`)
 
 - **Tokens.** Lines keep their own ending (`\n`, `\r\n` or a lone `\r`); words are runs of non-space and runs of space,
   so whitespace merges as it was typed.
@@ -509,7 +509,7 @@ asserts the merge.
 
 | Dependency   | Version | Licence | Where                              | Why                                         |
 | ------------ | ------- | ------- | ---------------------------------- | ------------------------------------------- |
-| `node-diff3` | 3.2.1   | MIT     | `@livediagram/text-merge`, bundled | Three-way merge and diffs over token arrays |
+| `node-diff3` | 3.2.1   | MIT     | `@livedoc/text-merge`, bundled | Three-way merge and diffs over token arrays |
 | `picomatch`  | 4.0.7   | MIT     | `apps/cli`, bundled                | `[mirror] ignore` globs (LC7)               |
 
 Both are the latest at the time of writing and confirmed again when added. No other asset.
@@ -518,7 +518,7 @@ Both are the latest at the time of writing and confirmed again when added. No ot
 
 - **Branch binding**, hooks, the merge driver, commits and pushes, `sync --resolve`, `link clean`, the managed
   `.gitignore` section: a local copy has none, and a `branches` link holds its pages back (E26).
-- **The diagram merge** (`@livediagram/tab-merge`): mirror files of diagrams in a local copy keep the first slice's
+- **The diagram merge** (`@livedoc/tab-merge`): mirror files of diagrams in a local copy keep the first slice's
   rules (`ahead` and `diverged` refused, naming `push`).
 - **Renders** (`.livedoc.svg` for a page that embeds a document).
 - **Link rewriting on a move** ([Links](../../032-wikis/links.md#renames)): the api's, when Links is built; a move
