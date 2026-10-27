@@ -20,6 +20,13 @@ docs.nu is LiveDoc's, and a guard keeps it so: `apps/help/lib/brand-name-guard.t
 - Documents are `.livedoc` files, `application/vnd.livedoc+json`; browser storage keys start `livedoc:`.
 - The MCP registry listing (`server.json`, `io.github.webbertakken/livedoc`) is published by hand from **Actions > Publish MCP server to registry**, once `mcp.docs.nu` serves. Restore the workflow's push trigger then.
 
+## Contact form
+
+The contact form ([help pages](../specs/018-help/help-pages.md#the-contact-form)) is a LiveDoc form in a document owned
+by Webber's docs.nu account, built and published with the CLI (`livedoc form add`, `livedoc form share … publish`).
+Its responses are cards on that document's board, and its owner is emailed for each one. Publishing again makes a new
+link, so a republished form means a new `CONTACT_FORM_URL`.
+
 ## Deploy
 
 From a clean checkout of the commit to ship:
