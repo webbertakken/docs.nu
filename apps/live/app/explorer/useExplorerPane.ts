@@ -27,6 +27,8 @@ type PaneLensResult = {
   empty: boolean;
   /** The rows the lens reads, for marking a suggestion that matches nothing. */
   subjects: readonly LensSubject[];
+  /** The text words the shown rows were narrowed by, for marking them in each name. */
+  text: readonly string[];
 };
 
 const newestFirst = <D extends { savedAt: number }>(rows: D[]): D[] =>
@@ -157,8 +159,8 @@ export function useExplorerPane({
   ]);
 
   const paneContent = useMemo<{ folders: Folder[]; documents: PaneDocument[] }>(() => {
-    const matched = narrowRows(base.documents, lens, viewerId, now);
-    const documents = selected.kind === 'recent' ? matched.slice(0, RECENT_LIMIT) : matched;
+    const limit = selected.kind === 'recent' ? RECENT_LIMIT : Number.POSITIVE_INFINITY;
+    const documents = narrowRows(base.documents, lens, viewerId, now, limit);
     return { folders: base.folders, documents };
   }, [base, lens, viewerId, now, selected.kind]);
 
@@ -173,8 +175,9 @@ export function useExplorerPane({
       total,
       empty: base.bare,
       subjects: base.reach.map((d) => lensSubjectOf(d, viewerId)),
+      text: lens.text,
     };
-  }, [base, paneContent.documents.length, lensSet, selected.kind, viewerId]);
+  }, [base, paneContent.documents.length, lensSet, selected.kind, viewerId, lens.text]);
 
   // The sidebar's Recent count, mirroring "Shared With Me": how many rows Recent shows, capped.
   const recentCount = useMemo(() => {

@@ -205,6 +205,32 @@ test.describe('explorer filters', () => {
     expectNoPageErrors(pageErrors);
   });
 
+  test('text finds names fuzzily, best match first, and marks what matched', async ({
+    page,
+    pageErrors,
+    baseURL,
+  }) => {
+    const owner = await mintSignedGuest(page.request);
+    await darkVisitor(page, owner);
+    await seed(page, owner, new URL(baseURL!).origin);
+    // "ro" starts Roadmap's name but sits inside Sprint retro's: Roadmap leads, though it is older.
+    await arrive(page, '/explorer/search?q=ro');
+    await expect(docLink(page, 'Roadmap')).toBeVisible({ timeout: 30_000 });
+    await expect(docLink(page, 'Sprint retro')).toBeVisible();
+    const top = async (name: string) => (await docLink(page, name).boundingBox())!.y;
+    expect(await top('Roadmap')).toBeLessThan(await top('Sprint retro'));
+    // A typo is forgiven, and the matched letters are marked; the link keeps the plain name.
+    await field(page).fill('paymnet');
+    await expect(docLink(page, 'AI payment flow')).toBeVisible();
+    await expect(docLink(page, 'Roadmap')).toHaveCount(0);
+    await expect(docLink(page, 'AI payment flow').locator('mark')).toHaveText(['payment']);
+    await page.screenshot({ path: test.info().outputPath('fuzzy-typo.png') });
+    // Initials across words.
+    await field(page).fill('apf');
+    await expect(docLink(page, 'AI payment flow').locator('mark')).toHaveText(['A', 'p', 'f']);
+    expectNoPageErrors(pageErrors);
+  });
+
   // Each retired address is its own test: two full page loads and a seeded library share one
   // test's time budget badly on a busy runner.
   test('the retired Unsorted address opens the My Documents root', async ({ page, pageErrors }) => {

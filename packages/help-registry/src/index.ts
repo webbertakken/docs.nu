@@ -2051,7 +2051,7 @@ export const articles: Article[] = [
     description:
       'Narrow any document list with words, chips or typed filters like made-by:ai, and share it as a link.',
     keywords:
-      'search find filter filters chips narrow refine query token tokens made by ai generated opens in mode diagram draw kind event storming template retrospective kanban edited date last week recent people me others owner space team shared unsorted unfiled root lens results pages plan',
+      'search find filter filters fuzzy typo typos misspelt misspelled initials chips narrow refine query token tokens made by ai generated opens in mode diagram draw kind event storming template retrospective kanban edited date last week recent people me others owner space team shared unsorted unfiled root lens results pages plan',
     category: 'Explorer',
     categorySlug: 'explorer',
     group: 'Your Library',
@@ -3083,7 +3083,7 @@ export const articles: Article[] = [
     slug: 'search-documents',
     title: 'Finding Documents and Folders',
     description: 'Search across your documents, folders, and the documents shared with you.',
-    keywords: 'find lookup locate files library open diagrams',
+    keywords: 'find lookup locate files library open diagrams fuzzy typo initials',
     category: 'Search Panel',
     categorySlug: 'search-panel/the-search-panel',
     parentSlug: 'the-search-panel',

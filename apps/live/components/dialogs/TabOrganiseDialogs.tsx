@@ -9,7 +9,7 @@
 // long document lists. Single-click commits — both are one-shot pickers.
 
 import { lucideFolderX } from '@livedoc/icons/lucide';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Dialog } from '@/components/dialogs/Dialog';
 import {
   FolderPlaceIcon,
@@ -25,7 +25,7 @@ import {
   useEscape,
 } from '@livedoc/ui';
 import { DocumentIcon } from '@/components/primitives/explorer-icons';
-import { matches } from '@livedoc/icons';
+import { compileTitleQuery, rankByTitle } from '@livedoc/explorer-lens';
 
 // Shared modal frame: header (title + sub + close) over a scrollable body.
 function OrganiseDialogFrame({
@@ -179,8 +179,16 @@ export function AddTabToDocumentDialog({
   onClose: () => void;
 }) {
   const [query, setQuery] = useState('');
-  const visible = otherDocuments.filter(
-    (d) => !query.trim() || matches(query, d.name || 'Untitled document'),
+  // Titles match as the Explorer's lens matches them, best first (docs/specs/013-workspace/explorer-filters.md
+  // "Matching").
+  const visible = useMemo(
+    () =>
+      rankByTitle(
+        otherDocuments,
+        compileTitleQuery(query.split(/\s+/)),
+        (d) => d.name || 'Untitled document',
+      ),
+    [otherDocuments, query],
   );
   return (
     <OrganiseDialogFrame

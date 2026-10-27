@@ -40,6 +40,7 @@ import { CARD_GRID, CARD_PREVIEW as previewArea, CARD_SHELL as cardShell } from 
 import { FolderPreview } from './FolderPreview';
 import { RelativeTimeChip } from '@/components/primitives/RelativeTimeChip';
 import { DocumentRowTags } from '@/components/tags/DocumentRowTags';
+import { HighlightedTitle } from '@/app/explorer/lens/TitleHighlight';
 
 export function CardView(props: CardViewProps) {
   const {
@@ -150,7 +151,7 @@ function DocumentCard(
               href={href}
               className="min-w-0 flex-1 truncate text-sm font-medium text-slate-900 transition hover:text-brand-700 dark:text-slate-100 dark:hover:text-brand-300"
             >
-              {liveDoc.name}
+              <HighlightedTitle name={liveDoc.name} />
             </Link>
           )}
           {renaming ? null : (

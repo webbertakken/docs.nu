@@ -27,6 +27,7 @@ import { ThisBrowserPill } from '@/components/primitives/ThisBrowserPill';
 import { MadeByAiPill, isMadeByAi } from '@/components/primitives/MadeByAiPill';
 import { isInThisBrowser } from '@/lib/document-space';
 import { DocumentRowTags } from '@/components/tags/DocumentRowTags';
+import { HighlightedTitle } from '@/app/explorer/lens/TitleHighlight';
 
 // One document row in the full-page /explorer list (open / rename / move /
 // duplicate / delete + the drag source). Split out of views.tsx; rendered
@@ -62,7 +63,7 @@ export function DocumentRow(props: DocumentEntryProps) {
       href={href}
       className="truncate text-sm font-medium text-slate-900 transition hover:text-brand-700 dark:text-slate-100 dark:hover:text-brand-300"
     >
-      {liveDoc.name}
+      <HighlightedTitle name={liveDoc.name} />
     </Link>
   );
 

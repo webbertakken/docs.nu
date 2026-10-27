@@ -18,7 +18,14 @@ export const metadata = helpMetadata({
 
 Every list of documents in the [Explorer](/explorer) can be narrowed. Type a few words of a document's name into the **Search or filter documents** field in the top bar, or pick a **filter chip** under the page title. Both edit the same search, so a chip you pick shows up in the field, and a filter you type lights its chip. On a phone the field sits on its own row under the logo.
 
-Words match the document's name, ignoring capitals and accents ("cafe" finds "Café"). With several words, a document has to contain all of them.
+Words match the document's name, ignoring capitals and accents ("cafe" finds "Café"). With several words, a document has to match all of them. You don't have to type a name exactly:
+
+- **Part of it** finds it: "notes" finds "Meeting notes".
+- **The starts of its words** find it: "meetnot" finds "Meeting notes".
+- **Initials, or a word's letters in order**, find it: "mn" and "mtg nts" both find "Meeting notes".
+- **A typo** is forgiven: one in a word of 4 to 7 letters, two from 8 letters, so "meetnig" still finds "Meeting notes". A swapped pair of letters counts as one typo.
+
+The best matches come first, and the letters that matched are underlined in each name. Without words, a list keeps its own order. Recent shows its 12 newest matches, best first, and the Details view keeps the column you sorted by.
 
 <Figure caption="Search results narrowed by a typed Made by AI filter and a word: the pill sits in the field, its chip is lit, and only matching documents remain.">
   <FilterSearchResults />
