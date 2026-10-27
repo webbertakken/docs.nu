@@ -21,7 +21,7 @@ async function openMore(page: Page, category: string, query?: string): Promise<v
       .getByRole('option', { name: category })
       .first()
       .click();
-    await page.getByRole('button', { name: /^More/ }).click();
+    await page.locator('[data-toolbar-palette] button[data-toolbar-more-button]').click();
   }
   await more(page).waitFor();
   if (query)

@@ -446,7 +446,7 @@ export async function paletteTile(page: Page, name: string, category = 'Shapes')
     .first()
     .click();
   if (await onStrip().isVisible()) return onStrip();
-  await strip.getByRole('button', { name: /^More/ }).click();
+  await strip.locator('button[data-toolbar-more-button]').click();
   const tile = page.getByRole('button', { name, exact: true }).first();
   await tile.waitFor();
   return tile;

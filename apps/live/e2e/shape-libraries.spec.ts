@@ -121,7 +121,7 @@ test('a draw.io library becomes a shape library, placed from My shapes', async (
   await startBlankDocument(page);
   await page.getByRole('button', { name: 'Palette category' }).click();
   await page.locator('[data-option-id="my-shapes"]').click();
-  const libraryCategory = page.getByRole('button', { name: /^More/ });
+  const libraryCategory = page.locator('[data-toolbar-palette] button[data-toolbar-more-button]');
   await libraryCategory.click();
   await page.getByRole('button', { name: 'Insert Service from House shapes' }).click();
   await expect.poll(() => storedElements(page), { timeout: 15_000 }).toBe(1);

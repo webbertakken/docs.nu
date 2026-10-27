@@ -169,7 +169,7 @@ test.describe('editor modes', () => {
   test('a new tab opens in the mode it was made from', async ({ page, pageErrors }) => {
     await openInMode(page, 'diagram');
     await chooseOnStart(page, 'Draw');
-    await page.getByRole('button', { name: 'Add tab' }).click();
+    await page.getByRole('button', { name: 'Add tab', exact: true }).click();
     await expect(page.locator('[data-editor-tabbar]').getByText('Tab 2')).toBeVisible();
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
     // On its mode's own start, with no Quick Start over it.
