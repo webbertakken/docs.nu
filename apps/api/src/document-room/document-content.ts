@@ -233,7 +233,9 @@ export async function importDocumentCopy(
   for (const tab of copy.tabs) {
     const id = tabIdMap.get(tab.id)!;
     const data = remapTabDataLinks(tab.data, tabIdMap);
-    const { stats } = tabStatsOfData(data);
+    const { stats, corrupt } = tabStatsOfData(data);
+    if (corrupt)
+      console.warn(`[tab-stats] corrupt body id=${documentId} tab=${id} counted as empty`);
     stmts.push(
       // Link remapping rewrites ids inside elements, never their number, so the count carries over.
       db

@@ -337,3 +337,20 @@ describe('created and copied documents (M4)', () => {
     ).toEqual(expect.arrayContaining(['doc-1-t1', 'doc-1-t2']));
   });
 });
+
+describe('a body that is not JSON', () => {
+  it('moves verbatim, counted as an empty tab, and says so', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { d1, roomOf } = setup();
+    d1.sql
+      .exec(`INSERT INTO documents (id, owner_id, name, saved_at, created_at) VALUES ('doc-1', 'o', 'D', 1, 1);
+      INSERT INTO tabs (id, name, data, updated_at, rev) VALUES ('bad', 'Bad', 'not json', 5, 1);
+      INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES ('doc-1', 'bad', 0, 1);`);
+    const { room, sql } = roomOf();
+    expect(await room.move(D)).toMatchObject({ status: 'moved', d1Tabs: 1 });
+    expect(sql.prepare("SELECT data FROM tabs WHERE id = 'bad'").get()).toEqual({
+      data: 'not json',
+    });
+    expect(warn).toHaveBeenCalledWith('[tab-stats] corrupt body id=doc-1 tab=bad counted as empty');
+  });
+});

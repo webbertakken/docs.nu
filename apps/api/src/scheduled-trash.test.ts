@@ -107,4 +107,25 @@ describe('the 03:00 cron', () => {
     await runCron(env, now + TRASH_RETENTION_MS);
     expect(sql.prepare(`SELECT COUNT(*) AS n FROM documents`).get()).toEqual({ n: 0 });
   });
+
+  it('keeps a document whose room has not pushed its summary yet', async () => {
+    const { env, sql } = sqliteD1();
+    const now = Date.now();
+    const longAgo = now - EMPTY_DOCUMENT_STALE_MS - 1000;
+    sql
+      .prepare(
+        `INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at)
+         VALUES ('unpushed', 'owner', 'unpushed', 0, ?, ?)`,
+      )
+      .run(longAgo, longAgo);
+    // The room's summary has not landed (an unmoved document): nothing says it is empty.
+    sql.exec(`DELETE FROM outbox; UPDATE documents SET content_summary = NULL`);
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await runCron(env, now);
+
+    expect(sql.prepare(`SELECT trash_reason FROM documents WHERE id = 'unpushed'`).get()).toEqual({
+      trash_reason: null,
+    });
+  });
 });

@@ -20,31 +20,6 @@ export type ContentSummary = {
   hasContent: boolean;
 };
 
-const isCount = (v: unknown): v is number =>
-  typeof v === 'number' && Number.isInteger(v) && v >= -1;
-
-// A D1 value as a summary, or null for absent or unreadable (logged: a room wrote something this does not read).
-export function readContentSummary(raw: string | null | undefined): ContentSummary | null {
-  if (raw == null) return null;
-  try {
-    const v = JSON.parse(raw) as Partial<ContentSummary>;
-    if (
-      v.v === 1 &&
-      isCount(v.tabs) &&
-      (v.firstTabCount === null || isCount(v.firstTabCount)) &&
-      typeof v.tabCounts === 'object' &&
-      v.tabCounts !== null &&
-      typeof v.hasContent === 'boolean'
-    ) {
-      return v as ContentSummary;
-    }
-  } catch {
-    // Falls through to the warning.
-  }
-  console.warn('[content-summary] unreadable', raw.slice(0, 120));
-  return null;
-}
-
 // The `first_tab_count` column of a document list (docs/specs/006-document/document-snapshots.md): the element count
 // of the document's first tab, or of `scopeTabSql`'s tab when that is not null. NULL = no tab (or a scope tab the
 // document does not hold), -1 = not yet known, which is also what a document whose summary has not landed reads as.

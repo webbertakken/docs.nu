@@ -6,7 +6,6 @@
 // Writes are STATEMENTS appended to the batch that writes the body, so the index lands in the same transaction as
 // the blob it mirrors. The rows cascade from `tabs`.
 
-import { IMAGE_REF_ID_MAX_LENGTH } from '../image-refs/extract';
 import type { DocumentEnv } from '../types';
 
 // ---------- Writers ---------------------------------------------------
@@ -39,46 +38,6 @@ export function imageRefAddStatements(
       'INSERT OR IGNORE INTO image_refs (tab_id, image_id) SELECT ?1, value FROM json_each(?2)',
     ).bind(tabId, JSON.stringify(ids)),
   ];
-}
-
-// ---------- Indexing from stored bodies --------------------------------
-
-// The image ids a tab body places, walked in SQL: image elements' `imageId` and image page backgrounds' fill. A
-// body that is not JSON, or names no image, indexes nothing. Used where bodies arrive without being parsed (a move
-// into the room recomputes its references this way, docs/specs/006-document/document-storage-move.md).
-function walkSql(
-  tabWhere: string,
-  array: '$.elements' | '$.pages',
-  typeAt: string,
-  kind: string,
-  idAt: string,
-): string {
-  return `SELECT t.id AS tab_id, json_extract(e.value, '${idAt}') AS image_id
-      FROM tabs t,
-           json_each(CASE WHEN instr(t.data, '"imageId"') = 0 THEN '{}'
-                          WHEN NOT json_valid(t.data) THEN '{}'
-                          WHEN json_type(t.data, '${array}') = 'array' THEN t.data
-                          ELSE '{}' END, '${array}') e
-     WHERE (${tabWhere})
-       AND e.type = 'object'
-       AND json_extract(e.value, '${typeAt}') = '${kind}'
-       AND json_type(e.value, '${idAt}') = 'text'
-       AND length(json_extract(e.value, '${idAt}')) BETWEEN 1 AND ${IMAGE_REF_ID_MAX_LENGTH}
-       AND substr(json_extract(e.value, '${idAt}'), 1, 5) <> 'data:'`;
-}
-
-// Index every tab of the document from its stored body.
-export function imageRefIndexDocumentStatement(
-  env: DocumentEnv,
-  documentId: string,
-): D1PreparedStatement {
-  const tabWhere = 't.id IN (SELECT tab_id FROM document_tabs WHERE document_id = ?1)';
-  return env.DOCUMENT_DB.prepare(
-    `INSERT OR IGNORE INTO image_refs (tab_id, image_id)
-    ${walkSql(tabWhere, '$.elements', '$.type', 'image', '$.imageId')}
-    UNION ALL
-    ${walkSql(tabWhere, '$.pages', '$.background.fill.kind', 'image', '$.background.fill.imageId')}`,
-  ).bind(documentId);
 }
 
 // ---------- Readers ---------------------------------------------------

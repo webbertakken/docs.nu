@@ -168,17 +168,30 @@ function insertRows(db: DocumentDb, rows: MovableRows): void {
 
 // The rows a body implies, recomputed rather than copied: tab stats dated by the tab's own save, its image
 // references and its boards' column statuses.
-function deriveRows(db: DocumentDb, env: DocumentEnv, tabs: Record<string, unknown>[]): void {
+function deriveRows(
+  db: DocumentDb,
+  env: DocumentEnv,
+  documentId: string,
+  tabs: Record<string, unknown>[],
+): void {
   for (const tab of tabs) {
     const id = tab.id as string;
     const data = tab.data as string;
     const statements = [
-      tabStatsStatement(env, id, tabStatsOfData(data).stats, Number(tab.updated_at ?? 0)),
+      tabStatsStatement(env, id, statsOf(documentId, id, data), Number(tab.updated_at ?? 0)),
       ...imageRefAddStatements(env, id, imageRefIdsFromData(data)),
       ...planBoardIndexStatements(env, id, elementsOf(data)),
     ];
     for (const statement of statements) db.execute(statement as never);
   }
+}
+
+// A body that is not JSON counts as an empty tab with its bytes, said once in the log.
+function statsOf(documentId: string, tabId: string, data: string) {
+  const { stats, corrupt } = tabStatsOfData(data);
+  if (corrupt)
+    console.warn(`[tab-stats] corrupt body id=${documentId} tab=${tabId} counted as empty`);
+  return stats;
 }
 
 function elementsOf(data: string): Element[] {
@@ -301,7 +314,7 @@ export async function moveIntoRoom(
           ),
       );
       insertRows(room.db, rows);
-      deriveRows(room.db, room.env, rows.tabs ?? []);
+      deriveRows(room.db, room.env, documentId, rows.tabs ?? []);
       const back = readRoom(room.db, documentId);
       const roomTabs = back.tabs.length;
       // Equal canonical texts hash equally, so the room's hash is the D1 hash; a difference throws, undoing it all.
