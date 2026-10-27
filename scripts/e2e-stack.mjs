@@ -93,7 +93,7 @@ const LIVE_PORT = Number(process.env.E2E_LIVE_PORT ?? 4002);
 const API_PORT = Number(process.env.E2E_API_PORT ?? 8787);
 // The other sites, for the audits that open them (docs/specs/004-interface-design/blueprints/
 // optical-alignment.md, "Ink audit"). Help and telemetry sit under their basePath on the
-// live origin, as the router mounts them; marketing owns "/" in production, so it gets its own port.
+// live origin, as the router mounts them; marketing owns "/about" and its root files ("/_next") in production, so it gets its own port.
 const SITES = [
   { prefix: '/help', dir: path.join(ROOT, 'apps', 'help', 'out') },
   { prefix: '/telemetry', dir: path.join(ROOT, 'apps', 'telemetry', 'out') },

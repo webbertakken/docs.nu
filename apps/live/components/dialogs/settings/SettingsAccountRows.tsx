@@ -120,7 +120,7 @@ export function SettingsDeleteAccountRow({ row }: { row: SettingsDeleteAccountRo
           onClose={() => setOpen(false)}
           onDeleted={() => {
             // The account and its session are gone and this browser has forgotten them (AuthBridge's
-            // deleteAccount): land on marketing with a fresh load.
+            // deleteAccount): back to the front door, which lands on Explorer Home, with a fresh load.
             window.location.assign('/');
           }}
         />

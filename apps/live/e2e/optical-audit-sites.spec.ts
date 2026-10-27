@@ -65,9 +65,9 @@ test.describe('Optical alignment audit, other sites', () => {
 
   test('the marketing site', async ({ page, pageErrors, baseURL }) => {
     const marketing = site('marketing', baseURL!);
-    await open(page, `${marketing}/`, 'marketing');
+    await open(page, `${marketing}/about`, 'marketing');
     await expectCentred(page, 'marketing home');
-    await open(page, `${marketing}/features/collaboration/`, 'marketing');
+    await open(page, `${marketing}/about/features/collaboration/`, 'marketing');
     await expectCentred(page, 'marketing feature page');
     expectNoPageErrors(pageErrors);
   });
