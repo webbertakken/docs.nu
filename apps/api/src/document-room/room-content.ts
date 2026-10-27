@@ -8,9 +8,11 @@ import { markBorn, moveIntoRoom, storedMove, type MoveOutcome } from './content-
 import { DocumentDb } from './document-db';
 import { json } from '../responses';
 import { RETRY_AFTER_S } from './document-route';
-import { drainOutbox } from './document-outbox';
+import { documentRoom } from './document-client';
+import { drainOutbox, pooled, PUSH_CONCURRENCY } from './document-outbox';
 import { documentRpc, type DocumentRoomRpc } from './document-rpc';
 import { hasDocumentSchema, migrateDocumentSchema } from './document-schema';
+import { allShares, drainShares } from './tab-shares';
 import type { DocumentEnv, Env } from '../types';
 
 // The drain's pace (blueprint "Constants and configuration").
@@ -70,6 +72,9 @@ export class RoomContent {
   // Whether this instance has run the schema steps (a wake after a release may find an older version).
   private migrated = false;
   private flushAt: number | null = null;
+  // The next send to the other holders of its shared tabs (tab-shares.ts): on idle, not held to the D1 drain's once
+  // a minute, since it is a call to another room rather than a D1 write.
+  private shareAt: number | null = null;
   private lastFlushAt = 0;
   private draining = false;
 
@@ -99,7 +104,8 @@ export class RoomContent {
     if (this.schemaReady) {
       const row = sql.exec('SELECT id FROM document LIMIT 1').toArray()[0];
       if (typeof row?.id === 'string') this.documentId = row.id;
-      if (sql.exec('SELECT 1 FROM outbox LIMIT 1').toArray().length > 0) this.flushAt = Date.now();
+      if (this.owesD1()) this.flushAt = Date.now();
+      if (this.owesShares()) this.shareAt = Date.now();
     }
   }
 
@@ -183,14 +189,20 @@ export class RoomContent {
     return settled.outcome;
   }
 
-  // The drain's deadline, for the room's one alarm; null with nothing owed.
+  // The earliest of the drains' deadlines, for the room's one alarm; null with nothing owed.
   deadline(): number | null {
-    return this.flushAt;
+    const due = [this.flushAt, this.shareAt].filter((d): d is number => d !== null);
+    return due.length > 0 ? Math.min(...due) : null;
   }
 
-  // From the room's alarm: drain when due. A failed unit retries a minute later; keys left by a drain bounded at
-  // DRAIN_TABS go straight after.
+  // From the room's alarm: each drain that is due.
   async alarm(now: number): Promise<void> {
+    await this.drainD1(now);
+    await this.sendShares(now);
+  }
+
+  // A failed unit retries a minute later; keys left by a drain bounded at DRAIN_TABS go straight after.
+  private async drainD1(now: number): Promise<void> {
     if (this.flushAt === null || this.flushAt > now) return;
     this.flushAt = null;
     const env = this.env;
@@ -214,9 +226,61 @@ export class RoomContent {
     }
   }
 
+  // Send the other holders of its shared tabs what they are owed. A failed send retries a minute later; messages
+  // left by a drain bounded at SHARE_DRAIN_MAX, or written while it ran, go once the room is quiet again.
+  private async sendShares(now: number): Promise<void> {
+    if (this.shareAt === null || this.shareAt > now) return;
+    this.shareAt = null;
+    const env = this.env;
+    const documentId = this.documentId;
+    if (!env || !documentId || !this.schemaReady) return;
+    let retry: boolean;
+    try {
+      const result = await drainShares(env, documentId, (to, messages) =>
+        documentRoom(env, to).receiveShares(documentId, messages),
+      );
+      retry = result.failed > 0;
+    } catch (error) {
+      console.warn(`[tab-shares] send failed id=${documentId} to=* kind=read`, error);
+      retry = true;
+    }
+    if (retry) this.shareAt = Date.now() + FLUSH_RETRY_MS;
+    else if (this.owesShares()) this.shareAt = Date.now() + FLUSH_IDLE_MS;
+  }
+
+  // A purge: every other holder of the document's shared tabs hears now that it left, PUSH_CONCURRENCY at once.
+  // Best effort: a holder this misses answers `gone` the next time it sends here, and is dropped then.
+  async leaveShares(): Promise<void> {
+    const env = this.env;
+    const documentId = this.documentId;
+    if (!env || !documentId || !this.schemaReady) return;
+    this.shareAt = null;
+    // A room woken after a release reads its shares through the current schema.
+    this.ensureSchema();
+    const shares = await allShares(env);
+    await pooled(
+      shares.map(({ tabId, to }) => async () => {
+        try {
+          const [answer = 'ok'] = await documentRoom(env, to).receiveShares(documentId, [
+            { kind: 'leave', tabId },
+          ]);
+          console.info(`[tab-shares] sent id=${documentId} to=${to} kind=leave answer=${answer}`);
+        } catch (error) {
+          console.warn(`[tab-shares] send failed id=${documentId} to=${to} kind=leave`, error);
+        }
+      }),
+      PUSH_CONCURRENCY,
+    );
+  }
+
   private owesD1(): boolean {
     const sql = this.state.storage.sql;
     return sql.exec('SELECT 1 FROM outbox LIMIT 1').toArray().length > 0;
+  }
+
+  private owesShares(): boolean {
+    const sql = this.state.storage.sql;
+    return sql.exec('SELECT 1 FROM share_outbox LIMIT 1').toArray().length > 0;
   }
 
   // The schema on the first write (R1), never on construction or a read; once per instance, so a wake after a
@@ -233,11 +297,20 @@ export class RoomContent {
       );
   }
 
-  // A write happened: arm the drain on idle, at most once a minute. The drain's own writes schedule nothing.
+  // A write happened: arm the D1 drain on idle, at most once a minute (the drain's own writes schedule nothing),
+  // and the shared tabs' sends on idle.
   private noteWrite(): void {
-    if (this.draining || this.flushAt !== null || !this.schemaReady || !this.owesD1()) return;
-    this.flushAt = nextFlushAt(Date.now(), this.lastFlushAt);
-    this.hooks.armAlarm();
+    if (!this.schemaReady) return;
+    let armed = false;
+    if (!this.draining && this.flushAt === null && this.owesD1()) {
+      this.flushAt = nextFlushAt(Date.now(), this.lastFlushAt);
+      armed = true;
+    }
+    if (this.shareAt === null && this.owesShares()) {
+      this.shareAt = Date.now() + FLUSH_IDLE_MS;
+      armed = true;
+    }
+    if (armed) this.hooks.armAlarm();
   }
 }
 

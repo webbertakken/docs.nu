@@ -20,6 +20,14 @@ import {
 } from './document-content';
 import { createDocumentContent, type CreateOutcome, type DocumentSeed } from './document-create';
 import { answerDocumentRequest, documentRouteContext, type RouteIdentity } from './document-route';
+import {
+  receiveShares,
+  recordShareJoin,
+  sharedTabCopy,
+  type ShareAnswer,
+  type ShareMessage,
+  type SharedTabCopy,
+} from './tab-shares';
 
 export type DocumentRoomRpc = {
   // One API request under /api/documents/:id/, answered by the same handlers (document-route.ts).
@@ -45,6 +53,16 @@ export type DocumentRoomRpc = {
   item(documentId: string, itemId: string): Promise<Item | null>;
   // A public form's doors, /api/forms/:code... (read, respond, report), for a form this document holds.
   respondToForm(documentId: string, request: Request, identity: RouteIdentity): Promise<Response>;
+  // A tab shared between documents (tab-shares.ts): a joining document's copy, the join recorded, and what
+  // another holder (`from`) sends.
+  sharedTabCopy(documentId: string, tabId: string): Promise<SharedTabCopy | null>;
+  shareJoined(
+    documentId: string,
+    tabId: string,
+    member: string,
+    seenUpdatedAt: number,
+  ): Promise<boolean>;
+  receiveShares(documentId: string, from: string, messages: ShareMessage[]): Promise<ShareAnswer[]>;
 };
 
 export function documentRpc(
@@ -67,5 +85,9 @@ export function documentRpc(
     item: (documentId, itemId) => readItem(env, documentId, itemId),
     respondToForm: (_documentId, request, identity) =>
       answerFormRequest(documentRouteContext(env, request, identity, waitUntil)),
+    sharedTabCopy: (documentId, tabId) => sharedTabCopy(env, documentId, tabId),
+    shareJoined: (documentId, tabId, member, seenUpdatedAt) =>
+      recordShareJoin(env, documentId, tabId, member, seenUpdatedAt),
+    receiveShares: (documentId, from, messages) => receiveShares(env, documentId, from, messages),
   };
 }

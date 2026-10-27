@@ -8,6 +8,7 @@ import type { DocumentEnv } from '../types';
 import { readDocumentOutline } from './document-content';
 import { DocumentDb } from './document-db';
 import { migrateDocumentSchema } from './document-schema';
+import { drainShares, receiveShares } from './tab-shares';
 
 // The room store's budgets (docs/specs/006-document/blueprints/document-storage.md "Performance and limits"),
 // node:sqlite standing in for the room's SQLite. Each case keeps the best of a few runs, so one slow tick of a busy
@@ -17,6 +18,22 @@ const D = 'doc-1';
 const RUNS = 5;
 
 let env: DocumentEnv;
+
+// A room of its own holding document `id`.
+function roomEnv(id: string): DocumentEnv {
+  const room = new DatabaseSync(':memory:');
+  room.exec('PRAGMA foreign_keys = ON');
+  const sql = nodeDocumentSql(room);
+  migrateDocumentSchema((q) => sql.exec(q));
+  const db = new DocumentDb(sql, {
+    transaction: nodeTransaction(room),
+    ensureSchema: () => {},
+    hasSchema: () => true,
+    onWrite: () => {},
+  });
+  room.exec(`INSERT INTO document (id, saved_at, created_at) VALUES ('${id}', 1, 1)`);
+  return { DOCUMENT_DB: db.asD1() } as unknown as DocumentEnv;
+}
 
 beforeEach(() => {
   const room = new DatabaseSync(':memory:');
@@ -92,6 +109,37 @@ describe('the room store budgets', () => {
       n: number;
     }>();
     expect(placed?.n).toBe(500);
+  });
+
+  it('sends a 1 MB shared tab to 20 holders, each taking it in, under 2 s', async () => {
+    const tab = bigTab('shared', 1_000_000);
+    await upsertTab(env, D, tab, 0);
+    const holders = new Map<string, DocumentEnv>();
+    for (let i = 0; i < 20; i++) {
+      const id = `holder-${i}`;
+      const holder = roomEnv(id);
+      await upsertTab(holder, id, tab, 0);
+      await holder.DOCUMENT_DB.prepare("UPDATE tabs SET updated_at = 1 WHERE id = 'shared'").run();
+      holders.set(id, holder);
+      await env.DOCUMENT_DB.prepare('INSERT INTO tab_shares (tab_id, document_id) VALUES (?, ?)')
+        .bind('shared', id)
+        .run();
+    }
+    await upsertTab(env, D, { ...tab, name: 'Shared, renamed' }, 0);
+    const start = performance.now();
+    const result = await drainShares(env, D, (to, messages) =>
+      receiveShares(holders.get(to)!, to, D, messages),
+    );
+    const took = performance.now() - start;
+    expect(result).toMatchObject({ sent: 20, failed: 0 });
+    expect(took).toBeLessThan(2_000);
+    const taken = await holders
+      .get('holder-19')!
+      .DOCUMENT_DB.prepare('SELECT name FROM tabs')
+      .first<{
+        name: string;
+      }>();
+    expect(taken?.name).toBe('Shared, renamed');
   });
 
   it('outlines a 200-tab document under 10 ms', async () => {

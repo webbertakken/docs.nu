@@ -23,6 +23,7 @@ import { handleQaBoardRoute } from './qa-board-routes';
 import { handleFormLinkRoutes } from './form-link-routes';
 import { handleCommentPicturesRoute } from './comment-pictures-routes';
 import { handleTabPut, refuseTokenTabPut } from './tab-put-route';
+import { handleTabLink } from './tab-link-route';
 import { handleTabRename } from './tab-name-route';
 import { handleTabForm } from './tab-form-route';
 import { handleTabPages } from './tab-pages-route';
@@ -39,7 +40,6 @@ import {
   gateEdit,
   gateGrant,
   missingDocument,
-  ownsDocument,
   requireOwner,
   shareCodeOf,
   type DocumentRouteContext,
@@ -239,48 +239,9 @@ export async function handleDocumentSubresources(
   const plan = await handlePlanRoute(ctx);
   if (plan) return plan;
 
-  // /api/documents/<id>/tabs/<tabId>/link — owner only.
-  //   POST — add an existing tab to this document (docs/specs/006-document/tab-document-many-to-many.md).
-  // Auth: the caller must own this document AND own at least
-  // one document that already contains the tab. The second
-  // half stops a stranger from grafting a tab they have no
-  // read access to. The `existing.ownerId !== owner` guard
-  // above the dispatch (canEditDocument on this document) only
-  // covers the destination side.
-  if (
-    segments.length === 6 &&
-    segments[3] === 'tabs' &&
-    segments[5] === 'link' &&
-    request.method === 'POST'
-  ) {
-    const id = segments[2]!;
-    const tabId = segments[4]!;
-    const owner = requireOwner(ctx);
-    if (owner instanceof Response) return owner;
-    const existing = await getDocument(env, id);
-    if (!existing) return missingDocument(ctx, id);
-    // `ownsDocument`, not a bare id compare: on a TEAM document the owner id is
-    // an account id every teammate can read, so it must be proven with a verified
-    // account id rather than the X-Owner-Id header (see routes/context.ts).
-    // The second half of this route's auth doesn't help here — it re-uses the
-    // SAME resolved owner, so a forged identity satisfies it with the victim's
-    // own documents.
-    if (!(await ownsDocument(ctx, existing))) return forbidden();
-    // A tab this document already holds: linking it again changes nothing.
-    const tab = await getTab(env, id, tabId);
-    if (tab) return json({ tab });
-    // A tab of another document lives in that document's room: taking a copy that stays in step is the shared
-    // tabs' join (docs/specs/006-document/tab-document-many-to-many.md "Joining"), which this route does not do
-    // yet. Refused by name, never half done.
-    console.warn('[tab-link] refused', { documentId: id, tabId, reason: 'shared_tabs_pending' });
-    return json(
-      {
-        error: 'tab_link_unavailable',
-        message: 'Adding a tab from another document is not available.',
-      },
-      { status: 501 },
-    );
-  }
+  // /api/documents/<id>/tabs/<tabId>/link — share a tab from another of the caller's documents into this one.
+  const linked = await handleTabLink(ctx);
+  if (linked) return linked;
 
   // /api/documents/<id>/share* — the share-link family lives in
   // document-share-routes.ts.

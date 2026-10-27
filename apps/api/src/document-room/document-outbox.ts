@@ -355,7 +355,7 @@ function unitsOf(env: DocumentEnv, documentId: string, rows: OutboxRow[], now: n
 }
 
 // Run `tasks` at most `limit` at a time.
-async function pooled<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
+export async function pooled<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
   const results: T[] = new Array<T>(tasks.length);
   let next = 0;
   const worker = async () => {

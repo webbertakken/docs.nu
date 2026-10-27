@@ -14,7 +14,7 @@ function assertTabDataFits(tabId: string, data: string, write: string): void {
   logTabRefused(write, tabId, bytes);
   throw new TabTooLargeError(tabId, bytes, write);
 }
-import type { SharedTabsSummary } from '@livedoc/api-schema';
+import { leaveStatements } from '../document-room/tab-shares';
 import type { DocumentEnv, TabDTO } from '../types';
 import { imageRefIds, imageRefIdsFromData } from '../image-refs/extract';
 import { tabStatsOf, tabStatsStatement, type TabStats } from './tab-stats';
@@ -373,35 +373,18 @@ export async function deleteTabRow(
     .bind(documentId, tabId)
     .first<{ data: string | null }>();
   // A room's tab is its document's alone (shared tabs are copies, one per holder), so the body goes with the
-  // link, and its stats, image and sheet references and changesets with it by cascade.
-  await env.DOCUMENT_DB.prepare(
-    'DELETE FROM tabs WHERE id = ? AND NOT EXISTS (SELECT 1 FROM document_tabs WHERE tab_id = ?)',
-  )
-    .bind(tabId, tabId)
-    .run();
+  // link, and its stats, image and sheet references, changesets and holders with it by cascade. A shared tab's other
+  // holders hear first that this document left (document-room/tab-shares.ts); they keep their copies.
+  await env.DOCUMENT_DB.batch([
+    ...leaveStatements(env, tabId),
+    env.DOCUMENT_DB.prepare(
+      'DELETE FROM tabs WHERE id = ? AND NOT EXISTS (SELECT 1 FROM document_tabs WHERE tab_id = ?)',
+    ).bind(tabId, tabId),
+  ]);
   // The tab's references are gone (by the FK cascade, or by the unlink the reference join reads), with the link
   // the triggers would find the document by, so the document's sheets settle here.
   await env.DOCUMENT_DB.batch(sheetSettleStatements(env, documentId, Date.now()));
   return unlinked?.data ?? null;
-}
-
-// How many of this document's tabs are shared (also linked into another
-// document), and across how many other documents: what deleting or taking the
-// document offline leaves behind (docs/specs/006-document/tab-document-many-to-many.md,
-// "Shared-tab notice").
-export async function sharedTabsSummary(
-  env: DocumentEnv,
-  documentId: string,
-): Promise<SharedTabsSummary> {
-  const row = await env.DOCUMENT_DB.prepare(
-    `SELECT COUNT(DISTINCT dt.tab_id) AS tabs, COUNT(DISTINCT o.document_id) AS documents
-       FROM document_tabs dt
-       JOIN document_tabs o ON o.tab_id = dt.tab_id AND o.document_id <> dt.document_id
-      WHERE dt.document_id = ?`,
-  )
-    .bind(documentId)
-    .first<SharedTabsSummary>();
-  return { tabs: row?.tabs ?? 0, documents: row?.documents ?? 0 };
 }
 
 // One position in a reorder request: the tab id plus its per-document

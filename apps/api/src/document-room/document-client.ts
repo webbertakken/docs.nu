@@ -15,6 +15,7 @@ import type { DocumentCopy, DocumentOutline } from './document-content';
 import type { CreateOutcome, DocumentSeed } from './document-create';
 import { roomUnavailable, type RouteIdentity } from './document-route';
 import type { DocumentRoomRpc } from './document-rpc';
+import type { ShareAnswer, ShareMessage, SharedTabCopy } from './tab-shares';
 
 /** Names the document on every worker-to-room fetch. */
 export const DOCUMENT_ID_HEADER = 'X-Document-Id';
@@ -34,6 +35,11 @@ export type DocumentRoomClient = {
   importCopy(copy: DocumentCopy): Promise<ContentSummary>;
   item(itemId: string): Promise<Item | null>;
   respondToForm(request: Request, identity: RouteIdentity): Promise<Response>;
+  // A tab shared between documents (tab-shares.ts): the tab and its holders for one joining through this document,
+  // the join recorded here, and what another holder (`from`) sends.
+  sharedTabCopy(tabId: string): Promise<SharedTabCopy | null>;
+  shareJoined(tabId: string, member: string, seenUpdatedAt: number): Promise<boolean>;
+  receiveShares(from: string, messages: ShareMessage[]): Promise<ShareAnswer[]>;
   // The sweep's move of the document's content into the room (content-move.ts); null when D1 has no row for it.
   move(): Promise<MoveOutcome | null>;
 };
@@ -71,6 +77,9 @@ export function documentRoom(
     importCopy: (copy) => room.importCopy(documentId, copy),
     item: (itemId) => room.item(documentId, itemId),
     respondToForm: (request, identity) => room.respondToForm(documentId, request, identity),
+    sharedTabCopy: (tabId) => room.sharedTabCopy(documentId, tabId),
+    shareJoined: (tabId, member, seen) => room.shareJoined(documentId, tabId, member, seen),
+    receiveShares: (from, messages) => room.receiveShares(documentId, from, messages),
     move: () => room.move(documentId),
   };
 }

@@ -99,8 +99,12 @@ export function withTestDocumentRooms(
 }
 
 // A real room on its own node:sqlite database: its state's storage has `sql`, `transactionSync` and the key-value
-// calls a room makes, in memory.
-export function testDocumentRoom(env?: Env): {
+// calls a room makes, in memory. `name` is its id's: a test of several rooms names each, so a room answers its own
+// id itself and reaches the others through the env's DOCUMENT_ROOM.
+export function testDocumentRoom(
+  env?: Env,
+  name?: string,
+): {
   room: DocumentRoom;
   sql: DatabaseSync;
   alarms: () => number | null;
@@ -111,9 +115,9 @@ export function testDocumentRoom(env?: Env): {
   let alarm: number | null = null;
   let gate: Promise<unknown> = Promise.resolve();
   const id = {
-    name: 'room',
-    toString: () => 'room',
-    equals: () => true,
+    name: name ?? 'room',
+    toString: () => name ?? 'room',
+    equals: (other: DurableObjectId) => name === undefined || String(other) === name,
   } as unknown as DurableObjectId;
   const storage = {
     sql: nodeDocumentSql(sql),
@@ -126,10 +130,17 @@ export function testDocumentRoom(env?: Env): {
     list: async () => new Map(kv),
     deleteAll: async () => {
       kv.clear();
+      // As the room's deleteAll: everything goes at once, so no trigger or foreign key sees a half-dropped schema.
+      sql.exec('PRAGMA foreign_keys = OFF');
+      for (const { name } of sql
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'trigger'")
+        .all() as { name: string }[])
+        sql.exec(`DROP TRIGGER IF EXISTS "${name}"`);
       for (const { name } of sql
         .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
         .all() as { name: string }[])
         sql.exec(`DROP TABLE IF EXISTS "${name}"`);
+      sql.exec('PRAGMA foreign_keys = ON');
     },
     // The synchronous key-value API of a SQLite-backed room, over the same keys.
     kv: {

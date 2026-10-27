@@ -24,6 +24,9 @@ const KNOWN_WRITERS: Record<string, number> = {
   'api/src/db/tabs.ts': 6,
   // importDocumentCopy (a copy's tabs, references from the copied bodies)
   'api/src/document-room/document-content.ts': 1,
+  // takeSharedTab and a shared tab taken in (receiveShares): each writes the body through tabWriteStatements, then
+  // dates the row as the copy it took, which sets `updated_at` only and has no image reference to keep.
+  'api/src/document-room/tab-shares.ts': 2,
 };
 
 // The last migration that wrote `tabs` without having to think about the

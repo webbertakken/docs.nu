@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { sentText } from '@livedoc/vitest-config/sent-request';
 import type { Tab } from '@livedoc/document';
-import { apiLoadTabRevisioned, apiSaveTab, flushDocumentSavesBeacon } from './tabs';
+import { apiLinkTab, apiLoadTabRevisioned, apiSaveTab, flushDocumentSavesBeacon } from './tabs';
 import * as offlineStore from '../offline/offline-store';
 import { SAVE_TIMEOUT_BASE_MS, saveTimeoutMs } from './core';
 
@@ -250,5 +250,39 @@ describe('saveTimeoutMs', () => {
     expect(saveTimeoutMs(0)).toBe(SAVE_TIMEOUT_BASE_MS);
     // The largest tab (just under 2 MB) still gets over two minutes on a slow uplink.
     expect(saveTimeoutMs(2 * 1024 * 1024)).toBe(SAVE_TIMEOUT_BASE_MS + 128_000);
+  });
+});
+
+// Add to Document (docs/specs/006-document/tab-document-many-to-many.md "API impact"): the link names the document the
+// tab is added from, and answers the tab as the target now holds it.
+describe('apiLinkTab', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('posts the source document as `from` and answers the linked tab', async () => {
+    const calls: { url: string; init: RequestInit }[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string, init: RequestInit) => {
+        calls.push({ url, init });
+        return Promise.resolve(Response.json({ tab: { id: 't', name: 'Glossary' } }));
+      }),
+    );
+    const tab = await apiLinkTab('owner-1', 'target', 't', 'source');
+    expect(tab).toMatchObject({ id: 't', name: 'Glossary' });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url).toMatch(/\/documents\/target\/tabs\/t\/link$/);
+    expect(calls[0]!.init.method).toBe('POST');
+    expect(JSON.parse(calls[0]!.init.body as string)).toEqual({ from: 'source' });
+    expect(new Headers(calls[0]!.init.headers).get('Content-Type')).toBe('application/json');
+  });
+
+  it('throws when the target refuses the tab id', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(Response.json({ error: 'tab_id_taken' }, { status: 409 }))),
+    );
+    await expect(apiLinkTab('owner-1', 'target', 't', 'source')).rejects.toThrow();
   });
 });

@@ -194,7 +194,7 @@ END;
 //   images  ''      document_images and the placement grants
 const OUTBOX = `
 CREATE TABLE IF NOT EXISTS outbox (
-  id          INTEGER PRIMARY KEY,
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
   document_id TEXT    NOT NULL,
   kind        TEXT    NOT NULL CHECK (kind IN ('summary', 'tab', 'cards', 'items', 'images')),
   key         TEXT    NOT NULL,
@@ -309,8 +309,46 @@ BEGIN
 END;`;
 }
 
+// A tab shared with other documents (tab-shares.ts, docs/specs/006-document/tab-document-many-to-many.md): every
+// holder keeps its own copy under the same tab id. `tab_shares` lists the OTHER documents holding it; `share_outbox`
+// is what this document still owes them, filled by the trigger below in the transaction of the write (R3):
+//   body   the tab's current name and body, read when sent
+//   join   `member` now holds the tab too
+//   leave  this document no longer holds the tab
+// A key written again is deleted and inserted under a new id, as in `outbox`, so a drain in flight keeps it.
+// `share_state.receiving` is set while a copy taken from another holder is written, so taking it in queues no send
+// back (receiveShares queues the holders the sender did not list itself).
+const SHARES = `
+CREATE TABLE IF NOT EXISTS tab_shares (
+  tab_id      TEXT NOT NULL REFERENCES tabs (id) ON DELETE CASCADE,
+  document_id TEXT NOT NULL,
+  PRIMARY KEY (tab_id, document_id)
+) WITHOUT ROWID;
+
+CREATE TABLE IF NOT EXISTS share_outbox (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind        TEXT    NOT NULL CHECK (kind IN ('body', 'join', 'leave')),
+  tab_id      TEXT    NOT NULL,
+  to_document TEXT    NOT NULL,
+  member      TEXT    NOT NULL DEFAULT '',
+  UNIQUE (kind, tab_id, to_document, member)
+);
+
+CREATE TABLE IF NOT EXISTS share_state (receiving INTEGER NOT NULL);
+INSERT INTO share_state (receiving) SELECT 0 WHERE NOT EXISTS (SELECT 1 FROM share_state);
+
+CREATE TRIGGER IF NOT EXISTS share_on_write AFTER UPDATE OF name, data ON tabs
+  WHEN EXISTS (SELECT 1 FROM tab_shares WHERE tab_id = NEW.id)
+   AND COALESCE((SELECT receiving FROM share_state), 0) = 0
+BEGIN
+  DELETE FROM share_outbox WHERE kind = 'body' AND tab_id = NEW.id;
+  INSERT INTO share_outbox (kind, tab_id, to_document)
+    SELECT 'body', NEW.id, document_id FROM tab_shares WHERE tab_id = NEW.id;
+END;
+`;
+
 /** Every step the room's schema has taken, in order; a change appends one and never edits a shipped step. */
-export const DOCUMENT_SCHEMA_STEPS: readonly string[] = [STEP_1 + OUTBOX];
+export const DOCUMENT_SCHEMA_STEPS: readonly string[] = [STEP_1 + OUTBOX + SHARES];
 
 export const DOCUMENT_SCHEMA_VERSION = DOCUMENT_SCHEMA_STEPS.length;
 

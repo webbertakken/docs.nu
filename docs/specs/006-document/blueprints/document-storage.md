@@ -72,12 +72,13 @@ table's so the content modules' SQL, and the tests' shared tables, stay keyed by
 
 A tab's insert and delete key through its `document_tabs` row (a room's tab is its document's alone).
 
-- A trigger re-keys by `DELETE` then `INSERT` of `(kind, key)`, so a key written during a drain gets a new `id`.
+- A trigger re-keys by `DELETE` then `INSERT` of `(kind, key)`, so a key written during a drain gets a new `id`; the
+  `id` is `AUTOINCREMENT`, so a re-keyed key never takes back the `id` it had, even when it held the largest.
 - **Scheduling**: after every write `DocumentDb`'s `onWrite` hook (`RoomContent.noteWrite`, skipped while draining)
   sets the drain's deadline `nextFlushAt(now, lastFlushAt) = max(now + FLUSH_IDLE_MS, lastFlushAt + FLUSH_MIN_GAP_MS)`
   and `DocumentRoom.armAlarm` arms the room's one alarm at the earliest deadline of: the drain
-  (`RoomContent.deadline`), the facilitator grace and agent presence expiry. The share drain (B4) and upkeep (B5)
-  join it when built. A room woken with keys in its outbox drains at once.
+  (`RoomContent.deadline`, the earliest of its drain, share drain and upkeep), the facilitator grace and agent presence
+  expiry. A room woken with keys in its outbox or its share outbox drains at once.
 - **Drain** (`drainOutbox(env, documentId)`): read keys ordered by `id`; the `summary`, `images`, `cards` and `items`
   keys plus at most `DRAIN_TABS` `tab` keys; build one D1 batch per pushed unit (the document unit: summary, images,
   cards, items; each tab its own unit); run at most `PUSH_CONCURRENCY` batches at once; delete exactly the keys whose
@@ -178,33 +179,47 @@ Every call goes through `documentRoom(env, id)`, so the id is bound and not repe
 | team mention of a card comment (`team-mention-routes.ts`) | `item(itemId)`                                  | `Item \| null`                                                                |
 | copy                                                      | `exportCopy(...)`, `importCopy(copy)`           | `DocumentCopy \| null`, `ContentSummary`                                      |
 | purge (`room-purge-client.ts` `purgeRooms`)               | `fetch` `POST /purge`, not an RPC               | 2xx once the room deleted its storage                                         |
-| shared tabs (not built)                                   | `sharedTabCopy`, `shareJoined`, `receiveShares` | (below)                                                                       |
+| shared tabs (`tab-link-route.ts`, the share drain)        | `sharedTabCopy`, `shareJoined`, `receiveShares` | (below)                                                                       |
 
-### Shared tabs (`document-room/tab-shares.ts` (planned))
+### Shared tabs (`document-room/tab-shares.ts`)
 
-Plan 0006, phase B4. Until it lands, `POST /api/documents/:id/tabs/:tabId/link` for a tab the document does
-not hold answers 501 `tab_link_unavailable`, logged `[tab-link] refused` (`reason: shared_tabs_pending`); a tab it
-already holds answers `{ tab }` as before.
-
-- Tables: `tab_shares (tab_id TEXT NOT NULL REFERENCES tabs (id) ON DELETE CASCADE, document_id TEXT NOT NULL,
-PRIMARY KEY (tab_id, document_id)) WITHOUT ROWID`; `share_outbox (id INTEGER PRIMARY KEY, kind TEXT NOT NULL CHECK
-(kind IN ('body','join','leave')), tab_id TEXT NOT NULL, to_document TEXT NOT NULL, member TEXT NOT NULL DEFAULT
-'', UNIQUE (kind, tab_id, to_document, member))`.
-- Trigger `share_on_write AFTER UPDATE OF name, data ON tabs` inserts a `body` row per `tab_shares` holder unless
-  the room's flag `receiving` (a one-row table `share_state (receiving INTEGER NOT NULL)`) is set.
+- Tables (room schema step 1, `SHARES`): `tab_shares (tab_id TEXT NOT NULL REFERENCES tabs (id) ON DELETE CASCADE,
+document_id TEXT NOT NULL, PRIMARY KEY (tab_id, document_id)) WITHOUT ROWID`, the OTHER holders; `share_outbox (id
+INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL CHECK (kind IN ('body','join','leave')), tab_id TEXT NOT NULL,
+to_document TEXT NOT NULL, member TEXT NOT NULL DEFAULT '', UNIQUE (kind, tab_id, to_document, member))`;
+  `share_state (receiving INTEGER NOT NULL)`, one row, `0`.
+- Trigger `share_on_write AFTER UPDATE OF name, data ON tabs` re-keys a `body` row per `tab_shares` holder unless
+  `share_state.receiving` is set.
 - `ShareMessage = { kind: 'body'; tabId; name; data; updatedAt; members } | { kind: 'join'; tabId; member } |
-{ kind: 'leave'; tabId }`; `ShareAnswer = 'ok' | 'gone'`.
-- **Later write wins**: take a body when `(updatedAt, sha256(data))` is greater than the stored copy's.
-- **No echo**: a received body is forwarded only to holders not in `members`.
-- Drain: `drainShares()` sends at most `SHARE_DRAIN_MAX` messages, `PUSH_CONCURRENCY` at once, after
-  `FLUSH_IDLE_MS` quiet; a failure keeps its row and retries after `FLUSH_RETRY_MS`; `gone` deletes the holder.
-- Link route `POST /api/documents/:id/tabs/:tabId/link` body `{ from: string }`: 400 `invalid_request` without
-  `from` or with `from === id`; 403 unless the caller `ownsDocument` both; 404 when `from` or the tab is missing;
-  answers `{ tab: TabSummaryDTO }`; a repeat answers the stored tab.
-- Leave on `deleteTabRow` and on `purge` (before `deleteAll`).
-- A target that already holds an unrelated tab with that id is refused 409 `tab_id_taken`: tab ids are unique per
-  document only ([Offline Mode](../offline-mode.md)).
-- `GET /api/documents/:id/shared-tabs` counts from `tab_shares` (`sharedTabsSummary`).
+{ kind: 'leave'; tabId }`, `members` the sender and every holder it lists; `ShareAnswer = 'ok' | 'gone'`;
+  `SharedTabCopy = { name; data; updatedAt; members }`, `members` the document joined through and its holders.
+- **Joining** (the link route, in the target's room): `sharedTabCopy` on `from` (records nothing; null: no such
+  tab) → `takeSharedTab` stores the copy at the end of the target's order, `updated_at` the copy's, and lists every
+  member but itself (false: the target holds a tab of that id) → `shareJoined(tabId, member, seenUpdatedAt)` on `from`
+  (`recordShareJoin`): lists the member, queues `join` to every other holder, and `body` to the member when the tab
+  changed since `seenUpdatedAt`.
+- **Receiving** (`receiveShares(env, documentId, from, messages)`, one answer per message): `leave` drops `from`
+  and what is owed to it about the tab, `ok`; a tab this document does not hold answers `gone`; a `join` lists the
+  sender and the member; a `body` lists the sender, and when **later** (`isLaterWrite`: `updatedAt`, then the
+  SHA-256 of `data`, then `name`) is written as a local write (`tabWriteStatements`, then `updated_at` set to the
+  message's) between `receiving = 1` and `receiving = 0`, and queued (**no echo**) only to holders not in
+  `{ from, ...members }`.
+- **Drain** (`drainShares(env, documentId, send)`): at most `SHARE_DRAIN_MAX` rows by `id`, `PUSH_CONCURRENCY` at
+  once, a body read once a drain; a row sent is deleted by its `id`; a failed send keeps it; `gone` drops the holder
+  and every row owed to it about the tab; a row whose tab went is deleted unsent. `RoomContent` schedules it
+  `FLUSH_IDLE_MS` after a write (not held to the D1 drain's minute), `FLUSH_RETRY_MS` after a failure, `FLUSH_IDLE_MS`
+  again while rows remain.
+- **Link route** `POST /api/documents/:id/tabs/:tabId/link` body `{ from: string }` (`tab-link-route.ts`): 404 or
+  410 for a missing or trashed target (`missingDocument`); 403 unless the caller `ownsDocument` the target; 400
+  `bad_request` without `from` or with `from === id`; 404 for a missing `from` (a trashed `from` is allowed); 403
+  unless the caller owns `from`; a tab the target holds and shares with `from` is a repeat: the join is recorded
+  again and `{ tab }` answered; 404 when `from` does not hold the tab; 409 `tab_id_taken` when the target holds an
+  unrelated tab of that id (tab ids are unique per document only, [Offline Mode](../offline-mode.md)); otherwise 200
+  `{ tab }`. A `shareJoined` that throws or answers false leaves the tab in the target, which queues a `body` to
+  `from` (`queueShareBody`): its arrival lists the target there.
+- **Leave** on `deleteTabRow` (`leaveStatements`, before the tab's delete) and on purge
+  (`RoomContent.leaveShares`: one `leave` per `(tab, holder)` now, `PUSH_CONCURRENCY` at once, before `deleteAll`).
+- `GET /api/documents/:id/shared-tabs` counts from `tab_shares` (`sharedTabsSummary`, `tab-shares.ts`).
 
 ### Purge
 
@@ -252,10 +267,10 @@ SQLite and unscheduled until then).
   `exportCopy(documentId, onlyTabId: string | null, redactAuthorsFor: string | null): Promise<DocumentCopy | null>`;
   `importCopy(documentId, copy: DocumentCopy): Promise<ContentSummary>`;
   `item(documentId, itemId): Promise<Item | null>`;
-  `respondToForm(documentId, request, identity): Promise<Response>`.
-  Not built yet (plan 0006, phase B4): `sharedTabCopy(documentId, tabId): Promise<SharedTabCopy | null>`;
-  `shareJoined(documentId, tabId, member): Promise<void>`;
-  `receiveShares(documentId, messages: ShareMessage[]): Promise<ShareAnswer[]>`.
+  `respondToForm(documentId, request, identity): Promise<Response>`;
+  `sharedTabCopy(documentId, tabId): Promise<SharedTabCopy | null>`;
+  `shareJoined(documentId, tabId, member, seenUpdatedAt: number): Promise<boolean>`;
+  `receiveShares(documentId, from, messages: ShareMessage[]): Promise<ShareAnswer[]>`.
 - `CreateOutcome = { ok: true; summary: ContentSummary } | { ok: false; status: number; body: unknown }`
   (`document-create.ts`).
 - Every RPC binds `documentId` first (`RoomContent.bind`): a room that stores nothing adopts it (a create, a copy's
@@ -297,7 +312,7 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 | `items`                                     | `(document_id, id)`                     | as D1                                                                                                   |
 | `plan_board_statuses`                       | `(tab_id, status, element_id)`          | FK `tabs` cascade                                                                                       |
 | `sheets`, `sheet_cells`, `sheet_refs`       | as D1                                   | FKs within the room                                                                                     |
-| `tab_shares`, `share_outbox`, `share_state` | above (B4, not built yet)               |                                                                                                         |
+| `tab_shares`, `share_outbox`, `share_state` | above (Shared tabs)                     |                                                                                                         |
 | `outbox`                                    | `id`, unique `(document_id, kind, key)` |                                                                                                         |
 
 - Classification: everything above is **content** (private to the document's readers); `outbox` and
@@ -334,14 +349,16 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
   `RouteIdentity` as it trusted the verified headers before, and re-runs every access check itself.
 - Content never crosses into D1 except the derived index rows and search text, which carry nothing a reader of the
   document cannot already read; reads of them are access-filtered.
-- `receiveShares` accepts a body only for a tab whose `tab_shares` lists the sender; otherwise `gone`.
+- `receiveShares` is reachable only from another room through the binding; it answers `gone` for a tab this document
+  does not hold, and a sender it does not list yet becomes a holder (a join still on its way). A holder is only ever
+  listed through a join the link route allowed, which refuses an unrelated tab of the same id (409).
 - Rate limits and body caps run in the worker before the room, so a room is never the first line against abuse.
 
 ## Performance and limits
 
 - Budgets (`document-room-store.test.ts`, node:sqlite as the room's SQLite, CPU time): a 1 MB tab saves under 60 ms
   and reads under 30 ms; a tab placing 500 images saves under 15 ms; a 200-tab outline under 10 ms. Sending a 1 MB
-  tab to 20 holders under 2 s in total joins them with shared tabs (B4).
+  tab to 20 holders and taking it in there under 2 s in total.
 - A drain writes at most `DRAIN_TABS` tab units, each one D1 batch; at most `PUSH_CONCURRENCY` in flight; subrequests
   per drain stay under 60, inside the Durable Object budget.
 - Durable Object SQLite: 2 MB per row or value (the tab cap), 10 GB per object; D1 statement limits (100 bound
@@ -351,21 +368,24 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 
 ## Observability
 
-| Fingerprint                                                             | When                    |
-| ----------------------------------------------------------------------- | ----------------------- |
-| `[room-route] failed id=<id> path=<path> error=<name>`                  | a routed request throws |
-| `[room-schema] migrated id=<id> from=<n> to=<m>`                        | a schema step runs      |
-| `[outbox] drained id=<id> units=<n> keys=<k> more=<bool>`               | every drain             |
-| `[outbox] unit failed id=<id> unit=<summary\|tab:<tabId>> error`        | a unit's batch fails    |
-| `[tab-shares] sent id=<id> to=<doc> kind=<k> answer=<a>`                | each share message (B4) |
-| `[tab-shares] holder gone id=<id> tab=<tab> holder=<doc>`               | holder `gone` (B4)      |
-| `[tab-link] refused { documentId, tabId, reason: shared_tabs_pending }` | link to another's tab   |
-| `[room-purge] did not reach the room { documentId, error }`             | a room purge failed     |
-| `[room-purge] purged { rooms, unreached }` / `[room] purged`            | each purge call / room  |
-| `[documents] create discarded { documentId, why }`                      | a create purged again   |
-| `[documents] create seed refused { documentId, status }`                | a seed store refused    |
-| `[documents] copy import failed { sourceId, newId, error }`             | a copy's import threw   |
-| `[room-upkeep] id=<id> changesets=<n> sheets=<m>`                       | each upkeep run (B5)    |
+| Fingerprint                                                            | When                    |
+| ---------------------------------------------------------------------- | ----------------------- |
+| `[room-route] failed id=<id> path=<path> error=<name>`                 | a routed request throws |
+| `[room-schema] migrated id=<id> from=<n> to=<m>`                       | a schema step runs      |
+| `[outbox] drained id=<id> units=<n> keys=<k> more=<bool>`              | every drain             |
+| `[outbox] unit failed id=<id> unit=<summary\|tab:<tabId>> error`       | a unit's batch fails    |
+| `[tab-shares] sent id=<id> to=<doc> kind=<k> answer=<a>`               | each share message sent |
+| `[tab-shares] send failed id=<id> to=<doc> kind=<k> error`             | a share send threw      |
+| `[tab-shares] holder gone id=<id> tab=<tab> holder=<doc>`              | holder `gone`           |
+| `[tab-link] joined { documentId, tabId, from, holders }`               | a link joined a tab     |
+| `[tab-link] refused { documentId, tabId, from, reason: tab_id_taken }` | 409 on a link           |
+| `[tab-link] join not recorded { documentId, tabId, from, error }`      | `shareJoined` failed    |
+| `[room-purge] did not reach the room { documentId, error }`            | a room purge failed     |
+| `[room-purge] purged { rooms, unreached }` / `[room] purged`           | each purge call / room  |
+| `[documents] create discarded { documentId, why }`                     | a create purged again   |
+| `[documents] create seed refused { documentId, status }`               | a seed store refused    |
+| `[documents] copy import failed { sourceId, newId, error }`            | a copy's import threw   |
+| `[room-upkeep] id=<id> changesets=<n> sheets=<m>`                      | each upkeep run (B5)    |
 
 ## Testing
 
@@ -383,8 +403,9 @@ Room schema step 1 (`DOCUMENT_SCHEMA_STEPS[0]`), columns as in D1 today unless n
 | `askRoom` answers 503 `room_unavailable` on a throw               | `document-client.test.ts`, `document-route.test.ts`                          |
 | Bind before the handover; mismatch refused; handover gate         | `document-room-handover.test.ts`                                             |
 | Access checks unchanged per route                                 | existing route tests, run through the room harness (`test-document-room.ts`) |
-| Shared tabs: join, write, later wins, no echo, leave, gone, purge | `tab-shares.test.ts` (B4, not built yet)                                     |
-| Link route answers 400/403/404/200                                | `tab-link-route.test.ts` (B4, not built yet)                                 |
+| Shared tabs: join, write, later wins, no echo, leave, gone, purge | `tab-shares.test.ts`                                                         |
+| Link route answers 400/403/404/409/200                            | `tab-link-route.test.ts`                                                     |
+| The move lists D1's other holders                                 | `content-move.test.ts` "moves a tab two documents hold"                      |
 | G3 tombstoned id answers 404                                      | `room-purge.test.ts` (B5, not built yet)                                     |
 | Upkeep deletes old changesets and sheets                          | `document-room-upkeep.test.ts` (B5, not built yet)                           |
 | Budgets                                                           | `document-room-store.test.ts`                                                |
@@ -420,8 +441,8 @@ The harnesses, neither a `.test.ts` file:
 | `SQLITE_ROW_MAX_BYTES`      | 2,000,000  | Durable Object SQLite limit                  | fixed                |
 | `SQLITE_ROW_HEADROOM_BYTES` | 8,192      | the tab row's other columns and header       | fixed                |
 
-`SHARE_DRAIN_MAX` (B4), `ROOM_PURGE_MAX_PER_RUN`, `ROOM_PURGE_RETRY_MS` and `UPKEEP_INTERVAL_MS` (B5) are not in the code
-yet; the rest are, the drain's pace in `room-content.ts` and its bounds in `document-outbox.ts`.
+`ROOM_PURGE_MAX_PER_RUN`, `ROOM_PURGE_RETRY_MS` and `UPKEEP_INTERVAL_MS` (B5) are not in the code yet; the rest are,
+the drain's pace in `room-content.ts`, its bounds in `document-outbox.ts` and `SHARE_DRAIN_MAX` in `tab-shares.ts`.
 `SQLITE_ROW_MAX_BYTES` and `SQLITE_ROW_HEADROOM_BYTES` live in `@livedoc/api-schema` (`tab-size.ts`); `MAX_TAB_BYTES`
 is their difference, 1,991,808.
 `wrangler.toml`: the class migration is the move blueprint's; no new binding here.

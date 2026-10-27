@@ -222,21 +222,16 @@ export function useTabActions(deps: TabActionsDeps) {
     track('Tab', 'Renamed');
   };
 
-  // Link the active tab into another of the user's documents (docs/specs/006-document/tab-document-many-to-many.md).
-  // Goes through POST /api/documents/<target>/tabs/<tabId>/link so the
-  // server inserts one `document_tabs` row pointing at the existing
-  // tab body. The previous implementation cloned the tab into a fresh
-  // row with a new id; that duplicated the content (edits on either
-  // side stayed siloed) and the menu label promised the linking
-  // behaviour the user actually wanted. After this call, edits to
-  // the tab from either document write to the same `tabs.data` row.
+  // Share the active tab into another of the user's documents (docs/specs/006-document/tab-document-many-to-many.md):
+  // POST /api/documents/<target>/tabs/<tabId>/link with this document as `from`. The target then holds the same
+  // tab, and an edit to it in either document reaches the other.
   const linkActiveTabTo = async (targetDocumentId: string) => {
     const source = tabs.find((t) => t.id === activeId);
-    if (!source) return;
+    if (!source || !documentId) return;
     const target =
       toastName(documentList.find((d) => d.id === targetDocumentId)?.name) ?? 'that document';
     try {
-      await apiLinkTab(ownerId, targetDocumentId, source.id);
+      await apiLinkTab(ownerId, targetDocumentId, source.id, documentId);
       toast.success(`${toastName(source.name) ?? 'Tab'} added to ${target}`);
       track('Tab', 'Linked');
     } catch {

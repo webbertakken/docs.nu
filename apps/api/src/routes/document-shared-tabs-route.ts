@@ -3,7 +3,8 @@
 // notice"): how many of the document's tabs are also in other documents, and how
 // many documents, so the user hears that those tabs stay before they act.
 
-import { getDocument, sharedTabsSummary } from '../db';
+import { getDocument } from '../db';
+import { sharedTabsSummary } from '../document-room/tab-shares';
 import { forbidden, json } from '../responses';
 import {
   mayDeleteDocument,

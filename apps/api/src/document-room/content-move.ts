@@ -131,11 +131,26 @@ async function readTabs(env: DocumentEnv, documentId: string): Promise<Record<st
   return rows;
 }
 
+// A tab D1 links into this document and another: once both have moved, each room holds its own copy and lists the
+// other as a holder (tab-shares.ts).
+type TabHolder = { tab_id: string; document_id: string };
+
+async function readHolders(env: DocumentEnv, documentId: string): Promise<TabHolder[]> {
+  const res = await env.DB.prepare(
+    `SELECT tab_id, document_id FROM document_tabs
+      WHERE tab_id IN (SELECT tab_id FROM document_tabs WHERE document_id = ?1) AND document_id <> ?1
+      ORDER BY tab_id, document_id`,
+  )
+    .bind(documentId)
+    .all<TabHolder>();
+  return res.results ?? [];
+}
+
 // Every row D1 holds for the document, or null when D1 has no `documents` row for it (G1).
 async function readD1(
   env: DocumentEnv,
   documentId: string,
-): Promise<{ head: DocumentHead; rows: MovableRows } | null> {
+): Promise<{ head: DocumentHead; rows: MovableRows; holders: TabHolder[] } | null> {
   const head = await env.DB.prepare(
     `SELECT presentation, item_types, item_types_rev, items_rev, items_next_key, saved_at, created_at
        FROM documents WHERE id = ?1`,
@@ -151,7 +166,7 @@ async function readD1(
   selects.forEach((s, i) => {
     rows[s.table] = (answers[i]?.results ?? []) as Record<string, unknown>[];
   });
-  return { head, rows };
+  return { head, rows, holders: await readHolders(env, documentId) };
 }
 
 // ---------- Writing the room ------------------------------------------------------------------------------
@@ -290,7 +305,7 @@ export async function moveIntoRoom(
   }
   const d1Tabs = d1.tabs.length;
   const expected = canonicalJson(d1);
-  const { head, rows } = read;
+  const { head, rows, holders } = read;
   let outcome: MoveOutcome;
   try {
     room.ensureSchema();
@@ -315,6 +330,13 @@ export async function moveIntoRoom(
       );
       insertRows(room.db, rows);
       deriveRows(room.db, room.env, documentId, rows.tabs ?? []);
+      for (const h of holders) {
+        room.db.execute(
+          room.db
+            .prepare('INSERT INTO tab_shares (tab_id, document_id) VALUES (?, ?)')
+            .bind(h.tab_id, h.document_id),
+        );
+      }
       const back = readRoom(room.db, documentId);
       const roomTabs = back.tabs.length;
       // Equal canonical texts hash equally, so the room's hash is the D1 hash; a difference throws, undoing it all.

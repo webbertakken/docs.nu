@@ -53,6 +53,7 @@ import type { ContentSummary } from '../db/content-summary';
 import type { DocumentCopy, DocumentOutline } from './document-content';
 import type { CreateOutcome, DocumentSeed } from './document-create';
 import type { RouteIdentity } from './document-route';
+import type { ShareAnswer, ShareMessage, SharedTabCopy } from './tab-shares';
 import {
   newSessionAttachment,
   readSessionAttachment,
@@ -590,10 +591,12 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     console.info('[room-access] closed', { match: close.match, closed });
   }
 
-  // The document is gone for good: end every session, then drop everything stored here, which includes the
-  // collaboration ledger's comment, idea and answer text, the order state, the poll, the baton and the alarm.
-  // The ledger's queued writes land first, so none of them can re-create a key after the wipe.
+  // The document is gone for good: tell the other holders of its shared tabs it left, end every session, then drop
+  // everything stored here, which includes the content, the collaboration ledger's comment, idea and answer text,
+  // the order state, the poll, the baton and the alarm. The ledger's queued writes land first, so none of them can
+  // re-create a key after the wipe.
   private async purge(): Promise<void> {
+    await this.content.leaveShares();
     this.closeSockets(() => [DOCUMENT_TRASHED_CLOSE, 'document-purged']);
     this.opLog = [];
     await this.ledger.settled();
@@ -1177,6 +1180,34 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     identity: RouteIdentity,
   ): Promise<Response> {
     return this.answer(documentId, (rpc) => rpc.respondToForm(documentId, request, identity));
+  }
+
+  // A tab shared between documents (tab-shares.ts): a joining document's copy, the join recorded, and what another
+  // holder sends. A room that holds no document answers every message `gone`.
+  async sharedTabCopy(documentId: string, tabId: string): Promise<SharedTabCopy | null> {
+    return (await this.content.rpc(documentId)).sharedTabCopy(documentId, tabId);
+  }
+
+  async shareJoined(
+    documentId: string,
+    tabId: string,
+    member: string,
+    seenUpdatedAt: number,
+  ): Promise<boolean> {
+    return (await this.content.rpc(documentId)).shareJoined(
+      documentId,
+      tabId,
+      member,
+      seenUpdatedAt,
+    );
+  }
+
+  async receiveShares(
+    documentId: string,
+    from: string,
+    messages: ShareMessage[],
+  ): Promise<ShareAnswer[]> {
+    return (await this.content.rpc(documentId)).receiveShares(documentId, from, messages);
   }
 
   // The sweep's move (docs/specs/006-document/blueprints/document-storage-move.md "The sweep"): the room's move

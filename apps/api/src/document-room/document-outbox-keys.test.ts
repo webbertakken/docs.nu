@@ -152,4 +152,14 @@ describe('the outbox triggers', () => {
     expect(again).toBeGreaterThan(first);
     expect(keys().filter((k) => k === 'd:tab:t')).toHaveLength(1);
   });
+
+  it('never hands a re-keyed key the id it had, even when it held the largest', () => {
+    db.exec('DELETE FROM outbox');
+    db.exec("UPDATE tabs SET name = 'Once' WHERE id = 't'");
+    const ids = () =>
+      (db.prepare('SELECT id FROM outbox ORDER BY id').all() as { id: number }[]).map((r) => r.id);
+    const before = ids();
+    db.exec("UPDATE tabs SET name = 'Twice' WHERE id = 't'");
+    expect(Math.min(...ids())).toBeGreaterThan(Math.max(...before));
+  });
 });

@@ -184,7 +184,7 @@ describe('a move', () => {
     expect(count(sql, 'document')).toBe(1);
   });
 
-  it('moves a tab two documents hold into both rooms', async () => {
+  it('moves a tab two documents hold into both rooms, each listing the other as a holder', async () => {
     const { d1, roomOf } = setup();
     seedD1(d1);
     d1.sql
@@ -197,6 +197,10 @@ describe('a move', () => {
     expect(two.sql.prepare('SELECT id, name FROM tabs').all()).toEqual([
       { id: 'doc-1-t1', name: 'Board' },
     ]);
+    const holders = (sql: DatabaseSync) =>
+      sql.prepare('SELECT tab_id, document_id FROM tab_shares').all();
+    expect(holders(one.sql)).toEqual([{ tab_id: 'doc-1-t1', document_id: 'doc-2' }]);
+    expect(holders(two.sql)).toEqual([{ tab_id: 'doc-1-t1', document_id: D }]);
   });
 
   it('answers a repeat from the stored move and heals a lost record', async () => {
