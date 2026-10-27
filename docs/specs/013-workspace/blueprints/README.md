@@ -2,7 +2,7 @@
 
 Follow the references below only as needed; never upfront.
 
-- ./trash.md - when implementing or changing the Trash: soft delete, restore, purge, the local Trash, the doors' 410
+- ./trash.md - when implementing or changing the Trash: soft delete, restore, purge and the room's purge, the local Trash, the doors' 410
 - ./document-placement.md - when changing where a create files a document: the placement resolver, its rejections, its callers
 - ./default-folders.md - when implementing or changing default folders: the table, the routes, the intent, the resolver step, the menus, marker, wizard and Settings surfaces
 - ./folder-delete.md - when changing what deleting a folder does: contents move up to the parent, in one batch
@@ -11,7 +11,7 @@ Follow the references below only as needed; never upfront.
 - ./explorer-filters.md - when implementing or changing Explorer filters: the lens grammar, matching, suggestions, view models, `q`
 - ./content-search.md - when implementing or changing content search: the D1 trigram index, its writes from the room's drain, the access-filtered read, ranking, snippets and the Explorer's merge
 - ./explorer-structure.md - when implementing or changing the Explorer sidebar: layout rules, rows, ARIA tree keyboard hook
-- ./explorer-details-view.md - when implementing or changing the Details view: `tab_stats` and its writers, `DocumentSummary.stats`, the backfill, the preview hint, the table and its sort
+- ./explorer-details-view.md - when implementing or changing the Details view: the room's `tab_stats` and its writers, `DocumentSummary.stats` from the content summary, the preview hint, the table and its sort
 - ./explorer-home.md - when changing Home's data: recording opens, Jump Back In's Within reach set, the `/api/home` read and its wire
 - ./explorer-home-view.md - when changing the Home page: its route, Jump Back In (grid, phone strip, See More), What Happened entries, local opens
 - ./share-roles.md - when implementing or changing access levels (Viewer, Participant, Editor): the participant content rule, the room's participant write path and adder keys, the Plan and Sheet doors, editor capabilities, the Share dialog and role pill
@@ -19,4 +19,4 @@ Follow the references below only as needed; never upfront.
 - ./team-invites.md - when changing team invites: the decline token and its open doors, rejected rows, the reminder and expiry sweep, migration 0095
 - ./DEFAULTS.md - when a workspace blueprint applies a default the spec leaves open
 - ./COMPLETENESS.md - when checking which completeness categories a workspace blueprint covers
-- ./empty-document-cleanup.md - when implementing or changing the daily move of empty documents to the Trash: the sweep, the trash reason, the restore restart
+- ./empty-document-cleanup.md - when implementing or changing the daily move of empty documents to the Trash: the sweep over the content summary, the trash reason, the restore restart
