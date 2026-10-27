@@ -17,7 +17,7 @@ Scope, by file. "(planned)" marks a file that does not exist yet; "new" a symbol
 
 | File                                                                               | Role                                                                                                                                                  |
 | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/text-merge/` (planned, `@livedoc/text-merge`)                        | Pure: `mergeText`, `editsBetween`, `editDistance`, `nearestBase`, `similarity`. Shared by the CLI now and `sync --resolve` and the branch merge later |
+| `packages/text-merge/` (planned, `@livedoc/text-merge`)                            | Pure: `mergeText`, `editsBetween`, `editDistance`, `nearestBase`, `similarity`. Shared by the CLI now and `sync --resolve` and the branch merge later |
 | `apps/cli/src/link/link-file.ts`                                                   | `LinkFile.git` (new: `binding`, `branch`, `commit`), `LinkFile.mirror.ignore` (new); `[git]` and `ignore` parsed and validated                        |
 | `apps/cli/src/link/binding.ts` (planned)                                           | `LinkBinding`, `bindingOf(io, link)`: `local-copy` (with why) or `branches`                                                                           |
 | `apps/cli/src/link/native/records.ts` (planned)                                    | `RECORDS_DIR`, `SyncRecord`, `recordPathOf`, `recordText`, `readRecords`, `writeRecord`, `removeRecord`                                               |
@@ -507,10 +507,10 @@ asserts the merge.
 
 ## Assets and external resources
 
-| Dependency   | Version | Licence | Where                              | Why                                         |
-| ------------ | ------- | ------- | ---------------------------------- | ------------------------------------------- |
+| Dependency   | Version | Licence | Where                          | Why                                         |
+| ------------ | ------- | ------- | ------------------------------ | ------------------------------------------- |
 | `node-diff3` | 3.2.1   | MIT     | `@livedoc/text-merge`, bundled | Three-way merge and diffs over token arrays |
-| `picomatch`  | 4.0.7   | MIT     | `apps/cli`, bundled                | `[mirror] ignore` globs (LC7)               |
+| `picomatch`  | 4.0.7   | MIT     | `apps/cli`, bundled            | `[mirror] ignore` globs (LC7)               |
 
 Both are the latest at the time of writing and confirmed again when added. No other asset.
 
