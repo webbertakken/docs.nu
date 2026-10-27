@@ -1,3 +1,4 @@
+import { isValidElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
@@ -30,16 +31,24 @@ describe('cardSubtitle', () => {
 // The share card every link preview shows (docs/specs/004-interface-design/brand-mark.md "Wordmark"; the purpose,
 // docs/specs/001-project-vision/purpose.md): the LiveDoc wordmark and LiveDoc's words, never the old product's.
 describe('renderSocialCard', () => {
-  const text = (html: string) => html.replace(/<[^>]+>/g, '').replace(/&nbsp;|\u00a0/g, ' ');
-  const html = renderToStaticMarkup(renderSocialCard());
+  // The card's text, read from its element tree (no markup to strip), with non-breaking spaces as spaces.
+  const textOf = (node: unknown): string => {
+    if (typeof node === 'string' || typeof node === 'number') return String(node);
+    if (Array.isArray(node)) return node.map(textOf).join('');
+    if (isValidElement<{ children?: unknown }>(node)) return textOf(node.props.children);
+    return '';
+  };
+  const card = renderSocialCard();
+  const html = renderToStaticMarkup(card);
+  const text = () => textOf(card).replace(/\u00a0/g, ' ');
 
   it('sets the wordmark as Live in the accent, then Doc', () => {
     expect(html).toMatch(/<span style="color:#0284c7">Live<\/span><span>Doc<\/span>/);
   });
 
   it('speaks of documents, not diagrams or drawing', () => {
-    expect(text(html)).toContain('Documents together, live.');
-    expect(text(html)).toContain('No sign-up. Open the link and start.');
-    expect(text(html)).not.toMatch(/diagram|drawing/i);
+    expect(text()).toContain('Documents together, live.');
+    expect(text()).toContain('No sign-up. Open the link and start.');
+    expect(text()).not.toMatch(/diagram|drawing/i);
   });
 });
