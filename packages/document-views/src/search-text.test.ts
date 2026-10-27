@@ -76,3 +76,20 @@ describe('tabSearchText', () => {
     expect(tabSearchText({ name: '', elements: 'nope', articles: 3, form: null })).toBe('');
   });
 });
+
+describe('tabSearchText on odd article and form parts', () => {
+  it('reads a run without text as nothing and skips options that are not text', () => {
+    const tab = {
+      name: 'T',
+      elements: [],
+      articles: {
+        f: { blocks: [{ id: 'b', type: 'paragraph', runs: [{ b: true }, { text: 'kept' }] }] },
+      },
+      form: {
+        heading: 'H',
+        sections: [{ title: 'S', questions: [{ prompt: 'P', options: [3, 'Yes'] }] }],
+      },
+    };
+    expect(tabSearchText(tab).split('\n')).toEqual(['T', 'kept', 'H', 'S', 'P', 'Yes']);
+  });
+});

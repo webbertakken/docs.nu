@@ -20,3 +20,17 @@ describe('itemsSearchText', () => {
     ).toBe('Fix login\nUsers see a blank page\nOn Safari\nRepro on iOS');
   });
 });
+
+describe('itemsSearchText on odd fields', () => {
+  it('skips rich runs and comments that are not records', () => {
+    expect(
+      itemsSearchText([
+        item({
+          title: 'T',
+          descriptionRich: ['x', { text: 'ok' }, { b: true }],
+          comments: { comments: [3, { text: 'c' }] },
+        }),
+      ]),
+    ).toBe('T\nok\nc');
+  });
+});
