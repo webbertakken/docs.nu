@@ -173,4 +173,4 @@ CREATE VIRTUAL TABLE content_search_fts USING fts5(
 
 ## Defaults ledger
 
-See [DEFAULTS.md](DEFAULTS.md) rows D171 to D176.
+See [DEFAULTS.md](DEFAULTS.md) rows D179 to D184.
