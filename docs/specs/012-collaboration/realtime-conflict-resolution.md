@@ -110,7 +110,7 @@ that let `viewport` through.
 - The DO keeps a bounded in-memory op log. On reconnect a client sends
   `{ epoch, lastSeq }`; the DO replays the delta or answers `resync: true` when
   it can't bridge the gap (behind the trimmed log floor, or a stale epoch), and
-  the client re-fetches its loaded tabs from D1 in place (`useRoomResync`), with
+  the client re-fetches its loaded tabs from the room's store in place (`useRoomResync`), with
   a `RealtimeResync` telemetry ping ([Resync without reloading the page](resync-without-reload.md)).
 - `epoch` and `seq` are persisted in Durable Object storage and restored on
   every wake, so hibernation does not strand a reconnecting client. The op log
@@ -147,10 +147,10 @@ that let `viewport` through.
   600 ms debounce cancelled the local save outright, and the stale baseline
   made the next save re-broadcast peers' elements in their older form.
 
-**D1 stays the system of record.** Tab content is persisted by clients (each
+**The room's store is the system of record** ([Document storage](../006-document/document-storage.md)). Tab content is persisted by clients (each
 editor PUTs its whole copy of a changed tab); the op log is a warm catch-up
 cache, not a second writer. Two later additions put the room on the
-persistence path without making it hold the document: the tab PUT merges the
+persistence path before the content moved into it: the tab PUT merges the
 room's collaboration ledger in before writing
 ([Collaboration race hardening](collab-race-hardening.md) phase 3), and Q&A board writes are performed
 by the room itself, one at a time ([Q&A board](qa-board.md)).
@@ -193,10 +193,10 @@ the editor until a reload, and nothing says so. The client therefore checks its 
    undoing takes back your own edits alone, never a collaborator's element or a
    tab they added, and the resulting element ops are broadcast as yours. A
    resync's re-read content replaces only what is on screen.
-2. **D1 is the system of record.** The room holds ordering and collaboration
-   state (epoch + seq, the op log, the collaboration ledger, the live poll, the
-   facilitator baton), never a copy of the document. REST reads, exports, and
-   offline durability read D1.
+2. **The room's SQLite is the system of record.** The room holds the document's content in its SQLite
+   ([Document storage](../006-document/document-storage.md)) beside its ordering and collaboration state (epoch +
+   seq, the op log, the collaboration ledger, the live poll, the facilitator baton). REST reads, exports and
+   offline durability read the stored tabs, never the room's memory.
 3. **The selection lock stays advisory.** The [Live app](../007-editor/live-app.md) lock soft-locks a
    selected element for peers on the client. It makes same-element concurrent
    editing rare, not impossible: the room does not enforce it between people.
@@ -223,7 +223,7 @@ It was dropped because the cost outweighed the benefit:
   library (~60 KB gzipped) that shipped in the editor bundle regardless of use,
   added a permanent second sync path to maintain alongside the element-op path,
   and made the room hold a live copy of the whole document in memory: a second
-  copy beside D1, which the room otherwise never holds.
+  copy beside the stored tabs, which the room otherwise never holds in memory.
 - **It was unverified.** It was never exercised with two live clients, so
   keeping it meant carrying risk that a future change flips it on and corrupts
   documents.
@@ -248,7 +248,7 @@ verified end-to-end and turned on properly, not carried as dormant code.
   rewrites comment authors in every mutation it relays and keeps collaboration
   state in Durable Object storage: the per-element ledger
   (`room-ledger-store.ts`), the live poll (`room-live-poll.ts`) and the
-  facilitator baton (`facilitator.ts`). It writes D1 for Q&A boards
+  facilitator baton (`facilitator.ts`). It writes the stored tab for Q&A boards
   (`handleQaWrite` → `qa-board-write.ts`). The full description is
   [API app → Realtime model](../015-api/api.md#realtime-model).
 - `apps/api/src/room-client.ts` — the worker's calls into the room: the ledger
