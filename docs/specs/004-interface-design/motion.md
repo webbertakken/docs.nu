@@ -169,7 +169,7 @@ Three kinds of content motion were compared against the 250ms budget, and the op
   250ms, a story becomes a blip.
 - **The logo's motions** keep their own pace ([Brand mark](./brand-mark.md)). The assembly takes about 1.7
   seconds once per page load; the stack fans open over 700ms, holds while the pointer stays and closes over 450ms;
-  the wordmark's gleam crosses once in 900ms; a press takes 90ms in and 300ms back; the homepage's every-kind cycle
+  the wordmark's gleam crosses once in 900ms; a press takes 90ms in and 160ms back; the homepage's every-kind cycle
   shows each kind for 1.6 seconds. Squeezed into 150ms, each becomes a twitch. The assembly and the every-kind cycle
   are content stylesheets (`packages/ui/src/brand-motion.css`, `apps/marketing/app/hero-kinds.css`); the fan and the
   press run in script only while moving. Reduced motion holds them still.

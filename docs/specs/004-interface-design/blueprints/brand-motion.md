@@ -40,13 +40,13 @@ each `[data-sheet]` as `sheetTransform(step, fan)`; nothing under reduced motion
 Web Animations on the logo's own elements, started by `pointerdown` (not touch-cancelled), or Enter or Space down,
 ended by `pointerup`, `pointerleave`, `pointercancel`, `blur` or the key coming up:
 
-| Element              | Pressed                  | In            | Out            |
-| -------------------- | ------------------------ | ------------- | -------------- |
-| `sheet` motion group | 0.2 step toward the page | 90ms ease-out | 300ms ease-out |
-| `plain` motion group | 0.1 step toward the page | 90ms ease-out | 300ms ease-out |
-| `[data-mark-art]`    | scale 0.97 about centre  | 90ms ease-out | 300ms ease-out |
+| Element              | Pressed                   | In            | Out            |
+| -------------------- | ------------------------- | ------------- | -------------- |
+| `sheet` motion group | 0.15 step toward the page | 90ms ease-out | 160ms ease-out |
+| `plain` motion group | 0.07 step toward the page | 90ms ease-out | 160ms ease-out |
+| `[data-mark-art]`    | scale 0.97 about centre   | 90ms ease-out | 160ms ease-out |
 
-No overshoot. Reduced motion: the art's opacity dips to 0.8 and back, 150ms each way.
+No overshoot (the gallery's 09b). Reduced motion: the art's opacity dips to 0.85 and back, 100ms each way.
 
 ## Every kind (`apps/marketing/components/HeroKinds.tsx`, `apps/marketing/app/hero-kinds.css`)
 

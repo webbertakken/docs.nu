@@ -4,18 +4,18 @@ import { STACK_STEP, ISO_COS } from './brand-mark-geometry';
 // The logo's press (docs/specs/004-interface-design/blueprints/brand-motion.md "Press"): the sheets draw a little
 // toward the page and the art a touch smaller, then ease back. Small and quick, no overshoot.
 export const BRAND_PRESS_IN_MS = 90;
-export const BRAND_PRESS_OUT_MS = 300;
+export const BRAND_PRESS_OUT_MS = 160;
 const PRESS_SCALE = 0.97;
-const REDUCED_PRESS_OPACITY = 0.8;
-const REDUCED_PRESS_MS = 150;
+const REDUCED_PRESS_OPACITY = 0.85;
+const REDUCED_PRESS_MS = 100;
 
 // A share of one step toward the page, in screen units.
 const toward = (share: number) =>
   `translate(${(-share * STACK_STEP.along * ISO_COS).toFixed(2)}px, ${(share * (STACK_STEP.along / 2 + STACK_STEP.rise)).toFixed(2)}px)`;
 
 const PRESSED: readonly [string, string][] = [
-  ['[data-sheet-motion="sheet"]', toward(0.2)],
-  ['[data-sheet-motion="plain"]', toward(0.1)],
+  ['[data-sheet-motion="sheet"]', toward(0.15)],
+  ['[data-sheet-motion="plain"]', toward(0.07)],
   ['[data-mark-art]', `scale(${PRESS_SCALE})`],
 ];
 

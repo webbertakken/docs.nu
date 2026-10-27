@@ -308,7 +308,7 @@ describe('the press', () => {
     fireEvent.pointerUp(link);
     const released = calls.slice(3);
     expect(released).toHaveLength(3);
-    expect(released.every((c) => c.options.duration === 300)).toBe(true);
+    expect(released.every((c) => c.options.duration === 160)).toBe(true);
     // No overshoot: every release ends where the mark rests.
     for (const c of released) expect(c.frames.at(-1)).toMatchObject({ transform: 'none' });
   });
@@ -320,7 +320,7 @@ describe('the press', () => {
     const { container } = render(<Brand href="/somewhere-else/" />);
     fireEvent.pointerDown(container.querySelector('a')!, { pointerType: 'mouse', button: 0 });
     expect(calls).toHaveLength(1);
-    expect(calls[0]!.frames.at(-1)).toMatchObject({ opacity: 0.8 });
+    expect(calls[0]!.frames.at(-1)).toMatchObject({ opacity: 0.85 });
   });
 
   it('presses from the keyboard with Enter or Space', async () => {
