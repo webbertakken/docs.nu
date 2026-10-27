@@ -12,7 +12,8 @@
     "./seo": "./src/seo.ts",
     "./relative-time": "./src/relative-time.ts",
     "./trusted-types": "./src/trusted-types.ts",
-    "./hero-band.css": "./hero-band.css"
+    "./hero-band.css": "./hero-band.css",
+    "./brand-motion.css": "./src/brand-motion.css"
   },
   "scripts": {
     "lint": "oxlint",

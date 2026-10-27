@@ -15,7 +15,7 @@ Before changesets an agent wrote a tab with the editor's whole-tab `PUT` ([API a
 persistence boundary"). That write never reached the room, so:
 
 - **A person never saw the agent's edit** until they reloaded, and their next autosave of the tab, built from a copy
-  without it, erased it from D1.
+  without it, erased it from the stored tab.
 - **An agent erased a person's edits.** The MCP's `update_document` read the tab, waited while the model thought,
   then wrote the whole tab back over anything saved in between.
 - **A personal document had no room**, on the premise that it has one writer. An agent is a second writer.
@@ -61,10 +61,12 @@ says what it has seen.
 4. **Compile.** The shared engine resolves selectors, applies the operations to the stored tab, normalises and lays
    out what they touched ([Edit operations](edit-operations.md)), and validates the result with `isValidTab`.
 5. **Write** the tab with compare-and-swap on `rev`. A lost race repeats steps 2 to 5 once, then answers `409`.
-6. **Record** the changeset in `agent_changesets` (D1) with its element ops and inverse.
+6. **Record** the changeset in `agent_changesets`, in the document's room with the tab, in the same transaction
+   ([Document storage](../006-document/document-storage.md)), with its element ops and inverse.
 7. **Relay** it to the submitting document's room as one sequenced `changeset` op. A relay failure is logged and
-   never fails the write: D1 already holds it, and step 8 keeps it there. A tab linked into other documents is not
-   relayed to their rooms; step 8 keeps it there too.
+   never fails the write: the room's store already holds it, and step 8 keeps it there. A tab shared with other
+   documents reaches them as a body send ([Tab ↔ document many-to-many](../006-document/tab-document-many-to-many.md)),
+   not as a changeset.
 8. **Merge on save.** An editor's tab `PUT` carries `X-Changeset-Seen: <rev>`, the highest changeset revision it has
    applied. The api re-applies every recorded changeset after that revision to the incoming tab before writing,
    element by element:
@@ -76,7 +78,7 @@ says what it has seen.
      A save without the header (a bundle older than this spec) is treated as having seen nothing newer than
      `CHANGESET_MERGE_WINDOW` ago.
 
-Because the merge reads D1 rather than the room, a changeset survives a dropped relay, a sleeping room and an
+Because the merge reads the stored changesets rather than the room's relay, a changeset survives a dropped relay, a sleeping room and an
 editor that was offline when it landed.
 
 ## What the room does
@@ -163,7 +165,8 @@ Plan tab.
   and listed as `kept`; the rest are reverted.
 - The editor's toast offers **Undo**, which is this revert. Personal Ctrl+Z never reverts an agent's changeset
   ([Realtime conflict resolution](../012-collaboration/realtime-conflict-resolution.md), locked decision 1).
-- A changeset can be reverted while its record exists: `CHANGESET_RETENTION_DAYS` after it landed.
+- A changeset can be reverted while its record exists: `CHANGESET_RETENTION_DAYS` after it landed; the room's own
+  daily upkeep deletes older ones.
 - Anyone with edit access to the tab may revert.
 - Reverting a changeset that created a tab empties the tab and keeps it. Reverting one twice keeps every element
   (each changed since) and writes nothing.
@@ -212,7 +215,7 @@ erases anything:
 | `CHANGESET_REVEAL_MS`         | 2000       | Long enough to notice, short enough not to clutter                       |
 | `CHANGESET_TOAST_COALESCE_MS` | 10000      | One toast per burst of work                                              |
 
-A changeset's element ops, inverse and result lines are stored beside its record, one D1 row each, so only the tab
+A changeset's element ops, inverse and result lines are stored beside its record, one row each in the room, so only the tab
 cap bounds a changeset.
 
 Changesets count against the token's write rate limit ([Public API and API tokens](../015-api/public-api-and-tokens.md) §3.5).

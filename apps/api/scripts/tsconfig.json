@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // The operator's scripts run in Node, not workerd: Node's types only, so `process` is Node's.
+    "types": ["node"],
+    "lib": ["ES2024"],
+    "target": "ES2024",
+    "noEmit": true
+  },
+  "include": ["./**/*.ts"]
+}

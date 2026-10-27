@@ -1,0 +1,94 @@
+import { DatabaseSync } from 'node:sqlite';
+import { describe, expect, it } from 'vitest';
+import {
+  DOCUMENT_SCHEMA_STEPS,
+  DOCUMENT_SCHEMA_VERSION,
+  hasDocumentSchema,
+  migrateDocumentSchema,
+} from './document-schema';
+
+function room() {
+  const db = new DatabaseSync(':memory:');
+  db.exec('PRAGMA foreign_keys = ON');
+  const exec = (q: string) => {
+    db.exec(q);
+    return { toArray: () => [] as Record<string, unknown>[] };
+  };
+  const read = (q: string) => ({ toArray: () => db.prepare(q).all() as Record<string, unknown>[] });
+  const run = (q: string) => (/^\s*SELECT/i.test(q) ? read(q) : exec(q));
+  return { db, run };
+}
+
+const tables = (db: DatabaseSync) =>
+  (
+    db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as {
+      name: string;
+    }[]
+  ).map((r) => r.name);
+
+describe('the room schema', () => {
+  it('starts with nothing, so a stray id stores nothing', () => {
+    const { db, run } = room();
+    expect(hasDocumentSchema(run)).toBe(false);
+    expect(tables(db)).toEqual([]);
+  });
+
+  it('makes every content table and records its version', () => {
+    const { db, run } = room();
+    migrateDocumentSchema(run);
+    expect(hasDocumentSchema(run)).toBe(true);
+    expect(tables(db)).toEqual(
+      expect.arrayContaining([
+        'document',
+        'tabs',
+        'document_tabs',
+        'tab_stats',
+        'image_refs',
+        'agent_changesets',
+        'agent_changeset_parts',
+        'items',
+        'plan_board_statuses',
+        'sheets',
+        'sheet_cells',
+        'sheet_refs',
+      ]),
+    );
+    expect(db.prepare('SELECT version FROM _document_schema').get()).toEqual({
+      version: DOCUMENT_SCHEMA_VERSION,
+    });
+    expect(DOCUMENT_SCHEMA_VERSION).toBe(DOCUMENT_SCHEMA_STEPS.length);
+  });
+
+  it('is idempotent', () => {
+    const { db, run } = room();
+    migrateDocumentSchema(run);
+    migrateDocumentSchema(run);
+    expect(
+      (db.prepare('SELECT count(*) AS n FROM _document_schema').get() as { n: number }).n,
+    ).toBe(1);
+  });
+
+  it('refuses a body write that skips a revision', () => {
+    const { db, run } = room();
+    migrateDocumentSchema(run);
+    db.exec("INSERT INTO tabs (id, name, data, updated_at, rev) VALUES ('t', 'T', '{}', 1, 1)");
+    expect(() => db.exec("UPDATE tabs SET data = '{\"a\":1}', rev = 3 WHERE id = 't'")).toThrow(
+      /tab_rev_stale/,
+    );
+  });
+
+  it("cascades a tab's rows when the tab goes", () => {
+    const { db, run } = room();
+    migrateDocumentSchema(run);
+    db.exec(`INSERT INTO document (id, saved_at, created_at) VALUES ('d', 1, 1);
+      INSERT INTO tabs (id, name, data, updated_at) VALUES ('t', 'T', '{}', 1);
+      INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES ('d', 't', 0, 1);
+      INSERT INTO image_refs (tab_id, image_id) VALUES ('t', 'i');
+      INSERT INTO tab_stats (tab_id, mode, element_count, comment_count, data_bytes, written_at)
+        VALUES ('t', 'diagram', 0, 0, 2, 1);`);
+    db.exec("DELETE FROM tabs WHERE id = 't'");
+    for (const t of ['document_tabs', 'image_refs', 'tab_stats']) {
+      expect((db.prepare(`SELECT count(*) AS n FROM ${t}`).get() as { n: number }).n).toBe(0);
+    }
+  });
+});

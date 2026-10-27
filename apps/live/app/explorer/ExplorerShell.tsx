@@ -185,7 +185,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
       {surface.appHeader ? (
         <header className="sticky top-0 z-[var(--z-chrome)] flex shrink-0 flex-wrap items-center justify-between gap-x-4 border-y border-slate-200 bg-white/85 pl-4 pr-0 backdrop-blur sm:h-14 sm:flex-nowrap lg:grid lg:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] dark:border-slate-700 dark:bg-slate-900/85">
           <div className="flex h-14 items-center gap-3 lg:col-start-1">
-            <Brand href="/" size="md" />
+            <Brand href="/" size="md" assemble />
             <ProductNav current="explorer" showOnMobile />
           </div>
           {/* While Home shows its hero the field sits there instead (docs/specs/013-workspace/explorer-filters.md "The

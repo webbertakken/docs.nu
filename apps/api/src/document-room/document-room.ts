@@ -1,3 +1,7 @@
+import { DurableObject } from 'cloudflare:workers';
+import { DOCUMENT_ID_HEADER } from '../room-client';
+import { json } from '../responses';
+import { takeLegacyState } from './legacy-handover';
 import {
   ACCESS_CHANGED_CLOSE,
   WORKBENCH_ENDED_CLOSE,
@@ -10,43 +14,43 @@ import {
   type AccessLevel,
 } from '@livedoc/api-schema';
 import { opForTheWire, stampCommentAuthor } from '@livedoc/document';
-import { RoomParticipantWrites } from './room-participant';
-import { RoomLedgerStore } from './room-ledger-store';
-import { RoomLivePoll } from './room-live-poll';
-import { RoomSelectionStore, selectionFromOp, type LiveSession } from './room-selections';
+import { RoomParticipantWrites } from '../room-participant';
+import { RoomLedgerStore } from '../room-ledger-store';
+import { RoomLivePoll } from '../room-live-poll';
+import { RoomSelectionStore, selectionFromOp, type LiveSession } from '../room-selections';
 import {
   agentPresenceLog,
   answerAgentPresence,
   clearAgentsForOp,
   RoomAgentPresence,
-} from './room-agent-presence';
-import type { ClientMessage, Env, ParticipantPresence, ServerMessage } from './types';
-import { reportServerEvent } from './server-telemetry';
-import { multiplayerDecision } from './room-multiplayer';
+} from '../room-agent-presence';
+import type { ClientMessage, Env, ParticipantPresence, ServerMessage } from '../types';
+import { reportServerEvent } from '../server-telemetry';
+import { multiplayerDecision } from '../room-multiplayer';
 import {
   type LoggedOp,
   MAX_TAB_ID_LEN,
   admitFrame,
   helloPresence,
   resolveCatchup,
-} from './document-room-rules';
-import { followerIdsOf, followTargetOf } from './room-follows';
-import { opForScope } from './room-scope';
-import { recheckAdmittedLink } from './room-link-recheck';
-import { gateClientOp } from './room-op-gate';
-import { answerInternal, type InternalRoom } from './room-internal';
-import { rosterFrames, type RosterEntry } from './room-roster';
-import { sessionMatchesAccessClose, type AccessCloseMatch } from './room-access';
-import type { FacilitatorState } from './facilitator';
-import { RoomFacilitator } from './room-facilitator';
+} from '../document-room-rules';
+import { followerIdsOf, followTargetOf } from '../room-follows';
+import { opForScope } from '../room-scope';
+import { recheckAdmittedLink } from '../room-link-recheck';
+import { gateClientOp } from '../room-op-gate';
+import { answerInternal, type InternalRoom } from '../room-internal';
+import { rosterFrames, type RosterEntry } from '../room-roster';
+import { sessionMatchesAccessClose, type AccessCloseMatch } from '../room-access';
+import type { FacilitatorState } from '../facilitator';
+import { RoomFacilitator } from '../room-facilitator';
 
-import { writeQaAction, type QaWriteRequest } from './qa-board-write';
+import { writeQaAction, type QaWriteRequest } from '../qa-board-write';
 import {
   newSessionAttachment,
   readSessionAttachment,
   verifiedSessionOf,
   type SessionAttachment,
-} from './room-session';
+} from '../room-session';
 
 // One Durable Object instance per document id. Holds the set of currently
 // connected WebSockets plus their participant identity, and broadcasts
@@ -117,7 +121,7 @@ const SHARE_LINK_OPS = new Set(['share-revoked', 'share-rescoped']);
 // 4000-4999 application range; the client reloads or leaves on the op itself.
 const SHARE_LINK_CHANGED_CLOSE = 4003;
 
-export class DocumentRoom implements DurableObject {
+export class DocumentRoom extends DurableObject<Env | undefined> {
   state: DurableObjectState;
   // Per-session op-rate window (sliding 1s) so one connected peer can't
   // flood the room. Legit cursor / laser / edit ops are client-throttled
@@ -174,11 +178,6 @@ export class DocumentRoom implements DurableObject {
   // Agent presence entries (docs/specs/024-agents/agent-presence.md "Presence").
   agents: RoomAgentPresence;
 
-  // The worker env, for the one server-side telemetry emit the room owns
-  // (Document·Used·Multiplayer). Optional so unit tests can build a room
-  // from a fake state alone; without it the emit is skipped.
-  env: Env | undefined;
-
   // The Q&A board write queue (docs/specs/012-collaboration/qa-board.md). Every board write for this document
   // runs through here ONE AT A TIME. A Durable Object only serialises the
   // synchronous parts of its handlers: while one write is awaiting D1, the
@@ -193,9 +192,11 @@ export class DocumentRoom implements DurableObject {
   // A Participant's content and answers (docs/specs/013-workspace/share-roles.md), see room-participant.ts.
   private participantWrites: RoomParticipantWrites;
 
+  // The worker env is optional so unit tests can build a room from a fake state alone; without it the telemetry
+  // emit (Document·Used·Multiplayer) is skipped.
   constructor(state: DurableObjectState, env?: Env) {
+    super(state, env);
     this.state = state;
-    this.env = env;
     this.ledger = new RoomLedgerStore(state.storage);
     this.participantWrites = new RoomParticipantWrites({
       env,
@@ -244,20 +245,77 @@ export class DocumentRoom implements DurableObject {
     // Restore before any request can observe `epoch`/`seq`. A wake re-runs
     // the constructor, so without this gate a socket could be handed the
     // freshly-minted field values above and defeat the whole point.
-    void state.blockConcurrencyWhile(async () => {
-      const saved = await state.storage.get<{ epoch: string; seq: number }>(ORDER_STATE_KEY);
-      if (saved) {
-        this.epoch = saved.epoch;
-        this.seq = saved.seq;
-      } else {
-        // First instantiation for this document: adopt the random epoch above.
-        await state.storage.put(ORDER_STATE_KEY, { epoch: this.epoch, seq: this.seq });
+    void state.blockConcurrencyWhile(() => this.restoreState());
+  }
+
+  // The room's durable state into memory: on every wake, and again after a legacy handover replaced it.
+  private async restoreState(): Promise<void> {
+    const saved = await this.state.storage.get<{ epoch: string; seq: number }>(ORDER_STATE_KEY);
+    if (saved) {
+      this.epoch = saved.epoch;
+      this.seq = saved.seq;
+    } else {
+      // First instantiation for this document: adopt the random epoch above.
+      await this.state.storage.put(ORDER_STATE_KEY, { epoch: this.epoch, seq: this.seq });
+    }
+    await this.baton.restore();
+    await this.poll.restore();
+    for (const r of await this.agents.restore()) agentPresenceLog('expired', r);
+    this.armAlarm();
+  }
+
+  // Whether this instance has taken its legacy room's state (legacy-handover.ts); the marker in storage decides
+  // across instances, this only saves the read.
+  private handedOver = false;
+  private missingIdLogged = false;
+
+  // The key-value room this document had before keeps its order state, ledger, poll, baton, selections and agent
+  // presence; the first request after the class change takes them over before it is answered
+  // (docs/specs/006-document/document-storage-move.md "Handing over room state"). Null to carry on, or the
+  // answer when the handover failed.
+  private async ensureHandedOver(request: Request): Promise<Response | null> {
+    if (this.handedOver) return null;
+    const legacyRooms = this.env?.LEGACY_DOCUMENT_ROOM;
+    if (!legacyRooms) {
+      this.handedOver = true;
+      return null;
+    }
+    const documentId = request.headers.get(DOCUMENT_ID_HEADER);
+    if (!documentId) {
+      if (!this.missingIdLogged)
+        console.warn('[legacy-handover] no document id', new URL(request.url).pathname);
+      this.missingIdLogged = true;
+      return null;
+    }
+    const legacy = legacyRooms.get(legacyRooms.idFromName(documentId));
+    let outcome: { taken: number | null } | { error: unknown } = { taken: null };
+    // A throw inside blockConcurrencyWhile resets the object, dropping every socket, so it is caught inside.
+    await this.state.blockConcurrencyWhile(async () => {
+      if (this.handedOver) return;
+      try {
+        const taken = await takeLegacyState(this.state.storage, legacy, Date.now());
+        if (taken !== null && taken > 0) await this.restoreState();
+        this.handedOver = true;
+        outcome = { taken };
+      } catch (error) {
+        outcome = { error };
       }
-      await this.baton.restore();
-      await this.poll.restore();
-      for (const r of await this.agents.restore()) agentPresenceLog('expired', r);
-      this.armAlarm();
     });
+    const result = outcome as { taken: number | null } | { error: unknown };
+    if ('error' in result) {
+      const name = result.error instanceof Error ? result.error.message : String(result.error);
+      console.error(`[legacy-handover] failed id=${documentId} error=${name}`);
+      return json({ error: 'room_unavailable' }, { status: 503, headers: { 'Retry-After': '5' } });
+    }
+    if (result.taken !== null) {
+      console.log(`[legacy-handover] took id=${documentId} keys=${result.taken}`);
+      this.state.waitUntil(
+        legacy.clear().catch((err: unknown) => {
+          console.error(`[legacy-handover] clear failed id=${documentId}`, err);
+        }),
+      );
+    }
+    return null;
   }
 
   // Record the seq we just handed out. Not awaited: the DO output gate holds
@@ -267,7 +325,9 @@ export class DocumentRoom implements DurableObject {
     void this.state.storage.put(ORDER_STATE_KEY, { epoch: this.epoch, seq: this.seq });
   }
 
-  async fetch(request: Request): Promise<Response> {
+  override async fetch(request: Request): Promise<Response> {
+    const handover = await this.ensureHandedOver(request);
+    if (handover) return handover;
     const url = new URL(request.url);
     const internal = await answerInternal(this.internal, request, url);
     if (internal) return internal;
@@ -574,7 +634,7 @@ export class DocumentRoom implements DurableObject {
   // Hibernation event handler: one inbound frame from one socket. The DO
   // may have just been re-materialized from cold — everything this needs
   // beyond flood control comes from the socket's attachment.
-  webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): void {
+  override webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): void {
     // Drop an oversized frame before parsing / broadcasting it: ops are
     // re-broadcast opaquely to every peer, so without a cap one socket
     // could fan a multi-MB payload out to the whole room. Far above any
@@ -892,7 +952,7 @@ export class DocumentRoom implements DurableObject {
   }
 
   /** Agent entries past their expiry go; then the grace clock ran out (or did not, if they came back). */
-  async alarm(): Promise<void> {
+  override async alarm(): Promise<void> {
     const expired = await this.agents.sweep();
     for (const r of expired) agentPresenceLog('expired', r);
     if (expired.length > 0) this.broadcastPresence();
@@ -918,11 +978,11 @@ export class DocumentRoom implements DurableObject {
   // Hibernation event handlers for a session ending. The runtime removes
   // the socket from getWebSockets() itself; our job is only to shed the
   // rate window (so the map can't leak) and re-announce the roster.
-  webSocketClose(ws: WebSocket): void {
+  override webSocketClose(ws: WebSocket): void {
     this.dropSession(ws);
   }
 
-  webSocketError(ws: WebSocket): void {
+  override webSocketError(ws: WebSocket): void {
     this.dropSession(ws);
   }
 

@@ -1,9 +1,11 @@
 @import 'tailwindcss';
 @import '@livedoc/tailwind-config';
+@import '@livedoc/ui/brand-motion.css';
 @import '@livedoc/template-previews/preview-art-tile.css';
 @import '@livedoc/template-previews/preview-motion.css';
 @import '@livedoc/ui/hero-band.css';
 @import './hero-fan.css';
+@import './hero-kinds.css';
 @import './hero-animations.css';
 @import './hero-mode-animations.css';
 @import './hero-scenes/diagram.css';

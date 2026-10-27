@@ -1,6 +1,6 @@
 # Deployment
 
-All deployments run **via GitHub Actions** to **Cloudflare Workers**. The **production** deploy is **manually triggered** — a green CI run no longer ships on its own.
+All deployments run **via GitHub Actions** to **Cloudflare Workers**. **Every merge to `main` deploys production**: when CI passes on the merge commit, that commit ships to docs.nu, with no one pressing a button. A red CI run ships nothing.
 
 Every pull request also gets a preview, which does deploy on its own: a complete copy with its own workers, D1 and R2 on workers.dev, deleted when the pull request closes. This spec covers production; [Preview deployments](preview-deployments.md) covers previews.
 
@@ -42,7 +42,7 @@ No job needs another's output: only the nine apps have a `build` script, and no 
 
 The two test steps run two packages at a time. Each package's Vitest already fills the runner's cores, and turbo's default fan-out on the 4-vCPU runner slowed the CPU-heavy `sticky-vision` suite about 70x, into timeouts. `pnpm test` cannot carry the flag: it is pnpm's built-in test command, so CI calls turbo directly.
 
-CI is the gate you check before deploying to production, but it does **not** trigger that deploy: production is a separate, manually-dispatched workflow (see below).
+CI is production's gate: a push to `main` whose CI passes triggers the production deploy (see below), and one whose CI fails deploys nothing.
 
 `pnpm deploy:check` runs `wrangler deploy --dry-run` for the three workers that carry bindings (api, mcp, router), so a broken binding, database or service name fails in CI rather than in a deploy.
 
@@ -60,11 +60,34 @@ CI is the gate you check before deploying to production, but it does **not** tri
 
 The cost is runner time: a merge on `main` is about a dozen jobs (CI's six, E2E's shards, CodeQL), so a burst of merges queues for runners alongside open pull requests' runs.
 
+### A red main
+
+Any failure on `main` is an issue, never only a red mark in the Actions tab. `.github/workflows/main-red.yml` follows
+every run on `main` of CI, E2E Smoke, CodeQL, Deploy Production, CLI publish, Publish MCP server to registry and
+Lucide re-vendor (`workflow_run`), whatever started it: a push, a schedule, a dispatch or the deploy's own trigger.
+Canvas Performance is left out; it reports through its own issue.
+
+- **One issue per workflow**, titled `<workflow> on main is red` and labelled `main-red` (made on first use).
+- **A failure, a timeout or a startup failure** opens that issue, or comments on the one already open, naming the
+  commit, its title, the failed jobs (each linked) and the run.
+- **A green run closes it**, with a comment naming the commit and run, but only when the green commit is still the tip
+  of `main`: an older commit's run finishing late never closes an issue a newer failure opened.
+- **A cancelled or skipped run** reports nothing.
+- Runs report one at a time per workflow, in the order they finish, so two reports never race on one issue. Each
+  report logs one `main-red:` line saying what it did.
+- A pull request's runs never report: its checks already show its author what is red.
+
 ## Deploy
 
 The deploy is split in two: `.github/workflows/deploy-reusable.yml` holds every job below as a **reusable workflow** (`workflow_call`), and `deploy.yml` triggers it for production. Its inputs (`wrangler_env`, the MCP origin, `deploy_mcp`) and the secrets the caller passes are all that would differ for another environment. Previews deploy through `preview.yml` and `scripts/preview.mjs` instead, from configs generated off the same production files ([Preview deployments](preview-deployments.md)).
 
-`.github/workflows/deploy.yml` is **manual-only** (`workflow_dispatch`). It does not chain off CI; trigger it yourself from the Actions tab, where it appears as **Deploy Production** (or `gh workflow run deploy.yml --ref main` — the file name is passed rather than the display name, so a future rename can't stale this out) once CI on `main` is green and you've decided to ship. It checks out and builds whatever the current `main` is at trigger time.
+`.github/workflows/deploy.yml` runs on **every completed CI run** (`workflow_run`) and deploys when that run **passed on a push to `main`** in `webbertakken/livedoc`. It checks out and builds **exactly the commit CI passed** (`workflow_run.head_sha`, through the reusable workflow's `ref`), never whatever `main` has moved to since.
+
+- **Only the tip of `main` deploys.** CI on `main` runs once per commit and never cancels an older run, so two quick merges can finish out of order. The `Latest on main` job compares the passed commit with `main`'s tip; an older commit stands down with the log line `deploy: <sha> passed CI but main is at <tip>; its own CI run deploys it`, and the newer commit's own CI run deploys it. A newer commit whose CI fails leaves production on the last commit that deployed.
+- **Deploys queue, never cancel** (`concurrency: deploy-main`, `cancel-in-progress: false`): half a deploy would leave some workers on new code and some on old.
+- **A pull request's CI never deploys production**; pull requests deploy previews ([Preview deployments](preview-deployments.md)).
+- **A redeploy by hand** stays possible from the Actions tab, where the workflow appears as **Deploy Production** (or `gh workflow run deploy.yml --ref main`: the file name rather than the display name, so a rename can't stale this out). It builds the current `main`.
+- **Forks deploy by hand.** The automatic trigger is guarded to `webbertakken/livedoc`, which holds docs.nu's secrets; a self-hosted fork dispatches the workflow, or widens the guard once its own secrets are set.
 
 Every `wrangler` invocation in the reusable workflow ends in `${WRANGLER_ENV:+--env "$WRANGLER_ENV"}`, which expands to nothing for production — so production runs exactly the commands it always ran — and to `--env staging` for the staging caller. Shell expansion rather than a GitHub expression, so it reads the same locally as in the log.
 
@@ -101,8 +124,9 @@ versions briefly serve side by side. The deploy keeps that window short and reco
 - The editor serves its old address during the overlap ([Router app](router-app.md#legacy-editor-route)),
   and a save that fails in the window is retried on its own
   ([Per-tab storage](../006-document/per-tab-storage.md#retrying-a-failed-save)).
-- Deploy a renaming migration to **staging first**, and to production at a quiet hour: for a minute or
-  so, api calls from open editors can fail and are retried.
+- A renaming migration runs first on its pull request's preview, against a real remote database
+  ([Preview deployments](preview-deployments.md)). Merge it at a quiet hour, since merging deploys it to
+  production: for a minute or so, api calls from open editors can fail and are retried.
 
 There is no down migration; a problem after a renaming migration is fixed forward.
 

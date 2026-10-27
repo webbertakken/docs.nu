@@ -151,8 +151,9 @@ Or just push to `main` and use the bundled GitHub Actions workflows:
 - `.github/workflows/codeql.yml` runs CodeQL security scanning in one job; a fork needs CodeQL default setup off.
 - `.github/workflows/canvas-perf.yml` runs the canvas performance probe nightly and reports through one issue; optional, disable it in a fork that does not want it.
 - `.github/workflows/deploy-reusable.yml` holds the deploy itself — build, then all seven workers (marketing, live, telemetry, help, api, mcp, router) in the right order. The `deploy-mcp` job always runs, so a fork without the MCP server removes it or provisions its KV namespace first. It is a reusable workflow, not directly triggerable.
-- `.github/workflows/deploy.yml` calls it for **production**, **manually** from the Actions tab.
+- `.github/workflows/deploy.yml` calls it for **production**. In `webbertakken/livedoc` every merge to `main` deploys once its CI passes; in a fork the automatic trigger stands down, so dispatch it from the Actions tab, or widen its repository guard once your secrets are set.
 - `.github/workflows/preview.yml` deploys a preview of every pull request and deletes it when the pull request closes.
+- `.github/workflows/main-red.yml` turns any red run on `main` into an issue per workflow (`main-red`), closed by the next green run; it needs only the default token ([Deployment](../specs/016-platform/deployment.md#a-red-main)).
 
 Self-hosting needs only the production pair. `preview.yml` uses the same two secrets; a fork that does not want a preview per pull request deletes it ([Preview deployments](../specs/016-platform/preview-deployments.md))
 
