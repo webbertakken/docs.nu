@@ -90,12 +90,12 @@ describe('the dark palette tokens', () => {
   });
 });
 
-// Explorer: Midnight (color-scheme.md "Explorer: Midnight"): the Explorer's own dark tokens, held to Steel's rules.
-describe('the Explorer Midnight tokens', () => {
+// Midnight (color-scheme.md "Midnight: the account and connect pages"): those pages' own dark tokens, held to Steel's rules.
+describe('the Midnight tokens', () => {
   const midnight = block(THEME_CSS, ".dark[data-palette='midnight']");
   const token = (name: string) => midnight[`--color-${name}`]!;
 
-  it('paints the Explorer in the navy surfaces', () => {
+  it('paints the account and connect pages in the navy surfaces', () => {
     expect(token('slate-950')).toBe('#070b1a');
     expect(token('slate-900')).toBe('#0a0f24');
     expect(token('slate-800')).toBe('#111833');

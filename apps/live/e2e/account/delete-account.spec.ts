@@ -45,6 +45,9 @@ test('deleting the account removes it, signs out, and frees the address', async 
   // onDeleted). Wait for that navigation to land: a goto issued while it is in flight is interrupted by it, which
   // is how this spec failed on CI's slower runners while passing on a fast machine.
   await page.waitForURL((url) => url.pathname === '/', { waitUntil: 'load' });
+  // In this stack the editor serves `/`, and its index forwards to `/new` once it hydrates (app/page.tsx). Wait for
+  // that second navigation too, or the goto below races it.
+  await page.waitForURL((url) => url.pathname === '/new', { waitUntil: 'load' });
 
   // Signed out, and the session is gone at the api, not only in this page.
   await expect.poll(() => sessionOf(context)).toBeNull();

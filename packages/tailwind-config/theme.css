@@ -286,7 +286,7 @@
   --color-brand-950: #142538;
 }
 
-/* Explorer: Midnight (docs/specs/004-interface-design/color-scheme.md "Explorer: Midnight"). The Explorer pages set
+/* Midnight (docs/specs/004-interface-design/color-scheme.md "Midnight: the account and connect pages"). Those pages set
  * `data-palette="midnight"` on the root while mounted; in dark mode it retargets Steel's tokens to the marketing
  * site's night section: a deep navy ground and the sky accent. The compound selector outranks `.dark`. */
 .dark[data-palette='midnight'] {

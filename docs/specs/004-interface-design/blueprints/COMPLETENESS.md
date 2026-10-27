@@ -154,3 +154,27 @@
 - [x] Testing
 - [x] Constants and configuration
 - [x] Defaults ledger
+
+## brand-media
+
+- [x] Domain and naming
+- [x] Behaviour and state
+- [x] Interfaces and contracts
+- [x] Performance and limits
+- [x] Presentation and UX
+- [x] Accessibility
+- [x] Testing
+- [x] Constants and configuration
+- [x] Assets and external resources
+
+## brand-motion
+
+- [x] Domain and naming
+- [x] Behaviour and state
+- [x] Interfaces and contracts
+- [x] Performance and limits
+- [x] Presentation and UX
+- [x] Accessibility
+- [x] Web Experience
+- [x] Testing
+- [x] Constants and configuration

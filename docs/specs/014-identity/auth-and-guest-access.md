@@ -176,7 +176,7 @@ the marketing site's "No Catch" night section:
   two-by-two grid and the card gains room; from 1920px the whole frame (not the lines) is zoomed 1.2 times, and 1.35
   times from 2400px, so a big monitor is filled at a readable size rather than left with a small island.
 - **Both themes.** Dark mode wears the Midnight palette (the root carries `data-palette="midnight"` while the frame is
-  mounted, as on the Explorer; [Colour scheme](../004-interface-design/color-scheme.md#explorer-midnight)), so the
+  mounted; [Colour scheme](../004-interface-design/color-scheme.md#midnight-the-account-and-connect-pages)), so the
   page is the night section itself. Light mode is the same layout on a pale dotted ground (`slate-100`) with a white
   card and the darker accent inks (`emerald-700`, `brand-700`, `amber-700`), all at WCAG 2.2 AA. Small text that
   sits on the bare ground (the eyebrow, the guest link) is `brand-800`, so it holds 4.5:1 even over a grid dot.

@@ -1,0 +1,100 @@
+/* The homepage's every-kind cycle (docs/specs/004-interface-design/brand-mark.md "Every kind"; the numbers are in
+   docs/specs/004-interface-design/blueprints/brand-motion.md "Every kind"). A content stylesheet: one 6400ms cycle,
+   each kind shown for a quarter, entering from below and leaving upwards; its name crossfades beneath; the page
+   lifts a little as each kind arrives. Paused while off screen (`data-paused`). */
+
+@keyframes hk-kind {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  5% {
+    opacity: 1;
+    transform: none;
+  }
+  25% {
+    opacity: 1;
+    transform: none;
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes hk-name {
+  0% {
+    opacity: 0;
+  }
+  5%,
+  25% {
+    opacity: 1;
+  }
+  30%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hk-lift {
+  0%,
+  25%,
+  100% {
+    transform: none;
+  }
+  10% {
+    transform: translateY(-5px);
+  }
+}
+
+.hero-kinds [data-kind] {
+  animation: hk-kind 6400ms cubic-bezier(0.2, 0.8, 0.2, 1) infinite both;
+}
+.hero-kinds [data-kind-name] {
+  animation: hk-name 6400ms ease-out infinite both;
+}
+.hero-kinds [data-kind='sheet'],
+.hero-kinds [data-kind-name='sheet'] {
+  animation-delay: 1600ms;
+}
+.hero-kinds [data-kind='board'],
+.hero-kinds [data-kind-name='board'] {
+  animation-delay: 3200ms;
+}
+.hero-kinds [data-kind='form'],
+.hero-kinds [data-kind-name='form'] {
+  animation-delay: 4800ms;
+}
+.hero-kinds [data-sheet-motion='page'] {
+  animation: hk-lift 1600ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.hero-kinds[data-paused] * {
+  animation-play-state: paused;
+}
+
+/* Reduced motion: opacity only, at a slower pace, and no lift. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-kinds [data-kind] {
+    animation-name: hk-name;
+    animation-duration: 9600ms;
+  }
+  .hero-kinds [data-kind-name] {
+    animation-duration: 9600ms;
+  }
+  .hero-kinds [data-kind='sheet'],
+  .hero-kinds [data-kind-name='sheet'] {
+    animation-delay: 2400ms;
+  }
+  .hero-kinds [data-kind='board'],
+  .hero-kinds [data-kind-name='board'] {
+    animation-delay: 4800ms;
+  }
+  .hero-kinds [data-kind='form'],
+  .hero-kinds [data-kind-name='form'] {
+    animation-delay: 7200ms;
+  }
+  .hero-kinds [data-sheet-motion='page'] {
+    animation: none;
+  }
+}

@@ -54,6 +54,15 @@ export const BRAND_ICONS: NonNullable<Metadata['icons']> = {
   apple: '/apple-icon',
 };
 
+// What iOS calls the site when it is added to the home screen, and that it opens standalone like the installed
+// Android app (docs/specs/004-interface-design/brand-mark.md "Icons and media"). The tile itself is BRAND_ICONS'
+// apple entry.
+export const BRAND_APPLE_WEB_APP: NonNullable<Metadata['appleWebApp']> = {
+  title: SITE_NAME,
+  capable: true,
+  statusBarStyle: 'default',
+};
+
 // Mobile chrome + colour-scheme signal for the public sites: brand-500 tints
 // Android Chrome's URL bar, the iOS PWA status bar and the Windows tile, and
 // 'light dark' says the pages paint both appearances. The painted one is the

@@ -1,0 +1,130 @@
+/* The logo's assembly as a page loads (docs/specs/004-interface-design/brand-mark.md "Size and motion"; the numbers
+   are in docs/specs/004-interface-design/blueprints/brand-motion.md "Assemble"). A content stylesheet: it plays
+   from the first paint of the static HTML, before any script, on logos marked `data-assemble`, until
+   useBrandAssembled marks the page assembled, so it plays once per load. */
+
+@keyframes ldm-drop {
+  from {
+    transform: translateY(-48px);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes ldm-pop {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes ldm-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* The fold flips about its diagonal, from standing up to lying on the page. Plane units: the corner starts at 96. */
+@keyframes ldm-fold {
+  from {
+    transform: translate(96px, 0) rotate(45deg) scaleY(-1) rotate(-45deg) translate(-96px, 0);
+  }
+  to {
+    transform: translate(96px, 0) rotate(45deg) scaleY(1) rotate(-45deg) translate(-96px, 0);
+  }
+}
+
+@keyframes ldm-arrive {
+  from {
+    transform: translateX(-14px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes ldm-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+html:not([data-brand-assembled]) [data-assemble] [data-sheet-motion] {
+  animation: ldm-drop 700ms cubic-bezier(0.34, 1.36, 0.64, 1) backwards;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-sheet-motion='plain'] {
+  animation-delay: 110ms;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-sheet-motion='page'] {
+  animation-delay: 220ms;
+}
+
+html:not([data-brand-assembled]) [data-assemble] [data-cell] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ldm-pop 260ms cubic-bezier(0.2, 0.8, 0.2, 1) 420ms backwards;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-cell]:nth-child(2) {
+  animation-delay: 480ms;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-cell]:nth-child(3) {
+  animation-delay: 540ms;
+}
+
+html:not([data-brand-assembled]) [data-assemble] [data-line] {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: ldm-draw 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 560ms backwards;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-line]:nth-child(2) {
+  animation-delay: 630ms;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-line]:nth-child(3) {
+  animation-delay: 700ms;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-line]:nth-child(4) {
+  animation-delay: 770ms;
+}
+
+html:not([data-brand-assembled]) [data-assemble] [data-fold] {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: ldm-fold 360ms cubic-bezier(0.4, 0, 0.2, 1) 760ms backwards;
+}
+
+html:not([data-brand-assembled]) [data-assemble] [data-logotype] > span:not([aria-hidden]) {
+  display: inline-block;
+  animation: ldm-arrive 500ms cubic-bezier(0.2, 0.8, 0.2, 1) 520ms backwards;
+}
+html:not([data-brand-assembled]) [data-assemble] [data-logotype] > span:not([aria-hidden]) + span {
+  animation-delay: 610ms;
+}
+
+/* Reduced motion: the logo fades in once, nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-brand-assembled]) [data-assemble] [data-sheet-motion],
+  html:not([data-brand-assembled]) [data-assemble] [data-cell],
+  html:not([data-brand-assembled]) [data-assemble] [data-line],
+  html:not([data-brand-assembled]) [data-assemble] [data-fold],
+  html:not([data-brand-assembled]) [data-assemble] [data-logotype] > span:not([aria-hidden]) {
+    animation: none;
+  }
+  html:not([data-brand-assembled]) [data-assemble] {
+    animation: ldm-fade-in 250ms ease-out backwards;
+  }
+}

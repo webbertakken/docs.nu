@@ -169,16 +169,16 @@ The wordmark's "live" half is the one vivid note: **sky-400 `#38bdf8`** in dark 
   not a literal, so it follows the dark palette and a themed tab's tint.
 - **Light mode is untouched.** No light token, class or colour changes with the dark palette.
 
-### Explorer: Midnight
+### Midnight: the account and connect pages
 
-In dark mode the Explorer pages (`/explorer/*`) wear **Midnight**, the marketing site's night section, instead of
-Steel: a deep navy ground and the vivid sky accent, so the Explorer reads as the front of the product. The account and
-connect pages wear it too ([Night Band](../014-identity/auth-and-guest-access.md#the-look-night-band)). The editor, its
-Explorer panel and every other page keep Steel.
+In dark mode the account and connect pages ([Night Band](../014-identity/auth-and-guest-access.md#the-look-night-band))
+wear **Midnight**, the marketing site's night section, instead of Steel: a deep navy ground and the vivid sky accent.
+The Explorer, the editor and every other page keep Steel: the Explorer is the editor's own workspace, in the editor's
+palette.
 
-- **How.** While the Explorer (or an account or connect page) is mounted, the document root carries `data-palette="midnight"`; under `.dark` that
+- **How.** While an account or connect page is mounted, the document root carries `data-palette="midnight"`; under `.dark` that
   attribute retargets the same tokens Steel does (selector `.dark[data-palette='midnight']`, which outranks `.dark`).
-  Menus, dialogs and tooltips opened from the Explorer portal to the body and so follow it too. The attribute is set
+  Menus, dialogs and tooltips opened from those pages portal to the body and so follow it too. The attribute is set
   before the first paint and removed when the page unmounts (`useMidnightPalette`, `apps/live/hooks/ui/`).
 - **Surfaces**
 

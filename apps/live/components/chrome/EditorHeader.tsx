@@ -131,6 +131,7 @@ export function EditorHeader({
           accentColor={brandAccent}
           wordmarkClassName="hidden sm:inline"
           className="relative touch-target"
+          assemble
         />
       </div>
       {/* min-w-0 down to the name, so a long name truncates instead of pushing Share and Sign in off a phone. */}

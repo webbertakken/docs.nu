@@ -36,7 +36,7 @@ export function AuthStage({
       <AuthLines />
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-8 lg:px-12 lg:py-10 2xl:max-w-[88rem] min-[1920px]:min-h-[calc(100dvh/1.2)] min-[1920px]:[zoom:1.2] min-[2400px]:min-h-[calc(100dvh/1.35)] min-[2400px]:[zoom:1.35]">
         <header className="lvd-auth-header flex items-center justify-between gap-4">
-          <Brand href="/" size="md" />
+          <Brand href="/" size="md" assemble />
           {guestHref ? (
             <a
               href={guestHref}

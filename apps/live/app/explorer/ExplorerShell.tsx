@@ -27,7 +27,6 @@ import { AreaErrorBoundary } from '@/components/primitives/AreaErrorBoundary';
 import { ExplorerProvider, useExplorer } from './ExplorerContext';
 import { ExplorerSidebar } from './sidebar/ExplorerSidebar';
 import { SectionsDrawer } from './SectionsDrawer';
-import { useMidnightPalette } from '@/hooks/ui/useMidnightPalette';
 import { useExplorerState } from './useExplorerState';
 import { teamFolderPath } from './routes';
 import { searchPanelSources } from '@/components/panels/search-panel-sources';
@@ -69,8 +68,6 @@ const SIDEBAR_WIDTH = 256;
 export function ExplorerShell({ children }: { children: ReactNode }) {
   const state = useExplorerState();
   const surface = explorerSurfaceFlags(useExplorerSurface());
-  // Dark mode's Midnight palette, before the first paint (docs/specs/004-interface-design/color-scheme.md).
-  useMidnightPalette();
   // Wait for the session to settle so a signed-in user never momentarily
   // reads the localStorage guest id and refreshes against the wrong
   // owner. After this gate, `ownerId` is either the account id or
@@ -178,7 +175,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
       {surface.appHeader ? (
         <header className="sticky top-0 z-[var(--z-chrome)] flex shrink-0 flex-wrap items-center justify-between gap-x-4 border-y border-slate-200 bg-white/85 pl-4 pr-0 backdrop-blur sm:h-14 sm:flex-nowrap lg:grid lg:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] dark:border-slate-700 dark:bg-slate-900/85">
           <div className="flex h-14 items-center gap-3 lg:col-start-1">
-            <Brand href="/" size="md" />
+            <Brand href="/" size="md" assemble />
             <ProductNav current="explorer" showOnMobile />
           </div>
           <div className="order-last w-full pb-2 pr-4 sm:order-none sm:ml-auto sm:w-auto sm:pb-0 sm:pr-0 lg:col-start-2 lg:ml-0">
