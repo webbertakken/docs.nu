@@ -4,48 +4,50 @@ Derived from [Explorer Details view](../explorer-details-view.md) and the Previe
 [Tooltips, hover cards and popovers](../../004-interface-design/tooltips-hover-cards-popovers.md#preview).
 The spec decides; this file adds engineering precision. Defaults are ledgered in
 [DEFAULTS.md](DEFAULTS.md) as `D145` to `D153`.
+Tab stats live in each document's room; the content summary that carries a document's stats to the lists, and the
+outbox that pushes it, are the [document storage blueprint](../../006-document/blueprints/document-storage.md)'s.
 
-**Gap, being re-derived (plan 0006, phase B3):** tab stats live in each document's room and reach the lists through
-its content summary (`documents.content_summary`, [Document storage](../../006-document/blueprints/document-storage.md));
-the D1 tab stats backfill is gone.
-
-| File                                                          | Role                                                                                    |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `apps/api/migrations/0084_tab_stats.sql`                      | The `tab_stats` table                                                                   |
-| `packages/document/src/tab-stats.ts`                          | `tabStatsOf`, `TabStats`: one counting rule for the api and the browser                 |
-| `apps/api/src/db/tab-stats.ts`                                | `tabStatsOfData`, `tabStatsStatement`, `documentStatsSql`, `readDocumentStats`          |
-| `apps/api/src/db/tabs.ts`, `apps/api/src/db/documents.ts`     | Every tab write batches `tabStatsStatement`; the summary projection selects `doc_stats` |
-| `apps/api/src/participant-write.ts`, `qa-board-write.ts`      | Hand `swapTabData` the next body's stats                                                |
-| `packages/api-schema/src/index.ts`                            | `DocumentStats`, `DocumentSummary.stats`                                                |
-| `packages/ui/src/hint/*`, `packages/ui/src/useRowPreview.tsx` | Hint kind `preview`: delay, per-kind warm-up (`isHintWarm`), look; `useRowPreview`      |
-| `apps/live/app/explorer/useExplorerViewMode.ts`               | `ExplorerViewMode` gains `'details'`                                                    |
-| `apps/live/app/explorer/ViewToggle.tsx`                       | The third button                                                                        |
-| `apps/live/app/explorer/details/DetailsView.tsx`              | The table: header, folder rows, document rows                                           |
-| `apps/live/app/explorer/details/DetailsHeader.tsx`            | Sortable column headers                                                                 |
-| `apps/live/app/explorer/details/DetailsDocumentRow.tsx`       | One document row: drag source, preview, `⋯`                                             |
-| `apps/live/app/explorer/details/DetailsFolderRow.tsx`         | One folder row: drop target, `⋯`                                                        |
-| `apps/live/app/explorer/details/details-columns.ts`           | `DETAILS_COLUMNS`, `sortDetailsEntries`, cell values                                    |
-| `apps/live/app/explorer/details/details-format.ts`            | `formatObjects`, `formatBytes`, `formatSize`, `formatDateTime`, `formatItems`           |
-| `apps/live/app/explorer/details/details-cells.tsx`            | `TypeCell`, `AccessCell`, `DateCell`, `NoValue`, `SHOWN_FROM_CLASS`                     |
-| `apps/live/app/explorer/explorer-view-props.ts`               | `documentEntryPropsFor`: the per-document bindings every view shares                    |
-| `apps/live/lib/offline/offline-stats.ts`                      | `offlineDocumentStats`: a document in this browser counted from its record              |
-| `apps/live/components/panels/TeamSharedDocuments.tsx`         | The team library's Details branch                                                       |
-| `apps/live/app/explorer/details/useDetailsSort.ts`            | The device-local sort                                                                   |
-| `apps/live/app/explorer/details/useSnapshotPrefetch.ts`       | Asks for a row's snapshot as it nears the viewport                                      |
-| `apps/live/lib/document-space.ts`                             | `readerAccessOf`                                                                        |
+| File                                                          | Role                                                                               |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `apps/api/src/document-room/document-schema.ts`               | The room's `tab_stats` table and its `summary` outbox triggers                     |
+| `packages/document/src/tab-stats.ts`                          | `tabStatsOf`, `TabStats`: one counting rule for the api and the browser            |
+| `apps/api/src/db/tab-stats.ts`                                | `tabStatsOfData`, `tabStatsStatement`, `documentStatsSql`, `readDocumentStats`     |
+| `apps/api/src/db/tabs.ts`                                     | Every tab write in the room batches `tabStatsStatement`                            |
+| `apps/api/src/document-room/document-content.ts`              | `importDocumentCopy` counts each copied body (`tabStatsOfData`)                    |
+| `apps/api/src/document-room/content-summary.ts`               | `contentSummaryOf`: the document's `stats` via `documentStatsSql`, in the room     |
+| `apps/api/src/db/content-summary.ts`                          | `docStatsSql`: a list's `doc_stats` read from `documents.content_summary`          |
+| `apps/api/src/db/documents.ts`                                | `DOCUMENT_SUMMARY_COLS` selects `doc_stats`; `rowToSummary` reads it               |
+| `apps/api/src/participant-write.ts`, `qa-board-write.ts`      | Hand `swapTabData` the next body's stats                                           |
+| `packages/api-schema/src/index.ts`                            | `DocumentStats`, `DocumentSummary.stats`                                           |
+| `packages/ui/src/hint/*`, `packages/ui/src/useRowPreview.tsx` | Hint kind `preview`: delay, per-kind warm-up (`isHintWarm`), look; `useRowPreview` |
+| `apps/live/app/explorer/useExplorerViewMode.ts`               | `ExplorerViewMode` gains `'details'`                                               |
+| `apps/live/app/explorer/ViewToggle.tsx`                       | The third button                                                                   |
+| `apps/live/app/explorer/details/DetailsView.tsx`              | The table: header, folder rows, document rows                                      |
+| `apps/live/app/explorer/details/DetailsHeader.tsx`            | Sortable column headers                                                            |
+| `apps/live/app/explorer/details/DetailsDocumentRow.tsx`       | One document row: drag source, preview, `⋯`                                        |
+| `apps/live/app/explorer/details/DetailsFolderRow.tsx`         | One folder row: drop target, `⋯`                                                   |
+| `apps/live/app/explorer/details/details-columns.ts`           | `DETAILS_COLUMNS`, `sortDetailsEntries`, cell values                               |
+| `apps/live/app/explorer/details/details-format.ts`            | `formatObjects`, `formatBytes`, `formatSize`, `formatDateTime`, `formatItems`      |
+| `apps/live/app/explorer/details/details-cells.tsx`            | `TypeCell`, `AccessCell`, `DateCell`, `NoValue`, `SHOWN_FROM_CLASS`                |
+| `apps/live/app/explorer/explorer-view-props.ts`               | `documentEntryPropsFor`: the per-document bindings every view shares               |
+| `apps/live/lib/offline/offline-stats.ts`                      | `offlineDocumentStats`: a document in this browser counted from its record         |
+| `apps/live/components/panels/TeamSharedDocuments.tsx`         | The team library's Details branch                                                  |
+| `apps/live/app/explorer/details/useDetailsSort.ts`            | The device-local sort                                                              |
+| `apps/live/app/explorer/details/useSnapshotPrefetch.ts`       | Asks for a row's snapshot as it nears the viewport                                 |
+| `apps/live/lib/document-space.ts`                             | `readerAccessOf`                                                                   |
 
 ## Domain and naming
 
-| Term           | Identifier                     | Meaning                                                                     |
-| -------------- | ------------------------------ | --------------------------------------------------------------------------- |
-| tab stats      | `TabStats`, table `tab_stats`  | One tab's `mode`, `elementCount`, `commentCount`, `dataBytes`, `writtenAt`  |
-| document stats | `DocumentStats`                | `{ mode, elements, comments, bytes }`, summed over a document's linked tabs |
-| not counted    | `stats: null`                  | No tabs, or a linked tab without a stats row; the cells show `–`            |
-| Details view   | `ExplorerViewMode` `'details'` | The third browse layout                                                     |
-| column         | `DetailsColumnId`              | `name`, `type`, `comments`, `access`, `size`, `created`, `updated`          |
-| sort           | `DetailsSort`                  | `{ column: DetailsColumnId, direction: 'asc' \| 'desc' }`                   |
-| reader access  | `readerAccessOf(doc)`          | `AccessLevel`: `edit` unless the row is shared, then its role               |
-| preview        | `HintKind` `'preview'`         | The resting-hover snapshot hint                                             |
+| Term           | Identifier                              | Meaning                                                                      |
+| -------------- | --------------------------------------- | ---------------------------------------------------------------------------- |
+| tab stats      | `TabStats`, room table `tab_stats`      | One tab's `mode`, `elementCount`, `commentCount`, `dataBytes`, `writtenAt`   |
+| document stats | `DocumentStats`, `ContentSummary.stats` | `{ mode, elements, comments, bytes }`, summed over a document's tabs         |
+| not counted    | `stats: null`                           | No tabs, a tab without a stats row, or no summary pushed; the cells show `–` |
+| Details view   | `ExplorerViewMode` `'details'`          | The third browse layout                                                      |
+| column         | `DetailsColumnId`                       | `name`, `type`, `comments`, `access`, `size`, `created`, `updated`           |
+| sort           | `DetailsSort`                           | `{ column: DetailsColumnId, direction: 'asc' \| 'desc' }`                    |
+| reader access  | `readerAccessOf(doc)`                   | `AccessLevel`: `edit` unless the row is shared, then its role                |
+| preview        | `HintKind` `'preview'`                  | The resting-hover snapshot hint                                              |
 
 ## Behaviour and state
 
@@ -60,8 +62,8 @@ the D1 tab stats backfill is gone.
   `INSERT INTO tab_stats (...) VALUES (...) ON CONFLICT(tab_id) DO UPDATE SET` every column. It is
   placed in each batch **after** the `tabs` upsert (the foreign key needs the row):
   `tabWriteStatements`, `seedTabs` (per tab), `swapTabData` (with `nextStats`, guarded by
-  `ifStoredData` so it lands only when the swap does), `copyDocument` (re-derived from the copied body
-  with `tabStatsOfData`).
+  `ifStoredData` so it lands only when the swap does), `importDocumentCopy` (re-derived from the copied
+  body with `tabStatsOfData`). All run against the room's SQLite (`env.DOCUMENT_DB`).
 - `renameTab` writes no stats: a rename is not work in a mode.
 - `documentStatsSql(idSql)` is a scalar subquery over `document_tabs LEFT JOIN tab_stats`:
   `NULL` when the document has no linked tab or any linked tab lacks a row, else
@@ -70,24 +72,18 @@ SUM, 'comments', SUM, 'bytes', SUM)`. It reads no `tabs` column, so no body.
 - `readDocumentStats(text)` parses that JSON; a value that fails to parse or carries a mode that
   `parseEditorMode` rejects is `null` with a warning `tab-stats: unreadable doc_stats`.
 
-### Backfill
+### To the lists
 
-`runTabStatsBackfill(env, clock)` loops while under `TAB_STATS_BACKFILL_BUDGET_MS` and
-`TAB_STATS_BACKFILL_MAX_ROWS`:
-
-1. `SELECT t.id, t.data, t.updated_at FROM tabs t WHERE NOT EXISTS (SELECT 1 FROM tab_stats s WHERE s.tab_id = t.id) LIMIT ?`
-   with `TAB_STATS_BACKFILL_PAGE_ROWS`.
-2. Each body counts through `tabStatsOfData`; a body that fails to parse counts as Diagram with no elements
-   and no comments, its bytes measured, and warns `tab-stats: corrupt tab <id> counted empty`.
-3. One batch of `INSERT ... ON CONFLICT(tab_id) DO NOTHING`, `written_at` set to the tab's own
-   `updated_at` (never the run's time, which would make the backfilled tab the document's newest and
-   so its Type). A write that landed since step 1
-   already wrote the newer stats, which stay.
-4. A page shorter than the page size ends the loop: `left=none`; otherwise `left=more`.
-
-It logs `tab-stats: backfilled n=<n> left=<more|none>` once per run and returns the count. The
-cron runs it in `waitUntil` beside the other sweeps, its failure logged as
-`tab-stats: backfill failed`.
+- `contentSummaryOf(env, documentId)` (in the room) selects `documentStatsSql('?1')` and stores
+  `readDocumentStats` of it as `ContentSummary.stats`. Triggers on `tab_stats` insert and update key the
+  `summary` outbox key, so every stats write reaches the listing on the next drain.
+- `docStatsSql(idSql)` (`db/content-summary.ts`) is
+  `(SELECT json_extract(cs.content_summary, '$.stats') FROM documents cs WHERE cs.id = <idSql>) AS doc_stats`;
+  `DOCUMENT_SUMMARY_COLS` selects it, and `rowToSummary` maps it through `readDocumentStats`.
+- A document whose summary is missing (`content_summary IS NULL`, not yet in its room) reads `stats: null`.
+- A tab without stats, in a document moved into its room, is counted by the move from its own body, dated by the
+  tab's last write ([Moving content into rooms](../../006-document/blueprints/document-storage-move.md)); nothing
+  else counts existing tabs.
 
 ### The view
 
@@ -135,9 +131,11 @@ stats: DocumentStats | null;
 
 ## Data and persistence
 
+In the room (a schema step of `DOCUMENT_SCHEMA_STEPS`):
+
 ```sql
-CREATE TABLE tab_stats (
-  tab_id        TEXT    PRIMARY KEY REFERENCES tabs(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS tab_stats (
+  tab_id        TEXT    PRIMARY KEY REFERENCES tabs (id) ON DELETE CASCADE,
   mode          TEXT    NOT NULL,
   element_count INTEGER NOT NULL,
   comment_count INTEGER NOT NULL,
@@ -146,22 +144,25 @@ CREATE TABLE tab_stats (
 );
 ```
 
-- Derived data: deleting every row loses nothing the backfill cannot rebuild.
-- The migration creates the table only (constant time); no statement reads a body.
-- A tab deleted cascades its row away. A document deleted keeps tabs other documents link, and their
-  stats.
-- The Trash, restore and purge need nothing: stats follow tabs.
+- Derived data, rebuildable from the room's `tabs.data` through `tabStatsOfData`.
+- D1 keeps no tab stats: a document's sum travels in `documents.content_summary` (`$.stats`). D1's
+  `tab_stats` (migration 0084) is a content table the move reads and then drops.
+- A tab deleted cascades its row away, and its `document_tabs` delete keys the summary.
+- The Trash and restore need nothing: the room and its summary stay. A purge deletes the room's storage
+  and the D1 row with its summary.
 
 ## Errors and edge cases
 
 | Case                                 | Handling                                                  |
 | ------------------------------------ | --------------------------------------------------------- |
 | Document with no tabs                | `stats: null`, cells `–`                                  |
-| Some tabs not yet counted            | `stats: null` until the backfill reaches them             |
+| Some tabs not yet counted            | `stats: null` until the move counts them                  |
+| No summary pushed yet                | `stats: null` (`content_summary IS NULL`)                 |
+| Write since the last drain           | The previous stats, up to about a minute                  |
 | Event-storming board                 | Mode Diagram (`opensInOf`)                                |
 | Legacy mode `infographic`            | Pages (`opensInOf` reads through `parseEditorMode`)       |
-| Corrupt tab body in the backfill     | Counted empty, warned                                     |
-| Write racing the backfill            | The write's row wins (`DO NOTHING`)                       |
+| Corrupt tab body in a copy           | Counted empty (`tabStatsOfData`), its bytes measured      |
+| Unreadable `$.stats` in a summary    | `stats: null`, warned                                     |
 | Shared row                           | No `stats`: `–`; no Created: `–` "Not known" (`D153`)     |
 | Offline row                          | Counted in the browser, the first tab's mode (`D152`)     |
 | Unknown stored sort or view mode     | Defaults                                                  |
@@ -175,11 +176,10 @@ CREATE TABLE tab_stats (
 
 ## Performance and limits
 
-- The list reads, per document, its `document_tabs` rows and their `tab_stats` rows: narrow rows, no
-  body, no overflow page.
-- A write adds one small statement to a batch it already sends.
-- The backfill parses at most `TAB_STATS_BACKFILL_PAGE_ROWS` bodies at once (each at most
-  `MAX_TAB_BYTES`), and at most `TAB_STATS_BACKFILL_MAX_ROWS` per run.
+- The list reads, per document, one `json_extract` of its own `content_summary`: no join, no body, no
+  room.
+- A write adds one small statement to a room batch it already runs; summing happens once per drain, in
+  the room, over its `document_tabs` and `tab_stats` rows.
 - The Details view renders every row of the folder, as the list does; each row's snapshot prefetch
   uses one `IntersectionObserver` per row with the thumbnails' `200px` margin, disconnected after its
   first sighting.
@@ -230,13 +230,11 @@ CREATE TABLE tab_stats (
 
 ## Observability
 
-| Fingerprint                                     | Where                                   |
-| ----------------------------------------------- | --------------------------------------- |
-| `tab-stats: backfilled n=<n> left=<more\|none>` | Each cron run                           |
-| `tab-stats: backfill failed`                    | A run that threw                        |
-| `tab-stats: corrupt tab <id> counted empty`     | Backfill on an unparseable body         |
-| `tab-stats: unreadable doc_stats`               | A summary row whose stats did not parse |
-| `[explorer-drop] …`                             | Drops on Details folder rows            |
+| Fingerprint                                 | Where                                           |
+| ------------------------------------------- | ----------------------------------------------- |
+| `tab-stats: unreadable doc_stats`           | Stats in a room or a summary that did not parse |
+| `[outbox] unit failed id=<id> unit=summary` | The summary push failed; retried                |
+| `[explorer-drop] …`                         | Drops on Details folder rows                    |
 
 ## Testing
 
@@ -250,6 +248,8 @@ CREATE TABLE tab_stats (
 | Warm-up per kind                                               | `packages/ui/src/hint/hint-registry.test.ts`                  |
 | Every write path leaves a matching stats row                   | `apps/api/src/db/tab-stats-writers.test.ts`                   |
 | Document stats sum, latest mode, null when uncounted           | `apps/api/src/db/tab-stats.test.ts`                           |
+| The summary carries the stats, null while a tab is uncounted   | `apps/api/src/document-room/content-summary.test.ts`          |
+| A stats write keys the summary                                 | `apps/api/src/document-room/document-outbox-keys.test.ts`     |
 | Preview delay, warm-up, focus                                  | `packages/ui/src/hint/useHint.test.tsx`                       |
 | Sort: natural direction, toggle, folders first, `–` last       | `apps/live/app/explorer/details/details-columns.test.ts`      |
 | Formats                                                        | `apps/live/app/explorer/details/details-format.test.ts`       |
@@ -260,14 +260,11 @@ CREATE TABLE tab_stats (
 
 ## Constants and configuration
 
-| Constant                       | Value                           | Provenance                                                    | Safe range     |
-| ------------------------------ | ------------------------------- | ------------------------------------------------------------- | -------------- |
-| `PREVIEW_OPEN_DELAY_MS`        | 600                             | Spec                                                          | 400-1000       |
-| `PREVIEW_WARMUP_MS`            | 500                             | Spec, as the tooltip's                                        | 300-800        |
-| `TAB_STATS_BACKFILL_PAGE_ROWS` | 10                              | `D147`: 10 bodies of at most `MAX_TAB_BYTES` stay under 20 MB | 1-20           |
-| `TAB_STATS_BACKFILL_MAX_ROWS`  | 5000                            | `D148`                                                        | 500-20000      |
-| `TAB_STATS_BACKFILL_BUDGET_MS` | 60 000                          | As the image-refs backfill                                    | 10 000-120 000 |
-| `DETAILS_SORT_STORAGE_KEY`     | `livedoc:explorer-details-sort` | Beside `livedoc:explorer-view`                                | n/a            |
+| Constant                   | Value                           | Provenance                     | Safe range |
+| -------------------------- | ------------------------------- | ------------------------------ | ---------- |
+| `PREVIEW_OPEN_DELAY_MS`    | 600                             | Spec                           | 400-1000   |
+| `PREVIEW_WARMUP_MS`        | 500                             | Spec, as the tooltip's         | 300-800    |
+| `DETAILS_SORT_STORAGE_KEY` | `livedoc:explorer-details-sort` | Beside `livedoc:explorer-view` | n/a        |
 
 ## Defaults ledger
 
