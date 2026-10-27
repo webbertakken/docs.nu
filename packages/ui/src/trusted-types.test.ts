@@ -60,7 +60,7 @@ describe('isAllowedScriptUrl', () => {
 
   it("refuses another app's build, or a path outside its prefix", () => {
     expect(isAllowedScriptUrl('/live/_next/static/chunks/b.js', page, '/help', [])).toBe(false);
-    expect(isAllowedScriptUrl('/_next/static/chunks/a.js', page, '/community', [])).toBe(false);
+    expect(isAllowedScriptUrl('/_next/static/chunks/a.js', page, '/telemetry', [])).toBe(false);
   });
 
   it('refuses a blob: URL, even for a worker', () => {

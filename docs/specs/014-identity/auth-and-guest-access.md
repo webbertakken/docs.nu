@@ -120,7 +120,6 @@ The two paths coexist forever. A signed-in person can hand a share link to a gue
 | Teams                       | ✗                             | ✓                                     |
 | API tokens, CLI, MCP        | ✗                             | ✓                                     |
 | Google Drive mirror         | ✗                             | ✓                                     |
-| Publishing to Community     | ✗                             | ✓                                     |
 
 ## Auth surface
 

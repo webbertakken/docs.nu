@@ -28,7 +28,6 @@
         "@livedoc/live#build",
         "@livedoc/help#build",
         "@livedoc/telemetry#build",
-        "@livedoc/community#build",
         "@livedoc/api#build",
         "@livedoc/mcp#build",
         "@livedoc/router#build"

@@ -18,7 +18,7 @@ Production stays as it is: manual, `workflow_dispatch`-only ([Deployment](deploy
 | Indexable     | Yes              | **No**: `X-Robots-Tag: noindex, nofollow`                         |
 | Lifetime      | Permanent        | Deleted when the pull request closes                              |
 
-The seven path-routed workers deploy (api, marketing, telemetry, help, live, community, router); the MCP worker does not. Only the router is on workers.dev; the other six are reached through its service bindings, as in production.
+The six path-routed workers deploy (api, marketing, telemetry, help, live, router); the MCP worker does not. Only the router is on workers.dev; the other five are reached through its service bindings, as in production.
 
 ## The address
 
@@ -51,7 +51,7 @@ The hosted profile ([Deployment](deployment.md) "Hosted profile") is not applied
 ## Lifecycle
 
 - **Open, push or reopen**: refuse a host that already serves another pull request, build every app, create the D1 and R2 when missing, apply migrations, deploy the api first and the router last, detach any host the router kept from a renamed branch, then wait, up to 15 minutes, until the host answers over HTTPS. Only then is the preview named in the pull request's description, in its preview slot: ``Live preview (`<sha>`): https://<branch>.preview.docs.nu``, with the short commit it was built from.
-- **Close or merge**: detach every custom domain, then delete the seven workers (router first, so nothing still binds a worker when it goes), the D1, and the R2 bucket after emptying it, and empty the preview slot, so a description never names a preview that is gone.
+- **Close or merge**: detach every custom domain, then delete the six workers (router first, so nothing still binds a worker when it goes), the D1, and the R2 bucket after emptying it, and empty the preview slot, so a description never names a preview that is gone.
 - One run per pull request at a time; a newer push or the close cancels an unfinished one.
 - A brand-new worker is briefly invisible to wrangler's workers.dev step, which then fails with `10007` although the upload succeeded. Every first preview deploy creates seven, so the generator retries that one answer, and only that one, up to six times, 30 seconds apart.
 

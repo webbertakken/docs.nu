@@ -455,3 +455,17 @@ describe('workbench sessions at the front door', () => {
     expect(ctx.token).toEqual({ id: 'tok1', readOnly: false });
   });
 });
+
+// docs/specs/001-project-vision/purpose.md "Boundaries that have moved": LiveDoc has no Community gallery,
+// so its old api addresses are unknown routes like any other.
+describe('the retired Community routes', () => {
+  beforeEach(() => resolveApiTokenMock.mockResolvedValue(null));
+
+  it.each(['/api/community/posts', '/api/community/featured', '/api/community/sitemap'])(
+    '404s %s',
+    async (path) => {
+      const res = await worker.fetch(get(path), env());
+      expect(res.status).toBe(404);
+    },
+  );
+});

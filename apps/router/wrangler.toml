@@ -9,7 +9,7 @@ routes = [
   { pattern = "www.docs.nu", custom_domain = true },
 ]
 
-# Service bindings to the six downstream apps. Each `service` must match the
+# Service bindings to the five downstream apps. Each `service` must match the
 # deployed Worker name of that app. See docs/specs/016-platform/router-app.md.
 
 [[services]]
@@ -32,10 +32,6 @@ service = "docs-nu-telemetry"
 binding = "HELP"
 service = "docs-nu-help"
 
-[[services]]
-binding = "COMMUNITY"
-service = "docs-nu-community"
-
 # Local dev (`wrangler dev --env local --port 4000`, the workspace `dev`
 # script): service bindings can't reach the local Next dev servers, so this
 # environment defines none and sets plain HTTP origins instead. The worker
@@ -49,4 +45,3 @@ LIVE_ORIGIN = "http://127.0.0.1:4002"
 API_ORIGIN = "http://127.0.0.1:8787"
 TELEMETRY_ORIGIN = "http://127.0.0.1:4003"
 HELP_ORIGIN = "http://127.0.0.1:4004"
-COMMUNITY_ORIGIN = "http://127.0.0.1:4005"

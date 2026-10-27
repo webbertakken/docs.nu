@@ -8,7 +8,7 @@
 
 export const SIGNED_IN_HINT_KEY = 'livedoc:v2:signed-in';
 // Whether this host offered sign-in when a page here last asked (`1` / `0`): lets a page that must decide before
-// asking (where `/new` saves a guest's document, whether the Community offers My Shares) do so without waiting.
+// asking (where `/new` saves a guest's document) do so without waiting.
 export const SIGN_IN_OFFERED_KEY = 'livedoc:v2:sign-in-offered';
 export const ACCOUNT_CHANNEL_NAME = 'livedoc-account';
 

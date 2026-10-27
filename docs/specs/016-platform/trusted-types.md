@@ -12,7 +12,7 @@ injection then needs a policy's help, and every policy is small, named and liste
 livedoc-markup livedoc-inert-parse nextjs ProseMirrorClipboard default`, enforced from the start, never
   report-only.
 - **Where it is set**: the editor's worker (`apps/live/src/worker.ts`) beside its other security headers; the four
-  static apps (marketing, help, community, telemetry) in their `public/_headers`. The router adds nothing; it holds no
+  static apps (marketing, help, telemetry) in their `public/_headers`. The router adds nothing; it holds no
   logic ([Router app](router-app.md)).
 - **Further policy names** (a third party's own policy) join the `trusted-types` list only with a row in
   "Third parties" below.

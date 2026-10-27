@@ -115,13 +115,6 @@ export function sharePasswordOf(request: Request): SharePasswordAttempt | null {
 // `tabId` names the tab the request touches. Leave it off for a
 // document-level door: a tab-scoped link is then refused (fail closed,
 // docs/specs/013-workspace/tab-scoped-share-links.md).
-//
-// A Community post's link is refused too unless the door passes `COMMUNITY_CONTENT`
-// (docs/specs/025-community/community.md "Viewing a post's document"): the link is a content-only pass,
-// so the document, its tabs, images and copy serve it, and comments, history, the timeline and any door
-// added later do not. Fail closed, like the tab scope.
-export const COMMUNITY_CONTENT = { community: true } as const;
-type GateOptions = { community?: boolean };
 
 export function gateRead(
   ctx: RouteContext,
@@ -129,7 +122,6 @@ export function gateRead(
   documentOwnerId: string,
   documentTeamId: string | null = null,
   tabId?: string,
-  opts: GateOptions = {},
 ): Promise<boolean> {
   return canReadDocument(
     ctx.env,
@@ -144,7 +136,6 @@ export function gateRead(
     // (docs/specs/013-workspace/team-shared-documents.md access trust boundary).
     ctx.verifiedAccountId,
     tabId,
-    opts.community ?? false,
   );
 }
 
@@ -197,16 +188,13 @@ export function gateEdit(
 // The caller's grant on a document, scope included, for the doors that narrow
 // what they return to a scoped visitor's tab rather than refuse them
 // (docs/specs/013-workspace/tab-scoped-share-links.md). Null = no access.
-//
-// A Community post's link answers null unless the door passes `COMMUNITY_CONTENT` (see gateRead).
-export async function gateGrant(
+export function gateGrant(
   ctx: RouteContext,
   documentId: string,
   documentOwnerId: string,
   documentTeamId: string | null = null,
-  opts: GateOptions = {},
 ): Promise<DocumentGrant | null> {
-  const grant = await resolveDocumentGrant(
+  return resolveDocumentGrant(
     ctx.env,
     documentId,
     ctx.resolveOwner(),
@@ -216,7 +204,6 @@ export async function gateGrant(
     documentTeamId,
     ctx.verifiedAccountId,
   );
-  return grant?.community && !opts.community ? null : grant;
 }
 
 // Route-entry guards. Each resolves the caller / loads + authorises the
@@ -301,39 +288,15 @@ export const mayDeleteDocument = managesDocument;
 export async function missingDocument(ctx: RouteContext, documentId: string): Promise<Response> {
   const trashed = await getTrashedDocumentMeta(ctx.env, documentId);
   if (!trashed) return notFound();
-  const grant = await gateGrant(
-    ctx,
-    documentId,
-    trashed.ownerId,
-    trashed.teamId,
-    COMMUNITY_CONTENT,
-  );
+  const grant = await gateGrant(ctx, documentId, trashed.ownerId, trashed.teamId);
   return grant ? documentTrashed() : notFound();
 }
 
-// Owner-only resource: resolve the caller, load the document, and confirm
-// the caller owns it. Returns the document, or 400 (no owner) / 404
-// (missing) / 403 (foreign). 404-before-403 means a foreign id can't be
-// distinguished from a missing one until ownership is proven, but once
-// the row exists a non-owner gets 403 — matching every owner-only branch
-// documents.ts hand-rolled (DELETE :id, /folder, /share, /share-password,
-// /share/:code).
-export async function requireOwnedDocument(
-  ctx: RouteContext,
-  documentId: string,
-): Promise<DocumentDTO | Response> {
-  const owner = ctx.resolveOwner();
-  if (!owner) return missingAuth();
-  const existing = await getDocument(ctx.env, documentId);
-  if (!existing) return missingDocument(ctx, documentId);
-  if (!(await ownsDocument(ctx, existing))) return forbidden();
-  return existing;
-}
-
-// The share-link family's guard (docs/specs/013-workspace/team-shared-documents.md): the
-// same 400 / 404 / 403 ladder as requireOwnedDocument, but a joined member of a team
-// document passes as well as its owner, since the team's documents are all of theirs
-// to share.
+// The share-link family's guard (docs/specs/013-workspace/team-shared-documents.md): resolve the caller,
+// load the document, and confirm the caller manages it. Returns the document, or 400 (no owner) / 404
+// (missing) / 403 (foreign). 404-before-403 means a foreign id can't be distinguished from a missing one
+// until access is proven. A joined member of a team document passes as well as its owner, since the
+// team's documents are all of theirs to share.
 export async function requireManagedDocument(
   ctx: RouteContext,
   documentId: string,

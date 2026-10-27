@@ -4,7 +4,7 @@ LiveDoc runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The to
 
 ## Shape
 
-- Workers: `docs-nu-api`, `docs-nu-marketing`, `docs-nu-live`, `docs-nu-telemetry`, `docs-nu-help`, `docs-nu-community` and `docs-nu-router`. `docs-nu-mcp` is configured but not deployed (the deploy's MCP job is opt-in), so `mcp.docs.nu` does not answer yet.
+- Workers: `docs-nu-api`, `docs-nu-marketing`, `docs-nu-live`, `docs-nu-telemetry`, `docs-nu-help` and `docs-nu-router`. `docs-nu-mcp` is configured but not deployed (the deploy's MCP job is opt-in), so `mcp.docs.nu` does not answer yet.
 - Resources: D1 `docs-nu` and R2 `docs-nu-images` (western Europe), and the KV namespace `docs-nu-mcp-oauth` for the MCP worker.
 - Rate limiters use namespace ids `7001`-`7014`: the ids are account-wide, and other workers on the account hold `1001` onwards.
 - Hostnames: `docs.nu` is canonical. `www.docs.nu` is attached to the router too, and a zone redirect rule (301, path and query kept) sends it to the apex. The zone has Always Use HTTPS on. Both zone settings live in the dashboard, not in this repo.
