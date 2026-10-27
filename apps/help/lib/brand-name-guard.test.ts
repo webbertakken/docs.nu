@@ -80,8 +80,31 @@ function leftoverMentions(): Record<string, number> {
   return counts;
 }
 
+// The old name split across two elements ("live" in one, "diagram" in the next), as a wordmark is set, which the
+// plain search above cannot see. The share card carried it that way after the rename.
+function splitWordmarks(): string[] {
+  const out = execFileSync(
+    'git',
+    ['grep', '--untracked', '-I', '-i', '-l', '-e', '>live<', '--', '.'],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+    },
+  );
+  return out
+    .split('\n')
+    .filter(Boolean)
+    .filter((file) =>
+      /live\s*<\/[a-z]+>\s*<[a-z]+[^>]*>\s*diagram/i.test(readFileSync(join(ROOT, file), 'utf8')),
+    );
+}
+
 describe('the brand name', () => {
   it('says livediagram only where it means the upstream project', () => {
     expect(leftoverMentions()).toEqual(UPSTREAM_MENTIONS);
+  });
+
+  it('never sets the old name as a split wordmark', () => {
+    expect(splitWordmarks()).toEqual([]);
   });
 });

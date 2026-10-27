@@ -1,6 +1,8 @@
+import { isValidElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import { cardSubtitle, CARD_SUBTITLE_MAX } from './social-card';
+import { cardSubtitle, CARD_SUBTITLE_MAX, renderSocialCard } from './social-card';
 
 describe('cardSubtitle', () => {
   it('keeps text that already fits', () => {
@@ -23,5 +25,34 @@ describe('cardSubtitle', () => {
 
   it('cuts a single unbroken word at the limit', () => {
     expect(cardSubtitle('x'.repeat(200), 10)).toBe(`${'x'.repeat(9)}…`);
+  });
+});
+
+// The share card every link preview shows (docs/specs/004-interface-design/brand-mark.md "Wordmark"; the purpose,
+// docs/specs/001-project-vision/purpose.md): the LiveDoc wordmark and LiveDoc's words, never the old product's.
+describe('renderSocialCard', () => {
+  // The card's text, read from its element tree (no markup to strip), with non-breaking spaces as spaces.
+  const textOf = (node: unknown): string => {
+    if (typeof node === 'string' || typeof node === 'number') return String(node);
+    if (Array.isArray(node)) return node.map(textOf).join('');
+    if (isValidElement<{ children?: unknown }>(node)) return textOf(node.props.children);
+    return '';
+  };
+  const card = renderSocialCard();
+  const html = renderToStaticMarkup(card);
+  const text = () => textOf(card).replace(/\u00a0/g, ' ');
+
+  // The card's renderer (next/og) sets a gap between two spans; Doc's margin closes it, so the two read as one
+  // word, as wide as plain "LiveDoc" (measured: 150px either way at 44px).
+  it('sets the wordmark as Live in the accent, then Doc, closed up into one word', () => {
+    expect(html).toMatch(
+      /<span style="color:#0284c7">Live<\/span><span style="margin-left:-5px">Doc<\/span>/,
+    );
+  });
+
+  it('speaks of documents, not diagrams or drawing', () => {
+    expect(text()).toContain('Documents together, live.');
+    expect(text()).toContain('No sign-up. Open the link and start.');
+    expect(text()).not.toMatch(/diagram|drawing/i);
   });
 });
