@@ -236,6 +236,9 @@ export type UserPreferences = {
   // (Play or Cancel), so each offers itself once ever. Surfaced in Settings as Tours › Show Me, one switch
   // per kind (inverted). Read through lib/element-tours.
   elementTourKinds?: ElementTourKind[];
+  // The toured kinds whose element tour this person asked to be offered (Settings › Tours › Show Me); none by
+  // default, so no Show Me sits beside the selection toolbar until they opt in (lib/element-tours.ts).
+  elementTourOffers?: ElementTourKind[];
   // Counts every element tour as answered while Power user mode is on (lib/tour-tracks.ts); written by its preset.
   elementToursSeen?: boolean;
   // Documents this user has hidden from the Explorer's Recent list

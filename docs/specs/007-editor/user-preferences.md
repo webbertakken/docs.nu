@@ -285,6 +285,9 @@ type UserPreferences = {
   // Element tours (docs/specs/007-editor/element-tours.md): the toured element kinds whose offer has been answered
   // (Play or Cancel). Surfaced in Settings as Tours › Show Me, one switch per kind (inverted).
   elementTourKinds?: ElementTourKind[];
+  // The toured kinds whose element tour this person opted in to (a Settings switch turned on); none by default,
+  // so no element tour is offered until they opt in.
+  elementTourOffers?: ElementTourKind[];
   // Counts every element tour as answered while Power user mode is on; written by its preset.
   elementToursSeen?: boolean;
   // The presenter settings (docs/specs/012-collaboration/presentation-mode.md "Presenter settings"), as one object,
@@ -806,9 +809,10 @@ and the dialog stays as the one complete, browsable index of them.
 
   Below the mode tours, **Show Me** (element tours, named Show Me in the interface) is its own section, a closed
   accordion naming how many are on ([Element tours](element-tours.md#settings)): **Show Me on Every Element**, built
-  as Plan Tours is (`tourTracksSwitch`) against `elementToursSeen` and `elementTourKinds`, with one switch per toured
-  kind nested under it, named for the element (**Sankey Diagram**). Element tours
-  need no relaunch: the offer shows the next time such an element is selected. A category may mark any section
+  against `elementToursSeen`, `elementTourKinds` and `elementTourOffers`, with one switch per toured kind nested
+  under it, named for the element (**Sankey Diagram**). Every one reads off until the person opts in: on opts the
+  kind in and forgets its answer, off answers it. Element tours need no relaunch: the offer shows the next time such
+  an element is selected. A category may mark any section
   closed this way (`collapsedSections`); Settings opened on one of its rows opens it.
 
   **Toggle groups.** Several related switches that share one description are
