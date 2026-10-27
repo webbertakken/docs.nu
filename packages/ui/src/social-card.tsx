@@ -73,7 +73,7 @@ export function renderSocialCard(opts?: SocialCardOptions) {
         }}
       >
         {/* The brand lockup: the full Page Stack mark, then the wordmark with
-            "live" in the sky-600 accent the marketing Brand uses. */}
+            "Live" in the sky-600 accent the marketing Brand uses, then "Doc". */}
         <div
           style={{
             fontSize: 44,
@@ -87,8 +87,8 @@ export function renderSocialCard(opts?: SocialCardOptions) {
         >
           <img src={MARK_DATA_URI} width={64} height={64} alt="" />
           <div style={{ display: 'flex' }}>
-            <span style={{ color: '#0284c7' }}>live</span>
-            <span>diagram</span>
+            <span style={{ color: '#0284c7' }}>Live</span>
+            <span>Doc</span>
           </div>
         </div>
 
@@ -124,7 +124,7 @@ export function renderSocialCard(opts?: SocialCardOptions) {
               <span>{opts.title}</span>
             ) : (
               <>
-                <span>Diagram together,&nbsp;</span>
+                <span>Documents together,&nbsp;</span>
                 <span style={{ color: '#0284c7' }}>live</span>
                 <span>.</span>
               </>
@@ -163,7 +163,7 @@ export function renderSocialCard(opts?: SocialCardOptions) {
           >
             docs.nu
           </div>
-          <div>{opts?.footer ?? 'No sign-up. Open the link, start drawing.'}</div>
+          <div>{opts?.footer ?? 'No sign-up. Open the link and start.'}</div>
         </div>
       </div>
     </div>

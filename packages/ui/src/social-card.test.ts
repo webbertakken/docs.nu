@@ -1,6 +1,7 @@
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import { cardSubtitle, CARD_SUBTITLE_MAX } from './social-card';
+import { cardSubtitle, CARD_SUBTITLE_MAX, renderSocialCard } from './social-card';
 
 describe('cardSubtitle', () => {
   it('keeps text that already fits', () => {
@@ -23,5 +24,22 @@ describe('cardSubtitle', () => {
 
   it('cuts a single unbroken word at the limit', () => {
     expect(cardSubtitle('x'.repeat(200), 10)).toBe(`${'x'.repeat(9)}…`);
+  });
+});
+
+// The share card every link preview shows (docs/specs/004-interface-design/brand-mark.md "Wordmark"; the purpose,
+// docs/specs/001-project-vision/purpose.md): the LiveDoc wordmark and LiveDoc's words, never the old product's.
+describe('renderSocialCard', () => {
+  const text = (html: string) => html.replace(/<[^>]+>/g, '').replace(/&nbsp;|\u00a0/g, ' ');
+  const html = renderToStaticMarkup(renderSocialCard());
+
+  it('sets the wordmark as Live in the accent, then Doc', () => {
+    expect(html).toMatch(/<span style="color:#0284c7">Live<\/span><span>Doc<\/span>/);
+  });
+
+  it('speaks of documents, not diagrams or drawing', () => {
+    expect(text(html)).toContain('Documents together, live.');
+    expect(text(html)).toContain('No sign-up. Open the link and start.');
+    expect(text(html)).not.toMatch(/diagram|drawing/i);
   });
 });
