@@ -194,6 +194,16 @@ R2 is a Cloudflare-only binding. Self-hosters on alternative runtimes (Node, Bun
 
 ## Reference index
 
+Where it lives ([Document storage](../006-document/document-storage.md)):
+
+- `image_refs` is in each document's room, written in the same transaction as the tab body it projects; the rules
+  below (what a reference is, replace, copy, compare-and-swap) hold there unchanged.
+- D1 keeps `document_images` (`document_id`, `image_id`): each document's whole set of placed images, replaced by
+  the room's outbox when the set changes, so it trails a save by up to about a minute.
+- Retention, the usage map and the placement grants read `document_images`; the byte endpoint also asks the
+  document's room whether it places the image, so an image placed a moment ago serves at once.
+- The reference backfill (`image_refs_backfill`) goes with the move: every room indexes its tabs as it moves.
+
 Which images a tab places lives in its `tabs.data` body, and that stays the source of truth. `image_refs` is a projection of it that SQL can query without reading a single tab body, so retention, the usage map and share-visitor image reads scale with the number of references, not with the bytes of every tab in the store.
 
 ```sql

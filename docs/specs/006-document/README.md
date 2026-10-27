@@ -6,6 +6,8 @@ Follow the references below only as needed; never upfront.
 - ./document-branches.md - when a document has named live copies beside main: starting, naming, viewing, comparing, merging (pages by character, diagrams by element), unmerged changes, discarding and restoring
 - ./file-tab.md - when any file (an image, a PDF, a script) lives in LiveDoc as a document: the file tab kind, its bytes, previews, whole-file changes, limits
 - ./document-structure.md - when working on Document structure: Documents contain tabs; elements can link across tabs
+- ./document-storage.md - when touching where a document's content is stored or read: one SQLite-backed Durable Object per document (`DocumentRoom`) holds its content; D1 keeps the listing and the cross-document indexes its outbox feeds
+- ./document-storage-move.md - when moving existing documents' content from D1 into their rooms: the one-shot move, its verification, rollback and the later drop
 - ./per-tab-storage.md - when working on Per-tab storage: Split tabs into their own D1 rows so autosave scope shrinks
 - ./tab-document-many-to-many.md - when working on Tab ↔ document many-to-many: Link table so a tab can live in multiple documents
 - ./tab-folders.md - when working on Tab folders: Group a document's tabs into one-level named folders that fan out from one chip

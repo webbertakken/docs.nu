@@ -108,6 +108,7 @@ The editor is real:
 
 ## Next
 
+- **Document content in Durable Objects** ([Document storage](../006-document/document-storage.md), [Moving content into rooms](../006-document/document-storage-move.md), [Content search](../013-workspace/content-search.md)): specified; each document's content moves into its own room, D1 keeps the listing, and the Explorer finds documents by what they hold.
 - **Pages and wikis** ([Markdown tab](../031-markdown/markdown-tab.md), [File tab](../006-document/file-tab.md), [Native files](../027-repositories/native-files.md), [Wiki](../032-wikis/wiki.md), [Links](../032-wikis/links.md)): specified, nothing built. Markdown as a native tab kind edited together live and synced byte for byte, any file as a document, and global and project wikis synced both ways with their repositories.
 - **Documents in repositories, in three outcomes, in this order** ([Repository link](../027-repositories/repository-link.md), [Native files](../027-repositories/native-files.md), [Branch binding](../027-repositories/branch-binding.md), [Document branches](../006-document/document-branches.md), [Committed files](../027-repositories/committed-files.md)): specified, nothing built.
   1. **Local copies**: a live two-way sync between LiveDoc and a folder of plain files, without git. The global wiki moves into LiveDoc and is edited there and in its files alike.

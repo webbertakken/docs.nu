@@ -12,37 +12,61 @@ The migration sequences as items #13 → #14 → #15 → #16 in the post-prototy
 
 ## Data model
 
-New table:
+Each document's content lives in its own room ([Document storage](document-storage.md)), so a tab in two documents
+is a tab in two rooms.
+Every document holding a shared tab keeps its own copy of it under the same tab id, lists the other holders, and the
+holders keep their copies in step.
 
-```sql
-CREATE TABLE document_tabs (
-  document_id  TEXT    NOT NULL,
-  tab_id      TEXT    NOT NULL,
-  order_index INTEGER NOT NULL,
-  added_at    INTEGER NOT NULL,
-  PRIMARY KEY (document_id, tab_id),
-  FOREIGN KEY (document_id) REFERENCES diagrams(id) ON DELETE CASCADE,
-  FOREIGN KEY (tab_id)     REFERENCES tabs(id)     ON DELETE CASCADE
-);
+In each room's SQLite:
 
-CREATE INDEX document_tabs_by_document ON document_tabs(document_id, order_index);
-CREATE INDEX document_tabs_by_tab     ON document_tabs(tab_id);
-```
+- `tabs` holds the body ([Per-tab storage](per-tab-storage.md)), with no pointer to any document.
+- `document_tabs` holds the tab's place in this document: `order_index`, `added_at` and the per-document `folder`
+  ([Tab folders](tab-folders.md)), so each document orders and files a shared tab its own way.
+- `tab_shares` lists, per shared tab, the **other** documents holding it.
+- `share_outbox` holds what this document still owes the other holders: a tab's body, a join, a leave.
 
-`order_index` lives on the link, not on the tab — two documents that share a tab can order it independently. `added_at` lets us surface "added to this document on date X" later. A later migration (0018, [Tab folders](tab-folders.md)) adds a nullable `folder` column to this table for the same reason: tab-folder membership is per-document, so a shared tab can be foldered in one document and loose in another.
+A **holder** is a document holding a shared tab; a **shared tab** is a tab with at least one other holder.
 
-The link is the only place a tab meets a document. `tabs` holds the body (`id, name, data, updated_at`, [Per-tab storage](per-tab-storage.md)) and no pointer to any document: migration 0049 dropped the original `tabs.document_id` and `tabs.order_index`, which 0011 had backfilled `document_tabs` from. That column's `ON DELETE CASCADE` meant deleting the document a tab was created in destroyed the tab in every other document, even after it had been removed from that first document.
+### Keeping the copies in step
+
+- **A write** to a shared tab (a save, a rename, a Q&A board vote, an agent's changeset, a comment through the api)
+  queues a `body` send to every other holder, from a trigger on `tabs`, so no write path can forget it.
+- **Sent when quiet.** The room's alarm sends the queue a few seconds after the document goes quiet, each send a call
+  to the holder's room carrying the tab's name and body, its write time and the holders the sender knows.
+  It is not held to the D1 push's once a minute: it is a call between rooms, not a D1 write.
+- **The later write wins.** A holder takes a body only when it is later than its own copy, by write time, then (two
+  writes in the same millisecond) by content, so every holder settles on the same one.
+  A copy taken in updates the tab's stats, image references and outbox as a local write does.
+- **No echo.** A holder taking a copy sends it on only to holders the sender did not list; that is also how a holder
+  that joined a moment ago hears of a write made by one that has not yet heard of it.
+- **Joining.** Add to Document runs in the target's room: it reads the tab and its holders from the document it was
+  added from, stores the copy at the end of the target's tab order, then has the source record the join.
+  The source lists the target, tells the other holders, and sends the target the tab again if it changed meanwhile.
+- **Leaving.** Removing the tab from one document tells the other holders and drops nothing of theirs.
+- **Purging.** Purging a document (the [Trash](../013-workspace/trash.md)'s purge, Take Offline, deleting an
+  account) tells each holder of each of its shared tabs first.
+- **Gone.** A holder that no longer holds the tab, or no longer exists, answers `gone` when next sent it, and is
+  dropped then; so a missed leave heals on the next write.
+- **Trash.** Trashing a document changes none of this: its shared tabs stay in step until it is purged.
+- **Failures.** A send that fails stays queued and is tried again a minute later.
+- **Not realtime across documents.** A document open in another window shows another holder's write on reload, as it
+  always did.
+
+A tab with Plan content or a Sheet is never added to another document
+([Plan mode](../026-plan/plan-mode.md), [Sheet](../029-sheets/sheet.md)), so items and sheets are never shared.
 
 ### Tab lifecycle
 
-- **Create tab** — insert one row into `tabs`, one row into `document_tabs` pointing it at the owning document.
-- **Add tab to another document** — `INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES (?, ?, ?, ?)`. No change to `tabs`. Edits to the tab propagate to every document referencing it.
-- **Remove tab from a document** — `DELETE FROM document_tabs WHERE document_id = ? AND tab_id = ?`. If no rows remain referencing the tab, the `tabs` row AND every collaboration-index and `image_refs` row keyed by that tab id are dropped in the same call (atomic on the server). When other documents still link the tab, the body stays, so any document that still surfaces the tab still surfaces its content. The server handles it with full knowledge of the link-count.
-- **Delete a document** — the document-scoped form of removing a tab, in one atomic batch (`documentRemovalStatements`, `apps/api/src/db/document-removal.ts`): every tab linked into the document that no other document links is dropped with its collaboration-index and `image_refs` rows, then the document row goes and `ON DELETE CASCADE` from `documents` removes its link rows. A tab another document still links survives whole there: body, index rows, and its order and folder in that document. Every path that removes a document takes this route: the [Trash](../013-workspace/trash.md) purge (a delete first moves the document to the Trash, touching no tab, and removal happens 30 days later, or at once on Delete permanently / Empty Trash / `?permanent=true`), Take Offline ([Offline Mode](offline-mode.md)), and account deletion (which keeps a tab shared into a document another owner holds). While a document waits in the Trash its tabs stay where they are, so a tab it shares carries on in the other document as before.
+- **Create tab**: a `tabs` row and a `document_tabs` row in the document's room.
+- **Add tab to another document**: joining, above.
+- **Remove tab from a document**: its rows in that room go, with its stats, image references and changesets; the
+  other holders are told and keep theirs.
+- **Delete a document**: the [Trash](../013-workspace/trash.md); purging it is leaving for every shared tab, then
+  the room deletes everything it stores.
 
 ### Shared-tab notice
 
-A **shared tab** is a tab linked into more than one document. Removing a document is safe for its shared tabs, but the user cannot see that from the document alone, so the Take Offline confirmation says it first. (A delete asks nothing: it goes to the Trash with an Undo, and a restore brings back the document's links to its tabs.) `GET /api/documents/:id/shared-tabs` answers `{ sharedTabs: { tabs, documents } }`: how many of the document's tabs are also linked elsewhere, and how many distinct other documents hold them. It answers exactly the callers who may delete the document (owner, or a joined member of its team; `mayDeleteDocument`), in the DELETE's order: 400 with no caller, 404 when missing, 403 otherwise.
+A **shared tab** is a tab linked into more than one document. Removing a document is safe for its shared tabs, but the user cannot see that from the document alone, so the Take Offline confirmation says it first. (A delete asks nothing: it goes to the Trash with an Undo, and a restore brings back the document's links to its tabs.) `GET /api/documents/:id/shared-tabs` answers `{ sharedTabs: { tabs, documents } }`: how many of the document's tabs other documents also hold, and how many distinct other documents, read from its room's tab shares. It answers exactly the callers who may delete the document (owner, or a joined member of its team; `mayDeleteDocument`), in the DELETE's order: 400 with no caller, 404 when missing, 403 otherwise.
 
 The confirmation reads the counts before it opens (`fetchSharedTabsNotice`, `apps/live/lib/shared-tabs-notice.ts`) and, when `tabs` is above zero, adds one sentence:
 
@@ -52,23 +76,25 @@ Singular forms read _"1 of its tabs is ... it stays there"_ and _"1 other docume
 
 ## API impact
 
-`GET /api/documents/:id` returns the document with its tab summaries — the join now goes through `document_tabs`:
-
-```sql
-SELECT t.id, t.name, dt.order_index
-  FROM document_tabs dt
-  JOIN tabs t ON t.id = dt.tab_id
- WHERE dt.document_id = ?
- ORDER BY dt.order_index ASC
-```
-
-`PUT /api/documents/:id/tabs/:tabId` (tab body write) is unchanged on the surface but the implementation no longer scopes by `document_id` to find the row — the tab id is globally unique. The caller's permission to edit the tab is still gated by their permission on at least one document that contains it (owner of any containing document, OR an edit-role share code for any containing document).
-
-`POST /api/documents/:id/tabs/:tabId/link` adds an existing tab into the target document. Idempotent: same `(document_id, tab_id)` pair returns 200 without duplicating the link row (`ON CONFLICT DO NOTHING`). Auth: caller must own the target document AND own at least one document that already contains the tab (so a stranger can't graft a tab they have no read access to). Returns the resulting tab summary. The tab menu's **Add to Document** row opens a centred modal (`AddTabToDocumentDialog`): a filterable tile grid of the caller's other documents, replacing the old in-menu list; each tile shows the destination document's cached snapshot preview ([Document SVG snapshots](document-snapshots.md), the same `DocumentThumbnail` the Explorer rows use, versioned by `savedAt`) over its name, so the user picks by recognising the canvas rather than parsing a list of near-identical names; picking one calls this endpoint. Because only the document's owner can make the link, the row offers no destinations, and so is disabled, on a document the caller doesn't own (an Editor on someone else's link), in an offline document and in a workbench (`addToDocumentTargets`, `apps/live/lib/add-to-document-targets.ts`); it never offers a call that can only fail. Subsequent edits on either side write to the same `tabs.data` row, so changes propagate.
-
-`DELETE /api/documents/:id/tabs/:tabId` now removes the link row first, then drops the underlying `tabs` row only when no other `document_tabs` entries reference it. Unlinking a shared tab from one document leaves the body intact for the others.
-
-`POST /api/documents/:id/copy` (item #9) copies tab bodies into freshly minted tab rows — that doesn't change. The new tab rows get fresh ids and their own `document_tabs` entries pointing at the new document, and any tab / element link, and any Tab Window's tab, in a copied body is re-pointed from the source tab id to its copy's (`remapTabLinks`, `@livedoc/document`). Cloning vs linking is a deliberate distinction: copy = independent content, link = shared content.
+- `GET /api/documents/:id` lists the document's tabs from its room, in its `document_tabs` order.
+- `PUT /api/documents/:id/tabs/:tabId` writes the copy in this document's room; the outbox carries it to the others.
+- `POST /api/documents/:id/tabs/:tabId/link` with `{ from }` adds the tab from `from` into the target `:id`.
+  Idempotent: a repeat answers the tab as the target holds it.
+  The caller must own the target and `from`, and `from` must hold the tab: 403 otherwise, 404 for a tab or `from`
+  that is not there, 400 with no `from` or with `from` the target itself.
+  It answers `{ tab }`, the summary of the tab as the target now holds it.
+- The tab menu's **Add to Document** row opens a centred modal (`AddTabToDocumentDialog`): a filterable tile grid of
+  the caller's other documents, each tile the destination's cached snapshot preview
+  ([Document SVG snapshots](document-snapshots.md)) over its name; picking one calls the link with this document as
+  `from`.
+  Because only the document's owner can link, the row offers no destinations, and so is disabled, on a document the
+  caller doesn't own, in an offline document and in a workbench (`addToDocumentTargets`,
+  `apps/live/lib/add-to-document-targets.ts`); it never offers a call that can only fail.
+- `DELETE /api/documents/:id/tabs/:tabId` removes the tab from this document only; the other holders keep theirs.
+- `POST /api/documents/:id/copy` copies the tab bodies into fresh tabs of the new document, shared with nothing, in
+  one transaction in the new document's room, and re-points any tab or element link, and any Tab Window's tab, from
+  the source tab id to its copy's (`remapTabLinks`, `@livedoc/document`).
+  Copy is independent content; link is shared content.
 
 ## Phasing
 
@@ -79,8 +105,11 @@ This spec describes the destination. The implementation lands in stages so each 
 3. **Item #15 — drop denormalised participant metadata from `change_log`** — `participant_name` and `participant_color` columns were copy-on-write snapshots for offline-friendly reads. Drop and join through `participants` on read instead.
 4. **Item #16 — 90-day `change_log` cron** — daily worker cron deletes `change_log` rows older than 90 days. Capacity guard against unbounded growth as collab traffic ramps up.
 5. **Migration 0049 — drop `tabs.document_id` + `tabs.order_index`.** A table rebuild; `tabs` is a parent table, so the migration parks and restores every `document_tabs`, `change_log` and collaboration-index row across the drop. Document deletion became link-aware first ("Delete a document" above), since with the column gone nothing else removes a tab its last document leaves behind.
+6. **Content into rooms** ([Document storage](document-storage.md)): each document's tabs move into its own room;
+   a tab in two documents becomes a copy in each, kept in step between the rooms (above).
 
 ## Cross-references
 
 - [API app](../015-api/api.md) — endpoint dispatch + the underlying schema overview. Updated alongside the migration in #13.
 - [Per-tab storage](per-tab-storage.md) — the per-tab storage rationale. Still applies; the link table is orthogonal to where the tab body lives.
+- [Document storage](document-storage.md) — the room each document's tabs live in.

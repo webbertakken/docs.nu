@@ -70,7 +70,7 @@ general diagram tab's environment.
 
 | Dimension | Key        | Chip label  | Values and their labels                                                                                                              |
 | --------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Text      | (none)     | (the field) | Free words, matched against names and the text of pages ([Wiki](../032-wikis/wiki.md#search))                                        |
+| Text      | (none)     | (the field) | Free words, matched against names and contents ([Content search](content-search.md))                                                 |
 | Opens in  | `opens-in` | Opens in    | `diagram` Diagram, `draw` Draw, `pages` Pages, `plan` Plan, `workshop` Workshop: the editor mode the document was created to open in |
 | Kind      | `kind`     | Kind        | `event-storming` Event Storming, `markdown` Markdown, `file` File: the first tab's kind when the document was created                |
 | Template  | `template` | Template    | `retrospective` Retrospective, `kanban` Kanban: the template family the document was made from                                       |
@@ -108,6 +108,8 @@ general diagram tab's environment.
 - A dimension may hold **several values**: they combine with **or** (`template:retrospective,kanban` lists both
   families). Dimensions combine with **and**.
 - Text matches the document's **name**: every word must appear in it, ignoring case and accents.
+- Text also matches what a document holds, in the api, and those documents join the list under the name matches
+  ([Content search](content-search.md)).
 - The empty lens matches everything.
 
 ## Token grammar

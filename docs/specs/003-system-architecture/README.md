@@ -2,6 +2,7 @@
 
 Follow the references below only as needed; never upfront.
 
+- ./one-live-service.md - when adding a kind of document or tab, or anything that would hold document content: one live service (the api Worker) for every kind, never a service, Durable Object class or index of its own
 - ./domain-language.md - when naming or adding anything that distinguishes documents or tabs: mode (how a tab is worked on), kind (what a tab is, only Event Storming differs) and template (what a document was made from); design decisions, never interchangeable; and This Browser, the one name for a document saved only in this browser
 - ./testing.md - when working on Testing: Vitest across the monorepo; shared config; co-located unit tests plus jsdom hook and component tests; per-workspace coverage shape
 - ./source-layout.md - when working on Source layout: group `apps/live` components + hooks by domain: `apps/live` components + hooks grouped into domain subdirectories (canvas/dialogs/panels/…)

@@ -9,6 +9,7 @@ Follow the references below only as needed; never upfront.
 - ./tags.md - when implementing or changing tags: the tables, `/api/tags`, the owner migration merge, the provider and its optimistic writes, the picker, chips, the Tags page, sidebar rows and the panel section
 - ./shape-libraries.md - when implementing or changing shape libraries: the table, api, import landing, My shapes, the Explorer page
 - ./explorer-filters.md - when implementing or changing Explorer filters: the lens grammar, matching, suggestions, view models, `q`
+- ./content-search.md - when implementing or changing content search: the D1 trigram index, its writes from the room's drain, the access-filtered read, ranking, snippets and the Explorer's merge
 - ./explorer-structure.md - when implementing or changing the Explorer sidebar: layout rules, rows, ARIA tree keyboard hook
 - ./explorer-details-view.md - when implementing or changing the Details view: `tab_stats` and its writers, `DocumentSummary.stats`, the backfill, the preview hint, the table and its sort
 - ./explorer-home.md - when changing Home's data: recording opens, Jump Back In's Within reach set, the `/api/home` read and its wire
