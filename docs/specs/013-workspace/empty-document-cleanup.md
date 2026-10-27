@@ -27,6 +27,10 @@ empty document has none. A tab shared with another document
 counts in every document that holds it: if it has elements, an article or a form,
 none of those documents is empty.
 
+The test runs in each document's room, which pushes its answer with the listing's content summary
+([Document storage](../006-document/document-storage.md#the-content-summary)); the daily clean-up reads that answer
+and never a tab. A document whose room has not pushed a summary is kept.
+
 A document is **stale** when it was created at least 30 days ago and has not
 been saved for 30 days. Saving an empty document (renaming a tab, changing a
 tab's settings, clearing its last element) starts the 30 days again, so a

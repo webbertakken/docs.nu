@@ -42,7 +42,7 @@ research) or **recalled** (from general knowledge; treat as indicative, check be
 | -------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------- |
 | Element-level ops `add / update / remove / reorder`, applied by id   | `packages/document/src/element-ops.ts`                 | The unit an agent changeset is made of; `diffToElementOps` derives them     |
 | Per-field deltas (`comment-add`, `comment-resolve`, `check`, ...)    | `packages/document/src/element-deltas.ts`              | Comments from the agent travel as deltas and merge, never clobber           |
-| Ordered room: `seq` within a persisted `epoch`, bounded op log (256) | `apps/api/src/document-room.ts`                        | Gives every agent change a total order and a cursor                         |
+| Ordered room: `seq` within a persisted `epoch`, bounded op log (256) | `apps/api/src/document-room/document-room.ts`          | Gives every agent change a total order and a cursor                         |
 | Collaboration ledger merged into tab PUTs after `X-Room-Cursor`      | `room-client.ts` `mergeRoomLedger`, `collab-ledger.ts` | The exact mechanism that can keep an agent's change alive through a race    |
 | Internal `POST /mutation` on the room (worker-originated op)         | `document-room.ts` (accepts only `el-delta` today)     | The seam a REST changeset enters the room through                           |
 | One-time room ticket minted over authenticated REST                  | `routes/document-room-routes.ts`                       | How a CLI process with an `lvd_` token can open a socket for `wait`/`watch` |
@@ -379,7 +379,7 @@ Webber decided these four forks; specs should record them when this work is spec
   `collab-race-hardening.md`, `resync-without-reload.md`, `comment-mentions.md`,
   `comment-pin.md`; `docs/specs/007-editor/live-app.md` (concurrent-selection lock);
   `docs/specs/015-api/mcp-server.md`, `public-api-and-tokens.md`;
-  `apps/api/src/document-room.ts`, `room-client.ts`, `routes/document-room-routes.ts`,
+  `apps/api/src/document-room/document-room.ts`, `room-client.ts`, `routes/document-room-routes.ts`,
   `routes/document-subresource-routes.ts`; `apps/live/app/document/[id]/useRoomConnection.ts`;
   `packages/document/src/element-ops.ts`, `element-deltas.ts`, `comments.ts`;
   `packages/api-schema/src/room-messages.ts`, `index.ts` (`ParticipantPresence`).

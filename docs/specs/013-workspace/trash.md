@@ -154,16 +154,18 @@ A tab can sit in several documents
 ([Tab ↔ document many-to-many](../006-document/tab-document-many-to-many.md)).
 Trashing a document does not touch its tabs, so a tab it shares with another
 document carries on there, editable as before. When the trashed document is
-purged, its tabs go the way every document delete takes them: a tab no other
-document holds goes, a tab still linked elsewhere stays exactly where it is.
+purged, its room tells the other holders of its shared tabs and deletes its own copies; every other holder keeps
+the tab exactly where it is ([Tab ↔ document many-to-many](../006-document/tab-document-many-to-many.md)).
 
 ## The purge
 
 The api worker's daily `0 3 * * *` cron purges every document that has been in
 the Trash for 30 days or more, through the same removal that deletes a document
 today (`documentRemovalStatements`), plus its snapshot, its Timeline events and
-its realtime room's storage ([API](../015-api/api.md) "Purging a room"), where the
-collaboration ledger kept the text of its comments, ideas and answers.
+its room's storage: its content and the collaboration ledger, which kept the text of its comments, ideas and
+answers ([Document storage](../006-document/document-storage.md#purging-and-copying)).
+A room that cannot be reached keeps a purge tombstone in D1, tried again by the next daily run; the document
+cannot be opened meanwhile.
 The purge is set-based and capped per run, so a backlog drains over a few days
 rather than overrunning one invocation. It logs how many it purged.
 

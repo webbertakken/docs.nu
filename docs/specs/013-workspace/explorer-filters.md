@@ -70,7 +70,7 @@ general diagram tab's environment.
 
 | Dimension | Key        | Chip label  | Values and their labels                                                                                                              |
 | --------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Text      | (none)     | (the field) | Free words, matched against names and the text of pages ([Wiki](../032-wikis/wiki.md#search))                                        |
+| Text      | (none)     | (the field) | Free words, matched against names and contents ([Content search](content-search.md))                                                 |
 | Opens in  | `opens-in` | Opens in    | `diagram` Diagram, `draw` Draw, `pages` Pages, `plan` Plan, `workshop` Workshop: the editor mode the document was created to open in |
 | Kind      | `kind`     | Kind        | `event-storming` Event Storming, `markdown` Markdown, `file` File: the first tab's kind when the document was created                |
 | Template  | `template` | Template    | `retrospective` Retrospective, `kanban` Kanban: the template family the document was made from                                       |
@@ -120,8 +120,8 @@ general diagram tab's environment.
      neighbouring letters swapped. A word under 4 letters is never forgiven a typo.
 - A word, in the text or in a name, is a run of letters and digits; anything else separates words, so "q3-plan"
   is the two words "q3" and "plan".
-- Only names are matched. Searching inside documents comes later in the same field, folding text the same way;
-  there, a name match ranks above a match in content only.
+- Text also matches what a document holds, in the api, folding text the same way
+  ([Content search](content-search.md)); how those matches show is the search's presentation.
 - The empty lens matches everything.
 
 ### Order

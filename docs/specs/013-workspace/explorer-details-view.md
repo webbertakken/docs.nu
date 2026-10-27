@@ -111,15 +111,14 @@ by any column.
   as the tab, by every write (a save, a changeset, a seeded create, a participant or Q&A write, a
   duplicate's copied tab), so it never drifts from the tab it describes. It lives apart from the tab
   body so a list reads the numbers without reading any body.
-- **A document's stats** are summed over the tabs it links: elements, comments and bytes added, the
+- **A document's stats** are summed in its room over the tabs it holds and pushed to the listing's content summary
+  ([Document storage](../006-document/document-storage.md#the-content-summary)), up to about a minute after a write: elements, comments and bytes added, the
   mode taken from the tab written last. `GET /api/documents` and each team library carry them on every
   row as `stats` (`{ mode, elements, comments, bytes }`), or `null` when the document has no tabs or one
   of its tabs has no record yet.
-- **Counting the existing tabs.** Tabs written before the stats existed are counted by the daily
-  cron, a bounded number per run, each dated by the tab's own last write so a counted old tab never
-  outranks a newer one for Type; a write that lands meanwhile keeps its own count, never overwritten
-  by the older one. The api logs
-  `tab-stats: backfilled n=<n> left=<more|none>` each run.
+- **Counting the existing tabs.** A tab with no stats record is counted when its document moves into its room
+  ([Moving content into rooms](../006-document/document-storage-move.md)), dated by the tab's own last write; the
+  daily backfill goes with the move.
 
 ## Not in scope
 

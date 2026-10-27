@@ -118,8 +118,8 @@ is made from it when first drawn). A sheet nothing references is **unreferenced*
 - **Cut**, an agent's or another person's removal, deleting a layer, a tab, or Fill Tab's clearing do not ask and
   do not delete the sheet: it is kept, so a paste, an Undo or a restore brings it back.
 - A sheet unreferenced for 30 days is deleted for good. The api notes the moment a sheet becomes unreferenced (or
-  referenced again) as the tabs that reference it are saved, and deletes, once a day, the sheets unreferenced for
-  longer.
+  referenced again) as the tabs that reference it are saved, and the document's room deletes, in its daily upkeep,
+  the sheets unreferenced for longer ([Document storage](../006-document/document-storage.md#upkeep)).
 - Deleting a document for good deletes its sheets with it.
 
 ## Who may do what
