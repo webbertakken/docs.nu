@@ -62,13 +62,13 @@ Kinds and keys (`outbox (id INTEGER PRIMARY KEY, document_id TEXT NOT NULL, kind
 UNIQUE (document_id, kind, key))`; `document_id` is the room's one document, kept as a column like every content
 table's so the content modules' SQL, and the tests' shared tables, stay keyed by document):
 
-| Kind      | Key        | Written by triggers on                                                                                                   | Drain pushes                                                              |
-| --------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| `summary` | `''`       | `document` insert/update, `document_tabs` insert/update/delete, `tabs` update, `tab_stats` insert/update                 | `documents.content_summary`, `documents.saved_at`                         |
-| `tab`     | the tab id | `tabs` update, `document_tabs` insert/delete, `sheet_cells` insert/update/delete on a sheet that tab owns or references   | collab rows, form link names, search text, tab-scoped link cleanup on delete |
-| `cards`   | `''`       | `items` insert/update/delete, `plan_board_statuses` insert/update/delete                                                 | `inbox_cards`, card threads in `collab_threads`                           |
-| `items`   | `''`       | `items` insert/update/delete                                                                                             | the items' search text (`~items` row)                                     |
-| `images`  | `''`       | `image_refs` insert/delete, `document_tabs` insert/delete                                                                | `document_images` (whole set), grants                                     |
+| Kind      | Key        | Written by triggers on                                                                                                  | Drain pushes                                                                 |
+| --------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `summary` | `''`       | `document` insert/update, `document_tabs` insert/update/delete, `tabs` update, `tab_stats` insert/update                | `documents.content_summary`, `documents.saved_at`                            |
+| `tab`     | the tab id | `tabs` update, `document_tabs` insert/delete, `sheet_cells` insert/update/delete on a sheet that tab owns or references | collab rows, form link names, search text, tab-scoped link cleanup on delete |
+| `cards`   | `''`       | `items` insert/update/delete, `plan_board_statuses` insert/update/delete                                                | `inbox_cards`, card threads in `collab_threads`                              |
+| `items`   | `''`       | `items` insert/update/delete                                                                                            | the items' search text (`~items` row)                                        |
+| `images`  | `''`       | `image_refs` insert/delete, `document_tabs` insert/delete                                                               | `document_images` (whole set), grants                                        |
 
 A tab's insert and delete key through its `document_tabs` row (a room's tab is its document's alone).
 

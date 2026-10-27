@@ -65,7 +65,8 @@ CREATE TRIGGER IF NOT EXISTS sheet_refs_added AFTER INSERT ON sheet_refs ...    
 
 A room holds one document, so the triggers find the sheet by `sheet_id` alone, and stamp
 `CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER)` (milliseconds, SQLite's clock). A change to a cell keys
-its sheet's tab in the room's outbox (`tab`, the tab id), so the tab's search text follows its cells.
+every tab that owns or references its sheet in the room's outbox (`tab`, the tab id), so each tab's search text
+follows the cells (`sheetSearchInputs`, the content search blueprint).
 
 - Field classification: `title`, `input`, `format` are user content (never logged); `updated_by` is display
   identity (a hashed id, `itemPersonId`); the rest is structural.
