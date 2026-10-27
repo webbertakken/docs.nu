@@ -15,6 +15,7 @@ Scope, by file:
 | `apps/api/migrations/0051_diagram_trash.sql`                                     | `documents.trashed_at` + the partial index                                                  |
 | `apps/api/src/db/trash.ts`                                                       | `trashDocument`, `restoreDocument`, `purgeDocuments`, `purgeExpiredTrash`, `listTrash`, ... |
 | `apps/api/src/db/document-removal.ts`                                            | `documentRemovalStatements` takes `{ ids }` besides one id / one owner                      |
+| `apps/api/src/room-purge-client.ts`                                              | `purgeRooms`: each purged document's room deletes its storage, content included             |
 | `apps/api/src/db/documents.ts`                                                   | `getDocument`, `getDocumentMeta`, both lists: live rows only                                |
 | `apps/api/src/db/{shared,favourites,collab-index,tabs,timeline}.ts`              | The reads that leave trashed documents out; `documentsTimelineSweepStatement`               |
 | `apps/api/src/timeline/expiry-sweep.ts`                                          | No expiry warning for a trashed document's links                                            |
@@ -84,8 +85,10 @@ Invariants:
   only. A trashed document is reachable solely through `db/trash.ts`.
 - **I2** `purgeDocuments` only ever removes trashed rows (`trashedIdsIn` filters its input), so no caller can
   skip the Trash by naming an id. The permanent path trashes first.
-- **I3** Trashing touches no child row: tabs, links, share links, stars, collaboration index,
-  Timeline events and image references all stay until the purge.
+- **I3** Trashing touches no child row and never reaches the room's content: the room's tabs, items, sheets and
+  image references, and D1's share links, stars, collaboration index, placed images (`document_images`), content
+  summary and Timeline events all stay until the purge. A restore finds them as they were; the restored document's
+  read asks its room for the outline as any read does.
 - **I4** Restore returns the document to `folder_id` only when that folder still exists in its scope (the
   owner's personal tree, or its team's); otherwise the root of that space. `team_id` and `owner_id` are unchanged.
 - **I5** A trashed document cannot be written: every write door answers 410, the room refuses the upgrade,
@@ -156,7 +159,11 @@ the rest. Deleting a team re-homes its trashed documents to their owners' person
 room`; open sessions still stop at their next save (I5).
 - **E6** The cloud Trash is unreachable from the view: the local group still shows; a toast says so.
 - **E7** A ticket minted before the delete: refused at the upgrade (I1).
-- **E8** A tab shared with another document: untouched by the trash, kept by the purge.
+- **E8** A tab shared with another document: untouched by the trash, kept by the purge (the other document's
+  room holds its own copy of the tab).
+- **E12** A room unreachable at the purge: the D1 rows are gone (the purge stands), the room keeps its storage,
+  logged `[room-purge] did not reach the room`; the retry is the purge tombstones' (plan 0006, phase B5, not built
+  yet), so until then the room's storage stays unreached, with no D1 row that can open it.
 - **E9** A purge backlog over one run's cap: oldest first, the rest the next day.
 - **E10** A page-session tombstone for a restored document: cleared by `unmarkDocumentDeleted`.
 - **E11** An owner re-creating (POST) a trashed id, e.g. a stale client: 410, nothing written.
@@ -174,10 +181,11 @@ room`; open sessions still stop at their next save (I5).
 ## Performance and limits
 
 - Trash / restore: one UPDATE each. The list: one query over the partial index plus joins.
-- The purge is set-based: per batch one `SELECT` (`trashedIdsIn`) and one D1 batch of three statements
-  (the Timeline sweep and the two removal statements) over a `json_each` id list, plus one R2 bulk delete.
-  `TRASH_PURGE_BATCH = 100`, `TRASH_PURGE_MAX_BATCHES = 20`: at most 2,000 purges and about 100 D1 queries
-  and 20 R2 calls per cron run, far inside the 1,000 subrequests of one invocation.
+- The purge is set-based: per batch one `SELECT` (`trashedIdsIn`) and one D1 batch of four statements
+  (the Timeline sweep and the three removal statements; the rest of a document's D1 rows cascade) over a
+  `json_each` id list, then `purgeRooms` (`ROOM_PURGE_CONCURRENCY = 10` rooms at once, `ROOM_PURGE_TIMEOUT_MS =
+3,000` each), plus one R2 bulk delete. `TRASH_PURGE_BATCH = 100`, `TRASH_PURGE_MAX_BATCHES = 20`: at most 2,000
+  purges, about 100 D1 queries, 2,000 room calls and 20 R2 calls per cron run.
 - The Timeline filter adds a primary-key probe per event row read; the favourites read a probe per star.
 
 ## Presentation and UX
@@ -214,42 +222,44 @@ room`; open sessions still stop at their next save (I5).
 
 ## Observability
 
-| Fingerprint                                                | Where                     |
-| ---------------------------------------------------------- | ------------------------- |
-| `[trash] trashed <id>`                                     | api, DELETE               |
-| `[trash] deleted permanently <id>`                         | api, `?permanent=true`    |
-| `[trash] bypassed for take offline <id>`                   | api, owner's Take Offline |
-| `[trash] purged from the Trash <id>`                       | api, purge one            |
-| `[trash] emptied <personal / team:id> <n>`                 | api, Empty Trash          |
-| `[trash] restored <id>`                                    | api, restore              |
-| `[trash] snapshot delete failed <n> <err>`                 | api, purge, warn          |
-| `trash sweep: purged <n> documents` / `trash sweep failed` | api, cron                 |
-| `[room-broadcast] document-trashed did not reach the room` | api, warn                 |
-| `[trash] purged local <n>`                                 | editor, local sweep       |
-| `[trash] cloud list failed`                                | editor, warn              |
-| `[trash] open document is in the Trash`                    | editor                    |
-| `Http410.<Action>.DocumentTrashed`                         | editor error telemetry    |
+| Fingerprint                                                   | Where                     |
+| ------------------------------------------------------------- | ------------------------- |
+| `[trash] trashed <id>`                                        | api, DELETE               |
+| `[trash] deleted permanently <id>`                            | api, `?permanent=true`    |
+| `[trash] bypassed for take offline <id>`                      | api, owner's Take Offline |
+| `[trash] purged from the Trash <id>`                          | api, purge one            |
+| `[trash] emptied <personal / team:id> <n>`                    | api, Empty Trash          |
+| `[trash] restored <id>`                                       | api, restore              |
+| `[trash] snapshot delete failed <n> <err>`                    | api, purge, warn          |
+| `trash sweep: purged <n> documents` / `trash sweep failed`    | api, cron                 |
+| `[room-broadcast] document-trashed did not reach the room`    | api, warn                 |
+| `[room-purge] did not reach the room` / `[room-purge] purged` | api, purge                |
+| `[trash] purged local <n>`                                    | editor, local sweep       |
+| `[trash] cloud list failed`                                   | editor, warn              |
+| `[trash] open document is in the Trash`                       | editor                    |
+| `Http410.<Action>.DocumentTrashed`                            | editor error telemetry    |
 
 ## Testing
 
-| Rule                                                    | Test                                                       |
-| ------------------------------------------------------- | ---------------------------------------------------------- |
-| Clock, days left, expiry                                | `packages/api-schema/src/trash.test.ts`                    |
-| Migration, trash / restore / purge / list / cron sweep  | `apps/api/src/db/trash.test.ts` (real SQLite)              |
-| Timeline hidden and back, Activity, tab link, expiry    | `apps/api/src/db/trash-surfaces.test.ts`                   |
-| Every door: 410 / 404 / lists / DELETE semantics / room | `apps/api/src/routes/trash-doors.test.ts`                  |
-| `/api/trash` authority                                  | `apps/api/src/routes/trash.test.ts`                        |
-| Cron wiring and log                                     | `apps/api/src/scheduled-trash.test.ts`                     |
-| Room closes with 4004; never relays a client's op       | `apps/api/src/document-room.test.ts`, `room-scope.test.ts` |
-| Permanent removal keeps shared tabs                     | `apps/api/src/db/document-delete.test.ts`                  |
-| OpenAPI parity                                          | `apps/api/src/openapi/*.test.ts`                           |
-| MCP tools                                               | `apps/mcp/src/tools.test.ts`                               |
-| Local Trash                                             | `apps/live/lib/offline/offline-trash.test.ts`              |
-| Client calls, dispatch, 410                             | `apps/live/lib/api/trash.test.ts`                          |
-| Room client stops on 4004                               | `apps/live/lib/api/room.test.ts`                           |
-| Grouping and copy                                       | `apps/live/lib/trash-groups.test.ts`                       |
-| End to end                                              | `apps/live/e2e/trash.spec.ts`                              |
-| Telemetry coverage and charts                           | `apps/live` telemetry tests, `apps/telemetry` suites       |
+| Rule                                                     | Test                                                       |
+| -------------------------------------------------------- | ---------------------------------------------------------- |
+| Clock, days left, expiry                                 | `packages/api-schema/src/trash.test.ts`                    |
+| Migration, trash / restore / purge / list / cron sweep   | `apps/api/src/db/trash.test.ts` (real SQLite)              |
+| Timeline hidden and back, Activity, tab link, expiry     | `apps/api/src/db/trash-surfaces.test.ts`                   |
+| Every door: 410 / 404 / lists / DELETE semantics / room  | `apps/api/src/routes/trash-doors.test.ts`                  |
+| `/api/trash` authority                                   | `apps/api/src/routes/trash.test.ts`                        |
+| Cron wiring and log                                      | `apps/api/src/scheduled-trash.test.ts`                     |
+| Room closes with 4004; never relays a client's op        | `apps/api/src/document-room.test.ts`, `room-scope.test.ts` |
+| Permanent removal takes the room's content, nothing else | `apps/api/src/db/document-delete.test.ts`                  |
+| A purge reaches the room                                 | `apps/api/src/db/trash.test.ts`                            |
+| OpenAPI parity                                           | `apps/api/src/openapi/*.test.ts`                           |
+| MCP tools                                                | `apps/mcp/src/tools.test.ts`                               |
+| Local Trash                                              | `apps/live/lib/offline/offline-trash.test.ts`              |
+| Client calls, dispatch, 410                              | `apps/live/lib/api/trash.test.ts`                          |
+| Room client stops on 4004                                | `apps/live/lib/api/room.test.ts`                           |
+| Grouping and copy                                        | `apps/live/lib/trash-groups.test.ts`                       |
+| End to end                                               | `apps/live/e2e/trash.spec.ts`                              |
+| Telemetry coverage and charts                            | `apps/live` telemetry tests, `apps/telemetry` suites       |
 
 ## Constants and configuration
 
