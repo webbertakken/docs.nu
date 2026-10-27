@@ -43,11 +43,11 @@ describe('HomeWelcome', () => {
     expect(track).toHaveBeenLastCalledWith('Home', 'Selected', 'Welcome.Blank');
   });
 
-  it('offers eight popular templates and a way to all of them', () => {
+  it('offers four popular templates and a way to all of them', () => {
     render(<HomeWelcome offerSignIn={false} />);
     const popular = section('Popular Templates');
     const starts = popular.querySelectorAll('[data-welcome-start]');
-    expect(starts).toHaveLength(8);
+    expect(starts).toHaveLength(4);
     expect(starts[0]!.getAttribute('href')).toBe('/new?template=mindmap');
     fireEvent.click(starts[0]!);
     expect(track).toHaveBeenLastCalledWith('Home', 'Selected', 'Welcome.Template');
