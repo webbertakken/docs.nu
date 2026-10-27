@@ -174,7 +174,7 @@ export const categories: Category[] = [
     title: 'Palette',
     description:
       'Your launchpad for everything on the canvas: every element and palette setting explained.',
-    articleCount: 36,
+    articleCount: 37,
     kind: 'feature',
     groups: ['Everyday Elements', 'Diagram Kits', 'Workshop Kits', 'Palette Settings'],
   },
@@ -1444,6 +1444,15 @@ export const articles: Article[] = [
     category: 'Palette',
     categorySlug: 'palette',
     group: 'Palette Settings',
+  },
+  {
+    slug: 'popular',
+    title: 'Popular',
+    description: "The twelve tiles Diagram mode's palette opens on, right on the strip.",
+    keywords: 'popular common default quick tiles landing everyday shapes strip diagram first',
+    category: 'Palette',
+    categorySlug: 'palette',
+    group: 'Everyday Elements',
   },
   {
     slug: 'toolbar-layout',

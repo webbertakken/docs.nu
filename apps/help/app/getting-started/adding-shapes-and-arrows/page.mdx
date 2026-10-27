@@ -1,7 +1,7 @@
 import { ArticleLayout } from '@/components/ArticleLayout';
 import { helpMetadata } from '@/lib/seo';
 import { QuickConnect } from '@/components/illustrations/getting-started';
-import { ToolbarCategoryFlyout } from '@/components/illustrations/toolbar-layout';
+import { PopularGrid } from '@/components/illustrations/palette-categories';
 
 export const metadata = helpMetadata({
   title: 'Adding Shapes and Arrows',
@@ -16,15 +16,15 @@ Almost every diagram is shapes joined by arrows. LiveDoc makes both fast: shapes
 
 ## Adding shapes
 
-The **Palette**, the strip across the top of the canvas, holds everything you can add. It starts with the selection mode (Select, Hand, Eraser and the rest), then the palette's categories by name: in Diagram mode **Shapes**, **Write**, **Draw**, **Diagrams**, **Concepts**, **Layout**, **Icons**, **Tech** and **Media** ([Plan mode](/help/canvas/plan-mode/) has no palette). Rest the pointer on a category, or click it, and its elements open in a panel underneath. See [where each one lives](/help/palette/tools/) for the full map.
+The **Palette**, the strip across the top of the canvas, holds everything you can add. It starts with the selection mode (Select, Hand, Eraser and the rest), then the category picker and that category's tiles. In Diagram mode it opens on [Popular](/help/palette/popular/): the square, circle, diamond, text, arrow and the rest of the twelve tiles most reached for. Pick **Shapes** in the category picker for the cylinder, hexagon, stadium and many more. See [where each one lives](/help/palette/tools/) for the full map.
 
-<Figure caption="Rest on Shapes and its panel opens under it: the basics, the flowchart shapes and more.">
-  <ToolbarCategoryFlyout />
+<Figure caption="Popular in Diagram mode: twelve tiles, right on the strip.">
+  <PopularGrid />
 </Figure>
 
 <Step n={1}>
-  Rest on **Shapes** in the palette, or click it: its panel opens with the square, circle, diamond,
-  cylinder, hexagon, stadium and many more, in groups. Click the one you want.
+  Click the shape you want on the palette strip, or pick **Shapes** in the category picker first for
+  the rest of them.
 </Step>
 
 <Step n={2}>

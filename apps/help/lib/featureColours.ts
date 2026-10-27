@@ -218,6 +218,7 @@ export const FEATURE_ENTITY_HEX: Record<string, string> = {
   'quick-add-on-hover': '#10b981',
   'auto-attach-arrows': '#10b981',
   'alignment-guides': '#22c55e',
+  popular: '#eab308',
   'toolbar-layout': '#0ea5e9',
   // Explorer section guides
   'list-and-card-views': '#0ea5e9',

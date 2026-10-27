@@ -30,6 +30,7 @@ import {
   lucideToggleRight,
   lucideUsers,
   lucideVote,
+  lucideZap,
 } from '@livedoc/icons/lucide';
 import { topCategorySlug } from '@livedoc/help-registry';
 import { Prims, Glyph as UiGlyph } from '@livedoc/ui';
@@ -1517,6 +1518,13 @@ export const FEATURE_ICONS: Record<string, ReactNode> = {
       <path d="M12 3v18" />
       <rect x="4" y="6" width="6" height="4" rx="1" />
       <rect x="14" y="14" width="6" height="4" rx="1" />
+    </Glyph>
+  ),
+  // Palette → Popular: a bolt, for the tiles one click away. Not the tab's own sparkles, which the
+  // AI Tools card already wears here.
+  popular: (
+    <Glyph>
+      <Prims prims={lucideZap} />
     </Glyph>
   ),
   // The strip across the top of a window, with the menu button's three bars

@@ -73,7 +73,7 @@ function Pill({
   );
 }
 
-// Diagram's category bar, in order: category names, and '|' for the divider between the bands.
+// The category bar (Workshop, Pages), in order: category names, and '|' for the divider between the bands.
 const BAR: readonly string[] = [
   'Shapes',
   'Draw',
@@ -94,8 +94,8 @@ const nameW = (name: string) => Math.round(name.length * charW + 2 * PAD);
 /** The width of the strip drawn by `Strip`. */
 export const STRIP_W = 49 + BAR.reduce((w, c) => w + (c === '|' ? 9 : nameW(c)), 0) + 36;
 
-/** The palette strip as Diagram's category bar, top-left corner at (x, y), STRIP_W wide and 32 tall: the selection
- *  mode, the categories by name (`open` pressed, its flyout showing), and Search. */
+/** The palette strip as the category bar (Workshop, Pages), top-left corner at (x, y), STRIP_W wide and 32 tall:
+ *  the selection mode, the categories by name (`open` pressed, its flyout showing), and Search. */
 export function Strip({ x, y, open }: { x: number; y: number; open?: string }) {
   const slots = barSlots(x);
   const end = slots.at(-1)!.left + slots.at(-1)!.w;
