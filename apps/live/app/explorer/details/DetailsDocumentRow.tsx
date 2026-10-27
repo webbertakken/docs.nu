@@ -28,6 +28,7 @@ import {
 import { formatSize } from './details-format';
 import { useSnapshotPrefetch } from './useSnapshotPrefetch';
 import { DocumentRowTags } from '@/components/tags/DocumentRowTags';
+import { HighlightedTitle } from '@/app/explorer/lens/TitleHighlight';
 
 // One document in the Details view (docs/specs/013-workspace/explorer-details-view.md): its columns,
 // the preview on a resting hover over the row, the drag source, and the `⋯` menu shown on hover.
@@ -94,7 +95,7 @@ export function DetailsDocumentRow(props: DocumentEntryProps) {
               {...preview.focusProps}
               className="truncate text-sm font-medium text-slate-900 transition hover:text-brand-700 dark:text-slate-100 dark:hover:text-brand-300"
             >
-              {doc.name}
+              <HighlightedTitle name={doc.name} />
             </Link>
           )}
           {/* The reader's tags (docs/specs/013-workspace/tags.md "Where tags show"), right after the name. */}

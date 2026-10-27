@@ -3,8 +3,8 @@
 
 import {
   LENS_DIMENSIONS,
-  compileLens,
   documentSubject,
+  rankByLens,
   sharedSubject,
   type Lens,
   type LensIssue,
@@ -52,16 +52,18 @@ export function isLensSet(lens: Lens): boolean {
   return lens.text.length > 0 || LENS_DIMENSIONS.some((d) => lens.filters[d].length > 0);
 }
 
-/** The rows the lens matches, in their order. */
+/** The rows the lens matches, best match first; ties, and every row of a lens without text, keep
+ *  their order. `limit` takes that many matches in the rows' own order before ranking them, so
+ *  Recent ranks its 12 newest matches rather than finding the 12 best. */
 export function narrowRows<R extends LensRow>(
   rows: readonly R[],
   lens: Lens,
   viewerId: string,
   now: number,
+  limit = Number.POSITIVE_INFINITY,
 ): R[] {
-  if (!isLensSet(lens)) return [...rows];
-  const matches = compileLens(lens, now);
-  return rows.filter((row) => matches(lensSubjectOf(row, viewerId)));
+  if (!isLensSet(lens)) return rows.slice(0, limit);
+  return rankByLens(rows, lens, now, (row) => lensSubjectOf(row, viewerId), limit);
 }
 
 /**

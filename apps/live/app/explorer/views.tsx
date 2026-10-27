@@ -19,6 +19,7 @@ import { DISMISS_SHARED, DismissSharedIcon } from '@/components/primitives/dismi
 import { HoverCard } from '@livedoc/ui';
 import { LIST_CARD } from '@/components/primitives/surface-classes';
 import type { AccessLevel } from '@livedoc/api-schema';
+import { HighlightedTitle } from '@/app/explorer/lens/TitleHighlight';
 
 // The Shared with you chip per level (docs/specs/013-workspace/share-roles.md).
 const SHARED_CHIP: Record<AccessLevel, string> = {
@@ -191,7 +192,9 @@ export function SharedList({
                 empty={s.empty}
                 shareCode={s.shareCode}
               />
-              <span className="truncate">{s.name}</span>
+              <span className="truncate">
+                <HighlightedTitle name={s.name} />
+              </span>
             </Link>
             <span className="hidden truncate text-xs text-slate-500 sm:block dark:text-slate-400">
               {s.ownerName || 'Unknown owner'}
