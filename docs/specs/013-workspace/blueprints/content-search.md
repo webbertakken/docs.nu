@@ -20,7 +20,8 @@ Name matching is the fuzzy title matcher's ([Explorer filters](explorer-filters.
 
 ### Writing the index (from the room's drain)
 
-- Tab unit, tab present: `text = cap(tabSearchText(tab, sheetsOf(tab)), SEARCH_TEXT_MAX_CHARS)`;
+- Tab unit, tab present: `text = cap(tabSearchText(tab, sheetSearchInputs(referenced)), SEARCH_TEXT_MAX_CHARS)`, where
+  `referenced` are the sheets its `sheet_refs` name and `sheetSearchInputs` is `@livedoc/sheets` `search-inputs.ts`;
   `INSERT INTO content_search (document_id, tab_id, tab_name, text, folded) VALUES (...) ON CONFLICT (document_id,
 tab_id) DO UPDATE SET tab_name = excluded.tab_name, text = excluded.text, folded = excluded.folded
 WHERE content_search.text IS NOT excluded.text OR content_search.tab_name IS NOT excluded.tab_name`, guarded by

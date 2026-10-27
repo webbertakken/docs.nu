@@ -229,3 +229,63 @@ describe('drainOutbox', () => {
     expect(row.saved_at).toBe(5);
   });
 });
+
+describe('the content search rows the drain writes', () => {
+  const searchRows = (d1: DatabaseSync) =>
+    d1
+      .prepare(
+        'SELECT tab_id, tab_name, text FROM content_search WHERE document_id = ? ORDER BY tab_id',
+      )
+      .all(D)
+      .map((r) => ({ ...r }));
+
+  it("writes each tab's search text, its sheets' inputs included", async () => {
+    const { env, room, d1 } = harness();
+    addTabs(room, 1);
+    room.exec(`INSERT INTO sheets (document_id, id, tab_id, title, layout, rev, created_at, updated_at, updated_by)
+      VALUES ('${D}', 's1', 't0', 'Budget', '{"rows":["r1"],"cols":["c1","c2"]}', 1, 1, 1, '{}');
+      INSERT INTO sheet_cells (document_id, sheet_id, row_id, col_id, input)
+      VALUES ('${D}', 's1', 'r1', 'c1', '{"s":"Rent"}'), ('${D}', 's1', 'r1', 'c2', '{"f":{"src":"=1"}}');
+      INSERT INTO sheet_refs (tab_id, sheet_id) VALUES ('t0', 's1');`);
+    await drainOutbox(env, D);
+    expect(searchRows(d1)).toEqual([
+      { tab_id: 't0', tab_name: 'Tab 0', text: 'Tab 0\ne0\nhi\nRent' },
+    ]);
+  });
+
+  it('re-indexes a tab when a cell of a sheet it references changes', async () => {
+    const { env, room, d1 } = harness();
+    addTabs(room, 1);
+    room.exec(`INSERT INTO sheets (document_id, id, tab_id, title, layout, rev, created_at, updated_at, updated_by)
+      VALUES ('${D}', 's1', 't0', 'Budget', '{"rows":["r1"],"cols":["c1"]}', 1, 1, 1, '{}');
+      INSERT INTO sheet_refs (tab_id, sheet_id) VALUES ('t0', 's1');`);
+    await drainOutbox(env, D);
+    room.exec(
+      `INSERT INTO sheet_cells (document_id, sheet_id, row_id, col_id, input) VALUES ('${D}', 's1', 'r1', 'c1', '{"s":"Groceries"}')`,
+    );
+    expect(outboxKeys(room)).toContain('tab:t0');
+    await drainOutbox(env, D);
+    expect(searchRows(d1)[0]?.text).toContain('Groceries');
+  });
+
+  it('deletes the row of a tab that has gone', async () => {
+    const { env, room, d1 } = harness();
+    addTabs(room, 2);
+    await drainOutbox(env, D);
+    room.exec("DELETE FROM document_tabs WHERE tab_id = 't1'");
+    room.exec("DELETE FROM tabs WHERE id = 't1'");
+    await drainOutbox(env, D);
+    expect(searchRows(d1).map((r) => r.tab_id)).toEqual(['t0']);
+  });
+
+  it("writes the cards' text under ~items, and deletes it with the last card", async () => {
+    const { env, room, d1 } = harness();
+    room.exec(`INSERT INTO items (document_id, id, type, item_key, rank, fields, rev, created_at, updated_at, created_by, updated_by)
+      VALUES ('${D}', 'i1', 'task', 1, 'a', '{"title":"Fix the boiler","status":"todo"}', 1, 1, 1, 'o', 'o')`);
+    await drainOutbox(env, D);
+    expect(searchRows(d1)).toEqual([{ tab_id: '~items', tab_name: '', text: 'Fix the boiler' }]);
+    room.exec("DELETE FROM items WHERE id = 'i1'");
+    await drainOutbox(env, D);
+    expect(searchRows(d1)).toEqual([]);
+  });
+});

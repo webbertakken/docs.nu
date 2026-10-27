@@ -280,17 +280,23 @@ ${outboxTrigger(
 ${outboxTrigger(
   'outbox_cell_insert',
   'AFTER INSERT ON sheet_cells',
-  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = NEW.document_id AND id = NEW.sheet_id",
+  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = NEW.document_id AND id = NEW.sheet_id" +
+    " UNION SELECT dt.document_id, 'tab', r.tab_id FROM sheet_refs r JOIN document_tabs dt ON dt.tab_id = r.tab_id" +
+    ' WHERE r.sheet_id = NEW.sheet_id',
 )}
 ${outboxTrigger(
   'outbox_cell_update',
   'AFTER UPDATE ON sheet_cells',
-  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = NEW.document_id AND id = NEW.sheet_id",
+  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = NEW.document_id AND id = NEW.sheet_id" +
+    " UNION SELECT dt.document_id, 'tab', r.tab_id FROM sheet_refs r JOIN document_tabs dt ON dt.tab_id = r.tab_id" +
+    ' WHERE r.sheet_id = NEW.sheet_id',
 )}
 ${outboxTrigger(
   'outbox_cell_delete',
   'AFTER DELETE ON sheet_cells',
-  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = OLD.document_id AND id = OLD.sheet_id",
+  "SELECT document_id, 'tab', tab_id FROM sheets WHERE document_id = OLD.document_id AND id = OLD.sheet_id" +
+    " UNION SELECT dt.document_id, 'tab', r.tab_id FROM sheet_refs r JOIN document_tabs dt ON dt.tab_id = r.tab_id" +
+    ' WHERE r.sheet_id = OLD.sheet_id',
 )}
 `;
 

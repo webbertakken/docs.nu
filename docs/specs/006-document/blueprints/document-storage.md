@@ -59,13 +59,13 @@ Kinds and keys (`outbox (id INTEGER PRIMARY KEY, document_id TEXT NOT NULL, kind
 UNIQUE (document_id, kind, key))`; `document_id` is the room's one document, kept as a column like every content
 table's so the content modules' SQL, and the tests' shared tables, stay keyed by document):
 
-| Kind      | Key        | Written by triggers on                                                                                  | Drain pushes                                                |
-| --------- | ---------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `summary` | `''`       | `document` update, `document_tabs` insert/update/delete, `tab_stats` upsert                             | `documents.content_summary`, `documents.saved_at`           |
-| `tab`     | the tab id | `tabs` insert/update/delete, `document_tabs` insert/delete, `sheet_cells` change on a sheet of that tab | collab rows, search text, tab-scoped link cleanup on delete |
-| `cards`   | `''`       | `items` insert/update/delete, `plan_board_statuses` change                                              | `inbox_cards`, card threads in `collab_threads`             |
-| `items`   | `''`       | `items` insert/update/delete                                                                            | the items' search text                                      |
-| `images`  | `''`       | `image_refs` insert/delete                                                                              | `document_images` (whole set), grants                       |
+| Kind      | Key        | Written by triggers on                                                                                                  | Drain pushes                                                |
+| --------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `summary` | `''`       | `document` update, `document_tabs` insert/update/delete, `tab_stats` upsert                                             | `documents.content_summary`, `documents.saved_at`           |
+| `tab`     | the tab id | `tabs` insert/update/delete, `document_tabs` insert/delete, `sheet_cells` change on a sheet that tab owns or references | collab rows, search text, tab-scoped link cleanup on delete |
+| `cards`   | `''`       | `items` insert/update/delete, `plan_board_statuses` change                                                              | `inbox_cards`, card threads in `collab_threads`             |
+| `items`   | `''`       | `items` insert/update/delete                                                                                            | the items' search text                                      |
+| `images`  | `''`       | `image_refs` insert/delete                                                                                              | `document_images` (whole set), grants                       |
 
 - A trigger re-keys by `DELETE` then `INSERT` of `(kind, key)`, so a key written during a drain gets a new `id`.
 - **Scheduling**: after every write `onWrite` computes `nextFlushAt(now, lastFlushAt) =

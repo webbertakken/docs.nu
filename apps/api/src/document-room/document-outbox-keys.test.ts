@@ -124,6 +124,19 @@ describe('the outbox triggers', () => {
     expect(keys()).toEqual(['d:tab:t']);
   });
 
+  it('key every tab referencing a sheet when one of its cells changes', () => {
+    db.exec(`INSERT INTO tabs (id, name, data, updated_at, rev) VALUES ('u', 'U', '{}', 1, 1);
+      INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES ('d', 'u', 1, 1);
+      INSERT INTO sheets (document_id, id, tab_id, title, layout, rev, created_at, updated_at, updated_by)
+      VALUES ('d', 's', 't', 'S', '{}', 1, 1, 1, 'p');
+      INSERT INTO sheet_refs (tab_id, sheet_id) VALUES ('u', 's');`);
+    clear();
+    db.exec(
+      "INSERT INTO sheet_cells (document_id, sheet_id, row_id, col_id, input) VALUES ('d', 's', 'r', 'c', '1')",
+    );
+    expect(keys().sort()).toEqual(['d:tab:t', 'd:tab:u']);
+  });
+
   it('re-key a key written again, so a drain that read the old id leaves the new one', () => {
     const first = (
       db.prepare("SELECT id FROM outbox WHERE kind = 'tab' AND key = 't'").get() as {
