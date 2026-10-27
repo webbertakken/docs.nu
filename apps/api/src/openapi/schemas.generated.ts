@@ -1513,9 +1513,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
         required: ['minVersion'],
         type: 'object',
       },
-      communityEnabled: {
-        type: 'boolean',
-      },
       documentFormat: {
         type: 'number',
       },
@@ -2288,482 +2285,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       },
     },
     required: ['header', 'threads', 'elision'],
-    type: 'object',
-  },
-  CommunityAuthor: {
-    additionalProperties: false,
-    properties: {
-      color: {
-        type: 'string',
-      },
-      name: {
-        type: 'string',
-      },
-      picture: {
-        type: ['string', 'null'],
-      },
-    },
-    required: ['name', 'color', 'picture'],
-    type: 'object',
-  },
-  CommunityCategory: {
-    enum: [
-      'architecture',
-      'flows',
-      'planning',
-      'workshops',
-      'mindmaps',
-      'design',
-      'data',
-      'learning',
-      'infographics',
-      'art',
-      'other',
-    ],
-    type: 'string',
-  },
-  CommunityFacetsResponse: {
-    additionalProperties: false,
-    properties: {
-      categories: {
-        additionalProperties: false,
-        properties: {
-          architecture: {
-            type: 'number',
-          },
-          art: {
-            type: 'number',
-          },
-          data: {
-            type: 'number',
-          },
-          design: {
-            type: 'number',
-          },
-          flows: {
-            type: 'number',
-          },
-          infographics: {
-            type: 'number',
-          },
-          learning: {
-            type: 'number',
-          },
-          mindmaps: {
-            type: 'number',
-          },
-          other: {
-            type: 'number',
-          },
-          planning: {
-            type: 'number',
-          },
-          workshops: {
-            type: 'number',
-          },
-        },
-        type: 'object',
-      },
-      tags: {
-        items: {
-          additionalProperties: false,
-          properties: {
-            count: {
-              type: 'number',
-            },
-            tag: {
-              type: 'string',
-            },
-          },
-          required: ['tag', 'count'],
-          type: 'object',
-        },
-        type: 'array',
-      },
-      total: {
-        type: 'number',
-      },
-    },
-    required: ['total', 'categories', 'tags'],
-    type: 'object',
-  },
-  CommunityFeaturedResponse: {
-    additionalProperties: false,
-    properties: {
-      posts: {
-        items: {
-          $ref: '#/components/schemas/CommunityPost',
-        },
-        type: 'array',
-      },
-    },
-    required: ['posts'],
-    type: 'object',
-  },
-  CommunityLikeResponse: {
-    additionalProperties: false,
-    properties: {
-      likeCount: {
-        type: 'number',
-      },
-      liked: {
-        type: 'boolean',
-      },
-    },
-    required: ['likeCount', 'liked'],
-    type: 'object',
-  },
-  CommunityListResponse: {
-    additionalProperties: false,
-    properties: {
-      nextOffset: {
-        type: ['number', 'null'],
-      },
-      posts: {
-        items: {
-          $ref: '#/components/schemas/CommunityPost',
-        },
-        type: 'array',
-      },
-    },
-    required: ['posts', 'nextOffset'],
-    type: 'object',
-  },
-  CommunityMinePost: {
-    additionalProperties: false,
-    properties: {
-      anonymous: {
-        type: 'boolean',
-      },
-      author: {
-        $ref: '#/components/schemas/CommunityAuthor',
-      },
-      category: {
-        $ref: '#/components/schemas/CommunityCategory',
-      },
-      copyCount: {
-        type: 'number',
-      },
-      description: {
-        type: 'string',
-      },
-      documentId: {
-        type: 'string',
-      },
-      id: {
-        type: 'string',
-      },
-      likeCount: {
-        type: 'number',
-      },
-      liked: {
-        type: 'boolean',
-      },
-      publishedAt: {
-        type: 'number',
-      },
-      shareCode: {
-        type: 'string',
-      },
-      state: {
-        $ref: '#/components/schemas/CommunityPostState',
-      },
-      tags: {
-        items: {
-          type: 'string',
-        },
-        type: 'array',
-      },
-      title: {
-        type: 'string',
-      },
-      updatedAt: {
-        type: 'number',
-      },
-    },
-    required: [
-      'anonymous',
-      'author',
-      'category',
-      'copyCount',
-      'description',
-      'documentId',
-      'id',
-      'likeCount',
-      'liked',
-      'publishedAt',
-      'shareCode',
-      'state',
-      'tags',
-      'title',
-      'updatedAt',
-    ],
-    type: 'object',
-  },
-  CommunityMineResponse: {
-    additionalProperties: false,
-    properties: {
-      nextOffset: {
-        type: ['number', 'null'],
-      },
-      posts: {
-        items: {
-          $ref: '#/components/schemas/CommunityMinePost',
-        },
-        type: 'array',
-      },
-      totals: {
-        $ref: '#/components/schemas/CommunityMineTotals',
-      },
-    },
-    required: ['posts', 'nextOffset', 'totals'],
-    type: 'object',
-  },
-  CommunityMineTotals: {
-    additionalProperties: false,
-    properties: {
-      copies: {
-        type: 'number',
-      },
-      likes: {
-        type: 'number',
-      },
-      posts: {
-        type: 'number',
-      },
-    },
-    required: ['posts', 'likes', 'copies'],
-    type: 'object',
-  },
-  CommunityOwnPost: {
-    additionalProperties: false,
-    properties: {
-      anonymous: {
-        type: 'boolean',
-      },
-      author: {
-        $ref: '#/components/schemas/CommunityAuthor',
-      },
-      category: {
-        $ref: '#/components/schemas/CommunityCategory',
-      },
-      copyCount: {
-        type: 'number',
-      },
-      description: {
-        type: 'string',
-      },
-      id: {
-        type: 'string',
-      },
-      likeCount: {
-        type: 'number',
-      },
-      liked: {
-        type: 'boolean',
-      },
-      publishedAt: {
-        type: 'number',
-      },
-      shareCode: {
-        type: 'string',
-      },
-      state: {
-        $ref: '#/components/schemas/CommunityPostState',
-      },
-      tags: {
-        items: {
-          type: 'string',
-        },
-        type: 'array',
-      },
-      title: {
-        type: 'string',
-      },
-      updatedAt: {
-        type: 'number',
-      },
-    },
-    required: [
-      'anonymous',
-      'author',
-      'category',
-      'copyCount',
-      'description',
-      'id',
-      'likeCount',
-      'liked',
-      'publishedAt',
-      'shareCode',
-      'state',
-      'tags',
-      'title',
-      'updatedAt',
-    ],
-    type: 'object',
-  },
-  CommunityPost: {
-    additionalProperties: false,
-    properties: {
-      anonymous: {
-        type: 'boolean',
-      },
-      author: {
-        $ref: '#/components/schemas/CommunityAuthor',
-      },
-      category: {
-        $ref: '#/components/schemas/CommunityCategory',
-      },
-      copyCount: {
-        type: 'number',
-      },
-      description: {
-        type: 'string',
-      },
-      id: {
-        type: 'string',
-      },
-      likeCount: {
-        type: 'number',
-      },
-      liked: {
-        type: 'boolean',
-      },
-      publishedAt: {
-        type: 'number',
-      },
-      shareCode: {
-        type: 'string',
-      },
-      tags: {
-        items: {
-          type: 'string',
-        },
-        type: 'array',
-      },
-      title: {
-        type: 'string',
-      },
-      updatedAt: {
-        type: 'number',
-      },
-    },
-    required: [
-      'id',
-      'title',
-      'description',
-      'category',
-      'tags',
-      'likeCount',
-      'copyCount',
-      'publishedAt',
-      'updatedAt',
-      'shareCode',
-      'author',
-      'anonymous',
-      'liked',
-    ],
-    type: 'object',
-  },
-  CommunityPostInput: {
-    additionalProperties: false,
-    properties: {
-      anonymous: {
-        type: 'boolean',
-      },
-      category: {
-        $ref: '#/components/schemas/CommunityCategory',
-      },
-      description: {
-        type: 'string',
-      },
-      tags: {
-        items: {
-          type: 'string',
-        },
-        type: 'array',
-      },
-      title: {
-        type: 'string',
-      },
-    },
-    required: ['title', 'description', 'category', 'tags', 'anonymous'],
-    type: 'object',
-  },
-  CommunityPostResponse: {
-    additionalProperties: false,
-    properties: {
-      post: {
-        $ref: '#/components/schemas/CommunityPost',
-      },
-      related: {
-        items: {
-          $ref: '#/components/schemas/CommunityPost',
-        },
-        type: 'array',
-      },
-    },
-    required: ['post', 'related'],
-    type: 'object',
-  },
-  CommunityPostState: {
-    enum: ['listed', 'hidden'],
-    type: 'string',
-  },
-  CommunityReportInput: {
-    additionalProperties: false,
-    properties: {
-      note: {
-        type: ['string', 'null'],
-      },
-      reason: {
-        $ref: '#/components/schemas/CommunityReportReason',
-      },
-    },
-    required: ['reason'],
-    type: 'object',
-  },
-  CommunityReportReason: {
-    enum: ['spam', 'offensive', 'personal-info', 'copyright', 'other'],
-    type: 'string',
-  },
-  CommunityShareInfo: {
-    additionalProperties: false,
-    properties: {
-      author: {
-        $ref: '#/components/schemas/CommunityAuthor',
-      },
-      postId: {
-        type: 'string',
-      },
-    },
-    required: ['postId', 'author'],
-    type: 'object',
-  },
-  CommunitySitemapEntry: {
-    additionalProperties: false,
-    properties: {
-      id: {
-        type: 'string',
-      },
-      updatedAt: {
-        type: 'number',
-      },
-    },
-    required: ['id', 'updatedAt'],
-    type: 'object',
-  },
-  CommunitySitemapResponse: {
-    additionalProperties: false,
-    properties: {
-      posts: {
-        items: {
-          $ref: '#/components/schemas/CommunitySitemapEntry',
-        },
-        type: 'array',
-      },
-    },
-    required: ['posts'],
     type: 'object',
   },
   ConceptAnim: {
@@ -4799,10 +4320,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
   Document: {
     additionalProperties: false,
     properties: {
-      communityState: {
-        enum: ['listed', 'hidden', null],
-        type: ['string', 'null'],
-      },
       createdAt: {
         type: 'number',
       },
@@ -5014,9 +4531,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
   DocumentSummary: {
     additionalProperties: false,
     properties: {
-      communityListed: {
-        type: 'boolean',
-      },
       createdAt: {
         type: 'number',
       },
@@ -5099,7 +4613,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       },
     },
     required: [
-      'communityListed',
       'createdAt',
       'empty',
       'folderId',
@@ -12062,9 +11575,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       expiry: {
         $ref: '#/components/schemas/ShareLinkExpiry',
       },
-      purpose: {
-        $ref: '#/components/schemas/SharePurpose',
-      },
       role: {
         $ref: '#/components/schemas/ShareRole',
       },
@@ -12072,24 +11582,11 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
         type: ['string', 'null'],
       },
     },
-    required: [
-      'code',
-      'documentId',
-      'role',
-      'createdAt',
-      'expiry',
-      'expiresAt',
-      'tabId',
-      'purpose',
-    ],
+    required: ['code', 'documentId', 'role', 'createdAt', 'expiry', 'expiresAt', 'tabId'],
     type: 'object',
   },
   ShareLinkExpiry: {
     enum: ['never', 'week', 'month', 'sixMonths'],
-    type: 'string',
-  },
-  SharePurpose: {
-    enum: ['share', 'community'],
     type: 'string',
   },
   ShareRole: {
@@ -13770,8 +13267,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       'Api',
       'Client',
       'Warning',
-      'Liked',
-      'Unliked',
       'Reported',
       'Measured',
     ],
@@ -13817,7 +13312,6 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       'Plan',
       'Sheet',
       'Form',
-      'Community',
       'Timing',
     ],
     type: 'string',

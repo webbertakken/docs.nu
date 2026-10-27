@@ -9,7 +9,6 @@ import {
 } from 'react';
 import { documentIdFromPath, isEditorPath } from '@/lib/legacy-editor-path';
 import type { Tab } from '@livedoc/document';
-import type { CommunitySession } from './editor-realtime';
 import {
   apiListShareLinks,
   apiLoadDocument,
@@ -107,8 +106,6 @@ export function useIdentityBootstrap(opts: {
     setSelfParticipant: SetState<Participant>;
     setSessionRole: SetState<ShareRole>;
     setSessionShareCode: SetState<string | null>;
-    // The Community post a community link opened (docs/specs/025-community/community.md).
-    setSessionCommunity: SetState<CommunitySession | null>;
     // The one tab a tab-scoped link opens (docs/specs/013-workspace/tab-scoped-share-links.md); null = all.
     setSessionTabScope: (scope: string | null) => void;
     setSharedDocuments: SetState<SharedWithItem[]>;
@@ -187,7 +184,6 @@ export function useIdentityBootstrap(opts: {
       setSelfParticipant,
       setSessionRole,
       setSessionShareCode,
-      setSessionCommunity,
       setSessionTabScope,
       setSharedDocuments,
       setShareLinks,
@@ -464,13 +460,12 @@ export function useIdentityBootstrap(opts: {
         writeCachedShareGrant(shareCodeParam, resolution.shareGrant ?? null);
         if (resolution.shareGrant) setSessionSharePassword(resolution.shareGrant);
         {
-          const { document: fetched, role, tabId: scopeTabId, community } = resolution;
+          const { document: fetched, role, tabId: scopeTabId } = resolution;
           const session = resolveDocumentSession({
             documentOwnerId: fetched.ownerId,
             selfId: self.id,
             shareRole: role,
             shareCodeParam,
-            community: community !== null,
             embed,
           });
           const codeForVisitor = session.sessionShareCode;
@@ -493,15 +488,6 @@ export function useIdentityBootstrap(opts: {
           // writes can present it as authorisation. Owner accessing
           // via a share URL keeps null.
           setSessionShareCode(session.sessionShareCode);
-          // A Community post's link (docs/specs/025-community/community.md "Viewing a post's
-          // document"): no room, no name prompt, not added to Shared with you.
-          // The author too opens it read-only (resolveDocumentSession), with a way to their own board.
-          const viaCommunity = community !== null;
-          setSessionCommunity(
-            community
-              ? { ...community, ownDocumentId: fetched.ownerId === self.id ? fetched.id : null }
-              : null,
-          );
           // Signed-in user opening their own document via a share URL
           // already has a confirmed identity — never prompt. Visitors
           // (signed in or not) still see the welcome card so they get
@@ -509,7 +495,7 @@ export function useIdentityBootstrap(opts: {
           // is locked downstream when they have a account identity so
           // they can't pretend to be someone else.
           const isOwnerVisit = session.isOwner;
-          if (!isOwnerVisit && !viaCommunity && !hasConfirmedName()) {
+          if (!isOwnerVisit && !hasConfirmedName()) {
             setIdentityPromptOpen(true);
           }
           // Optimistically add the current document to the shared-with
@@ -517,7 +503,7 @@ export function useIdentityBootstrap(opts: {
           // refreshSharedList network round-trip completes. The server
           // fetch will replace this with the full list; deduplicate so
           // returning visitors don't see a duplicate row.
-          if (!isOwnerVisit && !viaCommunity) {
+          if (!isOwnerVisit) {
             setSharedDocuments((prev) =>
               prev.some((d) => d.id === fetched.id)
                 ? prev

@@ -305,8 +305,8 @@ they only look, with no comments or votes. "edit": they can change anything.`
 
 Migration `0080_participate_links.sql`: `ALTER TABLE share_links ADD COLUMN level` and the same on `shared_with`
 (`CHECK (level IS NULL OR level IN ('view', 'participate', 'edit'))`), and `ALTER TABLE ws_tickets ADD COLUMN
-adder_key TEXT NULL`. No table is rebuilt (SR11): `community_posts` cascades from `share_links`, so a rebuild's DROP
-would delete them. No row changes level. Readers take `parseStoredLevel(level ?? role)` (`storedLevelOf`); writers
+adder_key TEXT NULL`. No table is rebuilt (SR11): adding columns leaves every
+row in place. No row changes level. Readers take `parseStoredLevel(level ?? role)` (`storedLevelOf`); writers
 keep `role` two-valued (`legacyRoleColumn`) and set `level` only for `participate` (`levelColumn`); the Shared lists
 join on `COALESCE(level, role)`. Copies,
 exports, templates and duplicates keep `addedBy` as data (it identifies nobody outside its document); a Make a copy

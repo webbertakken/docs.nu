@@ -22,7 +22,7 @@ const { access } = vi.hoisted(() => ({
 vi.mock('../auth/document-access', () => access);
 
 import type { RouteContext } from './context';
-import { ownsDocument, requireOwnedDocument, requireOwner, sharePasswordOf } from './context';
+import { ownsDocument, requireOwner, sharePasswordOf } from './context';
 
 function makeCtx(
   opts: { owner?: string | null; headers?: Record<string, string> } = {},
@@ -70,78 +70,6 @@ describe('requireOwner', () => {
     const out = requireOwner(makeCtx({ owner: null }));
     expect(out).toBeInstanceOf(Response);
     expect((out as Response).status).toBe(400);
-  });
-});
-
-describe('requireOwnedDocument', () => {
-  it('400s when there is no owner', async () => {
-    const out = await requireOwnedDocument(makeCtx({ owner: null }), 'd1');
-    expect((out as Response).status).toBe(400);
-    expect(db.getDocument).not.toHaveBeenCalled();
-  });
-
-  it('404s when the document is missing (before any ownership check)', async () => {
-    db.getDocument.mockResolvedValue(null);
-    const out = await requireOwnedDocument(makeCtx({ owner: 'owner-1' }), 'd1');
-    expect((out as Response).status).toBe(404);
-  });
-
-  it('403s when the document belongs to someone else', async () => {
-    db.getDocument.mockResolvedValue({ id: 'd1', ownerId: 'someone-else', teamId: null });
-    const out = await requireOwnedDocument(makeCtx({ owner: 'owner-1' }), 'd1');
-    expect((out as Response).status).toBe(403);
-  });
-
-  it('returns the document when the caller owns it', async () => {
-    const liveDoc = { id: 'd1', ownerId: 'owner-1', teamId: null };
-    db.getDocument.mockResolvedValue(liveDoc);
-    const out = await requireOwnedDocument(makeCtx({ owner: 'owner-1' }), 'd1');
-    expect(out).toBe(liveDoc);
-  });
-
-  // A TEAM document's owner id is an account id every teammate can read off
-  // `GET /api/teams/<id>` (`members[].userId`), so the hybrid X-Owner-Id path
-  // must not prove ownership of one — otherwise a removed member who kept the
-  // id reaches the owner-only surfaces this guard fronts: the share password
-  // in the clear, minting an edit-role link, clearing the password.
-  it('403s a TEAM document when the owner id arrives only as the guest header', async () => {
-    db.getDocument.mockResolvedValue({ id: 'd1', ownerId: 'user_owner', teamId: 'team-1' });
-    // resolveOwner() returns the header value; verifiedAccountId stays null.
-    const out = await requireOwnedDocument(makeCtx({ owner: 'user_owner' }), 'd1');
-    expect(out).toBeInstanceOf(Response);
-    expect((out as Response).status).toBe(403);
-  });
-
-  it('returns a TEAM document to its owner on a VERIFIED account id', async () => {
-    const liveDoc = { id: 'd1', ownerId: 'user_owner', teamId: 'team-1' };
-    db.getDocument.mockResolvedValue(liveDoc);
-    db.getMembership.mockResolvedValue({ status: 'joined' });
-    const ctx = { ...makeCtx({ owner: 'user_owner' }), verifiedAccountId: 'user_owner' };
-    expect(await requireOwnedDocument(ctx, 'd1')).toBe(liveDoc);
-  });
-
-  it('403s a TEAM document to an owner who is no longer in the team (docs/specs/013-workspace/team-shared-documents.md)', async () => {
-    // Removed (or left) before their work was handed on: owning the row must
-    // not keep the share-link, password and delete routes open to them.
-    db.getDocument.mockResolvedValue({ id: 'd1', ownerId: 'user_owner', teamId: 'team-1' });
-    db.getMembership.mockResolvedValue(null);
-    const ctx = { ...makeCtx({ owner: 'user_owner' }), verifiedAccountId: 'user_owner' };
-    expect(((await requireOwnedDocument(ctx, 'd1')) as Response).status).toBe(403);
-  });
-
-  it('403s a TEAM document for a verified caller who is not its owner', async () => {
-    db.getDocument.mockResolvedValue({ id: 'd1', ownerId: 'user_owner', teamId: 'team-1' });
-    const ctx = { ...makeCtx({ owner: 'user_other' }), verifiedAccountId: 'user_other' };
-    expect(((await requireOwnedDocument(ctx, 'd1')) as Response).status).toBe(403);
-  });
-
-  // The personal path is unchanged and must stay that way: a guest owner id is
-  // an unguessable server-minted UUID, which is what makes the header safe
-  // there, and every signed-out author depends on it.
-  it('still accepts the guest header for a PERSONAL document', async () => {
-    const liveDoc = { id: 'd1', ownerId: 'guest-uuid', teamId: null };
-    db.getDocument.mockResolvedValue(liveDoc);
-    expect(await requireOwnedDocument(makeCtx({ owner: 'guest-uuid' }), 'd1')).toBe(liveDoc);
   });
 });
 

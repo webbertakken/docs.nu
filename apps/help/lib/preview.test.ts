@@ -74,7 +74,7 @@ describe('PREVIEW_APPS', () => {
     expect(PREVIEW_APPS[0]).toBe('api');
     expect(PREVIEW_APPS.at(-1)).toBe('router');
     expect([...PREVIEW_APPS].sort()).toEqual(
-      ['api', 'community', 'help', 'live', 'marketing', 'router', 'telemetry'].sort(),
+      ['api', 'help', 'live', 'marketing', 'router', 'telemetry'].sort(),
     );
   });
 });

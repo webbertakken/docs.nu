@@ -1,6 +1,6 @@
 // How a profile picture is requested and logged (docs/specs/014-identity/profile-picture.md): the sizes asked of
 // Google's picture host, the URL for each, and the host a log may name. Pure; shared by PictureDisc and every app
-// that draws a person (the editor, the Community app, the landing page).
+// that draws a person (the editor, the landing page).
 
 /** The sizes asked for: 96px covers the largest disc (44px) at 2x, 192px at 3x and up. */
 export const PICTURE_SIZES_PX = [96, 192] as const;

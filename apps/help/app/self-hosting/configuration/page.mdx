@@ -72,8 +72,6 @@ Every other optional feature follows the same pattern: unset means off, and the 
 
 The `NEXT_PUBLIC_*` values above are baked in at build time. When you deploy through the bundled GitHub Actions workflow, add them to the workflow's build step (or set `mcp_origin` in `deploy.yml`); apart from the Google Picker key, they are not read from repository secrets. Sign-in needs none: the workflow syncs `BETTER_AUTH_SECRET` and `GOOGLE_AUTH_CLIENT_SECRET` to the api Worker from repository secrets of the same name.
 
-The Community is the one feature that is on by default; set `COMMUNITY_ENABLED` to `false` on the api Worker to switch it off.
-
 <Tip>
   For every variable, where it lives and the steps around it (OAuth redirect URIs, KV namespaces,
   the AI model knobs), follow the repository's `docs/operations/self-hosting.md` and each app's

@@ -196,8 +196,7 @@ may become. A branch address opened through a participant or viewer link opens m
 
 - **Documents in This Browser** and [offline documents](offline-mode.md) have no branches: **Branch** says "Save to
   LiveDoc to branch this document". Taking a document with open branches offline is refused, naming them.
-- The [Google Drive mirror](../022-drive-mirror/drive-mirror.md) and [Community](../025-community/community.md)
-  publish main only.
+- The [Google Drive mirror](../022-drive-mirror/drive-mirror.md) publishes main only.
 
 ## Usage
 
