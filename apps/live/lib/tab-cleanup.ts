@@ -1,14 +1,9 @@
 // The tab's cleanup transforms (docs/specs/008-canvas/layout-cleanup.md), as pure functions over an element
 // list: Auto-align, and Auto Layout in each of its styles.
 //
-// One module because there are now two callers with one requirement between
-// them: the menu row COMMITS a cleanup, and hovering that row PREVIEWS it. A
-// preview that is not byte-for-byte the change its click makes is worse than no
-// preview, which is the same reason lib/style-presets.ts exists for the preset
-// tiles. Keeping the arithmetic here (rather than inside the command that
-// commits it) is also what lets the command compute from the elements it is
-// handed rather than from a render closure, so a commit taken while a preview
-// is on screen still starts from the real pre-hover state.
+// Kept apart from the command that commits it, so the command computes from the elements it is handed
+// rather than from a render closure, and the verdicts (lib/tidy-verdict.ts) judge exactly the change a
+// press would make.
 
 import { isBoxed, tidyLayoutElements, type Element, type Layer } from '@livedoc/document';
 import { lockedElementIds } from '@/lib/locked-element-ids';

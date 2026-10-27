@@ -1,4 +1,3 @@
-import type { TidyUpActions } from './tidy-up-actions';
 import type { PenInk } from '@/hooks/canvas/commit-freehand';
 import type { SnapGuideStore } from '@/hooks/canvas/useSnapGuideState';
 import type { CombineOp } from '@/lib/combine/combine';
@@ -521,9 +520,6 @@ export type CanvasProps = {
   // Bottom-dock "Theme & canvas" button (docs/specs/011-theme/canvas-and-theme-dialog.md): opens the
   // CanvasThemeDialog. Omitted in read-only / embed sessions (no button).
   onOpenCanvasTheme?: () => void;
-  // Diagram mode's Tidy Up button and popover (docs/specs/008-canvas/layout-cleanup.md "The Tidy Up
-  // button"). Absent in a session that may not tidy (a Participant, a Viewer, an embed): no button.
-  tidyUp?: TidyUpActions;
   onSelectLayer: (layerId: string) => void;
   onAddLayer: () => void;
   onRemoveLayer: (layerId: string) => void;

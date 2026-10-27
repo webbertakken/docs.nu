@@ -1,4 +1,4 @@
-// The graph the editor's Tidy Up lays out (docs/specs/008-canvas/layout-cleanup.md "What moves
+// The graph the editor's tidy profile lays out (docs/specs/008-canvas/layout-cleanup.md "What moves
 // together"). An author's tab is not a bare graph: shapes sit in lanes and panels, badges and chips
 // sit on shapes, and moving each box on its own tore those apart. So before layout the tab is read
 // as a graph of NODES, each one of:

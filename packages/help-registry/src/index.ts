@@ -3040,9 +3040,9 @@ export const articles: Article[] = [
   {
     slug: 'auto-layout',
     title: 'Auto Layout',
-    description: 'Tidy Up the arrow graph as a flowchart, tree, or mindmap.',
+    description: 'Lay out the arrow graph as a flowchart, tree, or mindmap.',
     keywords:
-      'arrange flowchart tree mindmap tidy up automatic graph preview hover try before greyed out disabled already tidy lanes swimlane route arrows',
+      'arrange flowchart tree mindmap tidy up automatic graph command palette already tidy lanes swimlane route arrows',
     category: 'Tools',
     categorySlug: 'tools/layout-cleanup',
     parentSlug: 'layout-cleanup',

@@ -78,7 +78,6 @@ export function TrashSegment(props: {
         hoverTitle="Trash"
         hoverDescription="Drag a card here to put it out of the way; open it to restore cards or delete them for good."
         icon={<TrashIcon size={18} />}
-        name="Trash"
         badge={
           count > 0 ? (
             // Grey, not red: the Trash holds nothing urgent.

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 // docs/specs/007-editor/live-app.md: Layers and the Theme & Canvas brush share one strip in every
-// mode, and a session without one of the two keeps the other. Diagram mode's Tidy Up leads it
-// (docs/specs/008-canvas/layout-cleanup.md "The Tidy Up button").
+// mode, and a session without one of the two keeps the other. The cluster names nothing: each is its
+// icon alone on every width, and there is no Tidy Up button.
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -33,28 +33,25 @@ describe('LayersThemeStrip', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('puts Tidy Up first in the strip, left of Layers, and toggles its popover', () => {
-    const onTidy = vi.fn();
+  it('shows both as icons alone on a wide desktop, named only for assistive tech', () => {
+    // Every media query matches: the widest desktop there is.
+    window.matchMedia = vi.fn((query: string) => ({
+      matches: true,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
     render(
-      <LayersThemeStrip
-        tidyUp={{ open: false, onToggle: onTidy }}
-        layers={{ open: false, onToggle: () => {} }}
-        onOpenTheme={() => {}}
-      />,
+      <LayersThemeStrip layers={{ open: false, onToggle: () => {} }} onOpenTheme={() => {}} />,
     );
-    const strip = screen.getByRole('button', { name: 'Tidy Up' }).closest('[data-dock-button]')!;
-    const names = [...strip.querySelectorAll('button')].map((b) => b.getAttribute('aria-label'));
-    expect(names).toEqual(['Tidy Up', 'Open Layers', 'Theme and canvas']);
-    const tidy = screen.getByRole('button', { name: 'Tidy Up' });
-    expect(tidy.getAttribute('aria-expanded')).toBe('false');
-    fireEvent.click(tidy);
-    expect(onTidy).toHaveBeenCalledWith(tidy);
-  });
-
-  it('shows Tidy Up pressed while its popover is open', () => {
-    render(<LayersThemeStrip tidyUp={{ open: true, onToggle: () => {} }} />);
-    expect(screen.getByRole('button', { name: 'Tidy Up' }).getAttribute('aria-expanded')).toBe(
-      'true',
-    );
+    const strip = screen
+      .getByRole('button', { name: 'Open Layers' })
+      .closest('[data-dock-button]')!;
+    const buttons = [...strip.querySelectorAll('button')];
+    expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual([
+      'Open Layers',
+      'Theme and canvas',
+    ]);
+    expect(buttons.map((b) => b.textContent)).toEqual(['', '']);
   });
 });

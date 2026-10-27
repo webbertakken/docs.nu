@@ -190,9 +190,9 @@ type UserPreferences = {
   uiScalePanels?: number;
   uiScaleToolbar?: number;
   uiScaleCornerButtons?: number;
-  // Button Labels (Settings › Appearance): the names beside the editor's bottom buttons' icons, the
-  // footer bar's and, on a wide desktop, the bottom-right cluster's (live-app.md "Named on a wide
-  // desktop"). Missing / true === shown; a phone never shows them. Read through useDockNames.
+  // Button Labels (Settings › Appearance): the names beside the footer bar's buttons' icons (Search,
+  // Settings, the theme). The bottom-right cluster is icons alone whatever it says (live-app.md).
+  // Missing / true === shown; a phone never shows them. Read through useButtonLabelsSetting.
   dockButtonNames?: boolean;
 
   // Panel switches (the Panels sub-categories, see "Settings dialog"
@@ -399,8 +399,8 @@ Missing key === undefined === default behaviour. Concretely:
   row along its bottom edge; `'off'` hides them
   ([Element indicators](../008-canvas/element-indicators.md)). Emits `UI`/`Changed`/
   `ElementIndicatorsTop`, `ElementIndicatorsFooter` or `ElementIndicatorsOff`.
-- `dockButtonNames` undefined / true → the editor's bottom buttons named
-  beside their icons on a desktop (the default). `false` leaves them icons
+- `dockButtonNames` undefined / true → the footer bar's buttons (Search,
+  Settings, the theme) named beside their icons on a desktop (the default). `false` leaves them icons
   alone, each still named in its hover card. A phone shows icons alone
   whatever it says, so its Settings row is desktop only. Emits
   `UI`/`Toggled`/`DockButtonNames{On,Off}`.
@@ -819,10 +819,10 @@ and the dialog stays as the one complete, browsable index of them.
   construction guides" read as clutter.
 
   **Button Labels** (Appearance › Interface, `dockButtonNames`, on by default)
-  names the editor's bottom buttons beside their icons: the footer bar's Search,
-  Settings and theme, and the bottom-right cluster's (Layers, Style, Tidy Up and
-  the rest) on a desktop wide enough for them ([Live app](live-app.md)). Off,
-  they are icons alone, each still named in its hover card. A phone always shows
+  names the footer bar's buttons beside their icons: Search, Settings and the
+  theme. The bottom-right cluster is icons alone whatever it says
+  ([Live app](live-app.md)). Off, the footer's buttons are icons alone, each
+  still named in its hover card. A phone always shows
   icons alone, so the row is desktop only there.
 
   The dialog is **data-driven**: `settings-catalogue.ts` declares the

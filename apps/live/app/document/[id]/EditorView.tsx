@@ -72,7 +72,7 @@ import { RolePill, RoleStatusIcon } from '@/components/chrome/RoleIndicator';
 import { MinimalChromeProvider } from '@/components/providers/minimal-chrome';
 import { isMinimalChrome, isPowerUserMode } from '@/lib/power-user-mode';
 import { UiScaleProvider, useUiScalePreview } from '@/components/providers/ui-scale';
-import { DockNamesProvider } from '@/hooks/ui/useDockNames';
+import { ButtonLabelsProvider } from '@/hooks/ui/useButtonLabelsSetting';
 import { resolveUiScales } from '@/lib/ui-scale';
 import { useIsMobileViewport } from '@/hooks/ui/useIsMobileViewport';
 // Each major area fails on its own and reports which one it was (docs/specs/017-telemetry/telemetry.md).
@@ -471,7 +471,7 @@ export function EditorView() {
                         powerUser={isPowerUserMode(userPreferences)}
                       >
                         <UiScaleProvider value={uiScales}>
-                          <DockNamesProvider value={userPreferences?.dockButtonNames !== false}>
+                          <ButtonLabelsProvider value={userPreferences?.dockButtonNames !== false}>
                             <EditorModeProvider value={ctx.editorMode}>
                               {/* Side by side tabs (docs/specs/007-editor/split-view.md): the editor, and another
                       tab of the document live beside it when one has been dragged to the right. */}
@@ -690,7 +690,7 @@ export function EditorView() {
                                 )}
                               </SplitViewFrame>
                             </EditorModeProvider>
-                          </DockNamesProvider>
+                          </ButtonLabelsProvider>
                         </UiScaleProvider>
                       </MinimalChromeProvider>
                     </CanvasFocusProvider>

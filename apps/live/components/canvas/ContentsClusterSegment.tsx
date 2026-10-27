@@ -17,7 +17,6 @@ export function ContentsClusterSegment(props: {
   return (
     <ClusterPopoverSegment
       label="Contents"
-      name="Contents"
       hoverTitle="Contents"
       hoverDescription="Every page of this tab: jump to one, or add a page."
       icon={<ContentsIcon />}

@@ -1401,7 +1401,7 @@ export const EXACT: Readonly<Record<string, string>> = {
   'UI|Opened|SessionPoll':
     'Someone opened the Poll button in the bottom bar: the poll composer while none runs, the answers while one does.',
   'UI|Opened|TidyUp':
-    "Someone opened Diagram mode's Tidy Up button in the bottom bar, the panel of layout styles and Auto-align. What they then picked counts as a tab being auto-arranged.",
+    "Someone opened Diagram mode's Tidy Up button in the bottom bar, the panel of layout styles and Auto-align. No longer recorded: the button is gone, and the tidiers run from the command palette, counted as a tab being auto-arranged.",
   'UI|Opened|BehaviourGroup':
     "Someone opened one of Session's groups (Tools, Record, React, Selection Mode or Navigate) on Workshop mode's palette strip. Earlier, a category inside the palette's Collaborate tab (formerly Behaviours), before Workshop offered those categories one by one and then gathered them into Session.",
   'UI|Opened|CanvasStyle':

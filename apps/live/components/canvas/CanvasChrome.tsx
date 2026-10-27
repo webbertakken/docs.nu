@@ -46,7 +46,6 @@ import { ContentsClusterSegment } from './ContentsClusterSegment';
 import { PagesClusterStrip } from './PagesClusterStrip';
 import { PageNavigatorClusterStrip } from './PageNavigatorClusterStrip';
 import { LayersThemeStrip } from '@/components/canvas/LayersThemeStrip';
-import { tidyUpOffered } from '@/components/canvas/tidy-up-actions';
 import { UndoRedoClusterStrip } from '@/components/canvas/UndoRedoClusterStrip';
 import type { CanvasProps } from '@/components/canvas/Canvas.types';
 import {
@@ -404,7 +403,6 @@ export function CanvasChrome(props: CanvasChromeProps) {
     newCardPopoverEl,
     cardFinderPopoverEl,
     sessionPopoverEl,
-    tidyUpPopoverEl,
     contentsPopoverEl,
     contentsSidebarEl,
     contentsDocked,
@@ -589,7 +587,6 @@ export function CanvasChrome(props: CanvasChromeProps) {
       {zenMode ? null : trashPopoverEl}
       {zenMode ? null : newCardPopoverEl}
       {zenMode ? null : cardFinderPopoverEl}
-      {tidyUpPopoverEl}
       {contentsSidebarEl}
       {contentsPopoverEl}
       {avatarPopoverEl}
@@ -824,19 +821,6 @@ export function CanvasChrome(props: CanvasChromeProps) {
                 pass no handler), one strip in every mode: see LayersThemeStrip. */}
             {!zenMode ? (
               <LayersThemeStrip
-                // Tidy Up, first in the strip (docs/specs/008-canvas/layout-cleanup.md "The Tidy Up button").
-                tidyUp={
-                  tidyUpOffered({
-                    actions: props.tidyUp,
-                    editorMode: props.editorMode,
-                    zenMode: !!zenMode,
-                  })
-                    ? {
-                        open: activeDockPanel === 'tidy-up',
-                        onToggle: (button) => handleDockButtonClick('tidy-up', button, true),
-                      }
-                    : undefined
-                }
                 layers={
                   !readOnly && panelsOn.layers
                     ? {

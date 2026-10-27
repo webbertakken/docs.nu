@@ -56,11 +56,4 @@ export {
   FlipchartIcon,
   MarkerIcon,
 } from './drawing-kinds';
-export {
-  LayersStackIcon,
-  RedoIcon,
-  SettingsIcon,
-  ThemeLookIcon,
-  TidyUpIcon,
-  UndoIcon,
-} from './editor-chrome';
+export { LayersStackIcon, RedoIcon, SettingsIcon, ThemeLookIcon, UndoIcon } from './editor-chrome';

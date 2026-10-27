@@ -129,7 +129,6 @@ export function SessionClusterStrip({
         ) : (
           <ClusterPopoverSegment
             label="Open Timer"
-            name="Timer"
             hoverTitle="Timer"
             hoverDescription="Start a countdown or a stopwatch everyone on this tab can see."
             icon={<TimerMenuIcon size={ICON_SIZE} />}
@@ -148,7 +147,6 @@ export function SessionClusterStrip({
                 ? 'Open Vote'
                 : 'Start a Vote'
           }
-          name="Vote"
           hoverTitle="Vote"
           hoverDescription={
             voteRunning
@@ -175,7 +173,6 @@ export function SessionClusterStrip({
         <ClusterPopoverSegment
           divided={showTimer || showVote}
           label={pollRunning ? 'Open Poll' : 'Start a Poll'}
-          name="Poll"
           hoverTitle="Poll"
           hoverDescription={
             pollRunning ? 'The answers to the poll running now.' : 'Ask everyone here a question.'

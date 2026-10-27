@@ -18,7 +18,6 @@ export function AvatarClusterButton(props: {
   return (
     <ClusterPopoverButton
       label="Avatar"
-      name="Avatar"
       hoverTitle="Avatar"
       hoverDescription={
         canSpeak

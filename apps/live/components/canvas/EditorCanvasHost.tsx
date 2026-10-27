@@ -369,11 +369,6 @@ export function EditorCanvasHost() {
     pagesMode,
     presentArticles,
     loadedTabIds,
-    autoAlignTab,
-    autoLayoutTab,
-    previewCleanup,
-    endCleanupPreview,
-    assessCleanupKind,
     isOutOfScope,
     tabLoadErrors,
   } = useEditorContext();
@@ -1020,22 +1015,6 @@ export function EditorCanvasHost() {
                   : () => {
                       setCanvasThemeTab('looks');
                       track('UI', 'Opened', 'ThemePicker');
-                    }
-              }
-              // Diagram mode's Tidy Up button (docs/specs/008-canvas/layout-cleanup.md "The Tidy Up button"): an
-              // Editor's, so a Participant or Viewer (read-only for structure) and an embed get no button.
-              tidyUp={
-                isReadOnly || embedMode
-                  ? undefined
-                  : {
-                      run: (kind, judged) =>
-                        kind === 'align'
-                          ? autoAlignTab({ judged })
-                          : autoLayoutTab(kind, { judged }),
-                      preview: previewCleanup,
-                      endPreview: endCleanupPreview,
-                      assess: assessCleanupKind,
-                      blocked: activeTabLocked,
                     }
               }
               onSelectLayer={setActiveLayer}

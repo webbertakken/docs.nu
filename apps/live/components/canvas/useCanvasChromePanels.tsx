@@ -16,7 +16,6 @@ import type { CanvasChromeProps } from './CanvasChrome';
 import { usePaletteChrome } from './usePaletteChrome';
 import { useCanvasToolPanels } from './useCanvasToolPanels';
 import { stripSegmentGone, type SessionStripTools } from './SessionClusterStrip';
-import { tidyUpOffered } from './tidy-up-actions';
 import { useContentsChrome } from './useContentsChrome';
 import { useWithheldExplorerCloses } from './useWithheldExplorerCloses';
 
@@ -55,12 +54,6 @@ const CollaboratePanel = dynamic(
 // Lazy for the same reason: the Session strip's popovers (docs/specs/012-collaboration/session-tools.md
 // "The Session strip") load on the first press of a Timer, Vote or Poll button.
 const SessionPopover = dynamic(() => import('./SessionPopover').then((m) => m.SessionPopover), {
-  ssr: false,
-});
-
-// Lazy for the same reason: the Tidy Up popover (docs/specs/008-canvas/layout-cleanup.md "The Tidy Up button")
-// loads on the first press of its button.
-const TidyUpPopover = dynamic(() => import('./TidyUpPopover').then((m) => m.TidyUpPopover), {
   ssr: false,
 });
 
@@ -110,8 +103,6 @@ export function useCanvasChromePanels({
   cardFinderPopoverEl: ReactNode;
   // The Session strip's open popover (Timer, Vote or Poll), over its button.
   sessionPopoverEl: ReactNode;
-  // The Tidy Up popover over its button, in Diagram mode.
-  tidyUpPopoverEl: ReactNode;
   // Pages mode's Contents (docs/specs/007-editor/pages-mode.md "Contents"): the popover,
   // or docked as the sidebar (useContentsChrome).
   contentsPopoverEl: ReactNode;
@@ -284,17 +275,6 @@ export function useCanvasChromePanels({
     )
       closeDockPanel();
   }, [activeDockPanel, planMode, closeDockPanel]);
-  // The Tidy Up popover belongs to its button: leaving Diagram mode, Zen or a locked-out session closes it.
-  const tidyUp = props.tidyUp;
-  const tidyUpShown = tidyUpOffered({
-    actions: tidyUp,
-    editorMode: props.editorMode,
-    zenMode: !!zenMode,
-  });
-  const tidyUpOpen = activeDockPanel === 'tidy-up' && tidyUpShown && !chromeHidden;
-  useEffect(() => {
-    if (activeDockPanel === 'tidy-up' && !tidyUpShown) closeDockPanel();
-  }, [activeDockPanel, tidyUpShown, closeDockPanel]);
   // The Avatar panel belongs to its button, which belongs to the mode: leaving Avatar mode closes it.
   const avatarMode = props.canvasTool === 'avatar';
   const avatarOpen = activeDockPanel === 'avatar' && avatarMode;
@@ -578,15 +558,6 @@ export function useCanvasChromePanels({
     contentsSidebarEl,
     contentsDocked,
     contentsSide,
-    tidyUpPopoverEl:
-      tidyUpOpen && tidyUp ? (
-        <TidyUpPopover
-          actions={tidyUp}
-          empty={elements.length === 0}
-          anchor={activeDockAnchor ?? undefined}
-          onClose={closeDockPanel}
-        />
-      ) : null,
     cardTypesPopoverEl: cardTypesOpen ? (
       <CardTypesPanel
         popoverOpen

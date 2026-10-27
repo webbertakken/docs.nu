@@ -7,7 +7,7 @@ import {
   type ShapeElement,
 } from '@livedoc/document';
 import { buildTemplate } from '@livedoc/templates';
-import { assessCleanup, cleanupVerdict, verdictLine, verdictNotice } from './tidy-verdict';
+import { assessCleanup, cleanupVerdict, verdictNotice } from './tidy-verdict';
 import { cleanupElements, type CleanupKind } from './tab-cleanup';
 
 // docs/specs/008-canvas/layout-cleanup.md "A tidy never trashes the work".
@@ -119,11 +119,14 @@ describe('a second press', () => {
 });
 
 describe('verdict copy', () => {
-  it('has a line and a notice for every verdict but ok', () => {
-    expect(verdictLine({ kind: 'ok' })).toBeNull();
+  it('has a notice for every verdict but ok', () => {
     expect(verdictNotice('Smart', { kind: 'ok' })).toBeNull();
-    expect(verdictLine({ kind: 'covers', count: 1 })).toBe('Would cover a shape');
-    expect(verdictLine({ kind: 'covers', count: 3 })).toBe('Would cover 3 shapes');
+    expect(verdictNotice('Smart', { kind: 'covers', count: 1 })).toBe(
+      'Smart would cover a shape, so nothing moved.',
+    );
+    expect(verdictNotice('Smart', { kind: 'covers', count: 3 })).toBe(
+      'Smart would cover 3 shapes, so nothing moved.',
+    );
     expect(verdictNotice('Tree', { kind: 'unchanged' })).toBe(
       'Tree: the tab is already tidy, so nothing moved.',
     );
@@ -132,7 +135,6 @@ describe('verdict copy', () => {
       { kind: 'rearranges-lanes' },
       { kind: 'unsuited' },
     ] as const) {
-      expect(verdictLine(v)).toBeTruthy();
       expect(verdictNotice('Mindmap', v)).toMatch(/^Mindmap .*nothing moved\.$/);
     }
   });
