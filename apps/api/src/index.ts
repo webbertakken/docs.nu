@@ -496,7 +496,7 @@ const worker = {
   // `event.cron` for each pattern. Today's daily 03:00 UTC trigger
   // fires independent retention sweeps:
   //   - events,     60-day floor (docs/specs/017-telemetry/telemetry.md "Retention").
-  //   - images,     30-day floor, unused only, after the reference-index backfill
+  //   - images,     30-day floor, unused only, paused until every document has pushed its summary
   //                 (docs/specs/009-elements/images.md "Retention").
   //   - trash,      30 days after deletion (docs/specs/013-workspace/trash.md).
   //   - empty,      documents empty and unsaved for 30 days move to the Trash
@@ -584,7 +584,7 @@ const worker = {
           .then((count) => console.log(`empty sweep: moved ${count} documents to the Trash`))
           .catch((err) => console.error('empty sweep failed', err)),
       );
-      // docs/specs/009-elements/images.md "Retention": advance the reference-index backfill,
+      // docs/specs/009-elements/images.md "Retention": once every document has pushed its images,
       // then reap unused images. runImageRetention logs its own outcome.
       ctx.waitUntil(runImageRetention(env, now));
       // docs/specs/013-workspace/blueprints/workbench-embeds.md "Retention": spent tickets and requests,
