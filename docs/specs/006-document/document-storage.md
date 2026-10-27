@@ -6,8 +6,8 @@ outbox.
 Both sit in the one live service, the api Worker ([One live service](../003-system-architecture/one-live-service.md)).
 
 Ported by hand from upstream `77e511638f` (content into each canvas's room, a listing fed by an outbox) and
-`8be9a0be46` (shared tabs between rooms); the outbox mechanics follow upstream's `packages/index-app/src/outbox.ts`
-([livediagram upstream](../002-project-scope/livediagram-upstream.md)).
+`8be9a0be46` (shared tabs between rooms); the outbox mechanics follow upstream's index-app outbox kit
+([Upstream](../002-project-scope/livediagram-upstream.md)).
 
 ## Words
 

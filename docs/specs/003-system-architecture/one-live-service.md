@@ -22,7 +22,7 @@ It stays that way: a new kind of document or tab joins that service, never a ser
   class ([Open source and distribution](../002-project-scope/open-source-and-business-model.md)).
 - **Upstream split, LiveDoc does not.** Upstream divides its products into separate apps over a shared index service;
   LiveDoc takes their storage mechanics, never the split
-  ([livediagram upstream](../002-project-scope/livediagram-upstream.md)).
+  ([Upstream](../002-project-scope/livediagram-upstream.md)).
 
 ## What it rules out
 

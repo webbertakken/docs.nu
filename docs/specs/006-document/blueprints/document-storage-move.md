@@ -3,13 +3,13 @@
 Derived from [Moving content into rooms](../document-storage-move.md); the room it fills is
 [Document storage](document-storage.md).
 Modelled on upstream `b0f6444618` (snapshot, plan, apply, verify, resumable) and livedocuments'
-`document-room/document-migration.ts` (the room writes a moved document in one transaction).
+document migration door (the room writes a moved document in one transaction).
 
 ## Domain and naming
 
 | Term            | Identifier                                                                             | Never             |
 | --------------- | -------------------------------------------------------------------------------------- | ----------------- |
-| Move            | `moveIntoRoom()` (`document-room/content-move.ts`); RPC `DocumentRoom.move`            | migrate, import   |
+| Move            | `moveIntoRoom()` (`document-room/content-move.ts` (planned)); RPC `DocumentRoom.move`  | migrate, import   |
 | Moved           | room key-value `content-move` present (`MoveOutcome`)                                  | migrated, synced  |
 | Move gate       | `ensureMoved()`, first thing in every RPC and `fetch`                                  | lock              |
 | Content hash    | `contentHashOf(content: MovableContent): Promise<string>` (`content-hash.ts`)          | checksum          |
@@ -17,7 +17,7 @@ Modelled on upstream `b0f6444618` (snapshot, plan, apply, verify, resumable) and
 | Move record     | D1 `content_moves` row                                                                 | migration log     |
 | Legacy room     | class `LegacyDocumentRoom`, binding `LEGACY_DOCUMENT_ROOM` (`legacy-document-room.ts`) | old room          |
 | Sweep           | `sweepContentMoves(env, now)` (`content-move-sweep.ts`), cron `* * * * *`              | backfill          |
-| Operator tool   | `apps/api/scripts/content-move.ts`, commands `plan` and `verify`                       | migrator          |
+| Operator tool   | `apps/api/scripts/content-move.ts` (planned), commands `plan` and `verify`             | migrator          |
 
 ## Behaviour and state
 
@@ -116,7 +116,7 @@ lower-case hex.
 - Each id: `room.move(id)`, `MOVE_CONCURRENCY` at once, each bounded by `MOVE_TIMEOUT_MS`.
 - No rows: return at once without logging.
 
-### The operator tool (`apps/api/scripts/content-move.ts`, Node type stripping)
+### The operator tool (`apps/api/scripts/content-move.ts` (planned), Node type stripping)
 
 - `plan (--local | --remote) [--out <file>]`: for every `documents` row, the same reads as step 1 through
   `wrangler d1 execute DB --json --command <SELECT>`; prints `id, tabs, bytes, hash` and writes the JSON plan.
@@ -208,7 +208,7 @@ DEFAULT 0, tried_at INTEGER NOT NULL, moved_at INTEGER, error TEXT)`.
 | Shared tab moves into both holders                          | `content-move.test.ts`                             |
 | Legacy state carried verbatim, then cleared                 | `content-move.test.ts`                             |
 | Sweep order, batch, retry gap, idle                         | `content-move-sweep.test.ts`                       |
-| Tool refuses a non-SELECT; verify pass and fail tables      | `scripts/content-move.test.ts`                     |
+| Tool refuses a non-SELECT; verify pass and fail tables      | `scripts/content-move.test.ts` (planned)           |
 | Drop guard fails with an unmoved document                   | `migrations` test on node:sqlite                   |
 
 ## Constants and configuration
