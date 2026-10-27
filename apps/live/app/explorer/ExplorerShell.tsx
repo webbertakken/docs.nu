@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { dropSettingsLink } from '@/lib/settings-link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { Brand, ProductNav } from '@livedoc/ui';
+import { Brand, ProductNav, ProductNavLinks } from '@livedoc/ui';
 import { AuthControls } from '@/components/chrome/AuthControls';
 import { LensField } from './lens/LensField';
 import { LensAnnouncer } from './lens/LensStates';
@@ -287,6 +287,14 @@ function ShellChrome({ children }: { children: ReactNode }) {
         data-toast-floor=""
         className="sticky bottom-0 z-[var(--z-chrome)] flex h-12 shrink-0 items-center justify-end gap-2 border-t border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900"
       >
+        {/* The footer links (docs/specs/013-workspace/explorer-structure.md "Layout"): Home, the Editor, Help and
+            Telemetry, which the apps menu no longer lists. Left out in a workspace frame, like GitHub. */}
+        {surface.appLinks ? (
+          <ProductNavLinks
+            current="explorer"
+            className="mr-auto min-w-0 overflow-x-auto [scrollbar-width:none]"
+          />
+        ) : null}
         <ChromeControls
           onOpenSearch={() => setSearchOpen(true)}
           onOpenSettings={surface.settings ? () => setSettingsOpen(true) : undefined}

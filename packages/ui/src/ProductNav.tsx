@@ -67,6 +67,7 @@ const ICONS: Record<ProductNavKey, () => ReactNode> = {
   ),
 };
 
+// Every surface of the product, in the order the footer links list them.
 const ITEMS: { key: ProductNavKey; label: string; href: string; desc: string }[] = [
   { key: 'home', label: 'Home', href: '/', desc: 'Learn about our features' },
   { key: 'editor', label: 'Editor', href: '/new', desc: 'Start or edit a document' },
@@ -79,6 +80,11 @@ const ITEMS: { key: ProductNavKey; label: string; href: string; desc: string }[]
     desc: 'Anonymous usage, in the open',
   },
 ];
+
+// The menu switches between the places someone works. Home, Help and Telemetry are footer links instead
+// (ProductNavLinks, and the public sites' SiteFooter): docs/specs/004-interface-design/menus.md "Product switcher".
+const MENU_KEYS: readonly ProductNavKey[] = ['editor', 'explorer'];
+const MENU_ITEMS = ITEMS.filter((item) => MENU_KEYS.includes(item.key));
 
 // `showOnMobile` opts a surface into rendering the menu on phones (next to the
 // logo), where it otherwise hides to save room. The Explorer, Help, and
@@ -158,7 +164,7 @@ export function ProductNav({
           {...surfaceProps}
           className="w-60 max-sm:w-auto outline-none rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-900/10 dark:border-slate-700 dark:bg-slate-800 dark:shadow-black/30"
         >
-          {ITEMS.map((item) => {
+          {MENU_ITEMS.map((item) => {
             const isCurrent = item.key === current;
             return (
               <a
@@ -204,9 +210,9 @@ export function ProductNav({
   );
 }
 
-// The same surfaces as a row of links, for a host that carries no menu (the editor's Explorer footer,
-// docs/specs/013-workspace/explorer-structure.md "Layout"): each icon and label, `current` left out. Telemetry stays
-// in the menu but not in this row: the Explorer footer keeps to where someone works.
+// The surfaces as a row of footer links (the editor's Explorer panel and the Explorer page's bottom bar,
+// docs/specs/013-workspace/explorer-structure.md "Layout"): each icon and label, `current` left out. Home, Help and
+// Telemetry are reached here, not in the menu.
 export function ProductNavLinks({
   current,
   className = '',
@@ -214,7 +220,7 @@ export function ProductNavLinks({
   current: ProductNavKey;
   className?: string;
 }) {
-  const items = ITEMS.filter((i) => i.key !== current && i.key !== 'telemetry');
+  const items = ITEMS.filter((i) => i.key !== current);
   return (
     <nav aria-label="Go to" className={`flex items-center gap-0.5 ${className}`}>
       {items.map((item) => (
