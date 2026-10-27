@@ -217,8 +217,13 @@ test.describe('explorer filters', () => {
     await arrive(page, '/explorer/search?q=ro');
     await expect(docLink(page, 'Roadmap')).toBeVisible({ timeout: 30_000 });
     await expect(docLink(page, 'Sprint retro')).toBeVisible();
-    const top = async (name: string) => (await docLink(page, name).boundingBox())!.y;
-    expect(await top('Roadmap')).toBeLessThan(await top('Sprint retro'));
+    // In document order, as list rows or as cards side by side.
+    const order = await pane(page)
+      .getByRole('link', { name: /^(Roadmap|Sprint retro)$/ })
+      .evaluateAll((links) =>
+        links.map((a) => a.querySelector('.sr-only')?.textContent ?? a.textContent),
+      );
+    expect(order).toEqual(['Roadmap', 'Sprint retro']);
     // A typo is forgiven, and the matched letters are marked; the link keeps the plain name.
     await field(page).fill('paymnet');
     await expect(docLink(page, 'AI payment flow')).toBeVisible();

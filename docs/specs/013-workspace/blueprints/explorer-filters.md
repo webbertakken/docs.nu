@@ -300,10 +300,13 @@ row with `documentSubject` / `sharedSubject` and keeps its row on the subject (`
 - `applyLens` and `rankByLens` compile the lens once (cutoff, title query) and read each name's cached fold:
   `O(N × w × t)` for `N` subjects, `w` words and `t` title words, plus `O(N log N)` to sort the matches.
 - **Budget: 10 000 titles filtered and ranked within one 16 ms frame on a mid-range laptop.** A mid-range laptop runs
-  this work at most twice as slow as a developer's machine, so the speed test holds the median of five keystrokes
-  under `cpuBudgetMs(8)` for six queries (substring, initials, a two-typo word, word prefixes, three words, no match)
-  over a seeded corpus of 10 000 titles. Measured on an Intel i7-14700K under load (Node 24, warm): 1.1 to 5.2 ms per
-  query, the worst a 13-letter word with two typos; Chromium: see [Performance](#performance).
+  this work at most twice as slow as a developer's machine; the budget is measured in Chromium with the CPU throttled
+  2x ([Performance](#performance)). Measured on an Intel i7-14700K under load (Node 24, warm): 1.1 to 5.2 ms per
+  query, the worst a 13-letter word with two typos.
+- A speed test guards against a slide, not the frame: the median of five warm keystrokes over a seeded corpus of
+  10 000 titles stays under `cpuBudgetMs(40)` for six queries (substring, initials, a two-typo word, word prefixes,
+  three words, no match). Coverage instrumentation runs this per-character work 10 to 20 times slower (30 to 60 ms on
+  CI), so a tighter number would test the instrumentation; 40 still fails any quadratic path.
 - The first keystroke on a list also folds every name once: about 17 to 23 ms per 10 000 titles on the same machine.
   The rows narrow a beat behind the field (a deferred value), so typing never waits on it; the cache keeps
   `TITLE_CACHE_LIMIT` names and starts over when full.
