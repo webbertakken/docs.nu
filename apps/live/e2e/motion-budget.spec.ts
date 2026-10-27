@@ -22,7 +22,9 @@ type Motion = {
 
 // Installed before any app code: records every animation / transition as it
 // starts, from the element it runs on. Canvas elements (anything inside an
-// element wrapper) are canvas motion with their own specs, so they are skipped.
+// element wrapper) are canvas motion with their own specs, so they are skipped, and so
+// are the logo's own motions (keyframes named `ldm-`, brand-motion.css), which keep their
+// own pace (docs/specs/004-interface-design/motion.md "The logo's motions").
 function recordMotion(): void {
   const w = window as unknown as { __motion: Motion[] };
   w.__motion = [];
@@ -33,6 +35,7 @@ function recordMotion(): void {
       const timing = anim.effect?.getComputedTiming();
       if (!timing) continue;
       const css = anim as Animation & { animationName?: string; transitionProperty?: string };
+      if (css.animationName?.startsWith('ldm-')) continue;
       w.__motion.push({
         name: css.animationName ?? css.transitionProperty ?? anim.constructor.name,
         target: `${el.tagName.toLowerCase()}.${String(el.getAttribute('class') ?? '').slice(0, 60)}`,

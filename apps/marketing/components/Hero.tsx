@@ -1,4 +1,5 @@
 import { HeroConnectors } from './HeroConnectors';
+import { HeroKinds } from './HeroKinds';
 import { HeroFan } from './HeroFan';
 import { HeroSearch } from './HeroSearch';
 
@@ -21,7 +22,9 @@ export function Hero() {
         <HeroConnectors />
         {/* Two promises, each its own badge and each true today (free, MIT, no account needed). A
             phone keeps the first only, so the row stays one line. */}
-        <ul aria-label="Our promises" className="flex justify-center gap-2.5">
+        {/* The mark, its page cycling through the kinds of document LiveDoc makes. */}
+        <HeroKinds />
+        <ul aria-label="Our promises" className="mt-6 flex justify-center gap-2.5">
           <li className={BADGE}>
             <span aria-hidden className="h-2 w-2 rounded-full bg-emerald-500" />
             Free and open source

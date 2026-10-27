@@ -16,17 +16,12 @@ export const dynamic = 'force-static';
 //     for the homescreen tile.
 //   - Lighthouse PWA audit gets the basic-installability check.
 //
-// Icons, in increasing specificity. /icon.svg is the scalable master
-// (Next.js also auto-emits a <link> for app/icon.svg). The raster
-// PNGs from public/ (livedoc-icon-{256,512}.png) are listed at
-// explicit sizes because some Android installers + the Lighthouse PWA
-// audit prefer a concrete PNG over an SVG. All are purpose: 'any':
-// the Living Prism's corners reach outside the maskable safe zone
-// (the centre 80% circle), so declaring 'maskable' would let an
-// Android circle/squircle mask clip the cube. An opaque,
-// iOS-friendly home-screen tile is handled separately by
-// app/apple-icon.tsx (iOS renders transparency as black, so the
-// transparent PNGs here would tile badly on iOS).
+// Icons (docs/specs/004-interface-design/blueprints/brand-media.md "Android"). /icon.svg is the scalable master
+// (Next.js also auto-emits a <link> for app/icon.svg); the 192 and 512px PNGs on a white tile serve launchers and
+// the Lighthouse installability check that want a concrete raster. The maskable tiles draw the stack at 56% of the
+// tile, inside the safe zone (the centre circle of 80%), so a circle or squircle mask never clips a sheet. The
+// monochrome silhouette is for Android's themed icons, which keep only its alpha. An opaque, iOS-friendly
+// home-screen tile is app/apple-icon.tsx (iOS renders transparency as black).
 //
 // theme_color matches the viewport export in layout.tsx so the
 // installed-app chrome stays brand-blue. background_color paints the
@@ -41,23 +36,26 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#0EA5E9',
     background_color: '#ffffff',
     icons: [
+      { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+      { src: '/livedoc-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/livedoc-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
       {
-        src: '/icon.svg',
-        sizes: 'any',
-        type: 'image/svg+xml',
-        purpose: 'any',
-      },
-      {
-        src: '/livedoc-icon-256.png',
-        sizes: '256x256',
+        src: '/livedoc-maskable-192.png',
+        sizes: '192x192',
         type: 'image/png',
-        purpose: 'any',
+        purpose: 'maskable',
       },
       {
-        src: '/livedoc-icon-512.png',
+        src: '/livedoc-maskable-512.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'any',
+        purpose: 'maskable',
+      },
+      {
+        src: '/livedoc-monochrome-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'monochrome',
       },
     ],
   };

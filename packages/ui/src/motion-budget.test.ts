@@ -7,6 +7,9 @@ import { checkMotionBudget, formatViolations } from '@livedoc/tailwind-config/mo
 describe('shared UI motion', () => {
   it('keeps every chrome duration within the budget', () => {
     const root = fileURLToPath(new URL('.', import.meta.url));
-    expect(formatViolations(checkMotionBudget({ root }))).toBe('');
+    // The logo's assembly is content motion with its own pace (docs/specs/004-interface-design/motion.md).
+    expect(
+      formatViolations(checkMotionBudget({ root, canvasStylesheets: ['brand-motion.css'] })),
+    ).toBe('');
   });
 });

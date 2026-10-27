@@ -19,8 +19,8 @@ import {
 import { PROMISES, type Promise, type PromiseId } from '@/lib/promises';
 
 // The promises (docs/specs/019-marketing/marketing-site.md "Promises"), straight after the template
-// gallery: "Built with your values in mind", told through the brand mark. The mark is a prism (drawn
-// large, without its inner diagram, and opening and turning on hover as the header's does), so a
+// gallery: "Built with your values in mind", told through the brand mark. The mark, the Page Stack, is drawn
+// large (its compact drawing, fanning open on hover as the header's does), and a
 // beam of white light runs into it and leaves as five coloured beams, each landing on one promise
 // (Completely Free, No Account Needed, Open Source, Private by Design, Real-Time Collaboration). On a
 // deep indigo band in either appearance, so the light reads.
@@ -110,7 +110,7 @@ export function PromisePrism() {
   const { ref, seen } = useSeen<HTMLDivElement>();
   const [hot, setHot] = useState<PromiseId | null>(null);
   const [beams, setBeams] = useState<Beams | null>(null);
-  const [spinning, setSpinning] = useState(false);
+  const [fanning, setFanning] = useState(false);
 
   useLayoutEffect(() => {
     const stage = ref.current;
@@ -241,15 +241,15 @@ export function PromisePrism() {
               and turns it, as the header's logo does. */}
           <div
             aria-hidden
-            onPointerEnter={(e) => e.pointerType !== 'touch' && setSpinning(true)}
-            onPointerLeave={() => setSpinning(false)}
+            onPointerEnter={(e) => e.pointerType !== 'touch' && setFanning(true)}
+            onPointerLeave={() => setFanning(false)}
             className="absolute left-8 top-1/2 hidden h-36 w-36 -translate-y-1/2 lg:block"
           >
             <div className="promise-prism-glow pointer-events-none absolute -inset-10 rounded-full bg-[radial-gradient(circle,rgb(56_189_248/0.45),transparent_65%)]" />
             <div data-prism className="promise-prism relative h-full w-full">
               <BrandMark
                 variant="compact"
-                spinning={spinning}
+                fanning={fanning}
                 className="h-full w-full drop-shadow-[0_18px_30px_rgb(37_99_235/0.45)]"
               />
             </div>

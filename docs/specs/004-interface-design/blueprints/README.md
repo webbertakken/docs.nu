@@ -12,5 +12,7 @@ Follow the references below only as needed; never upfront.
 - ./within-reach.md - when implementing or changing the shared most used + recent allocation (`withinReach`)
 - ./colour-picker.md - when implementing or changing ColourPicker, its skins, the standard colours or Custom colours
 - ./toasts.md - when implementing or changing the toast stack, its queue, timer, floor, card or motion
+- ./brand-motion.md - when implementing or changing the logo's assembly, fan, press or the homepage's every-kind cycle
+- ./brand-media.md - when adding, regenerating or serving a brand asset: every icon, logo, share card and email mark, its size, path and generator
 - ./DEFAULTS.md - when an interface-design blueprint applies a default the spec leaves open
 - ./COMPLETENESS.md - when checking which completeness categories an interface-design blueprint covers
