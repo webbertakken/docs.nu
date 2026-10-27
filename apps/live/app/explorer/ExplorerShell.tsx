@@ -30,7 +30,6 @@ import { SectionsDrawer } from './SectionsDrawer';
 import { HomeHero } from '@/components/panels/home/HomeHero';
 import { useHeroPresence } from '@/components/panels/home/useHeroPresence';
 import { homeBannerShown } from '@/lib/home-banner';
-import { useMidnightPalette } from '@/hooks/ui/useMidnightPalette';
 import { useExplorerState } from './useExplorerState';
 import { teamFolderPath } from './routes';
 import { searchPanelSources } from '@/components/panels/search-panel-sources';
@@ -72,8 +71,6 @@ const SIDEBAR_WIDTH = 256;
 export function ExplorerShell({ children }: { children: ReactNode }) {
   const state = useExplorerState();
   const surface = explorerSurfaceFlags(useExplorerSurface());
-  // Dark mode's Midnight palette, before the first paint (docs/specs/004-interface-design/color-scheme.md).
-  useMidnightPalette();
   // Wait for the session to settle so a signed-in user never momentarily
   // reads the localStorage guest id and refreshes against the wrong
   // owner. After this gate, `ownerId` is either the account id or
