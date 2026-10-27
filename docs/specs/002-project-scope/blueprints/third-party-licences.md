@@ -96,7 +96,7 @@ The generator is a pure pipeline around two IO edges:
    - Licence id: see "Interfaces and contracts"; then `isLicenceAllowed`, else `LicenceNotAllowed`.
 4. **Assemble** (pure). `buildManifest(collected)` groups works by side, merges the same work's apps,
    deduplicates texts by hash, sorts, and reports unused overrides and embedded works.
-5. **Write** (IO). Removes and rewrites `<out>/public/licences/texts/`, writes one `<hash>.txt` per
+5. **Write** (IO). Removes and rewrites `<out>/public/about/licences/texts/`, writes one `<hash>.txt` per
    text and `<out>/generated/licences.json`.
 
 Invariants: every hash a `WorkEntry` names has a written text; every work has at least one text;
@@ -182,7 +182,7 @@ number }`) and `output_files` (`{ filename: string }`); a source's full path is 
 ## Data and persistence
 
 Nothing persists outside the build. Generated, gitignored and rebuilt every marketing build:
-`apps/marketing/generated/licences.json`, `apps/marketing/public/licences/texts/*.txt` and each Next
+`apps/marketing/generated/licences.json`, `apps/marketing/public/about/licences/texts/*.txt` and each Next
 app's `.next-analyze/`. Committed: `packages/licences/texts/*.txt`, each listed in `TEXT_SOURCES`
 with its upstream URL pinned to a tag or commit and its sha256. No schema migration: the manifest
 carries `schemaVersion: 1`, and the page refuses any other (`LicencesManifestInvalid`).
@@ -234,7 +234,7 @@ copy in the same box.
 - Page weight measured: 173.8 KB raw, 20.3 KB gzipped for 54 works. A static export ships the
   server-rendered entries twice (HTML and RSC payload), so repeated chrome is short `lic-*`
   classes (per-element utilities made it 353 KB) and no per-entry SVG (D16).
-- Budget: `LICENCES_HTML_BYTES_PER_WORK` (D14) times the works listed, on the exported `licences.html`, checked by
+- Budget: `LICENCES_HTML_BYTES_PER_WORK` (D14) times the works listed, on the exported `about/licences.html`, checked by
   `verify.ts`, which also refuses any text whose fingerprint (`textFingerprint`: its first long line HTML leaves
   unescaped) appears in the page: an inlined text is caught directly, whatever the size.
 
