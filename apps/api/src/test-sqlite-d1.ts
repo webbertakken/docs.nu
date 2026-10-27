@@ -217,7 +217,9 @@ export function sqliteD1(base: Partial<Env> = {}, opts: SqliteD1Options = {}): S
   const db = {
     prepare: (query: string) => {
       if (rooms && ROOM_TABLE_SQL.test(query))
-        throw new Error(`D1 statement names a room table: ${query.replace(/\s+/g, ' ').slice(0, 160)}`);
+        throw new Error(
+          `D1 statement names a room table: ${query.replace(/\s+/g, ' ').slice(0, 160)}`,
+        );
       return statement(query, []);
     },
     // Present so better-auth recognises the binding as D1 (it tests for prepare, batch and exec).
