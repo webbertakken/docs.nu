@@ -8,6 +8,14 @@ export * from './parse';
 export * from './serialise';
 export * from './suggest';
 export * from './telemetry';
+export { foldText, TITLE_CACHE_LIMIT } from './title-fold';
+export * from './title-match';
+export {
+  allowedTypos,
+  TWO_TYPO_MIN_WORD_LENGTH,
+  TYPO_MAX_TARGET,
+  TYPO_MIN_WORD_LENGTH,
+} from './typo-distance';
 export * from './types';
 export * from './url';
 export * from './view-models';
