@@ -871,6 +871,8 @@ export const EXACT: Readonly<Record<string, string>> = {
   'Search|Searched|':
     'A query was typed into search. Counted once per session, not on every keystroke.',
   'Search|Selected|Element': 'Someone picked an element match from the global search results.',
+  'Search|Selected|Template':
+    'Someone started a new document from a template found in the global search (Ctrl K).',
   'Session|Deleted|Account':
     'Someone permanently deleted their account and its data, after typing their email address to confirm.',
   'Session|Opened|Embed':

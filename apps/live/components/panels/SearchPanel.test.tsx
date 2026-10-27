@@ -6,6 +6,9 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { THIS_BROWSER_DESCRIPTION } from '@/components/primitives/ThisBrowserPill';
+const { assign } = vi.hoisted(() => ({ assign: vi.fn() }));
+vi.mock('@/lib/app-location', () => ({ assignAppLocation: assign }));
+
 import { SearchPanel } from './SearchPanel';
 
 afterEach(cleanup);
@@ -81,5 +84,21 @@ describe('SearchPanel', () => {
     fireEvent.keyDown(field, { key: 'ArrowDown' });
     expect(field.getAttribute('aria-activedescendant')).toBe(screen.getAllByRole('option')[1]!.id);
     expect(screen.getByText('2 results')).toBeTruthy();
+  });
+});
+
+// docs/specs/007-editor/command-palette.md "One search": a template found by name makes its document.
+describe('SearchPanel templates', () => {
+  it('offers a template by name and makes it on Enter', () => {
+    const onClose = vi.fn();
+    render(
+      <SearchPanel documents={[]} folders={[]} onSelectDocument={vi.fn()} onClose={onClose} />,
+    );
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'kanban board' } });
+    const option = screen.getByRole('option', { name: /Kanban Board/ });
+    expect(option.textContent).toContain('new document');
+    fireEvent.click(option);
+    expect(assign).toHaveBeenCalledWith('/new?template=kanban');
+    expect(onClose).toHaveBeenCalled();
   });
 });

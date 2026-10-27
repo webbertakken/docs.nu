@@ -1,6 +1,7 @@
 import type { Element, ShapeElement, Tab } from '@livedoc/document';
 import { describe, expect, it } from 'vitest';
 import { matches } from '@livedoc/icons';
+import { TEMPLATES, type TemplateKind } from '@livedoc/templates';
 import { buildSearchResults, type SearchResultItem } from './search';
 
 const shape = (id: string, label?: string): ShapeElement => ({
@@ -555,5 +556,55 @@ describe('buildSearchResults — help articles (docs/specs/018-help/help-app.md 
     const keys = out.map((g) => g.key);
     expect(keys.indexOf('help')).toBe(keys.length - 1);
     expect(keys.indexOf('documents')).toBeLessThan(keys.indexOf('help'));
+  });
+});
+
+// docs/specs/007-editor/command-palette.md "One search": templates to start a document from, matched as the New
+// Document wizard matches them (templateMatchesQuery).
+describe('buildSearchResults templates', () => {
+  const pick = (...kinds: TemplateKind[]) =>
+    kinds
+      .map((k) => TEMPLATES.find((t) => t.kind === k)!)
+      .map(({ kind, title, description }) => ({
+        kind,
+        title,
+        description,
+      }));
+  const templates = pick('mindmap', 'kanban', 'flowchart');
+  const base = { documents: [], folders: [], templates };
+  const templatesOf = (groups: ReturnType<typeof buildSearchResults>) =>
+    groups.find((g) => g.key === 'templates');
+
+  it('offers matching templates under Templates, only for a query', () => {
+    expect(templatesOf(buildSearchResults({ ...base, query: '' }))).toBeUndefined();
+    const group = templatesOf(buildSearchResults({ ...base, query: 'kanban' }));
+    expect(group?.label).toBe('Templates');
+    expect(group?.items).toEqual([{ kind: 'template', id: 'kanban', name: 'Kanban Board' }]);
+  });
+
+  it('matches a template by its description too', () => {
+    const group = templatesOf(buildSearchResults({ ...base, query: 'checkout' }));
+    expect(group?.items.map((i) => (i.kind === 'template' ? i.id : null))).toEqual(['flowchart']);
+  });
+
+  it('puts a template whose name begins with the query first', () => {
+    const group = templatesOf(
+      buildSearchResults({ ...base, templates: pick('data-flow', 'flowchart'), query: 'flow' }),
+    );
+    expect(group?.items.map((i) => (i.kind === 'template' ? i.id : null))).toEqual([
+      'flowchart',
+      'data-flow',
+    ]);
+  });
+
+  it('places templates after documents, before actions', () => {
+    const keys = buildSearchResults({
+      ...base,
+      documents: [{ id: 'd', name: 'Kanban notes' }],
+      commandItems: [{ id: 'c', name: 'Kanban layout', keywords: '' }],
+      query: 'kanban',
+    }).map((g) => g.key);
+    expect(keys.indexOf('documents')).toBeLessThan(keys.indexOf('templates'));
+    expect(keys.indexOf('templates')).toBeLessThan(keys.indexOf('commands'));
   });
 });

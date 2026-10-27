@@ -12,6 +12,8 @@
 
 // The palette ranking lives with the icon catalogues, so the api's icon search ranks alike.
 import { matches, paletteRank } from '@livedoc/icons';
+import { templateMatchesQuery } from '@livedoc/templates/template-search';
+import type { TemplateKind } from '@livedoc/templates';
 import { compileTitleQuery, rankByTitle, type TitleQuery } from '@livedoc/explorer-lens';
 import type { ShapeKind, Tab } from '@livedoc/document';
 
@@ -50,6 +52,7 @@ const PALETTE_LIMIT = 10;
 const COMMAND_LIMIT = 10;
 const HELP_LIMIT = 6;
 const SETTINGS_LIMIT = 6;
+const TEMPLATE_LIMIT = 5;
 
 // Internal-only input shapes for the by-name match inputs. Several
 // share the same {id, name} shape but stay distinct so a future
@@ -149,6 +152,11 @@ type PaletteItem = { kind: 'palette'; id: string; name: string; add: PaletteAdd 
 // what it's handed. Replaces the old single-purpose create-tab "action",
 // which is now just one command among many.
 type CommandItem = { kind: 'command'; id: string; name: string };
+// A template to start a document from (docs/specs/007-editor/command-palette.md "One search"); picking one makes it.
+type TemplateItem = { kind: 'template'; id: TemplateKind; name: string };
+
+/** A template as the panel searches it: its kind, title and one-line description. */
+export type TemplateSearchItem = { kind: TemplateKind; title: string; description: string };
 // A help-centre article result. Picking it opens the article (in a new tab);
 // `href` is the absolute /help path and `leaf` the article's telemetry id
 // (help-registry's articleTelemetryId: unique per article, slash-free).
@@ -178,6 +186,7 @@ export type SearchResultItem =
   | ElementItem
   | PaletteItem
   | CommandItem
+  | TemplateItem
   | HelpItem
   | SettingItem;
 
@@ -191,6 +200,7 @@ export type SearchGroup = {
     | 'elements'
     | 'palette'
     | 'commands'
+    | 'templates'
     | 'help'
     | 'settings';
   label: string;
@@ -268,6 +278,8 @@ type SearchInput = {
   // a non-empty query only (no catalogue dump, and an empty query keeping the
   // browse list free of a destructive command that Enter would run).
   commandItems?: CommandSearchItem[];
+  // Templates to start a document from, in the order they rank on a tie (Popular first). Non-empty query only.
+  templates?: readonly TemplateSearchItem[];
   // Help-centre catalogue surfaced as "Help" results. Matched only on a
   // non-empty query (an empty one would dump the whole catalogue). Both the
   // editor and the Explorer pass it, since help is global.
@@ -426,6 +438,24 @@ export function buildSearchResults(input: SearchInput): SearchGroup[] {
   // navigation + element groups so picking a tab / element by name keeps the
   // default Enter; the user types a verb to reach a command. Matched on name
   // + keywords.
+  // Templates: after every navigation group, so a document of the same name keeps the default Enter, and before the
+  // actions. A title that begins with the words leads; then the given order.
+  if (q && input.templates && input.templates.length > 0) {
+    const lead = q.toLowerCase();
+    const found = input.templates.filter((t) => templateMatchesQuery(t, q));
+    const templateMatches = [
+      ...found.filter((t) => t.title.toLowerCase().startsWith(lead)),
+      ...found.filter((t) => !t.title.toLowerCase().startsWith(lead)),
+    ].slice(0, TEMPLATE_LIMIT);
+    if (templateMatches.length > 0) {
+      groups.push({
+        key: 'templates',
+        label: 'Templates',
+        items: templateMatches.map((t) => ({ kind: 'template', id: t.kind, name: t.title })),
+      });
+    }
+  }
+
   if (q && input.commandItems && input.commandItems.length > 0) {
     const commandMatches = input.commandItems
       .filter((c) => matchesEveryWord(q, c.name, c.keywords))
