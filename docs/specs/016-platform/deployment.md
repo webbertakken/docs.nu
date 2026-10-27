@@ -60,6 +60,23 @@ CI is production's gate: a push to `main` whose CI passes triggers the productio
 
 The cost is runner time: a merge on `main` is about a dozen jobs (CI's six, E2E's shards, CodeQL), so a burst of merges queues for runners alongside open pull requests' runs.
 
+### A red main
+
+Any failure on `main` is an issue, never only a red mark in the Actions tab. `.github/workflows/main-red.yml` follows
+every run on `main` of CI, E2E Smoke, CodeQL, Deploy Production, CLI publish, Publish MCP server to registry and
+Lucide re-vendor (`workflow_run`), whatever started it: a push, a schedule, a dispatch or the deploy's own trigger.
+Canvas Performance is left out; it reports through its own issue.
+
+- **One issue per workflow**, titled `<workflow> on main is red` and labelled `main-red` (made on first use).
+- **A failure, a timeout or a startup failure** opens that issue, or comments on the one already open, naming the
+  commit, its title, the failed jobs (each linked) and the run.
+- **A green run closes it**, with a comment naming the commit and run, but only when the green commit is still the tip
+  of `main`: an older commit's run finishing late never closes an issue a newer failure opened.
+- **A cancelled or skipped run** reports nothing.
+- Runs report one at a time per workflow, in the order they finish, so two reports never race on one issue. Each
+  report logs one `main-red:` line saying what it did.
+- A pull request's runs never report: its checks already show its author what is red.
+
 ## Deploy
 
 The deploy is split in two: `.github/workflows/deploy-reusable.yml` holds every job below as a **reusable workflow** (`workflow_call`), and `deploy.yml` triggers it for production. Its inputs (`wrangler_env`, the MCP origin, `deploy_mcp`) and the secrets the caller passes are all that would differ for another environment. Previews deploy through `preview.yml` and `scripts/preview.mjs` instead, from configs generated off the same production files ([Preview deployments](preview-deployments.md)).
