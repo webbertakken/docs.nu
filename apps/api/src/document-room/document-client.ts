@@ -57,15 +57,12 @@ export function documentRoom(
   // The stub's RPC types wrap every answer for the wire; the shapes here are the class's own.
   const room = ns.get(ns.idFromName(documentId)) as unknown as RoomStub;
   return {
+    // Always one Request: a stub takes (input, init), but a room answering its own id in-process
+    // (room-content.ts localNamespace) is the class itself, whose fetch takes a single Request.
     fetch: (input, init) => {
-      if (typeof input !== 'string') {
-        const request = new Request(input, init);
-        request.headers.set(DOCUMENT_ID_HEADER, documentId);
-        return room.fetch(request);
-      }
-      const headers = new Headers(init?.headers);
-      headers.set(DOCUMENT_ID_HEADER, documentId);
-      return room.fetch(input, { ...init, headers });
+      const request = new Request(input, init);
+      request.headers.set(DOCUMENT_ID_HEADER, documentId);
+      return room.fetch(request);
     },
     route: (request, identity) => room.route(documentId, request, identity),
     create: (seed) => room.create(documentId, seed),
