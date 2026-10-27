@@ -70,12 +70,12 @@ The manifest also lists `/icon.svg` as `any`.
 
 ### Social (rendered at build from the module, no committed raster)
 
-| File                                                     | Size       |
-| -------------------------------------------------------- | ---------- |
-| `apps/marketing/app/opengraph-image.tsx`                 | 1200 × 630 |
-| `apps/marketing/app/twitter-image.tsx`                   | 1200 × 630 |
-| `apps/marketing/app/features/[slug]/opengraph-image.tsx` | 1200 × 630 |
-| `apps/help/app/og/[...card]/route.tsx`                   | 1200 × 630 |
+| File                                                           | Size       |
+| -------------------------------------------------------------- | ---------- |
+| `apps/marketing/app/opengraph-image.tsx`                       | 1200 × 630 |
+| `apps/marketing/app/twitter-image.tsx`                         | 1200 × 630 |
+| `apps/marketing/app/about/features/[slug]/opengraph-image.tsx` | 1200 × 630 |
+| `apps/help/app/og/[...card]/route.tsx`                         | 1200 × 630 |
 
 Each draws through `packages/ui/src/social-card.tsx` or the help card with `brandMarkSvg({ variant: 'full',
 scheme: 'light' })`. The api's share preview falls back to the site's card (`BRAND_CARD_PATH`).
