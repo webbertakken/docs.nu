@@ -9,6 +9,7 @@
 
 import { reportApiWarning } from '../api/error-report';
 import { debugLog } from '../debug-log';
+import { whenDocumentCreated } from '../new-document/create-hold';
 import { OfflineStoreUnavailableError, offlineBackend } from './offline-backend';
 
 // The channel the tabs of one browser tell each other about offline ids on.
@@ -65,7 +66,11 @@ async function loadIds(): Promise<Set<string>> {
   return idCacheLoad;
 }
 
+// A document still being made in this browser is answered once its create has landed (create-hold.ts), so nothing
+// asked of it meanwhile is routed to the server before it is known to live here.
 export async function isOfflineId(id: string): Promise<boolean> {
+  const created = whenDocumentCreated(id);
+  if (created) await created;
   return (await loadIds()).has(id);
 }
 

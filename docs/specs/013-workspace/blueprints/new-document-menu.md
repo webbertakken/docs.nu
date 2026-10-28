@@ -144,29 +144,144 @@ function startNewDocument(request: NewDocumentRequest): void;
 
 ## Instant open
 
-The contract `startNewDocument` meets; its implementation is derived here before it is built.
+The contract `startNewDocument` meets.
 
 - **Budget:** click to the editor painted and editable at most `NEW_DOCUMENT_OPEN_BUDGET_MS` (200) for a blank and
   `NEW_DOCUMENT_TEMPLATE_BUDGET_MS` (500) for a template, measured in a production build.
-- **Steps:** mint `documentId`, `tabId`; build the content (`newDocumentContent`); register it in memory for the
-  editor; `history.pushState` to `/document/<id>`; render the editor in the Explorer's place; start the create (cloud
-  `apiCreateDocument` with the place and intent, or `offlineCreateDocument` for This Browser) without awaiting it.
-- **The editor** opens a document registered in memory without `apiLoadDocument` or a tab fetch; until the create
-  lands it is not server-stored (no room, saves held); when it lands the room connects and held saves flush.
-- **Failure:** a create that fails keeps the editor and its edits, shows a not-saved notice with Try again (same ids)
-  or, for a refused placement, Save to My Documents (no placement).
-- **Back:** popstate to an Explorer address while the editor is shown renders the Explorer again.
-- The details (module names, the bootstrap branch, the save hold) are written here by the implementer before code.
+
+### Modules
+
+| File                                                              | Role                                                                                                       |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `apps/live/app/explorer/new-document/start-new-document.ts`       | The seam: the steps below, the busy guard, `prefetchNewDocumentOpen`                                       |
+| `apps/live/lib/new-document/pending-documents.ts`                 | The registry of **pending documents** (made in the browser, create not landed) and the hold                |
+| `apps/live/lib/new-document/write-new-document.ts`                | `writeNewDocument`, `trackNewDocumentCreated`: the one create `/new`, the workbench and the Explorer share |
+| `apps/live/lib/new-document/create-failure.ts`                    | The failure copy (moved from `app/new/`), shared by `/new` and the not-saved banner                        |
+| `apps/live/lib/new-document/new-document-creator.ts`              | Who is creating, bound by the Explorer shell: `bindNewDocumentCreator`, `newDocumentCreator`               |
+| `apps/live/lib/editor-page-loader.ts`                             | `loadEditorPage()`, `loadedEditorPage()`: the editor's chunk, fetched once                                 |
+| `apps/live/app/explorer/in-place-editor/InPlaceEditor.tsx`        | Wraps the Explorer shell in its layout; renders the editor in its place                                    |
+| `apps/live/app/explorer/in-place-editor/in-place-editor-store.ts` | Which document the Explorer shows in place: `openInPlace`, `closeInPlace`, `useInPlaceDocument`            |
+| `apps/live/app/document/[id]/seed-pending-document.ts`            | Seeds the editor's state from a pending document, every tab loaded                                         |
+| `apps/live/app/document/[id]/usePendingCreate.ts`                 | The editor's view of its create: `held`, the landing, the not-saved actions                                |
+| `apps/live/components/chrome/NotSavedBanner.tsx`                  | The not-saved notice in the top-centre stack                                                               |
+| `apps/live/components/start/initial-start-group.ts`               | Pure `initialStartGroup(taken, groupIds)`: a handed group, or Recommended                                  |
+
+### Pending documents
+
+```ts
+type PendingCreate =
+  | { status: 'creating' }
+  | { status: 'landed' }
+  | { status: 'failed'; failure: CreateFailure };
+
+type PendingDocument = {
+  id: string;
+  name: string; // untitledNameForTemplate
+  tabs: Tab[]; // whole, every element
+  itemTypes: ItemTypeCatalogue | null;
+  ownerId: string; // the creator's id; the document's owner is OFFLINE_OWNER_ID in This Browser
+  location: SaveLocationId; // 'livedoc' or 'browser' (This Browser)
+  teamId: string | null;
+  startedAt: number; // performance.now() at the click
+  create: PendingCreate;
+};
+
+addPendingDocument(doc, write: (place: NewDocumentPlace) => Promise<void>, place): void; // runs write at once
+pendingDocument(id): PendingDocument | null;
+subscribePendingDocuments(listener): () => void;
+retryPendingDocument(id, { withoutPlacement }): void; // the same ids, the same write
+attachPendingEditor(id, hasUnsavedChanges): () => void;
+isPendingSettled(id): boolean; // landed, and the editor holds nothing unsaved
+forgetPendingDocument(id): void;
+whenDocumentCreated(id): Promise<void> | null; // null once landed or never pending
+heldDocumentIn(url): string | null; // a pending id the url names
+```
+
+- A pending document's **hold** is one promise per id, resolved when its create lands and never rejected: a failed
+  create keeps everything that waits on it waiting, and Try again's landing releases it.
+- `apiFetch` awaits `whenDocumentCreated(heldDocumentIn(url))` before it sends, so every read and write naming the
+  document (items, sheets, comments, its tabs) waits for the create and goes out in the order it was made. The
+  create itself (`POST /api/documents`) names no id in its URL and is never held.
+- `isOfflineId(id)` awaits the same hold, so a request for a This Browser document cannot be routed to the server
+  before `offlineCreateDocument` has registered it.
+
+### Steps of `startNewDocument`
+
+1. Busy (a start in progress): ignored, logged `[new-document] busy`.
+2. Inside a workspace frame (`interceptAppNavigation` takes the `/new?template=…&folder=…&team=…` href): the frame's
+   own create in place makes it (All templates sends no template, so it opens on its start). Done.
+3. No creator bound (not on the Explorer, or the guest id not resolved yet): `assignAppLocation` to the same href,
+   the `/new` path, logged `[new-document] no-creator`. Done.
+4. Mint `documentId`, `tabId`; a blank closes its tab's start (`closeStartForBlank`).
+5. The location: LiveDoc when placed, else `defaultSaveLocationFor({ signedIn, signInOffered: signInOfferedHere() === true })`.
+6. The content: `newDocumentContent({ templateKind, themeId: NEW_DOCUMENT_THEME_ID, tabId, via: 'explorer' })`.
+7. `await loadEditorPage()` (already in from the prefetch in practice).
+8. `addPendingDocument`, which starts `writeNewDocument` without awaiting it.
+9. `history.pushState(null, '', '/document/<id>')`, then `openInPlace(id)`.
+
+### The editor's bootstrap branch
+
+- `useIdentityBootstrap`'s first layout effect checks `pendingDocument(idFromPath)` synchronously before the early
+  open; found, it takes the early path (`bootstrap(true)`) with the pending document, whatever auth says.
+- The branch sets the reader to the creator's id (`selfParticipant` with `id: pending.ownerId`), seeds from memory
+  (`seedPendingDocument`: `resetTabs(tabs)`, `lastSavedTabsRef = tabs`, every tab id loaded, the name, the item
+  types, owner fields, the first tab active), and sets `documentServerStored: false`, `isOwner: true`,
+  `sessionRole: 'edit'`, `documentId`. No `apiLoadDocument`, no tab fetch, no share-link list, no
+  `Document·Loaded`.
+- It ends with `setLoadStep('done')` and the `NewDocumentOpen` timing from `startedAt`, ended after paint, which also
+  logs `[new-document] opened ms=<n>`. The reader's profile and the lists settle in the background, as for an early
+  open (`settleEarlyIdentity`).
+
+### Saves held until the create lands
+
+- `usePendingCreate(documentId)` reads the registry: `held` while the document is pending and its create has not
+  landed. `useAutosave` and `useUnloadFlush` take `held`: no debounced save and no flush while held; leaving while
+  held with changes asks first (`shouldWarnOnLeave`).
+- On landing: `documentServerStored` becomes true for LiveDoc (the room connects), the Explorer lists refresh, and
+  the autosave effect runs once with the diff of everything done meanwhile against the created content: the held
+  saves flush once.
+- The editor attaches `hasUnsavedChanges` to the registry and forgets the pending document when it unmounts.
+
+### Failure
+
+- A create that fails sets `failed` with `createFailureCopy(error)`; the editor stays as it is and nothing is saved.
+- `NotSavedBanner` (top-centre, first in the stack, `role="alert"`): "Not saved yet. {message}" with **Try again**
+  (`retry`: the same ids, the same place) or **Save to My Documents** (`choose`: the same ids, no placement).
+- `Document·Created`, `Template·Used`, `Theme·Changed` and `Team·Added·Document` fire on landing
+  (`trackNewDocumentCreated`), as `/new` sends them.
+
+### In the Explorer's place
+
+- `InPlaceEditor` wraps `ExplorerShell` in `app/explorer/layout.tsx`. With a document open in place and the address
+  on `/document/<id>` (`usePathname`), it renders `loadedEditorPage()` in its own `Suspense` (fallback
+  `OpeningScreen`) instead of the Explorer.
+- **Back:** the address leaves `/document/<id>` (popstate, or the editor's own navigation within the Explorer
+  layout), and the Explorer renders again. An editor whose document is not settled (`isPendingSettled`) stays
+  mounted, hidden, until it is (checked every `IN_PLACE_SETTLE_POLL_MS`), so held changes still save; Forward shows
+  it again. Logged `[new-document] back-while-pending`.
+- The editor's chunk is fetched on idle by `InPlaceEditor` and on pointer enter or focus of the button
+  (`prefetchNewDocumentOpen`, which also fetches the Plan template seeds' chunk).
+
+### Start group
+
+- `StartFromTemplates` and `StartPlanning` open on `initialStartGroup(takeStartGroup(), groupIds)`, read once on
+  mount: a known id is logged `[start] group=<id>`; an unknown one opens Recommended and logs `[start] group-unknown`.
 
 ## Errors and edge cases
 
-| Case                                      | Handling                                                             |
-| ----------------------------------------- | -------------------------------------------------------------------- |
-| `last blank` holds an unknown id          | Read as Diagram; logged `[new-document] last-blank-unknown`          |
-| localStorage unavailable                  | Last blank is Diagram, kept in memory for the session                |
-| A double click on the face                | One document: `startNewDocument` ignores calls while one is starting |
-| The section offers no New Document        | No button (`paneHeaderActions`)                                      |
-| A template whose kind is unknown at build | A unit test fails: every listed kind is in `TEMPLATES`               |
+| Case                                      | Handling                                                              |
+| ----------------------------------------- | --------------------------------------------------------------------- |
+| `last blank` holds an unknown id          | Read as Diagram; logged `[new-document] last-blank-unknown`           |
+| localStorage unavailable                  | Last blank is Diagram, kept in memory for the session                 |
+| A double click on the face                | One document: `startNewDocument` ignores calls while one is starting  |
+| The section offers no New Document        | No button (`paneHeaderActions`)                                       |
+| A template whose kind is unknown at build | A unit test fails: every listed kind is in `TEMPLATES`                |
+| The create fails (network, 5xx, storage)  | Editor stays; `NotSavedBanner` with Try again; logged `create-failed` |
+| The create's placement is refused         | `NotSavedBanner` with Save to My Documents (no placement)             |
+| Back before the create lands              | The editor stays mounted, hidden, until settled (D198)                |
+| No creator bound                          | The `/new` path; logged `[new-document] no-creator`                   |
+| Inside a workspace frame                  | The frame's own create in place                                       |
+| Closing the page while held with changes  | The browser asks first (`shouldWarnOnLeave`)                          |
 
 ## Security and trust
 
@@ -176,7 +291,8 @@ No new trust boundary: the create is the same `POST /api/documents` with the sam
 ## Observability
 
 Logs (`debugLog`): `[new-document] choice=… blank=… template=…`, `opened ms=…`, `create-landed ms=…`,
-`create-failed action=…`, `last-blank-unknown`.
+`create-failed action=…`, `busy`, `no-creator`, `held <method> <path>`, `back-while-pending`, `last-blank-unknown`.
+Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetry.md)).
 
 ## Testing
 
@@ -194,17 +310,28 @@ Logs (`debugLog`): `[new-document] choice=… blank=… template=…`, `opened m
 | Blank opens with its start closed; template not              | e2e `new-document-menu.spec.ts`                           |
 | Folder section files into the folder                         | e2e `new-document-menu.spec.ts`                           |
 | Click to editable within budget                              | e2e `new-document-open-budget.spec.ts` (production build) |
+| Hold resolves on landing, never on failure; url matching     | `pending-documents.test.ts`                               |
+| Retry uses the same ids; Save to My Documents drops place    | `pending-documents.test.ts`, `start-new-document.test.ts` |
+| Busy guard; frame; no creator; blank closes its start        | `start-new-document.test.ts`                              |
+| One create for both stores; telemetry on landing             | `write-new-document.test.ts`                              |
+| Seeded from memory, every tab loaded, baseline set           | `seed-pending-document.test.ts`                           |
+| Held saves flush once; failed create keeps edits             | `usePendingCreate.test.tsx`, `useAutosave.test.tsx`       |
+| Editor shown on its address; Back hides; kept until settled  | `InPlaceEditor.test.tsx`                                  |
+| Known group opens; unknown is Recommended                    | `initial-start-group.test.ts`                             |
+| Signed-in cloud create within budget                         | e2e `account/new-document-open-budget.spec.ts`            |
 
 ## Constants and configuration
 
-| Constant                          | Value | Provenance                             | Safe range |
-| --------------------------------- | ----- | -------------------------------------- | ---------- |
-| `NEW_DOCUMENT_PANE_HEIGHT_REM`    | 26    | About four rows of cards and a heading | 22 to 30   |
-| `NEW_DOCUMENT_MENU_WIDTH_REM`     | 40    | Mockup E; the list 14.5 + a 3-up pane  | 36 to 44   |
-| `MENU_AIM_DELAY_MS`               | 300   | D193                                   | 150 to 500 |
-| `NEW_DOCUMENT_OPEN_BUDGET_MS`     | 200   | Spec                                   | fixed      |
-| `NEW_DOCUMENT_TEMPLATE_BUDGET_MS` | 500   | Spec                                   | fixed      |
+| Constant                          | Value | Provenance                             | Safe range  |
+| --------------------------------- | ----- | -------------------------------------- | ----------- |
+| `NEW_DOCUMENT_PANE_HEIGHT_REM`    | 26    | About four rows of cards and a heading | 22 to 30    |
+| `NEW_DOCUMENT_MENU_WIDTH_REM`     | 40    | Mockup E; the list 14.5 + a 3-up pane  | 36 to 44    |
+| `MENU_AIM_DELAY_MS`               | 300   | D193                                   | 150 to 500  |
+| `NEW_DOCUMENT_OPEN_BUDGET_MS`     | 200   | Spec                                   | fixed       |
+| `NEW_DOCUMENT_TEMPLATE_BUDGET_MS` | 500   | Spec                                   | fixed       |
+| --------------------------------- | ----- | -------------------------------------- | ----------- |
+| `IN_PLACE_SETTLE_POLL_MS`         | 250   | D198                                   | 100 to 1000 |
 
 ## Defaults ledger
 
-D191 to D193 and D195 in [DEFAULTS.md](DEFAULTS.md).
+D191 to D193 and D195 to D203 in [DEFAULTS.md](DEFAULTS.md).

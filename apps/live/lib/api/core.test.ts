@@ -31,6 +31,11 @@ import {
   tabForWire,
 } from './core';
 import { resetApiWriteListeners, subscribeApiWrites } from './write-signal';
+import {
+  holdDocument,
+  releaseDocument,
+  resetCreateHoldsForTests,
+} from '../new-document/create-hold';
 import { setApiErrorReporter, setApiWarningReporter } from './error-report';
 
 const H = (h: HeadersInit) => h as Record<string, string>;
@@ -384,5 +389,30 @@ describe('apiFetch under a workbench session', () => {
       }),
     ).rejects.toBeInstanceOf(WorkbenchConfinedError);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('apiFetch hold on a document still being created', () => {
+  afterEach(() => resetCreateHoldsForTests());
+
+  it('sends a request naming the document only once its create has landed', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    holdDocument('pending-1');
+    const sent = apiFetch(`${API_BASE}/documents/pending-1/tabs/t1`, { method: 'PUT' });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(fetchMock).not.toHaveBeenCalled();
+    releaseDocument('pending-1');
+    await sent;
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('never holds the create or another document', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    holdDocument('pending-1');
+    await apiFetch(`${API_BASE}/documents`, { method: 'POST' });
+    await apiFetch(`${API_BASE}/documents/other/tabs`);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

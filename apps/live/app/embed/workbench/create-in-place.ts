@@ -2,10 +2,9 @@
 // document in place", WB58): never the /new wizard. The wizard's href says where and what (`folder`, `team`,
 // `template`); the place the frame shows fills in where it says nothing, a folder view its folder and a team page its
 // team. The document is made as /new makes it (lib/new-document-content.ts) and opened in the frame.
-import { creationIntentOf } from '@livedoc/api-schema';
-import { templateFamilyOf, untitledNameForTemplate, type TemplateKind } from '@livedoc/templates';
-import { apiCreateDocument } from '@/lib/api-client';
+import { untitledNameForTemplate, type TemplateKind } from '@livedoc/templates';
 import { NEW_DOCUMENT_THEME_ID, newDocumentContent } from '@/lib/new-document-content';
+import { writeNewDocument } from '@/lib/new-document/write-new-document';
 import { wizardBypassKind } from '@/lib/new-document-params';
 import type { WorkspacePlace } from '@/lib/workbench/workspace-place';
 
@@ -42,7 +41,7 @@ export async function createDocumentInPlace(
   const { templateKind } = request;
   const documentId = crypto.randomUUID();
   const tabId = crypto.randomUUID();
-  const { tabs, tab, itemTypes, seedItems } = await newDocumentContent({
+  const content = await newDocumentContent({
     templateKind,
     themeId: NEW_DOCUMENT_THEME_ID,
     tabId,
@@ -50,15 +49,16 @@ export async function createDocumentInPlace(
     // No template asked for: the editor opens on its start, where the templates are.
     templateChosen: templateKind !== null,
   });
-  await apiCreateDocument(ownerId, {
-    id: documentId,
+  // Always LiveDoc: a workbench session is a server session (lib/new-document/write-new-document.ts).
+  await writeNewDocument({
+    ids: { documentId, tabId },
     name: untitledNameForTemplate(templateKind),
-    tabs: tabs ?? [tab],
-    ...(itemTypes ? { itemTypes } : {}),
-    ...(seedItems.length ? { items: seedItems } : {}),
+    templateKind,
+    content,
+    location: 'livedoc',
+    creator: async () => ({ id: ownerId, name: '', color: '' }),
     teamId: request.teamId,
     folderId: request.folderId,
-    intent: creationIntentOf(tab, templateFamilyOf(templateKind)),
   });
   return documentId;
 }
