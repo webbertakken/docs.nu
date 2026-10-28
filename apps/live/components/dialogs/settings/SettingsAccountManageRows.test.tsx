@@ -83,6 +83,17 @@ describe('SettingsAccountNameRow', () => {
     await screen.findByText(NAME_FAILED);
     expect(auth.value.refreshSession).not.toHaveBeenCalled();
   });
+
+  it('clears a refusal once the name is edited, even back to the stored one', async () => {
+    manage.saveAccountName.mockResolvedValue(false);
+    render(<SettingsAccountNameRow row={row()} />);
+    const input = screen.getByLabelText('Your name');
+    fireEvent.change(input, { target: { value: 'Grace' } });
+    fireEvent.submit(input.closest('form')!);
+    await screen.findByText(NAME_FAILED);
+    fireEvent.change(input, { target: { value: 'Ada' } });
+    expect(screen.queryByText(NAME_FAILED)).toBeNull();
+  });
 });
 
 describe('SettingsSignInMethodsRow', () => {
@@ -162,6 +173,40 @@ describe('SettingsSessionsRow', () => {
     render(<SettingsSessionsRow row={row()} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Sign Out Everywhere Else' }));
     await screen.findByText("That didn't work. Try again.");
+  });
+
+  // A signed-out session leaves the list at once, while the list is read again, and its button is busy meanwhile.
+  it('drops a signed-out session at once, without blanking the list, and never signs it out twice', async () => {
+    let answer!: (ok: boolean) => void;
+    manage.signOutSession.mockReturnValue(new Promise<boolean>((r) => (answer = r)));
+    let reread!: (rows: typeof sessions) => void;
+    manage.readAccountSessions
+      .mockResolvedValueOnce(sessions)
+      .mockReturnValueOnce(new Promise((r) => (reread = r)));
+    render(<SettingsSessionsRow row={row()} />);
+    const button = await screen.findByRole('button', { name: 'Sign out Safari on iOS' });
+    fireEvent.click(button);
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(button);
+    expect(manage.signOutSession).toHaveBeenCalledTimes(1);
+    answer(true);
+    await waitFor(() => expect(screen.queryByText('Safari on iOS')).toBeNull());
+    // The list is read again, but this browser stays on screen meanwhile.
+    expect(screen.getByText('This browser')).toBeTruthy();
+    expect(screen.queryByText('Loading…')).toBeNull();
+    reread([sessions[0]!]);
+    await waitFor(() => expect(manage.readAccountSessions).toHaveBeenCalledTimes(2));
+  });
+
+  it('drops every other session at once after Sign Out Everywhere Else', async () => {
+    manage.readAccountSessions
+      .mockResolvedValueOnce(sessions)
+      .mockReturnValueOnce(new Promise(() => {}));
+    manage.signOutOtherSessions.mockResolvedValue(true);
+    render(<SettingsSessionsRow row={row()} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Sign Out Everywhere Else' }));
+    await waitFor(() => expect(screen.queryByText('Safari on iOS')).toBeNull());
+    expect(screen.getByText('This browser')).toBeTruthy();
   });
 
   it('offers a retry when the sessions cannot be read', async () => {

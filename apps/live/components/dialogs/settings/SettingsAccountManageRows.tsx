@@ -67,7 +67,11 @@ export function SettingsAccountNameRow({ row }: { row: SettingsAccountNameRowSpe
             aria-label="Your name"
             value={name}
             maxLength={ACCOUNT_NAME_MAX}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setName(event.target.value);
+              // A refusal belongs to the name that was refused: editing clears it.
+              setStatus(null);
+            }}
             className="w-44"
           />
           <button type="submit" className={SETTINGS_ROW_BUTTON} disabled={!changed || busy}>
@@ -205,6 +209,8 @@ export function SettingsSignInMethodsRow({ row }: { row: SettingsSignInMethodsRo
 export function SettingsSessionsRow({ row }: { row: SettingsSessionsRowSpec }) {
   const [sessions, setSessions] = useState<AccountSessionRow[] | null | 'loading'>('loading');
   const [failed, setFailed] = useState(false);
+  // What is being signed out: one session's token, or 'others' for Sign Out Everywhere Else.
+  const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
     let current = true;
@@ -219,11 +225,30 @@ export function SettingsSessionsRow({ row }: { row: SettingsSessionsRowSpec }) {
     setSessions('loading');
     setSessions(await readAccountSessions());
   };
+  // Read again after a sign-out, keeping the list on screen: a failed read keeps what is shown.
+  const reread = async () => {
+    const read = await readAccountSessions();
+    if (read !== null) setSessions(read);
+  };
 
-  const act = async (work: Promise<boolean>) => {
+  // A session signed out here leaves the list at once (every other one, for 'others'), while the list is read
+  // again; its button is busy meanwhile, so it is never pressed twice.
+  const act = async (target: string, work: () => Promise<boolean>) => {
+    if (busy) return;
+    setBusy(target);
     setFailed(false);
-    if (await work) await load();
-    else setFailed(true);
+    const ok = await work();
+    setBusy(null);
+    if (!ok) {
+      setFailed(true);
+      return;
+    }
+    setSessions((list) =>
+      Array.isArray(list)
+        ? list.filter((s) => (target === 'others' ? s.current : s.token !== target))
+        : list,
+    );
+    await reread();
   };
 
   const others = Array.isArray(sessions) ? sessions.filter((s) => !s.current).length : 0;
@@ -235,9 +260,10 @@ export function SettingsSessionsRow({ row }: { row: SettingsSessionsRowSpec }) {
           <button
             type="button"
             className={SETTINGS_ROW_BUTTON}
-            onClick={() => void act(signOutOtherSessions())}
+            disabled={busy !== null}
+            onClick={() => void act('others', signOutOtherSessions)}
           >
-            Sign Out Everywhere Else
+            {busy === 'others' ? 'Signing Out…' : 'Sign Out Everywhere Else'}
           </button>
         ) : undefined
       }
@@ -271,10 +297,11 @@ export function SettingsSessionsRow({ row }: { row: SettingsSessionsRowSpec }) {
                 <button
                   type="button"
                   className={SETTINGS_ROW_BUTTON}
-                  onClick={() => void act(signOutSession(session.token))}
+                  disabled={busy !== null}
+                  onClick={() => void act(session.token, () => signOutSession(session.token))}
                   aria-label={`Sign out ${session.label}`}
                 >
-                  Sign Out
+                  {busy === session.token ? 'Signing Out…' : 'Sign Out'}
                 </button>
               )}
             </li>
