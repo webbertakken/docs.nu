@@ -503,7 +503,8 @@ popover is clipped no matter its z-index.
   copy is "No loaded events match these filters" ("Show More to look further back, or remove a filter.") instead, and Show
   more (§2.3) stays under it: claiming nothing matches while older
   pages are unread is the same lie in a smaller voice.
-- **Failed**: "Couldn't load your timeline", with a Try again action.
+- **Failed**: "Couldn't load your timeline", with a Try again action. Pressing it shows the loading state at
+  once, on the page and in the editor's Explorer panel, never the old failure until the new read answers.
   **A read that failed must never render as an empty feed.** The first
   version of this surface mapped every failure — offline, an expired
   session token, a worker 500 — onto an empty page, so a reader who

@@ -207,7 +207,12 @@ export function useTimelineFeed(
   const load = useCallback(
     async (mode: 'replace' | 'merge') => {
       if (!ownerId) return;
-      if (mode === 'replace') setLoading(true);
+      // A fresh read (Try again included) is no longer the failed one: it shows loading, never the old failure
+      // (timeline.md §2.4). A merge keeps what it had until it answers.
+      if (mode === 'replace') {
+        setLoading(true);
+        setError(false);
+      }
       await fetchFirstPage(ownerId, mode);
     },
     [ownerId, fetchFirstPage],
