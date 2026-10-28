@@ -252,24 +252,4 @@ test.describe('menus by keyboard', () => {
     await expect(trigger).toBeFocused();
     expectNoPageErrors(pageErrors);
   });
-
-  test('the product switcher opens from the keyboard, not on focus alone', async ({
-    page,
-    pageErrors,
-  }) => {
-    await page.goto('/explorer');
-    const switcher = page.getByRole('button', { name: /^Switch section/ });
-    await switcher.focus();
-    await expect(page.getByRole('menu')).toHaveCount(0);
-    await page.keyboard.press('Enter');
-    const menu = page.getByRole('menu', { name: /^Switch section/ });
-    await expect(menu).toBeVisible();
-    await expect(menu.getByRole('menuitem').first()).toBeFocused();
-    await page.keyboard.press('ArrowDown');
-    await expect(menu.getByRole('menuitem').nth(1)).toBeFocused();
-    await page.keyboard.press('Escape');
-    await expect(menu).toBeHidden();
-    await expect(switcher).toBeFocused();
-    expectNoPageErrors(pageErrors);
-  });
 });

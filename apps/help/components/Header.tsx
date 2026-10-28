@@ -2,8 +2,8 @@ import { SiteHeader } from '@livedoc/ui';
 import { SearchInput } from '@/components/SearchInput';
 
 // Help-centre header: the shared SiteHeader (packages/ui, also marketing's and
-// the dashboard's) keyed to Help in the apps menu. Brand links back to the
-// marketing home, the search box sits in the centre slot so it's reachable
+// the dashboard's). Brand links back to the marketing home, the search box
+// sits in the centre slot so it's reachable
 // from every article (not just the home hero), and the landing page's own CTA
 // pair (Start Blank + Choose Template) keeps the editor a click away (the
 // canvas works without signing in, docs/specs/014-identity/auth-and-guest-access.md),
@@ -13,13 +13,5 @@ import { SearchInput } from '@/components/SearchInput';
 // `wide` gives the bar help's own max-w-7xl / md:px-8 column, so the logo
 // lines up with the breadcrumb and article below.
 export function Header() {
-  return (
-    <SiteHeader
-      productNav="help"
-      ctaSurface="Help"
-      center={<SearchInput />}
-      shareRail={false}
-      wide
-    />
-  );
+  return <SiteHeader ctaSurface="Help" center={<SearchInput />} shareRail={false} wide />;
 }

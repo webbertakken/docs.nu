@@ -9,7 +9,7 @@ export {
 export { brandLogoSvg } from './brand-logo-svg';
 export { BRAND_KINDS, type BrandKind, type BrandKindShape } from './brand-kinds';
 export { PRISM_PALETTES, prismPalette, type PrismPalette, type PrismScheme } from './brand-prism';
-export { ProductNav, ProductNavLinks, type ProductNavKey } from './ProductNav';
+export { ProductNavLinks, type ProductNavKey } from './ProductNavLinks';
 export { START_BLANK_HREF, StartBlankLink } from './StartBlankLink';
 export { SiteHeader } from './SiteHeader';
 export { RAIL_CLEAR_PADDING } from './share-rail-clearance';

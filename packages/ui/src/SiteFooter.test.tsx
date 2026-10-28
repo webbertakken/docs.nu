@@ -32,9 +32,9 @@ describe('SiteFooter', () => {
     expect(footerNav).toContain('href="/about/licences"');
   });
 
-  // docs/specs/004-interface-design/menus.md "Product switcher": Home, Help and Telemetry left the apps menu for the
-  // footer links.
-  it('carries Home, the Help Centre and Telemetry, which the apps menu no longer lists', () => {
+  // docs/specs/019-marketing/marketing-site.md "Header": the header carries no section menu, so the footer links reach
+  // Home, Help and Telemetry.
+  it('carries Home, the Help Centre and Telemetry', () => {
     expect(labels.slice(0, 1)).toEqual(['Home']);
     expect(footerNav).toMatch(/<a href="\/about"[^>]*>(?:<svg[\s\S]*?<\/svg>)?Home<\/a>/);
     expect(labels).toEqual(expect.arrayContaining(['Help Centre', 'Telemetry']));
