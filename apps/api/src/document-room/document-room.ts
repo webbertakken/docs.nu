@@ -8,7 +8,9 @@ import {
   DOCUMENT_FORMAT,
   DOCUMENT_TRASHED_CLOSE,
   isRoomOpRef,
+  levelAtLeast,
   parseBuildId,
+  parseStoredLevel,
   ROOM_PING,
   ROOM_PONG,
   type AccessLevel,
@@ -815,8 +817,9 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       // the next hibernation and mis-place peers for every later joiner.
       // The live relay below still drives real-time updates for peers
       // already connected.
-      // Every selection is noted for the api's held check, whatever the role
-      // (docs/specs/024-agents/agent-changesets.md "Held elements"). The DO's output gate holds
+      // Every selection is noted for the api's held check, whatever the role; the check answers only
+      // the sessions that may change the content (liveSessions, docs/specs/024-agents/agent-changesets.md
+      // "Held elements"). The DO's output gate holds
       // what follows until the write lands.
       if (opKind === 'select') {
         void this.selections.note(sender.id, selectionFromOp(clientOp)).catch(() => {});
@@ -1076,7 +1079,13 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       const session = this.readSession(ws);
       const p = session?.presence;
       if (!p) continue;
-      live.set(p.id, { name: p.name, color: p.color, personTag: session.personTag ?? null });
+      live.set(p.id, {
+        name: p.name,
+        color: p.color,
+        personTag: session.personTag ?? null,
+        // Only someone who may change the content holds what they select: never a Viewer.
+        holds: levelAtLeast(parseStoredLevel(p.role), 'participate'),
+      });
     }
     return live;
   }

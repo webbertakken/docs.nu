@@ -2469,7 +2469,7 @@ describe('DocumentRoom and agent changesets', () => {
     room: DocumentRoom,
     id: string,
     personTag: string | null = null,
-    role: 'edit' | 'view' = 'edit',
+    role: 'edit' | 'participate' | 'view' = 'edit',
   ) {
     const ws = makeSocket();
     room.acceptSession(asWs(ws), role, false, null, null, personTag !== null, personTag);
@@ -2530,22 +2530,39 @@ describe('DocumentRoom and agent changesets', () => {
     expect(peer.sent).toEqual([]);
   });
 
-  it("answers every selection on the tab, any role, marking the agent owner's own", async () => {
+  it("answers the selections that hold on the tab, a Participant's and an Editor's, marking the agent owner's own", async () => {
     const { room } = newRoom();
     const owner = join(room, 'o', 'tag-owner');
+    const participant = join(room, 'p', null, 'participate');
     const viewer = join(room, 'v', null, 'view');
     join(room, 'idle');
     sendFrame(room, owner, {
       kind: 'op',
       op: { kind: 'select', elementId: 'a', tabId: 't1', elementIds: ['a', 'b'] },
     });
+    sendFrame(room, participant, {
+      kind: 'op',
+      op: { kind: 'select', elementId: 'd', tabId: 't1' },
+    });
     sendFrame(room, viewer, { kind: 'op', op: { kind: 'select', elementId: 'c', tabId: 't1' } });
     await Promise.resolve();
+    // A Viewer's selection holds nothing against an agent ("Held elements").
     expect((await selections(room, 'tab=t1&person=tag-owner')).selections).toEqual([
       { elementIds: ['a', 'b'], name: 'Name o', color: '#abc', mine: true },
-      { elementIds: ['c'], name: 'Name v', color: '#abc', mine: false },
+      { elementIds: ['d'], name: 'Name p', color: '#abc', mine: false },
     ]);
     expect((await selections(room, 'tab=t2&person=tag-owner')).selections).toEqual([]);
+  });
+
+  it("still answers the agent owner's own selection from a Viewer's seat", async () => {
+    const { room } = newRoom();
+    const owner = join(room, 'o', 'tag-owner', 'view');
+    sendFrame(room, owner, { kind: 'op', op: { kind: 'select', elementId: 'a', tabId: 't1' } });
+    await Promise.resolve();
+    expect((await selections(room, 'tab=t1&person=tag-owner')).selections).toEqual([
+      { elementIds: ['a'], name: 'Name o', color: '#abc', mine: true },
+    ]);
+    expect((await selections(room, 'tab=t1&person=someone-else')).selections).toEqual([]);
   });
 
   it('forgets a selection when it clears or its socket closes', async () => {
