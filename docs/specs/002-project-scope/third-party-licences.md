@@ -70,7 +70,8 @@ reach a deployed artefact, and nothing else.
 - **Two sections.** "In your browser" lists the works sent to people's browsers by the editor, the
   website, the help centre and the telemetry dashboard. "On our servers" lists the works bundled
   into the api, MCP and router workers; they run on Cloudflare, not on anyone's device, and are
-  listed in full all the same. A work shipped on both sides appears in both, with each side's apps.
+  listed in full all the same. Each section's intro names its apps from the same list the page is
+  built from, so it never falls behind when an app is added. A work shipped on both sides appears in both, with each side's apps.
 - **Entries are collapsed.** Each is a native disclosure showing the name, version, licence id and
   apps; opening it loads its texts. A vendored or embedded work also says what carries it. The
   disclosure marker is the platform's own, so no chevron is drawn once per entry.
