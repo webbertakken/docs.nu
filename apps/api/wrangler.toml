@@ -175,16 +175,30 @@ type = "ratelimit"
 namespace_id = "7003"
 simple = { limit = 20, period = 60 }
 
-# Per-IP limiter for share-code resolution (GET /api/share/<code>). That
-# read carries the optional share password and is otherwise unauthed +
-# exempt from the write limiter, so without this an attacker holding a
-# code could brute-force the password unbounded. 30 resolves / 60s per IP
-# is ample for legit visitors. Separate namespace. Absent binding → the
+# Per-IP limiter for share-code resolution (GET /api/share/<code>): an unauthed read, exempt from the write
+# limiter. 30 resolves / 60s per IP is ample for legit visitors. Separate namespace. Absent binding → the
 # index.ts check is skipped, so self-host still works.
 [[unsafe.bindings]]
 name = "SHARE_RATE_LIMITER"
 type = "ratelimit"
 namespace_id = "7004"
+simple = { limit = 30, period = 60 }
+
+# Share-password guesses (docs/specs/013-workspace/share-password.md "Guessing is limited"): every check the
+# verified cache cannot answer, on any share-code door, counts against the caller's network (share-pw:<network>,
+# an IPv4 address or IPv6 /64) and against the document from any network (share-pw-doc:<documentId>), so a
+# guesser can't spread tries across addresses either. Over either: 429 rate_limited, Retry-After 60
+# (SHARE_GUESS_RETRY_AFTER_S). A visitor already in spends nothing. Absent bindings → allow (self-host).
+[[unsafe.bindings]]
+name = "SHARE_GUESS_VISITOR_LIMITER"
+type = "ratelimit"
+namespace_id = "7016"
+simple = { limit = 10, period = 60 }
+
+[[unsafe.bindings]]
+name = "SHARE_GUESS_ITEM_LIMITER"
+type = "ratelimit"
+namespace_id = "7017"
 simple = { limit = 30, period = 60 }
 
 # Per-IP throttle for GET /api/unfurl (docs/specs/009-elements/link-cards.md): an unauthenticated outbound
@@ -218,10 +232,6 @@ type = "ratelimit"
 namespace_id = "7007"
 simple = { limit = 10, period = 60 }
 
-# Per-owner limiter for Explorer Home's reads (GET /api/home and /api/home/timeline,
-# docs/specs/013-workspace/explorer-home.md): one read answers a whole screen, and a healthy client
-# reads on mount, on return to the tab and after its own writes, a handful a minute. 60 / 60s bounds a
-# looping client. Separate namespace. Absent binding → allow (self-host).
 # Per-person limiter for content search (GET /api/search/content, docs/specs/013-workspace/content-search.md): a
 # search runs as typing pauses, so 120 / 60s is a person typing fast for a minute. Absent binding → allow (self-host).
 [[unsafe.bindings]]
@@ -230,6 +240,10 @@ type = "ratelimit"
 namespace_id = "7015"
 simple = { limit = 120, period = 60 }
 
+# Per-owner limiter for Explorer Home's reads (GET /api/home and /api/home/timeline,
+# docs/specs/013-workspace/explorer-home.md): one read answers a whole screen, and a healthy client
+# reads on mount, on return to the tab and after its own writes, a handful a minute. 60 / 60s bounds a
+# looping client. Separate namespace. Absent binding → allow (self-host).
 [[unsafe.bindings]]
 name = "HOME_RATE_LIMITER"
 type = "ratelimit"

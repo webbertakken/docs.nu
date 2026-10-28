@@ -1,6 +1,6 @@
 // One session's state in the room (docs/specs/015-api/api.md, Realtime model): what the room pins on each
 // socket's serialized attachment at the upgrade, read from the headers only the api worker can set.
-import { isAccessLevel, type AccessLevel } from '@livedoc/api-schema';
+import { isAccessLevel, KEY_ID_MAX, type AccessLevel } from '@livedoc/api-schema';
 import { ADDER_KEY_LENGTH } from '@livedoc/document';
 import type { ParticipantPresence } from './types';
 
@@ -46,6 +46,9 @@ export type SessionAttachment = {
   //   - `shareCode`: the share code that admitted it, from X-Verified-Share-Code,
   //     so revoking or rescoping that code can close exactly its sockets.
   tabScope?: string | null;
+  //   - `tabShowsAll`: the scoped tab already held a board or plan view when the session joined, as the room read
+  //     it then, so its ops may carry one (room-scope.ts); otherwise they may not add one.
+  tabShowsAll?: boolean;
   shareCode?: string | null;
   //   - `account`: a verified account holds this session, from X-Verified-Account
   //     (docs/specs/014-identity/profile-picture.md §6). Only such a session may put a picture on the
@@ -79,8 +82,8 @@ export type SessionAttachment = {
 const MAX_PERSON_TAG_LEN = 64;
 // A workbench pairing id is a UUID.
 const MAX_PAIRING_ID_LEN = 36;
-// A document id is a UUID; the clamp keeps a forged header from bloating the attachment.
-const MAX_DOCUMENT_ID_LEN = 64;
+// A document id is a key id (isKeyId, at most KEY_ID_MAX); the clamp keeps a forged header from bloating the attachment.
+const MAX_DOCUMENT_ID_LEN = KEY_ID_MAX;
 // A network tag is a 32-hex digest; the clamp keeps a forged header from bloating the attachment.
 const MAX_NETWORK_TAG_LEN = 32;
 
@@ -89,6 +92,7 @@ type VerifiedSession = {
   verifiedRole?: AccessLevel;
   isOwner: boolean;
   tabScope: string | null;
+  tabShowsAll?: boolean;
   shareCode: string | null;
   account: boolean;
   personTag: string | null;
@@ -137,6 +141,7 @@ export function newSessionAttachment(v: VerifiedSession, presenceId: string): Se
     presence: null,
     isOwner: v.isOwner,
     tabScope: v.tabScope,
+    tabShowsAll: v.tabShowsAll ?? false,
     shareCode: v.shareCode,
     account: v.account,
     personTag: v.personTag?.slice(0, MAX_PERSON_TAG_LEN) ?? null,

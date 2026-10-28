@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { dismissQuickTour, expect, expectNoPageErrors, test } from './fixtures';
+import { expect, expectNoPageErrors, test } from './fixtures';
 
 // The shape slots (docs/specs/023-draw-mode/draw-mode.md "Shape slots"), a Within reach set
 // (docs/specs/004-interface-design/within-reach.md) worked out by the shared `withinReach`. The dock
@@ -29,7 +29,6 @@ test('the shape slots fill Most used, then Recent, none twice', async ({ page, p
   await page.setViewportSize({ width: 1600, height: 900 });
   await page.goto('/new?template=whiteboard');
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
   await bar(page).waitFor();
 
   // The bar: the pins, then the Shapes button.

@@ -352,3 +352,33 @@ describe('applyRoomOpToTabs: documents', () => {
     expect(applyRoomOpToTabs(tabs, op)[0]!.articles).toBeUndefined();
   });
 });
+
+// docs/specs/013-workspace/tab-scoped-share-links.md "Realtime": a tab keeps the id its op names, whatever the
+// payload carries, so a peer's op can never renumber it (and the next save write it over another tab).
+describe('applyRoomOpToTabs: a tab keeps its own id', () => {
+  it('keeps the id through a whole-tab op whose payload names another tab', () => {
+    const tabs = [tab({ id: 't1', name: 'Mine' }), tab({ id: 't2', name: 'Other' })];
+    const op = { kind: 'tab', tabId: 't1', tab: { ...tab({ id: 't2', name: 'Moved' }) } } as RoomOp;
+    const next = applyRoomOpToTabs(tabs, op);
+    expect(next.map((t) => t.id)).toEqual(['t1', 't2']);
+    expect(next[0]!.name).toBe('Moved');
+  });
+
+  it('adds a new tab under the id the op names', () => {
+    const op = { kind: 'tab', tabId: 't3', tab: { ...tab({ id: 't9' }) } } as RoomOp;
+    expect(applyRoomOpToTabs([tab({ id: 't1' })], op).map((t) => t.id)).toEqual(['t1', 't3']);
+  });
+
+  it('never takes the id or elements from a tab-meta patch', () => {
+    const tabs = [tab({ id: 't1', elements: [el('a')] })];
+    const op = {
+      kind: 'tab-meta',
+      tabId: 't1',
+      patch: { id: 't2', elements: [], theme: 'mono' },
+    } as unknown as RoomOp;
+    const [only] = applyRoomOpToTabs(tabs, op);
+    expect(only!.id).toBe('t1');
+    expect(only!.elements.map((e) => e.id)).toEqual(['a']);
+    expect(only!.theme).toBe('mono');
+  });
+});

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fakeD1 } from '../test-d1';
 import {
+  dropDocumentVisits,
   dropSharedAccess,
   dropVisitsThroughLinks,
   hasSharedAccess,
@@ -178,5 +179,15 @@ describe('dropVisitsThroughLinks (docs/specs/013-workspace/share-roles.md Share 
     const db = fakeD1();
     await dropVisitsThroughLinks(db.env, 'diag-1', []);
     expect(db.calls).toHaveLength(0);
+  });
+});
+
+describe('dropDocumentVisits (docs/specs/013-workspace/share-password.md Existing viewers)', () => {
+  it('deletes every visit to the document, whichever link it came through', async () => {
+    const db = fakeD1();
+    await dropDocumentVisits(db.env, 'diag-1');
+    const del = db.one('DELETE FROM shared_with');
+    expect(del.sql).toContain('WHERE document_id = ?');
+    expect(del.bindings).toEqual(['diag-1']);
   });
 });

@@ -144,7 +144,8 @@ rect:
 
 Bottom chrome that comes or goes without resizing anything the stack watches dispatches `TOAST_FLOOR_CHANGED_EVENT`
 on `window` (`announceToastFloorChange()`): the sign-in banner on mount and unmount, the whiteboard dock on mount,
-move and unmount, the new-version prompt when it shows or hides.
+move and unmount, the new-version prompt when it shows or hides. (The tour banner did too until 28 October 2026,
+when tours stopped drawing banners.)
 
 ## Errors and edge cases
 

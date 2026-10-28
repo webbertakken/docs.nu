@@ -76,8 +76,14 @@ only the sweep direction differs).
   round-trip. Mermaid's numeric entity codes (`#124;` is `|`, `#37;` is `%`)
   decode on import. On export a `|` in an edge label is written `#124;`, a
   `%%` is written `#37;#37;` (an unquoted edge label would otherwise read it
-  as a comment), and a `#` that would read as an entity code is written
-  `#35;`, so every label round-trips losslessly.
+  as a comment), a `#` that would read as an entity code is written
+  `#35;`, a backtick `#96;` (a label wrapped in backticks would read back as a
+  markdown string, its marks stripped) and the `<` of a `<br>` typed as text
+  `#60;` (it would read back as a line break), so every label round-trips losslessly.
+  An empty subgraph draws no frame; an edge to it keeps a box of its own, labelled with the subgraph's title.
+  A subgraph opened again by the same id carries on the first one (one frame, the members of both). A node written
+  out with a subgraph's id (`a[Real node]` beside `subgraph a`) keeps the id, so edges naming it reach the node, and
+  the frame takes a fresh one (`a_subgraph`): neither is lost under the other's element id.
 - **Subgraphs → frames**: a top-level `subgraph id[Title] … end` block imports
   as a **frame** shape ([Canvas and palette](../008-canvas/canvas-and-palette.md)) drawn around its member nodes, laid out as a
   cluster: members are laid out among themselves, the cluster participates in
@@ -87,7 +93,9 @@ only the sweep direction differs).
   `C` in Kitchen; mentions outside every subgraph claim nothing. Edges may reference a subgraph id — the arrow pins to the frame.
   Nested subgraphs fold into their top-level ancestor (frames import one
   level deep); through the MCP the reply says so (`notes`: "2 nested subgraphs folded into their outer group:
-  groups draw one level deep"), rather than dropping the nesting silently. On export, each frame becomes a `subgraph` block containing
+  groups draw one level deep"), rather than dropping the nesting silently. An edge naming a folded subgraph's id
+  points at the frame it folded into, rather than a stray box of the id (a node written out under that id stays a
+  node, as does the box when the outer subgraph holds nothing else). On export, each frame becomes a `subgraph` block containing
   the boxed nodes whose centre sits inside it (a node inside several frames
   belongs to the smallest).
 - **Click links**: `click A "https://…"` (and the `click A href "https://…"`
@@ -118,7 +126,10 @@ LR` line sets the layout direction (TB default).
 - **Transitions**: `A --> B` with an optional `: label`.
 - **Composite states**: `state Name { … }` becomes a cluster → frame, same
   as a flowchart subgraph; nested composites fold into their top-level
-  ancestor. Transitions may reference a composite's id (pins to the frame).
+  ancestor. Transitions may reference a composite's id (pins to the frame); one naming a folded composite points at
+  the frame it folded into, rather than a stray box of the id (a state written out under that id stays a state, and
+  so does the box when the outer composite holds nothing else, since no frame is drawn). Flowcharts share the rule
+  (`foldedEdgeEnds` in `mermaid-shared.ts`).
 - Notes, concurrency separators (`--`), and history states are skipped.
 
 ## ER diagram coverage (import)
@@ -190,7 +201,9 @@ a `sequenceDiagram` and draws it the way the sequence diagram template does.
   inside, with its operator as its label and
   each guard in muted text, operands split by a dashed divider.
 - **Limits**: at most 30 participants and 300 messages, notes and fragment lines; past them the parser refuses
-  naming the limit.
+  naming the limit. Graph input's `style: "sequence"` is held to the same caps (its nodes the participants, its
+  edges the messages), refused the same way by the MCP and the api's changeset, and drops an edge naming no node, as
+  every other style does.
 
 ## Layout
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { SwitchChip } from '@livedoc/ui';
 import { SettingsRowShell } from './SettingsRowShell';
 import type { SettingsToggleGroupRowSpec } from './settings-catalogue';
 
@@ -32,15 +33,13 @@ export function SettingsToggleGroupRow({
           return (
             // A chip per switch: ticked and tinted while on. Chips rather than a grid of
             // switches, so a row of short names fits without truncating any of them.
-            <button
+            <SwitchChip
               key={toggle.key}
-              type="button"
-              role="switch"
-              aria-checked={on}
+              checked={on}
               disabled={disabled}
               data-settings-toggle={toggle.key}
-              onClick={() => onChange(toggle.key, !on)}
-              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              onChange={(next) => onChange(toggle.key, next)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${
                 on
                   ? 'border-brand-300 bg-brand-50 text-brand-800 hover:bg-brand-100 dark:border-brand-500/50 dark:bg-brand-500/15 dark:text-brand-200 dark:hover:bg-brand-500/25'
                   : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
@@ -65,7 +64,7 @@ export function SettingsToggleGroupRow({
                 ) : null}
               </span>
               {toggle.label}
-            </button>
+            </SwitchChip>
           );
         })}
       </div>

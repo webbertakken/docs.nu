@@ -9,14 +9,7 @@ import {
   seedOpenedDocument,
   shareLink,
 } from './audit-screens';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  test,
-  untilHydrated,
-  mintSignedGuest,
-} from './fixtures';
+import { expect, expectNoPageErrors, test, untilHydrated, mintSignedGuest } from './fixtures';
 
 // Contrast audit, dark mode (docs/specs/003-system-architecture/e2e-smoke.md; the palette it guards is
 // docs/specs/004-interface-design/color-scheme.md, Dark palette (Steel)). Every visible text node on each
@@ -56,7 +49,6 @@ test.describe('Contrast audit, dark mode', () => {
     await darkVisitor(page, owner);
     await page.goto(`/document/${id}`);
     await page.locator(CANVAS).waitFor();
-    await dismissQuickTour(page);
     await expect(page.getByRole('img', { name: /Spinner/ }).first()).toBeVisible();
     expectAA(await auditContrast(page), 'editor with its default panels');
 

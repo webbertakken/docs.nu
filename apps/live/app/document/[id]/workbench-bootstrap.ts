@@ -18,6 +18,7 @@ import {
   readCachedShareGrant,
   setSessionSharePassword,
   writeCachedShareGrant,
+  type SharePasswordAsk,
 } from '@/lib/api-client';
 import { isDocumentTrashedError } from '@/lib/document-trashed';
 import { randomColor, randomName, type Participant } from '@/lib/identity';
@@ -52,13 +53,13 @@ type WorkbenchBootstrapDeps = {
     setLoadingDocument: SetState<boolean>;
     setSessionShareCode: SetState<string | null>;
     setSessionTabScope: (scope: string | null) => void;
-    setSharePasswordGate: SetState<{ invalid: boolean } | null>;
+    setSharePasswordGate: SetState<SharePasswordAsk | null>;
   };
 };
 
 type Loaded = { document: LiveDoc; role: ShareRole; tabScope: string | null };
 // The link asks for its password; `invalid` when the one sent was wrong.
-type PasswordAsked = { password: { invalid: boolean } };
+type PasswordAsked = { password: SharePasswordAsk };
 
 export async function loadWorkbenchDocument({
   workbench,
@@ -150,7 +151,7 @@ async function loadByLink(
       writeCachedShareGrant(shareCode, null);
       setSessionSharePassword(null);
     }
-    return { password: { invalid: resolution.invalid } };
+    return { password: { invalid: resolution.invalid, rateLimited: resolution.rateLimited } };
   }
   writeCachedShareGrant(shareCode, resolution.shareGrant ?? null);
   if (resolution.shareGrant) setSessionSharePassword(resolution.shareGrant);

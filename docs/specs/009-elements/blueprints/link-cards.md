@@ -107,7 +107,7 @@ Lower-cased, IPv6 brackets stripped. Blocked when any holds:
 - dotted IPv4 in `0/8`, `10/8`, `127/8`, `169.254/16`, `172.16/12`, `192.168/16`, `100.64/10`
   (D58), plus `224/4`, `240/4`, `192.0.0/24`, `198.18/15` `[QB12]`;
 - IPv4-mapped IPv6 (`::ffff:` dotted or hex) whose embedded IPv4 is blocked;
-- an IPv6 literal (contains `:`) starting `fc`, `fd`, `fe80`, `ff` or `64:ff9b:` `[QB12]`.
+- an IPv6 literal (contains `:`) starting `fc`, `fd`, `fe8` to `feb` (all of `fe80::/10`), `ff` or `64:ff9b:` `[QB12]`.
 
 Invariants:
 
@@ -227,7 +227,7 @@ export function apiUnfurl(url: string): Promise<UnfurlResult | null>;
   16 px favicon or glyph, title (12 px semibold, `line-clamp-2`, `textColor`), destination (10 px,
   truncated), and a right arrow that nudges on hover when followable.
 - **Palette**: `tools:link-card`, "Add Link Card", Behaviour group, "move" tile group; draw banner
-  "Tap to drop or drag to draw a link card".
+  "Click to drop or drag to draw a link card" ("Tap" on a phone).
 - **Export**: rect with `rx` 6 and the card's fill and stroke, no text (D56).
 
 ## Accessibility
@@ -261,7 +261,7 @@ LinkUnfurled` exist.
 | ------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------ |
 | Blocked hosts and ranges                                | `blocks loopback / localhost / .local / metadata + private` | `apps/api/src/routes/unfurl.test.ts`             |
 | Public hosts allowed                                    | `allows public hosts + public IPs`                          | `apps/api/src/routes/unfurl.test.ts`             |
-| Domains starting `fc` / `fd` allowed `[QB12]`           | none                                                        |                                                  |
+| Domains starting `fc` / `fd` allowed `[QB12]`           | `allows public hosts + public IPs`                          | `apps/api/src/routes/unfurl.test.ts`             |
 | http(s) only                                            | `parsePublicHttpUrl` suite                                  | `apps/api/src/routes/unfurl.test.ts`             |
 | og:\* precedence, relative resolution, favicon fallback | `buildUnfurlResult` suite                                   | `apps/api/src/routes/unfurl.test.ts`             |
 | Rate limit, redirect re-check, non-HTML, timeout, cap   | none (GB16)                                                 |                                                  |

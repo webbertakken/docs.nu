@@ -19,13 +19,6 @@ export type FormTourApi = {
 
 export type FormTourStep = TourStepOf<FormTourApi>;
 
-const WELCOME: FormTourStep = {
-  id: 'welcome',
-  card: 'welcome',
-  title: 'Getting started with Forms?',
-  body: 'A hands-on look: we add a question, try your form as a respondent, and show where answers go and how to share it. Our example question goes when we finish.',
-};
-
 const question = (api: FormTourApi, inner = '') => {
   const id = api.questionId();
   return id ? `[data-form-page] [data-form-question="${id}"]${inner}` : null;
@@ -125,7 +118,6 @@ export function formTourSteps({
   destination: 'board' | 'sheet' | null;
 }): FormTourStep[] {
   return [
-    WELCOME,
     ADD,
     EDIT,
     TYPE,

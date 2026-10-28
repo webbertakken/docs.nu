@@ -26,6 +26,12 @@ changing card types and adding boards, for the MCP tools and the CLI verbs.
   `assignedto`, `owner`), custom field id or name on the item's type. Values: `status` by column name, `assignee`
   string by `personNamed`, Card fields (Parent among them) by item ref, `priority` lowercased when it is one of
   `PRIORITIES`, `labels` string split on commas, Choice by option name; others as given (the api validates).
+- `descriptionFromMarkdown(markdown)` (`packages/items/src/rich-text-markdown.ts`) → `{ plain, runs }`: line
+  marks `#`/`##`/`###` (a heading on the line's runs) and `- `/`* ` (a "• " prefix); inline `**`/`__` bold,
+  `*`/`_` italic, `~~` strikethrough, `[text](url)` (link kept when it passes the item store's safe-link check),
+  backticks dropped, `\` escapes the next mark. `runs` is undefined when nothing is marked. `applyItemChanges`
+  writes a `description` through it: `description` the plain text, `descriptionRich` the runs, or
+  `descriptionRich` cleared when there are none and the card has some; clearing `description` clears both.
 - `applyItemChanges`: one plan read per call; changes in order, each seeing earlier ones' items; first refusal
   stops; answers `applied` lines naming the column (`in To Do`, or `(on no board)`).
 - `applyCardTypeChanges`: changes in order on a working list; `add` starts from `NEW_ITEM_TYPE` (shared with the
@@ -58,7 +64,7 @@ trashedFrom }` on each live card of a deleted type, as the editor's `trashItems`
   (`isCardTypesStale`) reads the plan again and applies the changes again, up to `CARD_TYPES_SAVE_ATTEMPTS` (3), then
   answers the refusal; `bringBoardCardTypes` does the same with the document's `itemTypesRev` (`KnownCardTypes.rev`).
 - `placeBoard`: preset through `freshBoardSetup`; columns by name reuse a status `statusNamed` finds (each status
-  once), else `<slug>~<4 chars>`; a preset's `doneColumnId` is dropped with its columns; placed right of the tab's
+  once), else `<slug>~<4 chars>`; a preset's done flags go with its columns and the new ones are settled by name (`settleDoneColumns`); placed right of the tab's
   elements' bounding box by `PLACED_BOARD_GAP`, tops aligned, origin on an empty tab.
 - `addBoard`: tab = given, else first tab with a board, else lowest `orderIndex`; one changeset
   `{ operations: [{ op: 'add', element }], base: { rev, elements: {} } }` with the client header (`mcp` or `cli`).

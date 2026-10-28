@@ -222,14 +222,14 @@ export type UserPreferences = {
   // The Avatar tour's seen-guard (docs/specs/008-canvas/avatar-tour.md), as `drawTourSeen`.
   // Surfaced in Settings as Tours › "Avatar Tour" (inverted). Missing / undefined === not seen.
   avatarTourSeen?: boolean;
-  // The Pages tour's seen-guard (docs/specs/007-editor/pages-tour.md), as `planTourSeen`: true counts every
-  // page kind's track as seen while Power user mode is on. Set with every kind by Power user mode.
+  // The Pages tour's seen record (docs/specs/007-editor/pages-tour.md), as `planTourSeen`: true counts every
+  // page kind's track as taken while Power user mode is on. Set with every kind by Power user mode.
   pagesTourSeen?: boolean;
-  // The page kinds whose Pages tour track has been offered and answered (taken, skipped or declined), so each
-  // kind offers its own once ever. Cleared with `pagesTourSeen` when the Settings switch is turned on.
+  // The page kinds whose Pages tour track has been taken (completed or skipped). Feeds Settings' row per kind and
+  // which page a press of the Start Tour button prefers; it never hides the button.
   pagesTourKinds?: PageKind[];
-  // Element tours (docs/specs/007-editor/element-tours.md): the toured element kinds whose offer has been answered
-  // (Play or Cancel), so each offers itself once ever. Surfaced in Settings as Tours › Show Me, one switch
+  // Element tours (docs/specs/007-editor/element-tours.md): the opted-in toured kinds whose Settings switch was turned
+  // off since, so each is off the Start Tour button until switched on again. Surfaced in Settings as Tours › Show Me, one switch
   // per kind (inverted). Read through lib/element-tours.
   elementTourKinds?: ElementTourKind[];
   // The toured kinds whose element tour this person asked to be offered (Settings › Tours › Show Me); none by

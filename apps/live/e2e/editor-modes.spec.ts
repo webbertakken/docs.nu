@@ -1,17 +1,10 @@
 import type { Page } from '@playwright/test';
-import {
-  createInMode,
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  test,
-  pageOwnerHeaders,
-} from './fixtures';
+import { createInMode, expect, expectNoPageErrors, test, pageOwnerHeaders } from './fixtures';
 
-// Editor modes end to end (docs/specs/007-editor/editor-modes.md), in dark mode: a tab's mode is chosen on its
-// start while it is empty, never beside the menu button or in the tab menu; a tab with content keeps its mode (Shift+D
-// included) across a reload; a new tab opens in its maker's mode; and a switch reaches everyone at once, with Undo
-// switching it back. Synthesised content only.
+// Editor modes end to end (docs/specs/007-editor/editor-modes.md), in dark mode: the switch beside the menu button and
+// an empty tab's start always agree, the tab menu offers none; a tab with content switches beside the menu button
+// (Shift+D included) and keeps its strokes across a reload; a new tab opens in its maker's mode; and a switch reaches
+// everyone at once, with Undo switching it back. Synthesised content only.
 
 const CANVAS = '[data-canvas-a11y-root]';
 const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? '/api';
@@ -39,8 +32,9 @@ async function savedOpensIn(page: Page): Promise<unknown> {
 const dock = (page: Page) => page.locator('[data-whiteboard-dock]');
 // The open tab's editor mode, as the editor marks it.
 const mode = (page: Page) => page.locator('[data-editor-mode]');
-// The start's own switch, the one place a tab's mode is chosen.
+// The start's own switch, and the one beside the menu button.
 const startSwitch = (page: Page) => page.getByRole('button', { name: /^Tab mode: / });
+const topSwitch = (page: Page) => page.getByRole('button', { name: /^Editor mode: / });
 const boards = (page: Page) => page.locator('[data-plan-board]');
 const sketches = (page: Page) => page.locator(CANVAS).getByRole('img', { name: /^Sketch/ });
 
@@ -48,32 +42,16 @@ const sketches = (page: Page) => page.locator(CANVAS).getByRole('img', { name: /
 async function openInMode(page: Page, name: 'diagram' | 'draw' | 'plan') {
   await page.setViewportSize({ width: 1600, height: 900 });
   await page.emulateMedia({ colorScheme: 'dark' });
-  // The Plan and Workshop tours offer themselves 800 ms into their modes (OFFER_DELAY_MS), and their overlay
-  // takes the presses these specs make there on a slow runner; it has its own unit tests.
-  await page.addInitScript(() => {
-    const key = 'livedoc:user-preferences:v1';
-    try {
-      const prefs = JSON.parse(localStorage.getItem(key) ?? '{}') as Record<string, unknown>;
-      // The Plan tour offers each track once (lib/tour-tracks.ts): both answered.
-      if (!Array.isArray(prefs.planTourTracks) || prefs.workshopTourSeen !== true)
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            ...prefs,
-            planTourSeen: true,
-            planTourTracks: ['boards', 'sheets'],
-            workshopTourSeen: true,
-          }),
-        );
-    } catch {
-      // No storage: nothing to mark.
-    }
-  });
   await createInMode(page, name);
 }
 
 async function chooseOnStart(page: Page, name: 'Diagram' | 'Draw' | 'Plan') {
   await startSwitch(page).click();
+  await page.getByRole('menuitemradio', { name: new RegExp(`^${name}`) }).click();
+}
+
+async function chooseBesideMenu(page: Page, name: 'Diagram' | 'Draw' | 'Workshop') {
+  await topSwitch(page).click();
   await page.getByRole('menuitemradio', { name: new RegExp(`^${name}`) }).click();
 }
 
@@ -98,25 +76,33 @@ async function drawWave(page: Page, from: { x: number; y: number }) {
 }
 
 test.describe('editor modes', () => {
-  // docs/specs/007-editor/editor-modes.md "The mode switch": only an empty tab's start offers one.
-  test('a tab offers no mode switch beside the menu button or in its tab menu', async ({
+  // docs/specs/007-editor/editor-modes.md "The mode switch": beside the menu button and on an empty tab's start, the
+  // two always agreeing; none in the tab menu.
+  test("the switch beside the menu button agrees with the start's, and the tab menu offers none", async ({
     page,
     pageErrors,
   }) => {
     await openInMode(page, 'diagram');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
     await expect(startSwitch(page)).toHaveAccessibleName('Tab mode: Diagram');
-    await closeStart(page);
-    await expect(page.getByRole('button', { name: /mode:/i })).toHaveCount(0);
+    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Diagram');
 
+    await chooseBesideMenu(page, 'Workshop');
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'workshop');
+    await expect(startSwitch(page)).toHaveAccessibleName('Tab mode: Workshop');
+    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Workshop');
+
+    await chooseOnStart(page, 'Draw');
+    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Draw');
+
+    await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Tab menu' }).click();
-    await expect(page.getByRole('button', { name: 'Add to Folder' })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Mode/ })).toHaveCount(0);
     await expect(page.getByRole('group', { name: 'Mode' })).toHaveCount(0);
     expectNoPageErrors(pageErrors);
   });
 
-  test("the start's switch turns an empty tab to Draw, and once drawn on the tab keeps its mode", async ({
+  test('a drawn-on tab changes mode beside the menu button and keeps its strokes', async ({
     page,
     pageErrors,
   }) => {
@@ -130,15 +116,19 @@ test.describe('editor modes', () => {
     await drawWave(page, { x: 500, y: 600 });
     await expect(sketches(page)).toHaveCount(1);
 
-    // A tab with content keeps its mode: Shift+D does nothing.
+    // Shift+D works on a tab with content: Draw steps to Workshop.
     await page.keyboard.press('Escape');
     await page.keyboard.press('Shift+D');
-    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'workshop');
 
-    await expect.poll(() => savedOpensIn(page), { timeout: 15_000 }).toBe('draw');
+    await chooseBesideMenu(page, 'Diagram');
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
+    await expect(sketches(page)).toHaveCount(1);
+
+    await expect.poll(() => savedOpensIn(page), { timeout: 15_000 }).toBe('diagram');
     await page.reload();
     await page.locator(CANVAS).waitFor();
-    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
     await expect(sketches(page)).toHaveCount(1);
     expectNoPageErrors(pageErrors);
   });
@@ -190,7 +180,6 @@ test.describe('editor modes', () => {
     await other.setViewportSize({ width: 1600, height: 900 });
     await other.goto(page.url());
     await other.locator(CANVAS).waitFor({ timeout: 30_000 });
-    await dismissQuickTour(other);
     await expect(mode(other)).toHaveAttribute('data-editor-mode', 'diagram');
 
     await chooseOnStart(page, 'Draw');

@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../types';
-import { appBaseUrl, EMAIL_SEND_TIMEOUT_MS, emailEnabled, sendEmail } from './client';
+import {
+  appBaseUrl,
+  EMAIL_SEND_TIMEOUT_MS,
+  emailEnabled,
+  redactAddress,
+  sendEmail,
+} from './client';
 
 const withKey = { RESEND_API_KEY: 're_test' } as unknown as Env;
 const noKey = {} as Env;
@@ -12,6 +18,15 @@ describe('emailEnabled', () => {
   it('is true with a key', () => expect(emailEnabled(withKey)).toBe(true));
   it('is false for an empty key', () =>
     expect(emailEnabled({ RESEND_API_KEY: '' } as unknown as Env)).toBe(false));
+});
+
+describe('redactAddress', () => {
+  it('never shows a short local part whole, nor the @ twice', () => {
+    expect(redactAddress('a@example.com')).toBe('***@example.com');
+    expect(redactAddress('jo@example.com')).toBe('j***@example.com');
+    expect(redactAddress('joe@example.com')).toBe('jo***@example.com');
+    expect(redactAddress('no-at-sign')).toBe('***');
+  });
 });
 
 describe('appBaseUrl', () => {

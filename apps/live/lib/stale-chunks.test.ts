@@ -111,6 +111,21 @@ describe('recoverFromChunkError', () => {
     vi.restoreAllMocks();
   });
 
+  it('gives the reload back when it waited and never reloaded, so a later failure still reloads', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    let unsaved = true;
+    const d = deps({ hasUnsavedChanges: () => unsaved });
+    const first = recoverFromChunkError(named('ChunkLoadError'), d);
+    await vi.advanceTimersByTimeAsync(11_000);
+    await expect(first).resolves.toBe('unsaved');
+    unsaved = false;
+    await expect(recoverFromChunkError(named('ChunkLoadError'), d)).resolves.toBe('reloading');
+    expect(d.load).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
   it('recovers once per error, however many places report it', async () => {
     const d = deps();
     const error = named('ChunkLoadError');

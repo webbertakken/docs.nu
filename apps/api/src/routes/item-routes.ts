@@ -148,6 +148,13 @@ export async function createMany(
 async function create(ctx: DocumentRouteContext, documentId: string): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'participate');
   if (caller instanceof Response) return caller;
+  // A tab-scoped grant makes cards only from a tab that shows every card (a board or plan view): from any other tab
+  // the new card would land on boards elsewhere in the document, outside what the grant reaches. Refused before any
+  // named id is looked at, so a taken id elsewhere answers exactly as a free one.
+  if (caller.scope && !caller.scopeTakesNew) {
+    console.info('[items] scoped create refused', { documentId });
+    return forbidden();
+  }
   const body = await readBody(ctx);
   if (body instanceof Response) return body;
   const read = readCreate(body, caller.owner);

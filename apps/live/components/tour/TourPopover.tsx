@@ -8,16 +8,24 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { lucideCircleHelp } from '@livedoc/icons/lucide';
 import { clamp, type PlanPalette } from '@livedoc/document';
+import { lucideGlyph } from '@livedoc/ui';
 import { tourColourVars } from './tour-colours';
 import { glideTransition } from './tour-motion';
 import { placeTourPopover } from './tour-position';
 import type { TourTargetRect } from './useTourEngine';
 
-export { WELCOME_TOUR_COPY, type TourCardCopy, type TourWelcomeChoice } from './tour-card-copy';
+// The last card's help link wears the help icon beside its label.
+const HelpIcon = lucideGlyph(lucideCircleHelp, 14);
+
+/** What the last card shows in place of the step count and Next: its eyebrow, the help link and the finish button. */
+export type TourOutroCard = { eyebrow: string; helpHref: string; finish: string };
 
 // The tour's step card (docs/specs/007-editor/editor-tour.md): step count, title, copy, dots, Back / Next / Skip,
-// anchored to the highlighted target. The bookend cards (the offer and the last card) are TourBanner's.
+// anchored to the highlighted target. The last card is this card too (`outro`), centred: its eyebrow in place of the
+// count, and the help link and the finish button in place of Next (docs/specs/007-editor/editor-tour.md "The last
+// card"); there is no banner.
 // Positioning is measured two-pass (render off-screen, measure, place) against the current target rect, before the
 // first paint. One card for the whole run: it fades in on the first step (dialog-in), then glides beside the ring to
 // each next step while its words cross-fade (useTourGlide), and otherwise follows its target exactly.
@@ -36,6 +44,7 @@ export function TourPopover({
   gliding = false,
   busy = false,
   palette,
+  outro,
   onBack,
   onNext,
   onSkip,
@@ -56,8 +65,10 @@ export function TourPopover({
   busy?: boolean;
   // The dialog label's lead ("Tour step 2 of 7: ...").
   ariaPrefix?: string;
-  // The active tab's colours (tour-colours.ts): the card, its text and its accent wear them.
+  // The active tab's palette, worn as the card's CSS variables (tour-colours.ts): the card, its text and its accent.
   palette: PlanPalette;
+  // The last card: its eyebrow, help link and finish button (Next finishes the tour from it).
+  outro?: TourOutroCard;
   onBack?: () => void;
   onNext: () => void;
   onSkip: () => void;
@@ -71,8 +82,8 @@ export function TourPopover({
     // centre even after viewport clamping. Null = centred card, no caret.
     caret: { edge: 'top' | 'bottom' | 'left' | 'right'; offset: number } | null;
   } | null>(null);
-  // The card's keys (docs/specs/007-editor/editor-tour.md "Keyboard"): Escape skips the tour, as Skip tour does (the
-  // bookend banners take it from inside themselves, TourBanner); the right and left arrows are Next and Back. Not
+  // The card's keys (docs/specs/007-editor/editor-tour.md "Keyboard"): Escape skips the tour, as Skip tour does, and
+  // finishes it from the last card, as its finish button does; the right and left arrows are Next and Back. Not
   // while the key is editing something, where Escape puts the text back and the arrows move the caret (an element
   // tour asks for exactly that), nor when something else already took it, nor with a modifier held.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
@@ -87,7 +98,7 @@ export function TourPopover({
     e.stopImmediatePropagation();
     // Between steps the arrows wait, as the buttons do; Escape still skips.
     if (busy && e.key !== 'Escape') return;
-    if (e.key === 'Escape') onSkip();
+    if (e.key === 'Escape') (outro ? onNext : onSkip)();
     else if (e.key === 'ArrowRight') onNext();
     else if (onBack) onBack();
   });
@@ -136,7 +147,12 @@ export function TourPopover({
       ref={ref}
       data-tour-popover=""
       role="dialog"
-      aria-label={`${ariaPrefix} step ${stepNumber} of ${stepCount}: ${title}`}
+      aria-label={
+        outro
+          ? `${ariaPrefix}: ${title}`
+          : `${ariaPrefix} step ${stepNumber} of ${stepCount}: ${title}`
+      }
+      data-tour-card={outro ? 'outro' : 'step'}
       onPointerDown={(e) => e.stopPropagation()}
       className="pointer-events-auto fixed z-[var(--z-toast)] flex w-[22rem] max-w-[calc(100vw-1.5rem)] animate-tour-card-in flex-col rounded-2xl border border-[var(--tour-border)] bg-[var(--tour-card)] p-5 text-[var(--tour-text)] shadow-2xl shadow-slate-900/20 outline-none dark:shadow-black/40"
       style={{
@@ -182,31 +198,46 @@ export function TourPopover({
         <>
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--tour-accent)]">
-              {stepNumber} of {stepCount}
+              {outro ? outro.eyebrow : `${stepNumber} of ${stepCount}`}
             </span>
-            <button
-              type="button"
-              onClick={onSkip}
-              className="rounded-md px-1.5 py-0.5 text-xs font-medium text-[var(--tour-muted)] transition hover:bg-[var(--tour-hover)] hover:text-[var(--tour-text)]"
-            >
-              Skip tour
-            </button>
+            {outro ? null : (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="rounded-md px-1.5 py-0.5 text-xs font-medium text-[var(--tour-muted)] transition hover:bg-[var(--tour-hover)] hover:text-[var(--tour-text)]"
+              >
+                Skip tour
+              </button>
+            )}
           </div>
           <h3 className="mt-2 text-[15px] font-semibold leading-snug">{title}</h3>
           <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--tour-muted)]">{body}</p>
           <div className="mt-4 flex items-center justify-between gap-2">
-            {/* Progress dots keep place without reading like pagination. */}
-            <div className="flex items-center gap-1" aria-hidden>
-              {Array.from({ length: stepCount }, (_, i) => (
-                <span
-                  key={i}
-                  // The current step's dot is drawn long, so the row reads as where you are, not a count.
-                  className={`h-1.5 rounded-full transition-[width] duration-long ease-out motion-reduce:transition-none ${
-                    i === stepNumber - 1 ? 'w-4' : 'w-1.5'
-                  } ${i < stepNumber ? 'bg-[var(--tour-accent)]' : 'bg-[var(--tour-border)]'}`}
-                />
-              ))}
-            </div>
+            {outro ? (
+              // The help centre, in a new tab: the tour is over, so nothing is lost by going.
+              <a
+                href={outro.helpHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md text-[13px] font-medium text-[var(--tour-muted)] transition hover:text-[var(--tour-text)]"
+              >
+                <HelpIcon aria-hidden />
+                Learn More
+              </a>
+            ) : (
+              // Progress dots keep place without reading like pagination.
+              <div className="flex items-center gap-1" aria-hidden>
+                {Array.from({ length: stepCount }, (_, i) => (
+                  <span
+                    key={i}
+                    // The current step's dot is drawn long, so the row reads as where you are, not a count.
+                    className={`h-1.5 rounded-full transition-[width] duration-long ease-out motion-reduce:transition-none ${
+                      i === stepNumber - 1 ? 'w-4' : 'w-1.5'
+                    } ${i < stepNumber ? 'bg-[var(--tour-accent)]' : 'bg-[var(--tour-border)]'}`}
+                  />
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-2">
               {onBack ? (
                 <button
@@ -217,9 +248,8 @@ export function TourPopover({
                   Back
                 </button>
               ) : null}
-              {/* The outro card always follows the counted steps, so a
-                    counted step never ends the tour — no 'Done' state. */}
-              <AccentButton onClick={onNext}>Next</AccentButton>
+              {/* The last card finishes the tour; every other step moves it on. */}
+              <AccentButton onClick={onNext}>{outro ? outro.finish : 'Next'}</AccentButton>
             </div>
           </div>
         </>

@@ -9,7 +9,7 @@ export type TourStepOf<Api> = {
   title: string;
   body: string;
   // data-tour-id of the element the popover anchors to + highlights.
-  // Absent (and no `selector`) = no anchor: the card centres itself (the welcome / outro).
+  // Absent (and no `selector`) = no anchor: the card centres itself (the last card, a step about the whole page).
   target?: string;
   // A CSS selector for an anchor that has no data-tour-id of its own (a board element, a card on it),
   // resolved through the api when the step runs. Takes precedence over `target`; null = no anchor yet.
@@ -32,19 +32,13 @@ export type TourStepOf<Api> = {
   // leaves that focus be, where it otherwise releases a field a step's surface focused on opening.
   keepFocus?: true;
   revealAt?: RevealBlock;
-  // Centred bookend cards, outside the step count, each with its own
-  // illustration and button set: 'welcome' offers the tour (accept /
-  // decline, declining is permanent via the done-guard); 'outro' wraps it
-  // up (finish + a help-centre link).
-  card?: 'welcome' | 'outro';
+  // The tour's last card, outside the step count: drawn in the step card, centred, with the finish button and a
+  // help-centre link (docs/specs/007-editor/editor-tour.md "The last card"). There is no welcome card: the bottom bar's
+  // Start Tour button is the way in.
+  card?: 'outro';
   // Skip this step entirely on mobile viewports (desktop-only chrome, like
   // the paintbrush dock button).
   mobileSkip?: boolean;
-  // Skip this step on an event-storming board (docs/specs/021-event-storming/event-storming.md): the board hides
-  // the palette's header band, so its two dropdowns aren't there to point
-  // at. Without this the step anchors to a display:none trigger, a ring
-  // measuring 0x0 in the top-left corner and a menu opened off-screen.
-  boardSkip?: boolean;
   // Runs on entering the step, anchored or not (an anchorless outro can tidy up here).
   prepare?: (api: Api) => void | Promise<void>;
   cleanup?: (api: Api) => void;

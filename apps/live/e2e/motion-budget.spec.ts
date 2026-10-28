@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect, test, dismissQuickTour, expectNoPageErrors, paletteTile } from './fixtures';
+import { expect, test, expectNoPageErrors, paletteTile } from './fixtures';
 
 // The runtime motion guard (docs/specs/004-interface-design/motion.md "Enforcement").
 //
@@ -63,7 +63,6 @@ async function startBlank(page: Page): Promise<void> {
   // Straight to a blank canvas: the /new?blank=1 bypass (Start Blank).
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
 }
 
 /** Open a chrome surface, let its motion play out, and close it again. `shown` is the surface

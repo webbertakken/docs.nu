@@ -15,7 +15,6 @@ test.use({ colorScheme: 'dark', viewport: { width: 1280, height: 800 } });
 async function signedIn(page: Page, baseURL: string): Promise<Record<string, string>> {
   await page.addInitScript(() => {
     localStorage.setItem('livedoc:v2:name-confirmed', '1');
-    localStorage.setItem('livedoc:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
   const ida = await signIn(page.context(), { baseURL, name: 'Ida Maker' });
   return ida.apiHeaders();

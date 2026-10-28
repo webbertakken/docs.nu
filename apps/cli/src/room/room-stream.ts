@@ -1,15 +1,20 @@
 // The CLI's listening socket on a document's room (docs/specs/015-api/blueprints/cli.md "The room stream", CLI32):
 // a one-time ticket over REST, then a socket that never sends a frame, so it is no session in anyone's roster.
 // A dropped socket reconnects with a fresh ticket, backing off from ROOM_RECONNECT_MIN_MS doubling to
-// ROOM_RECONNECT_MAX_MS; a document moved to the Trash ends the stream.
+// ROOM_RECONNECT_MAX_MS; a document moved to the Trash ends the stream, and a full room is waited out at the
+// longest backoff (docs/specs/015-api/api.md "A room holds at most 100 connections").
 
 import { ApiError, type ApiClient } from '@livedoc/api-client';
-import { DOCUMENT_TRASHED_CLOSE } from '@livedoc/api-schema';
+import { DOCUMENT_TRASHED_CLOSE, ROOM_FULL_CLOSE } from '@livedoc/api-schema';
 import type { CliIo, RoomSocket } from '../io';
 
 export const ROOM_RECONNECT_MIN_MS = 1_000;
 export const ROOM_RECONNECT_MAX_MS = 30_000;
 const NORMAL_CLOSE = 1000;
+// Said once per spell of being turned away from a full room.
+export const ROOM_FULL_LINE = 'This room is full; waiting for a place…';
+// After a full room, how long an opened socket must stay open to count as rejoined.
+export const ROOM_FULL_SETTLE_MS = 1_000;
 
 export type RoomStreamEnd = 'stopped' | 'trashed';
 
@@ -47,6 +52,9 @@ export function openRoomStream(deps: Deps): RoomStream {
   let stopped = false;
   let backoff = ROOM_RECONNECT_MIN_MS;
   let reconnecting = false;
+  let roomFull = false;
+  // The pending "stayed open" check of a socket that opened after a full room (see ROOM_FULL_SETTLE_MS).
+  let cancelSettle: (() => void) | null = null;
   let cancelRetry: (() => void) | null = null;
   let settle!: (end: RoomStreamEnd) => void;
   let fail!: (err: unknown) => void;
@@ -56,7 +64,7 @@ export function openRoomStream(deps: Deps): RoomStream {
   });
 
   const retry = () => {
-    deps.notice('reconnecting…');
+    if (!roomFull) deps.notice('reconnecting…');
     reconnecting = true;
     log(`room reconnect in ${backoff} ms`);
     cancelRetry = io.timer(backoff, () => {
@@ -82,11 +90,19 @@ export function openRoomStream(deps: Deps): RoomStream {
     if (stopped) return;
     const ws = io.openSocket(socketUrl(deps.apiBase, documentId, ticket));
     socket = ws;
+    // After a full room, a socket that opens may be closed again at once: it counts as rejoined only once it
+    // has stayed open ROOM_FULL_SETTLE_MS, so a stream waiting outside the room never hears "reconnected" each try.
     ws.onOpen(() => {
       log('room open');
-      backoff = ROOM_RECONNECT_MIN_MS;
-      if (reconnecting) deps.onReconnected();
-      reconnecting = false;
+      const rejoined = () => {
+        cancelSettle = null;
+        backoff = ROOM_RECONNECT_MIN_MS;
+        roomFull = false;
+        if (reconnecting) deps.onReconnected();
+        reconnecting = false;
+      };
+      if (roomFull) cancelSettle = io.timer(ROOM_FULL_SETTLE_MS, rejoined);
+      else rejoined();
     });
     ws.onMessage((data) => {
       let frame: unknown;
@@ -108,10 +124,18 @@ export function openRoomStream(deps: Deps): RoomStream {
     ws.onClose((code) => {
       log(`room closed ${code}`);
       socket = null;
+      cancelSettle?.();
+      cancelSettle = null;
       if (stopped) return;
       if (code === DOCUMENT_TRASHED_CLOSE) {
         stopped = true;
         return settle('trashed');
+      }
+      // A full room frees up when somebody leaves: try again at the longest backoff, saying so once.
+      if (code === ROOM_FULL_CLOSE) {
+        if (!roomFull) deps.notice(ROOM_FULL_LINE);
+        roomFull = true;
+        backoff = ROOM_RECONNECT_MAX_MS;
       }
       retry();
     });
@@ -123,6 +147,7 @@ export function openRoomStream(deps: Deps): RoomStream {
       if (stopped) return;
       stopped = true;
       cancelRetry?.();
+      cancelSettle?.();
       socket?.close(NORMAL_CLOSE);
       settle('stopped');
     },

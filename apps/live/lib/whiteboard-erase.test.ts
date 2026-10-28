@@ -107,6 +107,13 @@ describe('partialEraseStep', () => {
       expect(out.map((e) => e.id)).toEqual(['kept']);
     });
 
+    it('drops an arrow hung off a dropped arrow too (docs/specs/008-canvas/arrow-to-arrow.md)', () => {
+      const hung = pinned('hung', { to: { kind: 'on-arrow', arrowId: 'arr', t: 0.5 } });
+      const els: Element[] = [line('a', 100), pinned('arr'), hung];
+      const out = partialEraseStep(els, { x: -50, y: 100 }, { x: 250, y: 100 }, 30, free, mint)!;
+      expect(out.map((e) => e.id)).toEqual([]);
+    });
+
     it('leaves arrows pinned to other elements as they were', () => {
       const other = pinned('arr', { to: { kind: 'pinned', elementId: 'b', anchor: 'e' } });
       const els: Element[] = [line('a', 100), line('b', 300), other];

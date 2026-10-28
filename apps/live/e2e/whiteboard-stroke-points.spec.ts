@@ -1,7 +1,6 @@
 import type { Browser, Page } from '@playwright/test';
 import type { StoredDocument, StoredTab } from './stored';
 import {
-  dismissQuickTour,
   expect,
   expectNoPageErrors,
   guestSigFor,
@@ -30,7 +29,6 @@ async function openWhiteboard(page: Page) {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/new?template=whiteboard');
   await page.locator(CANVAS).waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
   await page.locator('[data-whiteboard-dock]').waitFor();
 }
 
@@ -225,8 +223,6 @@ test('a peer’s pen stroke reaches the owner live, packed', async ({ page, brow
   const peerPage = await openAs(browser, baseURL!, `/document/shared?s=${code}`, null);
   await peerPage.getByRole('button', { name: /^join$/i }).click();
   await peerPage.locator(CANVAS).waitFor();
-  await dismissQuickTour(ownerPage);
-  await dismissQuickTour(peerPage);
   await expect
     .poll(() => ownerPage.locator('[role="img"][aria-label$="(Online)"]').count())
     .toBeGreaterThanOrEqual(2);

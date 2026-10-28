@@ -30,6 +30,19 @@ export const JWKS_GRACE_S = 2_592_000;
 export const EMAIL_CODE_LENGTH = 6;
 export const EMAIL_CODE_TTL_S = 300;
 export const EMAIL_CODE_ATTEMPTS = 3;
+// The email-otp plugin's routes LiveDoc never calls (docs/specs/014-identity/auth-and-guest-access.md "Sign-in methods").
+// Signing in is the only code flow (no passwords, no email change), and `check-verification-otp` checks a sign-in code
+// without spending it, counting a wrong guess in a read and a separate write, so guesses sent at once all count as one
+// and the code still signs in after. Off, they answer 404.
+export const UNUSED_CODE_PATHS = [
+  '/email-otp/check-verification-otp',
+  '/email-otp/verify-email',
+  '/email-otp/request-password-reset',
+  '/forget-password/email-otp',
+  '/email-otp/reset-password',
+  '/email-otp/request-email-change',
+  '/email-otp/change-email',
+] as const;
 
 const MODEL_NAMES = {
   user: 'identity_users',
@@ -73,6 +86,7 @@ export function identityOptions(
     basePath: '/api/auth',
     ...(rotated.length > 0 ? { secrets: rotated } : { secret }),
     trustedOrigins: [origin],
+    disabledPaths: [...UNUSED_CODE_PATHS],
     database: env.DB,
     telemetry: { enabled: false },
     rateLimit: { enabled: false },

@@ -6,9 +6,9 @@
 // has no name yet, "What should we call you?" once. An email that has no account is not turned away on `/sign-in`:
 // the code creates it.
 //
-// On success the browser goes to the destination with a full page load, so every page starts from a fresh session
-// read; other tabs are nudged to read theirs. Google's round trip ends at better-auth's own callback, which redirects
-// to the same destination (or back here with `?error=`).
+// On success the browser goes to the destination with a full page load in place of this page, so every page starts
+// from a fresh session read and Back skips the sign-in page; other tabs are nudged to read theirs. Google's round trip
+// ends at better-auth's own callback, which redirects to the same destination (or back here with `?error=`).
 
 import { announceAccountChange, writeSignedInHint } from '@livedoc/account-session';
 import { Button, TextInput } from '@livedoc/ui';
@@ -98,7 +98,9 @@ export function AuthFlow({ kind }: { kind: AuthFlowKind }) {
     writeSignedInHint(true);
     announceAccountChange(true);
     setStep('leaving');
-    window.location.assign(to);
+    // In place of this page: Back from where it lands never returns to a sign-in page that would only send the
+    // person on again.
+    window.location.replace(to);
   };
 
   const sendCode = async () => {

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { dismissQuickTour, expect, expectNoPageErrors, test } from './fixtures';
+import { expect, expectNoPageErrors, test } from './fixtures';
 
 // docs/specs/023-draw-mode/draw-mode.md: a whiteboard shape is picked by its outline, yet a
 // double-click anywhere inside it writes in it, selected or not ("Selecting"); a tap with a marker
@@ -12,7 +12,6 @@ async function openBoard(page: Page) {
   await page.setViewportSize({ width: 1400, height: 900 });
   await page.goto('/new?template=whiteboard');
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
 }
 
 const elements = (page: Page) => page.locator('[data-element-id]');
