@@ -436,7 +436,7 @@ export function EditorView() {
         </AreaErrorBoundary>
       </LandscapeBarFold>
     );
-  const lines = { actions: actionsGroup, document: documentGroup };
+  const lines = { actions: actionsGroup, document: documentGroup, embed: embedMode };
 
   // The bars handle, at the canvas's top-right corner: only on a phone held sideways (CSS), and only where there are
   // groups to fold (not in zen, an embed, the welcome flow or a running presentation).

@@ -646,7 +646,7 @@ export function CanvasChrome(props: CanvasChromeProps) {
             // buttons share the width there is, PHONE_CLUSTER_BUTTON_WIDTH, from 36px up to their usual size (always 44px
             // tall to tap). It may still wrap on a narrower one, so Undo is never pushed off the screen. With nothing in
             // it (the welcome flow) it is not drawn.
-            className={`pointer-events-auto relative phone:flex-wrap [&:not(:has([data-toolbar-part]:not(:empty)))]:hidden ${PHONE_CLUSTER_BUTTON_WIDTH} ${PHONE_TOOLBAR_ITEMS}`}
+            className={`pointer-events-auto relative ${lines?.embed ? 'ml-auto' : ''} phone:flex-wrap [&:not(:has([data-toolbar-part]:not(:empty)))]:hidden ${PHONE_CLUSTER_BUTTON_WIDTH} ${PHONE_TOOLBAR_ITEMS}`}
           >
             {welcomeOpen ? null : (
               <>

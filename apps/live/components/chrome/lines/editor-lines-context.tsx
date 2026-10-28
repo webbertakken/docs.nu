@@ -9,6 +9,9 @@ import { createContext, useContext, type ReactNode } from 'react';
 export type EditorLines = {
   actions: ReactNode;
   document: ReactNode;
+  // A share-code embed (docs/specs/013-workspace/embeds.md): its Open in LiveDoc badge holds the bottom-left corner, so
+  // the tools group (its zoom controls) keeps the bottom right.
+  embed?: boolean;
 };
 
 export const EditorLinesContext = createContext<EditorLines | null>(null);
