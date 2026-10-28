@@ -91,9 +91,10 @@ describe('BugReportDialog', () => {
     fillTitle('Save fails');
     fireEvent.click(screen.getByRole('button', { name: 'Send Report' }));
     expect((await screen.findByRole('alert')).textContent).toBe(copy);
-    expect(
-      (screen.getByRole('textbox', { name: 'What went wrong?' }) as HTMLInputElement).value,
-    ).toBe('Save fails');
+    expect(screen.getByRole('textbox', { name: 'What went wrong?' })).toHaveProperty(
+      'value',
+      'Save fails',
+    );
   });
 
   it('attaches nothing until asked, then previews, sends and removes a capture', async () => {

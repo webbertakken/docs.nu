@@ -68,6 +68,13 @@ test.describe('Contrast audit, dark mode', () => {
     await page.getByRole('dialog', { name: 'Share This Document' }).waitFor();
     expectAA(await auditContrast(page), 'Share dialog');
     await page.keyboard.press('Escape');
+
+    // Report a Bug (docs/specs/004-interface-design/report-a-bug-entries.md), with What's Attached open.
+    await page.locator('[data-bug-report-entry][aria-label="Report a Bug"]').click();
+    const report = page.getByRole('dialog', { name: 'Report a Bug' });
+    await report.getByText("What's Attached").click();
+    expectAA(await auditContrast(page), 'Report a Bug dialog');
+    await page.keyboard.press('Escape');
     expectNoPageErrors(pageErrors);
   });
 
