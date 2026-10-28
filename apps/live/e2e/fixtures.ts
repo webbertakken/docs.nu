@@ -59,66 +59,9 @@ export async function enableDebugLogs(context: BrowserContext): Promise<void> {
   );
 }
 
-// The Draw, Avatar, Forms, Pages and element tours (docs/specs/023-draw-mode/draw-tour.md, docs/specs/008-canvas/avatar-tour.md,
-// docs/specs/030-forms/forms.md, docs/specs/007-editor/pages-tour.md) offer themselves 800 ms into their modes and their overlays would take the presses of every spec there; they have
-// their own unit tests. Marked seen for every page of the context.
-async function markModeToursSeen(context: BrowserContext): Promise<void> {
-  await context.addInitScript(() => {
-    const key = 'livedoc:user-preferences:v1';
-    try {
-      const prefs = JSON.parse(localStorage.getItem(key) ?? '{}') as Record<string, unknown>;
-      // The Pages tour offers each page kind once (lib/tour-tracks.ts): every kind answered.
-      if (
-        prefs.drawTourSeen !== true ||
-        prefs.avatarTourSeen !== true ||
-        prefs.formTourSeen !== true ||
-        !Array.isArray(prefs.pagesTourKinds) ||
-        !Array.isArray(prefs.elementTourKinds)
-      )
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            ...prefs,
-            drawTourSeen: true,
-            avatarTourSeen: true,
-            formTourSeen: true,
-            pagesTourSeen: true,
-            pagesTourKinds: ['slide', 'infographic', 'article', 'logo'],
-            // Element tours (docs/specs/007-editor/element-tours.md): the offer beside a Sankey's toolbar.
-            elementTourKinds: [
-              'sankey',
-              'layer-stack',
-              'pyramid',
-              'funnel',
-              'cycle',
-              'hub',
-              'onion',
-              'chevrons',
-              'mind-node',
-              'flowchart',
-              'org-chart',
-              'sequence',
-              'chart',
-              'stack',
-              'entity',
-              'tab-window',
-              'lane',
-              'boundary',
-              'diagram-key',
-              'portal',
-            ],
-          }),
-        );
-    } catch {
-      // No storage: nothing to mark.
-    }
-  });
-}
-
 export const test = base.extend<{ pageErrors: string[] }>({
   context: async ({ context }, use) => {
     await enableDebugLogs(context);
-    await markModeToursSeen(context);
     await use(context);
   },
   pageErrors: async ({ page }, use) => {

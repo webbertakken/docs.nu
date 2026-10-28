@@ -72,10 +72,6 @@ test('a Sheet tab takes a formula, works it out, keeps it, and fills the tab', a
       localStorage.setItem('livedoc:v2:self-id', o);
       if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
       localStorage.setItem('livedoc:v2:name-confirmed', '1');
-      localStorage.setItem(
-        'livedoc:user-preferences:v1',
-        JSON.stringify({ planTourSeen: true, planTourTracks: ['boards', 'sheets'] }),
-      );
     },
     { o: owner, sig: guestSigFor(owner) },
   );

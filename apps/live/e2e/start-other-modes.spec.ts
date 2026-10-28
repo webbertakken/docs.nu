@@ -9,31 +9,12 @@ const mode = (page: import('@playwright/test').Page) => page.locator('[data-edit
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  // The mode tours offer themselves on arrival; their overlay would take the presses below.
-  await page.addInitScript(() => {
-    const key = 'livedoc:user-preferences:v1';
-    try {
-      const prefs = JSON.parse(localStorage.getItem(key) ?? '{}') as Record<string, unknown>;
-      localStorage.setItem(
-        key,
-        JSON.stringify({
-          ...prefs,
-          planTourSeen: true,
-          planTourTracks: ['boards', 'sheets'],
-          workshopTourSeen: true,
-        }),
-      );
-    } catch {
-      // No storage: nothing to mark.
-    }
-  });
 });
 
 test('Start Diagramming finds a Workshop template and switches the tab to it', async ({
   page,
   pageErrors,
 }) => {
-  // No tour dismissal: the tours wait while a start is open, and this one leaves for Workshop.
   await createInMode(page, 'diagram');
   const start = page.getByRole('region', { name: 'Start Diagramming' });
   await start.getByRole('textbox', { name: 'Find a template' }).fill('sailboat');

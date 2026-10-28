@@ -23,11 +23,6 @@ async function openAs(
         if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
         localStorage.setItem('livedoc:v2:name-confirmed', '1');
       }
-      // The Workshop tour offers itself over the board (fixtures openBlankSession); its overlay would take the presses.
-      localStorage.setItem(
-        'livedoc:user-preferences:v1',
-        JSON.stringify({ workshopTourSeen: true }),
-      );
     },
     { o: owner, sig: owner ? guestSigFor(owner) : null },
   );
