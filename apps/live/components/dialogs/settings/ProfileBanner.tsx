@@ -69,7 +69,7 @@ export function ProfileBanner({ name, colour }: { name: string; colour: string |
           />
         </svg>
         <span className="mt-4 -ml-1 inline-flex h-6 max-w-40 items-center rounded-full bg-(--identity) px-2.5 text-xs font-semibold text-white shadow-sm dark:bg-(--identity-deep)">
-          <span className="min-w-0 truncate">{name}</span>
+          <span className="text-optical-centre min-w-0 truncate">{name}</span>
         </span>
       </div>
     </div>
