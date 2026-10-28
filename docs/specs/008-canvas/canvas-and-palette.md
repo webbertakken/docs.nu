@@ -1495,7 +1495,7 @@ A shape can be **locked** to prevent accidental movement or resizing.
 
 ## Resize
 
-When a shape is selected, **four corner handles** (NW, NE, SW, SE) appear as small white squares with a brand-600 border, and **four edge handles** (N, E, S, W) as short bars on the edge midpoints. A multi-selection shows the four corner handles on its union box, no edge handles. Fixed-size elements show none, and a table shows no edge handles.
+When a shape is selected, **four corner handles** (NW, NE, SW, SE) appear as small white squares with a brand-600 border, and **four edge handles** (N, E, S, W) as short bars on the edge midpoints. A multi-selection shows the four corner handles on its union box, no edge handles. The union box spans the members a resize changes (the boxed, unlocked ones), each as drawn, so a rotated member sits inside it; a locked member or an arrow neither hides the handles nor takes their press, and a selection with no such member shows none. A rotated member scales about its centre along its own sides, so a horizontal stretch lengthens whichever side reads horizontally. However hard the union shrinks, it stops where its first member reaches the minimum size, so no member sticks out of the box. Fixed-size elements show none, and a table shows no edge handles.
 
 - **The handles are always on top.** Corner and edge handles (single and union), and the rest of a
   selection's grips, draw above every element on the board, whatever the selected element's place in
