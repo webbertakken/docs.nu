@@ -795,7 +795,8 @@ and the dialog stays as the one complete, browsable index of them.
   marked the per-tab pending flag the offer needed; the flag is gone.) The Plan tour is a
   tour of several tracks (`apps/live/lib/tour-tracks.ts`): **Plan Tours** is one switch over all of them
   (`tourTracksSwitch`, key `planTourSeen`: on while any track is untaken, off marks every track taken, on forgets
-  every record), and each track has its own row nested beneath it (`parent: 'planTourSeen'`), named for itself:
+  every record), and each track has its own row nested beneath it (`parent: 'planTourSeen'`), offered whether the switch
+  reads on or off (it only summarises its tracks, `summarisesChildren`), named for itself:
   **Boards Tour**, **Sheets Tour** and **Dashboards Tour** (`tourTrackSwitch`, keys `planTourSeen-boards`,
   `planTourSeen-sheets`, `planTourSeen-dashboards`). A track's row is on while its track is untaken; off adds its
   track to `planTourTracks`, on removes it alone, and both clear the single `planTourSeen`, folding it into the list
