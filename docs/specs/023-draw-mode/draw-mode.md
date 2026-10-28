@@ -197,15 +197,16 @@ pointing at the button that opened it, on the edge facing the dock, over its but
 - **At the top:**
   - it sits between the brand group and the actions group (Back, the menu button and the editor mode switch,
     [Editor modes](../007-editor/editor-modes.md#the-mode-switch); Search, Settings and the document's actions),
-    centred, and runs out of room as the strip does: when the line has no room for it, it takes its own row just
-    under the top line ([Toolbar layout](../007-editor/toolbar-layout.md#when-a-line-runs-out-of-room)), and when
+    centred while it fits centred, else off centre between them, as the strip does: when the line has no room for it
+    between the groups, it takes its own row just under the top line ([Toolbar layout](../007-editor/toolbar-layout.md#when-a-line-runs-out-of-room)), and when
     it scrolls sideways its tools stay clear of the groups rather than sliding under them;
   - its flyouts and the "Seven shapes are pinned" hint open **below** it;
   - the top-centre banners (follow-me, mode banners, timer, vote) sit
     **beneath** it, as they sit beneath the Toolbar strip;
   - panels docked in a top corner sit **below** the top line, and below the dock's own row while it has one, as
     they do for the Toolbar strip.
-- **At the bottom:** it sits on the bottom line, between the tools group and the document group, not lifted
+- **At the bottom:** it sits on the bottom line, between the tools group and the document group (centred while it
+  fits centred, else off centre between them), not lifted
   above them, and its flyouts and hint open **above** it. When the line has no room for it, it takes its own row
   just above the line ([Toolbar layout](../007-editor/toolbar-layout.md#when-a-line-runs-out-of-room)).
 - **Telemetry:** `UI` · `Changed` · `WhiteboardDockPositionTop` /

@@ -831,8 +831,8 @@ and the dialog stays as the one complete, browsable index of them.
   today; six near-identical rows each saying "Shows the X among a logo page's
   construction guides" read as clutter.
 
-  **Button Labels** (Appearance › Interface, `dockButtonNames`, off by default,
-  so the top line leaves the Palette strip its room) names the actions group's
+  **Button Labels** (Appearance › Interface, `dockButtonNames`, off by default, as
+  Webber decided, so the top line leaves the Palette strip its room) names the actions group's
   chrome buttons beside their icons: Search, Report a Bug, Settings and the
   appearance toggle ([Toolbar layout](toolbar-layout.md#the-top-line)). The tools group is icons alone whatever it
   says ([Live app](live-app.md)). Off, they are icons alone, each

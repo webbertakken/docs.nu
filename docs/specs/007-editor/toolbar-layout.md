@@ -605,6 +605,9 @@ their bottom-row buttons. What changes to fit the width:
 
 ## Decided in review
 
+- **Button Labels is off by default** (decided by Webber): the actions group shows Search, Report a Bug, Settings and
+  the appearance toggle as icons, each named in its hover card, so the top line leaves the Palette strip its room;
+  turning Button Labels on names them ([User preferences](user-preferences.md)).
 - **The strip opens on the mode's landing every time** (Diagram's Popular, Plan's Cards)
   ([Editor modes](editor-modes.md#the-palette-per-mode)). It does not remember the last category across documents.
 - **Diagram keeps the category picker**, not the category bar: Popular and its twelve tiles, one press from the

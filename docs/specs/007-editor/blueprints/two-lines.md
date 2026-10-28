@@ -189,18 +189,24 @@ alone ([gate a feature by share role](../../../instructions/gate-a-feature-by-sh
 
 ### When a line runs out of room
 
-- The document name's `max-width` is the room the bottom line leaves it: `useLineRoom` measures the line box, the
-  tools group and Draw's bottom dock (when drawn) and sets `--doc-name-max` on the document group, floored at
-  `DOC_NAME_MIN_PX`.
-- The strip's clearance on both sides is `topLineClearance(view)`: the larger of the brand group's right edge and the
-  actions group's left edge from the canvas's sides, plus `MENU_GAP_PX` (`useStripCrowded`, `useStripTileLimit`,
-  `useBarLabels`, `useMenuCardClearance` read it, so tiles drop first).
-- When the strip at its fewest tiles still does not fit, it drops to its own row, top `toolbarTopClearancePx`
-  (`data-strip-row="own"`), and the top corner stacks start one row lower. Draw's dock at the top does the same; at
-  the bottom it rises one row (`bottom` = the line's height + 8 px) when the line has no room for it between the
-  groups.
-- Phone: the strip always takes its own row under the top line (no menu card in the strip's row); the bottom line
-  wraps, the document group above the tools group.
+- One pure rule places a line's centre toolbar on both lines: `centreOnLine` (`apps/live/lib/line-centre.ts`). Given the
+  editor box, the line's two side groups and the toolbar's width, it answers the room between the groups (each side
+  less `LINE_GAP_PX`, or the line's `LINE_INSET_PX` where a group is not drawn), whether the toolbar fits there, and
+  its left edge: the centred left, clamped into the room, so it is centred while it fits centred and slides off
+  centre toward the narrower group otherwise.
+- The strip: `useStripTileLimit` fits tiles to that room (tiles drop only once the strip no longer fits between the
+  groups; a tile's pitch is the mean of the rail's, dividers included); `useBarLabels` names the category bar while
+  it fits there; `useStripPlacement` answers `shift` (the strip's centre from the editor's, applied as padding twice
+  the shift on one side of the strip's row) and `crowded` (even its fewest tiles do not fit: a row of its own,
+  top `secondRowTopPx`, and the top corner stacks one row lower, `centre-row-store`). A header band presses the
+  strip right and takes no shift.
+- Draw's dock: `dockLinePlacement` (`useDockLinePlacement`) on the same rule, against the brand and actions groups at
+  the top or the tools and document groups at the bottom: on the line its `left` and `max-width` are set inline; else
+  a row of its own just inside the line, centred.
+- The document name's `max-width` is the room the bottom line leaves it (`docNameRoom`, `useLineRoom`): beside the
+  tools group, and short enough that Draw's bottom dock fits between the groups, floored at `DOC_NAME_MIN_PX`.
+- Phone: the strip and the dock always take their own row; the bottom line wraps, the document group above the tools
+  group.
 
 ## Accessibility
 
