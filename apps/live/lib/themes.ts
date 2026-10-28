@@ -5,9 +5,11 @@
 // new-element colour derivation that depends on it. The ~120 `@/lib/themes`
 // consumers are unchanged — every symbol they imported is still exported here.
 import {
+  builtInThemeSource,
   getBuiltInTheme,
+  tabBackdropInAppearance,
+  type ResolvedBackdrop,
   isDefaultSchemeBackdrop,
-  THEMES,
   DEFAULT_BACKGROUND_COLOR,
   DEFAULT_PATTERN_COLOR,
   DEFAULT_SCHEME_ID,
@@ -16,9 +18,7 @@ import {
   DEFAULT_SCHEME_LIGHT,
   themeColourMap,
   themeHalf,
-  viewBackdropInTheme,
   type Appearance,
-  type BackgroundPattern,
   type BoxedElement,
   type Tab,
   type ThemeDefinition,
@@ -62,12 +62,9 @@ export function resolveTheme(
 
 /** The scheme as written (its native half, before tuning): what its light / dark halves and its colour map are built
  *  from. Undefined for an id that names nothing known. */
-function themeSource(id: string | undefined): ThemeDefinition | undefined {
+export function themeSource(id: string | undefined): ThemeDefinition | undefined {
   if (!id) return undefined;
-  const custom = lookupCustomTheme(id);
-  if (custom) return custom;
-  if (id === DEFAULT_SCHEME_ID) return DEFAULT_SCHEME_LIGHT;
-  return THEMES.find((t) => t.id === id);
+  return lookupCustomTheme(id) ?? builtInThemeSource(id);
 }
 
 /** Every colour the tab's scheme paints, in either half, mapped to the viewer's half (themeColourMap): what the canvas
@@ -108,12 +105,7 @@ export function getTheme(
 //
 // Only the two COLOURS swap. The pattern, its opacity and its scale are layout
 // choices, identical in both appearances, so they pass straight through.
-export type ResolvedBackdrop = {
-  backgroundColor: string;
-  patternColor: string;
-  backgroundPattern: BackgroundPattern | undefined;
-  backgroundOpacity: number | undefined;
-};
+export type { ResolvedBackdrop } from '@livedoc/document';
 
 export function resolveTabBackdrop(
   tab: Pick<
@@ -122,16 +114,8 @@ export function resolveTabBackdrop(
   >,
   appearance: Appearance = getResolvedAppearance(),
 ): ResolvedBackdrop {
-  const stored = {
-    backgroundColor: tab.backgroundColor ?? DEFAULT_BACKGROUND_COLOR,
-    patternColor: tab.patternColor ?? DEFAULT_PATTERN_COLOR,
-    backgroundPattern: tab.backgroundPattern,
-    backgroundOpacity: tab.backgroundOpacity,
-  };
   // A canvas or pattern colour the scheme painted, in either half, follows the viewer; a picked colour stays.
-  const source = themeSource(tab.theme ?? DEFAULT_SCHEME_ID);
-  if (!source) return stored;
-  return { ...stored, ...viewBackdropInTheme(stored, source, appearance) };
+  return tabBackdropInAppearance(tab, themeSource(tab.theme ?? DEFAULT_SCHEME_ID), appearance);
 }
 
 // Colour projection for a NEWLY-added boxed element, given the active tab's

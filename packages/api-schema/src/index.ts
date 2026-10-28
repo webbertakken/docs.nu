@@ -631,6 +631,7 @@ export type UnfurlResult = {
   favicon?: string;
 };
 
+export * from './custom-theme';
 export * from './access-levels';
 export * from './image-limits';
 export * from './cta-sources';

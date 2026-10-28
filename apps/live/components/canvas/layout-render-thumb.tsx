@@ -8,9 +8,11 @@
 //
 // Drawn as the viewer sees the page, not as an export prints it: placed as a press places it (in the
 // tab's theme, themedForTab), then drawn in the viewer's half (elementAsSeen), and on a dark-chrome
-// viewer's plain page on the dark paper the canvas shows (PAGE_PAPER_DARK), not an export's white.
+// viewer's plain page on the dark paper the canvas shows (pageInAppearance), not an export's white.
 import { useMemo } from 'react';
 import {
+  elementAsSeen,
+  pageInAppearance,
   pageIsDark,
   themedForTab,
   type Appearance,
@@ -21,22 +23,9 @@ import type { PageLayoutId } from '@livedoc/templates';
 import { trustedHtml, useAppearance } from '@livedoc/ui';
 import { useIconCatalogs } from '@/hooks/ui/useIconCatalogs';
 import { renderTabToSvg } from '@/lib/export-tab';
-import { elementAsSeen } from '@/lib/stock-colour-projector';
 import { themeViewMap } from '@/lib/themes';
 import { buildPageLayout } from '@livedoc/templates';
 import { withSamplePictures } from './layout-sample-pictures';
-
-// A plain page's paper in dark chrome, as CanvasPages paints it (dark:bg-slate-900).
-export const PAGE_PAPER_DARK = '#0f172a';
-
-/** The page as the viewer sees it: a plain page in dark chrome takes the dark paper. */
-function pageAsSeen(page: LaidOutPage, appearance: Appearance): LaidOutPage {
-  if (appearance !== 'dark' || page.background?.fill) return page;
-  return {
-    ...page,
-    background: { ...page.background, fill: { kind: 'solid', color: PAGE_PAPER_DARK } },
-  };
-}
 
 /** The page with `layout` placed, as SVG markup: what lands, as the viewer sees it, nothing else
  *  of the tab, save that each picture it leaves for the author shows a sample one
@@ -50,7 +39,7 @@ export function layoutRenderSvg(
   const placed = themedForTab(buildPageLayout(layout, page), tab.theme, {
     dark: pageIsDark(page),
   });
-  const seen = pageAsSeen(page, appearance);
+  const seen = pageInAppearance(page, appearance);
   // Elements are drawn for what they sit on: the page's own fill, else the chrome's paper.
   const surface: Appearance = seen.background?.fill
     ? pageIsDark(seen)

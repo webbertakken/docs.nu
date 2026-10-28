@@ -13,25 +13,16 @@ import { THEMES } from '@livedoc/document';
 // cycle): themes.ts calls lookupCustomTheme(); this file only borrows
 // the type.
 
-import type { CustomTheme, CustomThemeDefinition } from '@livedoc/api-schema';
+import {
+  customThemeDefinition,
+  type CustomTheme,
+  type CustomThemeDefinition,
+} from '@livedoc/api-schema';
 import type { ThemeDefinition } from './themes';
 
 const registry = new Map<string, ThemeDefinition>();
 
-// A saved CustomTheme (id + name + themable payload) materialised into a
-// full ThemeDefinition: the stored definition fields, with the row's id
-// + name becoming the theme id + label. The id cast is the one spot the
-// `custom:<uuid>` string meets ThemeDefinition's `ThemeId` union — safe
-// because getTheme keys on the string and never narrows it back.
-export function materialiseCustomTheme(t: CustomTheme): ThemeDefinition {
-  return {
-    id: t.id as ThemeDefinition['id'],
-    label: t.name,
-    ...t.definition,
-  };
-}
-
-// Inverse of materialiseCustomTheme: a built-in (or any) ThemeDefinition
+// Inverse of customThemeDefinition (@livedoc/api-schema): a built-in (or any) ThemeDefinition
 // stripped to its editable CustomThemeDefinition payload (drops id /
 // label / extra). Used by the "Copy" affordance on built-in themes to
 // seed the builder with an existing theme's options.
@@ -51,11 +42,11 @@ export function customDefinitionFromTheme(theme: ThemeDefinition): CustomThemeDe
 }
 
 export function registerCustomThemes(themes: CustomTheme[]): void {
-  for (const t of themes) registry.set(t.id, materialiseCustomTheme(t));
+  for (const t of themes) registry.set(t.id, customThemeDefinition(t));
 }
 
 export function registerCustomTheme(theme: CustomTheme): void {
-  registry.set(theme.id, materialiseCustomTheme(theme));
+  registry.set(theme.id, customThemeDefinition(theme));
 }
 
 export function unregisterCustomTheme(id: string): void {

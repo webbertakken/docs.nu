@@ -12,34 +12,14 @@
 // drawn for that page, not for the viewer's chrome: its theme colours in the half that matches the page's
 // surface, its stock colours for that surface, so a light slide in dark chrome keeps dark words.
 import {
-  resolveStockColours,
-  viewElementInTheme,
+  elementAsSeen,
   withReadableLabelInks,
   type CanvasSurface,
   type Element,
+  type PageView,
 } from '@livedoc/document';
 
 const NO_THEME_MAP: ReadonlyMap<string, string> = new Map();
-
-/** The surface of each element on a page with its own fill (elementPageSurfaces), and the theme map
- *  for each surface (themeViewMap in that appearance). */
-export type PageView = {
-  surfaces: ReadonlyMap<string, CanvasSurface>;
-  maps: Readonly<Record<CanvasSurface, ReadonlyMap<string, string>>>;
-};
-
-/** One element as drawn: on its page's surface where it has one, else on the canvas's. */
-export function elementAsSeen(
-  el: Element,
-  surface: CanvasSurface,
-  themeMap: ReadonlyMap<string, string>,
-  pageView?: PageView,
-): Element {
-  const onPage = pageView?.surfaces.get(el.id);
-  return onPage
-    ? resolveStockColours(viewElementInTheme(el, pageView!.maps[onPage]), onPage)
-    : resolveStockColours(viewElementInTheme(el, themeMap), surface);
-}
 
 export function createStockColourProjector(): (
   elements: Element[],

@@ -46,7 +46,16 @@ describe('deleteAccount snapshot cleanup (docs/specs/006-document/document-snaps
 
     // Image bytes AND document snapshots both leave R2.
     expect(del).toHaveBeenCalledWith(['i1']);
-    expect(del).toHaveBeenCalledWith(['thumb/d1', 'og/d1', 'thumb/d2', 'og/d2']);
+    expect(del).toHaveBeenCalledWith([
+      'thumb/d1',
+      'thumb/d1/light',
+      'thumb/d1/dark',
+      'og/d1',
+      'thumb/d2',
+      'thumb/d2/light',
+      'thumb/d2/dark',
+      'og/d2',
+    ]);
   });
 
   it('skips R2 cleanup when no bucket is bound (self-host) without throwing', async () => {

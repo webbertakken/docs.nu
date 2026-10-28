@@ -3,6 +3,7 @@
 // the read DTO joins owner display info from participants.
 
 import { readItemTypeCatalogue, type ItemTypeCatalogue } from '@livedoc/items';
+import { APPEARANCES, type Appearance } from '@livedoc/document';
 import type { DocumentDTO, DocumentEnv, DocumentSummary, Env } from '../types';
 import { getParticipant } from './participants';
 import { imageGrantCopyStatements, imageGrantOwnerChangeStatement } from './image-grants';
@@ -436,11 +437,11 @@ export async function deleteDocument(env: Env, id: string): Promise<void> {
   if (env.IMAGES) await env.IMAGES.delete(snapshotKeys(id)).catch(() => {});
 }
 
-// R2 object key for a document's cached SVG snapshot (docs/specs/006-document/document-snapshots.md). Shared by
-// the render-cache (which writes it) and deleteDocument (which clears it)
-// so the key shape lives in exactly one place.
-export function thumbnailKey(documentId: string): string {
-  return `thumb/${documentId}`;
+// R2 object key for a document's cached SVG snapshot (docs/specs/006-document/document-snapshots.md): as stored,
+// or drawn in one appearance's half for the Explorer. Shared by the render-cache (which writes it) and
+// deleteDocument (which clears it) so the key shape lives in exactly one place.
+export function thumbnailKey(documentId: string, appearance?: Appearance): string {
+  return appearance ? `thumb/${documentId}/${appearance}` : `thumb/${documentId}`;
 }
 
 // The share card a link preview shows (docs/specs/013-workspace/share-link-previews.md): the first-tab snapshot drawn
@@ -451,7 +452,11 @@ export function shareCardKey(documentId: string): string {
 
 // Every cached snapshot a document can have, for the paths that delete it.
 export function snapshotKeys(documentId: string): string[] {
-  return [thumbnailKey(documentId), shareCardKey(documentId)];
+  return [
+    thumbnailKey(documentId),
+    ...APPEARANCES.map((a) => thumbnailKey(documentId, a)),
+    shareCardKey(documentId),
+  ];
 }
 
 // When the cached snapshot was last rendered (docs/specs/006-document/document-snapshots.md), or null when it

@@ -1,7 +1,7 @@
 // A Form tab's picture (docs/specs/030-forms/forms.md "Agents": read_form's image; blueprint §15): the form as a
 // respondent sees it on its tab's look, every section one after another as Preview scrolls them: the cover band, the
-// heading card, each question's card with its answer control, and the button that ends it. Pure markup, light half.
-import { svgText, svgWrapLines, type FormLook } from '@livedoc/document';
+// heading card, each question's card with its answer control, and the button that ends it. Pure markup, in either half.
+import { svgText, svgWrapLines, type Appearance, type FormLook } from '@livedoc/document';
 import {
   DROPDOWN_AFTER,
   RATING_SCALE_DEFAULT,
@@ -27,16 +27,41 @@ export const FORM_ART_HEIGHT_MAX = 2048;
 // A long form flows on into a second column (1,440 px wide in all) before anything is left out.
 const FORM_ART_COLUMNS_MAX = 2;
 
-const INK = '#0f172a';
-const MUTED = '#64748b';
-const RULE = '#cbd5e1';
-const FIELD = '#f8fafc';
-const CARD = '#ffffff';
-const REQUIRED = '#dc2626';
+// The form card's colours in each half, as the builder paints them (docs/specs/030-forms/forms.md "Look": the card
+// stays white in light and the dark card colour in dark, so text contrast never depends on the theme).
+type FormInk = {
+  ink: string;
+  muted: string;
+  rule: string;
+  field: string;
+  card: string;
+  required: string;
+};
+const FORM_INK: Readonly<Record<Appearance, FormInk>> = {
+  // slate 900 / 500 / 300 / 50, white, red 600.
+  light: {
+    ink: '#0f172a',
+    muted: '#64748b',
+    rule: '#cbd5e1',
+    field: '#f8fafc',
+    card: '#ffffff',
+    required: '#dc2626',
+  },
+  // slate 50 / 400 / 600 / 900, slate 900, red 400: the builder's dark: classes.
+  dark: {
+    ink: '#f8fafc',
+    muted: '#94a3b8',
+    rule: '#475569',
+    field: '#0f172a',
+    card: '#0f172a',
+    required: '#f87171',
+  },
+};
 
 type Draw = {
   markup: string[];
   y: number;
+  ink: FormInk;
   accent: string;
   onAccent: string;
   rx: number;
@@ -122,12 +147,12 @@ function drawControl(d: Draw, q: FormQuestion, x: number, width: number): void {
         m.push(
           box(
             { x, y: top, width: Math.min(width, 280), height: INPUT_H },
-            { fill: FIELD, stroke: RULE, rx: d.rx },
+            { fill: d.ink.field, stroke: d.ink.rule, rx: d.rx },
           ),
         );
-        m.push(line(x + 12, top + 25, 'Choose', { size: 14, color: MUTED }));
+        m.push(line(x + 12, top + 25, 'Choose', { size: 14, color: d.ink.muted }));
         m.push(
-          `<path d="M${x + Math.min(width, 280) - 22} ${top + 17} l5 6 l5 -6" fill="none" stroke="${MUTED}" stroke-width="1.6"/>`,
+          `<path d="M${x + Math.min(width, 280) - 22} ${top + 17} l5 6 l5 -6" fill="none" stroke="${d.ink.muted}" stroke-width="1.6"/>`,
         );
         break;
       }
@@ -135,16 +160,16 @@ function drawControl(d: Draw, q: FormQuestion, x: number, width: number): void {
         const cy = top + i * OPTION_H + OPTION_H / 2;
         m.push(
           q.type === 'single'
-            ? `<circle cx="${x + 9}" cy="${cy}" r="8" fill="${CARD}" stroke="${MUTED}" stroke-width="1.5"/>`
+            ? `<circle cx="${x + 9}" cy="${cy}" r="8" fill="${d.ink.card}" stroke="${d.ink.muted}" stroke-width="1.5"/>`
             : box(
                 { x: x + 1, y: cy - 8, width: 16, height: 16 },
-                { fill: CARD, stroke: MUTED, rx: 3, strokeWidth: 1.5 },
+                { fill: d.ink.card, stroke: d.ink.muted, rx: 3, strokeWidth: 1.5 },
               ),
         );
-        m.push(line(x + 28, cy + 5, o, { size: 14, color: INK, width: width - 28 }));
+        m.push(line(x + 28, cy + 5, o, { size: 14, color: d.ink.ink, width: width - 28 }));
         if (o === 'Other:')
           m.push(
-            `<line x1="${x + 80}" y1="${cy + 6}" x2="${x + Math.min(width, 320)}" y2="${cy + 6}" stroke="${RULE}"/>`,
+            `<line x1="${x + 80}" y1="${cy + 6}" x2="${x + Math.min(width, 320)}" y2="${cy + 6}" stroke="${d.ink.rule}"/>`,
           );
       });
       break;
@@ -156,38 +181,49 @@ function drawControl(d: Draw, q: FormQuestion, x: number, width: number): void {
         for (let i = 0; i < scale; i += 1) {
           const bx = x + i * (w + 6);
           m.push(
-            box({ x: bx, y: top, width: w, height: 36 }, { fill: CARD, stroke: RULE, rx: d.rx }),
+            box(
+              { x: bx, y: top, width: w, height: 36 },
+              { fill: d.ink.card, stroke: d.ink.rule, rx: d.rx },
+            ),
           );
           m.push(
-            line(bx + w / 2, top + 23, String(i + 1), { size: 14, color: INK, anchor: 'middle' }),
+            line(bx + w / 2, top + 23, String(i + 1), {
+              size: 14,
+              color: d.ink.ink,
+              anchor: 'middle',
+            }),
           );
         }
         if (q.lowLabel)
-          m.push(line(x, top + 54, q.lowLabel, { size: 12, color: MUTED, width: width / 2 }));
+          m.push(line(x, top + 54, q.lowLabel, { size: 12, color: d.ink.muted, width: width / 2 }));
         if (q.highLabel)
           m.push(
             line(x + scale * (w + 6) - 6, top + 54, q.highLabel, {
               size: 12,
-              color: MUTED,
+              color: d.ink.muted,
               anchor: 'end',
               width: width / 2,
             }),
           );
       } else
         for (let i = 0; i < scale; i += 1)
-          m.push(star(x + 16 + i * 36, top + 20, 14, 'none', MUTED));
+          m.push(star(x + 16 + i * 36, top + 20, 14, 'none', d.ink.muted));
       break;
     }
     case 'checkbox':
       break;
     default: {
       const h = controlHeight(q);
-      m.push(box({ x, y: top, width, height: h }, { fill: FIELD, stroke: RULE, rx: d.rx }));
+      m.push(
+        box({ x, y: top, width, height: h }, { fill: d.ink.field, stroke: d.ink.rule, rx: d.rx }),
+      );
       // A paragraph's placeholder keeps its line breaks, as its text area shows them (three lines fit).
       const hint = q.placeholder ?? HINTS[q.type] ?? '';
       const lines = q.type === 'paragraph' ? hint.split('\n').slice(0, 3) : [hint];
       lines.forEach((l, i) =>
-        m.push(line(x + 12, top + 25 + i * 20, l, { size: 14, color: MUTED, width: width - 24 })),
+        m.push(
+          line(x + 12, top + 25 + i * 20, l, { size: 14, color: d.ink.muted, width: width - 24 }),
+        ),
       );
     }
   }
@@ -205,28 +241,31 @@ function drawQuestion(d: Draw, q: FormQuestion): void {
     body.markup.push(
       box(
         { x: x + PAD, y: body.y + 6, width: 18, height: 18 },
-        { fill: CARD, stroke: MUTED, rx: 3, strokeWidth: 1.5 },
+        { fill: d.ink.card, stroke: d.ink.muted, rx: 3, strokeWidth: 1.5 },
       ),
     );
   const lines = wrap(promptOf(q), inner - indent - 12, 16, 4);
   for (const [i, l] of lines.entries()) {
     body.y += 22;
     // The required mark rides the prompt's last line, so it sits right after the words whatever their width.
-    const mark = q.required && i === lines.length - 1 ? `<tspan fill="${REQUIRED}"> *</tspan>` : '';
+    const mark =
+      q.required && i === lines.length - 1 ? `<tspan fill="${d.ink.required}"> *</tspan>` : '';
     body.markup.push(
-      `<text x="${x + PAD + indent}" y="${body.y - 5}" font-size="16" font-weight="500" fill="${INK}">${xmlEscape(l)}${mark}</text>`,
+      `<text x="${x + PAD + indent}" y="${body.y - 5}" font-size="16" font-weight="500" fill="${d.ink.ink}">${xmlEscape(l)}${mark}</text>`,
     );
   }
   if (q.help) {
     body.y += 2;
-    textBlock(body, x + PAD, q.help, { size: 13, color: MUTED, width: inner, max: 3 });
+    textBlock(body, x + PAD, q.help, { size: 13, color: d.ink.muted, width: inner, max: 3 });
   }
   if (q.type !== 'checkbox') {
     body.y += 12;
     drawControl(body, q, x + PAD, inner);
   }
   const height = body.y + PAD - top;
-  d.markup.push(box({ x, y: top, width: COLUMN, height }, { fill: CARD, stroke: RULE, rx: d.rx }));
+  d.markup.push(
+    box({ x, y: top, width: COLUMN, height }, { fill: d.ink.card, stroke: d.ink.rule, rx: d.rx }),
+  );
   d.markup.push(...body.markup);
   d.y = top + height + GAP;
 }
@@ -243,12 +282,12 @@ function headerCard(
   if (o.label) {
     body.y += 16;
     body.markup.push(
-      svgText(x + PAD, body.y - 2, o.label, { size: 12, color: MUTED, weight: 600 }),
+      svgText(x + PAD, body.y - 2, o.label, { size: 12, color: d.ink.muted, weight: 600 }),
     );
   }
   textBlock(body, x + PAD, title, {
     size: o.heading ? 28 : 20,
-    color: INK,
+    color: d.ink.ink,
     weight: 700,
     width: COLUMN - PAD * 2,
     max: 3,
@@ -257,7 +296,7 @@ function headerCard(
     body.y += 6;
     textBlock(body, x + PAD, description, {
       size: 14,
-      color: MUTED,
+      color: d.ink.muted,
       width: COLUMN - PAD * 2,
       max: 8,
     });
@@ -266,14 +305,16 @@ function headerCard(
     body.y += 6;
     textBlock(body, x + PAD, o.rule, {
       size: 13,
-      color: MUTED,
+      color: d.ink.muted,
       weight: 600,
       width: COLUMN - PAD * 2,
       max: 2,
     });
   }
   const height = body.y + PAD - top;
-  d.markup.push(box({ x, y: top, width: COLUMN, height }, { fill: CARD, stroke: RULE, rx: d.rx }));
+  d.markup.push(
+    box({ x, y: top, width: COLUMN, height }, { fill: d.ink.card, stroke: d.ink.rule, rx: d.rx }),
+  );
   // The accent bar down the card's left edge, as the builder draws a selected card.
   d.markup.push(box({ x, y: top, width: 6, height }, { fill: d.accent, rx: d.rx ? 3 : 0 }));
   d.markup.push(...body.markup);
@@ -351,14 +392,20 @@ function block(d: Draw, draw: (b: Draw) => void, questions = 0): Block {
 
 // The form drawn on its look: every section in order, each later one under a "Section n of m" card, flowing down one
 // column and on into a second when the first is full; what still does not fit is counted under the last block drawn.
-export function formArt(form: FormDefinition, look: FormLook, fontStack?: string): FormArt {
-  const accent = look.accent.light;
+export function formArt(
+  form: FormDefinition,
+  look: FormLook,
+  fontStack?: string,
+  appearance: Appearance = 'light',
+): FormArt {
+  const accent = look.accent[appearance];
   const rx = look.finish === 'professional' ? 2 : 10;
   const d: Draw = {
     markup: [],
     y: 0,
+    ink: FORM_INK[appearance],
     accent,
-    onAccent: look.onAccent.light,
+    onAccent: look.onAccent[appearance],
     rx,
     font: fontStack ?? 'system-ui, sans-serif',
   };
@@ -389,7 +436,7 @@ export function formArt(form: FormDefinition, look: FormLook, fontStack?: string
         line(GUTTER + 48, 29, 'Submit', {
           size: 14,
           weight: 600,
-          color: look.onAccent.light,
+          color: d.onAccent,
           anchor: 'middle',
         }),
       );
@@ -428,7 +475,7 @@ export function formArt(form: FormDefinition, look: FormLook, fontStack?: string
         `${cut} more question${cut === 1 ? '' : 's'} not drawn: read_form lists every one`,
         {
           size: 13,
-          color: MUTED,
+          color: d.ink.muted,
           anchor: 'middle',
         },
       ),
@@ -442,7 +489,7 @@ export function formArt(form: FormDefinition, look: FormLook, fontStack?: string
     .join('');
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
-    `<rect width="100%" height="100%" fill="${xmlEscape(look.backdrop.light)}"/>` +
+    `<rect width="100%" height="100%" fill="${xmlEscape(look.backdrop[appearance])}"/>` +
     `<g font-family="${xmlEscape(d.font)}">${body}</g></svg>`;
   return { svg, width, height };
 }

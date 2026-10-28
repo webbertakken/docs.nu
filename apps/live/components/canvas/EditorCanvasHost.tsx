@@ -18,7 +18,7 @@ import { createStockColourProjector } from '@/lib/stock-colour-projector';
 import { usePageView } from '@/hooks/canvas/usePageView';
 import { drawnArrowAsShown } from '@/lib/drawn-arrow-preview';
 import { useMemo, useState } from 'react';
-import { isBoxed, isVoteHost, threadAt } from '@livedoc/document';
+import { isBoxed, isVoteHost, labelsFollowCanvas, threadAt } from '@livedoc/document';
 import { commentPersisters } from '@/lib/comment-persistence';
 import { pollHostFor } from '@/hooks/collab/useLivePoll';
 import { presentedPages } from '@/lib/presented-pages';
@@ -33,7 +33,6 @@ import { useEditModeContextMenu } from '@/hooks/canvas/useEditModeContextMenu';
 import { track } from '@/lib/telemetry';
 import { useTeamFolderActions } from '@/hooks/ui/useTeamFolderActions';
 import { getTheme, themeChartPalette, themeViewMap, type ThemeId } from '@/lib/themes';
-import { labelsFollowCanvas } from '@/lib/tab-theme-apply';
 import { resolveViewBackdrop } from '@/lib/view-backdrop';
 import { readDrawPattern } from '@/lib/whiteboard-dock-prefs';
 import { useAppearance } from '@/hooks/ui/useAppearance';
@@ -490,7 +489,7 @@ export function EditorCanvasHost() {
   // appearance, so its identity holds and the projector's cache with it.
   const shownElements = presentingElements ?? activeTab.elements;
   // On a page with a fill of its own, an element is drawn for that page rather than the chrome
-  // (stock-colour-projector.ts "PageView"); off Pages mode, or with no filled page, nothing to do.
+  // (@livedoc/document tab-as-seen.ts "PageView"); off Pages mode, or with no filled page, nothing to do.
   const pageView = usePageView(shownElements, pagesMode?.pages, activeTab.theme);
   const canvasElements = projectStockColours(
     shownElements,

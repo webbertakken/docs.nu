@@ -1232,10 +1232,18 @@ export const ROUTE_MANIFEST: RouteSpec[] = [
       "The document's cached SVG snapshot (a tab-scoped share visitor gets their tab). Read-gated like GET /documents/{id}; 404 when there is no snapshot.",
     auth: 'guest-or-session',
     tokenUsable: true,
-    query: [{ name: 'v', required: false, description: 'Cache-buster (the savedAt stamp).' }],
+    query: [
+      { name: 'v', required: false, description: 'Cache-buster (the savedAt stamp).' },
+      {
+        name: 'appearance',
+        required: false,
+        description:
+          'light or dark: drawn as a viewer in that appearance sees it. Absent, drawn as stored.',
+      },
+    ],
     responseSchema: { type: 'string' },
     responseMediaType: 'image/svg+xml',
-    statuses: [200, 404],
+    statuses: [200, 400, 404],
   },
   {
     method: 'POST',

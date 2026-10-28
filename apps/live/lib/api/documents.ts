@@ -19,7 +19,7 @@ import type {
   SharedWithItem,
   TeamRecentDocument,
 } from '@livedoc/api-schema';
-import type { Tab } from '@livedoc/document';
+import type { Appearance, Tab } from '@livedoc/document';
 import { dedupeInFlight } from '../dedupe';
 import {
   isOfflineId,
@@ -291,6 +291,11 @@ export async function apiListDocuments(ownerId: string): Promise<DocumentSummary
   return (await apiListDocumentsWithTeamRecent(ownerId)).documents;
 }
 
+// What a snapshot is asked for with: `version` (the document's savedAt) busts the browser cache, `shareCode`
+// authorises a shared row, `appearance` draws it in the viewer's half (document-snapshots.md "In the viewer's half";
+// absent, it is drawn as stored).
+type ThumbnailFetch = { version?: number; shareCode?: string | null; appearance?: Appearance };
+
 // Fetch a document's cached SVG snapshot (docs/specs/006-document/document-snapshots.md) and return a blob URL
 // for an `<img src>` plus the document's background colour. Native `<img>`
 // can't send auth headers, so — like apiFetchImageBlobUrl — the bytes
@@ -303,7 +308,7 @@ export async function apiListDocuments(ownerId: string): Promise<DocumentSummary
 export async function apiFetchDocumentThumbnailUrl(
   ownerId: string,
   documentId: string,
-  opts: { version?: number; shareCode?: string | null } = {},
+  opts: ThumbnailFetch = {},
 ): Promise<{ url: string; backgroundColor: string | null } | null> {
   const svg = await apiFetchDocumentThumbnailSvg(ownerId, documentId, opts);
   if (svg == null) return null;
@@ -321,10 +326,11 @@ export async function apiFetchDocumentThumbnailUrl(
 export async function apiFetchDocumentThumbnailSvg(
   ownerId: string,
   documentId: string,
-  opts: { version?: number; shareCode?: string | null } = {},
+  opts: ThumbnailFetch = {},
 ): Promise<string | null> {
   const params = new URLSearchParams();
   if (opts.version != null) params.set('v', String(opts.version));
+  if (opts.appearance) params.set('appearance', opts.appearance);
   const qs = params.toString();
   const url = `${API_BASE}/documents/${encodeURIComponent(documentId)}/thumbnail${qs ? `?${qs}` : ''}`;
   const headers = new Headers(await apiHeaders(ownerId, { share: opts.shareCode ?? null }));

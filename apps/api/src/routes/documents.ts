@@ -20,6 +20,7 @@ import {
   upsertDocumentMeta,
 } from '../db';
 import { badRequest, forbidden, json, notFound, svgImage } from '../responses';
+import { isAppearance } from '@livedoc/document';
 import { documentImageSvg } from '../document-image';
 import { redactDocumentForReader, redactDocumentForScope } from '../redact-document';
 import { answerOverview, parseViewQuery } from './document-views-route';
@@ -211,6 +212,17 @@ export async function handleDocumentRequest(ctx: DocumentRouteContext): Promise<
   if (segments.length === 4 && segments[3] === 'thumbnail') {
     const id = segments[2]!;
     if (request.method === 'GET') {
+      // The viewer's appearance (docs/specs/006-document/document-snapshots.md "In the viewer's half"): the
+      // snapshot is drawn in their half. Absent, it is drawn as stored; anything else is refused.
+      const asked = ctx.url.searchParams.get('appearance');
+      if (asked !== null && !isAppearance(asked)) {
+        console.warn('[thumbnail] appearance refused', {
+          documentId: id,
+          appearance: asked.slice(0, 32),
+        });
+        return badRequest('appearance must be light or dark');
+      }
+      const appearance = asked ?? undefined;
       // One query for the gate AND the cache-freshness check: this runs for
       // every preview in the Explorer grid, so its D1 round trips are the
       // floor on how fast a card can paint.
@@ -220,7 +232,10 @@ export async function handleDocumentRequest(ctx: DocumentRouteContext): Promise<
       if (!grant) return notFound();
       // A tab-scoped visitor (docs/specs/013-workspace/tab-scoped-share-links.md) gets their tab, never the
       // first-tab snapshot.
-      const svg = await documentImageSvg(env, d, grant.tabScope, { defer: ctx.waitUntil });
+      const svg = await documentImageSvg(env, d, grant.tabScope, {
+        defer: ctx.waitUntil,
+        appearance,
+      });
       // Nothing drawn (or no snapshot store). Past the gate, so this says
       // nothing about access, and the URL carries `?v=<savedAt>`: the answer
       // cannot change until the document does, so let the browser keep it

@@ -2,6 +2,7 @@
 // used out first, and an evicted picture's blob URL is released.
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Appearance } from '@livedoc/document';
 import {
   THUMBNAIL_CACHE_HELD_MAX,
   THUMBNAIL_CACHE_MAX,
@@ -12,14 +13,21 @@ import {
   thumbnailKey,
 } from './thumbnail-cache';
 
-vi.mock('@/lib/api-client', () => ({
-  apiFetchDocumentThumbnailUrl: async (_owner: string, id: string) => ({
-    url: `blob:${id}`,
+const fetchUrl = vi.hoisted(() =>
+  vi.fn(async (_owner: string, id: string, opts: { appearance?: string }) => ({
+    url: `blob:${id}:${opts.appearance}`,
     backgroundColor: null,
-  }),
-}));
+  })),
+);
+vi.mock('@/lib/api-client', () => ({ apiFetchDocumentThumbnailUrl: fetchUrl }));
 
-const req = (documentId: string) => ({ ownerId: 'me', documentId, version: 1, shareCode: null });
+const req = (documentId: string, appearance: Appearance = 'light') => ({
+  ownerId: 'me',
+  documentId,
+  version: 1,
+  shareCode: null,
+  appearance,
+});
 
 beforeEach(() => {
   URL.revokeObjectURL = vi.fn();
@@ -36,7 +44,7 @@ describe('thumbnail cache', () => {
     await loadThumbnail(req('overflow'));
     expect(peekThumbnail(thumbnailKey(req('d0')))).toBeDefined();
     expect(peekThumbnail(thumbnailKey(req('d1')))).toBeUndefined();
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:d1');
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:d1:light');
   });
 
   it('never evicts a picture a mounted thumbnail holds, growing past the bound instead', async () => {
@@ -53,7 +61,7 @@ describe('thumbnail cache', () => {
     await loadThumbnail(req('another'));
     expect(peekThumbnail(thumbnailKey(req('d0')))).toBeUndefined();
     expect(peekThumbnail(thumbnailKey(req('d10')))).toBeDefined();
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:d0');
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:d0:light');
   });
 
   it('counts two holders of one picture until both let go', async () => {
@@ -76,5 +84,18 @@ describe('thumbnail cache', () => {
     }
     expect(peekThumbnail(thumbnailKey(req('d0')))).toBeUndefined();
     expect(peekThumbnail(thumbnailKey(req(`d${THUMBNAIL_CACHE_HELD_MAX}`)))).toBeDefined();
+  });
+
+  it('keeps each appearance’s picture apart, asking the api for the half it wants', async () => {
+    const light = await loadThumbnail(req('d1', 'light'));
+    const dark = await loadThumbnail(req('d1', 'dark'));
+    expect(thumbnailKey(req('d1', 'light'))).not.toBe(thumbnailKey(req('d1', 'dark')));
+    expect(light).toMatchObject({ status: 'ready', src: 'blob:d1:light' });
+    expect(dark).toMatchObject({ status: 'ready', src: 'blob:d1:dark' });
+    expect(fetchUrl).toHaveBeenLastCalledWith('me', 'd1', {
+      version: 1,
+      shareCode: null,
+      appearance: 'dark',
+    });
   });
 });

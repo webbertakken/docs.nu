@@ -163,6 +163,13 @@ describe('apiFetchDocumentThumbnailSvg', () => {
     expect(seen[0]).toMatch(/\/documents\/d%201\/thumbnail\?v=7$/);
   });
 
+  it('asks for the viewer’s half when given an appearance', async () => {
+    const seen = stubFetch(() => new Response(SVG));
+
+    await apiFetchDocumentThumbnailSvg('owner', 'd1', { version: 7, appearance: 'dark' });
+    expect(seen[0]).toMatch(/\/documents\/d1\/thumbnail\?v=7&appearance=dark$/);
+  });
+
   it('is null when the server has no snapshot', async () => {
     stubFetch(() => new Response('', { status: 404 }));
 

@@ -14,6 +14,6 @@ export async function documentImageSvg(
   tabId: string | null,
   opts: ThumbnailOptions = {},
 ): Promise<string | null> {
-  if (tabId) return getDocumentTabImageSvg(env, liveDoc, tabId);
+  if (tabId) return getDocumentTabImageSvg(env, liveDoc, tabId, { appearance: opts.appearance });
   return getDocumentThumbnailSvg(env, liveDoc, opts);
 }

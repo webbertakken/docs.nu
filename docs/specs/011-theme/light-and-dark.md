@@ -78,7 +78,9 @@ does too, so the editor never asks anyone to switch mode to suit a tab.
   Picking a theme or a look applies it in the picker's half.
 - Everything that draws a tab for a person follows their half: the canvas, the Map, layer and slide thumbnails,
   exports made from the editor, the palette's tile tint, the theme and look previews in Tab Style, and the quick
-  style swatches. Server-made images (thumbnails, the MCP's inline renders) have no viewer and draw what is stored.
+  style swatches, and the Explorer's document thumbnails, which the server draws in the half the viewer asks for
+  ([Document snapshots](../006-document/document-snapshots.md#in-the-viewers-half)). Server-made images with no
+  viewer (the live image share, the share card, the MCP's inline renders) draw what is stored.
 
 ## Colours an agent writes
 
