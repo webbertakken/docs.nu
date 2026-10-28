@@ -78,6 +78,10 @@ A command run on the operator's machine, reading D1 through wrangler, never writ
 - After it, the previous Worker version can be restored; it reads D1's content tables, which the move never wrote,
   so every document shows its content as it was at the move. Edits made in rooms after the move are not in D1, so a
   rollback after people have edited loses those edits unless they are copied back first.
+- Documents created after the move live only in their rooms, so the previous Worker shows them empty.
+- The move release rebuilds the Inbox index keyed by document; before restoring the previous Worker, the index is put
+  back in its old shape, empty, or the previous Worker's saves of tabs with comments or actions fail. The exact SQL is in
+  the docs.nu runbook (`docs/operations/docs-nu.md` "Rollback").
 - The class change's release cannot be rolled back: Cloudflare does not roll back a deployment that applied a
   Durable Object migration. A fault there is fixed forward; content, still in D1 then, is never at risk.
 

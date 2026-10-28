@@ -10,9 +10,15 @@ import { validateItemTypeCatalogue, type ItemTypeCatalogue } from '@livedoc/item
 import { getDocument, setDocumentItemTypes } from '../db';
 import { badRequest, forbidden, json, methodNotAllowed } from '../responses';
 import { relayItemTypes } from '../room-client';
-import { gateEdit, missingDocument, readBody, requireOwner, type RouteContext } from './context';
+import {
+  gateEdit,
+  missingDocument,
+  readBody,
+  requireOwner,
+  type DocumentRouteContext,
+} from './context';
 
-async function put(ctx: RouteContext, documentId: string): Promise<Response> {
+async function put(ctx: DocumentRouteContext, documentId: string): Promise<Response> {
   const owner = requireOwner(ctx);
   if (owner instanceof Response) return owner;
   const doc = await getDocument(ctx.env, documentId);
@@ -61,7 +67,7 @@ async function put(ctx: RouteContext, documentId: string): Promise<Response> {
   return json(answer);
 }
 
-export async function handleItemTypeRoutes(ctx: RouteContext): Promise<Response | null> {
+export async function handleItemTypeRoutes(ctx: DocumentRouteContext): Promise<Response | null> {
   const { segments, request } = ctx;
   if (segments.length !== 4 || segments[3] !== 'item-types') return null;
   const documentId = segments[2]!;

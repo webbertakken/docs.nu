@@ -1,6 +1,7 @@
 // form_links, form_reports and form_reads (migrations 0092 and 0093, docs/specs/030-forms/blueprints/forms.md §11): a Form
 // tab's public link, what respondents reported, and what each reader has seen of its responses.
 import { FORM_CODE_LENGTH } from '@livedoc/forms';
+import type { FormLinkShown } from '../forms/form-link-shown';
 import type { Env } from '../types';
 
 export type FormLinkRow = {
@@ -100,10 +101,12 @@ export async function countSuspendedFormLinks(env: Env, documentId: string): Pro
 
 // A new live link for the tab. Its response number carries on from the tab's earlier links (suspended or deleted),
 // so numbers never repeat on one form. Null when the tab already has a live link (the unique index refuses a second).
+// `shown` is what the Inbox shows of it until its tab's next push (forms/form-link-shown.ts).
 export async function createFormLink(
   env: Env,
   documentId: string,
   tabId: string,
+  shown: FormLinkShown,
   now: number,
 ): Promise<FormLinkRow | null> {
   const code = generateFormCode();
@@ -114,12 +117,24 @@ export async function createFormLink(
     .first<{ n: number | null }>();
   try {
     await env.DB.prepare(
-      'INSERT INTO form_links (code, document_id, tab_id, open, created_at, responses) VALUES (?, ?, ?, 1, ?, ?)',
+      `INSERT INTO form_links (code, document_id, tab_id, open, created_at, responses, tab_name, heading, board_tab_id)
+       VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?)`,
     )
-      .bind(code, documentId, tabId, now, prior?.n ?? 0)
+      .bind(
+        code,
+        documentId,
+        tabId,
+        now,
+        prior?.n ?? 0,
+        shown.tabName,
+        shown.heading,
+        shown.boardTabId,
+      )
       .run();
-  } catch {
-    return null;
+  } catch (error) {
+    // The tab already has a live link: the unique index refused a second. Anything else is a failure.
+    if (String(error).includes('UNIQUE')) return null;
+    throw error;
   }
   return getFormLink(env, code);
 }

@@ -3,9 +3,9 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-// Every writer of `tabs` must keep `image_refs` in step
+// Every writer of a room's `tabs` must keep `image_refs` in step
 // (docs/specs/009-elements/images.md, "Reference index"): a writer that
-// doesn't is how a placed image gets reaped. This census fails the moment SQL
+// doesn't is how a placed image gets reaped once the room pushes its set. This census fails the moment SQL
 // writing `tabs` appears somewhere new, so the author has to wire the index
 // (and its test in db/image-refs-writers.test.ts) before the count is raised.
 
@@ -22,10 +22,11 @@ const KNOWN_WRITERS: Record<string, number> = {
   // stampTabElementCount and renameTab, which write element_count or the name, never `data`, so
   // they have no image reference to keep.
   'api/src/db/tabs.ts': 6,
-  // copyDocument
-  'api/src/db/documents.ts': 1,
-  // documentRemovalStatements
-  'api/src/db/document-removal.ts': 1,
+  // importDocumentCopy (a copy's tabs, references from the copied bodies)
+  'api/src/document-room/document-content.ts': 1,
+  // takeSharedTab and a shared tab taken in (receiveShares): each writes the body through tabWriteStatements, then
+  // dates the row as the copy it took, which sets `updated_at` only and has no image reference to keep.
+  'api/src/document-room/tab-shares.ts': 2,
 };
 
 // The last migration that wrote `tabs` without having to think about the
@@ -42,7 +43,10 @@ function sourceFiles(dir: string): string[] {
     const path = join(dir, name);
     if (name === 'node_modules' || name.startsWith('.')) return [];
     if (statSync(path).isDirectory()) return sourceFiles(path);
-    return /\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name) ? [path] : [];
+    // Test support (a `test-` module, as test-sqlite-d1.ts) arranges rows; it is not a writer.
+    return /\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name) && !name.startsWith('test-')
+      ? [path]
+      : [];
   });
 }
 

@@ -62,16 +62,14 @@ const OWNER_COLUMNS: OwnerColumn[] = [
     scope: "scope_type = 'user'",
     migrate: { kind: 'moves' },
   },
-  { table: 'collab_index_state', column: 'owner_id', migrate: { kind: 'moves' } },
   { table: 'owner_aliases', column: 'owner_id', migrate: { kind: 'moves' } },
   {
     table: 'owner_aliases',
     column: 'alias_id',
     migrate: { kind: 'stays', why: 'the guest id is recorded as an alias of the account' },
   },
-  // Agent changesets (docs/specs/024-agents/agent-changesets.md, CS27): a guest with an edit link
-  // writes and reverts changesets too.
-  { table: 'agent_changesets', column: 'author_id', migrate: { kind: 'moves' } },
+  // Agent changesets (docs/specs/024-agents/agent-changesets.md, CS27) are content, in each document's room, out
+  // of reach of both operations; they go with the room's changeset retention.
   { table: 'api_tokens', column: 'owner_id', migrate: { kind: 'account-only' } },
   { table: 'email_lifecycle', column: 'owner_id', migrate: { kind: 'account-only' } },
   // Mention and action-assigned email claims (docs/specs/012-collaboration/comment-mentions.md "The email"):
@@ -221,24 +219,7 @@ function seedGuestHoldable(sql: DatabaseSync, id: string, peerDocument: string) 
     added_at: T0,
   });
   insert(sql, 'timeline_scope_state', { scope_type: 'user', scope_id: id, backfilled_at: T0 });
-  insert(sql, 'collab_index_state', { owner_id: id, backfilled_at: T0 });
   insert(sql, 'owner_aliases', { owner_id: id, alias_id: `legacy-${id}`, created_at: T0 });
-  // A changeset they wrote on the peer's document, which outlives their own documents.
-  insert(sql, 'tabs', { id: `tab-${id}`, name: 'Board', data: '{"elements":[]}', updated_at: T0 });
-  insert(sql, 'agent_changesets', {
-    id: `cs-${id}`,
-    document_id: peerDocument,
-    tab_id: `tab-${id}`,
-    rev: 1,
-    author_id: id,
-    author_name: 'Otter',
-    author_color: '#ff8800',
-    fingerprints: '{}',
-    added: 1,
-    changed: 0,
-    removed: 0,
-    created_at: T0,
-  });
 }
 
 // The account-only rows: an API token, the lifecycle-email and first-seen

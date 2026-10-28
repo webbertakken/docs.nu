@@ -28,10 +28,12 @@ import { hashSharePassword } from '../auth/share-password-hash';
 import { closeShareCodeSessions } from '../room-access-client';
 import { broadcastShareOp } from '../room-client';
 import { recordShareLinkCreated } from '../timeline';
-import { readOptionalBody, requireManagedDocument, type RouteContext } from './context';
+import { readOptionalBody, requireManagedDocument, type DocumentRouteContext } from './context';
 
 // Returns null when the request isn't a share route.
-export async function handleDocumentShareRoutes(ctx: RouteContext): Promise<Response | null> {
+export async function handleDocumentShareRoutes(
+  ctx: DocumentRouteContext,
+): Promise<Response | null> {
   const { request, env, segments } = ctx;
   // /api/documents/<id>/share: the owner, or a joined member of the document's team.
   //   GET     : list every share link for this document.

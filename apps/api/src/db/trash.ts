@@ -8,7 +8,7 @@
 import { TRASH_RETENTION_MS, trashPurgeDueAt, type TrashedDocument } from '@livedoc/api-schema';
 import type { Env } from '../types';
 import { documentRemovalStatements } from './document-removal';
-import { purgeRooms } from '../room-purge-client';
+import { purgeRooms, roomCallBudget, type RoomCallBudget } from '../room-purge-client';
 import { snapshotKeys } from './documents';
 import { documentsTimelineSweepStatement } from './timeline';
 
@@ -167,19 +167,24 @@ export async function trashIdsFor(
 // Delete trashed documents for good: the document rows, the tabs no other
 // document holds (documentRemovalStatements), their Timeline events and their
 // cached snapshots. Only ever trashed ids: a live id in `ids` is skipped, so
-// no caller can purge past the Trash. Returns how many were purged.
-export async function purgeDocuments(env: Env, ids: string[]): Promise<number> {
+// no caller can purge past the Trash. Returns how many were purged. Their rooms are purged within `roomCalls`; the
+// rest keep their tombstones for the daily cron (room-purge-client.ts).
+export async function purgeDocuments(
+  env: Env,
+  ids: string[],
+  roomCalls: RoomCallBudget = roomCallBudget(),
+): Promise<number> {
   let purged = 0;
   for (let i = 0; i < ids.length; i += TRASH_PURGE_BATCH) {
     const doomed = [...(await trashedIdsIn(env, ids.slice(i, i + TRASH_PURGE_BATCH)))];
     if (doomed.length === 0) continue;
     const results = await env.DB.batch([
       documentsTimelineSweepStatement(env, doomed),
-      ...documentRemovalStatements(env, { ids: doomed }),
+      ...documentRemovalStatements(env, { ids: doomed }, Date.now()),
     ]);
     purged += results[results.length - 1]?.meta.changes ?? 0;
     // Their rooms' storage goes too (the ledger keeps comment and idea text). Best effort.
-    await purgeRooms(env, doomed);
+    await purgeRooms(env, doomed, roomCalls);
     // Best effort, like deleteDocument's: a snapshot left behind is an orphan
     // R2 object, never a reason to fail the purge that already landed.
     if (env.IMAGES) {
@@ -196,8 +201,9 @@ export async function purgeDocuments(env: Env, ids: string[]): Promise<number> {
 export async function purgeExpiredTrash(
   env: Env,
   now: number,
-  opts: { batch?: number; maxBatches?: number } = {},
+  opts: { batch?: number; maxBatches?: number; roomCalls?: RoomCallBudget } = {},
 ): Promise<number> {
+  const roomCalls = opts.roomCalls ?? roomCallBudget();
   const batch = opts.batch ?? TRASH_PURGE_BATCH;
   const maxBatches = opts.maxBatches ?? TRASH_PURGE_MAX_BATCHES;
   const cutoff = now - TRASH_RETENTION_MS;
@@ -212,7 +218,7 @@ export async function purgeExpiredTrash(
       .all<{ id: string }>();
     const ids = (res.results ?? []).map((r) => r.id);
     if (ids.length === 0) break;
-    purged += await purgeDocuments(env, ids);
+    purged += await purgeDocuments(env, ids, roomCalls);
     if (ids.length < batch) break;
   }
   return purged;

@@ -64,12 +64,15 @@ const labels = (db: SqliteD1) =>
     }
   ).elements.map((e) => [e.id, (e as { label?: string }).label]);
 
-// Every batch the pipeline sends meets a person's save first, `times` times.
+// Every tab write the pipeline sends meets a person's save first, `times` times.
 function interleave(db: SqliteD1, times: number) {
-  const batch = db.env.DB.batch.bind(db.env.DB);
+  const batch = db.env.DOCUMENT_DB.batch.bind(db.env.DOCUMENT_DB);
   let left = times;
-  db.env.DB.batch = async (statements: D1PreparedStatement[]) => {
-    if (left > 0) {
+  db.env.DOCUMENT_DB.batch = async (statements: D1PreparedStatement[]) => {
+    const writesTab = statements.some((s) =>
+      /INSERT INTO tabs/.test((s as unknown as { query: string }).query),
+    );
+    if (writesTab && left > 0) {
       left -= 1;
       const row = db.sql.prepare("SELECT data FROM tabs WHERE id = 't1'").get()!;
       const data = JSON.parse(row.data as string) as { elements: Element[] };

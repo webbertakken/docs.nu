@@ -12,12 +12,13 @@
 // reworded request cannot email anyone again. A canvas comment reaches D1 only with the next tab save,
 // so its request carries the text and mentions.
 
+import { documentRoom } from '../document-room/document-client';
 import { isOpenTeamMember } from '@livedoc/api-schema';
 import { legacyDocumentIdOf } from '../legacy-request-forms';
 import type { TeamMember } from '@livedoc/api-schema';
 import { MENTIONS_MAX, itemThread, type Comment } from '@livedoc/document';
 import { ITEM_ID_PATTERN } from '@livedoc/items';
-import { getDocumentMeta, getParticipant, listTeamMembers, readItem } from '../db';
+import { getDocumentMeta, getParticipant, listTeamMembers } from '../db';
 import { NOTIFY_EMAIL_DEDUPE_MS, notifyMentioned } from '../email/notifications';
 import { badRequest, forbidden, json, notFound } from '../responses';
 import type { RouteContext } from './context';
@@ -80,7 +81,7 @@ export async function handleTeamMentionRoutes(
     // The card must be one of this document's, and the comment the caller's own on it, posted inside the
     // dedupe window (an older one could be emailed again once its claim lapsed). 404 for each, so the route
     // cannot probe cards or comments.
-    const item = await readItem(env, liveDoc.id, itemId);
+    const item = await documentRoom(env, liveDoc.id).item(itemId);
     const comment: Comment | undefined = item
       ? itemThread(item)?.comments.find((c) => c.id === commentId)
       : undefined;

@@ -9,8 +9,8 @@ This guide is the practical path: provision Cloudflare resources, configure secr
 | Resource                             | Used by           | Why                                                                                                                                                                                                                                                                                                                                        |
 | ------------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Workers paid plan**                | All seven workers | Durable Objects (per-document realtime room) need the paid plan.                                                                                                                                                                                                                                                                           |
-| **D1 database**                      | `apps/api`        | Documents, tabs, comments, folders, share links, shared-with index, image metadata, user preferences, teams + membership + team library, custom themes, telemetry rows.                                                                                                                                                                    |
-| **Durable Object namespace**         | `apps/api`        | One stateful room per document for realtime presence + ops.                                                                                                                                                                                                                                                                                |
+| **D1 database**                      | `apps/api`        | The document listing (names, owners, folders, share links, the content summary), accounts, image metadata, user preferences, teams + membership + team library, custom themes, telemetry rows, and the indexes read across documents (Inbox, placed images, content search).                                                               |
+| **Durable Object namespace**         | `apps/api`        | One room per document: realtime presence and ops, and the document's content (tabs, cards, sheets, agent changesets) in the room's own SQLite ([Document storage](../specs/006-document/document-storage.md)).                                                                                                                             |
 | **R2 bucket** (optional)             | `apps/api`        | Image uploads ([Image element + per-owner gallery](../specs/009-elements/images.md)) + document SVG snapshots ([Document SVG snapshots](../specs/006-document/document-snapshots.md): Explorer thumbnails + the live image share). Without it, image endpoints `503` and snapshot endpoints `404` (the Explorer row shows a generic icon). |
 | **Rate Limiter bindings** (optional) | `apps/api`        | Abuse throttles: per-owner writes, plus telemetry ingest, share-code lookups, link unfurls, AI calls and API-token reads. Any binding you don't provision falls through to "allow", so none are required.                                                                                                                                  |
 | **Custom domain**                    | `apps/router`     | The router worker serves your hostname; downstream workers don't need their own domain.                                                                                                                                                                                                                                                    |
@@ -19,7 +19,7 @@ What you do NOT need:
 
 - An identity provider: sign-in is optional and runs inside the api worker, against your own D1. Without it, every user is a guest (a per-browser id stored in `localStorage`, carried as `X-Owner-Id`). With it on, session tokens are verified in-process; Google and the email provider are reached only when you configure them.
 - No _required_ SaaS: no Stripe (no paid tier) and no analytics vendor. The other integrations are all optional and stay off until you add a key: Resend for transactional email ([Transactional & lifecycle email (Resend)](../specs/014-identity/transactional-email.md)), a model key for the AI features ([AI Assistance](../specs/007-editor/ai-assistance.md)), and a Google OAuth client for the Google Drive mirror ([Google Drive mirror](../specs/022-drive-mirror/drive-mirror.md)), each covered in its own section below. The telemetry endpoint is first-party only and off by default.
-- A separate database host: D1 covers everything.
+- A separate database host: D1 and the rooms' own SQLite cover everything.
 
 ## One-time Cloudflare setup
 
@@ -161,6 +161,14 @@ See [Deployment](../specs/016-platform/deployment.md) for the deeper deploy mech
 
 Serve the editor over HTTPS (Cloudflare does by default, on `workers.dev` and on a custom domain). It also works over plain http, on a LAN address for instance: ids and hashes fall back to plain code there, and only the clipboard buttons need HTTPS ([Secure context](../specs/016-platform/secure-context.md)).
 
+## Upgrading to rooms (content moves out of D1)
+
+Older releases kept every document's content in D1; current ones keep it in the document's room ([Document storage](../specs/006-document/document-storage.md)). The change ships as releases you take **in order**, never skipping one ([Moving content into rooms](../specs/006-document/document-storage-move.md)):
+
+1. **The class change**: the room becomes a SQLite-backed Durable Object, keeping its state. It applies Durable Object migrations, so it cannot be rolled back.
+2. **The move**: D1 migrations `0105` to `0111` run with the deploy, then the api moves every document's content into its room: an every-minute sweep (the `* * * * *` cron in `apps/api/wrangler.toml`; keep it) moves 25 at a time, and a document opened before its turn moves on that request. Moving reads D1 and never changes its content tables. Wait until every document has moved: from `apps/api`, `node --import ../../scripts/ts-source-hooks.mjs scripts/content-move.ts verify --remote --plan plan.json` passes, given a plan taken before the deploy with `... scripts/content-move.ts plan --remote --out plan.json` (both only read, through wrangler).
+3. **The drop**: D1's content tables, the move records and the legacy room class go. Its migration refuses to run while any document has not moved, so taking it early fails the deploy and changes nothing.
+
 ## MCP server (optional, needs sign-in)
 
 The `apps/mcp` worker ([MCP server](../specs/015-api/mcp-server.md)) lets people connect an AI tool (Claude, any MCP
@@ -288,7 +296,7 @@ A workbench is a developer tool that frames the editor signed in, beside an agen
 
 ## Sheets
 
-Plan-mode Sheets ([Sheet store](../specs/029-sheets/sheet-store.md)) need no setup: migration `0078_sheets.sql` creates the `sheets` and `sheet_cells` tables and runs with the others, and the worker's existing daily scheduled run removes sheets that no Sheet element shows any more.
+Plan-mode Sheets ([Sheet store](../specs/029-sheets/sheet-store.md)) need no setup: a sheet's cells live in its document's room, and each room's own upkeep removes sheets that no Sheet element has shown for 30 days.
 
 ## Google Drive mirror (optional, needs sign-in)
 
@@ -339,5 +347,6 @@ The five downstream workers don't need their own domain; the router fans out via
 ## What can break, and how to debug
 
 - **`account not authorized` from wrangler**: the API token is missing a scope. See the token list above; most often it's missing **Account → Account Settings: Read**, which wrangler uses to look up your account.
+- **A document answers 503 `content_moving`**: its content has not moved into its room yet and the last try failed. `wrangler tail` shows `[content-move] failed id=<id> stage=<read|write|record|gate|sweep> error=<name>` or `[content-move] mismatch`; its `content_moves` row in D1 holds the attempt count. The sweep tries it again an hour later and every request tries at once; nothing in D1 changes meanwhile.
 - **`Durable Object class is not exported`**: the api worker's `wrangler.toml` references `DocumentRoom` as the DO class. It IS exported from `apps/api/src/index.ts`; if you've forked + renamed, keep the export name in step with the binding.
 - **Editor loads but every request 403s**: the resolved owner doesn't match the document's stored owner. If you turned sign-in on after running guest-only, the old guest documents still belong to the old guest id, and that id is unsigned, so owner-scoped routes refuse it (`401 signature_required`). `/api/migrate` moves rows from a signed guest id to an account after sign-in, never from an unsigned one; see [Auth + guest access](../specs/014-identity/auth-and-guest-access.md).

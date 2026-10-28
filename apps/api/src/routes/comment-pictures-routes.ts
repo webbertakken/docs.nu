@@ -9,12 +9,14 @@
 import { elementThreads, type Element } from '@livedoc/document';
 import { getDocument, getParticipant, getTab } from '../db';
 import { forbidden, json } from '../responses';
-import { gateRead, missingDocument, requireOwner, type RouteContext } from './context';
+import { gateRead, missingDocument, requireOwner, type DocumentRouteContext } from './context';
 
 // Bounds the participant reads one request can cause; a tab past it shows initials for the rest.
 const MAX_COMMENT_PICTURE_AUTHORS = 50;
 
-export async function handleCommentPicturesRoute(ctx: RouteContext): Promise<Response | null> {
+export async function handleCommentPicturesRoute(
+  ctx: DocumentRouteContext,
+): Promise<Response | null> {
   const { request, env, segments } = ctx;
   if (!(
     segments.length === 6 &&
@@ -37,7 +39,7 @@ export async function handleCommentPicturesRoute(ctx: RouteContext): Promise<Res
 }
 
 async function commentPictures(
-  env: RouteContext['env'],
+  env: DocumentRouteContext['env'],
   elements: Element[],
 ): Promise<Record<string, string>> {
   const byAuthor = new Map<string, string[]>();

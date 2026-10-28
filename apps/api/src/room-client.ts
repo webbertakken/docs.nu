@@ -14,6 +14,7 @@ import {
 } from '@livedoc/api-schema';
 import type { AgentPresenceWrite } from './room-agent-presence';
 import type { ItemsRoomOp, ItemTypesRoomOp, SheetsRoomOp } from '@livedoc/api-schema';
+import { documentRoom } from './document-room/document-client';
 import type { Env } from './types';
 
 // The worker's calls into a document's realtime room (docs/specs/012-collaboration/collab-race-hardening.md): reading its
@@ -21,30 +22,6 @@ import type { Env } from './types';
 
 // Every server-stored document has a room (docs/specs/024-agents/agent-changesets.md "Rooms for
 // personal documents"): an agent is a second writer even on a document nobody else can open.
-/** Names the document on every worker-to-room call, so a room knows whose legacy state to take over
- *  (docs/specs/006-document/blueprints/document-storage-move.md "Room state handover"). */
-export const DOCUMENT_ID_HEADER = 'X-Document-Id';
-
-/** A document's room, as every worker-to-room call reaches it: the one place that stubs DOCUMENT_ROOM, and every
- *  `fetch` through it carries the document's id. */
-export function documentRoom(
-  env: Env,
-  documentId: string,
-): { fetch(input: Request | string, init?: RequestInit): Promise<Response> } {
-  const stub = env.DOCUMENT_ROOM.get(env.DOCUMENT_ROOM.idFromName(documentId));
-  return {
-    fetch(input, init) {
-      if (typeof input !== 'string') {
-        const request = new Request(input, init);
-        request.headers.set(DOCUMENT_ID_HEADER, documentId);
-        return stub.fetch(request);
-      }
-      const headers = new Headers(init?.headers);
-      headers.set(DOCUMENT_ID_HEADER, documentId);
-      return stub.fetch(input, { ...init, headers });
-    },
-  };
-}
 
 // A room call that gives up after `ms`: the api never waits on a room longer than that.
 export async function roomFetch(

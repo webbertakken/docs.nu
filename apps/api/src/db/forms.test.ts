@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { sqliteD1 } from '../test-sqlite-d1';
+
+// What the Inbox shows of a form until its tab's next push.
+const SHOWN = { tabName: 'Form', heading: null, boardTabId: null };
 import {
   claimFormEmail,
   claimResponseNumber,
@@ -30,7 +33,7 @@ describe('claimFormEmail', () => {
     sql.exec(
       `INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at) VALUES ('d', 'o', 'D', 0, 1, 1)`,
     );
-    const link = await createFormLink(env, 'd', 't', 1);
+    const link = await createFormLink(env, 'd', 't', SHOWN, 1);
     const code = link!.code;
     expect(await claimFormEmail(env, code, 1000, 500)).toEqual({ send: true, heldBefore: 0 });
     expect(await claimFormEmail(env, code, 1100, 500)).toEqual({ send: false });
@@ -38,7 +41,7 @@ describe('claimFormEmail', () => {
     expect(await claimFormEmail(env, code, 1600, 500)).toEqual({ send: true, heldBefore: 2 });
     expect(await claimFormEmail(env, 'missing', 1600, 500)).toEqual({ send: false });
     // A second live link for the same tab is refused.
-    expect(await createFormLink(env, 'd', 't', 2)).toBeNull();
+    expect(await createFormLink(env, 'd', 't', SHOWN, 2)).toBeNull();
   });
 });
 
@@ -66,8 +69,10 @@ describe('the Inbox read (docs/specs/030-forms/forms.md "Hearing about responses
     `);
     tab('t1', 'mine');
     tab('t2', 'theirs');
-    const mine = (await createFormLink(env, 'mine', 't1', 1))!;
-    const theirs = (await createFormLink(env, 'theirs', 't2', 1))!;
+    const mine = (await createFormLink(env, 'mine', 't1', SHOWN, 1))!;
+    const theirs = (await createFormLink(env, 'theirs', 't2', SHOWN, 1))!;
+    // A later write of each tab: its room pushes the form's heading and board onto its link.
+    sql.exec('UPDATE tabs SET updated_at = 2');
     for (const code of [mine.code, mine.code, mine.code, theirs.code])
       await claimResponseNumber(env, code, 5000, 500);
     let read = await readActivity(env, 'me', { limit: 10 });
@@ -101,7 +106,7 @@ describe('claimResponseNumber and deleteFormLink (docs/specs/030-forms/forms.md 
 
   it('never passes the Response Limit, however many arrive at once', async () => {
     const env = setup();
-    const { code } = (await createFormLink(env, 'd', 't', 1))!;
+    const { code } = (await createFormLink(env, 'd', 't', SHOWN, 1))!;
     const got = await Promise.all(
       Array.from({ length: 5 }, () => claimResponseNumber(env, code, 5000, 500, 3)),
     );
@@ -113,14 +118,14 @@ describe('claimResponseNumber and deleteFormLink (docs/specs/030-forms/forms.md 
 
   it('keeps a deleted link so the next one carries its numbers on, its code answering no more', async () => {
     const env = setup();
-    const first = (await createFormLink(env, 'd', 't', 1))!;
+    const first = (await createFormLink(env, 'd', 't', SHOWN, 1))!;
     await claimResponseNumber(env, first.code, 5000, 500);
     await claimResponseNumber(env, first.code, 5000, 500);
     await deleteFormLink(env, first.code, 6000);
     expect(await getLiveFormLink(env, 'd', 't')).toBeNull();
     expect(await getFormLink(env, first.code)).toMatchObject({ deleted_at: 6000, open: 0 });
     expect(await claimResponseNumber(env, first.code, 7000, 500)).toBeNull();
-    const second = (await createFormLink(env, 'd', 't', 8000))!;
+    const second = (await createFormLink(env, 'd', 't', SHOWN, 8000))!;
     expect(second.code).not.toBe(first.code);
     expect(await claimResponseNumber(env, second.code, 9000, 500)).toBe(3);
   });

@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CHANGESET_MERGE_WINDOW_MS } from '@livedoc/api-schema';
-import { elementFingerprint, type Element, type ElementOp } from '@livedoc/document';
+import { elementFingerprint, type Element, type ElementOp, type Tab } from '@livedoc/document';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import type { Env } from '../types';
 import type { ChangesetRecord } from '../db/changesets';
 import { makeTestRouteContext } from './test-route-context';
 import { handleDocuments } from './documents';
+import { testDocumentRoom } from '../test-document-room';
 
 // The editor's whole-tab save (docs/specs/024-agents/blueprints/agent-changesets.md "The tab PUT"):
 // refused to tokens, merged with the changesets the saver had not seen, written at the revision it
@@ -238,9 +239,9 @@ describe('the tab PUT', () => {
     const db = await documentWith([box('a')]);
     const seen = String(revOf(db));
     // A changeset lands between the save's read and its write, once.
-    const batch = db.env.DB.batch.bind(db.env.DB);
+    const batch = db.env.DOCUMENT_DB.batch.bind(db.env.DOCUMENT_DB);
     let interleave = 1;
-    db.env.DB.batch = async (statements: D1PreparedStatement[]) => {
+    db.env.DOCUMENT_DB.batch = async (statements: D1PreparedStatement[]) => {
       if (interleave > 0) {
         interleave -= 1;
         recordAdd(db, box(`raced${interleave}`));
@@ -268,49 +269,62 @@ describe('the tab read', () => {
 
 // A save upserts by tab id: an id that names another document's tab is refused, never overwritten or adopted.
 // A share link makes tab ids visible (its document lists them), so this is what keeps a shared board safe.
-describe("someone else's tab id", () => {
-  it('is refused, leaving the tab and its document as they were', async () => {
-    const db = await documentWith([box('a', 'Original')]);
-    // A tab from before revisions (migration 0067), at rev 0 as most stored tabs are: the revision trigger alone
-    // would let an overwrite through.
-    db.sql
-      .prepare("INSERT INTO tabs (id, name, data, updated_at, rev) VALUES ('old', 'Old', ?, 1, 0)")
-      .run(JSON.stringify({ elements: [box('v', 'Original')] }));
-    db.sql
-      .prepare(
-        "INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES ('D', 'old', 1, 1)",
-      )
-      .run();
-    const attacker = (method: string, path: string, body?: unknown) =>
-      handleDocuments(
-        makeTestRouteContext(method, path, {
-          env: db.env,
-          owner: 'user_attacker',
-          sessionAccountId: 'user_attacker',
-          verifiedAccountId: 'user_attacker',
-          body,
-        }),
-      );
-    const own = await attacker('POST', '/api/documents', {
-      id: 'E',
-      name: 'Mine',
-      tabs: [{ id: 'e1', name: 'Mine', elements: [] }],
+describe("another document's tab id", () => {
+  // Each document's tabs are its own room's (docs/specs/006-document/offline-mode.md): a save naming another
+  // document's tab id makes a tab of the caller's own and cannot reach the other one. Two real rooms, one D1.
+  it("saves the caller's own tab, leaving the other document's as it was", async () => {
+    const db = sqliteD1();
+    db.sql.exec(`INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at)
+      VALUES ('D', 'user_victim', 'Theirs', 0, 1, 1), ('E', 'user_attacker', 'Mine', 0, 1, 1)`);
+    const identity = (owner: string) => ({
+      sessionAccountId: owner,
+      verifiedAccountId: owner,
+      accountEmail: null,
+      sessionAuthTime: null,
+      owner,
+      token: null,
+      workbench: null,
     });
-    expect(own.status).toBe(201);
-    const res = await attacker('PUT', '/api/documents/E/tabs/old', {
-      id: 'old',
-      name: 'Taken',
-      elements: [box('x', 'Overwritten')],
+    const victim = testDocumentRoom(db.env);
+    const attacker = testDocumentRoom(db.env);
+    const seed = (owner: string, tabs: Tab[]) => ({
+      identity: identity(owner),
+      owner,
+      recommit: false,
+      savedAt: 1,
+      createdAt: 1,
+      presentation: null,
+      itemTypes: null,
+      tabs,
+      items: [],
+      sheets: [],
     });
-    expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: 'tab_id_taken' });
-    const oldData = JSON.parse(
-      db.sql.prepare("SELECT data FROM tabs WHERE id = 'old'").get()!.data as string,
-    ) as { elements: { label?: string }[] };
-    expect(oldData.elements.map((e) => e.label)).toEqual(['Original']);
-    expect(
-      db.sql.prepare("SELECT document_id FROM document_tabs WHERE tab_id = 'old'").all(),
-    ).toEqual([{ document_id: 'D' }]);
+    await victim.room.create(
+      'D',
+      seed('user_victim', [{ id: 'old', name: 'Old', elements: [box('v', 'Original')] }]),
+    );
+    await attacker.room.create(
+      'E',
+      seed('user_attacker', [{ id: 'e1', name: 'Mine', elements: [] }]),
+    );
+    const res = await attacker.room.route(
+      'E',
+      new Request('https://api.test/api/documents/E/tabs/old', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: 'old', name: 'Taken', elements: [box('x', 'Overwritten')] }),
+      }),
+      identity('user_attacker'),
+    );
+    expect(res.status).toBe(200);
+    const labels = (sql: typeof victim.sql) =>
+      (
+        JSON.parse(sql.prepare("SELECT data FROM tabs WHERE id = 'old'").get()!.data as string) as {
+          elements: { label?: string }[];
+        }
+      ).elements.map((e) => e.label);
+    expect(labels(victim.sql)).toEqual(['Original']);
+    expect(labels(attacker.sql)).toEqual(['Overwritten']);
   });
 
   it('still saves a brand new tab, and the owner keeps saving their own', async () => {

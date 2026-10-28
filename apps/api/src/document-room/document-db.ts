@@ -22,8 +22,10 @@ export type DocumentSqlCursor = {
 export type DocumentDbHooks = {
   // Runs `fn` as one transaction (DurableObjectStorage.transactionSync).
   transaction: <T>(fn: () => T) => T;
-  // Before the first statement: the schema, made on first use (document-schema.ts).
+  // Before the first write: the schema, made on first use (document-schema.ts).
   ensureSchema: () => void;
+  // Whether the schema is there: a read of a room that has none answers empty and makes nothing (R1).
+  hasSchema: () => boolean;
   // After every statement that may have written: the room arms its outbox flush (document-room.ts).
   onWrite: () => void;
 };
@@ -89,6 +91,8 @@ export class DocumentDb {
 
   // One transaction for the whole batch, as D1. The results are D1's: a read's rows, a write's change count.
   async batch(statements: DocumentStatement[]): Promise<Result[]> {
+    if (!statements.some((s) => mayWrite(s.query)) && !this.hooks.hasSchema())
+      return statements.map(() => emptyResult());
     this.hooks.ensureSchema();
     const results = this.hooks.transaction(() => statements.map((s) => this.executeOne(s)));
     this.hooks.onWrite();
@@ -103,6 +107,7 @@ export class DocumentDb {
   }
 
   execute(statement: DocumentStatement): Result {
+    if (!mayWrite(statement.query) && !this.hooks.hasSchema()) return emptyResult();
     this.hooks.ensureSchema();
     const result = this.executeOne(statement);
     if (result.meta.changes > 0 || mayWrite(statement.query)) this.hooks.onWrite();
@@ -128,6 +133,10 @@ export class DocumentDb {
   asD1(): D1Database {
     return this as unknown as D1Database;
   }
+}
+
+function emptyResult(): Result {
+  return { results: [], success: true, meta: { changes: 0 } };
 }
 
 // A statement whose text starts as a write: the room hears about it even when it changed nothing, which

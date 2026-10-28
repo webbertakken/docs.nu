@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { DatabaseSync } from 'node:sqlite';
 import { migrateFrom, sqliteD1 } from '../test-sqlite-d1';
 import { copyDocument, setDocumentFolder } from './documents';
@@ -6,13 +6,14 @@ import { handTeamWorkToHeir } from './teams';
 import { migrateOwnerId } from './account';
 import { documentRemovalStatements } from './document-removal';
 import {
-  documentServesImage,
+  documentMayServeImage,
   imageGrantCopyStatements,
   imageGrantPlacementStatements,
   servableImageIds,
 } from './image-grants';
-import { resetImageRefIndexMemo } from './image-refs';
-import { linkTabToDocument, upsertTab } from './tabs';
+import { documentPlacesImage } from './image-refs';
+import { upsertTab } from './tabs';
+import type { DocumentEnv } from '../types';
 import { tabWith } from './test-image-fixtures';
 import { insert, liveDoc, team } from './test-trash-fixtures';
 
@@ -20,7 +21,19 @@ import { insert, liveDoc, team } from './test-trash-fixtures';
 // document serves an image only when the image's owner owns it, or it holds a
 // grant earned when the owner placed the image there or carried in by a copy.
 
-afterEach(() => resetImageRefIndexMemo());
+// The image byte endpoint's whole check: the document's room places the image (on the visitor's tab, when scoped)
+// and D1 says the document may serve it (routes/images.ts).
+async function documentServesImage(
+  env: DocumentEnv,
+  documentId: string,
+  imageId: string,
+  onlyTabId: string | null = null,
+): Promise<boolean> {
+  return (
+    (await documentMayServeImage(env, documentId, imageId)) &&
+    (await documentPlacesImage(env, documentId, imageId, onlyTabId))
+  );
+}
 
 function image(sql: DatabaseSync, id: string, ownerId: string, sha256 = id) {
   insert(sql, 'images', {
@@ -48,6 +61,7 @@ describe('documentServesImage', () => {
     liveDoc(db.sql, 'D', { owner: 'alice' });
     image(db.sql, 'mine', 'alice');
     await upsertTab(db.env, 'D', tabWith('t1', 'mine'), 0);
+    await db.flush();
     expect(await documentServesImage(db.env, 'D', 'mine')).toBe(true);
     expect([...(await servableImageIds(db.env, 'D', ['mine', 'missing']))]).toEqual(['mine']);
     expect(grants(db.sql)).toEqual([]);
@@ -60,6 +74,7 @@ describe('documentServesImage', () => {
     liveDoc(db.sql, 'theirs', { owner: 'mallory' });
     image(db.sql, 'alice-img', 'alice');
     await upsertTab(db.env, 'theirs', tabWith('t1', 'alice-img'), 0);
+    await db.flush();
     expect(await documentServesImage(db.env, 'theirs', 'alice-img')).toBe(false);
     expect(grants(db.sql)).toEqual([]);
     expect([...(await servableImageIds(db.env, 'theirs', ['alice-img']))]).toEqual([]);
@@ -78,6 +93,7 @@ describe('documentServesImage', () => {
     liveDoc(db.sql, 'D', { owner: 'user_alice', team: 'T' });
     image(db.sql, 'bob-img', 'user_bob');
     await upsertTab(db.env, 'D', tabWith('t1', 'bob-img'), 0);
+    await db.flush();
     expect(grants(db.sql)).toEqual(['D:bob-img']);
     db.sql.exec("DELETE FROM team_members WHERE user_id = 'user_bob'");
     expect(await documentServesImage(db.env, 'D', 'bob-img')).toBe(true);
@@ -89,6 +105,7 @@ describe('documentServesImage', () => {
     liveDoc(db.sql, 'D', { owner: 'user_alice', team: 'T' });
     image(db.sql, 'bob-img', 'user_bob');
     await upsertTab(db.env, 'D', tabWith('t1', 'bob-img'), 0);
+    await db.flush();
     expect(await documentServesImage(db.env, 'D', 'bob-img')).toBe(false);
   });
 
@@ -122,6 +139,7 @@ describe('documentServesImage', () => {
       });
     }
     await upsertTab(db.env, 'D', tabWith('t1', 'editor-img', 'participant-img', 'viewer-img'), 0);
+    await db.flush();
     expect(await documentServesImage(db.env, 'D', 'editor-img')).toBe(true);
     expect(await documentServesImage(db.env, 'D', 'participant-img')).toBe(true);
     expect(await documentServesImage(db.env, 'D', 'viewer-img')).toBe(false);
@@ -141,6 +159,7 @@ describe('documentServesImage', () => {
       share_code: 'GONE',
     });
     await upsertTab(db.env, 'D', tabWith('t1', 'victim-img'), 0);
+    await db.flush();
     expect(await documentServesImage(db.env, 'D', 'victim-img')).toBe(false);
   });
 
@@ -150,7 +169,9 @@ describe('documentServesImage', () => {
     image(db.sql, 'i1', 'alice');
     image(db.sql, 'i2', 'alice');
     await upsertTab(db.env, 'D', tabWith('t1', 'i1'), 0);
+    await db.flush();
     await upsertTab(db.env, 'D', tabWith('t2', 'i2'), 1);
+    await db.flush();
     expect(await documentServesImage(db.env, 'D', 'i1', 't1')).toBe(true);
     expect(await documentServesImage(db.env, 'D', 'i2', 't1')).toBe(false);
   });
@@ -163,6 +184,7 @@ describe('copies', () => {
     image(db.sql, 'alice-img', 'alice');
     image(db.sql, 'planted', 'carol');
     await upsertTab(db.env, 'src', tabWith('t1', 'alice-img', 'planted'), 0);
+    await db.flush();
     return db;
   }
 
@@ -183,21 +205,6 @@ describe('copies', () => {
 });
 
 // "Add a Tab to Another Document": the new holder serves what the tab already showed.
-describe('linked tabs', () => {
-  it("carries a teammate's image into a document the tab is linked into, and nothing planted", async () => {
-    const db = sqliteD1();
-    team(db.sql, 'T', [['user_bob', 'joined']]);
-    liveDoc(db.sql, 'teamDoc', { owner: 'user_alice', team: 'T' });
-    liveDoc(db.sql, 'personal', { owner: 'user_alice' });
-    image(db.sql, 'bob-img', 'user_bob');
-    image(db.sql, 'planted', 'carol');
-    await upsertTab(db.env, 'teamDoc', tabWith('t1', 'bob-img', 'planted'), 0);
-    expect(await linkTabToDocument(db.env, 'personal', 't1')).toBe(true);
-    expect(await documentServesImage(db.env, 'personal', 'bob-img')).toBe(true);
-    expect(await documentServesImage(db.env, 'personal', 'planted')).toBe(false);
-  });
-});
-
 describe('empty id lists', () => {
   it('write and read nothing for a body that places no image', async () => {
     const db = sqliteD1();
@@ -214,7 +221,8 @@ describe('removal', () => {
     liveDoc(db.sql, 'D', { owner: 'user_alice', team: 'T' });
     image(db.sql, 'bob-img', 'user_bob');
     await upsertTab(db.env, 'D', tabWith('t1', 'bob-img'), 0);
-    await db.env.DB.batch(documentRemovalStatements(db.env, { column: 'id', value: 'D' }));
+    await db.flush();
+    await db.env.DB.batch(documentRemovalStatements(db.env, { column: 'id', value: 'D' }, 1));
     expect(grants(db.sql)).toEqual([]);
   });
 });
@@ -253,6 +261,7 @@ describe('an owner change', () => {
     liveDoc(db.sql, 'D', { owner: 'user_alice', team: 'T' });
     image(db.sql, 'alice-img', 'user_alice');
     await upsertTab(db.env, 'D', tabWith('t1', 'alice-img'), 0);
+    await db.flush();
     await handTeamWorkToHeir(db.env, 'T', 'user_alice');
     expect(db.sql.prepare("SELECT owner_id FROM documents WHERE id = 'D'").get()?.owner_id).toBe(
       'user_bob',
@@ -266,6 +275,7 @@ describe('an owner change', () => {
     liveDoc(db.sql, 'D', { owner: 'user_alice', team: 'T' });
     image(db.sql, 'alice-img', 'user_alice');
     await upsertTab(db.env, 'D', tabWith('t1', 'alice-img'), 0);
+    await db.flush();
     await setDocumentFolder(db.env, 'D', null, null, 'user_bob');
     expect(await documentServesImage(db.env, 'D', 'alice-img')).toBe(true);
   });
@@ -279,7 +289,9 @@ describe('an owner change', () => {
     image(db.sql, 'account-img', 'user_ada', 'same-bytes');
     image(db.sql, 'guest-only', 'guest-1');
     await upsertTab(db.env, 'D', tabWith('t1', 'guest-img'), 0);
+    await db.flush();
     await upsertTab(db.env, 'D', tabWith('t2', 'guest-only'), 1);
+    await db.flush();
     await migrateOwnerId(db.env, 'guest-1', 'user_ada');
     const owners = db.sql.prepare('SELECT id, owner_id FROM images ORDER BY id').all() as {
       id: string;

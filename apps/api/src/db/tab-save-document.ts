@@ -3,7 +3,7 @@
 // the tab summaries) and used eight fields of it, two sequential round trips before anything else on every
 // autosave (~600 ms while someone edits). Live documents only, like every document read.
 
-import type { DocumentDTO, Env } from '../types';
+import type { DocumentDTO, DocumentEnv } from '../types';
 
 export type TabSaveDocument = Pick<
   DocumentDTO,
@@ -21,20 +21,27 @@ type Row = {
   created_at: number;
   owner_name: string | null;
   owner_color: string | null;
-  tab_count: number;
 };
 
-export async function getDocumentForSave(env: Env, id: string): Promise<TabSaveDocument | null> {
-  const row = await env.DB.prepare(
-    `SELECT d.id, d.owner_id, d.team_id, d.name, d.created_at,
-            p.name AS owner_name, p.color AS owner_color,
-            (SELECT COUNT(*) FROM document_tabs dt WHERE dt.document_id = d.id) AS tab_count
-       FROM documents d
-       LEFT JOIN participants p ON p.id = d.owner_id
-      WHERE d.id = ? AND d.trashed_at IS NULL`,
-  )
-    .bind(id)
-    .first<Row>();
+// The listing's half from D1 and the tab count from the room's own SQLite, read together.
+export async function getDocumentForSave(
+  env: DocumentEnv,
+  id: string,
+): Promise<TabSaveDocument | null> {
+  const [row, tabs] = await Promise.all([
+    env.DB.prepare(
+      `SELECT d.id, d.owner_id, d.team_id, d.name, d.created_at,
+              p.name AS owner_name, p.color AS owner_color
+         FROM documents d
+         LEFT JOIN participants p ON p.id = d.owner_id
+        WHERE d.id = ? AND d.trashed_at IS NULL`,
+    )
+      .bind(id)
+      .first<Row>(),
+    env.DOCUMENT_DB.prepare('SELECT COUNT(*) AS n FROM document_tabs WHERE document_id = ?')
+      .bind(id)
+      .first<{ n: number }>(),
+  ]);
   if (!row) return null;
   return {
     id: row.id,
@@ -44,6 +51,6 @@ export async function getDocumentForSave(env: Env, id: string): Promise<TabSaveD
     createdAt: row.created_at,
     ownerName: row.owner_name ?? null,
     ownerColor: row.owner_color ?? null,
-    tabCount: row.tab_count,
+    tabCount: tabs?.n ?? 0,
   };
 }

@@ -5,11 +5,12 @@ import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import { DAY, T0, liveDoc, insert, team } from './test-trash-fixtures';
 import type { Env } from '../types';
 import { deleteAccount } from './account';
-import { purgeRooms } from '../room-purge-client';
+import { purgeRooms, ROOM_PURGE_MAX_PER_RUN } from '../room-purge-client';
 
 // The rooms are another worker's storage; here only whether they are asked to purge is pinned.
-vi.mock('../room-purge-client', () => ({
-  purgeRooms: vi.fn(() => Promise.resolve({ rooms: 0, unreached: 0 })),
+vi.mock('../room-purge-client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../room-purge-client')>()),
+  purgeRooms: vi.fn(() => Promise.resolve({ rooms: 0, unreached: 0, deferred: 0 })),
 }));
 import {
   getDocument,
@@ -18,7 +19,7 @@ import {
   listDocumentsByTeam,
 } from './documents';
 import { deleteFolder } from './folders';
-import { linkTabToDocument, upsertTab } from './tabs';
+import { upsertTab } from './tabs';
 import {
   getTrashedDocumentMeta,
   listTrash,
@@ -300,7 +301,7 @@ describe('listTrash', () => {
 });
 
 describe('purgeDocuments', () => {
-  it('removes the document, its own tabs and its snapshot', async () => {
+  it('removes the document, its snapshot and, through its room, its content', async () => {
     const { db, del } = withImages();
     liveDoc(db.sql, 'A');
     await tab(db, 'A', 't1');
@@ -309,24 +310,12 @@ describe('purgeDocuments', () => {
     expect(await purgeDocuments(db.env, ['A'])).toBe(1);
 
     expect(count(db.sql, 'documents', 'id = ?', 'A')).toBe(0);
-    expect(count(db.sql, 'tabs', 'id = ?', 't1')).toBe(0);
     expect(del).toHaveBeenCalledWith(['thumb/A', 'og/A']);
-    // Its room's storage, where the ledger keeps comment and idea text (docs/specs/015-api/api.md "Purging a room").
-    expect(vi.mocked(purgeRooms)).toHaveBeenCalledWith(db.env, ['A']);
-  });
-
-  it('keeps a tab another document still holds', async () => {
-    const db = sqliteD1();
-    liveDoc(db.sql, 'A');
-    liveDoc(db.sql, 'B');
-    await tab(db, 'A', 'shared');
-    await linkTabToDocument(db.env, 'B', 'shared');
-    await trashDocument(db.env, 'A', T0);
-
-    await purgeDocuments(db.env, ['A']);
-
-    expect(count(db.sql, 'tabs', 'id = ?', 'shared')).toBe(1);
-    expect(count(db.sql, 'document_tabs', 'tab_id = ?', 'shared')).toBe(1);
+    // Its room's storage: the content, and the ledger's comment and idea text (docs/specs/015-api/api.md "Purging a
+    // room").
+    expect(vi.mocked(purgeRooms)).toHaveBeenCalledWith(db.env, ['A'], {
+      left: ROOM_PURGE_MAX_PER_RUN,
+    });
   });
 
   it('never purges a live document', async () => {
