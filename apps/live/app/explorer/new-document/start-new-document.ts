@@ -4,6 +4,7 @@
 // (pending-documents.ts).
 import {
   isBlankTemplate,
+  newDocumentBlankOf,
   untitledNameForTemplate,
   type NewDocumentBlankId,
   type TemplateKind,
@@ -15,14 +16,23 @@ import { debugLog } from '@/lib/debug-log';
 import { loadEditorPage } from '@/lib/editor-page-loader';
 import { prefetchWhenIdle } from '@/lib/idle-prefetch';
 import { markNameConfirmed } from '@/lib/local-identity';
-import { createIdsFor } from '@/lib/new-document/create-failure';
+import { createIdsFor, type CreateIds } from '@/lib/new-document/create-failure';
 import {
   newDocumentCreator,
   type NewDocumentCreator,
 } from '@/lib/new-document/new-document-creator';
-import { addPendingDocument, type NewDocumentPlace } from '@/lib/new-document/pending-documents';
+import {
+  addPendingDocument,
+  addStandbyDocument,
+  dropStandbyDocument,
+  type NewDocumentPlace,
+} from '@/lib/new-document/pending-documents';
 import { trackNewDocumentCreated, writeNewDocument } from '@/lib/new-document/write-new-document';
-import { NEW_DOCUMENT_THEME_ID, newDocumentContent } from '@/lib/new-document-content';
+import {
+  NEW_DOCUMENT_THEME_ID,
+  newDocumentContent,
+  type NewDocumentContent,
+} from '@/lib/new-document-content';
 import { handTemplatePick } from '@/lib/placement-defaults/template-pick-handoff';
 import {
   defaultSaveLocationFor,
@@ -30,7 +40,10 @@ import {
   type SaveLocationId,
 } from '@/lib/save-locations';
 import { closeStartForBlank } from '@/components/start/close-start-for-blank';
-import { openInPlace } from '@/app/explorer/in-place-editor/in-place-editor-store';
+import {
+  openInPlace,
+  setStandbyInPlace,
+} from '@/app/explorer/in-place-editor/in-place-editor-store';
 
 export type NewDocumentChoice = 'blank' | 'template';
 
@@ -103,16 +116,123 @@ export function startNewDocument(request: NewDocumentRequest): void {
     });
 }
 
+// A document made ready to open: its ids, its content and where it is stored. Made at the click, or ahead of it as the
+// standby the Explorer renders hidden (blueprint "Standby").
+type PreparedDocument = {
+  ids: CreateIds;
+  template: TemplateKind;
+  choice: NewDocumentChoice;
+  name: string;
+  content: NewDocumentContent;
+  location: SaveLocationId;
+  ownerId: string;
+};
+
+async function prepareDocument(
+  template: TemplateKind,
+  choice: NewDocumentChoice,
+  creator: NewDocumentCreator,
+  location: SaveLocationId,
+): Promise<PreparedDocument> {
+  const ids = createIdsFor(null);
+  // A blank opens with its start closed (close-start-for-blank.ts).
+  if (choice === 'blank') closeStartForBlank(ids.tabId, template);
+  const content = await newDocumentContent({
+    templateKind: template,
+    themeId: NEW_DOCUMENT_THEME_ID,
+    tabId: ids.tabId,
+    via: 'explorer',
+  });
+  return {
+    ids,
+    template,
+    choice,
+    name: untitledNameForTemplate(template),
+    content,
+    location,
+    ownerId: creator.ownerId,
+  };
+}
+
+const inputOf = (doc: PreparedDocument, teamId: string | null, startedAt: number) => ({
+  id: doc.ids.documentId,
+  name: doc.name,
+  tabs: doc.content.tabs ?? [doc.content.tab],
+  itemTypes: doc.content.itemTypes,
+  ownerId: doc.ownerId,
+  location: doc.location,
+  teamId,
+  startedAt,
+});
+
+// The standby: the blank the face makes next, for this creator, stored where an unplaced document goes.
+let standby: PreparedDocument | null = null;
+let preparing = false;
+
+function setStandby(next: PreparedDocument | null): void {
+  if (standby) dropStandbyDocument(standby.ids.documentId);
+  standby = next;
+  if (next) addStandbyDocument(inputOf(next, null, 0));
+  setStandbyInPlace(next?.ids.documentId ?? null);
+}
+
+// Makes the standby for the face's blank, once the editor's code is in and someone is bound to create it. Nothing is
+// written anywhere: a standby never used costs only memory.
+export async function prepareStandbyDocument(lastBlank: NewDocumentBlankId): Promise<void> {
+  const creator = newDocumentCreator();
+  const blank = newDocumentBlankOf(lastBlank);
+  if (!creator || !blank || preparing) return;
+  const location = locationFor({}, creator);
+  if (
+    standby &&
+    standby.template === blank.blank &&
+    standby.ownerId === creator.ownerId &&
+    standby.location === location
+  )
+    return;
+  preparing = true;
+  try {
+    await loadEditorPage();
+    setStandby(await prepareDocument(blank.blank, 'blank', creator, location));
+    debugLog(`[new-document] standby blank=${blank.id}`);
+  } finally {
+    preparing = false;
+  }
+}
+
+// The standby, when it is what the request makes; it is the request's from then on.
+function takeStandby(
+  request: NewDocumentRequest,
+  creator: NewDocumentCreator,
+  location: SaveLocationId,
+): PreparedDocument | null {
+  const taken = standby;
+  if (
+    !taken ||
+    taken.choice !== request.choice ||
+    taken.template !== request.template ||
+    taken.ownerId !== creator.ownerId ||
+    taken.location !== location
+  )
+    return null;
+  // Taken, not dropped: opening it in place (openInPlace) moves its editor from standby to open in one update.
+  standby = null;
+  dropStandbyDocument(taken.ids.documentId);
+  return taken;
+}
+
 async function openNewDocument(
   request: NewDocumentRequest,
   creator: NewDocumentCreator,
   startedAt: number,
 ): Promise<void> {
   const { choice, template, place } = request;
-  const ids = createIdsFor(null);
-  const { documentId, tabId } = ids;
-  if (choice === 'blank') closeStartForBlank(tabId, template);
   const location = locationFor(place, creator);
+  const fromStandby = takeStandby(request, creator, location);
+  debugLog(`[new-document] standby=${fromStandby ? 'used' : 'none'}`);
+  const doc = fromStandby ?? (await prepareDocument(template, choice, creator, location));
+  const { ids, name, content } = doc;
+  const { documentId, tabId } = ids;
   const offline = isOfflineLocation(location);
   // A mode's blank in the cloud: a template picked on its start may move it to that template's default folder
   // (docs/specs/013-workspace/default-folders.md "A template picked after creation").
@@ -123,13 +243,6 @@ async function openNewDocument(
   );
   // Whoever is making a document has their name; the join prompt is for someone arriving at another's.
   markNameConfirmed();
-  const name = untitledNameForTemplate(template);
-  const content = await newDocumentContent({
-    templateKind: template,
-    themeId: NEW_DOCUMENT_THEME_ID,
-    tabId,
-    via: 'explorer',
-  });
   await loadEditorPage();
   // A LiveDoc create needs only its owner's id; This Browser's example cards are signed by the person, if known.
   const author = async () =>
@@ -141,16 +254,7 @@ async function openNewDocument(
         })
       : { id: creator.ownerId, name: '', color: '' };
   addPendingDocument(
-    {
-      id: documentId,
-      name,
-      tabs: content.tabs ?? [content.tab],
-      itemTypes: content.itemTypes,
-      ownerId: creator.ownerId,
-      location,
-      teamId: place.teamId ?? null,
-      startedAt,
-    },
+    inputOf(doc, place.teamId ?? null, startedAt),
     async (at) => {
       await writeNewDocument({
         ids,
@@ -169,4 +273,10 @@ async function openNewDocument(
   // A new entry, so Back returns to the Explorer where it was.
   window.history.pushState(null, '', `/document/${documentId}`);
   openInPlace(documentId);
+}
+
+export function resetNewDocumentStartForTests(): void {
+  standby = null;
+  preparing = false;
+  starting = false;
 }

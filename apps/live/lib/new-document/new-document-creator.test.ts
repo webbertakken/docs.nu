@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { bindNewDocumentCreator, newDocumentCreator } from './new-document-creator';
+import {
+  bindNewDocumentCreator,
+  newDocumentCreator,
+  subscribeNewDocumentCreator,
+} from './new-document-creator';
 
 describe('the new document creator', () => {
   it('is whoever the Explorer bound last, until it unbinds', () => {
@@ -14,5 +18,19 @@ describe('the new document creator', () => {
     expect(newDocumentCreator()).toBe(guest);
     unbindGuest();
     expect(newDocumentCreator()).toBeNull();
+  });
+});
+
+describe('subscribeNewDocumentCreator', () => {
+  it('tells its listener when the creator is bound and unbound', () => {
+    const heard: (string | null)[] = [];
+    const stop = subscribeNewDocumentCreator(() =>
+      heard.push(newDocumentCreator()?.ownerId ?? null),
+    );
+    const unbind = bindNewDocumentCreator({ ownerId: 'pat', signedIn: true });
+    unbind();
+    stop();
+    bindNewDocumentCreator({ ownerId: 'later', signedIn: false })();
+    expect(heard).toEqual(['pat', null]);
   });
 });

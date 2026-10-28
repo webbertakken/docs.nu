@@ -48,6 +48,7 @@ import type { View } from '@/lib/viewport-store';
 import { useKeyboardAvoidance } from '@/hooks/canvas/useKeyboardAvoidance';
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -245,6 +246,8 @@ import { useEditorUiState } from './editor-ui-state';
 import { useTabScope } from './useTabScope';
 import { useEditorPersistence } from './editor-persistence';
 import { useEditorRealtime } from './editor-realtime';
+import { readEditorSeed } from './seed-pending-document';
+import { EditorSeedIdContext } from './editor-seed-context';
 import { useAssignRef, useLatest } from '@/hooks/ui/useLatest';
 import { announcePageLocked, guardLockedPagesIn, type PageLockGuard } from '@/lib/page-lock-guard';
 import { usePageLockedIds } from '@/hooks/editor/usePageLockedIds';
@@ -257,6 +260,17 @@ import { useArticleCaretBroadcast } from '@/hooks/collab/useArticleCaretBroadcas
 // The open tab's elements before the tabs load.
 const NO_ELEMENTS: readonly Element[] = [];
 
+// Local-session participant until the reader resolves. A stable placeholder, so the SSG output and the first client
+// paint agree (Math.random() in a lazy initialiser ran on both server and client and tripped React's hydration
+// mismatch); the bootstrap either loads a saved identity or mints a fresh random one inside a layout effect, so the
+// placeholder is never seen.
+const PLACEHOLDER_SELF: Participant = {
+  id: 'self',
+  name: 'Guest',
+  color: '#0ea5e9',
+  status: 'online',
+};
+
 export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // Where the editor runs (editor-surface.ts). The read-only embed view (docs/specs/013-workspace/
   // embeds.md) forces view behaviour regardless of the share role, suppresses the visitor identity
@@ -268,7 +282,14 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   const surface = opts.surface ?? 'app';
   const { embedMode, workbenchMode, appChrome } = surfaceFlags(surface);
   const workbench = useWorkbenchDocumentSession();
-  const initialTabs: Tab[] = [createTab('Tab 1')];
+  // A document just made opens from memory in this very first render (seed-pending-document.ts): no loading pass.
+  const seedId = useContext(EditorSeedIdContext);
+  const [seed] = useState(() =>
+    surface === 'app'
+      ? readEditorSeed(window.location.pathname + window.location.search, PLACEHOLDER_SELF, seedId)
+      : null,
+  );
+  const initialTabs: Tab[] = seed?.tabs ?? [createTab('Tab 1')];
 
   // Embed page-view telemetry (docs/specs/013-workspace/embeds.md) is emitted by editor-page.tsx —
   // exactly one site, so an embed render can't be double-counted.
@@ -447,7 +468,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // the active-tab guard in editor-ui-state reads its ref.
   const tabScope = useTabScope();
   const { sessionTabScope, setSessionTabScope, tabScopeRef, isOutOfScope } = tabScope;
-  const uiState = useEditorUiState(initialTabs[0]!.id, tabScopeRef);
+  const uiState = useEditorUiState(seed?.activeId ?? initialTabs[0]!.id, tabScopeRef);
   const {
     activeId,
     setActiveId,
@@ -505,11 +526,11 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // or Join Document on the join flow). Persisted via localStorage so a
   // returning visitor isn't re-prompted. Brand new visitors landing on a
   // pre-existing document see the join flow until they confirm.
-  const [nameConfirmed, setNameConfirmed] = useState(false);
+  const [nameConfirmed, setNameConfirmed] = useState(seed?.nameConfirmed ?? false);
   // True after hydration if we successfully loaded a saved document from
   // the API (i.e. the user is joining someone else's document, not
   // starting a fresh one). Drives the join-screen trigger.
-  const [loadedExistingDocument, setLoadedExistingDocument] = useState(false);
+  const [loadedExistingDocument, setLoadedExistingDocument] = useState(seed !== null);
   // True when the URL points at a document that the API didn't return
   // (deleted, never existed, or owned by someone else). Renders the
   // NotFound surface instead of the editor + welcome modal.
@@ -523,7 +544,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // The hydration useLayoutEffect flips it to false either immediately
   // (no URL params → straight to welcome modal) or once the API call
   // resolves (params → load the document first).
-  const [loadingDocument, setLoadingDocument] = useState(true);
+  const [loadingDocument, setLoadingDocument] = useState(seed === null);
   // User-facing tool picker. Spotlight (docs/specs/008-canvas/canvas-and-palette.md) is a non-editing presenter
   // mode, so entering it clears any selection: an element selected beforehand
   // would otherwise keep its handles (dimmed under the shroud) and pop back
@@ -585,12 +606,9 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // step below either loads a saved identity or mints a fresh random one
   // — both happen synchronously inside useLayoutEffect, so the user never
   // sees the placeholder.
-  const [selfParticipant, setSelfParticipant] = useState<Participant>({
-    id: 'self',
-    name: 'Guest',
-    color: '#0ea5e9',
-    status: 'online',
-  });
+  const [selfParticipant, setSelfParticipant] = useState<Participant>(
+    seed?.self ?? PLACEHOLDER_SELF,
+  );
   // Who "I" am in a dot vote (docs/specs/012-collaboration/collab-race-hardening.md): the collab key, which is stable and
   // safe to publish, rather than the owner id, which is a guest's credential.
   const voteSelfId = participantKey(selfParticipant);
@@ -606,7 +624,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // gates below can read `sharePasswordGate`. The slice is spread into
   // the returned view-model below, so the explicit return doesn't
   // re-list these.
-  const realtime = useEditorRealtime();
+  const realtime = useEditorRealtime(seed);
   const {
     roomRef,
     documentShareable,
@@ -740,7 +758,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // + autosave paths call. See editor-persistence; the slice is spread
   // into the returned view-model below, so the explicit return doesn't
   // re-list these.
-  const persistence = useEditorPersistence({ toast });
+  const persistence = useEditorPersistence({ toast, seed });
   const {
     setSaveStatus,
     setSavedAt,
@@ -799,7 +817,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // active tab inline; the rest pop in lazily when the user switches
   // to them. Tracked in a ref because it's only ever read inside the
   // effects, not rendered.
-  const loadedTabIdsRef = useRef<Set<string>>(new Set());
+  const loadedTabIdsRef = useRef<Set<string>>(new Set(seed?.loadedTabIds));
   // Mirror of the ref above into reactive state, used by the JSX
   // gate that hides the template picker until the active tab's
   // content has actually been fetched. Without this the user sees
@@ -809,7 +827,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // resolves and the picker hides. Re-rendering on every change
   // would be wasteful; we only update this set after a
   // hydration / fetch lands, so the renders are bounded.
-  const [loadedTabIds, setLoadedTabIds] = useState<Set<string>>(new Set());
+  const [loadedTabIds, setLoadedTabIds] = useState<Set<string>>(() => new Set(seed?.loadedTabIds));
   // Tab ids whose lazy fetch FAILED (network / 5xx — not a 404). Drives
   // the canvas's blocking error overlay so the user can't edit a blank
   // placeholder and have the autosave wipe the real server row (docs/specs/006-document/per-tab-storage.md).
@@ -847,8 +865,8 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // updates the URL) and pulls any saved tabs + name from localStorage.
   // Saves are gated on `hydrated` so we never overwrite stored data
   // with the empty initial render.
-  const [documentId, setDocumentId] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [documentId, setDocumentId] = useState<string | null>(seed?.documentId ?? null);
+  const [hydrated, setHydrated] = useState(seed !== null);
   // The deleted state (docs/specs/013-workspace/trash.md): the document is in
   // the Trash. Set by the load, the room and the autosave.
   const documentTrashed = useDocumentTrashed({
@@ -916,8 +934,8 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // ours to PUT; tab order / document rename hit the metadata PUT.
   // Debounced 600ms — feels responsive without hammering the API.
   // docs/specs/006-document/per-tab-storage.md has the design.
-  const lastSavedTabsRef = useRef<Tab[]>([]);
-  const lastSavedNameRef = useRef<string>('');
+  const lastSavedTabsRef = useRef<Tab[]>(seed?.tabs ?? []);
+  const lastSavedNameRef = useRef<string>(seed?.documentName ?? '');
   // Peer ops that land while a save is in flight (docs/specs/012-collaboration/collab-race-hardening.md); see save-baseline.
   const remoteOpJournalRef = useRef<RemoteOpJournal>(createRemoteOpJournal());
   // This editor's element writes the room has not sequenced yet (own-element-writes.ts): one stable object.

@@ -18,24 +18,32 @@ const PROBE = `(() => {
     const p = w.__openProbe;
     if (p.click === null || p.ready !== null || p.pending) return;
     if (!/^\\/document\\//.test(location.pathname)) return;
-    if (!document.querySelector('[data-canvas-a11y-root]')) return;
+    const root = document.querySelector('[data-canvas-a11y-root]');
+    if (!root || !root.checkVisibility()) return;
     p.pending = true;
     requestAnimationFrame(() => setTimeout(() => { p.ready = performance.now(); }, 0));
   };
-  new MutationObserver(check).observe(document, { subtree: true, childList: true });
+  new MutationObserver(check).observe(document, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['style', 'hidden', 'class'],
+  });
 })()`;
 
 export async function installOpenProbe(page: Page): Promise<void> {
   await page.addInitScript(PROBE);
 }
 
-// The Explorer, settled: the button hydrated and what opening needs fetched on idle. The face is named after the last
-// blank made (New Diagram in a fresh browser); the caret keeps its name.
+// The Explorer, settled: the button hydrated, what opening needs fetched and the standby built, all on idle. The
+// face is named after the last blank made (New Diagram in a fresh browser); the caret keeps its name.
 export async function openExplorer(page: Page): Promise<void> {
   await page.goto('/explorer/home');
   const caret = page.getByRole('button', { name: 'More new document choices' });
   await untilHydrated(caret);
   await page.waitForLoadState('networkidle');
+  // The face's blank made ready while the Explorer is idle (blueprint "Standby"): its editor, built and hidden.
+  await expect(page.locator('[data-canvas-a11y-root]')).toBeAttached();
   await caret.hover();
 }
 

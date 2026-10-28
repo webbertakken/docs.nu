@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, useSyncExternalStore } from 'react';
+import { startTransition, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { debugLog } from '@/lib/debug-log';
 import { useLatest } from '@/hooks/ui/useLatest';
 import type { CreateFailure } from '@/lib/new-document/create-failure';
@@ -22,8 +22,6 @@ export type PendingCreateView = {
   saveToMyDocuments: () => void;
 };
 
-const noPending = () => null;
-
 // Whether the document is LiveDoc's and its reader not known yet: a save would go out as nobody.
 function stillHeld(doc: PendingDocument, selfId: string): boolean {
   if (doc.create.status !== 'landed') return true;
@@ -41,11 +39,14 @@ export function usePendingCreate(opts: {
   refreshDocumentList: (ownerId: string) => void;
 }): PendingCreateView {
   const { documentId, selfId } = opts;
-  const doc = useSyncExternalStore(
-    subscribePendingDocuments,
-    () => pendingDocument(documentId),
-    noPending,
-  );
+  // Followed as a transition: a create that lands while the editor is first being painted (This Browser's lands at
+  // once) re-renders the editor after that paint, never before it (blueprint "Instant open", D204).
+  const [doc, setDoc] = useState(() => pendingDocument(documentId));
+  useEffect(() => {
+    const follow = () => startTransition(() => setDoc(pendingDocument(documentId)));
+    follow();
+    return subscribePendingDocuments(follow);
+  }, [documentId]);
   const held = doc !== null && stillHeld(doc, selfId);
 
   // The landing, once per document: what the create made it.

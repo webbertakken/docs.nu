@@ -134,5 +134,23 @@ export function forgetPendingDocument(id: string): void {
 
 export function resetPendingDocumentsForTests(): void {
   entries.clear();
+  standbys.clear();
   listeners.clear();
+}
+
+// A standby document (blueprint "Standby"): the blank the New Document button's face would make next, prepared while
+// the Explorer is idle so the editor can render it ahead, hidden. Nothing is created for it; the click makes it a
+// pending document under the same ids (addPendingDocument), and a standby never used is dropped with the page.
+const standbys = new Map<string, PendingDocument>();
+
+export function addStandbyDocument(input: PendingDocumentInput): void {
+  standbys.set(input.id, { ...input, create: { status: 'creating' } });
+}
+
+export function standbyDocument(id: string | null): PendingDocument | null {
+  return id ? (standbys.get(id) ?? null) : null;
+}
+
+export function dropStandbyDocument(id: string): void {
+  standbys.delete(id);
 }

@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   track: vi.fn(),
   closeStart: vi.fn(),
   openInPlace: vi.fn(),
+  setStandbyInPlace: vi.fn(),
   loadEditor: vi.fn(async () => () => null),
 }));
 vi.mock('@/lib/app-location', () => ({
@@ -25,6 +26,7 @@ vi.mock('@/components/start/close-start-for-blank', () => ({
 }));
 vi.mock('@/app/explorer/in-place-editor/in-place-editor-store', () => ({
   openInPlace: mocks.openInPlace,
+  setStandbyInPlace: mocks.setStandbyInPlace,
 }));
 vi.mock('@/lib/editor-page-loader', () => ({ loadEditorPage: mocks.loadEditor }));
 vi.mock('@/lib/api-client', () => ({
@@ -32,11 +34,18 @@ vi.mock('@/lib/api-client', () => ({
   ApiError: class ApiError extends Error {},
 }));
 
-import { newDocumentHref, startNewDocument, type NewDocumentRequest } from './start-new-document';
+import {
+  newDocumentHref,
+  prepareStandbyDocument,
+  resetNewDocumentStartForTests,
+  startNewDocument,
+  type NewDocumentRequest,
+} from './start-new-document';
 import { bindNewDocumentCreator } from '@/lib/new-document/new-document-creator';
 import {
   pendingDocument,
   resetPendingDocumentsForTests,
+  standbyDocument,
 } from '@/lib/new-document/pending-documents';
 import { resetCreateHoldsForTests } from '@/lib/new-document/create-hold';
 
@@ -62,6 +71,7 @@ afterEach(async () => {
   // Let a start in flight finish, so the busy guard is clear for the next test.
   await new Promise((r) => setTimeout(r, 0));
   unbind();
+  resetNewDocumentStartForTests();
   resetPendingDocumentsForTests();
   resetCreateHoldsForTests();
   vi.clearAllMocks();
@@ -147,6 +157,38 @@ describe('startNewDocument', () => {
     startNewDocument(request({ choice: 'template', template: 'kanban', place: { teamId: 't1' } }));
     expect(mocks.assign).toHaveBeenCalledWith('/new?template=kanban&team=t1');
     expect(mocks.openInPlace).not.toHaveBeenCalled();
+  });
+});
+
+describe('the standby', () => {
+  it('is made ahead for the face’s blank, its start closed, and nothing is created', async () => {
+    await prepareStandbyDocument('diagram');
+    const [id] = mocks.setStandbyInPlace.mock.calls.at(-1) as [string];
+    expect(standbyDocument(id)?.name).toBe('Untitled document');
+    expect(mocks.closeStart).toHaveBeenCalledWith(expect.any(String), 'blank');
+    expect(mocks.write).not.toHaveBeenCalled();
+    expect(pendingDocument(id)).toBeNull();
+  });
+
+  it('is what the face’s click opens, under the same id, created only then', async () => {
+    await prepareStandbyDocument('diagram');
+    const [id] = mocks.setStandbyInPlace.mock.calls.at(-1) as [string];
+    startNewDocument(request());
+    await opened();
+    expect(openedId()).toBe(id);
+    expect(mocks.openInPlace).toHaveBeenCalledWith(id);
+    expect(pendingDocument(id)?.create.status).toBeDefined();
+    expect(standbyDocument(id)).toBeNull();
+    expect(mocks.write).toHaveBeenCalledOnce();
+  });
+
+  it('is left for another choice, which is made fresh', async () => {
+    await prepareStandbyDocument('diagram');
+    const [id] = mocks.setStandbyInPlace.mock.calls.at(-1) as [string];
+    startNewDocument(request({ choice: 'template', template: 'flowchart' }));
+    await opened();
+    expect(openedId()).not.toBe(id);
+    expect(standbyDocument(id)).not.toBeNull();
   });
 });
 

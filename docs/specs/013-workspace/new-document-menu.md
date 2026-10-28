@@ -117,6 +117,8 @@ A blank is on screen, editable, **within 200 ms of the click**, and a template w
   has landed ([Offline mode](../006-document/offline-mode.md#instant-open)).
 - **Nothing to fetch first.** The editor's code is fetched while the Explorer is idle, and again when the pointer
   reaches the button.
+- **Nothing to build first.** While the Explorer is idle, the blank the face makes is made ready in the background,
+  unseen and unsaved, so the face's click only shows it; nothing is created until the click.
 - **A create that fails loses nothing.** The editor stays open with what was done, says the document is not saved
   yet, and offers **Try again**, which re-runs the same create under the same id
   ([New document route](../007-editor/new-document-route.md#a-failed-load-is-not-a-missing-document)). A refused

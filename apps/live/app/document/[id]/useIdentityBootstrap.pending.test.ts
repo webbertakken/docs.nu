@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Tab } from '@livedoc/document';
 
 // A document the Explorer has just made opens from memory (docs/specs/013-workspace/blueprints/new-document-menu.md
-// "The editor's bootstrap branch"): before auth settles, with nothing fetched and nothing server-stored yet.
+// "The editor's bootstrap branch"): its state is seeded in the editor's first render (seed-pending-document.ts), so the
+// bootstrap only notes the open, fetches nothing, and settles the reader once auth answers.
 
 const { api } = vi.hoisted(() => ({
   api: {
@@ -51,7 +52,8 @@ function run() {
   const props = (authLoaded: boolean) => ({
     authLoaded,
     passwordRetry: 0,
-    hydrated: false,
+    // Seeded in the first render.
+    hydrated: true,
     accountId: 'user_1',
     accountDisplayName: 'Pat',
     embed: false,
@@ -103,19 +105,11 @@ afterEach(() => {
 });
 
 describe('useIdentityBootstrap for a document just made', () => {
-  it('opens from memory at once, before auth, fetching nothing', () => {
-    const { set, resetTabs, lastSavedTabsRef } = run();
-    expect(resetTabs).toHaveBeenCalledWith(TABS);
-    expect(lastSavedTabsRef.current).toBe(TABS);
-    expect(set.setHydrated).toHaveBeenCalledWith(true);
-    expect(set.setLoadingDocument).toHaveBeenCalledWith(false);
-    expect(set.setDocumentServerStored).toHaveBeenCalledWith(false);
-    expect(set.setDocumentId).toHaveBeenCalledWith(ID);
-    expect(set.setIsOwner).toHaveBeenCalledWith(true);
-    expect(set.setSelfParticipant).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'user_1', status: 'online' }),
-    );
+  it('notes the open before auth, fetching and setting nothing', () => {
+    const { set, resetTabs } = run();
     expect(getLoadProgress().step).toBe('done');
+    expect(resetTabs).not.toHaveBeenCalled();
+    expect(set.setHydrated).not.toHaveBeenCalled();
     expect(api.apiLoadDocument).not.toHaveBeenCalled();
     expect(api.apiLoadTabRevisioned).not.toHaveBeenCalled();
     expect(api.apiListShareLinks).not.toHaveBeenCalled();
@@ -131,6 +125,6 @@ describe('useIdentityBootstrap for a document just made', () => {
       ),
     );
     expect(api.apiLoadDocument).not.toHaveBeenCalled();
-    expect(set.setHydrated).toHaveBeenCalledTimes(1);
+    expect(set.setHydrated).not.toHaveBeenCalled();
   });
 });

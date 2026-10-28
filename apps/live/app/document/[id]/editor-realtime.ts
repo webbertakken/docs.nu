@@ -8,6 +8,7 @@ import {
 } from '@/lib/api-client';
 import { mayShareDocument } from './editor-page-helpers';
 import { useChangesetSeen } from './useChangesetSeen';
+import type { EditorSeed } from './seed-pending-document';
 import { useLatest } from '@/hooks/ui/useLatest';
 
 // Sharing, session-permission and realtime-room infrastructure for the
@@ -22,7 +23,7 @@ import { useLatest } from '@/hooks/ui/useLatest';
 // usePresenceState; this slice owns the gating + connection plumbing the
 // hydration/bootstrap, autosave and room hooks read and write.
 
-export function useEditorRealtime() {
+export function useEditorRealtime(seed: Pick<EditorSeed, 'ownerId' | 'teamId'> | null = null) {
   // Single open room connection for the current document. Re-opens
   // whenever documentId changes.
   const roomRef = useRef<ReturnType<typeof connectRoom> | null>(null);
@@ -42,7 +43,7 @@ export function useEditorRealtime() {
   // Team library placement (docs/specs/013-workspace/team-shared-documents.md): non-null when the document lives
   // in a team's shared library. Drives the header badge's "Team"
   // state (shareable still wins with "Shared").
-  const [documentTeamId, setDocumentTeamId] = useState<string | null>(null);
+  const [documentTeamId, setDocumentTeamId] = useState<string | null>(seed?.teamId ?? null);
   // The legacy single share code (back-compat fallback for older
   // documents that haven't been migrated to share_links yet, and for
   // visitor arrivals that came in via the legacy URL flow). Modern
@@ -57,7 +58,7 @@ export function useEditorRealtime() {
   // in the room their full Participant row is in `livePresence` and we
   // can show avatar + name; otherwise the badge shows just the role
   // strip (Viewing / Editing) and skips the owner row entirely.
-  const [documentOwnerId, setDocumentOwnerId] = useState<string | null>(null);
+  const [documentOwnerId, setDocumentOwnerId] = useState<string | null>(seed?.ownerId ?? null);
   // Owner display info from the document fetch (api worker joins
   // participants on document.ownerId). Lets the top-middle Owner badge
   // render for visitors even when the owner isn't currently in the
