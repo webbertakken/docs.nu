@@ -10,7 +10,7 @@
 
 import { EXPLORER_LANDING_PATH } from '@/lib/explorer-landing';
 import { truncateName } from '@livedoc/document';
-import type { Dispatch, SetStateAction } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import {
   apiDeleteDocument,
   apiDismissSharedWith,
@@ -33,6 +33,7 @@ import { track } from '@/lib/telemetry';
 import type { useConfirm } from '@/hooks/ui/useConfirm';
 import type { useToast } from '@/hooks/ui/useToast';
 import { assignAppLocation } from '@/lib/app-location';
+import { createOptimisticField } from '@/lib/optimistic-layers';
 
 // A personal folder as a delete needs it: its name and where it sits.
 export type FolderNode = { id: string; name: string; parentId: string | null };
@@ -89,6 +90,10 @@ export function useDocumentListActions(deps: DocumentListActionsDeps) {
     sharedDocuments = [],
     setSharedDocuments,
   } = deps;
+  // Renames and moves still waiting on the api, as layers per document, so a refusal takes back only its own
+  // change (docs/specs/013-workspace/folders.md "Refused changes").
+  const [names] = useState(() => createOptimisticField<string>());
+  const [placements] = useState(() => createOptimisticField<string | null>());
 
   // Open a document from a list row. The current document (editor only)
   // is already autosaved, so a hard navigation loses nothing; path
@@ -115,19 +120,22 @@ export function useDocumentListActions(deps: DocumentListActionsDeps) {
     if (!trimmed) return;
     const prev = documentList.find((d) => d.id === id);
     const prevName = prev?.name?.trim() ?? '';
+    const write = names.begin(id, prev?.name ?? '', trimmed);
     setDocumentList((p) => p.map((d) => (d.id === id ? { ...d, name: trimmed } : d)));
     void apiSaveDocumentMeta(ownerId, { id, name: trimmed })
       // Only once the server accepted it. Emitting beside the request counted
       // renames the very next line rolls back and toasts as failures.
       .then(() => {
+        names.accept(id, write);
         if (trimmed !== prevName) track('Document', 'Renamed');
       })
       .catch(() => {
-        // Roll the optimistic rename back and surface the failure, matching
-        // the other consequential list actions (delete / move / duplicate)
-        // — a silent swallow left the row showing a name the server rejected.
-        if (prev)
-          setDocumentList((p) => p.map((d) => (d.id === id ? { ...d, name: prev.name } : d)));
+        // Take this rename back and surface the failure, matching the other consequential list actions
+        // (delete / move / duplicate): a silent swallow left the row showing a name the server rejected. A newer
+        // rename still showing stays (its own answer settles it).
+        const shown = names.refuse(id, write);
+        if (prev && shown !== undefined)
+          setDocumentList((p) => p.map((d) => (d.id === id ? { ...d, name: shown } : d)));
         toast.error(DOCUMENT_FAILURE.rename(prevName));
       });
   };
@@ -257,10 +265,11 @@ export function useDocumentListActions(deps: DocumentListActionsDeps) {
   const moveDocumentToFolder = (id: string, folderId: string | null) => {
     if (!ownerId) return;
     const moved = documentList.find((d) => d.id === id);
-    const prevFolderId = moved?.folderId ?? null;
+    const write = placements.begin(id, moved?.folderId ?? null, folderId);
     setDocumentList((prev) => prev.map((d) => (d.id === id ? { ...d, folderId } : d)));
     void apiSetDocumentFolder(ownerId, id, folderId)
       .then(() => {
+        placements.accept(id, write);
         // The row leaves the current view (it's now under the target
         // folder / the root), so confirm where it went — only once the
         // server actually accepted the move.
@@ -272,11 +281,11 @@ export function useDocumentListActions(deps: DocumentListActionsDeps) {
       })
       .catch((err: unknown) => {
         logMoveFailure('document', ` document=${id}`, err);
-        // Roll the row back to its old folder and tell the user, instead
-        // of swallowing the error after already claiming success.
-        setDocumentList((prev) =>
-          prev.map((d) => (d.id === id ? { ...d, folderId: prevFolderId } : d)),
-        );
+        // Take this move back and tell the user, instead of swallowing the error after already claiming
+        // success. A newer move still showing stays.
+        const shown = placements.refuse(id, write);
+        if (shown !== undefined)
+          setDocumentList((prev) => prev.map((d) => (d.id === id ? { ...d, folderId: shown } : d)));
         toast.error(DOCUMENT_FAILURE.move(moved?.name));
       });
   };

@@ -12,7 +12,8 @@ vi.mock('@/lib/api-client', () => ({
 vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));
 vi.mock('@/lib/api/trash', () => ({ apiRestoreDocument: vi.fn() }));
 
-const { apiDeleteDocument, apiSetDocumentFolder } = await import('@/lib/api-client');
+const { apiDeleteDocument, apiSaveDocumentMeta, apiSetDocumentFolder } =
+  await import('@/lib/api-client');
 const { track } = await import('@/lib/telemetry');
 const { isDocumentDeleted } = await import('@/lib/document-tombstones');
 const { apiRestoreDocument } = await import('@/lib/api/trash');
@@ -50,6 +51,7 @@ function setup() {
     confirm,
     ids: () => list.map((d) => d.id),
     folderOf: (id: string) => list.find((d) => d.id === id)?.folderId,
+    nameOf: (id: string) => list.find((d) => d.id === id)?.name,
   };
 }
 
@@ -135,5 +137,53 @@ describe('moveDocumentToFolder', () => {
     expect(vi.mocked(console.warn).mock.calls.map(([message]) => String(message))).toEqual([
       '[explorer-move] document failed document=b: offline',
     ]);
+  });
+});
+
+// docs/specs/013-workspace/folders.md "Refused changes": a refusal takes back only its own change.
+describe('a refused change', () => {
+  const deferred = () => {
+    let reject!: (e: Error) => void;
+    const promise = new Promise<undefined>((_, r) => (reject = r));
+    return { promise, reject };
+  };
+
+  it('keeps a newer name when an older rename is refused', async () => {
+    const slow = deferred();
+    vi.mocked(apiSaveDocumentMeta)
+      .mockReturnValueOnce(slow.promise as never)
+      .mockResolvedValueOnce(undefined as never);
+    const { actions, toast, nameOf } = setup();
+    actions.renameDocument('b', 'Second');
+    actions.renameDocument('b', 'Third');
+    await vi.waitFor(() => expect(track).toHaveBeenCalledWith('Document', 'Renamed'));
+    slow.reject(new Error('refused'));
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(nameOf('b')).toBe('Third');
+  });
+
+  it('falls back to the stored name only when every rename is refused', async () => {
+    vi.mocked(apiSaveDocumentMeta)
+      .mockRejectedValueOnce(new Error('refused'))
+      .mockRejectedValueOnce(new Error('refused'));
+    const { actions, toast, nameOf } = setup();
+    actions.renameDocument('b', 'Second');
+    actions.renameDocument('b', 'Third');
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalledTimes(2));
+    expect(nameOf('b')).toBe('Doc b');
+  });
+
+  it('keeps a newer folder when an older move is refused', async () => {
+    const slow = deferred();
+    vi.mocked(apiSetDocumentFolder)
+      .mockReturnValueOnce(slow.promise as never)
+      .mockResolvedValueOnce(undefined);
+    const { actions, toast, folderOf } = setup();
+    actions.moveDocumentToFolder('b', 'f1');
+    actions.moveDocumentToFolder('b', 'f2');
+    await vi.waitFor(() => expect(track).toHaveBeenCalledWith('Document', 'Moved'));
+    slow.reject(new Error('refused'));
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(folderOf('b')).toBe('f2');
   });
 });
