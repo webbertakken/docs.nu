@@ -201,6 +201,22 @@ describe('the writing', () => {
     expect(refusal(tab, { markdown: '[zone z9]' }).code).toBe('zone_unknown');
   });
 
+  it("keeps a zone where it is when an append names it: never a second block of the zone's id", () => {
+    const z = {
+      id: 'z1',
+      type: 'zone' as const,
+      zone: 'object' as const,
+      width: 200,
+      height: 100,
+    };
+    const tab = withArticle('f', { blocks: [para('1', 'Text'), z] });
+    const out = write(tab, { markdown: 'More\n\n[zone z1]', mode: 'append' });
+    const blocks = articlesOf(out.tab).f!.blocks;
+    expect(blocks.map((b) => b.id).filter((id) => id === 'z1')).toHaveLength(1);
+    expect(blocks.map((b) => b.type)).toEqual(['paragraph', 'zone', 'paragraph']);
+    expect(out.lines[0]).toBe('Appended to the article "Untitled" (f): 1 blocks added, 3 blocks.');
+  });
+
   it('removes margin-note markers whose text is gone', () => {
     const marker = {
       id: 'n1',
