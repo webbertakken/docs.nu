@@ -299,7 +299,7 @@ describe('getDocumentThumbnailSvg', () => {
       card('i3', 'Also'),
     ]);
     db.getDocumentItemTypes.mockResolvedValue(defaultCatalogue());
-    const env = { IMAGES: r2() } as unknown as Env;
+    const env = { IMAGES: r2() } as unknown as DocumentEnv;
 
     expect(await getDocumentThumbnailSvg(env, liveDoc())).toContain('>1003<');
     const named = (await getDocumentTabImageSvg(env, liveDoc(), 't1'))!;

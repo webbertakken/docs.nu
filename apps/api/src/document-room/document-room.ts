@@ -444,9 +444,12 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     documentId: string | null,
     tabScope: string | null,
   ): Promise<boolean> {
-    const env = this.env;
+    const env = this.content.env;
     if (!env || !documentId || !tabScope) return false;
-    const tab = await getTab(env, documentId, tabScope).catch(() => null);
+    const tab = await getTab(env, documentId, tabScope).catch((error: unknown) => {
+      console.warn('[room-scope] tab unreadable', { documentId, tabScope, error: String(error) });
+      return null;
+    });
     return tabShowsEveryCard(tab?.elements ?? []);
   }
 
