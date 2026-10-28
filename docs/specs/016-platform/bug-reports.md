@@ -29,13 +29,13 @@ Every screen can report a bug, one press away. The editor app holds one form (`B
 root layout) and every entry opens it through `useOpenBugReport()`; no entry mounts a form of its own or passes the
 context, which the form collects itself. Each entry is drawn in its neighbours' style.
 
-| Where                                                                       | Entry                                                     |
-| --------------------------------------------------------------------------- | --------------------------------------------------------- |
-| The editor's bottom bar and the Explorer's bottom bar (`ChromeControls`)    | A bug icon button, labelled "Report a Bug" when labelled  |
-| The account menu (signed in)                                                | A "Report a Bug" item above "Sign out"                    |
-| Every error card and crash panel (connection error, load error, area crash) | A secondary "Report a Bug" button beside the retry action |
-| The root error page (`global-error`) and the not-found page                 | A "Report a Bug" link to `/report-a-bug`                  |
-| The help centre's contact page and the shared site footer                   | A "Report a Bug" link to `/report-a-bug`                  |
+| Where                                                                                           | Entry                                                     |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| The editor's bottom bar and the Explorer's bottom bar (`ChromeControls`)                        | A bug icon button, labelled "Report a Bug" when labelled  |
+| The account menu (signed in)                                                                    | A "Report a Bug" item above "Sign out"                    |
+| Every error card and crash panel (connection error, load error, area crash), the not-found card | A secondary "Report a Bug" button beside the retry action |
+| The root error page (`global-error`)                                                            | A "Report a Bug" link to `/report-a-bug`                  |
+| The help centre's contact page and the shared site footer                                       | A "Report a Bug" link to `/report-a-bug`                  |
 
 The root error page has no app around it (the root layout itself failed), and the help centre, marketing site and
 telemetry dashboard are other apps: they link to **`/report-a-bug`**, a light page of the editor app that shows the
@@ -164,7 +164,7 @@ attempt count. Every path logs under `[bug-reports]`.
 
 The Bug Tracker is a document in the hosted operator's account, unshared, with:
 
-- a board tab (its id is `BUG_REPORT_TAB_ID`), whose board has the columns **Reported**, **Triaged**, **In Progress**,
+- a **Board tab** (its id is `BUG_REPORT_TAB_ID`; a board on any other tab is not found), whose board has the columns **Reported**, **Triaged**, **In Progress**,
   **Fixed** and **Won't Fix**, Fixed and Won't Fix done columns; reports land in the first column;
 - a card type labelled **Bug Report** with the custom fields **Severity** (Choice: Low, Medium, High, Critical),
   **Context** (Long Text), **Screenshot** (Link), **Reporter** (Text) and **Release** (Text).

@@ -21,7 +21,8 @@ Where the way to report a bug sits on each screen, and how it looks there. What 
 | Account menu                                | Above "Sign out"                                                                      | Menu item                                        |
 | Connection and load error cards             | Under the retry button                                                                | Secondary button, small                          |
 | An area's crash panel (`AreaErrorBoundary`) | After "Try Again"                                                                     | Secondary button, extra small                    |
-| Root error page, not-found page             | Under "Reload" or the way home                                                        | Text link to `/report-a-bug`                     |
+| Root error page                             | Under "Reload"                                                                        | Text link to `/report-a-bug`                     |
+| Not-found card                              | Under "New Document"                                                                  | Secondary button                                 |
 | Help centre contact page                    | The "Report a Bug" card, in place of the GitHub issues card                           | Secondary call-to-action link to `/report-a-bug` |
 | Shared site footer                          | The Contact column, after Contact                                                     | Footer link to `/report-a-bug`                   |
 

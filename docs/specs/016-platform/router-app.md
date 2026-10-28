@@ -15,7 +15,7 @@ A small Cloudflare Worker that fronts the apex domain (`docs.nu`) and routes URL
 | `/help`, `/help/*`                                                                                                                                           | help app (`apps/help`), stripped |
 | `/live/*` (the live app's `_next` assets only)                                                                                                               | live app (`apps/live`), stripped |
 | `/` (the front door: the live worker sends it on to Home, [Explorer Home](../013-workspace/explorer-home.md#route))                                          | live app (`apps/live`), as-is    |
-| live page routes: `/document/*`, `/explorer/*`, `/form/*`, `/new`, `/join`, `/sign-in`, `/get-started`, `/embed`, `/oauth/*`, `/icon.svg`                    | live app (`apps/live`), as-is    |
+| live page routes: `/document/*`, `/explorer/*`, `/form/*`, `/new`, `/join`, `/sign-in`, `/get-started`, `/embed`, `/oauth/*`, `/report-a-bug/*`, `/icon.svg` | live app (`apps/live`), as-is    |
 | a marketing page's address from before `/about` (`/faq`, `/ai`, `/features/*`, `/alternatives/*`, `/security`, `/status`, `/licences`, `/privacy`, `/terms`) | 308 redirect to `/about/<path>`  |
 | a help category segment with no `/help` prefix (`/canvas/*`, `/policies/*`, ...)                                                                             | 308 redirect to `/help/<path>`   |
 | `/about`, `/about/*`, and everything else                                                                                                                    | marketing app (`apps/marketing`) |

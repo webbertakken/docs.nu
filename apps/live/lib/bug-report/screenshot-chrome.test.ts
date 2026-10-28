@@ -13,10 +13,16 @@ const html = (markup: string) => {
 describe('isBugReportChrome', () => {
   it('leaves out an entry and the form with its backdrop', () => {
     expect(isBugReportChrome(html('<button data-bug-report-entry></button>'))).toBe(true);
+    expect(isBugReportChrome(html('<iframe data-bug-report-capture></iframe>'))).toBe(true);
     const backdrop = html(
       '<div><div data-dialog-panel><div data-bug-report-dialog></div></div></div>',
     );
     expect(isBugReportChrome(backdrop)).toBe(true);
+    // The focus trap's sentinels may come first.
+    const guarded = html(
+      '<div><span tabindex="0"></span><div data-dialog-panel><div data-bug-report-dialog></div></div></div>',
+    );
+    expect(isBugReportChrome(guarded)).toBe(true);
   });
 
   it('keeps another dialog, the page and text', () => {

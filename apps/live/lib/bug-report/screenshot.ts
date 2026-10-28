@@ -14,17 +14,15 @@ export const SCREENSHOT_QUALITY_STEPS = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4] as const;
 // How long a capture waits for the page's pictures, at most: a lazy picture below the fold never loads.
 const CAPTURE_MEDIA_TIMEOUT_MS = 1000;
 
-// What a capture leaves out: the form itself and every entry (they carry these attributes).
-export const BUG_REPORT_CHROME_SELECTOR = '[data-bug-report-dialog], [data-bug-report-entry]';
+// What a capture leaves out: the form itself, every entry and the capture's own scratch iframe.
+export const BUG_REPORT_CHROME_SELECTOR =
+  '[data-bug-report-dialog], [data-bug-report-entry], [data-bug-report-capture]';
 
 // The form (with its dimmed backdrop, the panel's parent) and every entry: never in the picture.
 export function isBugReportChrome(node: Node): boolean {
   if (!(node instanceof Element)) return false;
   if (node.matches(BUG_REPORT_CHROME_SELECTOR)) return true;
-  return Boolean(
-    node.firstElementChild?.matches('[data-dialog-panel]') &&
-    node.querySelector('[data-bug-report-dialog]'),
-  );
+  return node.querySelector(':scope > [data-dialog-panel] [data-bug-report-dialog]') !== null;
 }
 
 export const ACCEPTED_SCREENSHOT_TYPES: readonly string[] = [
@@ -96,11 +94,27 @@ export async function encodeImageFile(file: Blob): Promise<PreparedScreenshot | 
   }
 }
 
+// The capture library reads each element's default styles in a scratch iframe. Left to make its own, it writes the
+// iframe's document through `srcdoc`, an HTML sink the enforced Trusted Types refuse (docs/specs/016-platform/
+// trusted-types.md), so it is handed this one: an empty iframe whose blank document needs no HTML written at all.
+function captureSandbox(): HTMLIFrameElement {
+  const sandbox = document.createElement('iframe');
+  sandbox.setAttribute('data-bug-report-capture', '');
+  sandbox.setAttribute('aria-hidden', 'true');
+  sandbox.tabIndex = -1;
+  sandbox.width = '0';
+  sandbox.height = '0';
+  sandbox.style.visibility = 'hidden';
+  sandbox.style.position = 'fixed';
+  document.body.appendChild(sandbox);
+  return sandbox;
+}
+
 // The page as the reporter sees it, without the form and the entries; null when the capture fails.
 export async function captureScreen(): Promise<PreparedScreenshot | null> {
   try {
-    const { domToCanvas } = await import('modern-screenshot');
-    const canvas = await domToCanvas(document.documentElement, {
+    const { createContext, destroyContext, domToCanvas } = await import('modern-screenshot');
+    const context = await createContext(document.documentElement, {
       width: window.innerWidth,
       height: window.innerHeight,
       scale: Math.min(
@@ -111,7 +125,12 @@ export async function captureScreen(): Promise<PreparedScreenshot | null> {
       style: { transform: `translate(${-window.scrollX}px, ${-window.scrollY}px)` },
       filter: (node) => !isBugReportChrome(node),
     });
-    return await encodeCanvas(canvas);
+    context.sandbox = captureSandbox();
+    try {
+      return await encodeCanvas(await domToCanvas(context));
+    } finally {
+      destroyContext(context);
+    }
   } catch (error) {
     console.warn('[bug-reports] capture.failed', { error: String(error) });
     return null;

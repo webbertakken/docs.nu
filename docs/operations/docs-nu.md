@@ -46,12 +46,45 @@ What the hosted setup holds:
   `expire-bug-screenshots` deleting objects 90 days after upload. Create it before the first deploy that binds it.
 - **The rate limiter** `BUG_REPORT_RATE_LIMITER`, namespace `7018`, needs nothing created.
 
-Setting it up, once:
+Setting it up, once (the CLI steps were run against a local stack and file as described):
 
 1. `wrangler r2 bucket create docs-nu-bug-screenshots --location weur`
 2. `wrangler r2 bucket lifecycle add docs-nu-bug-screenshots expire-bug-screenshots --expire-days 90`
-3. With the CLI signed in as Webber: create the document, its board tab and board with the five columns, and the Bug
-   Report card type with its fields; note the document and tab ids.
+3. With the CLI signed in as Webber on docs.nu, write `types.json`:
+
+   ```json
+   [
+     {
+       "op": "add",
+       "name": "Bug Report",
+       "glyph": "bug",
+       "color": "#dc2626",
+       "fields": ["Description", "Assignee", "Priority"],
+       "custom": [
+         { "name": "Severity", "kind": "choice", "options": ["Low", "Medium", "High", "Critical"] },
+         { "name": "Context", "kind": "longtext" },
+         { "name": "Screenshot", "kind": "link" },
+         { "name": "Reporter", "kind": "text" },
+         { "name": "Release", "kind": "text" }
+       ]
+     }
+   ]
+   ```
+
+   then run:
+
+   ```sh
+   livedoc document create "Bug Tracker" --tab Notes
+   livedoc tab add "Bug Tracker" "Bug Reports" --template kanban
+   livedoc type apply "Bug Tracker" -f types.json
+   livedoc board set "Bug Tracker" Kanban --title "Bug Reports" \
+     --columns "Reported,Triaged,In Progress,Fixed,Won't Fix" --types "Bug Report" --done "Fixed,Won't Fix"
+   livedoc tab ls "Bug Tracker" --json
+   ```
+
+   The board must be on a **Board tab** (`tab add --template kanban` makes one): the api files only on a Board tab, and
+   stores every report as `board_missing` otherwise. Note the document id and the "Bug Reports" tab id.
+
 4. Set both ids in `apps/api/hosted-vars.json` (`environments.production`), merge and deploy.
 5. Send a test report as a guest with a screenshot; check the card is on the board, the screenshot opens for Webber
    only (`/report-a-bug/screenshot?key=…`), then delete the test card.
