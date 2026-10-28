@@ -438,4 +438,33 @@ describe('the thread listing', () => {
     expect((await list('', 'stranger')).status).toBe(403);
     expect((await call({ method: 'POST', path: '/comments' })).status).toBe(405);
   });
+
+  describe('through a link scoped to a tab with no comments', () => {
+    beforeEach(() => {
+      seed(
+        [shape('a')],
+        [shape('d', { commentThread: { resolved: false, comments: [comment('c3')] } })],
+      );
+      sql.sql.exec(`
+        INSERT INTO share_links (code, document_id, role, tab_id, created_at) VALUES ('EDIT1', 'd1', 'edit', 't1', 1);
+        INSERT INTO share_links (code, document_id, role, level, tab_id, created_at) VALUES ('PART1', 'd1', 'view', 'participate', 't1', 1);
+        INSERT INTO share_links (code, document_id, role, tab_id, created_at) VALUES ('VIEW1', 'd1', 'view', 't1', 1);
+      `);
+    });
+
+    it.each([
+      ['an Editor', 'EDIT1'],
+      ['a Participant', 'PART1'],
+      ['a Viewer', 'VIEW1'],
+    ])('answers %s an empty list, never another tab’s threads', async (_role, code) => {
+      expect(await list('?status=all', 'guest', code)).toEqual({
+        status: 200,
+        body: { threads: [] },
+      });
+    });
+
+    it('still refuses a caller with no grant at all', async () => {
+      expect((await list('?status=all', 'stranger')).status).toBe(403);
+    });
+  });
 });
