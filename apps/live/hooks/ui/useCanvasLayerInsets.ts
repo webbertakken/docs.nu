@@ -16,10 +16,12 @@ import {
   sameLayout,
   type CanvasLayout,
 } from '@/lib/canvas-layer-insets';
+import { ACTIONS_GROUP_SELECTOR } from '@/lib/top-line-clearance';
 
 // The strip itself (its root runs the canvas width; its card changes width with the category) for the header band.
 // The covering element's controls card too: the strip stops short of it, so its width matters.
-const OBSERVED = `${TOP_ROW_SELECTOR}, ${PANEL_SELECTOR}, [data-toolbar-palette], [data-toolbar-palette] > *, ${BAND_CONTROLS_SELECTOR}`;
+// The top line's actions group too: the band ends before it.
+const OBSERVED = `${TOP_ROW_SELECTOR}, ${ACTIONS_GROUP_SELECTOR}, ${PANEL_SELECTOR}, [data-toolbar-palette], [data-toolbar-palette] > *, ${BAND_CONTROLS_SELECTOR}`;
 
 // A child-list change that adds or removes a piece of chrome (or something holding one).
 export function touchesChrome(

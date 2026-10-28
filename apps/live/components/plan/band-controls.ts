@@ -11,8 +11,9 @@ export const BAND_CONTROLS_CLASS =
 
 // The header's own right padding in a band: a hairline, so the last control stands as far in from the element's right
 // edge as the menu box's first does from its left (the box's 4 px inset and hairline, from a 12 px canvas inset that is
-// also the element's).
-export const BAND_HEADER_END = '[[data-header-band]_&]:pr-px';
+// also the element's), plus the room the top line's actions group takes at the top right (`--plan-band-end`, the band's
+// `end`), so the controls sit before it.
+export const BAND_HEADER_END = '[[data-header-band]_&]:pr-[calc(1px+var(--plan-band-end,0px))]';
 
 // The menu box's height (TOOLBAR_CARD: 36 px controls, a 4 px inset and a hairline), which the controls and the
 // Sheet's toolbar in a header band match (a board's widgets ride in the menu box itself).

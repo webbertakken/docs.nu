@@ -16,7 +16,8 @@ describe('the header band', () => {
   it('nor around the menu box, and ends the header as far in as the menu starts', () => {
     expect(BAND_FLUSH).toContain('[[data-band-blend]_&]:border-transparent!');
     expect(BAND_FLUSH).toContain('[[data-band-blend]_&]:bg-transparent!');
-    expect(BAND_HEADER_END).toBe('[[data-header-band]_&]:pr-px');
+    // A hairline, plus the room the top line's actions group takes (--plan-band-end).
+    expect(BAND_HEADER_END).toBe('[[data-header-band]_&]:pr-[calc(1px+var(--plan-band-end,0px))]');
     expect(BAND_STRIP_FLUSH).toContain('[[data-strip-in-band]_&]:border-transparent!');
   });
 });

@@ -147,19 +147,20 @@ describe('headerBand', () => {
   const stripRight = 1440 - 12 - END - 12;
 
   it('runs as tall as the row, the strip pressed against the controls, the content between it and the menu', () => {
-    expect(headerBand(canvas, none, menu, strip, 0, END)).toEqual({
+    expect(headerBand(canvas, none, menu, strip, null, END)).toEqual({
       height: 145 - (80 + 12),
       left: 124 - 12 + 12,
       mid: stripRight - 446 - 12 - 124 - 12,
       stripEnd: 1440 - stripRight,
+      end: 0,
     });
   });
 
   // Moving the strip never takes the band away: only its width counts.
   it('lays the same band out wherever the strip is now', () => {
     const moved = box(stripRight - 446, 92, stripRight, 145);
-    expect(headerBand(canvas, none, menu, moved, 0, END)).toEqual(
-      headerBand(canvas, none, menu, strip, 0, END),
+    expect(headerBand(canvas, none, menu, moved, null, END)).toEqual(
+      headerBand(canvas, none, menu, strip, null, END),
     );
   });
 
@@ -170,11 +171,12 @@ describe('headerBand', () => {
   });
 
   it('holds the menu alone with no strip, its content running to the controls', () => {
-    expect(headerBand(canvas, none, menu, null, 0, END)).toEqual({
+    expect(headerBand(canvas, none, menu, null, null, END)).toEqual({
       height: 145 - (80 + 12),
       left: 124 - 12 + 12,
       mid: stripRight - 12 - 124 - 12,
       stripEnd: 1440 - stripRight,
+      end: 0,
     });
   });
 
@@ -186,24 +188,32 @@ describe('headerBand', () => {
   it('needs room for a title between the menu and the strip at the right', () => {
     // The strip's width that leaves exactly BAND_MID_MIN_PX.
     const widest = stripRight - 124 - 24 - BAND_MID_MIN_PX;
-    expect(headerBand(canvas, none, menu, box(200, 92, 200 + widest, 145), 0, END)).not.toBeNull();
-    expect(headerBand(canvas, none, menu, box(200, 92, 201 + widest, 145), 0, END)).toBeNull();
+    expect(
+      headerBand(canvas, none, menu, box(200, 92, 200 + widest, 145), null, END),
+    ).not.toBeNull();
+    expect(headerBand(canvas, none, menu, box(200, 92, 201 + widest, 145), null, END)).toBeNull();
     // A side panel taking the right of the canvas takes the room with it.
-    expect(headerBand(canvas, { left: 0, right: 900 }, menu, strip, 0, END)).toBeNull();
+    expect(headerBand(canvas, { left: 0, right: 900 }, menu, strip, null, END)).toBeNull();
     // Unmeasured controls are given BAND_RIGHT_MIN_PX.
     expect(headerBand(canvas, none, menu, strip)!.stripEnd).toBe(12 + BAND_RIGHT_MIN_PX + 12);
   });
 
   // "The name rides in the menu box": the room is judged without the name, the content starting after the box.
-  it('judges the room from the menu box without the name riding in it', () => {
-    const wide = box(200, 92, 200 + stripRight - 124 - 24 - BAND_MID_MIN_PX, 145);
-    const withName = box(12, 92, 124 + 200, 145);
-    const band = headerBand(canvas, none, withName, wide, 200, END);
-    expect(band).not.toBeNull();
-    expect(band!.left).toBe(124 + 200 - 12 + 12);
-    // The strip now starts before the box's end: the content has no room, never a negative one.
-    expect(band!.mid).toBe(0);
-    expect(headerBand(canvas, none, withName, wide, 0, END)).toBeNull();
+  // The actions group keeps the top line's right (docs/specs/007-editor/toolbar-layout.md "The top line"): the header's
+  // controls and the strip end before it, the header padded clear of it.
+  it('ends before the actions group at the top right', () => {
+    const actions = box(1440 - 12 - 300, 92, 1440 - 12, 145);
+    const band = headerBand(canvas, none, menu, strip, actions, END);
+    const right = actions.left - 12;
+    expect(band).toEqual({
+      height: 145 - (80 + 12),
+      left: 124 - 12 + 12,
+      mid: right - END - 12 - 446 - 12 - 124 - 12,
+      stripEnd: 1440 - (right - END - 12),
+      end: 1440 - 12 - right,
+    });
+    // An actions group with no room left for a title: no band.
+    expect(headerBand(canvas, none, menu, strip, box(700, 92, 1428, 145), END)).toBeNull();
   });
 
   it('measures off the page with the top inset given up to the header', () => {
@@ -239,13 +249,15 @@ describe('headerBand', () => {
     (stripEl!.firstElementChild as HTMLElement).getBoundingClientRect = rect(strip);
     const controls = main!.querySelector<HTMLElement>('[data-band-controls]')!;
     Object.defineProperty(controls, 'offsetWidth', { value: 144 });
-    expect(measureCanvasChrome(main!).band).toEqual(headerBand(canvas, none, menu, strip, 0, 160));
+    expect(measureCanvasChrome(main!).band).toEqual(
+      headerBand(canvas, none, menu, strip, null, 160),
+    );
   });
 });
 
 describe('sameLayout', () => {
   const insets = { top: 0, left: 0, right: 0, bottom: 0 };
-  const band = { height: 53, left: 124, mid: 349, stripEnd: 300 };
+  const band = { height: 53, left: 124, mid: 349, stripEnd: 300, end: 0 };
   it('compares the insets and the band by value', () => {
     expect(sameLayout({ insets, band }, { insets: { ...insets }, band: { ...band } })).toBe(true);
     expect(sameLayout({ insets, band }, { insets, band: { ...band, mid: 300 } })).toBe(false);
