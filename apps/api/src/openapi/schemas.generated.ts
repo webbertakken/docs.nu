@@ -1512,6 +1512,147 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       },
     ],
   },
+  BugReportContext: {
+    additionalProperties: false,
+    properties: {
+      from: {
+        type: 'string',
+      },
+      mode: {
+        $ref: '#/components/schemas/EditorMode',
+      },
+      online: {
+        type: 'boolean',
+      },
+      recentErrors: {
+        items: {
+          $ref: '#/components/schemas/BugReportRecentError',
+        },
+        type: 'array',
+      },
+      release: {
+        type: 'string',
+      },
+      route: {
+        type: 'string',
+      },
+      shareRole: {
+        $ref: '#/components/schemas/BugReportShareRole',
+      },
+      tabKind: {
+        $ref: '#/components/schemas/TabKind',
+      },
+      userAgent: {
+        type: 'string',
+      },
+      viewport: {
+        additionalProperties: false,
+        properties: {
+          height: {
+            type: 'number',
+          },
+          pixelRatio: {
+            type: 'number',
+          },
+          width: {
+            type: 'number',
+          },
+        },
+        required: ['width', 'height', 'pixelRatio'],
+        type: 'object',
+      },
+    },
+    required: ['route', 'viewport', 'online', 'recentErrors'],
+    type: 'object',
+  },
+  BugReportErrorSource: {
+    enum: ['uncaught', 'rejection', 'render', 'api'],
+    type: 'string',
+  },
+  BugReportFiledResponse: {
+    additionalProperties: false,
+    properties: {
+      number: {
+        type: 'number',
+      },
+    },
+    required: ['number'],
+    type: 'object',
+  },
+  BugReportRecentError: {
+    additionalProperties: false,
+    properties: {
+      at: {
+        type: 'string',
+      },
+      message: {
+        type: 'string',
+      },
+      source: {
+        $ref: '#/components/schemas/BugReportErrorSource',
+      },
+    },
+    required: ['at', 'source', 'message'],
+    type: 'object',
+  },
+  BugReportScreenshot: {
+    additionalProperties: false,
+    properties: {
+      contentType: {
+        $ref: '#/components/schemas/BugReportScreenshotType',
+      },
+      data: {
+        type: 'string',
+      },
+    },
+    required: ['contentType', 'data'],
+    type: 'object',
+  },
+  BugReportScreenshotType: {
+    enum: ['image/webp', 'image/jpeg', 'image/png'],
+    type: 'string',
+  },
+  BugReportShareRole: {
+    anyOf: [
+      {
+        const: 'owner',
+        type: 'string',
+      },
+      {
+        $ref: '#/components/schemas/AccessLevel',
+      },
+    ],
+  },
+  BugReportStoredResponse: {
+    additionalProperties: false,
+    properties: {
+      stored: {
+        const: true,
+        type: 'boolean',
+      },
+    },
+    required: ['stored'],
+    type: 'object',
+  },
+  BugReportSubmission: {
+    additionalProperties: false,
+    properties: {
+      context: {
+        $ref: '#/components/schemas/BugReportContext',
+      },
+      details: {
+        type: 'string',
+      },
+      screenshot: {
+        $ref: '#/components/schemas/BugReportScreenshot',
+      },
+      title: {
+        type: 'string',
+      },
+    },
+    required: ['title'],
+    type: 'object',
+  },
   CapabilitiesResponse: {
     additionalProperties: false,
     properties: {
@@ -13360,6 +13501,7 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       'Held',
       'Viewed',
       'Sent',
+      'Completed',
       'Api',
       'Client',
       'Warning',
@@ -13408,6 +13550,7 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       'Plan',
       'Sheet',
       'Form',
+      'Feedback',
       'Timing',
     ],
     type: 'string',

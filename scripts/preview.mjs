@@ -32,14 +32,7 @@ const DNS_LABEL_MAX = 63;
 const HASH_LENGTH = 6;
 
 /** Deploy order: the api first (two apps bind it), the router, which binds the other five, last. */
-export const PREVIEW_APPS = [
-  'api',
-  'marketing',
-  'telemetry',
-  'help',
-  'live',
-  'router',
-];
+export const PREVIEW_APPS = ['api', 'marketing', 'telemetry', 'help', 'live', 'router'];
 
 /**
  * A branch name as one DNS label: lowercase letters, digits and single hyphens, never at either end. A

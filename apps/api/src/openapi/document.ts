@@ -213,6 +213,10 @@ const TAGS = [
   { name: 'Participants', description: 'Display name and colour for a collaborator.' },
   { name: 'Account', description: 'Account-level data, preferences, and migration.' },
   { name: 'AI', description: 'Optional AI diagram assistant.' },
+  {
+    name: 'Bug reports',
+    description: 'Report a Bug: reports filed on a private board, and their screenshots.',
+  },
   { name: 'Telemetry', description: 'Anonymous first-party usage events and the public summary.' },
   { name: 'Meta', description: 'Capabilities, link unfurl, and this document.' },
 ];

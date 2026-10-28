@@ -9,6 +9,7 @@
 // the two create-new surfaces can't drift.
 import { SparkleIcon } from '@/components/palette/template-picker-icons';
 import { Button, CircleXIcon, lucideGlyph } from '@livedoc/ui';
+import { ReportBugScreenButton } from '@/components/bug-report/ReportBugButton';
 import { lucideFolder } from '@livedoc/icons/lucide';
 
 const FolderIcon = lucideGlyph(lucideFolder, 16);
@@ -70,6 +71,8 @@ export function NotFound({
             New Document
           </Button>
         </div>
+        {/* docs/specs/004-interface-design/report-a-bug-entries.md: a broken link is worth reporting too. */}
+        <ReportBugScreenButton className="mt-3" />
       </div>
     </div>
   );

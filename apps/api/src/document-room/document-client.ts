@@ -7,7 +7,9 @@
 // Inside the room itself the same call is a plain method call (DocumentRoom's local namespace), so code the worker
 // and the room share (a document read's outline) costs no hop there.
 
+import type { BugReportFiling } from '@livedoc/api-schema';
 import type { Item } from '@livedoc/items';
+import type { BugReportFileOutcome } from '../bug-reports/room-file';
 import type { ContentSummary } from '../db/content-summary';
 import type { Env } from '../types';
 import type { MoveOutcome } from './content-move';
@@ -35,6 +37,7 @@ export type DocumentRoomClient = {
   importCopy(copy: DocumentCopy): Promise<ContentSummary>;
   item(itemId: string): Promise<Item | null>;
   respondToForm(request: Request, identity: RouteIdentity): Promise<Response>;
+  fileBugReport(tabId: string, filing: BugReportFiling): Promise<BugReportFileOutcome>;
   // A tab shared between documents (tab-shares.ts): the tab and its holders for one joining through this document,
   // the join recorded here, and what another holder (`from`) sends.
   sharedTabCopy(tabId: string): Promise<SharedTabCopy | null>;
@@ -77,6 +80,7 @@ export function documentRoom(
     importCopy: (copy) => room.importCopy(documentId, copy),
     item: (itemId) => room.item(documentId, itemId),
     respondToForm: (request, identity) => room.respondToForm(documentId, request, identity),
+    fileBugReport: (tabId, filing) => room.fileBugReport(documentId, tabId, filing),
     sharedTabCopy: (tabId) => room.sharedTabCopy(documentId, tabId),
     shareJoined: (tabId, member, seen) => room.shareJoined(documentId, tabId, member, seen),
     receiveShares: (from, messages) => room.receiveShares(documentId, from, messages),

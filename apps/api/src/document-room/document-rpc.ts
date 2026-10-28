@@ -3,11 +3,13 @@
 // one document and runs it here; the tests' rooms (test-sqlite-d1.ts) run the same functions over shared tables.
 // The worker calls these only through document-client.ts.
 
+import type { BugReportFiling } from '@livedoc/api-schema';
 import type { Item } from '@livedoc/items';
 import type { ContentSummary } from '../db/content-summary';
 import { readItem } from '../db';
 import { documentPlacesImage } from '../db/image-refs';
 import { answerFormRequest } from '../routes/forms';
+import { fileBugReportInRoom, type BugReportFileOutcome } from '../bug-reports/room-file';
 import type { DocumentEnv } from '../types';
 import { answerDocumentImage } from './document-image-request';
 import {
@@ -53,6 +55,12 @@ export type DocumentRoomRpc = {
   item(documentId: string, itemId: string): Promise<Item | null>;
   // A public form's doors, /api/forms/:code... (read, respond, report), for a form this document holds.
   respondToForm(documentId: string, request: Request, identity: RouteIdentity): Promise<Response>;
+  // A bug report filed on the Bug Tracker board this document holds (docs/specs/016-platform/bug-reports.md).
+  fileBugReport(
+    documentId: string,
+    tabId: string,
+    filing: BugReportFiling,
+  ): Promise<BugReportFileOutcome>;
   // A tab shared between documents (tab-shares.ts): a joining document's copy, the join recorded, and what
   // another holder (`from`) sends.
   sharedTabCopy(documentId: string, tabId: string): Promise<SharedTabCopy | null>;
@@ -85,6 +93,8 @@ export function documentRpc(
     item: (documentId, itemId) => readItem(env, documentId, itemId),
     respondToForm: (_documentId, request, identity) =>
       answerFormRequest(documentRouteContext(env, request, identity, waitUntil)),
+    fileBugReport: (documentId, tabId, filing) =>
+      fileBugReportInRoom(env, documentId, tabId, filing, waitUntil),
     sharedTabCopy: (documentId, tabId) => sharedTabCopy(env, documentId, tabId),
     shareJoined: (documentId, tabId, member, seenUpdatedAt) =>
       recordShareJoin(env, documentId, tabId, member, seenUpdatedAt),

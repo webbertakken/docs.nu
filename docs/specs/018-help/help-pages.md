@@ -56,7 +56,7 @@ Top to bottom:
 3. **Editor guides.** The feature categories as art cards, three across on a computer.
 4. **Your account and data.** Account and Data, Privacy and Security, Supported Devices and Policies.
 5. **Developers and self-hosting.** Developers and Self-Hosting, as wide cards.
-6. **Still stuck?** A dark closing band: the contact form and GitHub issues as buttons, beside the
+6. **Still stuck?** A dark closing band: the contact form and Report a Bug (`/report-a-bug`, never a public issue) as buttons, beside the
    Troubleshooting card.
 
 The sections and their categories are `HOME_SECTIONS` in `lib/home-sections.ts`. Every category in the registry

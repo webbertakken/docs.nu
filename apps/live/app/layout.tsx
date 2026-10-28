@@ -10,6 +10,7 @@ import { TruthArmBoot } from '@/components/providers/TruthArmBoot';
 import { KeyboardAvoidanceBoot } from '@/components/providers/KeyboardAvoidanceBoot';
 import { ConfirmProvider } from '@/hooks/ui/useConfirm';
 import { DriveMirrorProvider } from '@/components/drive/DriveMirrorProvider';
+import { BugReportProvider } from '@/components/bug-report/BugReportProvider';
 import { ToastProvider } from '@/hooks/ui/useToast';
 import { googleFontsHref } from '@livedoc/document';
 import { BRAND_OG_IMAGE, BRAND_TWITTER_IMAGE } from '@livedoc/ui/seo';
@@ -173,7 +174,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <ConfirmProvider>
               {/* The Google Drive mirror (docs/specs/022-drive-mirror/drive-mirror.md): runs in one
                   tab per browser, signed in, on a deployment that offers it. */}
-              <DriveMirrorProvider>{children}</DriveMirrorProvider>
+              <DriveMirrorProvider>
+                {/* Report a Bug (docs/specs/016-platform/bug-reports.md): one form for every screen. */}
+                <BugReportProvider>{children}</BugReportProvider>
+              </DriveMirrorProvider>
             </ConfirmProvider>
           </ToastProvider>
         </AuthBridge>

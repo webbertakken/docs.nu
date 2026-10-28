@@ -183,6 +183,9 @@ export const TELEMETRY_CATEGORIES = [
   // (a document opening, a tab switch, a save, the live room connecting, a page's Web Vitals). Only ever
   // 'Measured', `type` the metric and the bucket its value fell in ('DocumentLoad.Under1000ms'), checked
   // against the closed list in timing-telemetry.ts. Never a raw number, never an id.
+  // Report a Bug (docs/specs/016-platform/bug-reports.md "Telemetry"): the form 'Opened' and a report sent
+  // 'Completed', typed 'Bug'. Never a report's words.
+  'Feedback',
   'Timing',
 ] as const;
 export type TelemetryCategory = (typeof TELEMETRY_CATEGORIES)[number];
@@ -273,6 +276,8 @@ export const TELEMETRY_ACTIONS = [
   // Email (docs/specs/014-identity/transactional-email.md): a transactional / lifecycle email left the worker for
   // the provider. Only ever paired with the 'Email' category.
   'Sent',
+  // Report a Bug (docs/specs/016-platform/bug-reports.md "Telemetry"): a report sent, filed or stored.
+  'Completed',
   // Error source (docs/specs/017-telemetry/telemetry.md): the nouns the 'Error' category uses in the
   // action slot — API failures vs client-side exceptions, and warnings: a
   // degradation the author was carried through (a spent AI budget that

@@ -366,6 +366,14 @@ export const SUPPORT_ARTICLE_ICONS: Record<string, ReactNode> = {
       <path d="M12 8v4.5l3 1.8" />
     </Glyph>
   ),
+  // A bug beside a sent note: telling the team, not fixing it.
+  'report-a-bug': (
+    <Glyph>
+      <rect x="5" y="8" width="9" height="12" rx="4.5" />
+      <path d="M7 8a2.5 2.5 0 015 0M9.5 12v8M2.5 11h2.5M2.5 16h2.5M14 11h2M3.5 6l2 2" />
+      <path d="M16 4h5.5v5H19l-1.5 1.5V9H16z" />
+    </Glyph>
+  ),
   'agent-changes': (
     <Glyph>
       <rect x="3" y="5" width="18" height="14" rx="2" />

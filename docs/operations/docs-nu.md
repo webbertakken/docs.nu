@@ -5,8 +5,8 @@ LiveDoc runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The to
 ## Shape
 
 - Workers: `docs-nu-api`, `docs-nu-marketing`, `docs-nu-live`, `docs-nu-telemetry`, `docs-nu-help` and `docs-nu-router`. `docs-nu-mcp` is configured but not deployed (the deploy's MCP job is opt-in), so `mcp.docs.nu` does not answer yet.
-- Resources: D1 `docs-nu` and R2 `docs-nu-images` (western Europe), and the KV namespace `docs-nu-mcp-oauth` for the MCP worker.
-- Rate limiters use namespace ids `7001`-`7014`: the ids are account-wide, and other workers on the account hold `1001` onwards.
+- Resources: D1 `docs-nu`, R2 `docs-nu-images` and `docs-nu-bug-screenshots` (western Europe), and the KV namespace `docs-nu-mcp-oauth` for the MCP worker.
+- Rate limiters use namespace ids `7001`-`7018`: the ids are account-wide, and other workers on the account hold `1001` onwards.
 - Hostnames: `docs.nu` is canonical. `www.docs.nu` is attached to the router too, and a zone redirect rule (301, path and query kept) sends it to the apex. The zone has Always Use HTTPS on. Both zone settings live in the dashboard, not in this repo.
 - Hosted profile (`apps/api/hosted-vars.json`, applied only in `webbertakken/livedoc`): telemetry on, image gallery caps of 100 images and 100 MB per owner, `APP_BASE_URL` `https://docs.nu`. No Google client id yet, so the Drive mirror is off.
 - Sign-in is on (`BETTER_AUTH_SECRET`, Google and email codes); its codes are sent as `LiveDoc <hello@docs.nu>`. AI is off until its key is set.
@@ -26,6 +26,71 @@ The contact form ([help pages](../specs/018-help/help-pages.md#the-contact-form)
 by Webber's docs.nu account, built and published with the CLI (`livedoc form add`, `livedoc form share … publish`).
 Its responses are cards on that document's board, and its owner is emailed for each one. Publishing again makes a new
 link, so a republished form means a new `CONTACT_FORM_URL`.
+
+## Bug Tracker
+
+Report a Bug ([spec](../specs/016-platform/bug-reports.md)) files every report as a card on the **Bug Tracker**, a
+private document in Webber's docs.nu account, never shared. Until it is set up, reports are kept in D1 `bug_reports`
+(reason `unconfigured`) and filed by the scheduled refile once it is.
+
+What the hosted setup holds:
+
+- **The document**: "Bug Tracker", owned by Webber's account, unshared. A board tab with one board whose columns are
+  Reported, Triaged, In Progress, Fixed and Won't Fix (the last two done), in that order: reports land in the first.
+- **The card type** "Bug Report" (the board takes it), with the custom fields Severity (Choice: Low, Medium, High,
+  Critical), Context (Long Text), Screenshot (Link), Reporter (Text) and Release (Text). A field left out is written
+  into the card's Details instead.
+- **The vars** `BUG_REPORT_DOCUMENT_ID` (the document's id) and `BUG_REPORT_TAB_ID` (the board tab's id), in the
+  production environment of `apps/api/hosted-vars.json`. Ids, not secrets.
+- **The R2 bucket** `docs-nu-bug-screenshots` (binding `BUG_SCREENSHOTS`), western Europe, with a lifecycle rule
+  `expire-bug-screenshots` deleting objects 90 days after upload. Create it before the first deploy that binds it.
+- **The rate limiter** `BUG_REPORT_RATE_LIMITER`, namespace `7018`, needs nothing created.
+
+Setting it up, once (the CLI steps were run against a local stack and file as described):
+
+1. `wrangler r2 bucket create docs-nu-bug-screenshots --location weur`
+2. `wrangler r2 bucket lifecycle add docs-nu-bug-screenshots expire-bug-screenshots --expire-days 90`
+3. With the CLI signed in as Webber on docs.nu, write `types.json`:
+
+   ```json
+   [
+     {
+       "op": "add",
+       "name": "Bug Report",
+       "glyph": "bug",
+       "color": "#dc2626",
+       "fields": ["Description", "Assignee", "Priority"],
+       "custom": [
+         { "name": "Severity", "kind": "choice", "options": ["Low", "Medium", "High", "Critical"] },
+         { "name": "Context", "kind": "longtext" },
+         { "name": "Screenshot", "kind": "link" },
+         { "name": "Reporter", "kind": "text" },
+         { "name": "Release", "kind": "text" }
+       ]
+     }
+   ]
+   ```
+
+   then run:
+
+   ```sh
+   livedoc document create "Bug Tracker" --tab Notes
+   livedoc tab add "Bug Tracker" "Bug Reports" --template kanban
+   livedoc type apply "Bug Tracker" -f types.json
+   livedoc board set "Bug Tracker" Kanban --title "Bug Reports" \
+     --columns "Reported,Triaged,In Progress,Fixed,Won't Fix" --types "Bug Report" --done "Fixed,Won't Fix"
+   livedoc tab ls "Bug Tracker" --json
+   ```
+
+   The board must be on a **Board tab** (`tab add --template kanban` makes one): the api files only on a Board tab, and
+   stores every report as `board_missing` otherwise. Note the document id and the "Bug Reports" tab id.
+
+4. Set both ids in `apps/api/hosted-vars.json` (`environments.production`), merge and deploy.
+5. Send a test report as a guest with a screenshot; check the card is on the board, the screenshot opens for Webber
+   only (`/report-a-bug/screenshot?key=…`), then delete the test card.
+
+Stored reports are read with `wrangler d1 execute docs-nu --remote --command "SELECT id, reason, attempts, created_at
+FROM bug_reports"`; the refile files them every 15 minutes once the board takes them.
 
 ## Deploy
 

@@ -118,7 +118,7 @@ export const categories: Category[] = [
     title: 'Troubleshooting',
     description:
       'Get unstuck fast with fixes for the most common editor and collaboration problems.',
-    articleCount: 6,
+    articleCount: 7,
   },
   {
     slug: 'supported-devices',
@@ -879,6 +879,15 @@ export const articles: Article[] = [
     description: 'How autosave works, what a failed save looks like, and how to recover.',
     keywords:
       'lost work autosave recover restore disappeared gone save history new version reload update',
+    category: 'Troubleshooting',
+    categorySlug: 'troubleshooting',
+  },
+  {
+    slug: 'report-a-bug',
+    title: 'Report a Bug',
+    description: 'Tell the team something went wrong, with an optional screenshot, privately.',
+    keywords:
+      'bug report problem broken error crash issue feedback screenshot not working glitch fault defect support',
     category: 'Troubleshooting',
     categorySlug: 'troubleshooting',
   },

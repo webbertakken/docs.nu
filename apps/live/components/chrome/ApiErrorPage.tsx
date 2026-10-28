@@ -8,6 +8,7 @@
 
 import type { ReactNode } from 'react';
 import { Button, Glyph } from '@livedoc/ui';
+import { ReportBugScreenButton } from '@/components/bug-report/ReportBugButton';
 
 type ApiErrorPageProps = {
   // Re-attempt the action that failed (reload the editor, retry the
@@ -52,6 +53,8 @@ export function ApiErrorPage({
           <RetryIcon />
           {retryLabel}
         </Button>
+        {/* A failed load is when a report is worth most (docs/specs/004-interface-design/report-a-bug-entries.md). */}
+        <ReportBugScreenButton className="mt-3" />
         {children}
       </div>
     </div>

@@ -454,6 +454,7 @@ export {
 export {
   DEFAULT_TAB_KIND,
   PLAN_TAB_KINDS,
+  TAB_KINDS,
   isPlanTabKind,
   stampTabKind,
   tabKindOf,

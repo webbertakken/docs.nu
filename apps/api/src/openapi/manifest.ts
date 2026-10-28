@@ -1573,6 +1573,32 @@ export const ROUTE_MANIFEST: RouteSpec[] = [
   },
 
   // ---- Shared with you ----
+  // ---- Report a Bug (docs/specs/016-platform/bug-reports.md) ----
+  {
+    method: 'POST',
+    path: '/bug-reports',
+    segment: 'bug-reports',
+    tag: 'Bug reports',
+    summary:
+      "Report a bug: filed as a card on the Bug Tracker's private board (201, its number), else kept to be filed shortly (202). The reporter is the caller's identity, never the body. 400 invalid_bug_report with the problem, 413 payload_too_large past 1.5 MB, 429 rate_limited past 5 reports in 600 s, 503 bug_reports_unavailable.",
+    auth: 'public',
+    requestSchema: ref('BugReportSubmission'),
+    responseSchema: ref('BugReportFiledResponse'),
+    statuses: [201, 202, 400, 405, 413, 429, 503],
+  },
+  {
+    method: 'GET',
+    path: '/bug-reports/screenshots/{tag}/{file}',
+    segment: 'bug-reports',
+    tag: 'Bug reports',
+    summary:
+      "A bug report's screenshot, served only to the Bug Tracker document's owner. 404 for anyone else, an unknown or expired key, or a host with no Bug Tracker.",
+    auth: 'guest-or-session',
+    tokenUsable: true,
+    responseMediaType: 'image/webp',
+    statuses: [200, 404],
+  },
+
   // ---- Forms, the public side (docs/specs/030-forms/forms.md "Filling in a form") ----
   {
     method: 'GET',

@@ -1,4 +1,4 @@
-import { lucideLayers, lucideSlidersHorizontal } from '@livedoc/icons/lucide';
+import { lucideBug, lucideLayers, lucideSlidersHorizontal } from '@livedoc/icons/lucide';
 
 import { Glyph, type IconProps } from './Glyph';
 import { lucideGlyph } from './lucide-glyph';
@@ -45,3 +45,6 @@ export const LayersStackIcon = lucideGlyph(lucideLayers, 20);
 
 // Settings: two sliders, never a cog (a cog's spokes read as a sun, the appearance toggle).
 export const SettingsIcon = lucideGlyph(lucideSlidersHorizontal, 16);
+
+// Report a Bug (docs/specs/004-interface-design/report-a-bug-entries.md): Lucide's bug, at the bar's icon size.
+export const BugIcon = lucideGlyph(lucideBug, 16);

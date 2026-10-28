@@ -27,8 +27,8 @@ export const SITE_PITCH = 'a real-time workspace for documents of every kind';
 export const sentencePitch = () => `${SITE_PITCH[0]!.toUpperCase()}${SITE_PITCH.slice(1)}.`;
 
 // The open-source repository (docs/specs/002-project-scope/open-source-and-business-model.md: the codebase is public + MIT), linked
-// from the footer, the FAQ, the status page, the help centre's contact page,
-// the editor's bottom bar and Explorer menu, and the `sameAs` JSON-LD.
+// from the footer, the FAQ, the status page, the editor's bottom bar and
+// Explorer menu, and the `sameAs` JSON-LD.
 export const REPO_URL = 'https://github.com/webbertakken/livedoc';
 
 // The public contact form (docs/specs/018-help/help-pages.md "The contact form"): a LiveDoc form on docs.nu in
@@ -36,6 +36,11 @@ export const REPO_URL = 'https://github.com/webbertakken/livedoc';
 // email address is published. Linked from the help centre's contact page, home page and article pager, the FAQ,
 // the status page and the Terms and Privacy Policy. Publishing the form again makes a new link, and a new value here.
 export const CONTACT_FORM_URL = 'https://docs.nu/form/M1SK9OVYzeEPolpJZrQQdx';
+
+// Report a Bug's own page (docs/specs/016-platform/bug-reports.md "Entries"), served by the editor app: where the
+// help centre's contact page, the site footer and the editor's root error page send a reporter. A page of another
+// site adds `?from=<its path>`.
+export const REPORT_A_BUG_PATH = '/report-a-bug';
 
 // Favicon set for the apps that serve their pages from the origin root (or
 // reference the root's assets): the SVG mark, a raster PNG fallback for

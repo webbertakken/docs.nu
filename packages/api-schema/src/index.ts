@@ -722,3 +722,6 @@ export * from './mcp-origin';
 export * from './forms';
 export { decodePathSegment } from './path-segment';
 export { KEY_ID_MAX, isKeyId } from './key-id';
+export * from './bug-report';
+export * from './bug-report-context-lines';
+export * from './bug-report-card';

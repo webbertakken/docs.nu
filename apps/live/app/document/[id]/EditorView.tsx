@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic';
 import { CommentBadgesContext } from '@/components/canvas/CommentBadgesContext';
 import { SuppressElementIndicators } from '@/components/canvas/ElementIndicatorStyleContext';
 import { EditorModeProvider } from '@/components/chrome/editor-mode/editor-mode-context';
-import { truncateName } from '@livedoc/document';
+import { tabKindOf, truncateName } from '@livedoc/document';
+import { useBugReportPlace } from '@/lib/bug-report/place';
 import { openSearchWithPrefetch } from '@/lib/open-search';
 import { track } from '@/lib/telemetry';
 import { NewVersionPrompt } from '@/components/chrome/NewVersionPrompt';
@@ -218,6 +219,12 @@ export function EditorView() {
   // One look in both editor modes (docs/specs/007-editor/editor-modes.md "One look"), so the accent
   // follows the tab's theme in Draw mode too.
   useEditorAccent(activeTab.theme);
+  // Where a bug report was sent from (docs/specs/016-platform/bug-reports.md "Context").
+  useBugReportPlace({
+    mode: ctx.editorMode.mode,
+    tabKind: tabKindOf(activeTab),
+    shareRole: isOwner ? 'owner' : ctx.can.level,
+  });
   // The viewer's own light / dark chrome (docs/specs/007-editor/live-app.md). Read here because the
   // Default theme resolves through it — see the canvas surface below.
   const { appearance } = useAppearance();

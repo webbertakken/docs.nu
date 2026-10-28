@@ -1,0 +1,49 @@
+import { ArticleLayout } from '@/components/ArticleLayout';
+import { helpMetadata } from '@/lib/seo';
+
+export const metadata = helpMetadata({
+  title: 'Report a Bug',
+  description:
+    'How to tell the LiveDoc team something went wrong: where Report a Bug is, what a report carries, adding a screenshot, and what happens next.',
+  path: '/help/troubleshooting/report-a-bug/',
+});
+
+<ArticleLayout title="Report a Bug" description="Tell the team something went wrong, from any screen, privately." categoryTitle="Troubleshooting" categorySlug="troubleshooting">
+
+When something in LiveDoc does not work the way it should, **Report a Bug** sends the team a short report. You do not need an account, and your report is never published: it goes to a private board the LiveDoc team works from.
+
+## Where to find it
+
+- **In the editor and the Explorer**: the bug button in the bottom bar, beside Search.
+- **In the account menu**, when you are signed in.
+- **On an error screen**: when a document cannot load or part of the page fails, the card offers **Report a Bug** beside **Try Again**.
+- **On this help centre**: on the [Contact](/help/contact/) page and in the footer of every page.
+
+## Sending a report
+
+1. Say **what went wrong** in a sentence. This is the only field you must fill in.
+2. Add **more details** if they help: what you were doing, what you expected, what happened instead.
+3. Add a **screenshot** if you like, with **Capture Screen** (a picture of the page behind the form) or **Upload Image**. You can also paste or drop an image onto the form. You always see the screenshot before it is sent, and **Remove Screenshot** takes it off.
+4. Press **Send Report**.
+
+You will see **Logged as report #12** (with your report's number), or **Saved; we will file it shortly.** if the team's board could not take it at that moment; either way it has arrived.
+
+## What a report carries
+
+Open **What's Attached** in the form to see everything that is sent besides your words:
+
+- the kind of page you were on, such as a document or the Explorer, but never which document, and never a share link;
+- the editor mode, the kind of tab and your role on the document, when one is open;
+- the app version, your browser and system, your screen size and whether you were online;
+- the last few error messages from this page, with any email address, web address or id taken out;
+- your account id or your browser's guest id, so the team can tell reports apart. Never your email address.
+
+A screenshot is only sent when you add one. Screenshots can show your document and the names on it, so look before you send. They are kept for 90 days, and only the LiveDoc team can open them. See the [Privacy Policy](/help/policies/privacy-policy/).
+
+## Good to know
+
+- You can send a few reports in a row; after five in ten minutes, the form asks you to wait a little.
+- A screenshot can be up to 1 MB; larger pictures are made smaller before sending.
+- For questions, or anything that is not a bug, use the [contact form](/help/contact/).
+
+</ArticleLayout>

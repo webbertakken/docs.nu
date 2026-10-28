@@ -168,3 +168,28 @@ export const HELP_CENTRE: MetricStack = {
   headline: ARTICLE_VIEWS,
   seeAlso: { section: 'help', label: 'See Each Article in Pages & Help' },
 };
+
+// Report a Bug (docs/specs/016-platform/bug-reports.md "Telemetry"): forms opened beside reports sent.
+export const BUG_FORMS_OPENED = chart(
+  'Feedback',
+  'Opened',
+  'Bug Forms Opened',
+  'Times someone opened the Report a Bug form.',
+  { types: ['Bug'], rising: 'neutral' },
+);
+
+export const BUG_REPORTS_SENT = chart(
+  'Feedback',
+  'Completed',
+  'Bug Reports Sent',
+  'Bug reports sent: filed on the private board, or kept to be filed shortly. A rise is something to look into.',
+  { types: ['Bug'], rising: 'bad' },
+);
+
+export const BUG_REPORTS: MetricStack = {
+  stack: true,
+  title: 'Bug Reports',
+  blurb: 'The Report a Bug form opened, and the reports sent from it.',
+  members: [BUG_FORMS_OPENED, BUG_REPORTS_SENT],
+  headline: BUG_REPORTS_SENT,
+};

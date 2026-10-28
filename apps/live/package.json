@@ -50,6 +50,7 @@
     "@tensorflow/tfjs-layers": "4.22.0",
     "better-auth": "1.7.13",
     "gifenc": "1.0.3",
+    "modern-screenshot": "4.7.0",
     "next": "^16.4.3",
     "polygon-clipping": "0.15.7",
     "prosemirror-commands": "^1.7.2",

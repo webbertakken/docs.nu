@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { helpMetadata } from '@/lib/seo';
-import { buttonClassName, CONTACT_FORM_URL, REPO_URL, ButtonContent } from '@livedoc/ui';
+import { buttonClassName, CONTACT_FORM_URL, REPORT_A_BUG_PATH, ButtonContent } from '@livedoc/ui';
 import { ExternalLinkIcon } from '@/lib/chrome-icons';
 
 export const metadata: Metadata = helpMetadata({
   title: 'Contact',
-  description: 'Get in touch with the LiveDoc team, report a bug, or request a feature.',
+  description: 'Get in touch with the LiveDoc team or report a bug.',
   path: '/help/contact/',
 });
 
@@ -48,22 +48,18 @@ export default function ContactPage() {
 
           <div className="rounded-xl border border-slate-200 bg-white p-5 transition-all duration-micro hover:border-slate-300 sm:p-6 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-600">
             <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Report a Bug or Request a Feature
+              Report a Bug
             </h2>
             <p className="mb-4 leading-relaxed text-slate-600 dark:text-slate-300">
-              LiveDoc is open source. Open an issue on GitHub to report a bug, suggest an idea, or
-              follow along with development.
+              Something not working? Tell us what went wrong. Your report goes to the LiveDoc team
+              privately, never to a public page, and you can add a screenshot if it helps.
             </p>
             <a
-              href={`${REPO_URL}/issues`}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`${REPORT_A_BUG_PATH}?from=/help/contact/`}
+              data-bug-report-entry=""
               className={buttonClassName({ variant: 'secondary', size: 'cta-sm' })}
             >
-              <ButtonContent>
-                Open an issue on GitHub
-                {ExternalIcon}
-              </ButtonContent>
+              Report a Bug
             </a>
           </div>
 

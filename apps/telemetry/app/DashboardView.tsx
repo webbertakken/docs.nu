@@ -16,6 +16,7 @@ import {
   FAILED_REQUESTS,
   FORMS,
   HELP_CENTRE,
+  BUG_REPORTS,
   LIVE_TOGETHER,
   LOOK_AND_FEEL,
   MCP_TOOL_CALLS,
@@ -107,7 +108,7 @@ export const GROUPS: MetricGroup[] = [
   // Visitors. Failures land on Exceptions as Error·Api·Http*.SendEmail.
   {
     title: 'Health & support',
-    metrics: [EXCEPTIONS, HELP_CENTRE, EMAILS_SENT],
+    metrics: [EXCEPTIONS, BUG_REPORTS, HELP_CENTRE, EMAILS_SENT],
   },
 ];
 

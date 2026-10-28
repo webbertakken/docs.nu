@@ -2,11 +2,12 @@ import { AppearanceToggle } from '@/components/chrome/AppearanceToggle';
 import { CHROME_BTN, CHROME_BTN_LABELLED, ChromeLabel } from '@/components/chrome/chrome-button';
 import { SettingsIcon, GithubIcon, SearchGlyph } from '@/components/chrome/tab-bar-icons';
 import { TourOfferButton } from '@/components/tour/TourOfferButton';
+import { ReportBugButton } from '@/components/bug-report/ReportBugButton';
 import { REPO_URL, HoverCard } from '@livedoc/ui';
 
 // The right-hand control cluster shared by the editor's bottom tab bar and
-// the Explorer's bottom bar (docs/specs/007-editor/live-app.md): the Start Tour button, search, the open-source GitHub
-// link, settings, and the dark-mode toggle. Each callback-driven control
+// the Explorer's bottom bar (docs/specs/007-editor/live-app.md): the Start Tour button, search, Report a Bug, the open-source
+// GitHub link, settings, and the dark-mode toggle. Each callback-driven control
 // renders only when its handler is supplied; dark-mode is always shown, and
 // GitHub unless the host opts out. Keyboard shortcuts live in Settings' Keyboard category. Rendered as a fragment
 // so each host drops it straight into its own bar flex row.
@@ -52,6 +53,8 @@ export function ChromeControls({
           </button>
         </HoverCard>
       ) : null}
+      {/* Report a Bug (docs/specs/004-interface-design/report-a-bug-entries.md): after Search, kept on a phone. */}
+      <ReportBugButton labelled={labelled} />
       {github ? (
         <>
           {/* Open-source repo link (the codebase is public + MIT, docs/specs/002-project-scope/open-source-and-business-model.md). An
