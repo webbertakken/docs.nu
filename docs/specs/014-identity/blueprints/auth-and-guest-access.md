@@ -110,7 +110,8 @@ One Google key without the other logs `[auth] google_half_configured`. The email
   `check-verification-otp` checks a code without spending it and counts a wrong guess in a read and a separate write,
   so guesses sent at once would all count as one.
 - `advanced`: `useSecureCookies` true unless `APP_BASE_URL` is `http://localhost…` (D13); `cookiePrefix: 'livedoc'`;
-  `ipAddress.ipAddressHeaders: ['cf-connecting-ip']`; `database.generateId` for the user model only →
+  `ipAddress: { disableIpTracking: true }` (no IP is stored on a session); `disableOriginCheck` and `disableCSRFCheck`
+  false, explicitly; `database.generateId` for the user model only →
   `generateAccountId()`, other models the default; `database.validateSchema: false` (the schema is checked in CI, D11); No `backgroundTasks` handler: better-auth would then send a code in the background and answer success whatever
   happened. It swallows a throw from the send callback anyway, so a failed send is recorded on the request's
   `CodeSend` and `routes/auth.ts` answers `502 EMAIL_SEND_FAILED`.
@@ -121,16 +122,19 @@ One Google key without the other logs `[auth] google_half_configured`. The email
   would also refuse listing sessions; the freshness gates below are LiveDoc's, on `FRESH_SESSION_AGE_S`);
   cookie cache off (a revoked session must stop at once).
 - `account: { accountLinking: { enabled: true, allowDifferentEmails: false, requireLocalEmailVerified: true,
-updateUserInfoOnLink: false }, encryptOAuthTokens: true }`, with no `trustedProviders`: a Google sign-in on an
+updateUserInfoOnLink: false, allowUnlinkingAll: methods.includes('email-code') }, encryptOAuthTokens: true }`
+  (Google may be unlinked only where email codes are offered), with no `trustedProviders`: a Google sign-in on an
   address that already has an account joins it only when Google says it verified the address (`email_verified`); a
-  trusted provider would join on an address it never verified. Google's access and refresh tokens are not stored
-  (`mapProfileToUser` keeps name, email, picture; the account row's token columns are written null by an
-  `account.create.before` hook).
+  trusted provider would join on an address it never verified. Google's access, refresh and id tokens are not stored:
+  `account.create.before` and `account.update.before` hooks (`withoutProviderTokens`, `identity-hooks.ts`) write the
+  account row's token columns null.
+- Each model's table through `modelName` (`MODEL_NAMES`: `identity_users`, `identity_sessions`, `identity_accounts`,
+  `identity_verifications`, `identity_jwks`).
 - `user: { deleteUser: { enabled: false } }`: deletion is LiveDoc's own route. `changeEmail` off (first release).
 - `socialProviders.google` when on: `clientId`, `clientSecret`, `prompt: 'select_account'`, scopes
   `openid email profile` only.
 - Plugins: `emailOTP` (length 6, `expiresIn` 300, `allowedAttempts` 3, `storeOTP: 'hashed'`,
-  `sendVerificationOTP` → `EmailSender.sendNow`), `jwt` (below). Nothing else: no
+  `sendVerificationOTP` → `sendSignInCode(env, { email, otp })`, a failure setting `codeSend.failed`), `jwt` (below). Nothing else: no
   `anonymous`, `bearer`, `organization`, `deviceAuthorization`, `twoFactor`, `passkey`,
   `apiKey`.
 - `jwt`: `jwks.keyPairConfig: { alg: 'EdDSA', crv: 'Ed25519' }`, `jwks.rotationInterval: JWKS_ROTATION_S`,
@@ -294,11 +298,11 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 | Field                          | Class                                                                               | Snapshot / restore      | Deletion                             |
 | ------------------------------ | ----------------------------------------------------------------------------------- | ----------------------- | ------------------------------------ |
 | `identity_users.*`             | personal data (email, name, picture URL)                                            | D1 Time Travel only     | `deleteIdentity`                     |
-| `identity_sessions.user_agent` | personal data                                                                       | not restored on purpose | cascade; expired rows swept daily    |
+| `identity_sessions.userAgent`  | personal data                                                                       | not restored on purpose | cascade; expired rows swept daily    |
 | `identity_sessions.token`      | credential (random, stored as-is by better-auth; the cookie carries it HMAC-signed) | never exported          | cascade                              |
-| `identity_accounts.account_id` | personal data (Google subject)                                                      | D1 Time Travel only     | cascade                              |
+| `identity_accounts.accountId`  | personal data (Google subject)                                                      | D1 Time Travel only     | cascade                              |
 | `identity_verifications.value` | credential (hashed code)                                                            | never                   | expiry sweep; `deleteIdentity`       |
-| `identity_jwks.private_key`    | secret (encrypted with the auth secret)                                             | never                   | never (rotation keeps the grace key) |
+| `identity_jwks.privateKey`     | secret (encrypted with the auth secret)                                             | never                   | never (rotation keeps the grace key) |
 
 - **Owner-keyed list** ([API](../../015-api/api.md#owner-keyed-data)) gains `identity_users.id`, `identity_sessions.userId`,
   `identity_accounts.userId` (all "Account-only; deleted by `deleteIdentity`") and loses `auth_accounts.owner_id`.
@@ -539,8 +543,8 @@ provider calls is the intended stand-in.
 | `EMAIL_CODE_TTL_S`                 | 300                           | spec                                | 120 to 900    |
 | `EMAIL_CODE_ATTEMPTS`              | 3                             | spec                                | 3 to 5        |
 | `CODE_RESEND_COOLDOWN_S`           | 30                            | D19                                 | 15 to 60      |
-| `AUTH_RATE_LIMIT`                  | 20 / 60 s per IP              | D12                                 | 10 to 60      |
-| `AUTH_EMAIL_RATE_LIMIT`            | 3 / 60 s per address          | D12                                 | 1 to 5        |
+| `AUTH_RATE_LIMITER` limit          | 20 / 60 s per IP              | D12                                 | 10 to 60      |
+| `AUTH_EMAIL_RATE_LIMITER` limit    | 3 / 60 s per address          | D12                                 | 1 to 5        |
 | `SIGN_UP_SESSION_WINDOW_MS`        | 60,000                        | D20                                 | 10 s to 5 min |
 | `GUEST_MIGRATION_WAIT_MS`          | 10,000                        | existing                            | unchanged     |
 | `ACCOUNT_ID_PREFIX`, random length | `acct_`, 24 base62 (143 bits) | D10                                 | ≥ 22 chars    |

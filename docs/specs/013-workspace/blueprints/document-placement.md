@@ -49,7 +49,7 @@ concept: cloud or this browser).
    `judgeTeam(caller.verifiedAccountId, joined)`: no verified id → `team_forbidden` (the membership lookup is not
    made); `joined === false` → `team_forbidden`; else space `team`.
 2. **Folder steps** (`FOLDER_STEPS`), first non-null wins: `explicitFolder` (null when
-   `requested.folderId === null`; else `judgeFolder`). When none answers, `spaceRoot` does (`folderId: null`,
+   `requested.folderId === null`; else `judgeFolder`). When none answers, nothing was chosen and `personalRoot` does (`teamId: null`, `folderId: null`,
    `via: 'root'`). `defaultFolder` follows `explicitFolder` ([default-folders.md](default-folders.md)).
 3. `judgeFolder(folder, space, caller, joinedFolderTeam)`:
    - `folder === null` → `folder_not_found`.

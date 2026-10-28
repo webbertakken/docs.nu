@@ -342,7 +342,7 @@ link.
   are personal folder rows (any nested depth) and the My Documents
   row, which files the document at the root. Drag-over highlights the target with a brand-blue ring so
   the user sees where the document will land. Drop fires the same
-  `onMoveDocumentToFolder(documentId, targetFolderId)` callback the
+  `onMoveDocumentToFolder(documentId, folderId)` callback the
   picker uses, so the move travels through the same API path and
   optimistic update. Drag transfer uses a custom MIME type
   (`application/x-livedoc-id`) so dragging a document never

@@ -173,7 +173,7 @@ every grant for no change. The close is best-effort and off the response path: t
 already stored, and every later API call and room join is gated on it either way.
 
 The editor also defers two ancillary fetches behind the gate so a visitor on the
-wrong password doesn't accumulate noise: the participant fetch (`apiLoadParticipant`)
+wrong password doesn't accumulate noise: the participant fetch (`apiLoadSelf`)
 skips its retry while the gate is showing, so refreshing the input doesn't replay
 a 401 on every keystroke; and the `useCapabilities` hook plus the
 server-preferences sync take an `enabled` flag that stays false until the gate

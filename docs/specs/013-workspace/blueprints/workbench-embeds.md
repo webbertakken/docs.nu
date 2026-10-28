@@ -67,7 +67,7 @@ It provides these names to sibling blueprints ([CLI](../../015-api/blueprints/cl
 | `apps/api/src/routes/images.ts`                                                                                                                                              | Under a session, `GET /api/images/:id` takes the document path only, with `d` the session's document                                                                                                                      |
 | `apps/api/src/routes/tokens.ts`                                                                                                                                              | Both revokes call `endWorkbenchAccess({ tokenId }, 'revoked')` after `revokeApiToken`                                                                                                                                     |
 | `apps/api/src/db/account.ts`, `apps/api/src/db/account-owner-columns.test.ts`                                                                                                | `deleteAccount` deletes the four tables' rows before `api_tokens`; four `account-only` ledger rows                                                                                                                        |
-| `apps/api/src/responses.ts`                                                                                                                                                  | `workbenchConfined()`, `pairingRequired(body)`                                                                                                                                                                            |
+| `apps/api/src/auth/workbench-confinement.ts`, `apps/api/src/routes/workbench-ticket-route.ts`                                                                                | `forbidden('workbench_confined')`; the 428 `json({ error: 'pairing_required', ... }, { status: 428 })`                                                                                                                    |
 | `apps/api/src/types.ts`, `apps/api/wrangler.toml`                                                                                                                            | `WORKBENCH_TICKET_RATE_LIMITER` (namespace `7010`, 30 per 60 s)                                                                                                                                                           |
 | `apps/api/src/openapi/manifest.ts`, `document.ts`, `schemas.generated.ts`                                                                                                    | Eleven operations under segment `workbench`, tag `Workbench`; the 428 and 401 bodies                                                                                                                                      |
 | `packages/document-views/src/selection-reference.ts` (new, + test), `index.ts`                                                                                               | `selectionReference(input)`                                                                                                                                                                                               |
@@ -147,7 +147,7 @@ The workspace scope adds or changes, by file:
 | `apps/api/src/routes/images.ts`                                                                                                                          | The document scope's image rule only; a workspace session reads as its person                                                                              |
 | `apps/api/src/workbench-end.ts`                                                                                                                          | Rooms of workspace sessions from `workbench_session_rooms`                                                                                                 |
 | `apps/live/lib/workbench/workspace-place.ts` (new, + test)                                                                                               | `WorkspacePlace`, `workspacePlaceOf`, `workspaceFramePath`, `framePathOfAppHref`, `appHrefOfPlace`, `placeView`                                            |
-| `apps/live/lib/workbench/workbench-frame-path.ts` (new, + test)                                                                                          | `WORKBENCH_FRAME_PAGE` `/embed/workbench/explorer`, `isWorkspaceFramePath`: the rewrite the live worker and the e2e stack share                            |
+| `apps/live/lib/workbench/workbench-frame-path.ts` (new, + test)                                                                                          | `WORKSPACE_FRAME_PAGE` `/embed/workbench/explorer`, `isWorkspaceFramePath`: the rewrite the live worker and the e2e stack share                            |
 | `apps/live/lib/app-location.ts` (new, + test)                                                                                                            | `assignAppLocation`, `setAppNavigationInterceptor`; every `window.location.assign` the Explorer makes goes through it                                      |
 | `apps/live/hooks/navigation/useAppNavigation.ts`                                                                                                         | `push` and `replace` ask the interceptor first                                                                                                             |
 | `apps/live/app/embed/workbench/explorer/page.tsx` (new)                                                                                                  | The static workspace frame page; renders `WorkbenchPage`                                                                                                   |
@@ -1441,27 +1441,27 @@ CLI's api calls carry their session token.
 
 ## Constants and configuration
 
-| Constant                            | Value                        | Provenance                                                       | Safe range          |
-| ----------------------------------- | ---------------------------- | ---------------------------------------------------------------- | ------------------- |
-| `WORKBENCH_TICKET_TTL_MS`           | 60000                        | Spec                                                             | 30000 to 120000     |
-| `WORKBENCH_SESSION_TTL_MS`          | 28800000                     | Spec                                                             | 3600000 to 86400000 |
-| `WORKBENCH_HANDSHAKE_MS`            | 5000                         | Spec                                                             | 2000 to 15000       |
-| `WORKBENCH_SELECTION_SETTLE_MS`     | 250                          | Spec                                                             | 100 to 1000         |
-| `WORKBENCH_SELECTION_MAX_REFS`      | 20                           | Spec                                                             | 5 to 50             |
-| `WORKBENCH_PAIRING_TTL_MS`          | 600000                       | Spec                                                             | 120000 to 1800000   |
-| `WORKBENCH_TICKETS_PER_MINUTE`      | 30                           | Spec; the binding's `simple.limit`                               | 10 to 120           |
-| `WORKBENCH_RENEW_LEAD_MS`           | 600000                       | WB38                                                             | 60000 to 3600000    |
-| `WORKBENCH_RENEW_RETRY_MS`          | 60000                        | WB38                                                             | 10000 to 300000     |
-| `WORKBENCH_PAIRING_POLL_INTERVAL_S` | `DEVICE_POLL_INTERVAL_S` (5) | The device grant's, as the spec's "as auth login --device waits" | 2 to 15             |
-| `WORKBENCH_TICKET_BYTES`            | 16                           | Spec: 128 random bits                                            | fixed               |
-| `WORKBENCH_SESSION_SECRET_BYTES`    | 32                           | As an API token (WB39)                                           | 32 to 64            |
-| `WORKBENCH_PAIRING_CODE_BYTES`      | 16                           | 128 bits, as a ticket (WB29)                                     | 16 to 32            |
-| `WORKBENCH_SESSION_PREFIX`          | `lvw_`                       | Spec                                                             | fixed               |
-| `WORKBENCH_NAME_MAX_LENGTH`         | 40                           | WB2                                                              | 20 to 80            |
-| `WORKBENCH_ORIGIN_MAX_LENGTH`       | 255                          | A host name's own cap plus scheme and port                       | fixed               |
-| `WORKBENCH_SESSION_GRACE_MS`        | 86400000                     | WB30                                                             | 0 to 604800000      |
-| `WORKBENCH_ENDED_CLOSE`             | 4006                         | Next after 4005                                                  | fixed               |
-| `WORKBENCH_TICKET_RATE_LIMITER`     | namespace `7010`, 30 / 60 s  | Spec; its own binding (WB41)                                     | as above            |
+| Constant                                                 | Value                       | Provenance                                                       | Safe range          |
+| -------------------------------------------------------- | --------------------------- | ---------------------------------------------------------------- | ------------------- |
+| `WORKBENCH_TICKET_TTL_MS`                                | 60000                       | Spec                                                             | 30000 to 120000     |
+| `WORKBENCH_SESSION_TTL_MS`                               | 28800000                    | Spec                                                             | 3600000 to 86400000 |
+| `WORKBENCH_HANDSHAKE_MS`                                 | 5000                        | Spec                                                             | 2000 to 15000       |
+| `WORKBENCH_SELECTION_SETTLE_MS`                          | 250                         | Spec                                                             | 100 to 1000         |
+| `WORKBENCH_SELECTION_MAX_REFS`                           | 20                          | Spec                                                             | 5 to 50             |
+| `WORKBENCH_PAIRING_TTL_MS`                               | 600000                      | Spec                                                             | 120000 to 1800000   |
+| `WORKBENCH_TICKETS_PER_MINUTE`                           | 30                          | Spec; the binding's `simple.limit`                               | 10 to 120           |
+| `WORKBENCH_RENEW_LEAD_MS`                                | 600000                      | WB38                                                             | 60000 to 3600000    |
+| `WORKBENCH_RENEW_RETRY_MS`                               | 60000                       | WB38                                                             | 10000 to 300000     |
+| `DEVICE_POLL_INTERVAL_S` (the pairing poll's `interval`) | 5                           | The device grant's, as the spec's "as auth login --device waits" | 2 to 15             |
+| `WORKBENCH_TICKET_BYTES`                                 | 16                          | Spec: 128 random bits                                            | fixed               |
+| `WORKBENCH_SESSION_SECRET_BYTES`                         | 32                          | As an API token (WB39)                                           | 32 to 64            |
+| `WORKBENCH_PAIRING_CODE_BYTES`                           | 16                          | 128 bits, as a ticket (WB29)                                     | 16 to 32            |
+| `WORKBENCH_SESSION_PREFIX`                               | `lvw_`                      | Spec                                                             | fixed               |
+| `WORKBENCH_NAME_MAX_LENGTH`                              | 40                          | WB2                                                              | 20 to 80            |
+| `WORKBENCH_ORIGIN_MAX_LENGTH`                            | 255                         | A host name's own cap plus scheme and port                       | fixed               |
+| `WORKBENCH_SESSION_GRACE_MS`                             | 86400000                    | WB30                                                             | 0 to 604800000      |
+| `WORKBENCH_ENDED_CLOSE`                                  | 4006                        | Next after 4005                                                  | fixed               |
+| `WORKBENCH_TICKET_RATE_LIMITER`                          | namespace `7010`, 30 / 60 s | Spec; its own binding (WB41)                                     | as above            |
 
 Configuration: `APP_BASE_URL` (existing var) builds the URLs; `WORKBENCH_TICKET_RATE_LIMITER` added to
 `apps/api/wrangler.toml` (`pnpm deploy:check`); both optional on a self-host (absent limiter allows).
