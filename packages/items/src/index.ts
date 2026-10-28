@@ -14,6 +14,7 @@ export * from './limits';
 export * from './rank';
 export * from './apply';
 export * from './board';
+export * from './done-columns';
 export * from './card-source';
 export * from './board-card-types';
 export * from './board-status-picks';

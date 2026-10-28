@@ -30,6 +30,7 @@ import {
   boardAddTypes,
   newItemId,
   isTrashed,
+  isDoneColumn,
 } from '@livedoc/items';
 import { useCanvasSurface } from '@/components/canvas/CanvasSurfaceContext';
 import { track } from '@/lib/telemetry';
@@ -532,7 +533,7 @@ export function PlanBoardView({
                           adding?.status === col.column.status && adding.laneKey === lane.key;
                         const firstEmpty =
                           empty && canEditCards && laneIndex === 0 && col === projection.columns[0];
-                        const done = setup.doneColumnId === col.column.id;
+                        const done = isDoneColumn(setup, col.column);
                         // Every type the board takes may be added in any cell: a type's left-out statuses only
                         // stop a card moving there (docs/specs/026-plan/item-types.md "An item type").
                         const cellTypes = addTypes;

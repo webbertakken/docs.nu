@@ -24,6 +24,7 @@ import {
   type ItemPatchOf,
   type ItemPerson,
   type BoardStatusTypes,
+  settleDoneColumns,
   type PlanBoardSetup,
   type StatusPhase,
 } from '@livedoc/items';
@@ -337,7 +338,9 @@ export function usePlanSlice(opts: {
           els.map((el) => {
             if (el.id !== boardId || el.type !== 'shape' || el.shape !== 'plan-board') return el;
             before = el.planBoard?.title;
-            return { ...el, planBoard: setup };
+            // Each column flagged as it counts (docs/specs/026-plan/plan-board.md "Done columns"): a column it had
+            // counts as it did, a new one by its name.
+            return { ...el, planBoard: settleDoneColumns(el.planBoard, setup) };
           }),
         // A Board tab and its board share one name (docs/specs/026-plan/plan-tabs.md "Names"): renamed, the tab follows.
         (tab) => (before === setup.title ? tab : tabNamedForBoard(tab, setup.title)),
@@ -360,7 +363,10 @@ export function usePlanSlice(opts: {
           changed = true;
           return {
             ...el,
-            planBoard: { ...setup, columns: setup.columns.filter((c) => c.status !== status) },
+            planBoard: settleDoneColumns(setup, {
+              ...setup,
+              columns: setup.columns.filter((c) => c.status !== status),
+            }),
           };
         });
         return changed ? next : els;
