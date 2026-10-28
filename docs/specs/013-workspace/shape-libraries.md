@@ -135,7 +135,7 @@ A D1 table `shape_libraries` (`id`, `owner_id`, `name`, `source`, `items` JSON, 
 `updated_at`), indexed by owner and by (owner, created) for the newest-first list. Migration
 `0060_shape_libraries.sql`: 0059 is taken by an open pull request; if the merge order changes, this
 takes the next free number and this line follows. No new binding: the table lives in the api's
-existing D1 database, so staging applies the migration with the others and `pnpm staging:check` has
+existing D1 database, so every deploy, a preview's or production's, applies the migration with the others and `pnpm deploy:check` has
 nothing new to compare.
 
 ## Telemetry

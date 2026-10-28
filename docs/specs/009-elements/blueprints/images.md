@@ -26,7 +26,7 @@ Scope, by file:
 | `apps/api/src/image-sniff.ts`, `image-strip.ts`      | Upload boundary: sniff re-export, `stripJpegMetadata`                   |
 | `apps/api/src/index.ts`                              | Pre-dispatch size gate, write limiter, `scheduled()` retention hand-off |
 | `apps/api/src/thumbnail.ts`                          | `loadEmbeddedImages` for the preview and live image                     |
-| `apps/api/wrangler.toml`                             | `IMAGES` bucket (production and `[env.staging]`), caps comment          |
+| `apps/api/wrangler.toml`                             | `IMAGES` bucket, caps comment                                           |
 | `apps/api/hosted-vars.json`                          | Hosted docs.nu's per-owner caps                                         |
 | `apps/live/lib/api/images.ts`                        | `apiListImages`, `apiUploadImage`, `apiDeleteImage`, `apiImageUsage`, … |
 | `apps/live/lib/upload-image.ts`                      | `uploadImageFile`, `addImageFileForDocument`, `ImageUploadError`        |
@@ -477,18 +477,18 @@ backfill fingerprints live in [Image reference index](image-reference-index.md#o
 
 ## Constants and configuration
 
-| Name                        | Value                                | Provenance / safe range                                    |
-| --------------------------- | ------------------------------------ | ---------------------------------------------------------- |
-| `MAX_IMAGE_BYTES`           | `10 * 1024 * 1024`                   | Spec per-file cap; below the 100 MB Workers body limit     |
-| `MAX_IMAGE_MB`              | `10`                                 | Derived, for copy                                          |
-| `ACCEPTED_IMAGE_TYPES`      | png, jpeg, webp, gif                 | Spec whitelist; SVG must never join                        |
-| `MAX_BODY_BYTES`            | `8 * 1024 * 1024`                    | Non-image write cap in `limits.ts`                         |
-| `IMAGE_MAX_PER_OWNER`       | unset; hosted `"100"`                | `hosted-vars.json`; positive integer or unset              |
-| `IMAGE_MAX_BYTES_PER_OWNER` | unset; hosted `"104857600"`          | `hosted-vars.json`; positive integer or unset              |
-| `IMAGE_EMBED_BUDGET_BYTES`  | `3 * 1024 * 1024`                    | Spec; 1 to 8 MiB keeps snapshots streamable                |
-| Read `Cache-Control`        | `private, max-age=86400`             | Spec; `private` is load-bearing                            |
-| Sniff window                | first 16 bytes, minimum 12           | Longest signature (WebP) needs 12                          |
-| Gallery placement size      | `240` px on the longer side          | D40; literal `max` in `addImageFromGallery`                |
-| `createImage` size          | 200 × 150                            | D49                                                        |
-| `WRITE_RATE_LIMITER`        | 300 per 60 s                         | `wrangler.toml`, namespace `1001`                          |
-| Buckets                     | `docs-nu-images`, `…-images-staging` | Separate so the staging sweep cannot reap production bytes |
+| Name                        | Value                                     | Provenance / safe range                                    |
+| --------------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| `MAX_IMAGE_BYTES`           | `10 * 1024 * 1024`                        | Spec per-file cap; below the 100 MB Workers body limit     |
+| `MAX_IMAGE_MB`              | `10`                                      | Derived, for copy                                          |
+| `ACCEPTED_IMAGE_TYPES`      | png, jpeg, webp, gif                      | Spec whitelist; SVG must never join                        |
+| `MAX_BODY_BYTES`            | `8 * 1024 * 1024`                         | Non-image write cap in `limits.ts`                         |
+| `IMAGE_MAX_PER_OWNER`       | unset; hosted `"100"`                     | `hosted-vars.json`; positive integer or unset              |
+| `IMAGE_MAX_BYTES_PER_OWNER` | unset; hosted `"104857600"`               | `hosted-vars.json`; positive integer or unset              |
+| `IMAGE_EMBED_BUDGET_BYTES`  | `3 * 1024 * 1024`                         | Spec; 1 to 8 MiB keeps snapshots streamable                |
+| Read `Cache-Control`        | `private, max-age=86400`                  | Spec; `private` is load-bearing                            |
+| Sniff window                | first 16 bytes, minimum 12                | Longest signature (WebP) needs 12                          |
+| Gallery placement size      | `240` px on the longer side               | D40; literal `max` in `addImageFromGallery`                |
+| `createImage` size          | 200 × 150                                 | D49                                                        |
+| `WRITE_RATE_LIMITER`        | 300 per 60 s                              | `wrangler.toml`, namespace `7001`                          |
+| Buckets                     | `docs-nu-images`, `docs-nu-pr-<n>-images` | Separate so a preview's sweep cannot reap production bytes |

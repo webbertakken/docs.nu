@@ -60,8 +60,7 @@ export function handleCapabilities(ctx: RouteContext): Response {
     // get a panel that 401s on first use rather than no panel. Whoever flips
     // that flag has to make this line auth-aware in the same change — which is
     // also why production locks the endpoint down with `AI_ALLOWED_ORIGINS`
-    // instead (see apps/api/wrangler.toml). Staging has the flag on today and
-    // has exactly that broken panel for guests.
+    // instead (see apps/api/wrangler.toml).
     aiEnabled: aiConfigured(env),
     // docs/specs/014-identity/profile-and-email-notifications.md: the live app hides the email-notification toggles when
     // Resend isn't configured (they'd do nothing). Same gate docs/specs/014-identity/transactional-email.md uses.

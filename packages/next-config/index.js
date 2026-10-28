@@ -10,7 +10,7 @@ export const SKIP_TYPECHECK_ENV = 'BUILD_SKIP_TYPECHECK';
  * Next's `typescript` setting. `next build` type-checks the app by default; a build made only to be
  * tested (the E2E Smoke jobs) sets BUILD_SKIP_TYPECHECK=1 and skips it, because CI's required Checks
  * job already type-checks every app with `tsc --noEmit` against the same tsconfig. Production and
- * staging builds leave it unset and keep the check.
+ * preview builds leave it unset and keep the check.
  *
  * @param {NodeJS.ProcessEnv} [env]
  * @returns {{ ignoreBuildErrors: boolean }}

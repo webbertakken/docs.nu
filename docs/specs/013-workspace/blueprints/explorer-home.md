@@ -37,7 +37,7 @@ Scope, by file:
 | `apps/api/src/routes/home.ts`                                                  | `GET /api/home`                                                                                |
 | `apps/api/src/index.ts`, `auth/guest-rest.ts`, `types.ts`                      | Dispatch, `HOME_RATE_LIMITER`, the `home_opens` sweep, `home` owner-scoped                     |
 | `apps/api/src/responses.ts`                                                    | CORS allows `X-Document-Open`                                                                  |
-| `apps/api/wrangler.toml`                                                       | `HOME_RATE_LIMITER` in the default and `[env.staging]` blocks                                  |
+| `apps/api/wrangler.toml`                                                       | `HOME_RATE_LIMITER`                                                                            |
 | `apps/api/src/openapi/manifest.ts`, `apps/api/scripts/gen-openapi-schemas.mjs` | The route; the `HomeResponse` schema; the create body's `markUsed`                             |
 | `packages/agent-verbs/src/mcp/schema.ts`, `apps/mcp/src/tools.ts`              | `create_document`'s optional `markUsed`, passed through to the create                          |
 | `apps/live/lib/api/documents.ts`                                               | `apiCreateDocument(..., { markUsed })` sends `markUsed: false` only                            |
@@ -496,7 +496,7 @@ stay on their own lazy route.
 | `TIMELINE_RETENTION_MS`         | 365 days  | `packages/api-schema/src/timeline.ts`         | Spec (the Timeline's retention), reused      | fixed          |
 | `LEGACY_BACKFILL_SKEW_MS`       | 60 s      | `apps/api/migrations/0063_document_opens.sql` | `D79`                                        | 10 s to 10 min |
 | `SEEN_WINDOW_MS`                | 60 s      | `apps/api/src/timeline/seen.ts`               | [Timeline](../timeline.md) §2.5, reused      | fixed          |
-| `HOME_RATE_LIMITER`             | 60 / 60 s | `apps/api/wrangler.toml`, namespace `1008`    | `D73`                                        | 30 to 120      |
+| `HOME_RATE_LIMITER`             | 60 / 60 s | `apps/api/wrangler.toml`, namespace `7008`    | `D73`                                        | 30 to 120      |
 
 No environment variable. The rate limiter binding is optional; absent means allow.
 

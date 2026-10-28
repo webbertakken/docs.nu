@@ -8,7 +8,7 @@ import { expect, test, pageOwnerHeaders } from './fixtures';
 //
 // Real browser caching throughout: no Playwright routes (they turn the HTTP cache off), and the e2e
 // stack serves files with production's caching headers. The deploy is simulated by the stack
-// (POST /__e2e/deploy): a copy of the build whose chunk files all carry new names. On staging the old
+// (POST /__e2e/deploy): a copy of the build whose chunk files all carry new names. On a deployed site the old
 // page's chunks were no longer in the browser's cache (the console showed them answering 404), so
 // while the Explorer first loads, the stack serves its build assets `no-store`
 // (POST /__e2e/assets-out-of-cache, until the deploy): the browser keeps the page, not its chunks.

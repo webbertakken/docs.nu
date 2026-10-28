@@ -18,7 +18,7 @@ Scope, by file:
 | `packages/api-schema/src/index.ts`                       | `UnfurlResult`                                                             |
 | `apps/api/src/routes/unfurl.ts`                          | `handleUnfurl`, `isBlockedHost`, `parsePublicHttpUrl`, `buildUnfurlResult` |
 | `apps/api/src/index.ts`                                  | Dispatch of `unfurl`                                                       |
-| `apps/api/wrangler.toml`                                 | `UNFURL_RATE_LIMITER` (production and `[env.staging]`)                     |
+| `apps/api/wrangler.toml`                                 | `UNFURL_RATE_LIMITER`                                                      |
 | `apps/live/lib/api/unfurl.ts`                            | `apiUnfurl`: fail-soft client                                              |
 | `apps/live/hooks/canvas/useElementLinks.ts`              | `applyElementLink`: sets the link, then fetches and commits `meta`         |
 | `apps/live/lib/url-safety.ts`                            | `normaliseUrl`, `isSafeFollowUrl`                                          |
@@ -283,7 +283,7 @@ LinkUnfurled` exist.
 | `FETCH_TIMEOUT_MS`    | `8000`                                           | Spec 8 s; 3 000 to 10 000 within the Worker budget |
 | `MAX_HTML_BYTES`      | `512 * 1024`                                     | Spec ~512 KB; the head is rarely past 100 KiB      |
 | `USER_AGENT`          | `livedoc-unfurl/1.0 (+https://docs.nu)`          | Spec "descriptive"; keep a contact URL             |
-| `UNFURL_RATE_LIMITER` | 60 per 60 s, namespace `1005`                    | Spec; production and staging                       |
+| `UNFURL_RATE_LIMITER` | 60 per 60 s, namespace `7005`                    | Spec; previews take `7105`                         |
 | `createLinkCard` size | 280 × 120                                        | Spec                                               |
 | Card radius           | 10 px canvas, 6 px export                        | `element-variant.ts`, `svg-render.ts` (D56)        |
 | Default colours       | fill `#ffffff`, stroke `#e2e8f0`, text `#1e293b` | `colors.ts`; text on fill 14.6:1                   |
