@@ -6,7 +6,8 @@
 // starts only while its section is mounted, so opening the editor costs nothing more.
 import { useState } from 'react';
 import { dateKey, pickRenderer, timeLabel } from '@livedoc/ui';
-import { ActivityPane } from '@/components/panels/ActivityPane';
+import { InboxPane } from '@/components/panels/inbox/InboxPane';
+import type { InboxDone } from '@/components/panels/inbox/inbox-verbs';
 import { GalleryPane } from '@/components/panels/GalleryPane';
 import { ThemesPane } from '@/components/panels/ThemesPane';
 import { ShapeLibrariesPane } from '@/components/panels/ShapeLibrariesPane';
@@ -255,8 +256,10 @@ export function HomeSection({
   );
 }
 
-export function InboxSection({ ownerId }: { ownerId: string }) {
-  return <ActivityPane compact feed={useActivityFeed(ownerId)} />;
+// The Inbox, compact and always narrow; `done` is the editor's Mark Done for the tab it has open
+// (docs/specs/013-workspace/inbox.md §5).
+export function InboxSection({ ownerId, done }: { ownerId: string; done?: InboxDone | null }) {
+  return <InboxPane compact feed={useActivityFeed(ownerId)} ownerId={ownerId} done={done} />;
 }
 
 // The Timeline as a list for the pane: each event one row under its day, the newest first. Its card menus and the

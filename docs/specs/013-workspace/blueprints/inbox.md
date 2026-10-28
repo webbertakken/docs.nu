@@ -24,13 +24,11 @@ Scope, by file:
 | `apps/live/components/panels/inbox/InboxPane.tsx`              | The orchestration: filter, choice, keys, layout, live region                           |
 | `apps/live/components/panels/inbox/InboxRows.tsx`              | The filter bar, the rows under their dividers, the skeleton                            |
 | `apps/live/components/panels/inbox/InboxReader.tsx`            | The reading pane: where, title, byline, verbs, body, reply field                       |
-| `apps/live/components/panels/inbox/inbox-states.tsx`           | Empty and failed states (moved from `activity-pane-parts.tsx`), the document chip      |
+| `apps/live/components/panels/inbox/inbox-states.tsx`           | Empty and failed states, the document chip                                             |
 | `apps/live/app/explorer/ExplorerPane.tsx`                      | The Inbox section draws `InboxPane`                                                    |
 | `apps/live/components/panels/explorer-panel/*`, `Explorer.tsx` | The panel's Inbox section draws `InboxPane compact`, with `inboxDone` from the editor  |
 | `apps/live/components/canvas/useCanvasChromePanels.tsx`        | Builds `inboxDone` from the open document, the open tab and `onToggleActionDone`       |
 | `apps/live/lib/telemetry-manifest.ts`, `apps/telemetry/app/*`  | `Activity·Changed`, `Activity·Added`, `Activity·Resolved`: manifest, charts, sentences |
-
-`ActivityPane.tsx` and `activity-pane-parts.tsx` are removed; their row anatomy is replaced by §1.2's.
 
 ## Domain and naming
 

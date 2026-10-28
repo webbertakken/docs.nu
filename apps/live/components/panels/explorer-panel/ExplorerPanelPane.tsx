@@ -6,6 +6,7 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import type { LibraryKind } from './PanelViews';
+import type { InboxDone } from '../inbox/inbox-verbs';
 import type { ReactNode } from 'react';
 import { explorerPathFor } from '@/app/explorer/routes';
 import { PaneSkeleton } from './pane-parts';
@@ -50,6 +51,7 @@ export function ExplorerPanelPane({
   onNewFolder,
   inFolder = false,
   onLibraryChanged,
+  inboxDone = null,
   footer,
 }: {
   section: PanelSection;
@@ -68,6 +70,8 @@ export function ExplorerPanelPane({
   inFolder?: boolean;
   // The Trash restored or deleted a document.
   onLibraryChanged: () => void;
+  // The editor's Mark Done for its open tab, handed to the Inbox section (docs/specs/013-workspace/inbox.md §5).
+  inboxDone?: InboxDone | null;
   // Pinned under the content, outside its scroll (the sign-in bar).
   footer?: ReactNode;
 }) {
@@ -86,7 +90,7 @@ export function ExplorerPanelPane({
       ) : null
     ) : section.kind === 'inbox' ? (
       ownerId ? (
-        <InboxSection ownerId={ownerId} />
+        <InboxSection ownerId={ownerId} done={inboxDone} />
       ) : null
     ) : section.kind === 'timeline' ? (
       ownerId ? (

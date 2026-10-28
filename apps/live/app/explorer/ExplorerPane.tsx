@@ -106,8 +106,8 @@ const HomePane = dynamic(
 const TagsPane = dynamic(() => import('./tags/TagsPane').then((m) => m.TagsPane), {
   ssr: false,
 });
-const ActivityPane = dynamic(
-  () => import('@/components/panels/ActivityPane').then((m) => m.ActivityPane),
+const InboxPane = dynamic(
+  () => import('@/components/panels/inbox/InboxPane').then((m) => m.InboxPane),
   { ssr: false },
 );
 
@@ -348,7 +348,9 @@ export function ExplorerPane() {
       ) : selected.kind === 'inbox' ? (
         // Like the Timeline, ahead of the document-list `loading` gate: the
         // section reads its own feed (docs/specs/013-workspace/inbox.md §5).
-        <ActivityPane feed={activity} />
+        ownerId ? (
+          <InboxPane feed={activity} ownerId={ownerId} />
+        ) : null
       ) : loading ? (
         <SkeletonRows />
       ) : selected.kind === 'invites' ? (
