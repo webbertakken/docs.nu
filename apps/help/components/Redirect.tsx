@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { redirectTarget } from '@livedoc/ui';
 
 // Client-side redirect for a help URL that has moved. The help app is a static
 // export (no server redirects), so a retired path keeps resolving via this
@@ -9,7 +10,8 @@ import { useEffect } from 'react';
 // basePath, since window.location is not basePath-aware.
 export function Redirect({ href, label }: { href: string; label: string }) {
   useEffect(() => {
-    window.location.replace(href);
+    // An old deep link's #section comes along: location.replace drops it.
+    window.location.replace(redirectTarget(href, window.location.hash));
   }, [href]);
 
   return (

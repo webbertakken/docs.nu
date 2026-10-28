@@ -278,7 +278,10 @@ Six articles about the container moved when it became a document ([Document](../
 | `/help/canvas/facilitate-mode/facilitate-tour/`        | `/help/canvas/workshop-mode/workshop-tour/`             |
 
 "Your First Diagram" and "Exporting Diagrams" keep their addresses: they are about drawing a diagram and getting the drawing out, not about the container.
+
 <!-- /legacy-names -->
+
+A moved page the router does not answer is a thin client redirect inside the help app (`components/Redirect.tsx`), and the marketing site's retired legal routes are the same (`components/LegalRedirect.tsx`). **Both keep an old deep link's `#section`**: `location.replace` drops the address's hash, so the redirect carries it onto the new address, unless the new address names its own section (`redirectTarget` in `@livedoc/ui`). An old link to a section lands on that section of the new page, never at its top.
 
 ## Header
 

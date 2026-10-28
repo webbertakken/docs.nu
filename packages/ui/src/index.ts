@@ -108,6 +108,7 @@ export {
   type PageMetadataInput,
   type BreadcrumbCrumb,
 } from './seo';
+export { redirectTarget } from './redirect-target';
 export * from './appearance';
 export * from './random-uuid-boot';
 export { indefiniteArticle, withArticle } from '@livedoc/items';

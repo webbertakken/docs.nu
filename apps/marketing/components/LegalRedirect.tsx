@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { redirectTarget } from '@livedoc/ui';
 
 // Client-side redirect for a retired legal page. The Terms and Privacy Policy
 // now live in the help centre; these stubs keep the historical /terms and
@@ -19,7 +20,8 @@ export function LegalRedirect({
   lead?: string;
 }) {
   useEffect(() => {
-    window.location.replace(href);
+    // An old deep link's #section comes along: location.replace drops it.
+    window.location.replace(redirectTarget(href, window.location.hash));
   }, [href]);
 
   return (
