@@ -17,7 +17,7 @@ export const metadata = helpMetadata({
 
 A **repository link** binds a directory in your code repository to documents in LiveDoc. Coding agents look for context by searching the files in front of them, and a diagram that only lives behind a link is invisible to them. Once a repository is linked, they find your diagrams by name, read them as text through the [CLI](/help/developers/cli/), and can change them while you watch.
 
-livedoc stays the home of every document. What the repository holds is a **snapshot** at a known revision, never a second copy you edit in parallel.
+LiveDoc stays the home of every document. What the repository holds is a **snapshot** at a known revision, never a second copy you edit in parallel.
 
 ## Link a Repository
 
@@ -65,7 +65,7 @@ livedoc link ls           # the documents the link covers
 
 A sync writes newer snapshots, adds documents that joined the folder and removes the files of documents that left it or went to the Trash. Git history keeps what was removed. With `--watch`, the files follow within a moment of each change in the editor. `--dry-run` cannot be combined with `--watch`, since it writes nothing to keep in step.
 
-A snapshot's file name comes from the document's name when it is first synced, and then stays put, so renaming or moving a document never churns your repository. Instead, a sync names the files whose path would now be different. Run `livedoc sync --relocate` to move them (with `git mv` inside a git repository). A move never overwrites a file livedoc did not write: if one is already at the new path, the document stays where it is and the sync names that file.
+A snapshot's file name comes from the document's name when it is first synced, and then stays put, so renaming or moving a document never churns your repository. Instead, a sync names the files whose path would now be different. Run `livedoc sync --relocate` to move them (with `git mv` inside a git repository). A move never overwrites a file LiveDoc did not write: if one is already at the new path, the document stays where it is and the sync names that file.
 
 Snapshots are for reading. If a snapshot was changed by hand, the sync leaves it alone and names it, so nothing you wrote is lost; send it back with `livedoc push <file>`. If a tab you changed also changed in LiveDoc since, push refuses that tab as stale and sends the rest. Keep a copy of your change, restore the file (`git checkout -- <file>`, or delete it), sync, then make the change again. A file that git left with conflict markers is held back the same way until you keep one side.
 
@@ -75,7 +75,7 @@ A teammate syncing with their own sign-in only reaches what they can open. A doc
 
 A command acts on the nearest `livedoc.toml` at or above the directory you run it in. In a monorepo with a link per package, add `--all` to `sync`, `link status` or `link ls` to act on every link below the current directory.
 
-A link can cover a team folder, so several repositories can link the same diagrams, or a single repository can hold your diagrams for everything else. Each repository keeps its own snapshot; livedoc keeps the one document.
+A link can cover a team folder, so several repositories can link the same diagrams, or a single repository can hold your diagrams for everything else. Each repository keeps its own snapshot; LiveDoc keeps the one document.
 
 ## Public Repositories
 
