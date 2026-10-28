@@ -71,7 +71,7 @@ export function SharePasswordGate({
             Too many tries. Wait a minute, then try again.
           </p>
         ) : invalid ? (
-          <p className="-mt-2 text-xs font-medium text-rose-600">
+          <p className="-mt-2 text-xs font-medium text-rose-600 dark:text-rose-400">
             That password didn&apos;t match. Try again.
           </p>
         ) : null}
