@@ -165,11 +165,16 @@ export async function handleDocumentSubresources(
       // "opened by a visitor · Someone with the share link" and files under the
       // sharing filter, so an owner saw that for a document they had never
       // shared a link for, once per teammate per day.
+      //
+      // A visitor is someone the grant admitted through a link, never merely a request carrying a share header:
+      // a teammate following a share link is still a teammate.
       if (owner !== existing.ownerId && shareCodeOf(request) !== null) {
         ctx.waitUntil?.(
-          getParticipant(env, owner).then((p) =>
-            recordVisitorOpened(env, existing, owner, p?.name ?? null),
-          ),
+          gateGrant(ctx, existing.id, existing.ownerId, existing.teamId).then(async (grant) => {
+            if (!grant?.shareCode) return;
+            const p = await getParticipant(env, owner);
+            await recordVisitorOpened(env, existing, owner, p?.name ?? null);
+          }),
         );
       }
       // docs/specs/013-workspace/explorer-home.md "Opens": the reader's own open, for their Home.

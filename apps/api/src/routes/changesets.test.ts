@@ -550,6 +550,32 @@ describe('agent presence after a changeset (docs/specs/024-agents/agent-presence
     ]);
   });
 
+  // The refresh names the link the grant came through, so a revoke of that link closes the entry; the owner's names
+  // none, whatever share header rides along.
+  it('names the link the grant came through, never a header the grant did not use', async () => {
+    quiet();
+    const { db, room: r } = await setUp();
+    await createShareLink(db.env, 'D', 'EDITCODE', 'edit');
+    await submit(
+      db,
+      { operations: 'set a label=A1' },
+      { token: true, headers: { 'X-Share-Code': 'EDITCODE' } },
+    );
+    await settled();
+    expect(presenceCalls(r).at(-1)?.body).toMatchObject({ shareCode: null });
+
+    db.sql.exec(
+      "INSERT INTO participants (id, name, color, created_at) VALUES ('guest-1', 'Ada', '#f97316', 1)",
+    );
+    await submit(
+      db,
+      { operations: 'set a label=A2' },
+      { owner: 'guest-1', token: true, headers: { 'X-Share-Code': 'EDITCODE' } },
+    );
+    await settled();
+    expect(presenceCalls(r).at(-1)?.body).toMatchObject({ shareCode: 'EDITCODE' });
+  });
+
   it('refreshes after a token’s revert too', async () => {
     quiet();
     const { db, room: r } = await setUp();

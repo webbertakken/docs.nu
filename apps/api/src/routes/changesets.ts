@@ -31,7 +31,6 @@ import {
   gateRead,
   missingDocument,
   requireOwner,
-  shareCodeOf,
   type DocumentRouteContext,
 } from './context';
 
@@ -92,7 +91,7 @@ async function handleSubmit(
     frontDoor: frontDoorOf(ctx.request),
     ...(ctx.waitUntil ? { waitUntil: ctx.waitUntil } : {}),
   });
-  refreshAfterWrite(ctx, document.id, tabId, author, result);
+  refreshAfterWrite(ctx, document, tabId, author, result);
   return respond(redactConflicts(result, document, owner));
 }
 
@@ -158,15 +157,16 @@ async function handleRevert(
     frontDoor: frontDoorOf(ctx.request),
     ...(ctx.waitUntil ? { waitUntil: ctx.waitUntil } : {}),
   });
-  refreshAfterWrite(ctx, document.id, record.tabId, author, result);
+  refreshAfterWrite(ctx, document, record.tabId, author, result);
   return respond(result);
 }
 
 // A token's written changeset or revert keeps its presence on the tab (docs/specs/024-agents/agent-presence.md
-// "Presence"); a dry run, a refusal and a session's write leave presence alone. Off the response path.
+// "Presence"); a dry run, a refusal and a session's write leave presence alone. Off the response path. The entry
+// names the link the grant came through, never the share header on its own, so a revoke of that link closes it.
 export function refreshAfterWrite(
   ctx: DocumentRouteContext,
-  documentId: string,
+  document: { id: string; ownerId: string; teamId: string | null },
   tabId: string,
   author: Author,
   result: { status: number; body: unknown },
@@ -174,14 +174,18 @@ export function refreshAfterWrite(
   const written = (result.body as { changeset?: unknown } | null)?.changeset;
   if (!ctx.token || result.status !== 200 || !written) return;
   const tokenId = ctx.token.id;
+  const documentId = document.id;
   ctx.waitUntil?.(
-    personTagFor(documentId, author.id).then((personTag) =>
+    Promise.all([
+      personTagFor(documentId, author.id),
+      gateGrant(ctx, documentId, document.ownerId, document.teamId),
+    ]).then(([personTag, grant]) =>
       refreshAgentPresence(ctx.env, {
         documentId,
         tokenId,
         tabId,
         personTag,
-        shareCode: shareCodeOf(ctx.request),
+        shareCode: grant?.shareCode ?? null,
         name: author.name,
         color: author.color,
         // A changeset passed the edit gate.
