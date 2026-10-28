@@ -28,7 +28,7 @@ import {
 } from '@livedoc/document';
 import { readForm } from '@livedoc/forms';
 import { formArt } from '@livedoc/plan-art';
-import { cardSourceOf, typesOf } from '@livedoc/items';
+import { cardSourceOf, itemIdsShownOnTab, typesOf, type Item } from '@livedoc/items';
 import { renderModelsForTab, sheetFramesOf } from '@livedoc/sheets';
 // Static-import icon resolver (bundle size is fine in a Worker) so icon
 // elements render their real glyph in the snapshot / live image instead of
@@ -151,7 +151,8 @@ export async function getDocumentTabImageSvg(
   // Gate on the same optional R2 binding as the cached path, so the
   // whole live-image feature is uniformly off on a binding-less deploy.
   if (!env.IMAGES) return null;
-  return renderTabBodyToSvg(env, liveDoc, await getTabBody(env, liveDoc.id, tabId));
+  // A named tab's picture is what a link confined to it gets: its card functions read only the cards it shows.
+  return renderTabBodyToSvg(env, liveDoc, await getTabBody(env, liveDoc.id, tabId), {}, true);
 }
 
 // One tab drawn by the shared renderer, for `GET .../tabs/:tabId/render.svg` (docs/specs/015-api/api.md): the
@@ -208,6 +209,8 @@ async function renderTabBodyToSvg(
   liveDoc: ThumbnailSubject,
   body: StoredTabBody | null,
   opts: ThumbnailOptions = {},
+  // Card functions read only the items this tab shows (docs/specs/029-sheets/sheet.md "Exports and images").
+  scoped = false,
 ): Promise<string | null> {
   if (!body) return null;
   let parsed: Partial<Tab>;
@@ -276,9 +279,14 @@ async function renderTabBodyToSvg(
             : getDocumentItemTypes(env, liveDoc.id),
         ])
       : [undefined, null];
+  const cardItems = (all: Map<string, Item>) => {
+    if (!scoped) return all.values();
+    const shown = itemIdsShownOnTab(tab.elements, all.values());
+    return [...all.values()].filter((item) => shown.has(item.id));
+  };
   const sheets = frames.length
     ? renderModelsForTab(sheetJson, frames, {
-        cards: sheetCards && items ? cardSourceOf(items.values(), typesOf(catalogue)) : null,
+        cards: sheetCards && items ? cardSourceOf(cardItems(items), typesOf(catalogue)) : null,
       })
     : undefined;
   const drawWith = {
