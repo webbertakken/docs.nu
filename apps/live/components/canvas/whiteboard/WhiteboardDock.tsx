@@ -7,18 +7,11 @@
 // flyouts open on its board side; on a narrow screen the groups scroll sideways together. One
 // flyout at a time, and nothing moves under the pointer when a tool is picked.
 
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
-import { useMenuCardClearance } from './useMenuCardClearance';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useDockLinePlacement } from './useDockLinePlacement';
+import { useReportCentreOwnRow } from '@/hooks/ui/centre-row-store';
 import { useCanvasSurface } from '@/components/canvas/CanvasSurfaceContext';
 import type { WhiteboardDockModel } from '@/hooks/canvas/useWhiteboard';
-import type { WhiteboardDockPosition } from '@/lib/whiteboard-dock-prefs';
 import { whiteboardShapeEntry } from '@/lib/whiteboard-shape-catalogue';
 import {
   pinFromMenu,
@@ -35,7 +28,7 @@ import {
   SettingsFlyoutBody,
   SlotMenuBody,
 } from './dock-flyouts';
-import { DockDivider } from './DockToolbar';
+import { ToolbarDivider, ToolbarGroup } from '@/components/chrome/ToolbarGroup';
 import { DrawingToolsGroup } from './DrawingToolsGroup';
 import { SettingsGroup } from './SettingsGroup';
 import { ShapesFlyout } from './ShapesFlyout';
@@ -49,22 +42,17 @@ import { announceToastFloorChange } from '@/components/toast/toast-floor';
 import { useIsMobileViewport } from '@/hooks/ui/useIsMobileViewport';
 import { useUiScale } from '@/components/providers/ui-scale';
 import { toSurfacePx, uiScaleStyle } from '@/lib/ui-scale';
-import { TOOLBAR_CARD } from '@/components/chrome/toolbar-surface';
 
 // How long the "seven pinned" hint stays up.
 const HINT_MS = 4000;
 
-// Where the wrapper sits. At the top it keeps clear of the Explorer menu card (top-left): beside it on a phone or a
-// tablet, centred with the same clearance on both sides from lg (D33), so a tablet in portrait still shows the whole
-// dock. The dock is one card that scrolls inside itself, with no bleed. The clearance is the card's measured right
-// edge plus 8 px (`--dock-clear`, useMenuCardClearance): the card holds the menu button, the editor mode switch and
-// on a computer the tab's name, so its width varies. Until measured, the old guesses hold: 7.5rem on a tablet,
-// 4.125rem on a phone. The 12 px margin on the right is kept.
-const WRAPPER_PLACEMENT: Record<WhiteboardDockPosition, string> = {
-  top: 'top-3 left-[var(--dock-clear,7.5rem)] max-w-[calc(100%-var(--dock-clear,7.5rem)-0.75rem)] phone:left-[var(--dock-clear,4.125rem)] phone:max-w-[calc(100%-var(--dock-clear,4.125rem)-0.75rem)] lg:left-1/2 lg:-translate-x-1/2 lg:max-w-[calc(100%-2*var(--dock-clear,7.5rem))]',
-  bottom:
-    'bottom-[4.25rem] left-1/2 -translate-x-1/2 max-w-[calc(100%-1.5rem)] min-[1760px]:bottom-4',
-};
+// Where the wrapper sits (docs/specs/023-draw-mode/draw-mode.md "Where the dock sits"): on its line, centred, or off
+// centre between the line's side groups while it fits there (its left edge and room set inline, useDockLinePlacement),
+// or on a row of its own just inside the line, centred, 12px from the canvas's sides (and always on a phone). The dock
+// is one card that scrolls inside itself, with no bleed. Its top or bottom is set inline too.
+const WRAPPER_OWN_ROW = 'left-1/2 -translate-x-1/2 max-w-[calc(100%-1.5rem)]';
+// Until measured: centred, as wide as it likes short of the canvas's sides.
+const WRAPPER_UNMEASURED = WRAPPER_OWN_ROW;
 
 type WhiteboardDockProps = {
   model: WhiteboardDockModel;
@@ -83,10 +71,13 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
   // (docs/specs/007-editor/ui-scale.md).
   const scale = useUiScale('toolbar');
   const wrapper = useRef<HTMLDivElement>(null);
-  const clear = useMenuCardClearance(wrapper, scale, model.position === 'top');
   // A phone's dock: one pinned shape on the bar, the rest in the Shapes flyout, and no dragging
   // shapes on or off the bar (its drop targets would not match the pins it hides).
   const phone = useIsMobileViewport();
+  const placement = useDockLinePlacement(wrapper, model.position, phone);
+  const edge = placement?.edge ?? 12;
+  // A top dock on its own row moves the top corners a row lower (centre-row-store).
+  useReportCentreOwnRow(model.position === 'top' && !!placement?.ownRow);
   const pins = phone
     ? splitPhonePins(model.pinnedShapes)
     : { onBar: model.pinnedShapes, inMenu: [] };
@@ -248,7 +239,7 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
   const groups = (
     <>
       <DrawingToolsGroup model={model} ink={ink} fly={fly} pickAndClose={pickAndClose} />
-      <DockDivider data-dock-group-divider="" />
+      <ToolbarDivider data-dock-group-divider="" />
       <ShapesGroup
         model={model}
         pinned={pins.onBar}
@@ -258,7 +249,7 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
         refusing={refusing}
         pickAndClose={pickAndClose}
       />
-      <DockDivider data-dock-group-divider="" />
+      <ToolbarDivider data-dock-group-divider="" />
       <SettingsGroup fly={fly} />
       {drag ? (
         <SlotGhost dragKey={drag.source.key} x={drag.x} y={drag.y} refusing={refusing} />
@@ -279,16 +270,18 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
         e.stopPropagation();
       }}
       style={{
-        ...(clear === null ? {} : ({ '--dock-clear': `${clear}px` } as CSSProperties)),
-        ...(scale === 1
-          ? {}
-          : {
-              ...uiScaleStyle(scale),
-              // Restated so the dock keeps its 12px from the edge however it is zoomed.
-              ...(model.position === 'top' ? { top: toSurfacePx(12, scale) } : {}),
-            }),
+        ...(placement && !placement.ownRow
+          ? {
+              left: toSurfacePx(placement.left, scale),
+              maxWidth: toSurfacePx(placement.room, scale),
+            }
+          : {}),
+        ...(scale === 1 ? {} : uiScaleStyle(scale)),
+        // Restated in the dock's own units, so it keeps its distance however it is zoomed.
+        [model.position]: toSurfacePx(edge, scale),
       }}
-      className={`pointer-events-none absolute z-[var(--z-toolbar)] w-max ${WRAPPER_PLACEMENT[model.position]}`}
+      data-dock-row={placement?.ownRow ? 'own' : 'line'}
+      className={`pointer-events-none absolute z-[var(--z-toolbar)] w-max ${placement && !placement.ownRow ? '' : placement ? WRAPPER_OWN_ROW : WRAPPER_UNMEASURED}`}
     >
       <DockBody below={below} hint={hint} fly={fly} open={open} groups={groups} />
     </div>
@@ -365,13 +358,13 @@ function DockBody({
       {/* One card, the Toolbar layout strip's, the groups between hairlines; they scroll
           together inside it on a narrow screen. Scrolling moves the openers, so an open flyout
           follows its button. */}
-      <div
+      <ToolbarGroup
         data-dock-scroller=""
         onScroll={fly.reanchor}
-        className={`${TOOLBAR_CARD} pointer-events-auto animate-pop-in overflow-x-auto [scrollbar-width:none]`}
+        className="pointer-events-auto animate-pop-in overflow-x-auto [scrollbar-width:none]"
       >
         {groups}
-      </div>
+      </ToolbarGroup>
     </>
   );
 }

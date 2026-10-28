@@ -109,7 +109,7 @@ Cost controls, all in `e2e.yml` and `playwright.config.ts`:
   (`playwright-report-shard-i`, `playwright-report-sites`, `playwright-report-account`). Locally a trace is kept for a
   retry only.
 - **No waiting on what is not coming.** A helper waits for a thing only when the app owes it: no tour offers
-  itself (tours start from the bottom bar's Start Tour button), so no helper dismisses one. `seedTab` returns once the seeded elements have
+  itself (tours start from the actions group's Start Tour button), so no helper dismisses one. `seedTab` returns once the seeded elements have
   finished popping in (`settledBox`), so a test never measures or drags a box that is still changing.
 - **No model downloads.** The photo-import tests stub the handwriting reader
   and serve the boundary model's weights from the app itself; nothing pulls

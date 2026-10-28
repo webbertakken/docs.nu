@@ -19,7 +19,7 @@ import {
 } from 'react';
 import { Tooltip } from '@livedoc/ui';
 import { PHONE_TOOLBAR_ITEMS } from '@/components/chrome/phone-toolbar-items';
-import { TOOLBAR_CONTROL_REST, TOOLBAR_DIVIDER } from '@/components/chrome/toolbar-surface';
+import { TOOLBAR_CONTROL_REST } from '@/components/chrome/toolbar-surface';
 
 type Roving = { focusKey: string; setFocusKey: (key: string) => void };
 const RovingContext = createContext<Roving>({ focusKey: '', setFocusKey: () => {} });
@@ -173,7 +173,3 @@ export const DockButton = forwardRef<HTMLButtonElement, DockButtonProps>(
     );
   },
 );
-
-export function DockDivider(props: Record<`data-${string}`, string>) {
-  return <span {...props} aria-hidden className={TOOLBAR_DIVIDER} />;
-}

@@ -1,4 +1,4 @@
-import type { SaveStatus } from '@/components/chrome/EditorHeader';
+import type { SaveStatus } from './save-status';
 import { ApiError, SessionTokenUnavailableError } from '@/lib/api-client';
 
 // The status a failed autosave shows (docs/specs/006-document/per-tab-storage.md). A 403 is a refusal

@@ -38,7 +38,7 @@ import { isStartCardKey, nextCardIndex } from './start-card-keys';
 import { noteStartPanelLeft, startPanelJustLeft } from './start-panel-open';
 import { usePalettePopoverOpen } from '@/lib/palette-popover-open';
 
-const TAB_BAR_SELECTOR = '[data-editor-tabbar]';
+const BOTTOM_LINE_SELECTOR = '[data-bottom-line]';
 
 const SearchGlyph = lucideGlyph(lucideSearch, 15);
 const ClearGlyph = lucideGlyph(lucideX, 13);
@@ -124,8 +124,8 @@ export function StartPanel<C extends string>({
   // On a phone the panel is a sheet risen from the bottom edge; one that can close drags down to close (Dialog's
   // phoneSheet, BottomSheet).
   const sheet = useSheetDrag(onClose ?? (() => {}));
-  // Where the tab bar stands, for the phone and short-window sheet to stand on (useChromeFloor, as toasts do).
-  const tabBarFloor = useChromeFloor(true, 0, TAB_BAR_SELECTOR);
+  // Where the bottom line stands, for the phone and short-window sheet to stand on (useChromeFloor, as toasts do).
+  const lineFloor = useChromeFloor(true, 0, BOTTOM_LINE_SELECTOR);
   const searching = query.trim().length > 0;
   // A title match leads, under Best Match, lifted out of its group (start-diagramming.md "A title match leads").
   const { best, groups: results } = searching
@@ -252,7 +252,7 @@ export function StartPanel<C extends string>({
       // On a phone, and on a short window, the sheet stands on the tab bar while it shows (measured as the toast stack
       // measures its floor; a sideways phone folds its bars away), so the tabs stay in reach: Start Planning cannot
       // close, and over the bar it left a new tab no way back to the others but a template. Flush on a phone.
-      style={{ '--start-floor': `${tabBarFloor}px` } as CSSProperties}
+      style={{ '--start-floor': `${lineFloor}px` } as CSSProperties}
     >
       <section
         aria-labelledby={titleId}

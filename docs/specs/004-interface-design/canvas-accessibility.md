@@ -25,10 +25,11 @@ delete, undo, label edit via Space) that already work on a selection.
   pointer or an edit selected it: one the walk itself just reached keeps Tab as traversal, or every press would
   grow a new node and focus could never leave.
 - **F6 moves between regions.** Tab is busy inside the canvas, walking its elements, so on a real document the
-  chrome after it in the tab order (the palette strip, the bottom controls, the tab bar) sat behind dozens of
+  chrome after it in the tab order (the palette strip, the bottom line's groups) sat behind dozens of
   presses. F6 moves focus to the next region and Shift+F6 to the previous, wrapping round, in screen order:
-  **Header** (the document's title row), **Palette** (the strip or the Draw dock), **Canvas**, **Controls** (the
-  bottom-right cluster: Undo, Layers, the Theme & Canvas brush, zoom) and **Tabs** (the tab bar). A region lands on its first
+  **Header** (the top line's brand group and actions group, [Toolbar layout](../007-editor/toolbar-layout.md#the-top-line)),
+  **Palette** (the strip or the Draw dock), **Canvas**, **Controls** (the tools group: Undo, Layers, the Theme &
+  Canvas brush, zoom) and **Tabs** (the document group: the document, the active tab, the tab stack). A region lands on its first
   control (the Canvas on the canvas itself); a region not on screen (a viewer has no Palette, Zen hides the chrome)
   is skipped. It works from anywhere on the page but a modal dialog (whose focus trap keeps it) and with focus in a
   text field, where F6 still moves on: typing never uses it. Each region is marked `data-region` with its name, and

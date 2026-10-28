@@ -21,13 +21,13 @@ afterEach(() => {
 
 describe('useToastFloor', () => {
   it('stays at the edge, measuring nothing, while the stack is empty', () => {
-    chrome('data-editor-tabbar', window.innerHeight - 48);
+    chrome('data-document-group', window.innerHeight - 48);
     const { result } = renderHook(() => useToastFloor(false, 0));
     expect(result.current).toBe(TOAST_EDGE_PX);
   });
 
   it('stands on the bottom chrome, and follows a banner that comes and goes', () => {
-    chrome('data-editor-tabbar', window.innerHeight - 48);
+    chrome('data-document-group', window.innerHeight - 48);
     const { result } = renderHook(() => useToastFloor(true, 1));
     expect(result.current).toBe(48 + TOAST_FLOOR_GAP_PX);
     const banner = chrome('data-toast-floor', window.innerHeight - 160, 100);

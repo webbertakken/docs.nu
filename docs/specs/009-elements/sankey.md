@@ -192,7 +192,7 @@ sees Show Me. Telemetry: `UI` · `Started` · `SankeyFlowsTour`, and `UI` · `En
 
 ## Element tour
 
-While an Editor has a Sankey selected, and has opted in to its tour in Settings' Tours › Show Me, the bottom bar's
+While an Editor has a Sankey selected, and has opted in to its tour in Settings' Tours › Show Me, the actions group's
 **Start Sankey Tour** button offers the
 [Sankey tour](../007-editor/element-tours.md#the-sankey-tour): it lifts the diagram's widest band and a leftover with
 their readouts, points at the menu's styling and at double-clicking, then opens the Flows dialog, runs its

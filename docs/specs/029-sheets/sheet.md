@@ -241,7 +241,7 @@ rule under it, gridlines off), **Plain** (no fills, colours or borders; bold and
 
 One row, shown for someone who may edit, in Plan mode: on its left a **category switcher** (the palette's own
 category dropdown, in its toolbar style, a tile grid; in a header band it fills the band's height, flush to its
-inset, as the menu box's mode tile does), and to its right the chosen category's buttons only:
+inset, as the brand group's mode switch does), and to its right the chosen category's buttons only:
 
 | Category  | Buttons                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -281,7 +281,7 @@ inset, as the menu box's mode tile does), and to its right the chosen category's
 - Undo and Redo are the canvas's own (its controls and the keys), not repeated in the toolbar.
 
 - In a header band (maximised or filling its tab) the Sheet's controls (Focus, Maximise or Restore and the cog) end the toolbar, after Search behind a hairline: the top row's right is one run of buttons, straight on the Sheet's
-  header with no card around it, as the menu box sits at its left ([Plan board](../026-plan/plan-board.md) "The header
+  header with no card around it, as the brand group sits at its left ([Plan board](../026-plan/plan-board.md) "The header
   holds the top row"). Their width is measured and kept out of the room the buttons share, so in a narrow
   window buttons fold into More rather than the controls being clipped.
 
@@ -842,7 +842,7 @@ A sheet maximises exactly as a board does ([Maximised board](../026-plan/plan-bo
 
 ## Zoom
 
-While a Sheet covers the canvas (maximised, or filling its tab), the canvas cannot zoom, so the bottom-right zoom
+While a Sheet covers the canvas (maximised, or filling its tab), the canvas cannot zoom, so the tools group's zoom
 controls zoom the **sheet's cells** instead of standing down as they do for a board or view
 ([Maximised board](../026-plan/plan-board.md#maximised-board)):
 

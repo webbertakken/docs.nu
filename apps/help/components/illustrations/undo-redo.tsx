@@ -1,11 +1,11 @@
 // Undo / Redo illustrations for the Canvas category (docs/specs/018-help/help-app.md): a change on
 // the canvas being stepped back or re-applied, the Undo / Redo pair in the
-// bottom-right controls, and the keyboard shortcut. Composed only from the
+// tools group at the bottom left, and the keyboard shortcut. Composed only from the
 // shared primitives so the house style holds.
 
 import { Scene, Shape, Label } from './primitives';
 
-/** A small square icon button (undo / redo hook arrow) in the bottom-right controls. */
+/** A small square icon button (undo / redo hook arrow) in the tools group at the bottom left. */
 function ArrowButton({
   x,
   y,
@@ -59,12 +59,12 @@ function ArrowButton({
   );
 }
 
-/** The Undo / Redo pair in the bottom-right controls. */
+/** The Undo / Redo pair in the tools group at the bottom left. */
 function UndoRedoControls({ active }: { active: 'undo' | 'redo' }) {
   return (
     <g>
       <rect
-        x={332}
+        x={16}
         y={196}
         width={60}
         height={32}
@@ -72,8 +72,8 @@ function UndoRedoControls({ active }: { active: 'undo' | 'redo' }) {
         className="fill-white stroke-slate-200"
         strokeWidth={1.5}
       />
-      <ArrowButton x={336} y={200} dir="undo" pressed={active === 'undo'} />
-      <ArrowButton x={364} y={200} dir="redo" pressed={active === 'redo'} />
+      <ArrowButton x={20} y={200} dir="undo" pressed={active === 'undo'} />
+      <ArrowButton x={48} y={200} dir="redo" pressed={active === 'redo'} />
     </g>
   );
 }

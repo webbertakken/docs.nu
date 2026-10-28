@@ -19,7 +19,7 @@ Scope, by file:
 | `packages/ui/src/site.ts`                                  | `PUBLIC_VIEWPORT` (`colorScheme: 'light dark'`) and `DARK_READER_LOCK`                                                                      |
 | `apps/*/app/layout.tsx` (live, marketing, help, telemetry) | Inline the boot script; declare the lock meta; dark body                                                                                    |
 | `apps/live/hooks/ui/useAppearance.ts`                      | The shared hook plus the editor's telemetry                                                                                                 |
-| `apps/live/components/chrome/AppearanceToggle.tsx`         | The three-state control on the TabBar                                                                                                       |
+| `apps/live/components/chrome/AppearanceToggle.tsx`         | The three-state control in the actions group                                                                                                |
 | `apps/live/components/canvas/CanvasSurfaceContext.tsx`     | Carries the `CanvasSurface` past `React.memo` element views                                                                                 |
 | `packages/document/src/colors.ts`                          | `CanvasSurface`, `canvasSurface`, `isLightColor`, the `default*Color` inks                                                                  |
 | `packages/document/src/canvas-colors.ts`                   | The Default scheme's light and dark canvas colours                                                                                          |
@@ -136,7 +136,7 @@ layout inlines the real string rather than a client-reference stub.
 ## Presentation and UX
 
 - The control shows the CURRENT setting (sun / moon / monitor); its tooltip and `aria-label` name where the next click goes.
-- Surfaces covered: body backdrop, TabBar, EditorHeader, TemplatePicker, the `/new` backdrop, `DocumentLoading`, and the
+- Surfaces covered: body backdrop, the two lines' toolbar groups, TemplatePicker, the `/new` backdrop, `DocumentLoading`, and the
   `MovablePanel` frame. Panel contents gain `dark:` variants one panel at a time.
 - Preview tiles re-light through `.preview-art-tile`; colour-scheme swatches are excluded.
 - The match nudge sits bottom-centre, yields to the sign-in banner, hides in zen and embed, and never shows for Default.

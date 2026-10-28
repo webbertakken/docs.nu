@@ -74,5 +74,5 @@ changes.
 
 ## Element tour
 
-The **Stack tour** is on the bottom bar's **Start Stack Tour** button while a stack is selected, once its kind is opted in to (Settings › Tours › Show Me), for an Editor on an unlocked element, and walks through
+The **Stack tour** is on the actions group's **Start Stack Tour** button while a stack is selected, once its kind is opted in to (Settings › Tours › Show Me), for an Editor on an unlocked element, and walks through
 it on the element itself ([Element tours](../007-editor/element-tours.md) "The Stack tour").

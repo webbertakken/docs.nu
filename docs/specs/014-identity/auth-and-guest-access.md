@@ -193,7 +193,7 @@ the marketing site's "No Catch" night section:
 - **Interstitials** (the redirecting card) use the same frame with no pitch, the card centred, so a
   hand-off between pages never flashes a different ground.
 
-Signed-in status surfaces in the editor header via `<AuthControls>` (initial bubble + Sign out menu). Signed-out users see a "Sign in" link in the same slot. Neither blocks the editor: they're purely informational.
+Signed-in status surfaces at the end of the editor's actions group via `<AuthControls>` (initial bubble + Sign out menu). Signed-out users see a "Sign in" link in the same slot. Neither blocks the editor: they're purely informational.
 
 ## Identity display name
 

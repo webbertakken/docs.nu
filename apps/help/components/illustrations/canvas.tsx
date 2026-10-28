@@ -4,6 +4,7 @@
 
 import { Scene, Shape, Arrow, SelectionBox, Cursor, Panel, Tabs, Label, Tile } from './primitives';
 import { MenuCard, Strip, stripCategory } from './toolbar-layout';
+import { ToolsGroup } from './editor-lines';
 
 /** The canvas with the menu button and the palette strip across the top and a small flow on
  *  it: the editor at a glance. */
@@ -72,20 +73,8 @@ export function PanAndZoom() {
       <Shape x={70} y={54} w={76} h={44} label="A" />
       <Shape x={232} y={108} w={76} h={44} accent label="B" />
       <Arrow from={[146, 76]} to={[232, 130]} kind="elbow" />
-      {/* Zoom controls, bottom-right */}
-      <Panel x={300} y={168} w={104} h={34}>
-        <g transform="translate(0 0)">
-          <Label x={316} y={185} size={14} weight={700} tone="muted">
-            −
-          </Label>
-          <Label x={352} y={185} size={11} weight={600} tone="body" anchor="middle">
-            100%
-          </Label>
-          <Label x={388} y={185} size={14} weight={700} tone="muted">
-            +
-          </Label>
-        </g>
-      </Panel>
+      {/* The tools group, bottom left, ending in the zoom */}
+      <ToolsGroup x={16} y={176} />
       {/* Grabbing-hand cursor */}
       <g transform="translate(150 120)">
         <path

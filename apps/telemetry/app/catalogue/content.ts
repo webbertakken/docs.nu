@@ -87,8 +87,18 @@ export const TABS_REORDERED = chart(
   'Tab',
   'Reordered',
   'Tabs Reordered',
-  'Tab pills dragged into a new order.',
+  'Tabs dragged into a new order in the tab list.',
 );
+
+// The tab list (docs/specs/007-editor/toolbar-layout.md "The tab list"): a tab switched to from its row.
+export const TABS_SWITCHED_FROM_LIST: Metric = {
+  category: 'Tab',
+  action: 'Selected',
+  type: 'TabList',
+  title: 'Tabs Switched From the List',
+  blurb:
+    'A tab switched to from its row in the tab list, which the tab stack and the contributors open.',
+};
 
 export const LINKS_ADDED = chart(
   'Element',
@@ -360,6 +370,7 @@ const TAB_CHANGES = [
   TAB_LOOKS_PICKED,
   TABS_ARRANGED,
   TABS_REORDERED,
+  TABS_SWITCHED_FROM_LIST,
   TABS_LINKED,
   TABS_LOCKED,
   TABS_CLEARED,
@@ -382,6 +393,7 @@ export const TAB_ACTIONS: MetricStack = {
     TAB_LOOKS_PICKED,
     TABS_ARRANGED,
     TABS_REORDERED,
+    TABS_SWITCHED_FROM_LIST,
     TABS_LINKED,
     TABS_LOCKED,
     TABS_CLEARED,

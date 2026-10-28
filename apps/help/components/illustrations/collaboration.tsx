@@ -14,6 +14,14 @@ import {
   Tabs,
   TextBar,
 } from './primitives';
+import {
+  DocumentGroup,
+  TabList,
+  tabListHeight,
+  tabStackCentre,
+  type Person as EditorPerson,
+  type TabListRow,
+} from './editor-lines';
 
 // --- Comments ----------------------------------------------------------------
 
@@ -90,59 +98,55 @@ export function CommentThread() {
 
 // --- Live presence -----------------------------------------------------------
 
-/** A shared canvas with several live cursors carrying name tags, plus a
- *  presence avatar stack in the corner. */
+/** Live cursors with name tags on the canvas, and the tab list open from the people here: each tab's row carries
+ *  who is on it. */
 export function LiveCursors() {
-  // A tab pill with the initials of who is on that tab at its right.
-  const pill = (x: number, w: number, label: string, on: boolean, people: Person[]) => (
-    <g>
-      <rect
-        x={x}
-        y={206}
-        width={w}
-        height={24}
-        rx={7}
-        className={on ? 'fill-white stroke-brand-400' : 'fill-slate-100 stroke-slate-200'}
-        strokeWidth={1.4}
-      />
-      <Label x={x + 10} y={219} size={10} weight={on ? 700 : 500} tone={on ? 'accent' : 'body'}>
-        {label}
-      </Label>
-      {people.map((p, i) => (
-        <Avatar
-          key={p.initial}
-          cx={x + w - 12 - (people.length - 1 - i) * 11}
-          cy={218}
-          r={7}
-          initial={p.initial}
-          colour={p.colour}
-        />
-      ))}
-    </g>
-  );
-  return (
-    <Scene w={420} h={246}>
-      <Shape x={60} y={48} w={92} h={48} kind="rect" label="Idea" />
-      <Shape x={236} y={116} w={92} h={48} kind="circle" label="Review" />
-      {/* Live cursors with name tags */}
-      <Cursor x={120} y={104} name="Aria" colour="brand" />
-      <Cursor x={250} y={60} name="Jae" colour="violet" />
-      <Cursor x={170} y={158} name="Mara" colour="emerald" />
-      {/* The tab bar: each tab carries the initials of who is on it. */}
-      <rect x={0} y={198} width={420} height={40} className="fill-slate-50" />
-      <line x1={0} y1={198} x2={420} y2={198} className="stroke-slate-200" strokeWidth={1} />
-      {pill(16, 118, 'Overview', true, [
+  const rows: TabListRow[] = [
+    {
+      kind: 'tab',
+      name: 'Overview',
+      active: true,
+      people: [
         { initial: 'A', colour: 'brand' },
         { initial: 'J', colour: 'violet' },
         { initial: 'M', colour: 'emerald' },
-      ])}
-      {pill(142, 96, 'Backlog', false, [{ initial: 'R', colour: 'amber' }])}
-      {pill(246, 72, 'Notes', false, [])}
+      ],
+    },
+    { kind: 'tab', name: 'Backlog', mode: 'Plan', people: [{ initial: 'R', colour: 'amber' }] },
+    { kind: 'tab', name: 'Notes' },
+  ];
+  const people: EditorPerson[] = [
+    { initial: 'J', colour: 'violet' },
+    { initial: 'M', colour: 'emerald' },
+    { initial: 'R', colour: 'amber' },
+  ];
+  const groupProps = { name: null, role: false, count: 3, people };
+  const lineY = 206;
+  const listW = 196;
+  const listH = tabListHeight(rows);
+  const opener = 408 - 4 - 26 - 8 - (10 + 3 * 14) / 2;
+  return (
+    <Scene w={420} h={246}>
+      <Shape x={30} y={40} w={92} h={48} kind="rect" label="Idea" />
+      <Shape x={60} y={130} w={92} h={48} kind="circle" label="Review" />
+      {/* Live cursors with name tags */}
+      <Cursor x={90} y={96} name="Aria" colour="brand" />
+      <Cursor x={130} y={30} name="Jae" colour="violet" />
+      <Cursor x={160} y={150} name="Mara" colour="emerald" />
+      {/* The tab list, open from the people here: each tab carries who is on it. */}
+      <TabList
+        x={408 - listW}
+        y={lineY - 10 - listH}
+        w={listW}
+        rows={rows}
+        count={3}
+        peopleHere={3}
+        arrowX={opener}
+      />
+      <DocumentGroup right={408} y={lineY} {...groupProps} />
     </Scene>
   );
 }
-
-type Person = { initial: string; colour: 'brand' | 'violet' | 'emerald' | 'amber' };
 
 /** An element a teammate has selected: their initials sit on its top-left corner, and the
  *  selection outline in their colour shows it is theirs while they hold it. */
@@ -170,39 +174,32 @@ export function PresenceSelection() {
 
 // --- Sharing ------------------------------------------------------------------
 
-/** A visitor on a one-tab link: their tab's canvas above a tab bar where the
- *  shared tab sits between two nameless "Not shared" pills. */
+/** A visitor on a one-tab link: their tab's canvas, and the tab list where the shared tab sits between two
+ *  nameless "Not shared" rows. */
 export function OneTabShare() {
-  const pill = (x: number, w: number, label: string, shared: boolean) => (
-    <g transform={`translate(${x} 196)`}>
-      <rect
-        width={w}
-        height={24}
-        rx={7}
-        className={shared ? 'fill-white stroke-brand-400' : 'fill-transparent stroke-slate-400'}
-        strokeWidth={1.5}
-        strokeDasharray={shared ? undefined : '4 3'}
-      />
-      <Label
-        x={w / 2}
-        y={13}
-        anchor="middle"
-        size={10}
-        weight={600}
-        tone={shared ? 'strong' : 'muted'}
-      >
-        {label}
-      </Label>
-    </g>
-  );
+  const rows: TabListRow[] = [
+    { kind: 'tab', name: '', notShared: true },
+    { kind: 'tab', name: 'Roadmap', active: true },
+    { kind: 'tab', name: '', notShared: true },
+  ];
+  const groupProps = { name: null, role: false, tab: 'Roadmap', count: 3, people: [] };
+  const lineY = 200;
+  const stack = tabStackCentre(408, groupProps);
+  const listW = 180;
+  const listH = tabListHeight(rows);
   return (
     <Scene w={420} h={240}>
-      <Shape x={70} y={60} w={112} h={56} kind="rect" label="Q3: beta" />
-      <Shape x={238} y={60} w={112} h={56} kind="rect" label="Q4: launch" />
-      <rect x={0} y={184} width={420} height={56} className="fill-slate-100" />
-      {pill(40, 104, 'Not shared', false)}
-      {pill(158, 104, 'Roadmap', true)}
-      {pill(276, 104, 'Not shared', false)}
+      <Shape x={30} y={40} w={104} h={52} kind="rect" label="Q3: beta" />
+      <Shape x={30} y={116} w={104} h={52} kind="rect" label="Q4: launch" />
+      <TabList
+        x={Math.min(408 - listW, Math.round(stack - listW / 2))}
+        y={lineY - 10 - listH}
+        w={listW}
+        rows={rows}
+        count={3}
+        arrowX={stack}
+      />
+      <DocumentGroup right={408} y={lineY} {...groupProps} stackOpen />
     </Scene>
   );
 }
@@ -564,7 +561,7 @@ export function TeamSharedTree() {
 
 /** The floating timer pill: its kicker, the clock, and (for editors) pause, reset and remove.
  *  A countdown drains left to right, so the tinted part is the time left. */
-/** The Session strip in the bottom bar: the Timer showing its clock over the countdown's drain
+/** The Session strip in the tools group: the Timer showing its clock over the countdown's drain
  *  (or its glyph alone, idle), then Vote with your dots left as a badge, and Poll, beside the
  *  Layers and Theme strip. */
 function SessionStripArt({
@@ -748,7 +745,7 @@ export function SessionTools() {
   );
 }
 
-/** The Timer set-up, as the bottom bar's Timer button opens it: Countdown or Stopwatch, the dial
+/** The Timer set-up, as the tools group's Timer button opens it: Countdown or Stopwatch, the dial
  *  with its nudge buttons, the presets, and the start button. */
 export function TimerControl() {
   const presets = ['1', '3', '5', '10', '15', '30'];

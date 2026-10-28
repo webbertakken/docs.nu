@@ -18,8 +18,8 @@ Every app's root layout inlines the same tiny script, before first paint, that a
 The browser's own chrome (an installed app's title bar, a phone's status bar and URL bar) wears the colour at the top
 of the page, so the window reads as one piece. That is one of two surfaces:
 
-- **Header**, in the editor app (the editor, the Explorer, the account pages): the header's and the site footer's
-  colour. White in light; in dark `slate-900` as painted now: Steel's `#131b26`, a themed tab's tinted surface, or
+- **Header**, in the editor app (the editor, the Explorer, the account pages): the colour of the editor's toolbar
+  groups ([Toolbar group](toolbar-group.md)), the Explorer's header and the site footer. White in light; in dark `slate-900` as painted now: Steel's `#131b26`, a themed tab's tinted surface, or
   Midnight's navy.
 - **Ground**, on the public sites (marketing, help, telemetry): their translucent header shows the page ground.
   `slate-50` (`#f8fafc`) in light; in dark `slate-950` as painted, Steel's `#0b0f16`.
@@ -33,7 +33,7 @@ opens, so it starts there before the page says otherwise.
 ## The control
 
 - One button that **cycles Light → Dark → System**, showing the CURRENT setting (sun / moon / monitor); its accessible name says where the next click goes.
-- In the editor it sits in the tab bar's controls ([Live app](../007-editor/live-app.md)). In [Power user mode](../007-editor/power-user-mode.md#quick-appearance-switch) a click switches between Light and Dark, and a right-click sets System. The public sites, the home page included, have no power user mode and always cycle.
+- In the editor it sits in the actions group ([Toolbar layout](../007-editor/toolbar-layout.md#the-top-line)). In [Power user mode](../007-editor/power-user-mode.md#quick-appearance-switch) a click switches between Light and Dark, and a right-click sets System. The public sites, the home page included, have no power user mode and always cycle.
 - On the public sites the toggle is **never in the header**. It sits on **its own small rail at the right edge**, directly under the [share rail](../019-marketing/marketing-site.md#social-sharing) where that shows, an icon button in the rail's style, with the toolbar name "Appearance". The rail shows from `xl` up on every public site, and from `2xl` on the wide ones (`max-w-7xl` pages: the help centre), where a narrower screen leaves no gutter beside the content. A surface that turns sharing off, such as the help centre, keeps the Appearance card alone. Below that there is no gutter for it, so it is left out and the appearance follows its saved choice or the device (System). It is quiet (a ghost icon button).
 - The public-site control emits **no telemetry**: those sites report page views only ([Page view telemetry](../017-telemetry/page-view-telemetry.md)). The editor's control keeps its `UI / Toggled / <setting>` event.
 

@@ -69,7 +69,6 @@
  */
 @layer components {
   [data-floating-panel],
-  [data-editor-tabbar],
   [data-zoom-cluster] {
     animation: fade-in var(--transition-duration-short) ease-out;
   }

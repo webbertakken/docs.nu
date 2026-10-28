@@ -40,6 +40,25 @@ describe('Brand', () => {
     // Named on the link, so it keeps a name where a caller hides the wordmark (the editor header on a phone).
     expect(container.querySelector('a')?.getAttribute('aria-label')).toBe('LiveDoc');
   });
+
+  // The editor's Back (docs/specs/007-editor/toolbar-layout.md "The top line"): a caret before the mark alone, named
+  // for where it goes.
+  it('draws the mark alone, after what leads it, under the name it is given', () => {
+    const { container } = render(
+      <Brand
+        href="/explorer"
+        wordmark={false}
+        label="Back to the Explorer"
+        leading={<i data-caret="" />}
+        markClassName="size-6"
+      />,
+    );
+    const link = container.querySelector('a')!;
+    expect(link.getAttribute('aria-label')).toBe('Back to the Explorer');
+    expect(container.querySelector('[data-logotype]')).toBeNull();
+    expect(link.firstElementChild?.hasAttribute('data-caret')).toBe(true);
+    expect(link.querySelector('svg')?.getAttribute('class')).toContain('size-6');
+  });
 });
 
 describe('BrandMark', () => {
@@ -123,6 +142,8 @@ describe('the hover fan', () => {
       act(() => frames.splice(0).forEach((cb) => cb(performance.now() + ms)));
 
     fireEvent.pointerEnter(container.querySelector('a')!, { pointerType: 'mouse' });
+
+    fireEvent.pointerMove(container.querySelector('a')!, { pointerType: 'mouse' });
     step(1000);
     expect(page()).not.toBe(rest);
 
@@ -153,6 +174,7 @@ describe('the wordmark', () => {
     const wordmark = container.querySelector<HTMLElement>('[data-logotype]')!;
     const before = wordmark.outerHTML;
     fireEvent.pointerEnter(container.querySelector('a')!, { pointerType: 'mouse' });
+    fireEvent.pointerMove(container.querySelector('a')!, { pointerType: 'mouse' });
     expect(wordmark.querySelector('[aria-hidden="true"]')).toBeNull();
     expect(wordmark.outerHTML).toBe(before);
   });

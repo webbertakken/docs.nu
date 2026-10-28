@@ -27,7 +27,7 @@ So the themed bar is the **default**, and a surface does nothing to get it.
   - Light: thumb slate 500, slate 600 on hover.
   - Dark: thumb slate 500, slate 400 on hover (the dark palette's slate tokens).
 - **One narrower variant**, `.scrollbar-slim`, for dense strips where even a thin bar crowds the
-  content (the tab bar, packed panel lists). Same colours, narrower.
+  content (the tab list, packed panel lists). Same colours, narrower.
 - **Hidden** stays a per-surface choice (a swipe carousel, a scrolling tab strip), made with
   `scrollbar-width: none`; the default never overrides it.
 - No other scrollbar styling exists. A surface that wants a different bar changes this spec first.

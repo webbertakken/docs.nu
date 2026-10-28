@@ -113,8 +113,8 @@ separate piece of work.
 
 A long category (Components runs to ten rows) used to run off the bottom of a
 short window with no way to reach the last few. The panel body's height is now
-capped at the space between its top edge and the bottom chrome — the zoom dock
-and the tab bar, both measured rather than assumed, since the dock hides in Zen
+capped at the space between its top edge and the bottom chrome — the bottom line's groups,
+measured rather than assumed, since they hide in Zen
 mode — and only then does it scroll. A category that fits shows no scrollbar
 and still animates its height on switch.
 

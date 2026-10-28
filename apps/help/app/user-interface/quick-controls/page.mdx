@@ -5,34 +5,35 @@ import { QuickControls } from '@/components/illustrations/user-interface';
 export const metadata = helpMetadata({
   title: 'Quick Controls',
   description:
-    'The quick controls at the end of the bottom bar gather the always-available actions: search, settings, and the dark-mode toggle.',
+    'The quick controls at the top right of the editor gather the always-available actions: search, reporting a bug, settings, and the dark-mode toggle.',
   path: '/help/user-interface/quick-controls/',
 });
 
 <ArticleLayout
   title="Quick Controls"
-  description="The always-available actions tucked into the corner of the editor."
+  description="The always-available actions at the top right of the editor."
   categoryTitle="User Interface"
   categorySlug="user-interface"
 >
 
-The **quick controls** sit at the right-hand end of the bottom bar, after the [tab bar](/help/user-interface/tab-bar/)'s tabs, and gather the actions you want reachable at any moment, whatever you are doing on the canvas. They stay put while the rest of the interface comes and goes with your selection, and a matching cluster appears at the bottom of the full-page [Explorer](/help/explorer/explorer-page/), so the two screens don't hide their controls in different places.
+The **quick controls** open **the actions group**, at the right of [the top line](/help/user-interface/title-bar/#the-top-line), before the document's own actions (Share or Copy) and your account. They gather the actions you want reachable at any moment, whatever you are doing on the canvas, and they stay put while the rest of the interface comes and goes with your selection. A matching cluster appears at the bottom of the full-page [Explorer](/help/explorer/explorer-page/).
 
-<Figure caption="The quick controls at the right-hand end of the bottom bar: Search, Settings and the appearance switch.">
+<Figure caption="The quick controls at the start of the actions group, top right: Search, Report a Bug, Settings and the appearance switch, then Share and your account.">
   <QuickControls />
 </Figure>
 
 ## What lives here
 
-Three controls, left to right:
+Four controls, left to right:
 
 - **Search**: open the [search panel](/help/search-panel/) to jump to any document, tab, or element, to drop something onto the canvas, or to run a command. `⌘K` (Ctrl+K) opens it from the keyboard.
+- **Report a Bug**: tell us what went wrong, without leaving the document. See [Report a Bug](/help/troubleshooting/report-a-bug/).
 - **Settings**: the [Settings dialog](/help/user-interface/settings/): the preferences that follow you between devices, plus the **Keyboard** category with the full [shortcut reference](/help/tips-and-tricks/keyboard-shortcuts/) and the switch that turns shortcuts off.
-- **Appearance**: click to step the [interface between Light, Dark, and System](/help/tools/dark-mode/) (System follows your device). This is the app's own chrome, not the diagram's theme, which lives behind the **Theme & canvas** button in the bottom-right corner. In [power user mode](/help/user-interface/power-user-mode/) a click flips straight between light and dark instead.
+- **Appearance**: click to step the [interface between Light, Dark, and System](/help/tools/dark-mode/) (System follows your device). This is the app's own chrome, not the diagram's theme, which lives behind the **Theme & canvas** button in the tools group at the bottom left. In [power user mode](/help/user-interface/power-user-mode/) a click flips straight between light and dark instead.
 
 The Explorer's cluster also carries a link to LiveDoc's source on GitHub, on a computer.
 
-On a computer each control in the editor's bar shows its name beside the icon (the appearance switch names the mode in force: Light, Dark, or System), and hovering one shows what it does. On a phone the bar is tight, so the controls are icons only; with Minimal Chrome on in power user mode they are icons only everywhere.
+In the editor the controls are icons alone, and hovering one shows its name and what it does. Turn on **Button Labels** in [Settings](/help/user-interface/settings/) under **Appearance** to show each name beside its icon on a computer (the appearance switch names the mode in force: Light, Dark, or System). On a phone they are always icons alone, and so they are everywhere with Minimal Chrome on in power user mode.
 
 Because they are fixed in the corner rather than tied to a selection, the quick controls are the dependable starting point when you are not sure where an action lives: search finds both things and commands.
 

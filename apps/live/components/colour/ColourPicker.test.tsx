@@ -171,6 +171,7 @@ describe('ColourPicker', () => {
     );
     const green = screen.getByRole('button', { name: 'Green' });
     fireEvent.pointerEnter(green, { pointerType: 'mouse' });
+    fireEvent.pointerMove(green, { pointerType: 'mouse' });
     expect(onPreview).toHaveBeenLastCalledWith(standardColours('soft', 'light')[5]!.hex);
     fireEvent.pointerEnter(screen.getByRole('button', { name: 'Blue' }), { pointerType: 'touch' });
     expect(onPreview).toHaveBeenCalledTimes(1);

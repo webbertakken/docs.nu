@@ -138,17 +138,17 @@ The **Slide Deck panel** is the seventh tool panel, on exactly the contract the 
 - **Every verb lives in the row's `…` menu**, built from the shared menu furniture the Explorer's rows and the tab context menu use, in the same shape: a quick-action icon **toolbar** (rename, notes, duplicate, with delete pinned right), then labelled accordion categories — **Selection** (add / remove what you have selected, with a line above the buttons saying what they act on; not offered on a page slide, which is whatever is on its page) and **Visibility** (hide this slide from the run, or show it again). A menu that looks like this one and like nothing else in the app is a menu people have to learn twice.
 - **Deleting a slide asks first**, in a ConfirmPopover anchored to the row's own menu button. The elements survive, but the arrangement does not, and the arrangement is what you spent the time on. The confirm says so: "The elements stay on the canvas." ("The element stays", for one), or for a page slide "The page stays."
 - **Hidden slides** are skipped by `presentableSlides`, which is the ONE place the run is decided — so the count on the Present button, the `7 / 23` in the HUD, and what advancing lands on can never disagree about the deck's length. The row shows a struck-through name and an eye marker, so a hidden slide is visible in the panel and invisible in the show. A row itself does ONE thing — press it to open that slide — because a panel the width of the palette cannot carry five controls per row and stay legible.
-- **Reorder** by dragging rows. A slide page's slide dragged out of its page order moves its page in the tab, since a tab's page slides follow its page order ([Pages](../007-editor/pages-mode.md) "Slides"). The order does NOT change while you drag: a caret shows where the row will land and the move commits on release, the way the tab bar reorders ([Tab folders](../006-document/tab-folders.md)). Reordering live reshuffled the list under the pointer, which moved the very row you were aiming at. Pointer events rather than HTML5 dnd, so it works on touch.
+- **Reorder** by dragging rows. A slide page's slide dragged out of its page order moves its page in the tab, since a tab's page slides follow its page order ([Pages](../007-editor/pages-mode.md) "Slides"). The order does NOT change while you drag: a caret shows where the row will land and the move commits on release, the way the tab list reorders ([Tab folders](../006-document/tab-folders.md)). Reordering live reshuffled the list under the pointer, which moved the very row you were aiming at. Pointer events rather than HTML5 dnd, so it works on touch.
 - **Rename** inline, **delete**, and **duplicate** a slide. A slide page's only slide has no Delete: the deck would put it straight back, and **Hide** leaves it out of the show.
 - **Presenter notes** opened from the row's `…` menu, written in a text area under the list, with the slide's optional **time budget** beside them — the two things you decide about a slide while writing the talk rather than while giving it (see Pacing). Here rather than on the canvas, because a note is about the slide rather than about anything on it, and behind the menu rather than always-on so the panel never grows a text area you did not ask for.
 - Selecting a row **switches to that slide's tab and highlights its members on the canvas**. This is how you check a slide without presenting, and it is why a slide names its tab rather than inferring one. A page slide has no members to highlight: its row frames its page instead, as the page's own label does ([Pages](../007-editor/pages-mode.md) "Slides").
 - **Present** — enters the full-screen deck at slide 1, with a badge carrying the slide count.
 
-### The header's Present button
+### The actions group's Present button
 
 A deck you have built should be one press away from wherever you are in the document, without
 picking the Slide Deck tool first. So while the deck has **at least one presentable slide**
-(`presentableSlides`: not hidden, its tab still there), the editor header carries a **Present**
+(`presentableSlides`: not hidden, its tab still there), the editor's actions group carries a **Present**
 button (a play glyph and the word), immediately to the **left of Share** (or, for a visitor, of the
 account controls, where Share would sit). Pressing it starts the presentation at slide 1, exactly
 as the panel's Present does (`start()`, so the cross-tab load and the overlay preload are the same);
@@ -187,7 +187,7 @@ gains the headline names, the markers and the count badge.
 
 ### What the panel does not do
 
-Reorder tabs. It was asked for while a slide belonged to a tab and the deck was "tab order, then layer order", and the model moved on: slide order is its own array now, so reordering tabs changes nothing about the deck. Everything that DOES affect the presentation lives in this panel; a control that looks like deck management but only reshuffles the tab bar would undermine exactly that promise.
+Reorder tabs. It was asked for while a slide belonged to a tab and the deck was "tab order, then layer order", and the model moved on: slide order is its own array now, so reordering tabs changes nothing about the deck. Everything that DOES affect the presentation lives in this panel; a control that looks like deck management but only reshuffles the tab list would undermine exactly that promise.
 
 ## Presenting
 
@@ -299,7 +299,7 @@ Two ways out, because a presenter mid-sentence should not have to remember one:
 - **`Esc`**, any time.
 - **The close button** in the HUD.
 
-Exiting restores the previous tab, viewport, chrome and **keyboard focus**: back on the control that started the deck (the header's or the Slides panel's Present), or the canvas when that control is gone, never the page itself, where a keyboard user had to Tab in again from the top. The viewport matters more than it sounds: a deck leaves the camera wherever the last slide needed it, often 250% on one box, so without the restore you came back to a canvas you had to go and find.
+Exiting restores the previous tab, viewport, chrome and **keyboard focus**: back on the control that started the deck (the actions group's or the Slides panel's Present), or the canvas when that control is gone, never the page itself, where a keyboard user had to Tab in again from the top. The viewport matters more than it sounds: a deck leaves the camera wherever the last slide needed it, often 250% on one box, so without the restore you came back to a canvas you had to go and find.
 
 - Available to **every role including share-link viewers**: presenting is read-only by nature, and a viewer narrating a shared document is a core case.
 

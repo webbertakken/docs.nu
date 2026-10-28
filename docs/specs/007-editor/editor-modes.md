@@ -41,20 +41,20 @@ where it is and changes only how the next mark is made.
 ## The mode switch
 
 - **Beside the menu (hamburger) button, on every tab.** The top chrome's switch (`EditorModeSwitch`) sits directly
-  to the right of the menu button, in the same card at the top left ([Toolbar layout](toolbar-layout.md)), before
-  the tab's name. A tab with content changes mode here: the palette and the tab pill's icon follow at once, and
+  to the right of the menu button, last in the brand group at the top left
+  ([Toolbar layout](toolbar-layout.md#the-top-line)). A tab with content changes mode here: the palette and the
+  active tab's glyph follow at once, and
   every element stays exactly where it is.
-  - **On a phone** it shows the icon and the chevron only, no name, to save room in the strip's row; its accessible
-    name still says the mode. It sits in the menu card wherever that card is: at the left of the strip's row, or in
-    the corner where a Draw tab or a read-only visitor has no strip.
+  - **On a phone** it shows the icon and the chevron only, no name, to save room on the top line; its accessible
+    name still says the mode. It sits in the brand group, top left, whether or not the line holds a strip.
   - It stays up in every mode, so it never moves when the mode changes.
 - **And on an empty tab's start.** The switch also leads every start panel's rail ([Template
   starts](start-diagramming.md) "Changing mode"), named and full width (`StartModeSwitch`), so a tab begun in the
   wrong mode changes before anything is made.
 - **The two always agree.** On an empty tab both show at once. Both read and write the one source of truth, the
   tab's mode (`Tab.opensIn`, through the editor's one `EditorModeState`), so a switch in either place updates the
-  other, the palette and the tab pill's icon in the same render.
-- **Nowhere else.** The tab menu holds no Mode section, and the tab bar and the Explorer offer none.
+  other, the palette and the active tab's glyph in the same render.
+- **Nowhere else.** The tab menu holds no Mode section, and the tab list and the Explorer offer none.
 - **A dropdown chip** (`ModeMenuChip`): on the start's rail a full-width row; beside the menu button a compact
   chip (`compact`). Both show the current mode's icon, its name (not on a phone beside the menu button) and a
   chevron, on the faint tint the editor's menu-like controls use. A press opens the **mode menu** below it, hanging
@@ -161,7 +161,7 @@ of the line: from then on it switches only among the modes there. A Board, Sheet
 - **Nothing is remembered per person.** A mode chosen before this change and kept in a browser
   (`livedoc:v2:editor-mode:<tab>`) is no longer read: the tab's own mode wins. The keys are
   left in place and ignored.
-- **A new tab opens in the mode it was made from.** A tab added from the tab bar's **+** or the command palette's
+- **A new tab opens in the mode it was made from.** A tab added from the document group's **+** (or the tab list's New Tab) or the command palette's
   **Create New Tab** opens in the mode of the tab its maker was on (the active tab's mode, for everyone on the new
   tab): made from a Pages tab it is a Pages tab, from a Draw tab a Draw tab, from a Plan tab (a Board,
   Sheet or Dashboard tab included) a Plan tab, and from an event-storming board, always Diagram, a Diagram tab. The

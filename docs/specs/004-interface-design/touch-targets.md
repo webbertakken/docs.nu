@@ -37,7 +37,7 @@ floor at 24px; the editor aims past it, because a diagram editor is used with a 
   without aiming for the pill. A pad cannot reach above it, where the sheet's edge clips it.
 - **Padding where a pad would be clipped.** A `truncate` box or a horizontal scroller clips its own
   `::before`, so there the control grows by padding instead (`pointer-coarse:py-*`, with a matching
-  negative margin where the line must not move): the document title in the editor header, the
+  negative margin where the line must not move): the document's name in the editor's document group, the
   breadcrumb links, and the telemetry view tabs and their arrows.
 - **A list's rows abut at 44px.** Where links or rows stack closer than 44px, a pad would overlap the
   next row's, so on a touch screen each row is 44px tall and the list drops its gap: the Explorer tree
@@ -63,9 +63,9 @@ floor at 24px; the editor aims past it, because a diagram editor is used with a 
   positioned box, so it counts toward its scroll container's overflow; a container that sets
   `overflow-x: auto` gets `overflow-y: auto` too and scrolls (and draws a scrollbar) by the few
   pixels a pad reaches past it. Such a scroller hides its other axis (`overflow-y-hidden` on the
-  tab bar's tab row and the strip's rail, `overflow-x-hidden` on the Explorer tree), which clips
+  strip's rail, `overflow-x-hidden` on the Explorer tree), which clips
   the pads at that edge by a few pixels.
-- **Toolbars keep their drawn sizes on a phone:** 36px items, the bottom-right cluster's 44px.
+- **Toolbars keep their drawn sizes on a phone:** 36px items in every [toolbar group](toolbar-group.md), each with a 44px tap area.
   Fitting more tiles is the strip's swipe's job ([Toolbar layout](../007-editor/toolbar-layout.md)),
   not smaller targets.
 

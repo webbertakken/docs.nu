@@ -24,6 +24,9 @@ import { track } from '@/lib/telemetry';
 import { SnapWidth } from '@/components/primitives/SnapWidth';
 import { PHONE_TOOLBAR_ITEMS } from '@/components/chrome/phone-toolbar-items';
 import { BAND_STRIP_FLUSH, BAND_TINT, TOOLBAR_CARD } from '@/components/chrome/toolbar-surface';
+import { ToolbarGroup } from '@/components/chrome/ToolbarGroup';
+import { secondRowTopPx } from '@/lib/canvas-chrome';
+import { useReportCentreOwnRow } from '@/hooks/ui/centre-row-store';
 import { PaletteTintProvider } from './palette-controls';
 import { PaletteGroupProvider } from './palette-group-state';
 import { PaletteDropdown, TOOLBAR_TRIGGER_TONE } from './PaletteDropdown';
@@ -64,7 +67,7 @@ import { BrowseMemoryContext, useBrowseMemory } from './PaletteCategoryBrowser';
 import { CATEGORY_BAR_MODES } from './category-flyout-groups';
 import { setPalettePopoverOpen } from '@/lib/palette-popover-open';
 import { useBarLabels } from './useBarLabels';
-import { useStripCrowded } from './useStripCrowded';
+import { useStripPlacement } from './useStripPlacement';
 import { SessionBrowse } from './session-category';
 import { barCategoriesFor } from './bar-categories';
 import { CategoryBarButtons, CategoryBarFlyout, useCategoryBar } from './CategoryBar';
@@ -111,6 +114,8 @@ type Props = Pick<
   };
 // The strip's card, and the leading card beside it on a phone.
 const CARD_CLASS = `${TOOLBAR_CARD} ${BAND_TINT} ${BAND_STRIP_FLUSH} ${PHONE_TOOLBAR_ITEMS}`;
+// The strip itself is a toolbar group (docs/specs/004-interface-design/toolbar-group.md), which brings the surface.
+const STRIP_CLASS = `${BAND_TINT} ${BAND_STRIP_FLUSH} ${PHONE_TOOLBAR_ITEMS}`;
 
 // On a phone's row, the menu card sits at the left gutter and the strip beside
 // it rather than centred (docs/specs/007-editor/toolbar-layout.md "On a phone");
@@ -279,7 +284,10 @@ export function ToolbarPalette(props: Props) {
   });
   const leadingRef = useRef<HTMLDivElement>(null);
   // Too wide to centre between the menu card's sides (a tablet): the strip sits at the right instead.
-  const crowded = useStripCrowded(cardRef, leading == null);
+  // On the top line, centred or off centre between its side groups, or its own row (useStripPlacement).
+  const { crowded, shift } = useStripPlacement(cardRef, leading == null);
+  // Crowded, it takes its own row under the top line, and the top corners follow (centre-row-store).
+  useReportCentreOwnRow(crowded && !props.hidden);
   const stripLimit = useStripTileLimit(cardRef, {
     leadingRef,
     isMobile,
@@ -441,12 +449,19 @@ export function ToolbarPalette(props: Props) {
       // centred; `top` is restated so the strip keeps its 12px from the top.
       // In a maximised element's header band the strip moves to the header's right end (CanvasCover's setStripEnd
       // sets the two properties on the canvas; centred otherwise, docs/specs/026-plan/plan-board.md).
+      // Crowded (it would run under a side group of the top line even with its fewest tiles), it takes a row of its own
+      // under the line, still centred (docs/specs/007-editor/toolbar-layout.md "When a line runs out of room"); a
+      // phone's strip always does.
       style={{
-        ...(scale === 1 ? {} : { ...uiScaleStyle(scale), top: toSurfacePx(12, scale) }),
-        alignItems: crowded ? 'flex-end' : 'var(--plan-strip-align, center)',
-        paddingRight: crowded
-          ? 'max(0.75rem, var(--plan-strip-end, 0px))'
-          : 'var(--plan-strip-end, 0px)',
+        ...(scale === 1 ? {} : uiScaleStyle(scale)),
+        top: toSurfacePx(crowded || phoneRow ? secondRowTopPx(scale) : 12, scale),
+        alignItems: crowded ? 'center' : 'var(--plan-strip-align, center)',
+        // Off centre between the side groups: padding twice the shift on one side moves the centred card by it.
+        ...(shift > 0
+          ? { paddingLeft: toSurfacePx(2 * shift, scale) }
+          : shift < 0
+            ? { paddingRight: toSurfacePx(-2 * shift, scale) }
+            : { paddingRight: 'var(--plan-strip-end, 0px)' }),
       }}
       // While one of its popovers is open (a category's flyout, More, Search) the strip rises to the popover layer,
       // so what hangs from it sits over everything on the canvas, an element's toolbar and menus included.
@@ -475,7 +490,7 @@ export function ToolbarPalette(props: Props) {
                 <CardWidth swipe={swipe}>
                   {/* The tour's Palette anchor (docs/specs/007-editor/editor-tour.md) is the card, not the
                 full-width row around it, so the ring frames the strip. */}
-                  <div
+                  <ToolbarGroup
                     ref={cardRef}
                     data-tour-id="palette"
                     // Chrome, not canvas: a paste, a drop or a drag ghost over the strip treats it like
@@ -488,8 +503,8 @@ export function ToolbarPalette(props: Props) {
                     // selection mode, the category picker and More keep their size.
                     className={
                       swipe
-                        ? `${CARD_CLASS} min-w-0 [&>:not([data-strip-rail])]:shrink-0`
-                        : CARD_CLASS
+                        ? `${STRIP_CLASS} min-w-0 [&>:not([data-strip-rail])]:shrink-0`
+                        : STRIP_CLASS
                     }
                   >
                     {/* Event-storming boards hide the selection mode (docs/specs/021-event-storming/event-storming.md): the
@@ -632,7 +647,7 @@ export function ToolbarPalette(props: Props) {
                         </div>
                       </>
                     )}
-                  </div>
+                  </ToolbarGroup>
                 </CardWidth>
               )}
             </StripRow>

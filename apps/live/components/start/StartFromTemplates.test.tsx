@@ -63,21 +63,21 @@ describe('StartFromTemplates', () => {
   });
 });
 
-// docs/specs/007-editor/start-diagramming.md "On a phone": the sheet stands on the tab bar while it shows, so the tabs
+// docs/specs/007-editor/start-diagramming.md "On a phone": the sheet stands on the bottom line while it shows, so the tabs
 // stay in reach; with the bars folded away (a sideways phone) there is nothing to stand on.
 describe('StartFromTemplates on a phone', () => {
   const frameOf = () =>
     screen.getByRole('heading', { name: 'Start Diagramming' }).closest('section')!.parentElement!;
 
-  it('stands on the edge with no tab bar showing', () => {
+  it('stands on the edge with no bottom line showing', () => {
     mount('diagram');
     expect(frameOf().className).toContain('max-sm:pb-[calc(var(--start-floor)-8px)]');
     expect(frameOf().style.getPropertyValue('--start-floor')).toBe('16px');
   });
 
-  it('stands on the tab bar where it shows', () => {
+  it('stands on the bottom line where it shows', () => {
     const bar = document.createElement('div');
-    bar.setAttribute('data-editor-tabbar', '');
+    bar.setAttribute('data-bottom-line', '');
     bar.getBoundingClientRect = () =>
       ({ top: 616, left: 0, right: 390, width: 390, height: 48 }) as DOMRect;
     document.body.appendChild(bar);

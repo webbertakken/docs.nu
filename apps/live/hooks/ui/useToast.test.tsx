@@ -271,6 +271,7 @@ describe('plain toasts', () => {
       vi.advanceTimersByTime(3_000);
     });
     fireEvent.pointerEnter(card);
+    fireEvent.pointerMove(card);
     act(() => {
       vi.advanceTimersByTime(60_000);
     });

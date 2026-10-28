@@ -89,15 +89,24 @@ test('a tab-scoped link opens its tab and nothing else', async ({ page, browser,
   await visitor.goto(url);
   const canvas = visitor.locator('[data-canvas-a11y-root]');
   await expect(canvas.getByRole('img', { name: /Q3 beta/ })).toBeVisible();
-  await expect(visitor.getByRole('button', { name: 'Not shared' })).toHaveCount(2);
-  await expect(visitor.getByRole('button', { name: /Roadmap/ })).toBeVisible();
+  // The tab list (docs/specs/007-editor/toolbar-layout.md "The tab list"): the scoped tab, and the others as Not
+  // shared rows; the stack counts the tabs in scope.
+  const stack = visitor.locator('[data-document-group] [data-tab-stack]');
+  await expect(stack).toHaveAccessibleName('All tabs (1)');
+  await stack.click();
+  const list = visitor.getByRole('dialog', { name: 'Tabs' });
+  await expect(list.getByRole('button', { name: 'Not shared' })).toHaveCount(2);
+  await expect(list.getByRole('button', { name: /Roadmap/ })).toBeVisible();
   await expect(visitor.getByText('Pricing')).toHaveCount(0);
+  await visitor.keyboard.press('Escape');
   expect(leaks).toEqual([]);
 
   // Widening the link reloads the visitor into every tab.
   await scopeSelect.selectOption({ label: 'All tabs' });
-  await expect(visitor.getByRole('button', { name: /Pricing/ })).toBeVisible({ timeout: 15_000 });
-  await expect(visitor.getByRole('button', { name: 'Not shared' })).toHaveCount(0);
+  await expect(stack).toHaveAccessibleName('All tabs (3)', { timeout: 15_000 });
+  await stack.click();
+  await expect(list.getByRole('button', { name: /Pricing/ })).toBeVisible();
+  await expect(list.getByRole('button', { name: 'Not shared' })).toHaveCount(0);
 
   await visitorContext.close();
 });

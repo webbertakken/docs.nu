@@ -8,8 +8,8 @@ a screen, or thinking without the toolbars in the way.
 
 When zen mode is on, the editor hides:
 
-- the editor header (top bar),
-- the tab bar,
+- both of the editor's lines ([Toolbar layout](toolbar-layout.md#the-two-lines)): the brand group, the
+  actions group and the document group, and the tools group but its Zoom,
 - the palette (tools + add-element), the context / inspector
   panel, the Explorer, the Collaborate panel, the AI
   panel, the Toolbar strip and menu button, and the owner / role status badge,
@@ -19,7 +19,7 @@ What stays:
 
 - the **canvas and its content** (elements, alignment guides, laser
   trails, remote cursors, selection — interaction is unaffected),
-- the **zoom controls** (bottom-right), so the user can still zoom / fit,
+- the tools group's **zoom controls** (bottom left), so the user can still zoom / fit,
 - an **exit-zen button on the zoom controls**, shown only while zen is
   active, so there's always a visible way out.
 
@@ -35,7 +35,7 @@ view-only visitors (focusing is read-only).
   it hides the chrome and leaves the current tool selected. (Entering
   originally lived as an always-visible button on the zoom controls;
   it moved into the dropdown to keep the resting UI minimal.)
-- **Exit — the zoom controls** (bottom-right), the only chrome left in
+- **Exit — the zoom controls** (bottom left), the only chrome left in
   zen: a compress icon ("Exit zen mode") shown only while zen is active.
   Exception: view-only visitors have no palette, so their zoom dock keeps
   the enter button too (zen stays available to everyone).
@@ -60,13 +60,13 @@ toggle.
   dropdown's Zen entry, and the zoom-dock exit button.
 - The chrome is hidden by the same gates that already hide it during the
   welcome flow — each `welcomeOpen ? null` / `welcomeOpen || readOnly`
-  guard in `CanvasChrome` also checks `zenMode`. The header + tab bar are
-  hidden in `EditorView`.
+  guard in `CanvasChrome` also checks `zenMode`. The two lines' groups are
+  hidden by the same gate.
 - Not a `CanvasTool` (Select / Hand / Laser are mutually-exclusive cursor
   modes); zen mode is an orthogonal visibility flag, so it sits beside
   the tool row rather than inside the tool group.
 
-A phone held sideways folds the header and the tab bar on its own, without zen mode, and
+A phone held sideways folds the actions group and the document group on its own, without zen mode, and
 shows them again from a handle ([A phone held sideways](live-app.md#a-phone-held-sideways)); in zen
 mode that handle is not drawn.
 

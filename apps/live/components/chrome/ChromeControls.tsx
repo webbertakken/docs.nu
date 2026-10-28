@@ -1,5 +1,5 @@
 import { AppearanceToggle } from '@/components/chrome/AppearanceToggle';
-import { CHROME_BTN, CHROME_BTN_LABELLED, ChromeLabel } from '@/components/chrome/chrome-button';
+import { ChromeLabel, useChromeButtonClass } from '@/components/chrome/chrome-button';
 import { SettingsIcon, GithubIcon, SearchGlyph } from '@/components/chrome/tab-bar-icons';
 import { TourOfferButton } from '@/components/tour/TourOfferButton';
 import { ReportBugButton } from '@/components/bug-report/ReportBugButton';
@@ -20,6 +20,7 @@ export function ChromeControls({
   github = true,
   powerUser = false,
   appearance = true,
+  tourOffer = true,
 }: {
   onOpenSearch?: () => void;
   onOpenSettings?: () => void;
@@ -37,14 +38,16 @@ export function ChromeControls({
   // The Appearance control; withheld where the host sets the scheme itself (a workbench frame,
   // docs/specs/013-workspace/blueprints/workbench-embeds.md, WB15).
   appearance?: boolean;
+  // The Start Tour button leads the controls; the editor's actions group draws it with the document actions instead.
+  tourOffer?: boolean;
 }) {
-  const BTN = labelled ? `${CHROME_BTN} ${CHROME_BTN_LABELLED}` : CHROME_BTN;
+  const BTN = useChromeButtonClass(labelled);
   return (
     <>
       {/* The Start Tour button, first in the cluster and immediately left of Search: the one way into a tour,
           drawn only while one is on offer (docs/specs/007-editor/editor-tour.md "Where it appears"). Leading the
           cluster, it comes and goes without moving the controls beside it. */}
-      <TourOfferButton labelled={labelled} />
+      {tourOffer ? <TourOfferButton labelled={labelled} /> : null}
       {onOpenSearch ? (
         <HoverCard title="Search" description="Find documents, folders, tabs and elements.">
           <button type="button" onClick={onOpenSearch} aria-label="Search" className={BTN}>

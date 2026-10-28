@@ -299,7 +299,7 @@ refused tidier sends nothing: it changed nothing.
 
 ### Decided in review
 
-- **No Tidy Up button.** A broom in the bottom-right cluster, left of Layers, opened a popover of
+- **No Tidy Up button.** A broom in the tools group, left of Layers, opened a popover of
   tiles, each a drawing of its layout, previewed on hover. It made the cluster busier
   ([Live app](../007-editor/live-app.md)); the tidiers live in the command palette.
 

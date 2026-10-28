@@ -178,3 +178,15 @@
 - [x] Web Experience
 - [x] Testing
 - [x] Constants and configuration
+
+## toolbar-group
+
+- [x] Domain and naming
+- [x] Behaviour and state
+- [x] Interfaces and contracts
+- [x] Errors and edge cases
+- [x] Presentation and UX
+- [x] Accessibility
+- [x] Testing
+- [x] Constants and configuration
+- [x] Defaults ledger

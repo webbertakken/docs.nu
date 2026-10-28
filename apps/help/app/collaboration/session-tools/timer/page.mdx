@@ -11,11 +11,11 @@ export const metadata = helpMetadata({
 
 <ArticleLayout title="The Timer" description="Time-box a workshop activity with a shared countdown or stopwatch, synced to everyone." categoryTitle="Collaboration" categorySlug="collaboration" parentArticle={{ title: "Session Tools", slug: "session-tools" }} subArticles={getSubArticles("session-tools").filter((a) => a.slug !== "timer")}>
 
-The timer time-boxes an activity for the whole room. Set it going and the **Timer** button in the bottom bar shows the clock for every participant, ticking in sync. It comes in two flavours: a **countdown** for "you have five minutes", and a **stopwatch** for "let us see how long this takes".
+The timer time-boxes an activity for the whole room. Set it going and the **Timer** button in the tools group shows the clock for every participant, ticking in sync. It comes in two flavours: a **countdown** for "you have five minutes", and a **stopwatch** for "let us see how long this takes".
 
 ## Setting it up
 
-Press the **Timer** button in the bottom bar (in [Workshop](/help/canvas/workshop-mode/) and Plan mode, and on an Event Storming board) to open the set-up above it. You need edit access to run it, and while someone is the [facilitator](/help/collaboration/facilitator/) it is theirs to run.
+Press the **Timer** button in the tools group at the bottom left (in [Workshop](/help/canvas/workshop-mode/) and Plan mode, and on an Event Storming board) to open the set-up above it. You need edit access to run it, and while someone is the [facilitator](/help/collaboration/facilitator/) it is theirs to run.
 
 You can also put the timer **on the canvas**: a [session button](/help/palette/behaviour/session-buttons/) set to Timer counts down where it sits, carrying its own pause, resume and reset. It is the same timer as the **Timer** button's, not a second one, which is what lets a template ship its own running order.
 
@@ -44,7 +44,7 @@ While it runs, the wedge turns amber in the last minute and red at zero, so the 
 
 ## What everyone sees
 
-The live clock shows on the **Timer** button in the bottom bar, right after Undo and Redo, ticking smoothly while it runs. A countdown also **drains**: the button starts fully tinted and empties from left to right as the time goes, so someone across the room can read how long is left without parsing the digits. It turns red and **flashes when it reaches 0:00** so the room knows time is up. A stopwatch has no end to work towards, so it gets no fill. There is no sound.
+The live clock shows on the **Timer** button in the tools group, right after Undo and Redo, ticking smoothly while it runs. A countdown also **drains**: the button starts fully tinted and empties from left to right as the time goes, so someone across the room can read how long is left without parsing the digits. It turns red and **flashes when it reaches 0:00** so the room knows time is up. A stopwatch has no end to work towards, so it gets no fill. There is no sound.
 
 Press the button to open the timer above it. People with edit access get the dial with **+30s**, **+1 min** and **+5 min**, plus **Reset**, **Pause** or **Resume**, and **End**; view-only visitors get the same dial to read. While no timer runs, the button shows just its icon, and pressing it opens the set-up, so you can start one from there too.
 

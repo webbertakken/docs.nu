@@ -1,59 +1,69 @@
 import { ArticleLayout } from '@/components/ArticleLayout';
 import { helpMetadata } from '@/lib/seo';
-import { TitleBarParts, VisibilityLegendFigure } from '@/components/illustrations/title-bar';
+import { TwoLinesParts, VisibilityLegendFigure } from '@/components/illustrations/title-bar';
 
 export const metadata = helpMetadata({
-  title: 'The Title Bar',
+  title: 'The Two Lines',
   description:
-    'The strip across the top of the editor: the document name, who can see it, whether you are editing or viewing, and Share or Copy at the right.',
+    'The two lines of controls over the editor: Back, the menu and mode, Search and Share at the top; the tools, the document and its tabs at the bottom.',
   path: '/help/user-interface/title-bar/',
 });
 
 <ArticleLayout
-  title="The Title Bar"
-  description="The document's name, who can see it, your role in it, and Share or Copy, in the strip above the canvas."
+  title="The Two Lines"
+  description="Where the editor's controls sit: the top line and the bottom line, the document's name, who can see it, your role in it, and Share or Copy."
   categoryTitle="User Interface"
   categorySlug="user-interface"
 >
 
-The **title bar** is the strip across the top of the editor, above the canvas. Reading from left to right, it holds the logo, the document's name, a pill saying who can see the document, a pill saying whether you are editing or viewing it, and at the right edge the button that matters most for this document: **Share** if it is yours, **Copy** if it is someone else's. Your account button sits at the very end.
+The canvas fills the whole window, and every control in the editor sits over it in small groups on **two lines**: **the top line** along the top edge and **the bottom line** along the bottom edge. Each line has a group at the left, a group at the right, and room in the middle.
 
-<Figure caption="The title bar of a shared document, as its owner sees it: the name, the Shared visibility pill, the Editing role pill, a solid Share button and the account button.">
-  <TitleBarParts />
+<Figure caption="The two lines of a shared document, as its owner sees them: the brand group, the Palette strip and the actions group along the top; the tools group and the document group along the bottom.">
+  <TwoLinesParts />
 </Figure>
 
-## The logo
+## The top line
 
-The logo on the left takes you to the LiveDoc home page. On a phone it shows without its wordmark. The other parts of LiveDoc (the **Explorer**, **Help** and more) are links along the foot of the [Explorer panel](/help/explorer/explorer-panel/).
+- **The brand group**, at the left: **Back** (a back caret and the logo), which takes you to the [Explorer](/help/explorer/explorer-page/); the **menu button** (☰), which opens the [Explorer panel](/help/explorer/explorer-panel/) under it; and the [mode](/help/canvas/editor-modes/) switch. The other parts of LiveDoc (the **Explorer**, **Help** and more) are links along the foot of the Explorer panel.
+- **In the middle**: the [palette strip](/help/palette/toolbar-layout/), or [Draw mode](/help/canvas/draw-mode/)'s dock when the dock sits at the top.
+- **The actions group**, at the right: **Search**, **Report a Bug**, **Settings** and the [appearance](/help/tools/dark-mode/) switch (the [quick controls](/help/user-interface/quick-controls/)), then the actions for this document that apply to you (**Start Tour** while a tour is on offer, **Copy**, **Present** when the document has slides, **Share** or **Share Form**), then your account.
 
-## The document name
+## The bottom line
 
-The name sits in the middle of the bar. To rename the document, click the name, type the new one, and press `Enter` (or click away) to keep it. `Escape` leaves the old name in place, and clearing the box and confirming keeps the old name too. Names are capped at 60 characters, the same limit the Explorer uses. You can also start a rename from the [command palette](/help/tips-and-tricks/command-palette/) with **Rename Document**.
+- **The tools group**, at the left: Undo and Redo, the [session tools](/help/collaboration/session-tools/), the mode's own buttons, **Collaborate**, **Layers**, the **Theme & canvas** button and the [zoom controls](/help/user-interface/zoom-controls/). The [Map](/help/user-interface/minimap/) sits just above it.
+- **In the middle**: Draw mode's dock, when it sits at the bottom.
+- **The document group**, at the right: the document's visibility icon, its name and the role pill (all three below), then the active tab, the tab stack, the people here and the **+** button. Those last four are covered in [The Tab List](/help/user-interface/tab-bar/).
 
-Only people who can change the document's structure can rename it: its owner and anyone on an Editor link. On a Participant or Viewer link, or a [link to a single tab](/help/collaboration/sharing/one-tab/), the name is plain text and clicking it does nothing.
+## The visibility icon
 
-## The visibility pill
+The document group opens with a small round icon saying who can see this document. It is one of four:
 
-Right after the name, a small pill says who can see this document. It reads one of four words:
+- **Private** (a lock): only you can see it.
+- **Shared** (a link): anyone with one of its [share links](/help/collaboration/sharing/) can open it.
+- **Team** (people): it lives in a [team library](/help/collaboration/teams/team-shared-documents/) and every member of the team can open it. A team document with a live share link reads **Shared** instead.
+- **This Browser** (an app window): it is saved only in this browser, never on our servers (see [Offline Mode](/help/privacy-and-security/offline-mode/)). This wins over all the others.
 
-- **Private**: only you can see it.
-- **Shared**: anyone with one of its [share links](/help/collaboration/sharing/) can open it.
-- **Team**: it lives in a [team library](/help/collaboration/teams/team-shared-documents/) and every member of the team can open it. A team document with a live share link reads **Shared** instead.
-- **This Browser**: it is saved only in this browser, never on our servers (see [Offline Mode](/help/privacy-and-security/offline-mode/)). This wins over all the others.
+Hover the icon, or tab to it with the keyboard, and a legend opens. At the top it shows **Who Can See This** for the current state, with rings around a figure of you lit out as far as the document reaches. Under that the three audiences sit on one scale: Just you (Private), Link (Shared) and Team, filled up to where the document is now. Hover any other stop to see what it would mean (the heading changes to **If It Were**). This Browser sits apart below the scale, since it is the opposite of sharing: the document never leaves this browser.
 
-Hover the pill, or tab to it with the keyboard, and a legend opens beneath it. At the top it shows **Who Can See This** for the current state, with rings around a figure of you lit out as far as the document reaches. Under that the three audiences sit on one scale: Just you (Private), Link (Shared) and Team, filled up to where the document is now. Hover any other stop to see what it would mean (the heading changes to **If It Were**). This Browser sits apart below the scale, since it is the opposite of sharing: the document never leaves this browser.
-
-<Figure caption="The legend under the visibility pill of a Shared document: who can see it, the three audiences from Just you to Team, This Browser apart, and the owner's Change Who Can See This button.">
+<Figure caption="The legend of the visibility icon of a Shared document: who can see it, the three audiences from Just you to Team, This Browser apart, and the owner's Change Who Can See This button.">
   <VisibilityLegendFigure />
 </Figure>
 
-If the document is yours, the pill is also a button: clicking it opens the Share dialog, and the legend ends with a **Change Who Can See This** button that does the same. Everyone else gets the legend to read but no button, since only the owner decides who can see a document.
+If the document is yours, the icon is also a button: clicking it opens the Share dialog, and the legend ends with a **Change Who Can See This** button that does the same. Everyone else gets the legend to read but no button, since only the owner decides who can see a document.
 
-The pill does not show on a phone (the bar has no room for it), while the welcome screen of a new document is open, in [Zen mode](/help/tools/zen-mode/), or inside an [embed](/help/collaboration/sharing/embeds/), which hides the whole title bar.
+The icon shows at every width, a phone included. It is hidden only while the welcome screen of a new document is open, in [Zen mode](/help/tools/zen-mode/), and inside an [embed](/help/collaboration/sharing/embeds/), which hides both lines.
+
+## The document name
+
+The name follows the icon. To rename the document, click the name, type the new one, and press `Enter` (or click away) to keep it. `Escape` leaves the old name in place, and clearing the box and confirming keeps the old name too. Names are capped at 60 characters, the same limit the Explorer uses. You can also start a rename from the [command palette](/help/tips-and-tricks/command-palette/) with **Rename Document**.
+
+Only people who can change the document's structure can rename it: its owner and anyone on an Editor link. On a Participant or Viewer link, or a [link to a single tab](/help/collaboration/sharing/one-tab/), the name is plain text and clicking it does nothing.
+
+When the bottom line runs short of room, a long name is cut short with an ellipsis. On a phone the name is not shown at all.
 
 ## The role pill
 
-After the visibility pill comes a second pill saying what you can do here right now: **Editing**, **Participating** or **Viewing**. It follows your [share role](/help/collaboration/sharing/): the owner and anyone on an Editor link see **Editing**, a Participant link shows **Participating**, and a Viewer link shows **Viewing**.
+After the name comes a pill saying what you can do here right now: **Editing**, **Participating** or **Viewing**. It follows your [share role](/help/collaboration/sharing/): the owner and anyone on an Editor link see **Editing**, a Participant link shows **Participating**, and a Viewer link shows **Viewing**.
 
 Hover the pill to see who owns the document: **Owned by you** on your own documents, or **Owned by** and the owner's name on someone else's. When the owner's name is not known, the pill has no hover text.
 
@@ -67,13 +77,13 @@ The preview only changes what you can do, in this browser tab: nobody else sees 
 
 For a Participant or a Viewer the pill is just a label. Clicking it does nothing, because their link does not allow editing.
 
-Like the visibility pill, the role pill is hidden on a phone, in Zen mode and in embeds. With [Minimal Chrome](/help/user-interface/power-user-mode/#minimal-chrome) on, it leaves the title bar and becomes a pencil, a ballot box or an eye at the start of the bottom bar, which works the same way.
+The role pill is hidden on a phone, in Zen mode and in embeds. With [Minimal Chrome](/help/user-interface/power-user-mode/#minimal-chrome) on, it stays in the same place as a pencil, a ballot box or an eye, which works the same way.
 
 ## Share or Copy
 
-The right edge of the bar holds one main action, and which one you get depends on whose document it is.
+The actions group holds one main action for the document, and which one you get depends on whose document it is.
 
-**Share** is for the owner. It opens the [Share dialog](/help/collaboration/sharing/), where you create and manage links. The button turns solid blue once the document has a live link, so you can tell at a glance that it is shared. On a [This Browser](/help/privacy-and-security/offline-mode/) document it asks you to save the document to your account first, since there is nothing on a server to share yet.
+**Share** is for the owner. It opens the [Share dialog](/help/collaboration/sharing/), where you create and manage links. The button turns solid blue once the document has a live link, so you can tell at a glance that it is shared. On a [This Browser](/help/privacy-and-security/offline-mode/) document it asks you to save the document to your account first, since there is nothing on a server to share yet. On a [Form](/help/canvas/plan-mode/forms/) tab it becomes **Share Form**.
 
 **Copy** is for everyone else who has the document open: someone on a share link of any role, or a team member opening a document a teammate owns. It makes a copy of the document that belongs to you:
 
@@ -88,6 +98,14 @@ Your copy starts **Private**: no share links come with it, and nothing you do to
 
 ## Your account
 
-At the far right is your account. Signed in, it shows your initial or profile picture; click it for a menu with your name and email, **Account** (which opens [Settings](/help/user-interface/settings/) on your account details, without leaving the document) and **Sign out**. Not signed in, it shows **Sign in** instead (see [Signing In](/help/account-and-data/signing-in/)). On a self-hosted copy without sign-in this space is empty.
+At the far right of the top line is your account. Signed in, it shows your initial or profile picture; click it for a menu with your name and email, **Account** (which opens [Settings](/help/user-interface/settings/) on your account details, without leaving the document) and **Sign out**. Not signed in, it shows **Sign in** instead (see [Signing In](/help/account-and-data/signing-in/)). On a self-hosted copy without sign-in this space is empty.
+
+## When a line runs out of room
+
+Each line stays a single row while its groups fit side by side. The palette strip (or Draw mode's dock) sits in the middle while it fits there; when it does not, it slides between the groups, then drops some of its tiles, and only as a last resort takes a row of its own just inside the line. On the bottom line the document name is cut short before anything else gives way; the active tab never is.
+
+On a phone the same lines wrap to fit, and the document name is not shown. On a phone held sideways, the actions group and the document group fold away to leave the canvas more room: the **Show Controls** button at the top-right corner brings them back, and **Hide Controls** folds them again.
+
+In a [workbench](/help/developers/workbenches/) frame, **Back** goes back within the frame, and **Open in LiveDoc** in the actions group opens what the frame shows in LiveDoc itself.
 
 </ArticleLayout>

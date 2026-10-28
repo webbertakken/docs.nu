@@ -12,7 +12,8 @@ import { useLongPress } from '@/hooks/ui/useLongPress';
 import type { WhiteboardDockModel } from '@/hooks/canvas/useWhiteboard';
 import { whiteboardShapeEntry, type WhiteboardShapeKey } from '@/lib/whiteboard-shape-catalogue';
 import { dropIndicatorX, PINNED_SHAPES_MAX, type SlotSource } from '@/lib/whiteboard-shape-slots';
-import { DockButton, DockDivider, DockToolbar } from './DockToolbar';
+import { DockButton, DockToolbar } from './DockToolbar';
+import { ToolbarDivider } from '@/components/chrome/ToolbarGroup';
 import { ShapePreview, shapeShortcut } from './ShapePreview';
 import type { DockFlyoutApi } from './useDockFlyout';
 import type { ShapeSlotDragApi } from './useShapeSlotDrag';
@@ -79,7 +80,7 @@ export function ShapesGroup({
             onMenu={openPinMenu}
           />
         ))}
-        <DockDivider data-pinned-separator="" />
+        <ToolbarDivider data-pinned-separator="" />
         <DockButton
           itemKey="shapes"
           label="Shapes"

@@ -71,6 +71,7 @@ describe('chevron stage controls', () => {
     const { zone } = show();
     expect(screen.queryAllByRole('toolbar')).toHaveLength(0);
     fireEvent.pointerEnter(zone(1));
+    fireEvent.pointerMove(zone(1));
     expect(screen.getAllByRole('toolbar').map((t) => t.getAttribute('aria-label'))).toEqual([
       'Stage 2',
     ]);
@@ -89,6 +90,7 @@ describe('chevron stage controls', () => {
     zone(1).getBoundingClientRect = () =>
       ({ ...at, x: 100, y: 0, width: 100, height: 80 }) as DOMRect;
     fireEvent.pointerEnter(zone(1));
+    fireEvent.pointerMove(zone(1));
     // Onto the name: the zone sees the pointer leave, the names see it move over stage 2.
     fireEvent.pointerLeave(zone(1));
     // A node of the stages drawn over the zones (whatever wraps them).
@@ -113,9 +115,11 @@ describe('chevron stage controls', () => {
     const { zone, rows, element } = show();
     const [a, b, c] = element.conceptRows!;
     fireEvent.pointerEnter(zone(1));
+    fireEvent.pointerMove(zone(1));
     fireEvent.click(screen.getByRole('button', { name: 'Move stage left' }));
     expect(rows().slice(0, 3)).toEqual([b, a, c]);
     fireEvent.pointerEnter(zone(1));
+    fireEvent.pointerMove(zone(1));
     fireEvent.click(screen.getByRole('button', { name: 'Move stage right' }));
     expect(rows().slice(0, 3)).toEqual([a, c, b]);
   });
@@ -123,6 +127,7 @@ describe('chevron stage controls', () => {
   it('turns off a move past either end, and Delete at the fewest stages', () => {
     const { zone } = show(chevrons([{ label: 'One' }, { label: 'Two' }]));
     fireEvent.pointerEnter(zone(0));
+    fireEvent.pointerMove(zone(0));
     expect(screen.getByRole('button', { name: 'Move stage left' })).toHaveProperty(
       'disabled',
       true,
@@ -133,6 +138,7 @@ describe('chevron stage controls', () => {
   it('deletes a stage', () => {
     const { zone, rows, element } = show();
     fireEvent.pointerEnter(zone(0));
+    fireEvent.pointerMove(zone(0));
     fireEvent.click(screen.getByRole('button', { name: 'Delete stage' }));
     expect(rows()).toEqual(element.conceptRows!.slice(1));
   });
@@ -141,6 +147,7 @@ describe('chevron stage controls', () => {
     vi.mocked(track).mockClear();
     const { zone } = show();
     fireEvent.pointerEnter(zone(1));
+    fireEvent.pointerMove(zone(1));
     fireEvent.click(screen.getByRole('button', { name: 'Move stage left' }));
     expect(track).toHaveBeenCalledWith('Element', 'Changed', 'ConceptRows');
   });
@@ -148,10 +155,12 @@ describe('chevron stage controls', () => {
   it('offers Add Note only while no stage has a note', () => {
     const { zone } = show();
     fireEvent.pointerEnter(zone(0));
+    fireEvent.pointerMove(zone(0));
     expect(screen.queryByRole('button', { name: 'Add note' })).toBeNull();
     cleanup();
     const bare = show(chevrons([{ label: 'One' }, { label: 'Two' }]));
     fireEvent.pointerEnter(bare.zone(1));
+    fireEvent.pointerMove(bare.zone(1));
     fireEvent.click(screen.getByRole('button', { name: 'Add note' }));
     expect(bare.rows()).toEqual([{ label: 'One' }, { label: 'Two', note: 'Note' }]);
   });

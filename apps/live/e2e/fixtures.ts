@@ -361,3 +361,12 @@ export async function paletteTile(page: Page, name: string, category = 'Shapes')
   await tile.waitFor();
   return tile;
 }
+
+// Switch to a tab by name through the tab list (docs/specs/007-editor/toolbar-layout.md "The tab list"): the document
+// group's tab stack opens it, a row switches and closes it.
+export async function switchToTab(page: Page, name: string | RegExp): Promise<void> {
+  await page.locator('[data-document-group] [data-tab-stack]').click();
+  const list = page.getByRole('dialog', { name: 'Tabs' });
+  await list.getByRole('button', { name, exact: typeof name === 'string' }).click();
+  await expect(list).toHaveCount(0);
+}

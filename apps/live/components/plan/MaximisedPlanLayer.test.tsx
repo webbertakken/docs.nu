@@ -303,7 +303,7 @@ describe('the canvas cover', () => {
     document.body.appendChild(main);
     const { container, rerender } = render(
       <CanvasCover
-        layout={{ insets, band: { height: 53, left: 124, mid: 349, stripEnd: 300 } }}
+        layout={{ insets, band: { height: 53, left: 124, mid: 349, stripEnd: 300, end: 0 } }}
         marker={{}}
       >
         <span />
@@ -336,7 +336,7 @@ describe('the canvas cover', () => {
   it("lends the element's hue to the chrome in its band, and takes it back", () => {
     const main = document.createElement('main');
     document.body.appendChild(main);
-    const band = { height: 53, left: 124, mid: 349, stripEnd: 300 };
+    const band = { height: 53, left: 124, mid: 349, stripEnd: 300, end: 0 };
     const { rerender } = render(
       <CanvasCover layout={{ insets, band }} marker={{}} tint="#0284c7">
         <span />

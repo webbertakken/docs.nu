@@ -46,7 +46,7 @@ it brings its own behaviour.
 - A Board tab's board fills the screen, so it starts with its cards **Detailed**, whatever its preset uses on a canvas
   (a Kanban's Compact): from Start Planning and from a template alike. Card Layout changes it as ever.
 - A Board, Sheet or Dashboard tab shows no palette, as nothing in Plan does ([No palette](plan-mode.md#no-palette)); a
-  Sheet tab's toolbar sits in the top row beside the menu box, in a card of its own
+  Sheet tab's toolbar sits in the top row beside the brand group, in a card of its own
   ([Sheet](../029-sheets/sheet.md#sheet-tab)).
 - Anything else added to a Board or Sheet tab (a paste, an agent) is hidden under the element, as for Fill Tab.
 - **Import and Export** in a Board or Sheet tab's tab menu are only what fits its element, in place of the
@@ -75,7 +75,7 @@ A Board tab and its board, and a Sheet tab and its sheet, share **one name**:
   Opening a document never renames a tab whose name already differs.
 - **A Visualisation tab and its chart** share one name too: renaming the tab gives the chart its own title (`planView
 .title`, up to 80 characters, in place of the view's name: "Launch Plan", or "Launch Plan · Oct 2026" on a Due
-  Calendar), and an Editor renames the chart with a click on its name in the menu box (Enter or leaving saves,
+  Calendar), and an Editor renames the chart with a click on its name in the active tab segment (Enter or leaving saves,
   Escape puts it back), the tab following in the same step. The field starts from the chart's name alone, never what
   it shows at the moment ("Due Calendar", not "Due Calendar · Oct 2026"). A Participant or a Viewer cannot rename it.
   A Visualisation tab started on a tab with a name of its own gives that name to its chart as its title.
@@ -186,7 +186,7 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
   - **Links**: a heading ("Links") over labelled links, each to a site (opened in a new browser tab, `noopener`; only
     http, https or mailto, "https://" added to a bare host (a host with a port, `example.com:8080`, among them), anything else refused as "Enter a web address, an email
     (mailto:) or a tab’s name") or to one of this document's tabs (opened here). Each link is a row: its kind's icon in
-    a small well (a globe for a site, an envelope for an email, the tab's own tab-bar icon for a tab), its label and,
+    a small well (a globe for a site, an envelope for an email, the tab's own glyph in the tab list for a tab), its label and,
     muted under it, the site's host and path, the email's address ("Email" when that is the label), or "Tab in this
     document". A link with no label shows its site's host, its email's address or its tab's name. A row tints on hover;
     a site's row shows an external-link mark and an Editor's × on hover or focus only (always on a screen without
@@ -194,7 +194,7 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
   - **Add Link** (an Editor): opens a form straight under the links (never anywhere else in the card), with Label
     focused: **Label** (optional) and **Address** ("example.com or a tab"), the shared text fields, then Cancel and
     **Add Link**. In a card under 448 px wide (a container query on the card) Label sits over Address; wider, they
-    share a row, Label a third. Address is a combobox listing the document's tabs, each with its tab-bar icon and name,
+    share a row, Label a third. Address is a combobox listing the document's tabs, each with its tab-list glyph and name,
     narrowed as you type (names starting with the text first); ArrowDown and ArrowUp move through it, Enter or a click
     picks a tab, Enter with nothing highlighted adds the link, and Escape closes the list, then cancels the form. The
     list is drawn over the page (never clipped by a short slot). Everything under the heading scrolls when the slot is
@@ -249,7 +249,7 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
   a Sheet tab for it, as Start Planning makes one (its kind, opening in Plan, a board drawing its cards Detailed, a
   board bringing its preset's card types), named as Start Planning names it (the board's title, such as "Kanban"; the
   Sheet's, "Sheet" or its template's name), looking like the dashboard's tab, and placed straight after the dashboard
-  in the tab bar. The slot shows that tab (as picking it under This Document’s Tabs does), and the new tab, the slot
+  in the tab list. The slot shows that tab (as picking it under This Document’s Tabs does), and the new tab, the slot
   filled and the card types are one undo step. The Sheet is made on its own tab even though it is first drawn in the
   slot. The dashboard stays the open tab. Telemetry: `Plan · Created · BoardTab` or `SheetTab` with the slot's
   `Plan · Changed · DashboardContent`; no new values.
@@ -288,11 +288,11 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
   Sheet**, **Card Metrics**, **Form Metrics** (only while the document has a Form tab), **Visualisations**, **From a Sheet** (Sheet Figure, Column Summary, Trend, Sheet Chart) and **Utilities** (Note, Title, Status, Checklist, Key Date, Links); picking
   one fills that slot. Each fill is one undo step, replacing what the slot held (an element it held leaves the tab
   with it).
-- **Its name in the menu box**: as a maximised or tab-filling board's or Sheet's name rides there
-  ([The name rides in the menu box](plan-board.md)), a Dashboard tab's name (no glyph) sits in the menu box beside the
-  mode menu. For an Editor the name is a button (**Rename Dashboard**): a click, or Enter or Space on it, opens the
-  field (Enter or leaving saves the trimmed name, up to 80 characters; Escape puts it back; focus returns to the name),
-  and the tab bar follows. A phone's box has no room for it.
+- **Its name in the active tab**: as a maximised or tab-filling board's or Sheet's name rides there
+  ([The name rides in the active tab](plan-board.md)), a Dashboard tab's name is the document group's active tab
+  segment's ([The tab's name](../007-editor/toolbar-layout.md#the-tabs-name)). For an Editor the name is a button
+  (**Rename Dashboard**): a click, or Enter or Space on it, opens the field (Enter or leaving saves the trimmed name,
+  up to 80 characters; Escape puts it back; focus returns to the name), and the tab list follows.
 - **Look**: each slot is a translucent card over the canvas (white at 72%, slate 900 at 60% in dark), 16 px corners,
   a hairline edge and a soft shadow, lifting a little on hover; no backdrop blur (up to 48 slots would each
   recomposite on scroll).
@@ -316,7 +316,7 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
 - Elements on a Dashboard tab are only ever in a slot: never moved, resized, rotated, layered or animated; a slot's
   element is removed with the slot's Clear.
 - Their copies on the canvas under the page draw nothing, so a slot's board, view or Sheet **maximised** has one
-  header: one title in the menu box and one set of controls (never a slot's smaller ones).
+  header: one title in the active tab segment and one set of controls (never a slot's smaller ones).
 - **Maximising from a slot** grows the board, view or Sheet out of the slot it is drawn in, and restoring shrinks it
   back into that slot, wherever the slot is on screen at that moment ([Maximised board](plan-board.md)); under
   reduced motion it switches at once, with no grow or shrink.
@@ -474,14 +474,14 @@ leaves it out of a smaller slot and names charts in its line.
 ## Dashboard Settings
 
 An Editor's **Dashboard Settings** cog sits in a card of its own at the page's top right, 12 px from the corner at the
-toolbar's UI scale, as the menu box sits at the top left (and as a board's or Sheet's cog sits in its header). While a
+toolbar's UI scale, as the brand group sits at the top left (and as a board's or Sheet's cog sits in its header). While a
 board, view or Sheet maximised from a slot covers the page, the cog is not shown (the covering element's own cog sits
 in that corner); it is back the moment it is restored. It
 opens the settings popover boards and Sheets use, built from the same parts as Sheet Settings (a labelled field,
 compact action buttons with their icon left of their label, picture choices), its sections collapsible, one open at a time (Dashboard Setup when it opens), under a slim title row holding **Show Me** (below) and **Help** (the labelled Help link, to the Dashboards article):
 
 - **Dashboard Setup**: **Name**, the tab's name typed in place (Enter or leaving saves it trimmed, up to 80
-  characters; Escape puts it back; the tab bar and the menu box follow; untouched, it follows a rename made
+  characters; Escape puts it back; the active tab segment and the tab list follow; untouched, it follows a rename made
   elsewhere); then two action buttons, **Add Row** (two
   empty slots at the foot; dimmed at 12 rows, with a line saying so; the cog closes and the page scrolls the new row
   into view, smoothly, at once under reduced motion) and **Clear Dashboard** (empties every slot, the
@@ -511,7 +511,7 @@ hover while the step is up; only when a slot holds something), **Dashboard Setti
 closing card, **That Is a Dashboard**, with a link to the Dashboards article. Which steps it has is fixed when it
 starts, so filling the empty slot mid-tour keeps the count. Only an Editor has the cog, so only an Editor sees Show
 Me; a locked tab has no cog, so none. Telemetry: `UI` · `Started` · `DashboardTour`, and `UI` · `Ended` ·
-`DashboardTourCompleted` or `DashboardTourSkipped`. The same steps are the Dashboards tour, started from the bottom bar's **Start Dashboards Tour** button while an
+`DashboardTourCompleted` or `DashboardTourSkipped`. The same steps are the Dashboards tour, started from the actions group's **Start Dashboards Tour** button while an
 Editor has a dashboard open ([Plan tour](plan-tour.md) "The Dashboards tour"); its cards read Show Me either way, and
 only a run from the footer marks the `dashboards` track taken.
 
@@ -521,7 +521,7 @@ A row may **fill the page** (`fill`): it takes the height the page has left (at 
 has no resize handle, and is as tall as anything needs (What fits). A **Visualisation tab** is a Dashboard of one such
 row holding one visualisation (Start Planning's Visualisations, [Plan mode](plan-mode.md#starting-a-board)): its
 chart fills the tab as a Board tab's board does (`fill-tab.ts`, `View`), its header holding the top row (its title in
-the menu box, its own controls in the card at the right, no Maximise), the page drawing nothing over it.
+the active tab segment, its own controls in the card at the right, no Maximise), the page drawing nothing over it.
 
 ## On a phone
 
@@ -549,12 +549,12 @@ stack, and where the swap would squeeze either slot below what its content needs
 Nothing waits for a hover on a touch screen: a slot's floating cog and a link's × are always shown there, and the slot's
 cog, Add to Slot (which offers everything, as the stacked slot takes the height its content needs) and the Dashboard
 Settings cog in the top row all work by tap. A view's header gives way in a narrow slot: its own controls (a Gantt's
-Today, steps and scale) scroll sideways while Maximise and the cog stay in reach. The canvas's zoom cluster, which
+Today, steps and scale) scroll sideways while Maximise and the cog stay in reach. The tools group's Zoom, which
 has nothing to offer a dashboard (zoom is off), is not shown on a touch screen, a tablet's as a phone's.
 
 ## Showing a tab
 
-Add to Slot's **This Document’s Tabs** offers each of the document's tabs but a Dashboard, in tab-bar order, as a
+Add to Slot's **This Document’s Tabs** offers each of the document's tabs but a Dashboard, in the tab list's order, as a
 card named for the tab: a **Board** or **Sheet** tab, worked on in place in the slot, and any other tab as a
 **Diagram** (a diagram or an Event Storming board). Picked, it shows that tab in the slot. The list follows the tab
 bar live (a tab added, renamed or deleted) and is left out while the document has no other tab. A tab may show in several slots and
@@ -598,7 +598,7 @@ nearest its own. Focus follows the slot; at an edge nothing happens.
 **Clear Slot** and **Remove Slot** take what the slot showed off the dashboard. Where more goes with it, the slot's menu
 asks first, in place:
 
-- A slot showing a **Board or Sheet tab**: "Delete the <name> tab too? Kept, it stays in the tab bar." with **Keep
+- A slot showing a **Board or Sheet tab**: "Delete the <name> tab too? Kept, it stays in the tab list." with **Keep
   the Tab** and **Delete the Tab Too** (the tab's own delete, a step of its own).
 - A slot holding a **Sheet**: "Delete this sheet’s cells too? Kept, they stay in this document." with **Keep Its
   Cells** and **Delete the Sheet Too** (its sheet released from the store, as deleting a Sheet does).

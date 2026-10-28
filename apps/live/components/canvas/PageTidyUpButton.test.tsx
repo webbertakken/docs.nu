@@ -47,10 +47,12 @@ describe('PageTidyUpButton', () => {
     fireEvent.pointerEnter(button, { pointerType: 'touch' });
     expect(previewTidy).not.toHaveBeenCalled();
     fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+    fireEvent.pointerMove(button, { pointerType: 'mouse' });
     expect(previewTidy).toHaveBeenLastCalledWith('p1');
     fireEvent.pointerLeave(button);
     expect(previewTidy).toHaveBeenLastCalledWith(null);
     fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+    fireEvent.pointerMove(button, { pointerType: 'mouse' });
     previewTidy.mockClear();
     unmount();
     expect(previewTidy).toHaveBeenCalledWith(null);

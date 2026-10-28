@@ -39,7 +39,7 @@ Both tools can also be started by a [Session button](session-button.md) — a ca
 Each tool has a purpose-built pane (`components/panels/session-studio/`: `TimerPane`, `VotePane`,
 `PollPane`), described under its section below and in [Live poll (ephemeral pulse-check)](live-poll.md)
 for the poll. A pane shows the tool's **set-up** while it is idle and its **live** controls once it
-runs. The panes open from the [Session strip](#the-session-strip) in the bottom bar, one popover per
+runs. The panes open from the [Session strip](#the-session-strip) in the tools group, one popover per
 tool. The tab menu (the tab's ⋯ and the canvas right-click menu) has **no** session tools: its
 Collaborate row, a flyout with a Timer · Vote · Poll switcher (the Session Studio), was removed once
 the strip gave each tool its own button.
@@ -110,7 +110,7 @@ started.
   resuming re-anchors. Minor cross-client clock skew is acceptable for a
   workshop timer (out of scope: a server-authoritative clock).
 - The running timer is the **Timer button** of the [Session strip](#the-session-strip) in the
-  bottom-right cluster. The button shows the live clock, ticking ~4×/sec while running, with the
+  tools group. The button shows the live clock, ticking ~4×/sec while running, with the
   countdown's drain behind it, and it flashes when a countdown hits 0:00. Pressing it opens the
   live Timer pane as a popover above it: the dial, the +30s / +1 min / +5 min extensions and
   Reset / Pause or Resume / End. View-role visitors, and everyone while somebody else
@@ -284,7 +284,7 @@ Ending a vote persists the host's final state. Server-side merge of the map is
 
 ## The Session strip
 
-The running session tools live in **one strip in the bottom-right cluster**, the way Plan mode's
+The running session tools live in **one strip in the tools group**, the way Plan mode's
 New Card, Find a Card and Card Types share one strip. It sits **left of Layers** (or of the mode's
 own strip: Slides in Pages mode, the Plan strip in Plan mode), right
 after Undo and Redo. **An editor always has all three buttons**, running or not, so a session tool
@@ -317,7 +317,7 @@ a Dashboard tab, a timer or vote already running keeping its button so it can be
 editor included), so a vote or poll started from a session button on a page can be watched and
 ended (the Poll button, like the Poll panel anywhere, only for the poll's host and anyone who has
 answered: answering is what buys you the tally, and only the host ends it), and nothing is started from the strip there (the session buttons on the page do that); it
-never shows a Timer; **Diagram** and **Draw** have no strip, keeping their bottom bar to their own
+never shows a Timer; **Diagram** and **Draw** have no strip, keeping their tools group to their own
 tools, even while a tool runs (a session button on the canvas still starts one there). A popover whose button
 leaves (a mode switch) closes.
 

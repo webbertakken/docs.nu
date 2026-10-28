@@ -191,7 +191,7 @@ Builds on [Items](items.md) (the item store, fields) and [Plan mode](plan-mode.m
 
 ## The Card Types panel
 
-- In Plan mode, the bottom-right cluster has a **Card Types** button (the Cards glyph) where Diagram has Layers,
+- In Plan mode, the tools group has a **Card Types** button (the Cards glyph) where Diagram has Layers,
   the second of one strip with **Find a Card**.
   It opens the panel as a popover hanging above the button, as Layers does from its button; it closes on a
   press outside, a second press of the button, or leaving Plan mode.
@@ -215,7 +215,7 @@ Builds on [Items](items.md) (the item store, fields) and [Plan mode](plan-mode.m
 - **With no types**, the list's place holds an empty state (the Cards glyph): **No Card Types Yet**, and "Add a card
   type of your own, or add the default types: Project, Task, Note, Idea and Action." for someone who may edit, "This
   document has no card types yet." for anyone else. Add Type and Add Default Types sit under it as always.
-- **With no types**, Plan's bottom-right strip shows only **Card Types**: New Card and Find a Card would surface
+- **With no types**, Plan's strip in the tools group shows only **Card Types**: New Card and Find a Card would surface
   nothing, so they wait for the first type. The Trash stays while it holds cards (deleting the last type sends its
   cards there), so they can be restored once a type exists.
 - Someone who may only view the document sees the list without the edit and add controls.

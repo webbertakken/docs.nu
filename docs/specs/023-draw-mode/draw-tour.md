@@ -1,6 +1,6 @@
 # Draw tour ("Start Draw Tour")
 
-A short, optional guided tour of [Draw mode](draw-mode.md), started from the bottom bar's **Start Draw Tour** button. It
+A short, optional guided tour of [Draw mode](draw-mode.md), started from the actions group's **Start Draw Tour** button. It
 is the [Workshop tour](../012-collaboration/workshop-tour.md)'s sibling: the same Start Tour button, anchored step
 cards, glide, dimming ring, Skip, Back and closing card, driven by the same engine. Where this spec is silent, the
 Workshop tour's rules hold.
@@ -15,7 +15,7 @@ Workshop tour's rules hold.
 
 ## Where it appears
 
-- **On the Start Tour button, in Draw mode.** The bottom bar's button, left of Search
+- **On the Start Tour button, in Draw mode.** The actions group's button, leading the document actions
   ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Draw Tour** while the open tab is in
   Draw on a tab the person may edit, unless something more specific is on offer. The editor has to be usable
   (hydrated, no welcome overlay, not read-only, not an embed), and the tab not locked. It is not on offer while a

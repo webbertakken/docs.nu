@@ -27,11 +27,12 @@ theirs without adding a settings screen.
   all chrome; while it is on the docking system is inert.
 - **Participating panels:** AI, Minimap, Poll, Vote, and the tool panels (Avatar, Laser,
   Spotlight, Eraser, Format, Slide Deck), every corner panel built on the shared `MovablePanel`.
-- **Zoom controls stay fixed** bottom-right (they are not a `MovablePanel`; zen mode and
-  the body-height measurement both rely on that pin). They are not dockable, and the
-  **bottom-right corner zone is raised to sit above them** (`ZOOM_CLEARANCE_PX`) so a panel
-  docked there never overlaps the zoom bar — the snap anchor, the corner guide, and the
-  dock container all use the raised inset.
+- **The two lines' groups stay fixed** ([Toolbar layout](toolbar-layout.md#the-two-lines)): the tools group
+  (with Zoom) bottom left, the document group bottom right, the brand group top left and the actions group top
+  right. They are not `MovablePanel`s and not dockable (zen mode and the body-height measurement rely on that
+  pin), and **every corner zone is raised or lowered to clear the group in its corner**: the bottom-left stack sits
+  above the tools group, the bottom-right stack above the document group (`ZOOM_CLEARANCE_PX`), and the top
+  stacks below the top line. The snap anchor, the corner guide, and the dock container all use the cleared inset.
 
 ## The four corners
 
@@ -49,15 +50,15 @@ the corner. No manual re-measuring — the layout falls out of the flexbox.
 
 When the user has never arranged panels, the corners match today's defaults:
 
-| Corner         | Panels (top → bottom)                                         |
-| -------------- | ------------------------------------------------------------- |
-| `top-left`     | _(empty; the menu button)_                                    |
-| `top-right`    | _(empty; the palette strip's end)_                            |
-| `bottom-left`  | Minimap                                                       |
-| `bottom-right` | AI, tool panels, above the bottom cluster (zoom controls pin) |
+| Corner         | Panels (top → bottom)                     |
+| -------------- | ----------------------------------------- |
+| `top-left`     | _(empty; below the brand group)_          |
+| `top-right`    | _(empty; below the actions group)_        |
+| `bottom-left`  | Minimap, above the tools group            |
+| `bottom-right` | AI, tool panels, above the document group |
 
 The AI panel and the tool panels (Laser, Spotlight, Eraser, Format, Slide Deck) open bottom-right, stacked
-upwards from just above the bottom cluster, where the controls they set sit within reach of the canvas they
+upwards from just above the document group, where the controls they set sit within reach of the canvas they
 act on, not top-right under the palette strip, where they hid its end and opened over a template's title. A panel
 the user has docked or placed keeps its spot; only the home moves.
 A panel in a bottom corner grows upward only as far as the canvas's top edge, and stops below the palette strip
@@ -184,7 +185,7 @@ later, or reading a layout written by a newer client, never strands the UI.
   land (its height mirrors the dragged panel); the candidate corner comes from the dock hook.
 - **`CanvasChrome`** — renders four corner **stack
   containers** (absolutely positioned flex columns, `gap-4`; bottom corners
-  `flex-col-reverse`; bottom-right raised to clear the zoom controls) and distributes each
+  `flex-col-reverse`; each cleared of the toolbar group in its corner) and distributes each
   visible panel node into the container for its **persisted** corner. A panel mid-drag stays
   in its current container (it just lifts to fixed); only free-placement panels render in a
   separate free layer. The whole corner-container path is gated behind "not zen". The
@@ -198,8 +199,8 @@ pair fits. Layout reads / reflows are silent.
 
 ## Relationship to other specs
 
-- [Toolbar layout](toolbar-layout.md) — the Palette strip, the menu-button Explorer and the
-  cluster popovers, none of which take a corner.
+- [Toolbar layout](toolbar-layout.md) — the two lines' toolbar groups, the Palette strip, the
+  menu-button Explorer and the tools group's popovers, none of which take a corner.
 - [User preferences](user-preferences.md) — panel layout is intentionally a **separate,
   device-local** store, not part of the synced preferences blob.
 - [Minimap](../008-canvas/minimap.md) — the Minimap's default corner (bottom-left) and its position

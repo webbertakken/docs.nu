@@ -278,6 +278,7 @@ describe('WhiteboardDock settings', () => {
     renderDock();
     const cog = screen.getByRole('button', { name: 'Settings' });
     fireEvent.pointerEnter(cog, { pointerType: 'mouse' });
+    fireEvent.pointerMove(cog, { pointerType: 'mouse' });
     expect(screen.queryByRole('group', { name: 'Settings' })).toBeNull();
     fireEvent.click(cog);
     expect(screen.getByRole('group', { name: 'Settings' })).toBeTruthy();
@@ -396,7 +397,8 @@ describe('WhiteboardDock position', () => {
   it('sits at the top by default, its flyouts and hint opening below it', () => {
     renderDock(model('select', { pinnedShapes: [...SEVEN] }));
     expect(dock().dataset.dockPosition).toBe('top');
-    expect(dock().className).toContain('top-3');
+    // On the top line, 12px down, until measured (useDockLinePlacement).
+    expect(dock().style.top).toBe('12px');
     fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     const flyout = screen.getByRole('group', { name: 'Settings' });
     expect(flyout.dataset.side).toBe('below');
@@ -412,7 +414,8 @@ describe('WhiteboardDock position', () => {
   it('sits at the bottom when chosen, its flyouts and hint opening above it', () => {
     renderDock(model('select', { position: 'bottom', pinnedShapes: [...SEVEN] }));
     expect(dock().dataset.dockPosition).toBe('bottom');
-    expect(dock().className).toContain('bottom-[4.25rem]');
+    // On the bottom line, 12px up, not lifted above it.
+    expect(dock().style.bottom).toBe('12px');
     fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     const flyout = screen.getByRole('group', { name: 'Settings' });
     expect(flyout.dataset.side).toBe('above');
@@ -421,20 +424,11 @@ describe('WhiteboardDock position', () => {
     expect(refusePin().dataset.side).toBe('above');
   });
 
-  it('keeps clear of the Explorer menu card at the top: right beside it on a phone, clear of it at UI scale on a tablet, centred from lg', () => {
-    renderDock();
+  it('sits centred until it is measured onto its line', () => {
+    renderDock(model('select', { pinnedShapes: [...SEVEN] }));
     const cls = dock().className.split(' ');
-    expect(cls).toEqual(
-      expect.arrayContaining([
-        'left-[var(--dock-clear,7.5rem)]',
-        'max-w-[calc(100%-var(--dock-clear,7.5rem)-0.75rem)]',
-        'phone:left-[var(--dock-clear,4.125rem)]',
-        'phone:max-w-[calc(100%-var(--dock-clear,4.125rem)-0.75rem)]',
-        'lg:left-1/2',
-        'lg:-translate-x-1/2',
-        'lg:max-w-[calc(100%-2*var(--dock-clear,7.5rem))]',
-      ]),
-    );
+    expect(cls).toEqual(expect.arrayContaining(['left-1/2', '-translate-x-1/2']));
+    expect(dock().dataset.dockRow).toBe('line');
   });
 
   it('moves between top and bottom in place, keeping its groups', () => {

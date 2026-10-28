@@ -16,7 +16,7 @@ So the three motions never write the same property. The page's text lines carry 
 ## Assemble (`packages/ui/src/brand-motion.css`)
 
 A content stylesheet, imported by every app's `globals.css`. It animates the logos that carry `data-assemble` (the
-site header's and the editor header's `<Brand assemble>`), only while `<html>` lacks `data-brand-assembled`:
+site header's and the editor brand group's `<Brand assemble>`), only while `<html>` lacks `data-brand-assembled`:
 
 | Part                      | From                                   | Duration | Delay             | Easing                         |
 | ------------------------- | -------------------------------------- | -------- | ----------------- | ------------------------------ |

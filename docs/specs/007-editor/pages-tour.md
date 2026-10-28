@@ -1,7 +1,7 @@
 # Pages tour ("Start Pages Tour")
 
 A short, optional guided tour of one [page kind](pages-mode.md#page-kinds) in Pages mode: a slide, an
-infographic, an article or a logo. Like every tour it is started from the bottom bar's **Start Pages Tour** button
+infographic, an article or a logo. Like every tour it is started from the actions group's **Start Pages Tour** button
 and never offers itself; [Show Me](show-me.md) runs the same track from a page's panel. Each kind has its own
 **track**, which shows how that kind of page is made by opening the real controls on the person's own page (a
 slide's Layout and Background popovers, its deck button, the Slide Deck and Present) rather than only pointing at
@@ -22,7 +22,7 @@ Draw tour's rules hold.
 
 ## Where it appears
 
-The bottom bar's Start Tour button is the one way in, for this tour as for every other; the [Diagram
+The actions group's Start Tour button is the one way in, for this tour as for every other; the [Diagram
 tour](editor-tour.md) "Where it appears" describes the button, which tour it offers when several could run, and the
 closing card. This tour's part:
 

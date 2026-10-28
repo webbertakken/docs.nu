@@ -55,6 +55,7 @@ describe('chart views', () => {
     const paths = container.querySelectorAll('path[fill-rule="evenodd"]');
     expect(paths.length).toBe(3);
     fireEvent.pointerEnter(paths[0]!);
+    fireEvent.pointerMove(paths[0]!);
     expect(container.textContent).toContain('40');
   });
 
@@ -83,6 +84,7 @@ describe('chart views', () => {
     const rects = [...container.querySelectorAll('rect')].filter((r) => r.getAttribute('rx'));
     expect(rects.length).toBe(3);
     fireEvent.pointerEnter(rects[0]!);
+    fireEvent.pointerMove(rects[0]!);
     expect(container.textContent).toContain('40');
   });
 
@@ -117,6 +119,7 @@ describe('chart views', () => {
       expect.arrayContaining(['1', '3.25', '5.5', '7.75', '10']),
     );
     fireEvent.pointerEnter(dots[1]!);
+    fireEvent.pointerMove(dots[1]!);
     expect(scatter.textContent).toContain('5 · Y');
   });
 });

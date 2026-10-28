@@ -1,7 +1,7 @@
 # Element tours
 
 An **element tour** teaches one complex element type, on the element itself: what its parts mean, how to read it and
-how to change it. It is started from the bottom bar's Start Tour button while an element of that type is selected, but
+how to change it. It is started from the actions group's Start Tour button while an element of that type is selected, but
 only once a person has opted in to that type's tour in Settings (below): by default selecting an element never
 changes the button, and the mode's own tour stays on it. It walks through the real element the person selected, not a
 sample.
@@ -25,7 +25,7 @@ The toured kinds: the [Sankey diagram](../009-elements/sankey.md), and the
 | Term                  | Means                                                                                                 |
 | --------------------- | ----------------------------------------------------------------------------------------------------- |
 | **Element tour**      | This pattern, and one tour of it (the **Sankey tour**)                                                |
-| **Start Tour button** | The bottom bar button that starts every tour ([Diagram tour](editor-tour.md) "Where it appears")      |
+| **Start Tour button** | The actions group's button that starts every tour ([Diagram tour](editor-tour.md) "Where it appears") |
 | **Toured kind**       | An element type that has an element tour (`sankey`, `chart`, …)                                       |
 | **Opted-in kind**     | A toured kind whose Settings switch is on (`elementTourOffers`): the only kinds the button ever names |
 | **Selection toolbar** | The floating toolbar over a single selection ([Canvas](../008-canvas/canvas-and-palette.md))          |
@@ -70,7 +70,7 @@ section is called **Show Me**. "Element tour" is the code's and the specs' word 
 Settings' **Tours** category holds element tours in their own section, **Show Me**, below the mode tours'
 **Offer Again** section. It is a closed accordion (people rarely look for it): its header names the section and
 how many are on (`0 of 21 On` by default). Opened, it shows the section's line ("Off unless you switch one on. Then,
-while you select that element, Start Tour in the bottom bar shows how it works."), then **Show Me on Every Element**,
+while you select that element, Start Tour in the actions group shows how it works."), then **Show Me on Every Element**,
 one switch over them all ("Every element’s Show Me at once": on while any kind is opted in and not answered; on
 opts every kind in and forgets every answer, off answers every kind), with one switch per toured kind nested beneath
 it, named for the element alone: **Sankey Diagram** ("With a Sankey diagram selected.", linking the Sankey

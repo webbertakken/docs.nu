@@ -300,8 +300,9 @@ the underlying setters keep their existing `Canvas` / `Theme` / `Tab` events (th
 - `ThemeBrowser` — the flat, paged theme list. Rendered by the palette accordion, the New-document picker and the dialog's Colours panel.
 - `PagedCarousel` — the carousel (arrows, page dots, nine or six to a page) the looks, themes, typefaces and patterns share.
 - On a screen wider than a phone (640 px and up), the dialog is a **popover flying out of the Theme & canvas button**: its
-  bottom-right corner sits 8 px above the button, its right edge on the bottom-right cluster's (the right of the zoom
-  controls, so it sits as far right as the cluster and covers as little of the work as it can), and it grows from that corner (the long motion
+  bottom corner sits 8 px above the button, its left edge on the tools group's outer end (the group's
+  left edge at the canvas's bottom-left corner, so it sits as far into the corner as the tools group and covers as
+  little of the work as it can), and it grows from that corner (the long motion
   token's `fly-up-in`; a fade alone with reduced motion), at most as tall as the room above the button. Without the
   button on screen it is the centred dialog. On a phone it is a **bottom sheet**, as the editor's other phone sheets
   are: the screen's width, rising from the bottom edge (`sheet-up`), at most 75% of the screen tall so the canvas stays

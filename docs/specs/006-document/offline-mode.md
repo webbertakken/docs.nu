@@ -155,8 +155,8 @@ Explorer lists follow after the paint.
 
 ## "This Browser" badge + Explorer
 
-- **Editor header badge.** The status pill reads Private / Shared / Team
-  (the `SharedBadge` in `EditorHeader`). For an offline document it reads
+- **Editor share-state badge.** The status pill reads Private / Shared / Team
+  (the `SharedBadge` leading the editor's document group). For an offline document it reads
   **"This Browser"** (a state that supersedes "Private" for these documents),
   matching the [This Browser pill](#this-browser-pill): the same words, the same
   browser-window icon, the same amber tone and contrast, and the same sentence,
@@ -526,7 +526,7 @@ Track adoption without content, reusing the closed vocabulary:
 - New Document wizard (`TemplatePicker` / `template-picker-settings.tsx`,
   [Dedicated route for new-document creation](../007-editor/new-document-route.md)): the **Settings** step's Save location chooser ([Save Locations](save-locations.md), the
   This Browser tile) + data-loss warning + contextual help link.
-- `EditorHeader` (`SharedBadge`) — the **This Browser** badge state.
+- `SharedBadge` (the editor's document group) — the **This Browser** badge state.
 - Explorer (row + card components, `ThisBrowserPill`): merge the local index,
   show the **This Browser** pill wherever an offline document is listed plus a
   fixed offline thumbnail everywhere, and skip server fetches for offline rows.

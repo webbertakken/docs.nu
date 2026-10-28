@@ -60,11 +60,13 @@ describe('SplitStaticPane', () => {
     const field = document.body.appendChild(document.createElement('input'));
     field.focus();
     fireEvent.pointerEnter(section);
+    fireEvent.pointerMove(section);
     act(() => void vi.advanceTimersByTime(SPLIT_HOVER_FOCUS_MS + 1));
     expect(onFocus).not.toHaveBeenCalled();
     field.blur();
     fireEvent.pointerLeave(section);
     fireEvent.pointerEnter(section);
+    fireEvent.pointerMove(section);
     act(() => void vi.advanceTimersByTime(SPLIT_HOVER_FOCUS_MS + 1));
     expect(onFocus).toHaveBeenCalledWith('Hover');
   });

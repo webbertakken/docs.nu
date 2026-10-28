@@ -618,7 +618,7 @@ export function ExplorerPageLayout() {
   );
 }
 
-/** The editor's Explorer, open under the menu button in the top-left card: the Current Document
+/** The editor's Explorer, open under the menu button in the brand group: the Current Document
  *  card, then Overview, Spaces and More, with My Documents opened in place to a folder and a
  *  document. */
 /** The editor's Explorer panel open under the menu button: the Current Document card (its name to rename, its

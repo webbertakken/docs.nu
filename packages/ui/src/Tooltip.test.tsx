@@ -31,6 +31,7 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
     fireEvent.pointerEnter(screen.getByRole('button'), mouse);
+    fireEvent.pointerMove(screen.getByRole('button'), mouse);
     advance(TOOLTIP_OPEN_DELAY_MS - 1);
     expect(hint()).toBeNull();
     advance(1);
@@ -61,6 +62,7 @@ describe('Tooltip', () => {
       vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(left, 300, 40, 20));
     at(400);
     fireEvent.pointerEnter(button, mouse);
+    fireEvent.pointerMove(button, mouse);
     advance(TOOLTIP_OPEN_DELAY_MS);
     advance(32);
     const before = hint()?.style.left;
@@ -124,9 +126,11 @@ describe('Tooltip', () => {
     );
     const [zoomIn, zoomOut] = screen.getAllByRole('button') as [HTMLElement, HTMLElement];
     fireEvent.pointerEnter(zoomIn, mouse);
+    fireEvent.pointerMove(zoomIn, mouse);
     advance(TOOLTIP_OPEN_DELAY_MS);
     fireEvent.pointerLeave(zoomIn, mouse);
     fireEvent.pointerEnter(zoomOut, mouse);
+    fireEvent.pointerMove(zoomOut, mouse);
     expect(screen.getAllByRole('tooltip')).toHaveLength(1);
     expect(hint()?.textContent).toBe('Zoom out');
   });
@@ -144,10 +148,12 @@ describe('Tooltip', () => {
     );
     const [zoomIn, zoomOut] = screen.getAllByRole('button') as [HTMLElement, HTMLElement];
     fireEvent.pointerEnter(zoomIn, mouse);
+    fireEvent.pointerMove(zoomIn, mouse);
     advance(TOOLTIP_OPEN_DELAY_MS);
     fireEvent.pointerLeave(zoomIn, mouse);
     advance(HINT_CLOSE_GRACE_MS + 1000);
     fireEvent.pointerEnter(zoomOut, mouse);
+    fireEvent.pointerMove(zoomOut, mouse);
     expect(hint()).toBeNull();
     advance(TOOLTIP_OPEN_DELAY_MS);
     expect(hint()?.textContent).toBe('Zoom out');
@@ -161,6 +167,7 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
     fireEvent.pointerEnter(screen.getByRole('button'), mouse);
+    fireEvent.pointerMove(screen.getByRole('button'), mouse);
     advance(TOOLTIP_OPEN_DELAY_MS);
     expect(warn).toHaveBeenCalledWith('[tooltip] label is not the accessible name', {
       label: 'Hotspot',
@@ -176,6 +183,7 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
     fireEvent.pointerEnter(screen.getByText('Untitled token'), mouse);
+    fireEvent.pointerMove(screen.getByText('Untitled token'), mouse);
     advance(TOOLTIP_OPEN_DELAY_MS);
     expect(warn).not.toHaveBeenCalled();
   });

@@ -302,7 +302,7 @@ shared-with-you document's menu (Open, Dismiss) is the same shape.
 **The editor's Explorer rows use this same menu** (both the
 personal rows and a team library's rows). The panel used to carry its
 own toolbar-and-accordion menu with a Share section; sharing is the
-editor header's job, and a menu that looked like no other in the app was
+editor actions group's job, and a menu that looked like no other in the app was
 one people had to learn twice. A row that can't offer a verb (the panel
 has no star or history) simply doesn't pass its handler, and the menu
 leaves that tile out.

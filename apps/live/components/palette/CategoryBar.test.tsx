@@ -62,8 +62,10 @@ describe('hover intent', () => {
   it('opens a category the pointer rests on, not one it sweeps across', () => {
     show();
     fireEvent.pointerEnter(button('Shapes'), mouse);
+    fireEvent.pointerMove(button('Shapes'), mouse);
     fireEvent.pointerLeave(button('Shapes'), mouse);
     fireEvent.pointerEnter(button('Layout'), mouse);
+    fireEvent.pointerMove(button('Layout'), mouse);
     wait(HOVER_OPEN_MS - 10);
     expect(flyout()).toBeNull();
     wait(20);
@@ -73,8 +75,10 @@ describe('hover intent', () => {
   it('moves an open flyout to the next category at once, and ignores a touch', () => {
     show('pages');
     fireEvent.pointerEnter(button('Shapes'), mouse);
+    fireEvent.pointerMove(button('Shapes'), mouse);
     wait(HOVER_OPEN_MS);
     fireEvent.pointerEnter(button('Concepts'), mouse);
+    fireEvent.pointerMove(button('Concepts'), mouse);
     expect(heading()).toBe('Concepts');
     fireEvent.pointerEnter(button('Components'), { pointerType: 'touch' });
     expect(heading()).toBe('Concepts');
@@ -83,10 +87,12 @@ describe('hover intent', () => {
   it('closes once the pointer has left both the bar and the flyout, after a grace', () => {
     show();
     fireEvent.pointerEnter(button('Shapes'), mouse);
+    fireEvent.pointerMove(button('Shapes'), mouse);
     wait(HOVER_OPEN_MS);
     fireEvent.pointerLeave(button('Shapes'), mouse);
     // Crossing the gap into the flyout keeps it.
     fireEvent.pointerEnter(flyout()!.firstElementChild!, mouse);
+    fireEvent.pointerMove(flyout()!.firstElementChild!, mouse);
     wait(HOVER_CLOSE_MS * 2);
     expect(flyout()).not.toBeNull();
     fireEvent.pointerLeave(flyout()!.firstElementChild!, mouse);
@@ -102,6 +108,7 @@ describe('hover intent', () => {
     expect(heading()).toBe('Shapes');
     // Pointing at another category still moves it there, and it stays pinned.
     fireEvent.pointerEnter(button('Layout'), mouse);
+    fireEvent.pointerMove(button('Layout'), mouse);
     expect(heading()).toBe('Layout');
     fireEvent.pointerLeave(button('Layout'), mouse);
     wait(HOVER_CLOSE_MS * 2);
@@ -113,6 +120,7 @@ describe('hover intent', () => {
   it('pins a category the hover opened once it is clicked', () => {
     show();
     fireEvent.pointerEnter(button('Shapes'), mouse);
+    fireEvent.pointerMove(button('Shapes'), mouse);
     wait(HOVER_OPEN_MS);
     fireEvent.click(button('Shapes'), { detail: 1 });
     fireEvent.pointerLeave(button('Shapes'), mouse);
@@ -123,6 +131,7 @@ describe('hover intent', () => {
   it('keeps a click on a category the hover opened from closing it', () => {
     show();
     fireEvent.pointerEnter(button('Shapes'), mouse);
+    fireEvent.pointerMove(button('Shapes'), mouse);
     wait(HOVER_OPEN_MS);
     fireEvent.click(button('Shapes'), { detail: 1 });
     expect(heading()).toBe('Shapes');
@@ -163,6 +172,7 @@ describe('hover intent', () => {
   it('stays open while a tile is dragged out, and closes on the drop', () => {
     show();
     fireEvent.pointerEnter(button('Shapes'), mouse);
+    fireEvent.pointerMove(button('Shapes'), mouse);
     wait(HOVER_OPEN_MS);
     const body = flyout()!.firstElementChild!;
     fireEvent.dragStart(within(flyout()!).getByRole('button', { name: 'Add Square' }), {
@@ -178,6 +188,7 @@ describe('hover intent', () => {
   it('stays open while its search holds a query', () => {
     show('workshop');
     fireEvent.pointerEnter(button('Session'), mouse);
+    fireEvent.pointerMove(button('Session'), mouse);
     wait(HOVER_OPEN_MS);
     const field = within(flyout()!).getByRole('textbox') as HTMLInputElement;
     field.focus();
@@ -275,9 +286,11 @@ describe('a tile’s side panel', () => {
     fireEvent.click(button('Layout'), { detail: 1 });
     const card = within(flyout()!).getByRole('button', { name: 'Add Card' });
     fireEvent.pointerEnter(card);
+    fireEvent.pointerMove(card);
     wait(200);
     expect(side()).not.toBeNull();
     fireEvent.pointerEnter(within(flyout()!).getByRole('button', { name: 'Add Frame' }));
+    fireEvent.pointerMove(within(flyout()!).getByRole('button', { name: 'Add Frame' }));
     wait(HOVER_CLOSE_MS);
     expect(side()).toBeNull();
     fireEvent.click(card);
@@ -292,6 +305,7 @@ describe('a tile’s side panel', () => {
     fireEvent.click(within(flyout()!).getByRole('button', { name: 'Add Badge' }));
     expect(side()).not.toBeNull();
     fireEvent.pointerEnter(button('Shapes'), mouse);
+    fireEvent.pointerMove(button('Shapes'), mouse);
     expect(side()).toBeNull();
   });
 });

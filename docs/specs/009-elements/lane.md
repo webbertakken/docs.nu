@@ -135,5 +135,5 @@ for the work.
 
 ## Element tour
 
-The **Lane tour** is on the bottom bar's **Start Lane Tour** button while a lane is selected, once its kind is opted in to (Settings › Tours › Show Me), for an Editor on an unlocked element, and walks through
+The **Lane tour** is on the actions group's **Start Lane Tour** button while a lane is selected, once its kind is opted in to (Settings › Tours › Show Me), for an Editor on an unlocked element, and walks through
 it on the element itself ([Element tours](../007-editor/element-tours.md) "The Lane tour").

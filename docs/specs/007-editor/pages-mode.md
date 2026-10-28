@@ -1163,8 +1163,8 @@ canvas's ink; the Slide Deck's pictures the same.
   person's per-device choice, kept in this browser alone (`livedoc:contents-side:v1`), as the
   corner panels' places are ([Panel docking](panel-docking.md)). It stays open while the person
   works; the cluster has no Contents button while it shows, and the corner panels and the
-  bottom-right cluster on its side start past it.
-- **Minimised to its button**: the bottom-right cluster holds **Contents** (a list glyph, named
+  bottom line's group on its side start past it.
+- **Minimised to its button**: the tools group holds **Contents** (a list glyph, named
   beside it on a desktop), left of the Theme & canvas button. It opens the **Contents** popover
   above it, whose header adds **Dock as Sidebar** (a panel-open glyph; HoverCard "Dock as Sidebar",
   "Keep Contents open beside the canvas."), which closes the popover and docks the sidebar.
@@ -1182,7 +1182,7 @@ under reduced motion.
 opening the tab) centres in what shows beside the sidebar, never under it. Docking it (from the
 popover, opening the tab, dragging it to the other side) frames the page in view again beside it,
 measured where the sidebar comes to rest rather than mid-slide;
-minimising it frames that page again across the whole canvas. **Fit** (the zoom cluster's, and
+minimising it frames that page again across the whole canvas. **Fit** (the tools group's, and
 Shift+1) frames the page nearest the middle of what shows, not the whole tab.
 
 Both show the same list:
@@ -1419,7 +1419,7 @@ is while the rest of the tab is worked on.
   snaps to the edges, the centre lines and the margins (7% of the short side) of every page, with
   the same guides as element-to-element alignment (not to the pages' spacing: equal-spacing snaps
   stay element to element).
-- **The page navigator**: in the bottom-right cluster, right of Undo / Redo (first when there is
+- **The page navigator**: in the tools group, right of Undo / Redo (first when there is
   no Undo / Redo), while there are two pages or more: a cluster strip of the cluster's own 44 px
   controls, **Previous page**, the place of the page someone is on ("2 of 5"), **Next page**
   (disabled at either end). An arrow fits that neighbouring page in the view, as a press on its label does, gliding
@@ -1647,7 +1647,7 @@ SlideShown`).
 
 ## Chrome in Pages mode
 
-- **Slides button**: in the bottom-right cluster, where Layers sits in the other modes (left of
+- **Slides button**: in the tools group, where Layers sits in the other modes (left of
   the brush), joined to Contents in one frame (`PagesClusterStrip`, as Layers and Theme share one), a **Slides** button opens the Slide Deck panel as a popover hanging above it (an
   outside press closes it; the button shows pressed while open). An infographic is likely to be
   presented, so its deck is one press away. Desktop only, as the Slide Deck itself is. Shown only

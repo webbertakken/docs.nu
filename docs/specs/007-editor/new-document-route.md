@@ -296,7 +296,7 @@ reports `UI` · `Closed` · `NewDocument` ([Telemetry](../017-telemetry/telemetr
 
 The New Document wizard (`apps/live/components/palette/NewDocumentWizard.tsx`) on `/new` and the visitor name prompt (`apps/live/components/palette/IdentityPrompt.tsx`) over the editor are two cards of one build. On `sm:` and up each renders as a centred floating card (max 44rem for the wizard, 26rem for the name prompt), with rounded corners + shadow over the canvas. On mobile (below `sm`) it fills the viewport edge-to-edge: full width, full dynamic-viewport height, no border / radius / shadow, so the user can read every row and click through without zoom. The footer's Create button (the name prompt's Join and Cancel) stays reachable because the body scrolls inside the card while the header + footer remain pinned (mobile and desktop alike).
 
-The card has no backdrop, so the editor header stays live beside it. It stacks on the `canvas-modal` rung: above every canvas surface, beneath the header, so the header's menus (the account menu) open in front of the card rather than behind it.
+The card has no backdrop, so what the welcome flow keeps of the editor's two lines (the brand group and the account control, [Toolbar layout](toolbar-layout.md#layout-details)) stays live beside it. It stacks on the `canvas-modal` rung: above every canvas surface, beneath those groups, so their menus (the account menu among them) open in front of the card rather than behind it.
 
 This is the only welcome surface so it sets the mobile floor for the rest of the editor's panel chrome (Palette / Context / Explorer, see [07-live-app](live-app.md)). Those are addressed separately.
 
@@ -451,7 +451,7 @@ default document name) without walking the wizard:
     another blank document or trapping the user behind a page that always
     navigates forward again.
   - No tour is queued on this path, nor on any other: since 28 October 2026 tours start only from
-    the bottom bar's Start Tour button ([Diagram tour ("Start Diagram Tour")](editor-tour.md) "Handoff"),
+    the actions group's Start Tour button ([Diagram tour ("Start Diagram Tour")](editor-tour.md) "Handoff"),
     so no create waits for the document count.
   - **The wizard must never paint on this path, not even for a frame.**
     `/new` is a static export, so its prerendered HTML is the wizard and

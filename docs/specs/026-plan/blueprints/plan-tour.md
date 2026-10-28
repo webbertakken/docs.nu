@@ -1,7 +1,7 @@
 # Plan tour blueprint
 
 Derived from [Plan tour](../plan-tour.md). The engine, stage, popover, spotlight, shield, tour colours and the
-bottom bar's Start Tour button live once in `apps/live/components/tour`
+actions group's Start Tour button live once in `apps/live/components/tour`
 ([Diagram tour](../../007-editor/editor-tour.md)), shared rather than copied.
 
 ## Domain and naming
@@ -10,7 +10,7 @@ bottom bar's Start Tour button live once in `apps/live/components/tour`
 | ------------ | ------------------------------------------------------------------------------------------------------------------ |
 | Plan tour    | `PlanTourHost`, `planTourSteps(track)`, `planTourStepTelemetryType`                                                |
 | tour track   | `BoardSheetTrack` (`'boards' \| 'sheets'`), of `PLAN_TOUR_TRACKS`                                                  |
-| offer        | `useOfferTour('plan', …)` (`tour-offer.ts`): the track the bottom bar button names, `offerTrack`                   |
+| offer        | `useOfferTour('plan', …)` (`tour-offer.ts`): the track the actions group's Start Tour button names, `offerTrack`   |
 | tour subject | `Subject` (`{ boardId, sheetId }`, element ids) in `PlanTourHost`, fixed at a press by `visiblePlanWork`           |
 | plan work    | `plan-board` / `plan-sheet` shape elements on `activeTab.elements` (`isBoard`, `isSheet`)                          |
 | example card | The Boards track's own card: `TOUR_CARD_TITLE` (`'Your First Card'`), held in `tourCardRef` in `PlanTourHost`      |
@@ -24,7 +24,7 @@ bottom bar's Start Tour button live once in `apps/live/components/tour`
 | `apps/live/components/tour/tour-step.ts`        | `TourStepOf<Api>` (the shared step shape), `hasAnchor`, `stepTelemetryType(prefix, id)`                                                                 |
 | `apps/live/components/tour/useTourEngine.ts`    | The shared step runner: step index, direction, target rect, prepare / wait / heal                                                                       |
 | `apps/live/components/tour/tour-offer.ts`       | `useOfferTour`, `TOUR_OFFER_RANK`: each host publishes its tour; the most specific one is on the button                                                 |
-| `apps/live/components/tour/TourOfferButton.tsx` | The bottom bar's Start Tour button, left of Search (`ChromeControls`)                                                                                   |
+| `apps/live/components/tour/TourOfferButton.tsx` | The actions group's Start Tour button, leading the document actions (`ChromeControls`)                                                                  |
 | `apps/live/components/tour/TourStage.tsx`       | The shared overlay: highlight ring, `TourPopover`                                                                                                       |
 | `apps/live/components/tour/TourPopover.tsx`     | `copy` (`TourCardCopy`): the step card, the last card included                                                                                          |
 | `apps/live/components/tour/TourHost.tsx`        | The Diagram tour on the engine; publishes itself to `tour-active`                                                                                       |
@@ -212,7 +212,7 @@ button for it (`isReadOnly`).
 
 ## Presentation and UX
 
-As the Diagram tour ([Diagram tour](../../007-editor/editor-tour.md)). The bottom bar's button reads **Start Boards
+As the Diagram tour ([Diagram tour](../../007-editor/editor-tour.md)). The actions group's button reads **Start Boards
 Tour** or **Start Sheets Tour**. The cards' `ariaPrefix` is **Boards tour** or **Sheets tour**. The last card is a
 step card in `TourPopover`, with **Help** linking the track's article (`BOARDS_TOUR_COPY` or `SHEETS_TOUR_COPY`)
 and **Start** (`TOUR_FINISH`). The tour has no art.
@@ -220,7 +220,7 @@ and **Start** (`TOUR_FINISH`). The tour has no art.
 ## Accessibility
 
 As every editor tour: the popover is a labelled dialog ("Plan tour step 2 of 7: Add cards"), buttons are
-native, the ring is `aria-hidden`, reduced motion stills the glide. The bottom bar button keeps its full name as its
+native, the ring is `aria-hidden`, reduced motion stills the glide. The actions group's Start Tour button keeps its full name as its
 accessible name when it shows the glyph alone.
 
 ## Web Experience

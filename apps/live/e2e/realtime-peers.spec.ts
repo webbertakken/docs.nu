@@ -84,9 +84,10 @@ test('two peers see each other, edit live, and every edit is kept', async ({
   await peerPage.getByRole('button', { name: /^join$/i }).click();
   await peerPage.locator(CANVAS).waitFor();
 
-  // Presence: the owner sees two people online, the peer among them.
-  const online = ownerPage.locator('[role="img"][aria-label$="(Online)"]');
-  await expect.poll(() => online.count()).toBeGreaterThanOrEqual(2);
+  // Presence: the owner sees the peer online among the contributors (docs/specs/007-editor/toolbar-layout.md "The
+  // bottom line").
+  const online = ownerPage.locator('[data-contributors] [role="img"][aria-label$="(Online)"]');
+  await expect.poll(() => online.count()).toBeGreaterThanOrEqual(1);
 
   // A peer's edit reaches the owner live.
   await (

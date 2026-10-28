@@ -45,23 +45,29 @@ const props: ComponentProps<typeof CanvasThemeDialog> = {
 };
 
 describe('CanvasThemeDialog placement', () => {
-  it('sits just above the paintbrush, right edges aligned', () => {
+  it("sits just above the paintbrush, its left edge on the tools group's", () => {
     Object.assign(window, { innerWidth: 1440, innerHeight: 900 });
     const brush = document.createElement('button');
     brush.setAttribute('data-tour-id', 'canvas-theme');
     brush.getBoundingClientRect = () =>
-      ({ left: 1360, right: 1404, top: 840, bottom: 884, width: 44, height: 44 }) as DOMRect;
+      ({ left: 120, right: 164, top: 840, bottom: 884, width: 44, height: 44 }) as DOMRect;
     document.body.appendChild(brush);
+    // The tools group at the bottom left (docs/specs/007-editor/toolbar-layout.md "The bottom line").
+    const group = document.createElement('div');
+    group.setAttribute('data-zoom-cluster', '');
+    group.getBoundingClientRect = () =>
+      ({ left: 12, right: 330, top: 836, bottom: 888, width: 318, height: 52 }) as DOMRect;
+    document.body.appendChild(group);
     render(<CanvasThemeDialog {...props} />);
     const panel = screen.getByRole('dialog', { name: 'Tab style' });
-    expect(panel.style.right).toBe('36px');
+    expect(panel.style.left).toBe('12px');
     expect(panel.style.bottom).toBe('68px');
   });
 
   it('is the centred dialog without a brush', () => {
     Object.assign(window, { innerWidth: 1440, innerHeight: 900 });
     render(<CanvasThemeDialog {...props} />);
-    expect(screen.getByRole('dialog', { name: 'Tab style' }).style.right).toBe('');
+    expect(screen.getByRole('dialog', { name: 'Tab style' }).style.left).toBe('');
   });
 });
 

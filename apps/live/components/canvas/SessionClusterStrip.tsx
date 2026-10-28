@@ -8,7 +8,7 @@ import { useNow } from '@/hooks/ui/useNow';
 import { CLUSTER_CONTROL_REST } from '@/components/canvas/cluster-strip';
 import { ClusterPopoverSegment, ClusterStrip } from './ClusterPopoverButton';
 
-// The Session strip in the bottom-right cluster (docs/specs/012-collaboration/session-tools.md "The Session
+// The Session strip in the tools group (docs/specs/012-collaboration/session-tools.md "The Session
 // strip"): Timer, Vote and Poll in one strip left of Layers, as Plan mode's buttons share one. Each
 // opens its tool above it, set-up while idle and the live tool while it runs. An editor always has
 // the three; a view-role visitor, who cannot start anything, gets only the ones running. The Timer
@@ -139,7 +139,6 @@ export function SessionClusterStrip({
       ) : null}
       {showVote ? (
         <ClusterPopoverSegment
-          divided={showTimer}
           label={
             voteDotsLeft !== null
               ? `Open Vote (${voteDotsLeft} ${voteDotsLeft === 1 ? 'dot' : 'dots'} left)`
@@ -171,7 +170,6 @@ export function SessionClusterStrip({
       ) : null}
       {showPoll ? (
         <ClusterPopoverSegment
-          divided={showTimer || showVote}
           label={pollRunning ? 'Open Poll' : 'Start a Poll'}
           hoverTitle="Poll"
           hoverDescription={
@@ -250,7 +248,7 @@ function TimerClockSegment({
       aria-label={`${kind} ${clock}`}
       aria-expanded={open}
       style={open ? undefined : timerFillStyle(timer, now)}
-      className={`flex h-11 items-center gap-1.5 px-3 transition ${
+      className={`relative flex h-9 touch-target-y items-center gap-1.5 rounded-md px-3 transition ${
         open
           ? PRESSED
           : done

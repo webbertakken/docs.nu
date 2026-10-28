@@ -4,7 +4,7 @@
 // (docs/specs/007-editor/toolbar-layout.md "Twelve tiles is enough"): the chrome around the tiles (the
 // pickers, More, dividers, padding: whatever they measure today, in whatever
 // category), one tile's pitch, and the room the centred strip may take (the
-// window less the Explorer menu button on both sides; on a phone, the window
+// room between the top line's side groups, lib/line-centre; on a phone, the window
 // less its gutters and the menu card beside the strip). Nothing is assumed about how wide a picker is, so a
 // longer category name or a new control keeps fitting.
 //
@@ -16,9 +16,9 @@
 import { useLayoutEffect, useState, type RefObject } from 'react';
 import { fitStripTiles } from './toolbar-strip-tiles';
 import { editorViewportOf } from '@/lib/editor-viewport';
+import { measureTopLine, topLineGroups } from '@/lib/top-line-clearance';
 
 const PHONE_GUTTERS_PX = 24;
-const MENU_GAP_PX = 8;
 
 export function useStripTileLimit(
   cardRef: RefObject<HTMLElement | null>,
@@ -58,7 +58,6 @@ export function useStripTileLimit(
       // the minimum, so keep the last good answer instead.
       if (tileWidth <= 0 || cardWidth <= 0) return;
       const gap = parseFloat(getComputedStyle(tile.parentElement!).columnGap) || 0;
-      const pitch = tileWidth + gap;
       // The rail's share of the card is its width plus its (negative) side
       // margins, which give its pressed rings room inside the clip.
       const railStyle = getComputedStyle(rail);
@@ -67,6 +66,7 @@ export function useStripTileLimit(
         (parseFloat(railStyle.marginLeft) || 0) +
         (parseFloat(railStyle.marginRight) || 0);
       const chrome = cardWidth - railShare;
+      const pitch = tileWidth + gap;
       // The room is the editor's: the window, or its pane in a side by side split
       // (docs/specs/007-editor/split-view.md), measured from the pane's own left edge.
       const view = editorViewportOf(card);
@@ -77,9 +77,9 @@ export function useStripTileLimit(
         if (leadingRef?.current)
           available = vw - PHONE_GUTTERS_PX / 2 - (card.getBoundingClientRect().left - view.left);
       } else {
-        const menu = document.querySelector<HTMLElement>('[data-toolbar-menu]');
-        const clear = menu ? menu.getBoundingClientRect().right - view.left + MENU_GAP_PX : 0;
-        available = vw - 2 * clear;
+        // Between the top line's side groups, centred or not (lib/line-centre): tiles drop only once the strip no
+        // longer fits between them.
+        available = measureTopLine(view, cardWidth).room;
       }
       setMeasured(fitStripTiles({ available, chrome, pitch }));
     };
@@ -89,6 +89,9 @@ export function useStripTileLimit(
     // A pane resizes without the window (the split's divider): refit as it does.
     const pane = editorViewportOf(card).element;
     if (pane) observer.observe(pane);
+    // The room is between the top line's side groups, which change width on their own (Start Tour offered, the mode
+    // switch's name, an account signing in): refit as they do, or the strip kept a count fitted to the old room.
+    if (!isMobile) for (const group of topLineGroups()) observer.observe(group);
     window.addEventListener('resize', measure);
     return () => {
       observer.disconnect();

@@ -1,7 +1,14 @@
 // docs/specs/008-canvas/canvas-performance.md "A selection change re-renders what it touches": the
 // selection chrome reads the selection store, and follows it through select, reselect, select-all,
 // a free arrow, delete and undo.
-import { expect, expectNoPageErrors, seedTab, startBlankDocument, test } from './fixtures';
+import {
+  expect,
+  expectNoPageErrors,
+  seedTab,
+  startBlankDocument,
+  switchToTab,
+  test,
+} from './fixtures';
 
 const square = (id: string, label: string, x: number, y: number) => ({
   id,
@@ -94,7 +101,7 @@ test('the selection chrome follows the selection', async ({ page, pageErrors }) 
   await expect(plus.first()).toBeVisible();
   await page.locator('[data-tour-id="add-tab"]').click();
   await expect(plus).toHaveCount(0);
-  await page.getByRole('button', { name: /^Tab 1$/ }).click();
+  await switchToTab(page, 'Tab 1');
   await expect(box('b')).toBeVisible();
   await expect(plus).toHaveCount(0);
   await expect(page.getByTestId('arrow-move-frame')).toHaveCount(0);

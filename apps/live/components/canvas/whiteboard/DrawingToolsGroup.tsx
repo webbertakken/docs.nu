@@ -15,7 +15,8 @@ import { penLabel } from '@/lib/whiteboard-prefs';
 import { useCanvasSurface } from '@/components/canvas/CanvasSurfaceContext';
 import { WHITEBOARD_TOOL_KEYS } from '@/hooks/canvas/editor-shortcut-keys';
 import type { WhiteboardDockModel } from '@/hooks/canvas/useWhiteboard';
-import { DockButton, DockDivider, DockToolbar } from './DockToolbar';
+import { DockButton, DockToolbar } from './DockToolbar';
+import { ToolbarDivider } from '@/components/chrome/ToolbarGroup';
 import type { DockFlyoutApi } from './useDockFlyout';
 import { DOCK_ICON_PX, PenGlyph, TextGlyph } from './whiteboard-icons';
 
@@ -53,7 +54,7 @@ export function DrawingToolsGroup({
         pressed={tool === 'select'}
         onPress={() => pickAndClose(model.pathEditing ? model.leavePathEdit : model.pickSelect)}
       />
-      <DockDivider />
+      <ToolbarDivider />
       {prefs.pens.map((pen) => {
         const inHand = tool === 'pen' && prefs.activePenId === pen.id;
         return (
@@ -72,7 +73,7 @@ export function DrawingToolsGroup({
           />
         );
       })}
-      <DockDivider />
+      <ToolbarDivider />
       <DockButton
         itemKey="text"
         label="Text"
@@ -90,7 +91,7 @@ export function DrawingToolsGroup({
         pressed={tool === 'path'}
         onPress={() => pickAndClose(model.pickPath)}
       />
-      <DockDivider />
+      <ToolbarDivider />
       <DockButton
         itemKey="eraser"
         label="Eraser"

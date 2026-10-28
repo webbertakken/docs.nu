@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { HoverCard } from '@livedoc/ui';
 import { CLUSTER_STRIP, CLUSTER_CONTROL_REST } from '@/components/canvas/cluster-strip';
 
-// A bottom-right cluster button that opens a panel as a popover hanging ABOVE it, as the Layers
+// A tools group button that opens a panel as a popover hanging ABOVE it, as the Layers
 // button does, and shows pressed while it is open: Slides in Pages mode, Card Types in Plan
 // mode, each where Layers sits in the other modes. Two or more can share one frame, as Undo and Redo
 // do (ClusterStrip of ClusterPopoverSegments): Plan's Find a Card and Card Types.
@@ -23,8 +23,6 @@ type SegmentProps = {
   buttonRef?: React.Ref<HTMLButtonElement>;
   // A guided tour's anchor (docs/specs/026-plan/plan-tour.md).
   dataTourId?: string;
-  // A segment after the first in a strip: a hairline parts it from the one before.
-  divided?: boolean;
   // A count for the button (the Trash's), tucked into its corner (the strip clips anything outside it).
   badge?: ReactNode;
 };
@@ -45,6 +43,7 @@ export function ClusterStrip({
         e.preventDefault();
         e.stopPropagation();
       }}
+      data-toolbar-part=""
       className={CLUSTER_STRIP}
     >
       {children}
@@ -62,7 +61,6 @@ export function ClusterPopoverSegment({
   onTogglePopover,
   buttonRef,
   dataTourId,
-  divided = false,
   badge,
 }: SegmentProps) {
   const button = (
@@ -74,7 +72,7 @@ export function ClusterPopoverSegment({
       onClick={(e) => onTogglePopover(e.currentTarget)}
       aria-label={label}
       aria-expanded={popoverOpen}
-      className={`relative flex h-11 w-11 items-center justify-center transition ${divided ? 'border-l border-slate-100 dark:border-slate-800' : ''} ${
+      className={`relative flex h-9 w-9 touch-target items-center justify-center rounded-md transition ${
         popoverOpen
           ? 'bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-100'
           : CLUSTER_CONTROL_REST
@@ -97,7 +95,7 @@ export function ClusterPopoverSegment({
 }
 
 // A cluster button on its own: a strip of one.
-export function ClusterPopoverButton({ dataTourId, ...props }: Omit<SegmentProps, 'divided'>) {
+export function ClusterPopoverButton({ dataTourId, ...props }: SegmentProps) {
   return (
     <ClusterStrip dataTourId={dataTourId}>
       <ClusterPopoverSegment {...props} />

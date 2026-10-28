@@ -3,7 +3,24 @@ import type { StoredDocument, StoredTab } from './stored';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Page } from '@playwright/test';
-import { expect, expectNoPageErrors, startBlankDocument, test, pageOwnerHeaders } from './fixtures';
+import {
+  expect,
+  expectNoPageErrors,
+  pageOwnerHeaders,
+  startBlankDocument,
+  switchToTab,
+  test,
+} from './fixtures';
+
+// The document's tabs by name, as the tab list shows them (docs/specs/007-editor/toolbar-layout.md "The tab list").
+async function expectTabs(page: Page, names: string[]): Promise<void> {
+  await page.locator('[data-document-group] [data-tab-stack]').click();
+  const list = page.getByRole('dialog', { name: 'Tabs' });
+  for (const name of names)
+    await expect(list.getByRole('button', { name, exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(list).toHaveCount(0);
+}
 
 // draw.io import end to end (docs/specs/020-import-export/drawio-import.md): pick a
 // file from the fixture corpus through the real Import dialog, and check the
@@ -84,9 +101,8 @@ test('a multi-page draw.io file becomes a tab per page, with a summary', async (
   await shot(page, 'multi-page.drawio-2-summary');
   await page.getByRole('button', { name: 'Done' }).click();
 
-  for (const name of ['Overview', 'Detail', 'Scratch']) {
-    await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
-  }
+  // A tab per page.
+  await expectTabs(page, ['Overview', 'Detail', 'Scratch']);
   await expect(page.getByText("Platform team's board").first()).toBeVisible();
   await shot(page, 'multi-page.drawio-3-overview');
 
@@ -97,13 +113,13 @@ test('a multi-page draw.io file becomes a tab per page, with a summary', async (
       { name: 'Detail', elements: 8 },
       { name: 'Scratch', elements: 0 },
     ]);
-  await page.getByText('Detail', { exact: true }).first().click();
+  await switchToTab(page, 'Detail');
   await expect(page.getByText('Big and bold').first()).toBeVisible();
   await shot(page, 'multi-page.drawio-4-detail');
 
   // One undo takes the whole import back: the new tabs go, the first tab is
   // empty and named as before, on screen and in storage.
-  await page.getByText('Overview', { exact: true }).first().click();
+  await switchToTab(page, 'Overview');
   await page.locator('[data-canvas-a11y-root]').click({ position: { x: 5, y: 5 } });
   await page.keyboard.press('ControlOrMeta+z');
   await expect(page.getByText('Detail', { exact: true })).toHaveCount(0);
@@ -180,9 +196,7 @@ test('a draw.io file keeps its routes: shared ends, curves, ends on arrows', asy
   await expect(page.getByRole('dialog')).toHaveCount(0);
 
   const pages = ['Trunks', 'Floating ends', 'Waypoints and routers', 'Curves', 'Edges on edges'];
-  for (const name of pages) {
-    await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
-  }
+  await expectTabs(page, pages);
   await page.waitForTimeout(600); // the fit animation settles
   await shot(page, 'routes.drawio-1-trunks');
 
@@ -229,7 +243,7 @@ test('a draw.io file keeps its routes: shared ends, curves, ends on arrows', asy
   )!;
   expect(tag.width as number).toBeGreaterThan(20);
 
-  await page.getByText('Curves', { exact: true }).first().click();
+  await switchToTab(page, 'Curves');
   await page.waitForTimeout(600);
   await shot(page, 'routes.drawio-2-curves');
   expectNoPageErrors(pageErrors);
@@ -321,7 +335,7 @@ test.describe('importing draw.io files from the Explorer', () => {
         { name: 'Deploy', elements: 1 },
       ]);
     await page.locator('[data-canvas-a11y-root]').waitFor();
-    await expect(page.getByText('Containers', { exact: true }).first()).toBeVisible();
+    await expectTabs(page, ['Context', 'Containers']);
     await page.waitForTimeout(600); // the fit animation settles
     await shot(page, 'explorer-3-document');
     expectNoPageErrors(pageErrors);

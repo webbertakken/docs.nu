@@ -151,6 +151,7 @@ describe('the Image category', () => {
   it('changes the overlay, its tint from the theme accent, and the position, one edit each', () => {
     const { onBackground, onPreview } = show({ fill: picture });
     fireEvent.pointerEnter(radio('Dark'));
+    fireEvent.pointerMove(radio('Dark'));
     expect(onPreview).toHaveBeenLastCalledWith({
       fill: { ...picture, overlay: { kind: 'dark', strength: 0.6 } },
     });

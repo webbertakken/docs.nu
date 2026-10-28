@@ -47,7 +47,7 @@ describe('computeDockAnchor', () => {
   });
 
   it("opens a cluster button's popover up from the button", () => {
-    // Activity / Layers in the bottom-right cluster: hang from the button's
+    // Activity / Layers in the tools group: hang from the button's
     // left, and `bottom` is the canvas bottom edge to the button's top.
     const a = computeDockAnchor(
       { left: 600, top: 700, bottom: 744, width: 44 },

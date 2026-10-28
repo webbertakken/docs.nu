@@ -18,7 +18,7 @@ import {
   reportSaveFailure,
   type DocumentListItem,
 } from '@/lib/api-client';
-import type { SaveStatus } from '@/components/chrome/EditorHeader';
+import type { SaveStatus } from './save-status';
 import { saveFailureStatus } from './save-failure';
 import { isDocumentDeleted } from '@/lib/document-tombstones';
 import { debugLog } from '@/lib/debug-log';

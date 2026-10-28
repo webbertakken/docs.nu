@@ -1,5 +1,5 @@
-// Tabs-category illustrations (docs/specs/018-help/help-app.md): the tab bar and its tab pills,
-// tab folders and their upward fan, the tab menu (toolbar over full-width rows split into groups),
+// Tabs-category illustrations (docs/specs/018-help/help-app.md): the document group at the bottom right
+// (chrome/lines/DocumentGroup), tab folders in the tab list, the tab menu (toolbar over full-width rows split into groups),
 // the Add to Folder / Add to Document / Import / Export dialogs, cross-tab links, a locked tab,
 // and a before/after cleanup. Labels are the editor's own (TabPortalMenu,
 // TabOrganiseDialogs, ImportTabDialog, ExportTabDialog).
@@ -8,8 +8,18 @@
 import type { ReactNode } from 'react';
 import { Scene, Shape, Arrow, Label, Dialog, Cursor } from './primitives';
 import { Glyph } from './element-indicators';
+import {
+  DocumentGroup,
+  SAMPLE_PEOPLE,
+  TabList,
+  tabListHeight,
+  tabStackCentre,
+  type TabListRow,
+} from './editor-lines';
 
-// --- Tab-bar building blocks -------------------------------------------------
+const TWO_PEOPLE = SAMPLE_PEOPLE.slice(0, 2);
+
+// --- Building blocks ---------------------------------------------------------
 
 /** A small padlock glyph drawn from its centre (the locked-tab marker). */
 function Padlock({ tone = 'accent' }: { tone?: 'accent' | 'muted' }) {
@@ -25,82 +35,6 @@ function Padlock({ tone = 'accent' }: { tone?: 'accent' | 'muted' }) {
         strokeWidth={1.5}
       />
     </g>
-  );
-}
-
-/** One tab in the bar. The active tab is a raised white card with an accent ring, accent text
- *  and its trailing ⋯ menu button; the others are soft tinted chips. */
-function TabPill({
-  x,
-  y,
-  w,
-  label,
-  active = false,
-  locked = false,
-  h = 26,
-}: {
-  x: number;
-  y: number;
-  w: number;
-  label: string;
-  active?: boolean;
-  locked?: boolean;
-  h?: number;
-}) {
-  const textX = x + 10 + (locked ? 13 : 0);
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={w}
-        height={h}
-        rx={7}
-        className={active ? 'fill-white stroke-brand-400' : 'fill-slate-100 stroke-transparent'}
-        strokeWidth={1.5}
-      />
-      {locked && (
-        <g transform={`translate(${x + 15} ${y + h / 2})`}>
-          <Padlock tone={active ? 'accent' : 'muted'} />
-        </g>
-      )}
-      <Label
-        x={textX}
-        y={y + h / 2 + 1}
-        size={11}
-        weight={active ? 700 : 500}
-        tone={active ? 'accent' : 'body'}
-      >
-        {label}
-      </Label>
-      {active && (
-        <g>
-          {[0, 1, 2].map((i) => (
-            <circle
-              key={i}
-              cx={x + w - 18 + i * 5}
-              cy={y + h / 2}
-              r={1.4}
-              className="fill-slate-400"
-            />
-          ))}
-        </g>
-      )}
-    </g>
-  );
-}
-
-/** The `+` (Add tab) button after the last tab. */
-function AddTabButton({ x, y, h = 26 }: { x: number; y: number; h?: number }) {
-  const cx = x + h / 2;
-  const cy = y + h / 2;
-  return (
-    <path
-      d={`M${cx - 6} ${cy} h12 M${cx} ${cy - 6} v12`}
-      className="stroke-slate-500"
-      strokeWidth={2}
-      strokeLinecap="round"
-    />
   );
 }
 
@@ -130,76 +64,6 @@ function FolderIcon({ open = false }: { open?: boolean }) {
       className="fill-slate-200 stroke-slate-500"
       strokeWidth={1.4}
       strokeLinejoin="round"
-    />
-  );
-}
-
-/** A folder on the bar: a dashed container holding the chip (folder glyph, the name in small
- *  caps, a count badge) and, when the active tab lives in the folder, that one tab inline. */
-function FolderGroup({
-  x,
-  y,
-  name,
-  count,
-  open = false,
-  chipW = 92,
-  member,
-  memberW = 62,
-}: {
-  x: number;
-  y: number;
-  name: string;
-  count: number;
-  open?: boolean;
-  chipW?: number;
-  member?: string;
-  memberW?: number;
-}) {
-  const w = chipW + (member ? memberW + 6 : 0) + 8;
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y - 3}
-        width={w}
-        height={32}
-        rx={8}
-        className="fill-slate-100 stroke-slate-300"
-        strokeWidth={1.5}
-        strokeDasharray="4 3"
-      />
-      <g transform={`translate(${x + 15} ${y + 13})`}>
-        <FolderIcon open={open} />
-      </g>
-      <Label x={x + 28} y={y + 14} size={10} weight={700} tone="muted">
-        {name.toUpperCase()}
-      </Label>
-      <rect
-        x={x + chipW - 18}
-        y={y + 7}
-        width={18}
-        height={13}
-        rx={6.5}
-        className="fill-slate-200"
-      />
-      <Label x={x + chipW - 9} y={y + 14} anchor="middle" size={10} weight={700} tone="muted">
-        {String(count)}
-      </Label>
-      {member && <TabPill x={x + chipW + 6} y={y} w={memberW} label={member} active />}
-    </g>
-  );
-}
-
-/** The bottom tab-bar strip. */
-function TabBar({ y, w }: { y: number; w: number }) {
-  return (
-    <rect
-      x={0}
-      y={y}
-      width={w}
-      height={42}
-      className="fill-slate-50 stroke-slate-200"
-      strokeWidth={1.5}
     />
   );
 }
@@ -304,55 +168,30 @@ function FormatCard({
 
 // --- Scenes ------------------------------------------------------------------
 
-/** The tab bar: several tabs, the active one raised with its ⋯ button, then the + button. */
+/** The document group at the bottom right: the active tab with its ⋯, the tab stack with the count, the people
+ *  here and the + button, under the active tab's canvas. */
 export function TabBarOverview() {
-  const barY = 158;
   return (
     <Scene w={420} h={210}>
-      {/* The active tab's canvas above the bar */}
-      <Shape x={84} y={56} w={92} h={44} kind="rect" accent label="Overview" />
-      <Shape x={256} y={24} w={80} h={40} kind="rect" label="API" />
-      <Shape x={256} y={92} w={80} h={40} kind="rect" label="Web" />
-      <Arrow from={[176, 78]} to={[256, 44]} kind="elbow" tone="muted" />
-      <Arrow from={[176, 78]} to={[256, 112]} kind="elbow" tone="muted" />
-      <TabBar y={barY} w={420} />
-      <TabPill x={14} y={barY + 8} w={98} label="Overview" active />
-      <TabPill x={118} y={barY + 8} w={66} label="Systems" />
-      <TabPill x={190} y={barY + 8} w={56} label="Teams" />
-      <TabPill x={252} y={barY + 8} w={64} label="Scratch" />
-      <AddTabButton x={322} y={barY + 8} />
+      {/* The active tab's canvas */}
+      <Shape x={64} y={44} w={92} h={44} kind="rect" accent label="Overview" />
+      <Shape x={236} y={16} w={80} h={40} kind="rect" label="API" />
+      <Shape x={236} y={80} w={80} h={40} kind="rect" label="Web" />
+      <Arrow from={[156, 66]} to={[236, 36]} kind="elbow" tone="muted" />
+      <Arrow from={[156, 66]} to={[236, 100]} kind="elbow" tone="muted" />
+      <DocumentGroup right={408} y={166} count={4} people={TWO_PEOPLE} />
     </Scene>
   );
 }
 
-/** Renaming a tab inline: the tab's name editor open with a text caret. */
+/** Renaming the active tab in place: its name a field, ringed, with a text caret. */
 export function RenamingTab() {
-  const barY = 70;
   return (
-    <Scene w={420} h={150} bg="plain">
-      <TabBar y={barY} w={420} />
-      <TabPill x={14} y={barY + 8} w={56} label="Tab 1" />
-      {/* The tab being renamed: its name editor, ringed in the brand colour */}
-      <g>
-        <rect
-          x={78}
-          y={barY + 6}
-          width={118}
-          height={30}
-          rx={7}
-          className="fill-white stroke-brand-400"
-          strokeWidth={2}
-        />
-        <Label x={90} y={barY + 21} size={11} weight={600} tone="strong">
-          Payments
-        </Label>
-        <rect x={146} y={barY + 13} width={1.5} height={16} className="fill-brand-500" />
-      </g>
-      <TabPill x={204} y={barY + 8} w={58} label="Billing" />
-      <AddTabButton x={268} y={barY + 8} />
-      <Label x={78} y={barY - 14} size={10} tone="muted">
-        Double-click the active tab, Enter to save
+    <Scene w={420} h={130} bg="plain">
+      <Label x={408} y={52} size={10} tone="muted" anchor="end">
+        Click the active tab&apos;s name, Enter to save
       </Label>
+      <DocumentGroup right={408} y={70} tab="Payments" count={3} people={TWO_PEOPLE} renaming />
     </Scene>
   );
 }
@@ -432,10 +271,7 @@ export function TabMenu() {
   const rows = ['Add to Folder', 'Add to Document', null, 'Import', 'Export', 'Clear'];
   return (
     <Scene w={420} h={230}>
-      <TabBar y={barY} w={420} />
-      <TabPill x={14} y={barY + 8} w={64} label="Draft" />
-      <TabPill x={252} y={barY + 8} w={98} label="Overview" active />
-      <AddTabButton x={356} y={barY + 8} />
+      <DocumentGroup right={408} y={barY} count={3} people={TWO_PEOPLE} />
       {/* The menu, right-aligned above the ⋯ button */}
       <rect
         x={mx}
@@ -572,34 +408,32 @@ export function TabMenu() {
   );
 }
 
-/** A tab folder on the bar: the chip with its open tab inline, and the rest of the folder's
- *  tabs fanned upward above the chip after a click. */
+/** A tab folder in the tab list: the Plans heading with its count, its tabs indented under it (the active one
+ *  tinted), and a loose tab above it. */
 export function TabFolderStates() {
-  const barY = 118;
+  const rows: TabListRow[] = [
+    { kind: 'tab', name: 'Notes' },
+    { kind: 'folder', name: 'Plans', count: 3 },
+    { kind: 'tab', name: 'Q1 plan', indent: true, active: true },
+    { kind: 'tab', name: 'Q2 plan', indent: true },
+    { kind: 'tab', name: 'Q3 plan', indent: true },
+  ];
+  const lineY = 230;
+  const groupProps = { tab: 'Q1 plan', count: 4, people: [] };
+  const stack = tabStackCentre(408, groupProps);
+  const listW = 200;
+  const listH = tabListHeight(rows);
   return (
-    <Scene w={420} h={170}>
-      {/* The fan: the folder's other tabs, listed above the chip */}
-      <rect
-        x={14}
-        y={28}
-        width={108}
-        height={80}
-        rx={8}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
+    <Scene w={420} h={274}>
+      <TabList
+        x={Math.min(408 - listW, Math.round(stack - listW / 2))}
+        y={lineY - 10 - listH}
+        w={listW}
+        rows={rows}
+        count={4}
+        arrowX={stack}
       />
-      <TabPill x={22} y={36} w={92} label="Q2 plan" />
-      <TabPill x={22} y={66} w={92} label="Q3 plan" />
-      <Label x={136} y={50} size={10} tone="muted">
-        Click the chip to fan out
-      </Label>
-      <Label x={136} y={66} size={10} tone="muted">
-        the folder&apos;s other tabs
-      </Label>
-      <TabBar y={barY} w={420} />
-      <FolderGroup x={10} y={barY + 8} name="Plans" count={3} open member="Q1 plan" memberW={82} />
-      <TabPill x={208} y={barY + 8} w={66} label="Notes" />
-      <AddTabButton x={280} y={barY + 8} />
+      <DocumentGroup right={408} y={lineY} {...groupProps} stackOpen />
     </Scene>
   );
 }
@@ -675,10 +509,7 @@ export function CrossTabLink() {
       {/* The target tab's content */}
       <Shape x={258} y={58} w={120} h={52} kind="rect" accent label="DB internals" />
 
-      <TabBar y={barY} w={420} />
-      <TabPill x={14} y={barY + 8} w={70} label="Overview" />
-      <TabPill x={90} y={barY + 8} w={120} label="DB internals" active />
-      <AddTabButton x={216} y={barY + 8} />
+      <DocumentGroup right={408} y={barY + 4} tab="DB internals" count={3} people={[]} />
     </Scene>
   );
 }
@@ -773,10 +604,7 @@ export function ImportMenu() {
   const my = 14;
   return (
     <Scene w={420} h={210}>
-      <TabBar y={barY} w={420} />
-      <TabPill x={14} y={barY + 8} w={64} label="Notes" />
-      <TabPill x={252} y={barY + 8} w={90} label="Draft" active />
-      <AddTabButton x={348} y={barY + 8} />
+      <DocumentGroup right={408} y={barY + 4} tab="Draft" count={3} people={TWO_PEOPLE} />
       <rect
         x={mx}
         y={my}
@@ -930,19 +758,14 @@ export function CleanupBeforeAfter() {
   );
 }
 
-/** A locked tab: the padlock sits before its name in the tab bar. */
+/** A locked tab: the padlock sits before its name, on the active tab (and on its row in the tab list). */
 export function LockedTab() {
-  const barY = 78;
   return (
-    <Scene w={420} h={150} bg="plain">
-      <TabBar y={barY} w={420} />
-      <TabPill x={14} y={barY + 8} w={58} label="Draft" />
-      <TabPill x={80} y={barY + 8} w={122} label="Approved" active locked />
-      <TabPill x={210} y={barY + 8} w={60} label="Notes" />
-      <AddTabButton x={276} y={barY + 8} />
-      <Label x={80} y={barY - 14} size={10} tone="muted">
+    <Scene w={420} h={130} bg="plain">
+      <Label x={408} y={52} size={10} tone="muted" anchor="end">
         Locked: read-only until unlocked
       </Label>
+      <DocumentGroup right={408} y={70} tab="Approved" count={3} people={TWO_PEOPLE} locked />
     </Scene>
   );
 }

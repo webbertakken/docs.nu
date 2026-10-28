@@ -32,7 +32,7 @@ Switching the mode **on** writes these values, once:
 
 The Plan and Pages tours record each of their tracks once taken (`planTourTracks`, `pagesTourKinds`); their seen
 flag counts every track as taken only while the mode is on, so switching it off gives back every Settings row not
-yet taken. Marking a tour seen only changes its Settings row (and which Plan track the bottom bar's Start Tour
+yet taken. Marking a tour seen only changes its Settings row (and which Plan track the actions group's Start Tour
 button names): every mode tour stays on the button ([Diagram tour](editor-tour.md) "Where it appears"). An
 [element tour](element-tours.md) is on the button only for a kind opted in to (`elementTourOffers`), which the mode
 never changes, so for someone who never opted in it changes nothing there.
@@ -85,8 +85,8 @@ the interface, and leaves the controls:
 - **Selection kind chip.** The caption above the selection toolbar ("Selected Arrow", "Selected Square", "Selected
   Elements (3)") is hidden.
 - **Palette tile captions.** Palette tiles show their icon only.
-- **Status bar text.** The bottom bar's Search, Start Tour, Settings and appearance controls show their icons only.
-- **The "Tabs" label** before the tab pills is hidden.
+- **Actions group text.** The actions group's Search, Start Tour, Settings and appearance controls show their icons
+  only ([Toolbar layout](toolbar-layout.md#the-top-line)).
 - **Panel titles and help buttons.** Panels (Explorer, Map, Layers, ...) hide their
   header title and their `?` help button. A panel with a `⋯` menu gains a **Help** row there, opening the same
   article. The Explorer is the one panel with a `⋯` menu today. A panel without one simply drops its `?`: no menu is
@@ -94,8 +94,8 @@ the interface, and leaves the controls:
 - **Onboarding notices and hints.** The modifier-key hint banner, the Explorer's sign-in / "saved to this browser"
   notice, and the match-theme nudge are not shown.
 - **The bin** (Delete) in the selection toolbars, on desktop. Touch devices keep it: they have no Delete key.
-- **The role pill** leaves the title bar ([Live app](live-app.md#role-pill)) and becomes an icon, **first** in the
-  bottom-left of the status bar: a pencil while editing, an eye while viewing. Its Tooltip reads "Editing" or
+- **The role pill** becomes its status icon in the document group, where the pill was
+  ([Live app](live-app.md#role-pill)): a pencil while editing, an eye while viewing. Its Tooltip reads "Editing" or
   "Viewing (read-only)". Whoever may toggle the pill may toggle the icon, the same way.
 
 Kept as they are:
@@ -146,7 +146,7 @@ Other consumers:
 
 ### Quick appearance switch
 
-While the mode is on, the status bar's **Appearance** control ([Appearance](../004-interface-design/appearance.md#the-control))
+While the mode is on, the actions group's **Appearance** control ([Appearance](../004-interface-design/appearance.md#the-control))
 switches between Light and Dark instead of cycling through System, so the everyday flip is one click:
 
 - **Click** switches to the opposite of what the chrome is painted as: Light goes to Dark, Dark to Light, and System
@@ -156,7 +156,7 @@ switches between Light and Dark instead of cycling through System, so the everyd
 - **Its name says both.** The accessible name reads where you are, where a click goes, and that a right-click follows
   the device ("Appearance: Dark. Switch to Light. Right-click to follow your device."). The hover card's description
   says the same.
-- It applies wherever the control reads the mode: the editor's status bar and the Explorer's bottom bar. It is not a
+- It applies wherever the control reads the mode: the editor's actions group and the Explorer's bottom bar. It is not a
   Minimal chrome behaviour: it holds with Minimal chrome off.
 - The public sites (the home page, help centre and dashboard) have no power user mode, so their control keeps the
   three-step cycle whatever the preference holds.

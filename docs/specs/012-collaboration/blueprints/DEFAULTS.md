@@ -22,7 +22,7 @@ One row per default applied where a spec is silent or qualitative.
 
 | #   | Blueprint         | Spec silence                                             | Default applied                                                                                    |
 | --- | ----------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| FT1 | workshop-tour     | When to decide the Share step is out                     | When the tour starts, by whether the header's Share button is on screen                            |
+| FT1 | workshop-tour     | When to decide the Share step is out                     | When the tour starts, by whether the actions group's Share button is on screen                     |
 | FT2 | workshop-tour     | The help card's hue                                      | `#ea580c`, a step from Workshop mode's `#c2410c`, as the Plan tour's is to Plan                    |
 | PM1 | presentation-mode | What counts as a step (counted from the slide asked for) | A move of exactly one slide; a jump (list, Home, End) is taken as given                            |
 | PM2 | presentation-mode | What logs a refused fullscreen                           | `console.warn`, always shown ([Console logging](../../003-system-architecture/console-logging.md)) |

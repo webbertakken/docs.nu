@@ -2,14 +2,13 @@
 
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { editorViewportOf } from '@/lib/editor-viewport';
+import { measureTopLine, topLineGroups } from '@/lib/top-line-clearance';
 
 // Whether the category bar names its categories (docs/specs/007-editor/toolbar-layout.md "The category bar"), from
-// the strip's REAL sizes, as useStripTileLimit fits tiles: the centred strip may take the editor's width less the
-// top-left menu card on both sides (that card's width varies: the mode switch, the tab's name). The strip is drawn
+// the strip's REAL sizes, as useStripTileLimit fits tiles: the strip may take the room between the top line's side
+// groups (lib/line-centre). The strip is drawn
 // named first and its width kept; while that width fits, the names show, and once it does not, glyphs alone do,
 // until the window grows back past the width it needs. Measured before paint, so no frame shows the overflow.
-
-const MENU_GAP_PX = 8;
 
 export function useBarLabels(
   cardRef: RefObject<HTMLElement | null>,
@@ -43,16 +42,14 @@ export function useBarLabels(
         return;
       }
       const view = editorViewportOf(card);
-      const menu = document.querySelector<HTMLElement>('[data-toolbar-menu]');
-      const clear = menu ? menu.getBoundingClientRect().right - view.left + MENU_GAP_PX : 0;
-      const fits = named.current.width <= view.width - 2 * clear;
+      // Between the top line's side groups, centred or not (lib/line-centre).
+      const fits = measureTopLine(view, named.current.width).fits;
       if (fits !== labels) setLabels(fits);
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(card);
-    const menu = document.querySelector<HTMLElement>('[data-toolbar-menu]');
-    if (menu) observer.observe(menu);
+    for (const group of topLineGroups()) observer.observe(group);
     window.addEventListener('resize', measure);
     return () => {
       observer.disconnect();

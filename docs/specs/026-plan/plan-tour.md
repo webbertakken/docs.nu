@@ -1,6 +1,6 @@
 # Plan tour
 
-A guided tour of [Plan mode](plan-mode.md) on the person's own board or Sheet, started from the bottom bar's
+A guided tour of [Plan mode](plan-mode.md) on the person's own board or Sheet, started from the actions group's
 **Start Boards Tour** or **Start Sheets Tour** button while one is open. It runs on the shared tour engine
 ([Diagram tour](../007-editor/editor-tour.md)): the same anchored step cards, glide, dimming, Skip, Back and last
 card as every other tour, so the tours read as one product. Where this spec is silent, the
@@ -18,8 +18,8 @@ card as every other tour, so the tours read as one product. Where this spec is s
 
 ## Where it appears
 
-- **The bottom bar's Start Tour button.** The one way in is the button in the editor's bottom bar, immediately left of
-  Search ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"). It never starts, prompts or offers
+- **The actions group's Start Tour button.** The one way in is the button in the editor's actions group, leading the
+  document actions ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"). It never starts, prompts or offers
   itself on its own. Until 28 October 2026 it offered itself once per track on a banner ("Getting started with
   boards?", **No** / **Yes**), and asked **Boards** or **Spreadsheets** on a choice card when both were on the tab.
 - **Only while there is plan work to show.** The tour is on offer while a person may edit a tab **with a board or
@@ -49,7 +49,7 @@ card as every other tour, so the tours read as one product. Where this spec is s
 
 The Plan tour's third track, a tour of its own on a dashboard (`DashboardTour.tsx`): the steps of the dashboard's
 Show Me ([Plan tabs](plan-tabs.md) "Show Me": rows of slots, filling a slot, a slot's cog, Dashboard Settings),
-started from the bottom bar's **Start Dashboards Tour** button. Its cards read **Show Me** whichever way it started.
+started from the actions group's **Start Dashboards Tour** button. Its cards read **Show Me** whichever way it started.
 
 - **On offer** while an Editor's dashboard is on screen: not to a Participant or a Viewer, not in an embed, not
   while a maximised slot covers the page. It ranks above the Plan and Forms tours, so on a dashboard the button

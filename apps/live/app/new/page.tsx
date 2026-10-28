@@ -11,7 +11,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { EditorHeader } from '@/components/chrome/EditorHeader';
+import { StatusTopLine } from '@/components/chrome/lines/StatusTopLine';
 import { ApiErrorPage } from '@/components/chrome/ApiErrorPage';
 import { NewDocumentWizard } from '@/components/palette/NewDocumentWizard';
 import type { NewDocumentSettings } from './new-document-settings';
@@ -410,15 +410,8 @@ export default function NewDocumentPage() {
   if (createError) {
     return (
       <div className="flex h-dvh flex-col">
-        <EditorHeader
-          documentName="New document"
-          hideTitle
-          showShare={false}
-          shareable={false}
-          onOpenShare={() => {}}
-          onRename={() => {}}
-        />
         <main className="relative flex-1 bg-slate-50 dark:bg-slate-950">
+          <StatusTopLine />
           <ApiErrorPage
             eyebrow={createError.eyebrow}
             title={createError.title}
@@ -472,18 +465,11 @@ export default function NewDocumentPage() {
       {/* A mode card chosen before hydration is kept, not lost (early-mode-choice.ts). */}
       <script dangerouslySetInnerHTML={{ __html: trustedHtml(EARLY_MODE_SCRIPT) }} />
       <style>{EARLY_MODE_STYLE}</style>
-      <EditorHeader
-        documentName="New document"
-        hideTitle
-        showShare={false}
-        shareable={false}
-        onOpenShare={() => {}}
-        onRename={() => {}}
-      />
       <main className="relative flex-1 overflow-hidden bg-slate-50 dark:bg-slate-950">
         {/* Soft animated lines give the otherwise-empty backdrop life
             behind the wizard card. Decorative + reduced-motion aware. */}
         <AnimatedLinesBackdrop />
+        <StatusTopLine />
         {/* No identity spinner: the wizard is static mode data, so it renders immediately; identity resolves in the
             background, and a create waits for it only when it must (resolveSelf). */}
         {/* display:contents so the guard wrapper adds no box of its own;

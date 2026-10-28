@@ -109,8 +109,10 @@ test.describe('arrow labels and bending', () => {
     await page.keyboard.press('Shift+Enter');
     await page.keyboard.type('2');
     await page.keyboard.press('Enter');
-    const one = (await page.getByText('1', { exact: true }).boundingBox())!;
-    const two = (await page.getByText('2', { exact: true }).boundingBox())!;
+    // Within the arrow: the chrome (the tab stack's count) draws numbers too.
+    const arrow = page.getByRole('img', { name: /^Arrow / });
+    const one = (await arrow.getByText('1', { exact: true }).boundingBox())!;
+    const two = (await arrow.getByText('2', { exact: true }).boundingBox())!;
     // Two line heights apart, not one: the blank line between them stays.
     expect(two.y - one.y).toBeGreaterThan(one.height * 1.8);
     expectNoPageErrors(pageErrors);

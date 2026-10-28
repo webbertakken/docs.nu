@@ -2,6 +2,94 @@
 
 Status: shipped
 
+## The two lines
+
+The editor has **no header bar and no tab bar**. All of its chrome sits in [toolbar groups](../004-interface-design/toolbar-group.md)
+on two lines over the canvas, a top line and a bottom line, each a single row while the window is wide enough
+("When a line runs out of room"). The canvas runs the full height of the window under them.
+
+```
+ ┌‹ ◆ │ ☰ │ ⬡ Diagram ▾┐        ┌ the Palette strip ┐        ┌🔍 ⚙ ◐ │ Copy Present Share │ Sign in┐
+
+ ┌Map┐
+ └───┘
+ ┌↶ ↷ │ Session │ Mode │ Collab │ Layers Theme │ − 100% + ┐  ┌ Draw's dock ┐  ┌◉ Name EDITING │ ⬡ Tab ⋯ │ ⧉ 7 │ ●●● │ +┐
+```
+
+### The top line
+
+- **Left: the brand group.** In order: **Back** (a back caret and the logo, one link), a divider, the menu button
+  (☰, the Explorer popover, "The Explorer and the other panels"), the mode switch. The tab's name is no longer here
+  ("The tab's name").
+  - **Back** goes to the Explorer (`EXPLORER_LANDING_PATH`); in a workspace workbench frame it goes where the
+    document was opened from, replacing the frame's separate Back button
+    ([Workbench embeds](../013-workspace/workbench-embeds.md#what-renders)). Its name is "Back to the Explorer" (in a
+    frame, "Back"), with a hover card.
+  - The caret is a chevron 8 × 14 px, a 1.75 px round stroke in the chrome's muted ink (slate-500, slate-400 in dark),
+    8 px before the logo; the logo is the brand mark alone, 24 px, **without the wordmark**, tinted by the tab's theme
+    as today ([Brand mark](../004-interface-design/brand-mark.md)). Caret and mark are one 36 px tall hit area with
+    the group's hover fill.
+  - Where there is nowhere to go back to (a workbench frame with document scope) the caret is not drawn and the mark
+    is not a link.
+- **Centre: the Palette strip** (below), or Draw's dock when it sits at the top ([Draw mode](../023-draw-mode/draw-mode.md)).
+- **Right: the actions group.** In order: Search, Settings, the appearance toggle (the `ChromeControls` trio, icon
+  only; **Button Labels** names them, [User preferences](user-preferences.md)), a divider, the document actions that
+  apply (Start Tour while offered, Make a Copy, Present, Share or Share Form), then the account control (Sign in, or
+  the account menu). Each keeps its own rule for who sees it ([Live app](live-app.md)).
+
+### The bottom line
+
+- **Left: the tools group**, the bottom cluster moved from the right: Undo and Redo, the Session strip, the mode's
+  strip, Collaborate, Layers and the Theme & Canvas brush, Zoom, in that order, each part after a divider
+  ([Live app](live-app.md)). Its popovers hang above their buttons as before. The **Map** keeps its default corner,
+  bottom left, stacked above this group ([Minimap](../008-canvas/minimap.md)); the Quick style panel keeps its
+  collision rule, which lands it just above the Map when both are shown ([Quick style panel](../008-canvas/quick-style-panel.md#collisions)).
+- **Centre: Draw's dock** when it sits at the bottom, on the line, not lifted above it.
+- **Right: the document group.** In order:
+  1. the document's **share-state icon** (the 28 px badge, [The top bar's middle](live-app.md#the-top-bars-middle)), its
+     **name** (click to rename, for someone who may) and the **role pill**, as they were in the header;
+  2. a divider, then the **active tab** as a tinted segment: its kind glyph, its name, its tab menu (⋯). It never
+     shortens; a click on it renames it in place for someone who may change the document's tabs
+     (as the menu box's name did), a double-click on the name does too;
+  3. the **tab stack**: a stack glyph and the number of tabs in the session's scope. A press opens the **tab list**;
+  4. the **contributors**: the avatars of everyone else in the document, up to three, then **+N**. A press opens the
+     same tab list. Not drawn while nobody else is here;
+  5. **Add tab** (+), for someone who may add tabs.
+
+### The tab list
+
+The one place every tab is seen and switched to. A popover hanging above the button that opened it (the tab stack or
+the contributors), arrow at that button, kept 12 px inside the canvas, in the menu surface ([Menus](../004-interface-design/menus.md)).
+
+- **Header**: "Tabs" and the count; on the right, how many people are here ("3 people here"), when anyone is.
+- **Find a tab**: a filter field, when there are more than five tabs; typing narrows the rows by name.
+- **Rows**, in document order, with [tab folders](../006-document/tab-folders.md) as headings (glyph, name, count)
+  and their tabs indented under them: each row is the tab's kind glyph, its name (cut short with an ellipsis), and
+  the [presence stack](../012-collaboration/collaborator-enhancements.md) of who is on it. The active tab's row is
+  tinted and carries its tab menu (⋯). Pressing a row switches to that tab and closes the list.
+- **Footer**: **New Tab**, for someone who may add tabs.
+- Rows drag to reorder and into or out of a folder, and rename on a double-click, for someone who may change the
+  document's tabs; every other tab-bar gesture lives here too, so nothing the tab bar did is lost.
+- It is a menu: the arrow keys walk the rows, Enter switches, Escape closes and returns focus to the button that
+  opened it ([Menus](../004-interface-design/menus.md)).
+
+### When a line runs out of room
+
+Each line is one row while its groups fit side by side with an 8 px gap. A line's **centre toolbar** (the Palette strip
+or Draw's dock on the top line, Draw's dock on the bottom line) sits on the line between the line's two side groups,
+by one rule for both lines:
+
+1. **Centred** on the line, while it fits centred: 8 px or more clear of both side groups.
+2. Else **between the groups, off centre**: as near the centre as it can be while it keeps 8 px clear of each side
+   group, still on the line.
+3. Else the document name shortens (bottom line), down to 72 px, with an ellipsis, and the Palette's tiles drop as
+   they already do ("Decided in review"), until the toolbar fits between the groups, still on the line.
+4. Only when even the Palette's fewest tiles (or the whole of Draw's dock) do not fit between the groups does the
+   centre toolbar move to a row of its own, just inside the line (under the top line, above the bottom line),
+   centred, and the side groups keep their corners.
+
+The active tab never shortens. On a phone ("On a phone") the same order runs, and the document name is not drawn.
+
 ## What
 
 The editor's one panel layout, on every device (see "One layout" for the retired Floating
@@ -11,21 +99,20 @@ Excalidraw's tool bar works. In Workshop and Pages the strip is the **category b
 and one category's tiles:
 
 ```
- ☰ ⬡|✎   ┌──────────────────────────────────────────────────────────────────────┐
- │        │ [↖ ▾] │ Shapes Write Draw │ Diagrams Concepts Layout │ Icons … │ [🔍] │   Workshop, Pages
- ▼        └──────────────────────────────────────────────────────────────────────┘
- ☰ ⬡|✎   ┌──────────────────────────────────────────────────────┐
+ ‹◆ ☰ ⬡  ┌──────────────────────────────────────────────────────────────────────┐
+    │    │ [↖ ▾] │ Shapes Write Draw │ Diagrams Concepts Layout │ Icons … │ [🔍] │   Workshop, Pages
+    ▼    └──────────────────────────────────────────────────────────────────────┘
+ ‹◆ ☰ ⬡  ┌──────────────────────────────────────────────────────┐
           │ [↖ ▾] │ [Popular ▾] │ □ ○ ◇ T → ▤ … │ [⋯ ▾] │ [🔍] │                  Diagram
           │ [↖ ▾] │ [Cards ▾] │ □ ◇ ○ → ─ ✎ A ▤ … │ [⋯ ▾] │ [🔍] │                  Plan
           └──────────────────────────────────────────────────────┘
- Explorer            (Undo/Redo, Layers, zoom: the bottom-right cluster)
+    Explorer        (Undo/Redo, Layers, zoom: the tools group, bottom left)
 ```
 
-- **Top left, before the strip: the menu button and the editor mode switch**
-  ([The mode switch](editor-modes.md#the-mode-switch)), then the tab's name, in one card. The switch shows the
-  mode's icon and name; on a phone, its icon alone.
-  On a phone that card sits at the far left of the strip's row, the strip beside it (below). In a workspace
-  workbench frame, which has no Explorer button, the card holds **Back** instead
+- **Top left, before the strip: the brand group** ("The top line"): Back, the menu button and the editor mode
+  switch ([The mode switch](editor-modes.md#the-mode-switch)). The switch shows the mode's icon and name; on a
+  phone, its icon alone. The tab's name is on the bottom line ("The tab's name"). In a workspace workbench frame
+  Back goes where the document was opened from
   ([Workbench embeds](../013-workspace/workbench-embeds.md#what-renders)).
 - **Left: the selection mode.** The canvas-tool picker (Select / Hand /
   Eraser / Format / Laser / Spotlight / Isometric / Zen (Avatar only while in it), [Tile grids for the palette dropdowns](../004-interface-design/dropdown-tile-grid.md))
@@ -84,11 +171,11 @@ under the pointer as a category is switched.
   from, as My shapes does in the picker.
 
 - **Names fit or go.** The bar shows its names while the strip, named, fits the room the centred strip may take
-  (the editor's width less the top-left menu card, measured, on both sides); otherwise the glyphs alone
-  (`useBarLabels`). Measured, not estimated: the menu card is wider in a mode that shows the tab's name, and an
-  estimate let Pages mode's bar run under it. **Too wide even bare**, as on a tablet (768px) where Diagram's glyphs
-  need about 425px of the 382px centring leaves, the strip sits at the right instead, 12px from the edge, clear of
-  the card (`useStripCrowded`, measured the same way); it centres again once there is room. A phone always shows the glyphs, 44 px apart, and the bar swipes
+  (the editor's width less the wider of the top line's side groups, the brand group and the actions group,
+  measured, on both sides); otherwise the glyphs alone (`useBarLabels`). Measured, not estimated: the side groups
+  change width with the mode's name, the document actions that apply and Button Labels, and an estimate let Pages
+  mode's bar run under them. **Too wide even bare**, as on a tablet (768px), the strip takes a row of its own
+  ("When a line runs out of room", measured the same way); it returns to the line once there is room. A phone always shows the glyphs, 44 px apart, and the bar swipes
   sideways while the selection mode and Search stay put (the tile rail's rule, "On a phone"). A swiping rail (the bar,
   the tile rail, an article's dock) fades the edge with more beyond it over 20px (`scroll-edge-fade`, a scroll-driven
   mask where the browser has them), so a glyph cut by the edge reads as more to swipe to, not a stray sliver of an
@@ -335,18 +422,19 @@ so a new page load starts on the mode's landing (Plan's Cards, or Boards while t
 
 ## The tab's name
 
-- On a desktop, the menu box (the Explorer button and the mode switch, top left) ends with the open tab's name, after a
-  hairline, in every mode: Diagram, Draw, Pages and Plan alike, as a board's name rides there
-  ([The name rides in the menu box](../026-plan/plan-board.md)). It is the chrome's ink, 14 px at regular weight (never bold), cut short
-  with an ellipsis past 16rem, and follows a rename at once. The box shows a name alone, never an icon beside it.
-- While a board, Sheet or view filling the tab (or maximised) has its own name in the box, that name shows instead,
-  so the box never shows two.
+- The open tab's name is in the document group's **active tab** segment, bottom right ("The bottom line"), after
+  the tab's kind glyph, in every mode: Diagram, Draw, Pages and Plan alike, as a board's name rides there
+  ([The name rides in the active tab](../026-plan/plan-board.md)). It is the chrome's ink, 14 px at regular weight
+  (never bold), never shortens ("When a line runs out of room"), and follows a rename at once. The brand group, top
+  left, carries no name.
+- While a board, Sheet or view filling the tab (or maximised) has its own name, that name shows in the segment
+  instead, so the segment never shows two.
 - A click (a tap) on it renames the tab in place, for someone who may change the
   document's tabs: Enter or leaving saves, Escape puts it back; up to 60 characters.
-- Every name in the box renames on a single click, whichever it is (the tab's, a board's, a Sheet's, a chart's, a
-  Dashboard's): in the box a click has nothing else to do. In an element's own header a press moves the element, so
-  there a double-click renames, as before.
-- Not on a phone: the top row is the strip's there.
+- Every name in the segment renames on a single click, whichever it is (the tab's, a board's, a Sheet's, a chart's,
+  a Dashboard's): in the segment a click has nothing else to do. In an element's own header a press moves the
+  element, so there a double-click renames, as before.
+- On a phone too: the active tab is drawn there; only the document's name is not ("On a phone").
 
 ## The Explorer and the other panels
 
@@ -403,12 +491,12 @@ button always was. It gets the same chrome as a desktop ([Live app](live-app.md)
 panels in their corners, Layers and Collaborate as popovers over
 their bottom-row buttons. What changes to fit the width:
 
-- **The menu button gets its own card, left of the strip,** with the mode switch beside it as an icon and a
-  chevron, no name, and no tab name.
-  The card sits at the left gutter and the strip follows it 8px to the right,
-  left-aligned rather than centred, so the two read as separate toolbars on
-  one row. There is no room for a corner card above a strip that needs the
-  whole top row.
+- **The same two lines** ("The two lines"), wrapping by the overflow order ("When a line runs out of room"). The
+  document's name is not drawn; its share-state icon and the active tab stay, and the role pill keeps its own rule
+  ([Role pill](live-app.md#role-pill)). The brand group's mode
+  switch is its icon and a chevron, no name. Where the strip does not fit between the brand group and the actions
+  group, it takes its own row just under the top line, starting at the left gutter, left-aligned rather than
+  centred.
 - **The category picker is icon-only**, like the selection mode, and the two sit together with no divider between
   them, each caret 4px from its glyph. The strip's tiles are 32px wide (36px elsewhere), so more fit in view.
 - **The tiles swipe.** The strip holds the whole current category and fills the row to the
@@ -421,22 +509,20 @@ their bottom-row buttons. What changes to fit the width:
   button.
 - **Zoom drops − and +** (`pinchOnly`), as on every phone ([Live app](live-app.md)). Fit
   stays.
-- **The top corner stacks start below the strip** (68px down rather than
-  the 16px inset), since the strip spans the width. A panel docked top-right,
-  such as the Collaborate banner, otherwise rendered underneath the strip
-  where it could not be reached. Without a strip (read-only, zen, the welcome
-  flow) the corners keep their inset.
-- Read-only visitors have no strip, so their menu button stays top-left.
-- **Held sideways there is no menu button and no Explorer**, in the strip's row or the corner,
-  for every role, and nothing brings them back while the phone is sideways: the screen is too
-  short for the Explorer to be any use. The strip starts at the left gutter in the menu card's
-  place, still swiping. Turning the phone upright brings the button back ([A phone held
+- **The top corner stacks start below the strip's row** while the strip has a row of its own, since it spans
+  the width. A panel docked top-right, such as the Collaborate banner, otherwise rendered underneath the strip
+  where it could not be reached. Without a strip (read-only, the welcome flow) they start below the top line,
+  as on every device ([Panel docking](panel-docking.md#the-four-corners)).
+- Read-only visitors have no strip, so their top line is the brand group and the actions group alone.
+- **Held sideways there is no menu button and no Explorer**, in the brand group, for every role, and nothing
+  brings them back while the phone is sideways: the screen is too short for the Explorer to be any use. The brand
+  group keeps Back and the mode switch, and the strip stays, still swiping. Turning the phone upright brings the button back ([A phone held
   sideways](live-app.md#a-phone-held-sideways)).
 - The minimap stays off ([Minimap](../008-canvas/minimap.md)).
 
 ## Layout details
 
-- The strip sits at `top-3`, centred, at `z-toolbar`. The top-centre stack
+- The strip sits at `top-3`, centred on the top line, at `z-toolbar`. The top-centre stack
   (follow-me pill, timer, vote, [Canvas and palette](../008-canvas/canvas-and-palette.md)) moves
   down to clear it.
 - **Messages hang from the strip, as its tray.** The messages that tell you what the next press does (the
@@ -446,8 +532,8 @@ their bottom-row buttons. What changes to fit the width:
   - One shared look, the **palette tray**: the strip's own surface (white, hairline border, dark in dark mode),
     no top border, so it joins the strip's bottom edge with no gap; its bottom corners round as the strip's do,
     and a soft shadow falls below it.
-  - Centred under the strip's card and never wider than it, on a phone too (where the card sits beside the
-    menu button). It follows the card as it moves, including when the card's whole-pixel box re-centres it a beat
+  - Centred under the strip's card and never wider than it, on a phone too (where the strip may take its own
+    row). It follows the card as it moves, including when the card's whole-pixel box re-centres it a beat
     after a resize (the category bar dropping its names left the tray off-centre until it watched that box).
   - One row at the strip's type size (13 px): a leading icon (or the modifier's key chip), the message, then
     its actions as small text buttons at the end (**Cancel**, **Done**) and any toggles the message carries. On a
@@ -465,9 +551,15 @@ their bottom-row buttons. What changes to fit the width:
 - Event-storming boards ([Event storming](../021-event-storming/event-storming.md)) hide the strip's pickers, and the strip shows the notation's tiles, led by
   the board's **Add from Photo** (an icon button with a hover card) where the deployment offers
   photo import.
-- Read-only sessions have no palette, so no strip. The menu button still
-  shows.
-- Zen hides the strip and the menu button along with the rest of the chrome.
+- Read-only sessions have no palette, so no strip. The brand group and its menu button still
+  show.
+- Zen hides the strip and both lines along with the rest of the chrome, all but the tools group's Zoom, its way
+  out ([Zen mode](zen-mode.md)). Embeds and a running presentation draw neither line; the welcome flow shows the
+  brand group and the account control only.
+- The tab stack shows even with one tab, so the document group keeps its width as tabs come and go; Find a tab
+  shows in the tab list only above five tabs.
+- Tab-scoped share links: the tab list shows the tabs out of scope as "Not shared" rows, not switchable, and the
+  tab stack counts the tabs in scope ([Tab-scoped share links](../013-workspace/tab-scoped-share-links.md)).
 - The Diagram tour ([Diagram tour ("Start Diagram Tour")](editor-tour.md)) follows the layout: its Palette step rings the
   strip's card. (Its Explorer step, which opened the Explorer from the menu button, went when the
   welcome tour became the Diagram tour.)
@@ -513,6 +605,9 @@ their bottom-row buttons. What changes to fit the width:
 
 ## Decided in review
 
+- **Button Labels is off by default** (decided by Webber): the actions group shows Search, Report a Bug, Settings and
+  the appearance toggle as icons, each named in its hover card, so the top line leaves the Palette strip its room;
+  turning Button Labels on names them ([User preferences](user-preferences.md)).
 - **The strip opens on the mode's landing every time** (Diagram's Popular, Plan's Cards)
   ([Editor modes](editor-modes.md#the-palette-per-mode)). It does not remember the last category across documents.
 - **Diagram keeps the category picker**, not the category bar: Popular and its twelve tiles, one press from the
@@ -523,23 +618,19 @@ their bottom-row buttons. What changes to fit the width:
   rather than estimated (`useStripTileLimit`): its own chrome (the pickers,
   More, dividers and padding, whatever they measure in the current category),
   one tile's pitch, and the room the centred strip may take (the window less
-  the Explorer menu button on both sides; on a phone, less its gutters and the menu card). The
+  the wider of the top line's side groups on both sides; in its own row, less its gutters). The
   rest is behind More. A longer category name or a new control keeps fitting
   with no constant to update; an estimate stands in only for the first paint.
-- **The top corners give way to the strip.** When the strip reaches a panel
-  docked in a top corner, measured against the real corner stack
-  (`useStripCrowdsCorners`, re-checked as panels dock and the window
-  resizes), the top corner stacks start below the strip, 68px down, exactly
-  as they always do on a phone. Otherwise they keep their inset. Without it
-  a docked panel (the Laser panel, say) sat under the strip's right end and
-  could not be reached. A whiteboard's dock at the top gets the same
-  treatment ([Where the dock sits](../023-draw-mode/draw-mode.md#where-the-dock-sits)),
-  its corners starting 76px down.
-- **Undo / Redo stay where they are**, in the bottom-right dock.
-- **A phone's toolbar items keep their size** (`PHONE_TOOLBAR_ITEMS`): 36px, the bottom-right
-  cluster's 44px, each with a 44px-tall tap area ([Touch targets](../004-interface-design/touch-targets.md)).
+- **The top corners give way to the top line.** The brand group and the actions group hold the top corners, so
+  the top corner stacks start below the top line, and below the strip's own row while it has one
+  ([Panel docking](panel-docking.md#the-four-corners)). Without it a docked panel (the Laser panel, say) sat under
+  the strip's right end and could not be reached. A whiteboard's dock at the top gets the same treatment
+  ([Where the dock sits](../023-draw-mode/draw-mode.md#where-the-dock-sits)).
+- **Undo / Redo stay together**, first in the tools group, bottom left ("The bottom line").
+- **A phone's toolbar items keep their size** (`PHONE_TOOLBAR_ITEMS`): 36px, as in every
+  [toolbar group](../004-interface-design/toolbar-group.md), each with a 44px-tall tap area ([Touch targets](../004-interface-design/touch-targets.md)).
   Only the pickers give up 4px of side padding, and the strip's dividers their margins down to
-  1px, so more tiles show beside the menu card. The row keeps its 12px gutters and 8px gap.
+  1px, so more tiles show in the strip. The row keeps its 12px gutters and 8px gap.
 - **The category picker stays on the bar**, left of the tiles. Folding it
   into More (a category list, then the category behind a BackBar) was tried
   and taken back out: it hid the current category and cost a click to

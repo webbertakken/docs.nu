@@ -564,12 +564,13 @@ A board can be maximised to work on it without the rest of the canvas around it.
 - In Plan mode, the board's header ends with **Maximise Board** (a maximise icon, with a tooltip) at its top
   right.
 - Maximised, the board fills the canvas area: it is drawn over the canvas and everything on it, while the
-  editor's chrome stays as the person has it (the header, the tab bar and footer, and the palette as a toolbar or
-  panels, per their setting); zen mode is not switched on (a zen mode the person had on stays on). It starts clear
+  editor's chrome stays as the person has it (the two lines and the palette,
+  [Toolbar layout](../007-editor/toolbar-layout.md#the-two-lines)); zen mode is not switched on (a zen mode the person had on stays on). It starts clear
   of the chrome laid over the canvas, measured from that chrome as it is (never a fixed number): below the Toolbar
-  layout's top row (the menu button and mode menu at the top left, the palette toolbar at the top centre), and
+  layout's top line (the brand group at the top left, the palette toolbar at the top centre, the actions group at
+  the top right), and
   beside the layout's own panels (the Explorer, the Palette as panels: a panel nearer the left edge pushes the left
-  side in, one nearer the right the right side). It runs down to the canvas's foot: the bottom-right controls (undo, the dock, zoom) float over it,
+  side in, one nearer the right the right side). It runs down to the canvas's foot: the bottom line's groups (the tools group, the dock, the document group) float over it,
   still clickable, and its last cards are reached by scrolling. The Map is hidden while a board is maximised or fills
   its tab (there is no canvas to map) and comes back when it is restored. Around the board, the whole canvas area is
   painted with the canvas's own background (its colour and pattern, an animated pattern moving there as on the canvas),
@@ -582,42 +583,43 @@ A board can be maximised to work on it without the rest of the canvas around it.
   open and add, and widgets filter. The header does not move the board while it is maximised.
 - **The header holds the top row**: maximised (or filling its tab), a board, view or Sheet does not start below the
   Toolbar layout's top row; it starts at the top of the canvas area, and its header grows to that row's height
-  (`HeaderBand`), so the menu button, the mode menu and the palette toolbar float inside the header instead of over
+  (`HeaderBand`), so the brand group and the palette toolbar float inside the header instead of over
   a strip of canvas above it. The palette leaves the centre for the header's right end, 12 px before its controls,
   so the middle of the header is the title's and widgets'. Its controls (the view's own, Maximise or Restore, the cog)
   sit together at its right end straight on the header, with no card of their own, its buttons the palette's tile size
   (36 px); the last one stands as far in from the element's right edge as the menu's first does from its left. In the
-  band the menu box and the palette (a mode's strip, or a board's cards) drop their cards too (no border, no fill, no
+  band the brand group and the palette (a mode's strip, or a board's cards) drop their cards too (no border, no fill, no
   shadow, no hue), so the top row reads as the board's,
   view's or sheet's own header: the menu and name at the left, the controls at the right, and a hairline under it all
-  (a board's header draws one there, as a Sheet's and a view's always have). The bottom-right buttons (Undo, the Plan strip, Theme, Zoom) move inside its frame while it covers the canvas: 16
+  (a board's header draws one there, as a Sheet's and a view's always have). The tools group's buttons (Undo, the Plan strip, Theme, Zoom) move inside its frame while it covers the canvas: 16
   px further in and 20 px further up than on a canvas, clear of its edge and its scrollbar (not on a Dashboard's
   page). A board's **widgets** ride with the controls at the band's right, before the cog behind a hairline, so the right
-  of the top row is one run of widgets and controls. The controls and a Sheet's toolbar are the menu box's height on screen (46 px at a 100% toolbar UI scale, its
+  of the top row is one run of widgets and controls. The controls and a Sheet's toolbar are the brand group's height on screen (46 px at a 100% toolbar UI scale, its
   controls and inset scaling with it, its hairline not; `--plan-band-card-h`). The header's own content keeps clear of them: its title, count and widgets
   start after the mode menu and stop short of the palette (truncating, or the widgets scrolling, as they do when
   narrow). It is laid out this way only when there is room: at least 140 px between the mode menu and the palette
   with the palette at the right (a desktop or a wide tablet). On a phone (under 640 px of canvas) it still holds the
-  top row, more simply: its header grows to the menu box's height and its content starts 12 px after the box, the
+  top row, more simply: its header grows to the brand group's height and its content starts 12 px after the group, the
   name staying in the header and the controls as they are, with at least 160 px left after the menu (else, as in a
-  narrow window, the element starts below the top row as before). The menu box takes the element's surface there too. The header follows the row
+  narrow window, the element starts below the top row as before). The brand group takes the element's surface there too. The header follows the row
   as it changes (the palette's category switching its width, the window resizing). With no palette in the row (it is
   hidden, below, or the person may not edit) the header holds the menu alone, its content running on to its controls.
-  The menu box and the palette in the band wear the element's hue: a 10% mix of it into the chrome's own light or
+  The brand group and the palette in the band wear the element's hue: a 10% mix of it into the chrome's own light or
   dark card, and a 40% mix for their border, so their ink reads as ever. The hue is the element's board or sheet
   preset's (Style presets "Boards and sheets"), else its own border colour; an element in the theme's neutral colours
   leaves the chrome as it is.
-- **The name rides in the menu box**: while the header holds the top row, the element's name (a board's or view's
-  title, a Sheet's title) moves out of its header into the menu box at the top left, after the mode menu and a hairline,
-  in the chrome's own text colour, truncating past 16 rem. It is the same title: a double-click on it renames it in
-  place, as in the header. The room the band needs is measured from the menu box without the name, so the name
-  coming or going never takes the band away. Without a band (a phone, a narrow window) the name stays in the header.
+- **The name rides in the active tab**: while the header holds the top row, the element's name (a board's or view's
+  title, a Sheet's title) moves out of its header into the document group's active tab segment, bottom right, in
+  place of the tab's name ([Toolbar layout](../007-editor/toolbar-layout.md#the-tabs-name)), in the chrome's own text
+  colour. It is the same title: a click on it renames it in place, as every name in the segment does. The band's room
+  never depends on the name, so the name coming or going never takes the band away. Without a band (a phone, a
+  narrow window) the name stays in the header.
 - **It is not placed on the canvas while it fills it**: maximised or filling its tab, a board, view or Sheet's
   element menu leaves out **Layer**, **Size**, **Rotation** and its **Animation** categories (they would change
   where and how it sits on the canvas it hides), and its animation does not play; restored, it animates in its
   place again and the categories come back.
 - **Zoom stands down**: while a board, view or Sheet is maximised or fills its tab, the canvas cannot zoom, so the
-  bottom-right zoom controls (Zoom out, the zoom level and its menu, Zoom in, and a phone's Fit) stay where they
+  tools group's zoom controls (Zoom out, the zoom level and its menu, Zoom in, and a phone's Fit) stay where they
   are but are disabled, each hover card saying why: "Zoom is off while a board, view or sheet fills the canvas." They
   come back the moment it is restored. A Sheet is the exception: covering the canvas, the controls zoom its cells
   instead ([Zoom](../029-sheets/sheet.md#zoom)).
@@ -640,10 +642,10 @@ A board can be maximised to work on it without the rest of the canvas around it.
     **cards**: a card of its own at the header's right end, apart from the controls card (the cog), holding a card
     tile for each card type the board takes (none for an Archive board, or one taking no types: the card is not
     shown), placed as the Cards tiles are (dragged into a column, or picked and then a column chosen). It wears the
-    board's hue in the header band as the menu box does. On a phone, where the menu shares the palette's row, the
+    board's hue in the header band as the brand group does. On a phone the
     palette stays and opens on Plan's **Cards** alone, whatever the mode.
   - A Sheet **maximised or filling its tab**: the palette is hidden altogether (nothing it offers can land in a
-    Sheet); on a phone, where the menu shares the palette's row, the menu stays.
+    Sheet); on a phone the brand group stays.
   - A view **maximised** (the person's own view for a moment): the palette is the mode's
     as usual. Picking a tile that is not a card (pressing it, not dragging it) restores the element first, so the
     tool is ready on the canvas it is meant for; a card tile keeps it maximised (onto a board, a card is dropped).
@@ -656,8 +658,8 @@ A board can be maximised to work on it without the rest of the canvas around it.
   a Sheet zooms its cells: [Sheet](../029-sheets/sheet.md#zoom)), so restoring it gives back the view it covered. The canvas's
   own keyboard shortcuts stand down (no arrow nudge, Delete, select-all, duplicate, lock, z-order, zoom, paste or
   tool key; the chords the browser would take over, Cmd+D and Cmd+A among them, are prevented), while undo and redo
-  (Cmd+Z, Cmd+Shift+Z, Ctrl+Y), search (Cmd+K), zen (Z), the mode switch (Shift+D), Escape, the chrome (header, tab
-  bar, palette, panels, the bottom-right controls) and everything on the board keep working; copy and cut are left to
+  (Cmd+Z, Cmd+Shift+Z, Ctrl+Y), search (Cmd+K), zen (Z), the mode switch (Shift+D), Escape, the chrome (the two lines'
+  groups, palette, panels) and everything on the board keep working; copy and cut are left to
   the browser, for text on the board.
 - **No selection chrome over it**: while a board is maximised (or fills its tab, [Fill Tab](#fill-tab)), no selection
   toolbar, popover, multi-selection toolbar or quick-connect plus floats over the canvas, for the board or anything
@@ -697,7 +699,7 @@ for a moment at most ([Maximised board](#maximised-board)).
   Plan tab makes it a Board tab ([Converting old Plan tabs](plan-tabs.md#converting-old-plan-tabs)).
 - **Filled**: whenever the tab is shown (opening the document, switching to the tab, a reload, a collaborator's or
   a share link's view), the board is drawn over the canvas area as a maximised board is (its header holding the top
-  row where there is room), in Plan mode. The editor's header, tab bar, footer and panels stay, so the person can
+  row where there is room), in Plan mode. The editor's two lines and panels stay, so the person can
   move between tabs; the board sits clear of them. It appears at once (no grow). There is no Maximise/Restore, no
   Focus and no Add to Slides, and Escape restores nothing. Presses, wheel and right-click on it stay on the board,
   so the canvas under it is never selected, panned, zoomed or menu'd; the board's settings are its cog.

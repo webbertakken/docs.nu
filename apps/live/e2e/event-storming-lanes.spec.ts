@@ -212,8 +212,10 @@ test('paste lands at the pointer over the canvas, and staggers when it is elsewh
   expect(pasted[0]!.y).toBe(below.y);
   expect(pasted[0]!.x).toBe(below.x + 200 + 16);
 
-  // Off the canvas: staggered on the ORIGINAL, same lane, 24px right.
-  await page.mouse.move(2, 2);
+  // Off the canvas, over the chrome (the brand group at the top left; the canvas runs the window's height under the
+  // two lines): staggered on the ORIGINAL, same lane, 24px right.
+  const brand = (await page.locator('[data-toolbar-menu]').boundingBox())!;
+  await page.mouse.move(brand.x + 4, brand.y + brand.height / 2);
   await page.keyboard.press('ControlOrMeta+v');
   await expect(notes).toHaveCount(6);
   tab = await boardTab(page);

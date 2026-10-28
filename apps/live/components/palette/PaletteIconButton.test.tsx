@@ -11,6 +11,7 @@ const noop = () => {};
 // its delay, a hover card at once, so an immediate hover card is telling.
 function hintOn(button: HTMLElement): string | null {
   fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+  fireEvent.pointerMove(button, { pointerType: 'mouse' });
   return screen.queryByRole('tooltip')?.dataset.hint ?? null;
 }
 

@@ -14,6 +14,7 @@ describe('HoverCard', () => {
       </HoverCard>,
     );
     fireEvent.pointerEnter(screen.getByRole('button'), { pointerType: 'mouse' });
+    fireEvent.pointerMove(screen.getByRole('button'), { pointerType: 'mouse' });
     const card = screen.getByRole('tooltip');
     expect(card.dataset.hint).toBe('hover-card');
     expect(card.textContent).toBe('Zoom inZoom in by 10%.');
@@ -38,6 +39,7 @@ describe('HoverCard', () => {
       </HoverCard>,
     );
     fireEvent.pointerEnter(screen.getByRole('button'), { pointerType: 'mouse' });
+    fireEvent.pointerMove(screen.getByRole('button'), { pointerType: 'mouse' });
     expect(screen.queryByRole('tooltip')).toBeNull();
     expect(screen.getByRole('button')).toBe(button);
     expect(document.activeElement).toBe(button);

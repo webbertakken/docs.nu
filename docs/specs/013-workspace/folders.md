@@ -306,7 +306,7 @@ A row whose handler the host doesn't pass is absent, and a band left
 empty takes its separator with it (the Explorer behind an error screen
 has no document, so no Share / Export). This replaced a **+ New** chip
 whose hover-open popover held only band 1, and took GitHub off the
-editor's bottom bar, which keeps Search, Settings and the appearance
+editor's actions group, which keeps Search, Settings and the appearance
 toggle ([Live app](../007-editor/live-app.md)). The full-page Explorer's bottom bar keeps its GitHub
 link.
 
@@ -372,8 +372,8 @@ Image Gallery their per-browser id owns. AuthControls in the page header
 surfaces a "Sign in" CTA for guests who want to upgrade. The page is
 modelled on Windows Explorer: a sidebar tree drives navigation, a
 breadcrumb + list view on the right shows the focused folder's
-contents. A **bottom bar** mirrors the editor's tab-bar strip (minus the
-tabs): the shared right-hand control cluster (`ChromeControls` — search,
+contents. A **bottom bar** holds the
+shared control cluster the editor's actions group also holds (`ChromeControls` — search,
 the open-source GitHub link, Settings, dark-mode toggle). It's sticky so
 it stays in view as the dashboard scrolls; Settings opens the same synced
 `UserPreferences` dialog the editor uses ([User preferences](../007-editor/user-preferences.md)).

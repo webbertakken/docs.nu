@@ -187,10 +187,11 @@ describe('panel-layout', () => {
       expect(nearestSnapCorner(belowStack, { 'top-left': stack })).toBe('top-left');
     });
 
-    it('bottom-right anchor is raised to clear the zoom controls', () => {
-      // The bottom-right corner sits higher than the others by the zoom
-      // clearance, so a panel docked there clears the zoom bar.
-      expect(cornerBottomInset('bottom-right')).toBeGreaterThan(cornerBottomInset('bottom-left'));
+    it('bottom anchors are raised to clear the bottom line', () => {
+      // Both bottom corners sit above the bottom line's groups (the tools group bottom left, the document group
+      // bottom right; docs/specs/007-editor/toolbar-layout.md "The bottom line"), so a panel docked there clears them.
+      expect(cornerBottomInset('bottom-right')).toBe(cornerBottomInset('bottom-left'));
+      expect(cornerBottomInset('bottom-left')).toBeGreaterThan(CORNER_INSET_PX);
       // A panel flush in the bottom-right at the RAISED inset snaps there.
       const raised: PanelDragGeometry = {
         x: container.parentWidth - CORNER_INSET_PX - size.width,
@@ -202,11 +203,11 @@ describe('panel-layout', () => {
     });
 
     it('clears zoom controls drawn at a UI scale (docs/specs/007-editor/ui-scale.md)', () => {
-      // The 44px cluster grows with the scale; the corner inset and the 12px
-      // gap above it do not.
-      expect(cornerBottomInset('bottom-right', 1)).toBe(72);
-      expect(cornerBottomInset('bottom-right', 1.5)).toBe(94);
-      expect(cornerBottomInset('bottom-left', 1.5)).toBe(CORNER_INSET_PX);
+      // The 46px group grows with the scale; the line's 12px inset and the 12px gap above it do not.
+      expect(cornerBottomInset('bottom-right', 1)).toBe(70);
+      expect(cornerBottomInset('bottom-right', 1.5)).toBe(93);
+      expect(cornerBottomInset('bottom-left', 1.5)).toBe(93);
+      expect(cornerBottomInset('top-left', 1.5)).toBe(CORNER_INSET_PX);
       // The snap anchor moves with it, so a panel landing at the raised
       // inset still snaps there.
       const tall: PanelDragGeometry = {

@@ -103,7 +103,7 @@ A blue-slate, one hue with the canvas (`#0d121a`) so chrome and paper read as on
 | Token       | Dark value | Usage                               |
 | ----------- | ---------- | ----------------------------------- |
 | `slate-950` | `#0b0f16`  | Page background, deepest wells      |
-| `slate-900` | `#131b26`  | Panels, dialogs, header, tab bar    |
+| `slate-900` | `#131b26`  | Panels, dialogs, toolbar groups     |
 | `slate-800` | `#16202e`  | Raised rows, inputs, hover surfaces |
 
 The lighter stops (`slate-50`…`slate-700`) keep Tailwind's values: they carry dark-mode text and borders.

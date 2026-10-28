@@ -11,7 +11,7 @@
 // `from: 'button'` opens DOWN from the button: the Toolbar layout's menu
 // button in the top-left corner (docs/specs/007-editor/toolbar-layout.md).
 //
-// `from: 'above'` opens UP from a button in the bottom-right cluster (Layers,
+// `from: 'above'` opens UP from a button in the tools group (Layers,
 // Activity, Collaborate), and `bottom` (the distance from the canvas's bottom
 // edge to the button's top) tells the panel to hang there.
 // How far below the canvas's top the Toolbar strip ends, with a gap: where what sits under the strip
@@ -19,6 +19,10 @@
 // sits 12px down and is 46px tall; 68px leaves a 10px gap. It is drawn at the UI scale
 // (docs/specs/007-editor/ui-scale.md), so only its height scales.
 export const toolbarTopClearancePx = (scale: number) => 12 + 46 * scale + 10;
+
+// Where a centre toolbar on a row of its own under the top line starts (docs/specs/007-editor/toolbar-layout.md "When a
+// line runs out of room"): the line's 12px inset, its 46px group at the toolbar UI scale, the line's 8px gap.
+export const secondRowTopPx = (scale: number) => 12 + 46 * scale + 8;
 
 export type DockAnchor = { left: number; top: number; arrowOffset: number; bottom?: number };
 

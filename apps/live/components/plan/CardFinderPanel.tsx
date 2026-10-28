@@ -5,7 +5,7 @@
 // a Board** narrows it to the cards no board in the document shows (no column holds the status, or every board
 // naming it leaves the card's type out), so strays can be found and put
 // somewhere, and the field filters (Card Type among them) narrow it further. Choosing one opens it. A popover above its button in
-// Plan mode's bottom-right cluster, like Card Types and the Trash.
+// Plan mode's tools group, like Card Types and the Trash.
 import { useMemo, useState } from 'react';
 import {
   CARD_FIELDS,

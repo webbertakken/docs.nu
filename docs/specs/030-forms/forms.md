@@ -125,7 +125,7 @@ previewing), the help link and the form's **cog**.
   form: they show a not-allowed cursor and take no input; a press on one selects its question. For a screen reader an
   unselected question is one button, "Edit question: <prompt>", stretched across the card (the picture of it hidden
   behind that name), with its grip a control of its own beside it rather than inside it.
-- **Share Form** is the header's Share button: on a Form tab, for someone who may edit it, the header's **Share** is
+- **Share Form** is the actions group's Share button: on a Form tab, for someone who may edit it, the actions group's **Share** is
   **Share Form** (filled once the form is published), so the page never shows two share buttons. Everyone else keeps
   the document's Share.
 
@@ -248,7 +248,7 @@ so text contrast never depends on the theme.
 
 ### Preview
 
-**Preview** (in the menu box) hides every piece of editing chrome and draws the form
+**Preview** (in the brand group) hides every piece of editing chrome and draws the form
 exactly as the form link does, working: sections, validation and the confirmation. Escape or **Back to Editing**
 returns; both start at the form's top.
 
@@ -358,7 +358,7 @@ number).
 ### The Forms tour
 
 A guided tour, as [Plan's](../026-plan/plan-tour.md) is (`components/tour/FormTourHost.tsx`, its steps in
-`form-tour-steps.ts`), started from the bottom bar's **Start Forms Tour** button, left of Search
+`form-tour-steps.ts`), started from the actions group's **Start Forms Tour** button, leading the document actions
 ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"). It is on offer while an Editor has a Form tab open
 and the editor is ready (hydrated, no start panel, not read-only, not locked, not embedded); it stays on offer once
 taken, and a press while another tour is on screen does nothing. It never starts or offers itself: until 25 October
@@ -389,7 +389,7 @@ banner) is no longer sent.
 
 ## Publishing and the form link
 
-- **Share Form** (the header's Share on a Form tab, an Editor's) opens the **Share Form** dialog, separate from the
+- **Share Form** (the actions group's Share on a Form tab, an Editor's) opens the **Share Form** dialog, separate from the
   document's Share dialog:
   - Its subtitle: "Anyone with the link can fill in this form. They won’t see your document."
   - Not yet published: a line on what publishing does ("Each response becomes a card on your board", or "a row in

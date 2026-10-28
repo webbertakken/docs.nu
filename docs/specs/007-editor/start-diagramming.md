@@ -189,7 +189,7 @@ picked after creation"). The move loads only at the pick (`useTemplatePickMove`,
 ## The tours wait
 
 A tour never lands over a start: while one is on screen the Diagram, Workshop, Draw, Avatar and Pages tours are not
-on offer, so the bottom bar's Start Tour button does not show them, and they come onto it once a template is picked
+on offer, so the actions group's Start Tour button does not show them, and they come onto it once a template is picked
 or the start closed (`start-panel-open.ts`, `useStartPanelOpen`). Start Planning shows only on a tab with no board or
 Sheet, where the Plan tour has nothing to show, so it needs no hold.
 
@@ -208,15 +208,15 @@ They are kept for the browser tab only and read once (`start-query.ts`).
   ([Diagram tour](editor-tour.md) "Look").
 - **Entrance.** The panel rises in with the dialog entrance (`animate-dialog-in`; a fade alone under reduced
   motion), and its cards and rail cascade in after it (`lvd-cascade`).
-- **On a phone** the panel is a sheet risen from the bottom (`animate-sheet-up`), full width below the top bar,
-  standing on the tab bar, with the grab handle every phone sheet has. A start that cannot close (Start Planning)
-  settles back when dragged. The tab bar stays in reach: over it, a new Plan tab's start left no way back to the
-  document's other tabs, nor to the tab's menu, but choosing a template. Where the bar stands is measured, as the
+- **On a phone** the panel is a sheet risen from the bottom (`animate-sheet-up`), full width below the top line,
+  standing on the bottom line, with the grab handle every phone sheet has. A start that cannot close (Start Planning)
+  settles back when dragged. The bottom line stays in reach: over it, a new Plan tab's start left no way back to the
+  document's other tabs, nor to the tab's menu, but choosing a template. Where the line stands is measured, as the
   toast stack measures its floor (`useChromeFloor`), so a short window stands on it too while it shows and keeps
-  the room when the bars are folded away.
+  the room when its groups are folded away.
 - **On a short window** (under 500px tall, whatever the pointer: a phone held sideways, or a laptop zoomed to 200%,
-  720×450) the panel clears only the palette strip's height (`pt-16`) and lies over the bottom cluster (the overlay
-  layer), standing on the tab bar while it shows, as on a sideways phone. With the desktop clearances (8.5rem above, 7rem below) a 450px window left
+  720×450) the panel clears only the palette strip's height (`pt-16`) and stands on the bottom line while
+  it shows, as on a sideways phone. With the desktop clearances (8.5rem above, 7rem below) a 450px window left
   the cards 96px, less than one card, so zooming the browser made the start unusable.
 
 ## Telemetry

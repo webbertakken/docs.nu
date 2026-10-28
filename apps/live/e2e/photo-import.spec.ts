@@ -74,6 +74,11 @@ async function importPhoto(page: Page, notes: WallNote[]) {
     .waitFor({ state: 'hidden', timeout: 20_000 })
     .catch(() => {});
   await add.click();
+  // The review closes and leaves the pointer resting over the bottom line: a control the layout moved under it opens
+  // no hover card (docs/specs/004-interface-design/tooltips-hover-cards-popovers.md "Only a moving pointer opens
+  // it"), so nothing stands over the draft bar.
+  await page.waitForTimeout(700);
+  await expect(page.locator('[data-hint="hover-card"]')).toHaveCount(0);
 }
 
 // Pan the canvas with Space + drag (the editor's own pan, whatever tool is

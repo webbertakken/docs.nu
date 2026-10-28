@@ -134,20 +134,22 @@ The bullets above are the document scope. A **workspace** session is confined di
 
 ## What renders
 
-The editor of the document, minus the app's surroundings: no app header, Explorer or account menu. The canvas, the
-tab bar, the palette, the toolbars and the panels stay, since a workbench embed is for drawing. An **Open in
-LiveDoc** button opens the document in a full tab. The colour scheme follows the workbench (`livedoc:theme`),
+The editor of the document, minus the app's surroundings: no Explorer or account menu, so the brand group has no
+menu button and the actions group no account control. The canvas, the two lines' groups
+([Toolbar layout](../007-editor/toolbar-layout.md#the-two-lines)), the palette and the panels stay, since a
+workbench embed is for drawing. An **Open in LiveDoc** button, in the actions group, opens the document in a full
+tab. The colour scheme follows the workbench (`livedoc:theme`),
 else the system. Presence shows the person as themselves; their agent shows as their status line
 ([Agent presence](../024-agents/agent-presence.md)).
 
 A **workspace** frame renders the Explorer as it is at `/explorer`: its sidebar, its views and its empty states,
 without the app header, the account menu, Settings, or the Teams administration rows. Opening a document opens the
 editor in the same frame (`/embed/workbench/document/<id>`), with a **Back** control to where it was opened from;
-the browser's own back and forward walk the frame's history. **Back** is the first thing at the top left of the frame,
-where back controls live: a button of its own in the corner the app's menu button takes, level with the canvas's
-toolbar and clear of it, and the first of the editor's controls for the keyboard. It is not in the tab bar. A
-document's status screens (deleted, load error, not found) carry Back at their top left too. The document scope has
-no Back. **New document** creates the document in place and opens
+the browser's own back and forward walk the frame's history. **Back** is the brand group's Back
+([Toolbar layout](../007-editor/toolbar-layout.md#the-top-line)): the first thing at the top left of the frame,
+where back controls live, and the first of the editor's controls for the keyboard. There is no separate Back
+button. A document's status screens (deleted, load error, not found) carry Back at their top left too. The document
+scope has nowhere to go back to: its brand group shows the mark without the caret, and the mark is not a link. **New document** creates the document in place and opens
 it in the frame, never `/new`. **Open in LiveDoc** opens the current view or document in a full tab. A frame
 started on a folder shows that folder; its empty state is the Explorer's own, with New document and the templates.
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import type { EditorSeed } from './seed-pending-document';
 
 import { UNTITLED_DOCUMENT_NAME } from '@livedoc/templates';
-import type { SaveStatus } from '@/components/chrome/EditorHeader';
+import type { SaveStatus } from './save-status';
 import type { useToast } from '@/hooks/ui/useToast';
 import {
   apiListDocuments,

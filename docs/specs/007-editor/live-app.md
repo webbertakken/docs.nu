@@ -29,35 +29,36 @@ The document shape follows [Document structure](../006-document/document-structu
 
 ## Layout
 
-Three regions stacked vertically, filling the viewport:
+The canvas fills the viewport, and the editor's chrome sits over it on two lines, each made of
+[toolbar groups](../004-interface-design/toolbar-group.md) ([Toolbar layout](toolbar-layout.md#the-two-lines)). There is
+no header bar and no tab bar:
 
 ```
 ┌────────────────────────────────────────────────────┐
-│ Header — brand + document name + Share              │
-├────────────────────────────────────────────────────┤
+│ [‹◆ ☰ Mode]     [ Palette strip ]   [🔍 ⚙ ◐ Share] │
 │                                                    │
-│   Canvas area — viewport with zoom + pan + the     │
-│   Palette strip, corner panels, popovers   │
-│   and selection chrome on top.                     │
+│   Canvas area: viewport with zoom + pan, corner    │
+│   panels, popovers and selection chrome on top.    │
 │                                                    │
-├────────────────────────────────────────────────────┤
-│  [ Tab 1 ] [ Tab 2 ] [ + ]            Tab bar      │
+│ [↶ ↷ Layers − 100% +]       [◉ Name │ Tab ⋯ │ ⧉ 7] │
 └────────────────────────────────────────────────────┘
 ```
 
-- **Header:** brand wordmark (a link to the Explorer home, [Brand mark](../004-interface-design/brand-mark.md#links)) on the left, the [top bar's middle](#the-top-bars-middle) (the document's share-state icon and its name, then the [role pill](#role-pill)), and the Share button and account on the right. (The full-page `/explorer` library is reached from the AuthControls menu and the **Explorer** link in the marketing site header, and the header logo opens its Home.) The editor header carries no product menu: the product's surfaces (Home, Explorer, Help) are links in the Explorer panel's footer ([The editor's Explorer](../013-workspace/explorer-structure.md#the-editors-explorer)), and no other header carries one either.
+- **The top line:** the brand group on the left (**Back**, the brand mark alone with a back caret, a link to the Explorer home, [Brand mark](../004-interface-design/brand-mark.md#links); the menu button; the mode switch), the Palette strip in the middle, and the actions group on the right (Search, Settings, the appearance toggle, then the document actions that apply, then Sign in or the account control). (The full-page `/explorer` library is reached from the AuthControls menu and the **Explorer** link in the marketing site header, and Back opens its Home.) The editor carries no product menu: the product's surfaces (Home, Explorer, Help) are links in the Explorer panel's footer ([The editor's Explorer](../013-workspace/explorer-structure.md#the-editors-explorer)); the other apps' headers keep the menu.
 - **Canvas:** owns most of the viewport. See [09-canvas-and-palette.md](../008-canvas/canvas-and-palette.md) for the full surface — shapes, arrows, marquee, multi-select, the Palette strip, plus the context panels.
-- **Tab bar (status bar):** horizontal row of tabs with `+` to add. Click to switch, double-click to rename, drag to reorder. When the tabs run past the bar it scrolls sideways, the edge with more tabs beyond it fading out (`scroll-edge-fade`, as the strip's rails do) rather than clipping a label mid-word, and **the active tab is always in view**: switching to a tab, or adding one, scrolls the row the least distance that shows all of it, and **Add tab** with it when it is the last tab (smoothly, or at once under reduced motion). Its right-hand cluster (`ChromeControls`, shared with the Explorer's bottom bar) holds the **Start Tour** button, **Search**, **Settings**, and the appearance toggle. The Start Tour button leads the cluster, immediately left of Search, and is drawn only while a tour is on offer, reading **Start <Name> Tour** (Start Diagram Tour, Start Draw Tour, Start Sankey Tour): it is the one way into every tour ([Diagram tour](editor-tour.md) "Where it appears"). In the editor each shows a text label beside its icon from `sm` up ("Start Diagram Tour", "Search", "Settings", and the appearance in force: "Light" / "Dark" / "System") and is icon-only on a phone; the Explorer's bar stays icon-only. **Button Labels** in Settings › Appearance (`dockButtonNames`, on by default) turns those labels off on a desktop too, as Minimal chrome does; a phone never shows them, whatever it says. There is no keyboard-shortcuts button: the shortcut reference and the per-device on/off switch live in Settings' **Keyboard** category ([User preferences](user-preferences.md)), which the "Keyboard shortcuts" search command opens directly.
+- **The bottom line:** the tools group on the left (its buttons are under "Mobile chrome", below) and the document group on the right: the [document's place](#the-top-bars-middle) (its share-state icon, its name and the [role pill](#role-pill)), the active tab with its tab menu, the tab stack, the people here and **Add tab** (+) ([Toolbar layout](toolbar-layout.md#the-bottom-line)). Every tab is seen and switched to in the **tab list**, which the tab stack and the people here open ([The tab list](toolbar-layout.md#the-tab-list)): a press on a row switches, a double-click renames, a drag reorders. The actions group's `ChromeControls` (shared with the Explorer's bottom bar) are **Search**, **Settings** and the appearance toggle, icons alone; **Button Labels** in Settings › Appearance (`dockButtonNames`) names them on a desktop while Minimal chrome is off; a phone never shows their names, whatever it says. The **Start Tour** button leads the document actions, drawn only while a tour is on offer, reading **Start <Name> Tour** (Start Diagram Tour, Start Draw Tour, Start Sankey Tour), its glyph alone on a phone with its name kept for assistive tech: it is the one way into every tour ([Diagram tour](editor-tour.md) "Where it appears"). There is no keyboard-shortcuts button: the shortcut reference and the per-device on/off switch live in Settings' **Keyboard** category ([User preferences](user-preferences.md)), which the "Keyboard shortcuts" search command opens directly.
 
 ## The top bar's middle
 
-The middle of the top bar says where you are, in the Explorer and the editor alike.
+This says where you are: in the middle of the Explorer's top bar, and at the start of the editor's document group,
+bottom right (the editor has no top bar, [Toolbar layout](toolbar-layout.md#the-bottom-line)).
 
 - **No document open** (the Explorer): the search field ([Explorer filters](../013-workspace/explorer-filters.md#the-field)),
   centred between the brand and the account on a desktop, its own row under the header on a phone.
-- **A document open** (the editor): the document's **share-state icon**, then its **name**, centred between the brand
-  and the right-hand actions from `sm` up and left-aligned beside the brand on a phone. A long name is cut short with
-  an ellipsis; the icon never is.
+- **A document open** (the editor): the document's **share-state icon**, then its **name**, leading the document
+  group. A long name is cut short with an ellipsis, down to 72 px, when the bottom line runs out of room
+  ([Toolbar layout](toolbar-layout.md#when-a-line-runs-out-of-room)); the icon never is. On a phone the name is not
+  drawn.
   - **The icon** says who can open the document, one state at a time: **Private** (a lock: only you), **Shared** (a
     link: anyone with a link), **Team** (people: the document lives in a team library and has no share links,
     [Team shared documents](../013-workspace/team-shared-documents.md)) and **This Browser** (an app window: saved only
@@ -77,9 +78,9 @@ The middle of the top bar says where you are, in the Explorer and the editor ali
 
 The **role pill** says whether you are editing, participating in or viewing this document. Everyone sees it, owner included.
 
-- **Where.** In the top bar's middle, after the document's name. From `sm` up: a phone's title
-  bar has no room. Under [Minimal chrome](power-user-mode.md#minimal-chrome) it becomes an icon at the start of the
-  status bar instead.
+- **Where.** In the document group, after the document's name ([The top bar's middle](#the-top-bars-middle)). From
+  `sm` up: a phone's line has no room. Under [Minimal chrome](power-user-mode.md#minimal-chrome) it becomes its
+  status icon in the document group instead, where the pill was.
 - **What it reads.** "Editing" (emerald), "Participating" (teal) or "Viewing" (amber).
 - **Level with the name.** The 19 px pill is centred on the title's line, as the share-state icon is: neither sits higher or lower.
 - **Who owns the document** is disclosed progressively: a Tooltip on the pill reads "Owned by <name>" ("Owned by you"
@@ -97,7 +98,7 @@ The **role pill** says whether you are editing, participating in or viewing this
   (as a Participant sees it)" / "Switch to viewing (read-only)" / "Switch to editing").
 - **Not a toggle when your role is view.** A view-link visitor's pill is static text, focusable so its Tooltip
   can be read by keyboard.
-- Zen mode and embeds hide it with the rest of the header.
+- Zen mode and embeds hide it with the rest of the two lines.
 
 ## What the editor supports today
 
@@ -140,11 +141,11 @@ This complements the marketing site's SEO policy (see [16-marketing-site.md](../
 
 ## Appearance (light / dark / system)
 
-The editor ships with an **Appearance** control, distinct from the per-tab **themes** (`apps/live/lib/themes.ts`, see [Canvas and palette](../008-canvas/canvas-and-palette.md)). A theme recolours CANVAS content (background, element fill / stroke / text) and is stored in the document, so every viewer sees it; Appearance recolours the editor CHROME (tab bar, editor header, panels, body backdrop) around it and lives only in this browser. A Pink-schemed document still sits on dark chrome when the control is flipped.
+The editor ships with an **Appearance** control, distinct from the per-tab **themes** (`apps/live/lib/themes.ts`, see [Canvas and palette](../008-canvas/canvas-and-palette.md)). A theme recolours CANVAS content (background, element fill / stroke / text) and is stored in the document, so every viewer sees it; Appearance recolours the editor CHROME (the two lines' toolbar groups, panels, body backdrop) around it and lives only in this browser. A Pink-schemed document still sits on dark chrome when the control is flipped.
 
 Two words, two owners, and the naming is deliberate: **Appearance** is yours, a **theme** is the document's. The stored names stay `theme` (`Tab.theme`, the MCP parameter, the `Theme` telemetry category, and the `livedoc:v2:ui-mode` localStorage key) because they are data on the wire — renaming them would need a migration and would break saved documents and existing MCP callers for no user-visible gain.
 
-- **Three settings, one button.** The control lives on the right edge of the TabBar and CYCLES Light → Dark → System (`AppearanceToggle`). The glyph shows the CURRENT setting (sun / moon / monitor), not the next one: as a two-state toggle it could get away with showing the target, but with three states — one of them deferring to the OS — the only readable thing is where you are, so the hover card and `aria-label` carry where the next click goes.
+- **Three settings, one button.** The control lives in the actions group, top right, and CYCLES Light → Dark → System (`AppearanceToggle`). The glyph shows the CURRENT setting (sun / moon / monitor), not the next one: as a two-state toggle it could get away with showing the target, but with three states — one of them deferring to the OS — the only readable thing is where you are, so the hover card and `aria-label` carry where the next click goes.
 - **System follows the OS, live.** `system` resolves through `matchMedia('(prefers-color-scheme: dark)')`, and that query is WATCHED: a machine that turns dark at sunset takes the editor with it without a reload. An explicit Light / Dark ignores the OS entirely and never even reads the query.
 - **System is the default.** A first-time visitor gets the chrome their device asks for, and `DEFAULT_APPEARANCE_SETTING` is the one line that says so; an unreadable or older-build value falls back to it too. The editor was light-by-default for as long as the control was a two-state toggle, on the reasoning that going dark should be asked for — but that reasoning only held while there was no way to say "follow my device". Now there is, and a reader whose machine is dark has already said it. An explicit Light or Dark still outranks the device: System is where the choice STARTS, not a rule.
 - **Dark is its own palette.** The dark chrome is the blue-slate **Steel** palette ([Colour scheme](../004-interface-design/color-scheme.md#dark-palette-steel)), and the Default scheme's dark half is the canvas of the same hue ([Canvas and palette](../008-canvas/canvas-and-palette.md#default-scheme-dark-half)). Light mode's colours are not touched by it.
@@ -152,22 +153,22 @@ Two words, two owners, and the naming is deliberate: **Appearance** is yours, a 
 - **Unpainted elements take the canvas's ink.** An element carrying no colour of its own is drawn from `defaultStrokeColor` / `defaultFillColor` / `defaultTextColor`, which take a `CanvasSurface` (`'light' | 'dark'`, derived from the resolved backdrop by `canvasSurface`). That is what lets the Default scheme paint nothing onto elements and still read correctly on a charcoal canvas — and it fixes every dark scheme's unpainted elements as a side effect. The surface reaches the views through `CanvasSurfaceContext` rather than props, because the element views are `React.memo`'d and memo blocks a parent re-render but not a context update; the element MENUS read the same context, so a swatch can't show a light-canvas blue beside a grey shape. Exports derive it from the paper they are exporting onto, so what you export is what you see.
 - **No match nudge.** Every theme has a light and a dark half ([Light and dark halves](../011-theme/light-and-dark.md)), so a tab never needs the viewer to switch appearance; the floating prompt that used to offer it (`ThemeModeBanner`) and the theme browser's inline switch are gone.
 - **One setting for the whole origin** ([Appearance](../004-interface-design/appearance.md)). Stored in `localStorage` under `livedoc:v2:ui-mode`. The value, its storage, the OS watch, the pre-paint script and the public-site toggle live in `@livedoc/ui` (`packages/ui/src/appearance/`), shared with marketing, help and the dashboard, so a pick made on any of them holds in the editor. The shared `useAppearance` returns both the `setting` (what the user picked, what a control renders) and the resolved `appearance` (what the chrome is painted as, what a colour decision reads). The editor wraps it in `hooks/ui/useAppearance.ts` only to add its `UI / Toggled` telemetry, and `AppearanceToggle` draws the shared `AppearanceIcon`.
-- The choice is applied on **every** route by a tiny inline script in the root layout (`app/layout.tsx`) that runs before first paint. This matters for two reasons. React mounts after first paint, so ANY hook-based application flashes light before it lands. And the hook is not mounted everywhere anyway — the TabBar, the appearance toggle and the scheme browser render it, but the standalone `/new` route renders none of them, so without the layout script it would paint light over a dark body and stay that way. The snippet is the shared `APPEARANCE_BOOT_SCRIPT`, a string a test EXECUTES against stub globals: what matters about it is not its text but which stored value ends up dark before first paint, and a string assertion happily passed while `system` painted light on a dark machine.
+- The choice is applied on **every** route by a tiny inline script in the root layout (`app/layout.tsx`) that runs before first paint. This matters for two reasons. React mounts after first paint, so ANY hook-based application flashes light before it lands. And the hook is not mounted everywhere anyway — the actions group, the appearance toggle and the scheme browser render it, but the standalone `/new` route renders none of them, so without the layout script it would paint light over a dark body and stay that way. The snippet is the shared `APPEARANCE_BOOT_SCRIPT`, a string a test EXECUTES against stub globals: what matters about it is not its text but which stored value ends up dark before first paint, and a string assertion happily passed while `system` painted light on a dark machine.
 - **Dark Reader stands down.** The root layout declares `<meta name="darkreader-lock">` (through `metadata.other`), the opt-out the Dark Reader extension honours. The editor already paints its own dark chrome, so a reader running the extension gets that instead of a filter over it: without the lock, Dark Reader re-darkens the already dark chrome, muddies the template preview art, and rewrites inline SVG attributes before React hydrates, which React reports as a hydration mismatch. Every app paints its own dark appearance, so every root layout carries the lock (`DARK_READER_LOCK` in `@livedoc/ui`). The meta carries a non-empty `content`, because Next drops a meta whose content is empty; Dark Reader keys on the name alone.
 - The `@custom-variant dark (&:where(.dark, .dark *))` declaration in `packages/tailwind-config/theme.css` configures Tailwind v4's `dark:` variant to use the class selector rather than the media query.
-- **Surfaces covered:** body backdrop, TabBar, EditorHeader, the TemplatePicker modal (the welcome / "New Document" / "Pick a template" flow) and the `/new` backdrop. Template **preview tiles** and the export-format glyphs are light-canvas art (white fills, slate rules, dark ink). They used to keep a LIGHT plate in dark chrome so they stayed legible, which left the New Document screen reading as a grid of bright white cards on a near-black dialog. They are now re-lit instead of redrawn: `.preview-art-tile` (shipped by `@livedoc/template-previews`) inverts lightness and spins the hue back under `.dark`, so the art lands on dark paper with its hues intact (a blue node stays blue, an amber sticky stays amber) and new previews inherit it for free. The paper it lands on is the dark canvas colour: the tile's plate and every white fill are clamped to `#f3faff` before the filter (`invert(0.95) hue-rotate(180deg)`, with a `mix-blend-mode: darken` veil), which the filter maps to `#0d1318`, the nearest it can reach to the canvas `#0d121a`. A thumbnail therefore previews the canvas you will get. The marketing template gallery uses the same rule. Colour-scheme swatches are deliberately EXCLUDED — those show a scheme's actual colours, so re-lighting them would be a lie. The **loading screen** (`DocumentLoading`) is dark-aware for the same reason: it is a whole screen between the click and the editor, and a white flash there is the appearance failing at the one moment the user is waiting. Panel chromes (`MovablePanel`) carry the effect on the outer frame; per-panel content (Palette, Context, Explorer) lights up incrementally as the `dark:` variants get added to each accordion / row. Until that's done, an open panel reads light over a dark backdrop — usable, not yet polished.
+- **Surfaces covered:** body backdrop, the two lines' toolbar groups, the TemplatePicker modal (the welcome / "New Document" / "Pick a template" flow) and the `/new` backdrop. Template **preview tiles** and the export-format glyphs are light-canvas art (white fills, slate rules, dark ink). They used to keep a LIGHT plate in dark chrome so they stayed legible, which left the New Document screen reading as a grid of bright white cards on a near-black dialog. They are now re-lit instead of redrawn: `.preview-art-tile` (shipped by `@livedoc/template-previews`) inverts lightness and spins the hue back under `.dark`, so the art lands on dark paper with its hues intact (a blue node stays blue, an amber sticky stays amber) and new previews inherit it for free. The paper it lands on is the dark canvas colour: the tile's plate and every white fill are clamped to `#f3faff` before the filter (`invert(0.95) hue-rotate(180deg)`, with a `mix-blend-mode: darken` veil), which the filter maps to `#0d1318`, the nearest it can reach to the canvas `#0d121a`. A thumbnail therefore previews the canvas you will get. The marketing template gallery uses the same rule. Colour-scheme swatches are deliberately EXCLUDED — those show a scheme's actual colours, so re-lighting them would be a lie. The **loading screen** (`DocumentLoading`) is dark-aware for the same reason: it is a whole screen between the click and the editor, and a white flash there is the appearance failing at the one moment the user is waiting. Panel chromes (`MovablePanel`) carry the effect on the outer frame; per-panel content (Palette, Context, Explorer) lights up incrementally as the `dark:` variants get added to each accordion / row. Until that's done, an open panel reads light over a dark backdrop — usable, not yet polished.
 
 ## Header actions
 
 A long document name truncates with an ellipsis; it never pushes the actions: they keep their full width at every screen size, a phone included, and the name takes what is left.
 
-The right edge of the header holds Share (owner), Copy (visitor), and Sign in or the account control as full-height, edge-flush actions, each an icon stacked over a small label (`HEADER_ACTION_BTN` in `apps/live/components/chrome/header-action.tsx`); Share fills brand while the document is shared. Pill, gradient, bordered and ink-button restyles were tried and dropped in favour of this simpler look.
+In the editor the actions group, top right ([Toolbar layout](toolbar-layout.md#the-top-line)), holds Start Tour (while offered), Copy (visitor), Present and Share (owner), then Sign in or the account control, as the [toolbar group](../004-interface-design/toolbar-group.md)'s flat labelled buttons; Share fills brand while the document is shared. The Explorer's header keeps them as full-height, edge-flush actions, each an icon stacked over a small label (`HEADER_ACTION_BTN` in `apps/live/components/chrome/header-action.tsx`). Pill, gradient, bordered and ink-button restyles were tried and dropped in favour of these simpler looks.
 
 The account menu's **Account** item opens the host page's own Settings dialog on the Account category, in place (the editor via `openSettingsOn('account')`, the Explorer via its settings state); it navigates to `/explorer?settings=account` only when the host passes no handler.
 
 ## Share dialog
 
-The "Share This Document" modal (`apps/live/components/dialogs/ShareDialog.tsx`, opened from the header Share button, for the owner and, on a team document, every joined member: [Team shared documents](../013-workspace/team-shared-documents.md)) follows the same dialog conventions as Settings / Export: a dimmed blurred backdrop (`bg-slate-900/40 backdrop-blur-sm`, click-to-close, Esc closes), a centred panel with dark-mode styling, and a scrollable body capped to the viewport.
+The "Share This Document" modal (`apps/live/components/dialogs/ShareDialog.tsx`, opened from the actions group's Share button, for the owner and, on a team document, every joined member: [Team shared documents](../013-workspace/team-shared-documents.md)) follows the same dialog conventions as Settings / Export: a dimmed blurred backdrop (`bg-slate-900/40 backdrop-blur-sm`, click-to-close, Esc closes), a centred panel with dark-mode styling, and a scrollable body capped to the viewport.
 
 ### The pass metaphor
 
@@ -240,11 +241,11 @@ check). Edit Outline closes itself the same way (`useMindOutline`).
 
 ## Toasts
 
-Asynchronous failures that previously fell through to silent `catch` blocks (link-tab, gallery delete, image upload from a background flow) now surface through a bottom-right toast stack: `apps/live/hooks/ui/useToast.tsx` (`ToastProvider` + `useToast`). Three tones: `error` (rose), `success` (emerald), `info` (slate). Each toast auto-dismisses after 4 seconds, can be closed early, and dedupes against an identical message already on-screen so a tight retry loop can't drown the surface.
+Asynchronous failures that previously fell through to silent `catch` blocks (link-tab, gallery delete, image upload from a background flow) now surface through a bottom-centre toast stack: `apps/live/hooks/ui/useToast.tsx` (`ToastProvider` + `useToast`). Three tones: `error` (rose), `success` (emerald), `info` (slate). Each toast auto-dismisses after 4 seconds, can be closed early, and dedupes against an identical message already on-screen so a tight retry loop can't drown the surface.
 
 Toasts are NOT used for:
 
-- Autosave progress / failures: the EditorHeader already carries a dedicated save-status pill.
+- Autosave progress: nothing shows it while saves succeed (its failures do each raise a toast, [Per-tab storage](../006-document/per-tab-storage.md), so a failed save never looks like a saved one).
 - In-context errors that have a sensible place to live near the action (the image picker's inline "Unsupported file type" surface, the gallery's "Could not load your gallery" banner).
 
 They ARE used for actions that finish off-surface from the gesture: clicking "Add to another document", duplicating a document, or any future flow whose UI has already navigated away by the time the network call resolves.
@@ -253,24 +254,22 @@ They ARE used for actions that finish off-surface from the gesture: clicking "Ad
 
 On a phone-sized viewport the editor's chrome would crowd the canvas. It tightens so a mobile visitor can read the canvas and tap through:
 
-- **A phone has the same layout as a desktop** ([Toolbar layout](toolbar-layout.md)), fitted to its width. A phone is below `sm:`, or a touch screen under 500px tall (landscape; `PHONE_MEDIA_QUERY`, the `phone:` variant). There the Palette is the strip across the top, the Explorer opens from the strip's menu button, and every other panel behaves as on a desktop: tool panels dock in their corners, and the session panels ([Session tools (timer + voting)](../012-collaboration/session-tools.md), [Live poll (ephemeral pulse-check)](../012-collaboration/live-poll.md)) open from the Session strip, reachable by view-only participants too (a view-only participant answers polls and watches vote results). (Per-element + tab formatting lives in the right-click context menus, so there is no Editor panel. The desktop-only [Quick style panel](../008-canvas/quick-style-panel.md) offers the few most-used choices beside a selection; it is not that panel, and the menus stay the complete home of every setting.) The `/explorer/` page and the AuthControls menu item are alternate routes to the library, open to guests and signed-in users alike.
+- **A phone has the same layout as a desktop** ([Toolbar layout](toolbar-layout.md)), fitted to its width. A phone is below `sm:`, or a touch screen under 500px tall (landscape; `PHONE_MEDIA_QUERY`, the `phone:` variant). There the Palette is the strip across the top, the Explorer opens from the brand group's menu button, and every other panel behaves as on a desktop: tool panels dock in their corners, and the session panels ([Session tools (timer + voting)](../012-collaboration/session-tools.md), [Live poll (ephemeral pulse-check)](../012-collaboration/live-poll.md)) open from the Session strip, reachable by view-only participants too (a view-only participant answers polls and watches vote results). (Per-element + tab formatting lives in the right-click context menus, so there is no Editor panel. The desktop-only [Quick style panel](../008-canvas/quick-style-panel.md) offers the few most-used choices beside a selection; it is not that panel, and the menus stay the complete home of every setting.) The `/explorer/` page and the AuthControls menu item are alternate routes to the library, open to guests and signed-in users alike.
 
-  **Layers and Collaborate are buttons in the bottom-right cluster**, beside Undo and Redo. Left to right: Undo / Redo, the [Session strip](../012-collaboration/session-tools.md#the-session-strip) (Timer, Vote, Poll), the mode's own strip (Slides, Plan), Collaborate, then **Layers and the Theme & Canvas brush as one strip** (in every mode; a mode or session without one of the two keeps the other), then Zoom (Collaborate only while the tab has a comment thread or an action, [Assigned actions](../012-collaboration/assigned-actions.md) §5). Each button opens its panel as a **popover hanging above it** (`computeDockAnchor(..., 'above')`: from the button's left edge, kept on the canvas, arrow on the popover's bottom edge pointing at the button), and a second press closes it, as does a press anywhere outside it such as the canvas (`dismissOnOutside`; its own portalled menus and confirms count as inside). The popovers share one open-at-a-time slot with the Explorer popover, so opening one closes the others. **The cluster names nothing**: every button in it is its icon alone on every width (Undo, Redo, Contents, Slides, Timer, Vote, Poll, Layers, the Theme & Canvas brush, and the Plan strip's Trash, New Card, Find a Card and Card Types), each named by its `aria-label` and its hover card. Settings › Appearance › **Button Labels** names the footer bar's buttons, never the cluster's ([User preferences](user-preferences.md)). The cluster carries no Tidy Up button: the tidiers run from the command palette ([Layout cleanup](../008-canvas/layout-cleanup.md#where-the-tidiers-live)). **A phone's zoom controls drop − and +** (`pinchOnly`): the cluster carries Undo, Redo and Layers, and pinch zooms. Fit stays.
+  **The tools group.** Layers and Collaborate are buttons in the tools group, bottom left ([Toolbar layout](toolbar-layout.md#the-bottom-line)), beside Undo and Redo. Left to right: Undo / Redo, the [Session strip](../012-collaboration/session-tools.md#the-session-strip) (Timer, Vote, Poll), the mode's own strip (Slides, Plan), Collaborate, then **Layers and the Theme & Canvas brush as one strip** (in every mode; a mode or session without one of the two keeps the other), then Zoom (Collaborate only while the tab has a comment thread or an action, [Assigned actions](../012-collaboration/assigned-actions.md) §5). Each button opens its panel as a **popover hanging above it** (`computeDockAnchor(..., 'above')`: from the button's left edge, kept on the canvas, arrow on the popover's bottom edge pointing at the button), and a second press closes it, as does a press anywhere outside it such as the canvas (`dismissOnOutside`; its own portalled menus and confirms count as inside). The popovers share one open-at-a-time slot with the Explorer popover, so opening one closes the others. **The tools group names nothing**: every button in it is its icon alone on every width (Undo, Redo, Contents, Slides, Timer, Vote, Poll, Layers, the Theme & Canvas brush, and the Plan strip's Trash, New Card, Find a Card and Card Types), each named by its `aria-label` and its hover card. Settings › Appearance › **Button Labels** names the actions group's Search, Settings and appearance, never the tools group's buttons ([User preferences](user-preferences.md)). The tools group carries no Tidy Up button: the tidiers run from the command palette ([Layout cleanup](../008-canvas/layout-cleanup.md#where-the-tidiers-live)). **A phone's zoom controls drop − and +** (`pinchOnly`): the tools group carries Undo, Redo and Layers, and pinch zooms. Fit stays.
 
-- **EditorHeader** drops the `LiveDoc` wordmark on mobile via the Brand component's new `wordmarkClassName` prop (set to `hidden sm:inline`). The mark stays for orientation. The header's reserved width shrinks accordingly so the document title centres correctly.
-- **TabBar** hides the leading `Tabs` label below `sm` and drops the right-hand cluster's text labels to icons only. Tabs themselves, the +-add, the Start Tour button (its glyph alone, its name kept for assistive tech), Search, Settings and the dark-mode toggle stay. (There is no shortcuts button to hide: the shortcut reference lives in Settings' Keyboard category, [User preferences](user-preferences.md).)
+- **The two lines wrap** by their overflow order ([Toolbar layout](toolbar-layout.md#on-a-phone)): the brand group shows the mark alone (never a wordmark, on any width) and the mode switch as its icon; the document group leaves out the document's name; Search, Settings and the appearance toggle are icons only. The active tab, the tab stack, Add tab, the Start Tour button (its glyph alone, its name kept for assistive tech), Search, Settings and the appearance toggle stay. (There is no shortcuts button to hide: the shortcut reference lives in Settings' Keyboard category, [User preferences](user-preferences.md).)
 
 Decided in review:
 
-- **Icons alone, on every width.** Named strips (Layers, Style, Tidy Up and the rest from 1440 px up) made the cluster busier than the canvas it sits on; a hover card names each button, so the cluster went back to icons.
-- **No Tidy Up button.** It made the cluster busier; the tidiers (Auto Layout and its styles, Auto-align) live in the command palette.
+- **Icons alone, on every width.** Named strips (Layers, Style, Tidy Up and the rest from 1440 px up) made the tools group busier than the canvas it sits on; a hover card names each button, so the cluster went back to icons.
+- **No Tidy Up button.** It made the tools group busier; the tidiers (Auto Layout and its styles, Auto-align) live in the command palette.
 
 ### A phone held sideways
 
-**The header and the tab bar fold away on a phone held sideways**, so the canvas fills the screen.
-Held sideways, a phone is short: the header (56px) and the tab bar (48px) took 104px of an iPhone
-15's 393px, leaving the canvas 289px, and 256px of a small Android's 360px (measured 2026-10-17).
-Folded, the canvas gets all of it (393px, 360px). Sideways means a touch screen in landscape under
+**The actions group and the document group fold away on a phone held sideways** (what a header and a tab bar
+once held), so they cover less of the canvas. Held sideways, a phone is short: an iPhone 15 is 393px tall and a
+small Android 360px (measured 2026-10-17), and the bars these groups replace took 104px of it. Sideways means a touch screen in landscape under
 500px tall: `LANDSCAPE_PHONE_MEDIA_QUERY` in `lib/responsive.ts`,
 `(pointer: coarse) and (orientation: landscape) and (max-height: 499px)`, with the CSS twin the
 `landscape-phone:` variant (`app/globals.css`). The height is `PHONE_MAX_HEIGHT_PX`, the same 500px
@@ -279,54 +278,52 @@ that makes a sideways phone a phone at all (above): the tallest phone held sidew
 and a desktop window however short (a fine pointer) never fold. `orientation: landscape` keeps an
 upright phone whose layout shrinks for its keyboard (an older Android) from folding mid-typing.
 
-- **What stays.** Everything else on the canvas stays where it is: the strip across the top (the
-  palette, its Search), the bottom-right cluster (Undo, Redo, the Session strip, Layers, the Theme
-  & Canvas brush, Fit), the menus and the dialogs.
+- **What stays.** Everything else on the canvas stays where it is: the brand group (without its menu button,
+  below), the strip across the top (the palette, its Search), the tools group (Undo, Redo, the Session strip,
+  Layers, the Theme & Canvas brush, Fit), the menus and the dialogs.
 - **What goes for good: the menu button and the Explorer.** At this height the Explorer has no
-  room to be useful, so the menu button is not drawn (in the strip's row or, without a strip, the
-  corner) and the strip starts at the left gutter in its place. Unlike the bars, nothing brings
+  room to be useful, so the brand group's menu button is not drawn. Unlike the two groups, nothing brings
   it back while the phone is sideways: not the handle, not a tour. An Explorer open when the
   phone turns closes. Turning the phone upright brings the button back. `EditorCanvasHost` sets
   `explorerHidden` from `useIsLandscapePhone` (`hooks/ui/useIsMobileViewport.ts`, the
   `LANDSCAPE_PHONE_MEDIA_QUERY` above), the same gate the workbench frame uses; the palette keeps
-  the phone's swiping row without the menu card (`leading` of `null`).
+  the phone's swiping row.
 - **The bars handle.** A small card at the canvas's top-right corner (12px in, and past a landscape
   notch's side inset and below the top inset; a 36px button with a 44px tap area) holds a chevron:
-  **Show Header and Tabs**. Pressing it brings both bars back where they always are: the canvas
-  shrinks to make room again, so nothing covers it or the chrome on it. The button, now under the
-  header, turns into **Hide Header and Tabs** (`aria-expanded` says which) and folds them again. So
-  what lives in the bars stays one press away: Share or Make a Copy, the document's name and
-  badges, the role pill, the tabs and their menus, Add Tab, Search, Settings and the appearance
+  **Show Controls**. Pressing it brings both groups back where they always are, over the canvas.
+  The button turns into **Hide Controls** (`aria-expanded` says which) and folds them again. So
+  what lives in the two groups stays one press away: Share or Make a Copy, the document's name and
+  badges, the role pill, the active tab and its menu, the tab stack and its tab list, Add Tab, Search, Settings and the appearance
   toggle. The strip's row keeps the handle's 54px clear on its right (`LANDSCAPE_HANDLE_ROOM`: the
   46px card and the row's 8px gap), so a long strip scrolls short of it rather than under it. The
   choice lasts while the document is open in that window: not saved, not synced, and a
   fresh load starts folded.
-- **The bars come back on their own** when something needs them: a rename asked for elsewhere (the
+- **The two groups come back on their own** when something needs them: a rename asked for elsewhere (the
   Rename Document and Rename Tab search commands) shows them first, so the name field takes the
-  focus; a tour on screen (any of them: the Diagram tour's Tabs step points at the tab bar) keeps
-  them shown; and a bar never folds while focus is inside it, so a layout that changes while a
+  focus; a tour on screen (any of them: the Diagram tour's Tabs step points at the active tab) keeps
+  them shown; and a group never folds while focus is inside it, so a layout that changes while a
   name is typed there (the on-screen keyboard resizing it) cannot fold the field away. Pressing
   Hide takes the focus to the handle, which ends a rename as any press outside it does.
-- **Turning the phone** upright shows the bars at once and sideways folds them again (unless shown
-  with the handle). The fold is CSS alone: a media query hides the two bars' wrappers
-  (`display: contents` otherwise, so the column lays out as before), with no resize or orientation
+- **Turning the phone** upright shows the two groups at once and sideways folds them again (unless shown
+  with the handle). The fold is CSS alone: a media query hides the two groups' wrappers
+  (`display: contents` otherwise, so the line lays out as before), with no resize or orientation
   listener and no script on the hot path; a press of the handle re-lays the column out once.
-- **Not drawn** where the bars are not there to fold: zen mode (it hides them already and keeps its
+- **Not drawn** where the two groups are not there to fold: zen mode (it hides them already and keeps its
   own way out, [Zen mode](zen-mode.md)), embeds and the workbench frame, the welcome flow, and a
   running presentation.
 - **Every share role** gets the fold and the handle alike, Editor, Participant and Viewer: it is a
-  view of the editor, never of the document, and what is inside each bar keeps its own role gates.
-- **Telemetry:** the handle sends `UI / Toggled / LandscapeBarsOn` when it shows the bars and
+  view of the editor, never of the document, and what is inside each group keeps its own role gates.
+- **Telemetry:** the handle sends `UI / Toggled / LandscapeBarsOn` when it shows the two groups and
   `LandscapeBarsOff` when it folds them ([Telemetry](../017-telemetry/telemetry.md)); the automatic
   fold and unfold send nothing.
 
 Implementation: `useLandscapeBars` (the shown flag, the rename and tour reveals, the telemetry),
-`LandscapeBarFold` (the wrapper round each bar) and `LandscapeBarsHandle`
+`LandscapeBarFold` (the wrapper round each folding group) and `LandscapeBarsHandle`
 (`components/chrome/LandscapeBars.tsx`), wired in `EditorView`.
 
 These don't change desktop layout. The strip and the popovers are what resolve the old "panels overlap when all four open" case on a phone: the Palette is one strip and the Explorer, Layers and Collaborate are one-at-a-time popovers. The mobile picker ([Dedicated route for new-document creation](new-document-route.md) responsive section) covers the template / identity surface the same way.
 
-The routes that draw the canvas (`/document/<id>`, `/new`, which opens the editor in place, `/embed` and `/embed/workbench`) export `EDITOR_VIEWPORT` (`apps/live/lib/page-viewport.ts`), which pins the page at `initialScale: 1` with `maximumScale: 1` + `userScalable: false`, so mobile browsers don't auto-zoom on top of the editor's own canvas zoom. The two paths this blocks: pinch-zoom on the whole page, and iOS Safari's automatic focus-zoom when a focused input's effective font-size is under 16px (every TabBar / Explorer / Palette field is well under). Without this, focusing a text input on iOS zooms the page in and leaves the chrome misaligned with the canvas-transform coordinate space the cursor / selection-ring math expects. The canvas zoom (pinch on the canvas surface, or the bottom-right zoom buttons) is the only zoom the editor wants users to drive.
+The routes that draw the canvas (`/document/<id>`, `/new`, which opens the editor in place, `/embed` and `/embed/workbench`) export `EDITOR_VIEWPORT` (`apps/live/lib/page-viewport.ts`), which pins the page at `initialScale: 1` with `maximumScale: 1` + `userScalable: false`, so mobile browsers don't auto-zoom on top of the editor's own canvas zoom. The two paths this blocks: pinch-zoom on the whole page, and iOS Safari's automatic focus-zoom when a focused input's effective font-size is under 16px (every tab list / Explorer / Palette field is well under). Without this, focusing a text input on iOS zooms the page in and leaves the chrome misaligned with the canvas-transform coordinate space the cursor / selection-ring math expects. The canvas zoom (pinch on the canvas surface, or the tools group's zoom buttons) is the only zoom the editor wants users to drive.
 
 That lock stays. Lifting it was tested (2026-10-03): with page zoom allowed, a pinch on the canvas
 zoomed the whole page (Chromium, 1.5x) instead of the canvas, which breaks the editor's core
@@ -344,7 +341,7 @@ shared `ContextMenu`; and the tab menu, from a tab's `⋯` or a long-press on th
 card hung off the long-press point, which covered the element it was about and ran under the tab
 bar. Full width (up to 32rem), at most 60% of the screen tall with its own scroll, clear of the
 home indicator, rising in (`animate-sheet-up`). A grab handle across its top moves it, the sheet
-following the finger: dragged up past 48px (or flicked up) it fills the screen below the top bar, its handle
+following the finger: dragged up past 48px (or flicked up) it fills the screen below the top line, its handle
 still across its top; dragged down from there past 48px it returns to its own height; dragged down from its
 own height past 80px (or flicked down) it closes; anything less springs back (`useSheetDrag`).
 Outside taps and Escape close it as before. A section's flyout opens in place inside it.
@@ -400,8 +397,8 @@ alignment guide (not again while it stays on it), **delete** (a double pulse) wh
 deleted. Never with a mouse.
 
 **Safe areas.** The edge chrome clears the device's safe-area insets (`packages/ui/src/safe-area.ts`): the
-header below the top inset and past the side insets, the tab bar above the home indicator and past
-the side insets, the strip's row and the bottom-right cluster past a landscape notch. Inline
+top line below the top inset and past the side insets, the bottom line above the home indicator and past
+the side insets, and both past a landscape notch. Inline
 `env(safe-area-inset-*)` styles, at least the chrome's own gutters. The editor does not set
 `viewport-fit=cover`, so the insets are 0 today and nothing moves; the rules keep the chrome clear
 the day it goes edge to edge.

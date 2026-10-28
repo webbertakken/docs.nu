@@ -99,7 +99,7 @@ blank canvas the autosave persists the empty-plus-new tab and **wipes
 the real server row**. So while the active tab's content is outstanding:
 
 - **Loading**: an opaque, pointer-capturing overlay covers the canvas
-  (palette included) with a spinner. The header + TabBar stay live, so the
+  (palette included) with a spinner. The two lines' groups stay live, so the
   user can still switch tabs or navigate away.
 - **Error**: if the fetch _fails_ the same overlay shows a "couldn't load
   this tab" card with a **Retry** that re-issues the fetch. Both network /

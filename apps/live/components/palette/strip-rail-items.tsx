@@ -8,6 +8,7 @@ import { BrowseStartGroup } from './PaletteCategoryBrowser';
 import { PaletteTile, type PaletteTileActions } from './PaletteTileGrid';
 import type { PaletteTileDef } from './palette-tile-defs';
 import { STRIP_DIVIDER_ATTR } from './useEdgeDividers';
+import { TOOLBAR_DIVIDER } from '@/components/chrome/toolbar-surface';
 import type { useStripPopover } from './ToolbarStripPopover';
 
 // The Toolbar strip's rail items and the popover a group or opener opens (docs/specs/007-editor/toolbar-layout.md
@@ -23,7 +24,7 @@ export function Divider() {
     <span
       aria-hidden
       {...{ [STRIP_DIVIDER_ATTR]: '' }}
-      className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 phone:mx-px dark:bg-slate-700"
+      className={`${TOOLBAR_DIVIDER} phone:mx-px`}
     />
   );
 }

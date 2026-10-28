@@ -18,13 +18,6 @@ import {
   type RefObject,
 } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  activeTabRenameId,
-  useActiveTabName,
-  useActiveTabRename,
-  type TabRename,
-} from '@/hooks/editor/active-tab-name-store';
-import { NAME_MAX_LENGTH } from '@livedoc/document';
 import { createListeners } from '@/lib/listeners';
 
 let slot: HTMLElement | null = null;
@@ -59,71 +52,15 @@ const getEpoch = () => bandEpoch;
 // The selector CanvasCover marks its element's box with while it has a band.
 const HEADER_BAND_SELECTOR = '[data-header-band]';
 
-// The slot in the menu box: a hairline before it, the chrome's own ink, hidden while it holds nothing. Its width is
-// left out of the room the band needs (canvas-layer-insets MENU_NAME_SLOT_SELECTOR).
+// The slot in the document group's active tab segment (docs/specs/026-plan/plan-board.md "The name rides in the active
+// tab"), in the segment's ink, hidden while it holds nothing.
 export function MenuNameSlot() {
   return (
     <span
       ref={setMenuNameSlot}
       data-menu-name-slot=""
-      className="ml-0.5 flex min-w-0 items-center gap-1.5 border-l border-slate-200 pl-2.5 pr-2 text-slate-800 empty:hidden dark:border-slate-700 dark:text-slate-100"
+      className="flex min-w-0 items-center gap-1.5 whitespace-nowrap empty:hidden"
     />
-  );
-}
-
-// The open tab's name in the menu box (docs/specs/007-editor/toolbar-layout.md "The tab's name"), in every mode on a
-// desktop, as a board's name rides there: right after the slot, and hidden by CSS while the slot holds an element's
-// name (a board, Sheet or view filling the tab or maximised), so the box never shows two.
-export function TabNameInBox() {
-  const name = useActiveTabName();
-  const rename = useActiveTabRename();
-  if (!name) return null;
-  // Keyed by the tab it renames: another tab opening drops a draft begun on this one.
-  return <TabName key={rename?.tabId ?? ''} name={name} rename={rename} />;
-}
-
-function TabName({ name, rename }: { name: string; rename: TabRename | null }) {
-  const [draft, setDraft] = useState<string | null>(null);
-  const hide = '[[data-menu-name-slot]:not(:empty)+&]:hidden';
-  const frame = `ml-0.5 border-l border-slate-200 pl-2.5 pr-2 text-slate-800 dark:border-slate-700 dark:text-slate-100 ${hide}`;
-  if (draft !== null && rename) {
-    const save = () => {
-      const next = draft.trim();
-      setDraft(null);
-      // Saved only onto the tab it was begun on, should that tab no longer be the open one.
-      if (activeTabRenameId() !== rename.tabId) return;
-      if (next && next !== name) rename.rename(next);
-    };
-    return (
-      <span data-tab-name-in-box="" className={`flex items-center ${frame}`}>
-        <input
-          autoFocus
-          data-keeps-escape
-          aria-label="Tab name"
-          value={draft}
-          maxLength={NAME_MAX_LENGTH}
-          onFocus={(e) => e.currentTarget.select()}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={save}
-          onKeyDown={(e) => {
-            e.stopPropagation();
-            if (e.key === 'Enter') save();
-            if (e.key === 'Escape') setDraft(null);
-          }}
-          className="w-48 rounded-md border border-brand-400 bg-transparent px-1.5 py-0.5 text-[14px] font-normal leading-tight outline-none"
-        />
-      </span>
-    );
-  }
-  return (
-    <span
-      data-tab-name-in-box=""
-      // A click (a tap) renames the tab, for someone who may.
-      onClick={rename ? () => setDraft(name) : undefined}
-      className={`${frame} ${rename ? 'cursor-text' : ''} ${IN_BOX_TITLE_CLASS}`}
-    >
-      {name}
-    </span>
   );
 }
 

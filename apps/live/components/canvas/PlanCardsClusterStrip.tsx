@@ -7,7 +7,7 @@ import { TrashDropTarget, TrashSegment, usePlanCardDragging } from './TrashClust
 import { NewCardSegment } from './NewCardClusterButton';
 import { usePlan } from '@/components/plan/PlanContext';
 
-// Plan mode's buttons in the bottom-right cluster, one strip as Undo and Redo are, where Layers sits in the other
+// Plan mode's buttons in the tools group, one strip as Undo and Redo are, where Layers sits in the other
 // modes: the **Trash** on its left (docs/specs/026-plan/items.md "Trash"; given only off a phone, to an editor),
 // then **New Card** (an editor's +, items.md "New Card"), then **Find a Card** (items.md "Finding a card"), the search over every card in the document, then **Card
 // Types** (docs/specs/026-plan/item-types.md "The Card Types panel"). Each opens its own panel above it. While a
@@ -51,12 +51,10 @@ export function PlanCardsClusterStrip({
           <TrashSegment popoverOpen={trash.open} onTogglePopover={trash.onToggle} />
         ) : null}
         {newCard && showsNewCard ? (
-          <NewCardSegment divided={trashInStrip} open={newCard.open} onToggle={newCard.onToggle} />
+          <NewCardSegment open={newCard.open} onToggle={newCard.onToggle} />
         ) : null}
         {hasTypes ? (
           <ClusterPopoverSegment
-            // A divider when a button sits to its left (the Trash, or an editor's New Card).
-            divided={trashInStrip || showsNewCard}
             label="Find a Card"
             hoverTitle="Cards"
             hoverDescription="Every card in this document: search them, find the ones on no board, and open any of them."
@@ -66,7 +64,6 @@ export function PlanCardsClusterStrip({
           />
         ) : null}
         <ClusterPopoverSegment
-          divided={hasTypes || trashInStrip}
           label="Open Card Types"
           hoverTitle="Card Types"
           hoverDescription="The kinds of card this document's boards hold, and the fields each one has."

@@ -10,7 +10,7 @@ import {
   shareLink,
 } from './audit-screens';
 import { expect, expectNoPageErrors, test, untilHydrated, mintSignedGuest } from './fixtures';
-import { auditOptical, OPTICAL_TOLERANCE_PX } from './optical';
+import { auditOptical, OPTICAL_TOLERANCE_PX, pinUiFace } from './optical';
 
 // Optical alignment audit (docs/specs/004-interface-design/optical-alignment.md): on each screen, every glyph
 // in a small painted shape sits within OPTICAL_TOLERANCE_PX of the shape's centre, and stack rows share one
@@ -144,4 +144,33 @@ test('initials with a tailed capital centre on their cap band', async ({ page })
   expect(tailed.map((f) => `${f.offsetPx}px ${f.what}`)).toEqual([]);
   // The audit reads a tailed capital through a stand-in and puts the text back.
   await expect(page.getByLabel('Tailed initials')).toHaveText('QW');
+});
+
+// The audit measures one face wherever it runs (optical.ts pinUiFace): the chrome's system stack resolves to Liberation
+// Sans here as on CI, whatever else the machine has installed.
+test('measures the chrome in the face CI draws it in', async ({ page }) => {
+  await page.goto('/new');
+  const label = page.getByText('New Document', { exact: false }).first();
+  await label.waitFor();
+  await pinUiFace(page);
+  // The element holding the card's own text (a platform font belongs to the text it draws).
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-new-mode="diagram"]')!;
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode())
+      if (n.textContent?.trim()) {
+        n.parentElement!.setAttribute('data-face-probe', '');
+        return;
+      }
+  });
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  await cdp.send('CSS.enable');
+  const { root } = await cdp.send('DOM.getDocument', { depth: -1 });
+  const { nodeId } = await cdp.send('DOM.querySelector', {
+    nodeId: root.nodeId,
+    selector: '[data-face-probe]',
+  });
+  const { fonts } = await cdp.send('CSS.getPlatformFontsForNode', { nodeId });
+  expect(fonts.map((f) => f.familyName)).toEqual([expect.stringMatching(/^Liberation Sans/)]);
 });

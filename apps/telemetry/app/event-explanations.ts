@@ -1043,6 +1043,7 @@ export const EXACT: Readonly<Record<string, string>> = {
     "Someone took a tab out of its tab folder, making it a loose tab again, whether by dragging it out or from the tab's menu.",
   'Tab|Renamed|': 'A tab was renamed.',
   'Tab|Reordered|': 'Someone dragged a tab to a new position.',
+  'Tab|Selected|TabList': 'Someone switched to a tab from its row in the tab list.',
   'Tab|Opened|SideBySideDrag':
     'Someone dragged a tab to the right edge of the screen to open it beside the tab they were editing.',
   'Tab|Opened|SideBySideMenu': "Someone opened a tab side by side from the tab's menu.",

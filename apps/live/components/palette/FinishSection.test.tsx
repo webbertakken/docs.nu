@@ -58,6 +58,7 @@ describe('FinishSection', () => {
   it('previews on mouse hover and ends the preview on leave', () => {
     const h = renderSection(undefined);
     fireEvent.pointerEnter(tile('Sketch'), { pointerType: 'mouse' });
+    fireEvent.pointerMove(tile('Sketch'), { pointerType: 'mouse' });
     expect(h.onPreview).toHaveBeenLastCalledWith('sketch');
     fireEvent.pointerLeave(tile('Sketch'), { pointerType: 'mouse' });
     expect(h.onPreviewEnd).toHaveBeenCalled();

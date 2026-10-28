@@ -232,14 +232,14 @@ export function resolvePlacement(layout: PanelLayout, panel: PanelId): ResolvedP
 // The corner inset (px) that resting panels sit at — matches the
 // `*-4` (1rem) Tailwind corner classes in the dock containers.
 export const CORNER_INSET_PX = 16;
-// Extra bottom inset for the BOTTOM-RIGHT corner so a panel docked there
-// sits ABOVE the fixed zoom controls (bottom-right, 44px tall at a 16px
-// inset) with a 12px gap, rather than overlapping them. The cluster is drawn
-// at the UI scale (docs/specs/007-editor/ui-scale.md), so its height scales
-// and the gap does not. Internal: they reach the dock container + snap
-// detection via cornerBottomInset(), so nothing imports the raw constants.
-const ZOOM_CLUSTER_HEIGHT_PX = 44;
-const ZOOM_CLUSTER_GAP_PX = 12;
+// The bottom corners' extra inset, so a panel docked there sits ABOVE the bottom line's group in its corner (the
+// tools group bottom left, the document group bottom right; docs/specs/007-editor/toolbar-layout.md "The bottom
+// line"), 46px tall at the line's 12px inset, with a 12px gap, rather than overlapping it. The group is drawn at the
+// UI scale (docs/specs/007-editor/ui-scale.md), so its height scales and the gaps do not. Internal: they reach the
+// dock container + snap detection via cornerBottomInset(), so nothing imports the raw constants.
+const BOTTOM_LINE_INSET_PX = 12;
+const BOTTOM_LINE_GROUP_PX = 46;
+const BOTTOM_LINE_GAP_PX = 12;
 // How close (px) the panel's relevant corner must get to a corner anchor
 // before that corner becomes the snap candidate. Internal to the snap math.
 const SNAP_RADIUS_PX = 96;
@@ -255,11 +255,11 @@ export const STACK_GAP_PX = 16;
 // panel is already there. Missing / 0 means an empty corner.
 export type CornerStackExtents = Partial<Record<PanelCorner, number>>;
 
-// The total bottom inset for a corner: bottom-right is raised to clear the
-// zoom controls, drawn at `scale`; every other corner uses the plain inset.
+// The total bottom inset for a corner: a bottom corner is raised to clear the bottom line, its group drawn at
+// `scale`; a top corner uses the plain inset.
 export function cornerBottomInset(corner: PanelCorner, scale = 1): number {
-  return corner === 'bottom-right'
-    ? CORNER_INSET_PX + ZOOM_CLUSTER_HEIGHT_PX * scale + ZOOM_CLUSTER_GAP_PX
+  return corner.startsWith('bottom')
+    ? Math.round(BOTTOM_LINE_INSET_PX + BOTTOM_LINE_GROUP_PX * scale + BOTTOM_LINE_GAP_PX)
     : CORNER_INSET_PX;
 }
 

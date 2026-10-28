@@ -4,7 +4,7 @@
 // bottom-left "Open in LiveDoc" badge that links out to the full
 // share view, plus a tab switcher next to it (only when the document
 // has more than one tab). Bottom-left specifically because the
-// ZoomControls dock keeps bottom-right in embeds. Pointer events stop
+// tools group (its zoom controls) keeps the bottom right in embeds (EditorLines `embed`). Pointer events stop
 // here so clicks don't fall through to the canvas underneath.
 //
 // The tab switcher is a compact hamburger button showing the current

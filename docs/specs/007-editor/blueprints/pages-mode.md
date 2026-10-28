@@ -121,7 +121,7 @@ page; "template" stays the whole-tab starting point.
 | `DRAW_AHEAD_PX`, `WIREFRAME_TILE_MAX_H`                                    | 320 px, 200 px                                                                     | `LayoutTile.tsx`: how far past the scrolling area a tile starts drawing; the tallest a wireframe page's tile stands; D89                 |
 | `DESCRIBED_MIN_WIDTH`, `CARD_CHROME_HEIGHT`                                | 520 px, 168 px                                                                     | `EmptyPageLayouts.tsx`: a card wide enough for descriptions and the badge; the card's height less its gallery's                          |
 | `PAGE_PAPER_DARK`                                                          | `#0f172a`                                                                          | `layout-render-thumb.tsx`: a plain page's paper in dark chrome, as `CanvasPages` paints it (slate-900)                                   |
-| Page navigator                                                             | the bottom-right cluster, right of Undo / Redo                                     | `PageNavigatorClusterStrip`; D57                                                                                                         |
+| Page navigator                                                             | the tools group, right of Undo / Redo                                              | `PageNavigatorClusterStrip`; D57                                                                                                         |
 | `PAGE_NAME_MAX`                                                            | 60                                                                                 | D23                                                                                                                                      |
 | `PAGE_MARGIN_FRACTION`                                                     | 0.07                                                                               | Spec "Layouts", "Snapping"                                                                                                               |
 | `PAGE_GRADIENT_ANGLE`                                                      | 160 (CSS degrees)                                                                  | `packages/document/src/page-paint.ts`; spec "Backgrounds"                                                                                |
@@ -665,7 +665,7 @@ EmptyPageLayouts`) and `layoutCardSize(page, zoom)` (the page on screen less `LA
   `UI · Opened · EmptyPageInvite` and opens `LayoutGalleryDialog` (the shared `Dialog`, `size="3xl"`,
   `phoneSheet`, `initialFocus="container"`, no Change Theme, as the card) for the page, whose press
   or Surprise Me applies and closes.
-- **Page navigator**: `PageNavigatorClusterStrip` in `CanvasChrome`'s bottom-right cluster, after
+- **Page navigator**: `PageNavigatorClusterStrip` in `CanvasChrome`'s tools group, after
   `UndoRedoClusterStrip`, while not zen, not `isMobile` and `pagesMode.pages.length > 1`: `CLUSTER_STRIP`, 44 px
   previous / "n of m" / next (the place from `useCurrentPageId`, the first page before one is known),
   disabled at the ends; `onGo(id)` = `pagesMode.focusPage` (gliding); the palette follows the view.

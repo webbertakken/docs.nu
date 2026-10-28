@@ -53,6 +53,9 @@ describe('the Shapes flyout', () => {
     fireEvent.pointerEnter(screen.getByRole('button', { name: 'Shapes' }), {
       pointerType: 'mouse',
     });
+    fireEvent.pointerMove(screen.getByRole('button', { name: 'Shapes' }), {
+      pointerType: 'mouse',
+    });
     expect(flyout()).toBeTruthy();
     expect(document.activeElement).toBe(field());
   });
@@ -185,6 +188,9 @@ describe('the Shapes flyout', () => {
     fireEvent.pointerEnter(screen.getByRole('button', { name: 'Shapes' }), {
       pointerType: 'mouse',
     });
+    fireEvent.pointerMove(screen.getByRole('button', { name: 'Shapes' }), {
+      pointerType: 'mouse',
+    });
     fireEvent.keyDown(field(), { key: 'Escape' });
     expect(flyout()).toBeNull();
     expect(document.activeElement).toBe(document.body);
@@ -196,9 +202,11 @@ describe('the Shapes flyout', () => {
       renderDock();
       const shapes = screen.getByRole('button', { name: 'Shapes' });
       fireEvent.pointerEnter(shapes, { pointerType: 'mouse' });
+      fireEvent.pointerMove(shapes, { pointerType: 'mouse' });
       fireEvent.pointerLeave(shapes, { pointerType: 'mouse' });
       // Crossing the gap into the flyout keeps it open.
       fireEvent.pointerEnter(flyout()!, { pointerType: 'mouse' });
+      fireEvent.pointerMove(flyout()!, { pointerType: 'mouse' });
       act(() => {
         vi.advanceTimersByTime(1000);
       });
@@ -220,6 +228,7 @@ describe('the Shapes flyout', () => {
       renderDock();
       const shapes = screen.getByRole('button', { name: 'Shapes' });
       fireEvent.pointerEnter(shapes, { pointerType: 'mouse' });
+      fireEvent.pointerMove(shapes, { pointerType: 'mouse' });
       fireEvent.keyDown(field(), { key: 'h' });
       fireEvent.change(field(), { target: { value: 'h' } });
       fireEvent.pointerLeave(shapes, { pointerType: 'mouse' });

@@ -72,6 +72,9 @@ type Machine = {
   dismissed: boolean;
   suppressClick: boolean;
   pressStart: { x: number; y: number } | null;
+  // The pointer has moved over the trigger since it entered (an enter alone may be the layout moving the trigger
+  // under a resting pointer).
+  pointed: boolean;
 } & Record<TimerName, Timer>;
 
 const newMachine = (): Machine => ({
@@ -84,6 +87,7 @@ const newMachine = (): Machine => ({
   dismissed: false,
   suppressClick: false,
   pressStart: null,
+  pointed: false,
   openTimer: null,
   closeTimer: null,
   pressTimer: null,
@@ -179,15 +183,15 @@ export function useHint(kind: HintKind): HintState {
       const m = machine.current;
       m.overTrigger = true;
       clearTimers(m, 'closeTimer');
-      if (m.open || m.dismissed || m.openTimer !== null) return;
-      const delay = OPEN_DELAY_MS[kind];
-      if (delay === 0 || isHintWarm(kind, Date.now())) show('pointer');
-      else m.openTimer = setTimeout(() => show('pointer'), delay);
+      // Not yet: Chrome reports an enter when the layout moves the trigger under a resting pointer (a dialog closing,
+      // a group sliding in), and nobody pointed at it then. The pointer's first move over the trigger opens it
+      // (onPointerMoveCapture; tooltips-hover-cards-popovers.md "Only a moving pointer opens it").
     },
     onPointerLeave: (e) => {
       if (e.pointerType === 'touch') return;
       const m = machine.current;
       m.overTrigger = false;
+      m.pointed = false;
       clearTimers(m, 'openTimer');
       settle();
     },
@@ -211,7 +215,16 @@ export function useHint(kind: HintKind): HintState {
     },
     onPointerMoveCapture: (e) => {
       const m = machine.current;
-      if (e.pointerType !== 'touch' || m.pressTimer === null || !m.pressStart) return;
+      if (e.pointerType !== 'touch') {
+        if (!m.overTrigger || m.pointed) return;
+        m.pointed = true;
+        if (m.open || m.dismissed || m.openTimer !== null) return;
+        const delay = OPEN_DELAY_MS[kind];
+        if (delay === 0 || isHintWarm(kind, Date.now())) show('pointer');
+        else m.openTimer = setTimeout(() => show('pointer'), delay);
+        return;
+      }
+      if (m.pressTimer === null || !m.pressStart) return;
       const moved = Math.hypot(e.clientX - m.pressStart.x, e.clientY - m.pressStart.y);
       if (moved > HINT_LONG_PRESS_SLOP_PX) clearTimers(m, 'pressTimer');
     },

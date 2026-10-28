@@ -197,6 +197,8 @@ function bandVars(
     '--plan-band-card-h': `${Math.round(((BAND_CARD_PX - 2) * toolbarScale + 2) * 10) / 10}px`,
     '--plan-band-left': `${band.left}px`,
     '--plan-band-mid': `${band.mid}px`,
+    // Clear of the top line's actions group at the top right (HeaderBand `end`).
+    '--plan-band-end': `${band.end}px`,
   };
 }
 

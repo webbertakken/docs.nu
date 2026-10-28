@@ -55,6 +55,11 @@ const advance = (ms: number) =>
     vi.advanceTimersByTime(ms);
   });
 const mouse = { pointerType: 'mouse' };
+// A pointer moving onto the trigger: its enter, then its first move over it.
+const pointTo = (el: HTMLElement) => {
+  fireEvent.pointerEnter(el, mouse);
+  fireEvent.pointerMove(el, mouse);
+};
 const touch = { pointerType: 'touch' };
 
 // jsdom has no keyboard-modality heuristic; say which focus is visible.
@@ -82,7 +87,7 @@ afterEach(() => {
 describe('useHint, tooltip on pointer', () => {
   it('opens after the delay, not before', () => {
     render(<Harness kind="tooltip" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     advance(TOOLTIP_OPEN_DELAY_MS - 1);
     expect(tip()).toBeNull();
     advance(1);
@@ -91,7 +96,7 @@ describe('useHint, tooltip on pointer', () => {
 
   it('never opens when the pointer leaves first', () => {
     render(<Harness kind="tooltip" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     advance(TOOLTIP_OPEN_DELAY_MS / 2);
     fireEvent.pointerLeave(wrapper(), mouse);
     advance(TOOLTIP_OPEN_DELAY_MS * 2);
@@ -109,15 +114,38 @@ describe('useHint, tooltip on pointer', () => {
 describe('useHint, hover card on pointer', () => {
   it('opens at once', () => {
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     expect(tip()).not.toBeNull();
+  });
+
+  // docs/specs/004-interface-design/tooltips-hover-cards-popovers.md "Only a moving pointer opens it": the browser
+  // reports an enter when the layout moves a control under a resting pointer; nobody pointed at it.
+  it('stays shut for a control the layout moved under a resting pointer', () => {
+    render(<Harness kind="hover-card" />);
+    fireEvent.pointerEnter(wrapper(), mouse);
+    expect(tip()).toBeNull();
+  });
+
+  it("opens on the pointer's first move over it", () => {
+    render(<Harness kind="hover-card" />);
+    fireEvent.pointerEnter(wrapper(), mouse);
+    fireEvent.pointerMove(button(), mouse);
+    expect(tip()).not.toBeNull();
+  });
+
+  it('forgets the enter when the pointer leaves without moving', () => {
+    render(<Harness kind="hover-card" />);
+    fireEvent.pointerEnter(wrapper(), mouse);
+    fireEvent.pointerLeave(wrapper(), mouse);
+    fireEvent.pointerMove(button(), mouse);
+    expect(tip()).toBeNull();
   });
 });
 
 describe('useHint, preview on pointer', () => {
   it('opens after the longer preview delay, not before', () => {
     render(<Harness kind="preview" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     advance(PREVIEW_OPEN_DELAY_MS - 1);
     expect(tip()).toBeNull();
     advance(1);
@@ -130,16 +158,16 @@ describe('useHint, preview on pointer', () => {
         <Harness kind="preview" />
       </>,
     );
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     advance(PREVIEW_OPEN_DELAY_MS);
     fireEvent.pointerLeave(wrapper(), mouse);
     advance(HINT_CLOSE_GRACE_MS);
     expect(tip()).toBeNull();
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     expect(tip()).not.toBeNull();
     fireEvent.pointerLeave(wrapper(), mouse);
     advance(HINT_CLOSE_GRACE_MS + PREVIEW_WARMUP_MS);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     expect(tip()).toBeNull();
     advance(PREVIEW_OPEN_DELAY_MS);
     expect(tip()).not.toBeNull();
@@ -172,7 +200,7 @@ describe('useHint, keyboard focus', () => {
     focusVisible(true);
     render(<Harness kind="tooltip" />);
     fireEvent.focus(button());
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.pointerLeave(wrapper(), mouse);
     advance(HINT_CLOSE_GRACE_MS * 5);
     expect(tip()).not.toBeNull();
@@ -194,7 +222,7 @@ describe('useHint, Escape', () => {
     const outer = vi.fn();
     window.addEventListener('keydown', outer);
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
     act(() => {
       document.body.dispatchEvent(event);
@@ -207,19 +235,19 @@ describe('useHint, Escape', () => {
 
   it('stays dismissed until the pointer leaves and returns', () => {
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.keyDown(document.body, { key: 'Escape' });
     fireEvent.pointerMove(wrapper(), mouse);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     expect(tip()).toBeNull();
     fireEvent.pointerLeave(wrapper(), mouse);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     expect(tip()).not.toBeNull();
   });
 
   it('ignores other keys', () => {
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.keyDown(document.body, { key: 'a' });
     expect(tip()).not.toBeNull();
   });
@@ -228,19 +256,21 @@ describe('useHint, Escape', () => {
 describe('useHint, hoverable', () => {
   it('stays open when the pointer crosses onto the hint within the grace', () => {
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.pointerLeave(wrapper(), mouse);
     advance(HINT_CLOSE_GRACE_MS - 1);
     fireEvent.pointerEnter(tip()!, mouse);
+    fireEvent.pointerMove(tip()!, mouse);
     advance(HINT_CLOSE_GRACE_MS * 5);
     expect(tip()).not.toBeNull();
   });
 
   it('closes after the grace once the pointer leaves the hint too', () => {
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.pointerLeave(wrapper(), mouse);
     fireEvent.pointerEnter(tip()!, mouse);
+    fireEvent.pointerMove(tip()!, mouse);
     fireEvent.pointerLeave(tip()!, mouse);
     advance(HINT_CLOSE_GRACE_MS);
     expect(tip()).toBeNull();
@@ -248,7 +278,7 @@ describe('useHint, hoverable', () => {
 
   it('closes after the grace when the pointer goes elsewhere', () => {
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.pointerLeave(wrapper(), mouse);
     advance(HINT_CLOSE_GRACE_MS - 1);
     expect(tip()).not.toBeNull();
@@ -260,14 +290,14 @@ describe('useHint, hoverable', () => {
 describe('useHint, pressing', () => {
   it('closes an open hint', () => {
     render(<Harness kind="hover-card" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.pointerDown(button(), mouse);
     expect(tip()).toBeNull();
   });
 
   it('sees the press even when the control stops it from bubbling', () => {
     render(<Harness kind="hover-card" stopPresses />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.pointerDown(button(), mouse);
     expect(tip()).toBeNull();
   });
@@ -284,7 +314,7 @@ describe('useHint, pressing', () => {
 
   it('cancels a pending tooltip until the pointer leaves', () => {
     render(<Harness kind="tooltip" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     fireEvent.pointerDown(button(), mouse);
     advance(TOOLTIP_OPEN_DELAY_MS * 2);
     expect(tip()).toBeNull();
@@ -358,7 +388,7 @@ describe('useHint, surface events', () => {
         <Harness kind="hover-card" />
       </div>,
     );
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     const surface = tip()!;
     fireEvent.pointerDown(surface, mouse);
     fireEvent.mouseDown(surface);
@@ -371,7 +401,7 @@ describe('useHint, surface events', () => {
 describe('useHint, lifecycle', () => {
   it('clears its timers on unmount', () => {
     const { unmount } = render(<Harness kind="tooltip" />);
-    fireEvent.pointerEnter(wrapper(), mouse);
+    pointTo(wrapper());
     unmount();
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -385,7 +415,9 @@ describe('useHint, lifecycle', () => {
     );
     const [first, second] = screen.getAllByTestId('wrapper') as [HTMLElement, HTMLElement];
     fireEvent.pointerEnter(first, mouse);
+    fireEvent.pointerMove(first, mouse);
     fireEvent.pointerEnter(second, mouse);
+    fireEvent.pointerMove(second, mouse);
     expect(screen.getAllByRole('tooltip')).toHaveLength(1);
   });
 });

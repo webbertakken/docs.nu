@@ -36,7 +36,7 @@ exhaustive — each file lands in the bucket that owns its concern):
 - `panels/` — side/floating panels (`CollaboratePanel`,
   `AiPanel`, `GalleryPane`, Explorer surfaces).
 - `palette/` — palette + context-menu tiles/rows.
-- `chrome/` — header, toolbars, docks, tab bar.
+- `chrome/` — the two lines' toolbar groups, toolbars, docks, the tab list.
 - `toast/`: the toast stack, card, queue, timer and floor ([Toasts](../004-interface-design/toasts.md)); `useToast` stays in `hooks/ui/`.
 - `primitives/` — local leaves (`CloseIcon`, `Portal`, chart leaves) not
   promoted to `@livedoc/ui`.

@@ -5,6 +5,7 @@
 import type { ReactNode } from 'react';
 import { Label, Panel, Scene, Tile } from './primitives';
 import { SelectGlyph } from './palette-modes-parts';
+import { BrandGroup, DocumentGroup, ToolsGroup } from './editor-lines';
 
 // The strip's element tiles, drawn as the simple outlines the real tiles use.
 function ShapeGlyph({
@@ -185,44 +186,16 @@ export function stripCategory(x: number, name: string): { left: number; w: numbe
   return slot ? { left: slot.left, w: slot.w } : { left: x, w: 0 };
 }
 
-/** The top-left card, its top-left corner at (x, y): the menu button (☰) and, unless `menuOnly`
- *  (a phone), the open tab's name beside it. 62 wide (34 menu-only) and 32 tall. */
-export function MenuCard({ x, y, menuOnly = false }: { x: number; y: number; menuOnly?: boolean }) {
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={menuOnly ? 34 : 62}
-        height={32}
-        rx={9}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <path
-        d={`M${x + 8} ${y + 10}h14M${x + 8} ${y + 16}h14M${x + 8} ${y + 22}h14`}
-        className="stroke-slate-500"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-      />
-      {!menuOnly && (
-        <>
-          <line x1={x + 29} y1={y + 9} x2={x + 29} y2={y + 23} className="stroke-slate-200" />
-          <Label x={x + 34} y={y + 16} size={10} tone="strong">
-            Tab 1
-          </Label>
-        </>
-      )}
-    </g>
-  );
+/** The brand group at the top left, its top-left corner at (x, y): Back, the menu button and the mode switch
+ *  (editor-lines.tsx). Named so the strip's scenes read as they always did. */
+export function MenuCard({ x, y }: { x: number; y: number }) {
+  return <BrandGroup x={x} y={y} />;
 }
 
-/** The editor's top row and bottom row: the menu button and the tab's name top-left,
- *  the strip across the top (ending in Search), and Undo and Redo, Layers and the Theme
- *  paintbrush, then the zoom bottom-right. */
+/** The editor's two lines, reduced to what this article is about: the brand group top-left and the strip across the
+ *  top (ending in Search); the tools group bottom-left and the document group bottom-right. */
 export function ToolbarLayoutOverview() {
   const leader = { className: 'stroke-slate-300', strokeWidth: 1 } as const;
-  const ink = { className: 'stroke-slate-500', strokeWidth: 1.4, fill: 'none' } as const;
   return (
     <Scene w={420} h={200}>
       <MenuCard x={8} y={16} />
@@ -230,7 +203,7 @@ export function ToolbarLayoutOverview() {
       {/* Two rows of labels: side by side, neighbouring labels ran into each other. The lower row
           hangs from its control on a thin leader through the gap in the row above. */}
       <Label x={10} y={62} size={10} tone="muted">
-        Explorer, mode
+        Back, Explorer, mode
       </Label>
       <line x1={99} y1={51} x2={99} y2={70} {...leader} />
       <Label x={99} y={80} size={10} anchor="middle" tone="muted">
@@ -244,51 +217,17 @@ export function ToolbarLayoutOverview() {
       <Label x={78 + STRIP_W - 18} y={80} size={10} anchor="middle" tone="muted">
         Search
       </Label>
-      {/* The bottom row: Undo and Redo, Layers and the paintbrush, then zoom. */}
-      <rect
-        x={170}
+      {/* The bottom line: the tools group at the left, the document group at the right. */}
+      <ToolsGroup x={8} y={158} />
+      <DocumentGroup
+        right={412}
         y={158}
-        width={60}
-        height={26}
-        rx={6}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
+        name={null}
+        role={false}
+        tab="Tab 1"
+        count={2}
+        people={[]}
       />
-      <line x1={200} y1={163} x2={200} y2={179} className="stroke-slate-200" strokeWidth={1.2} />
-      <path d="M190 168 h-8 l3 -3 M182 168 l3 3 M182 168 h5 a4.5 4.5 0 0 1 0 9 h-2" {...ink} />
-      <path d="M210 168 h8 l-3 -3 M218 168 l-3 3 M218 168 h-5 a4.5 4.5 0 0 0 0 9 h2" {...ink} />
-      <rect
-        x={238}
-        y={158}
-        width={60}
-        height={26}
-        rx={6}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <line x1={268} y1={163} x2={268} y2={179} className="stroke-slate-200" strokeWidth={1.2} />
-      <path
-        d="M247 170 L253 167 L259 170 L253 173 Z M247 174 L253 177 L259 174"
-        {...ink}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M286 164 l2 2 l-6 6 l-2 -2 Z M280 172 c-2.5 0 -3.5 1.5 -3.5 4 c2.5 0 4 -1 4 -3.5"
-        {...ink}
-        strokeLinejoin="round"
-      />
-      <rect
-        x={306}
-        y={158}
-        width={98}
-        height={26}
-        rx={6}
-        className="fill-slate-50 stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <Label x={355} y={172} size={10} anchor="middle" tone="muted">
-        100%
-      </Label>
     </Scene>
   );
 }
