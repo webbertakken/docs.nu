@@ -169,7 +169,8 @@ describe('Activity: Plan cards assigned to the reader', () => {
     expect((await read()).map((c) => c.id)).toEqual(['doing']);
   });
 
-  it('follows the board: moving the done column re-opens a card', async () => {
+  // docs/specs/026-plan/plan-board.md "Done columns": Shipped is done by its name until Counts as Done is turned off.
+  it('follows the board: a column no longer counting as done re-opens a card', async () => {
     const { env, card, read } = await setUp();
     await card('shipped', { status: 'shipped' });
     expect(await read()).toEqual([]);
@@ -177,6 +178,14 @@ describe('Activity: Plan cards assigned to the reader', () => {
       env,
       'D',
       tab('t-plan', 'Plan', [board('b1', { ...KANBAN, doneColumnId: undefined })]),
+      1,
+    );
+    expect(await read()).toEqual([]);
+    const columns = KANBAN.columns.map((c) => ({ ...c, done: c.id === 'done' }));
+    await upsertTab(
+      env,
+      'D',
+      tab('t-plan', 'Plan', [board('b1', { ...KANBAN, doneColumnId: undefined, columns })]),
       1,
     );
     expect((await read()).map((c) => c.id)).toEqual(['shipped']);
