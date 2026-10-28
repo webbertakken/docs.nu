@@ -148,7 +148,7 @@ export const categories: Category[] = [
     slug: 'user-interface',
     title: 'User Interface',
     description:
-      'Get your bearings in the editor: the panels, toolbar, context menus, the Map, zoom and tab bars, quick controls, and power user mode.',
+      'Get your bearings in the editor: the panels, toolbar, context menus, the Map, zoom, the two lines and the tab list, quick controls, and power user mode.',
     articleCount: 10,
     kind: 'feature',
   },
@@ -278,10 +278,11 @@ export const articles: Article[] = [
   },
   {
     slug: 'tab-bar',
-    title: 'The Tab Bar',
+    title: 'The Tab List',
     description:
-      'Switch between the boards in a document, add new ones, and group them into folders.',
-    keywords: 'tabs boards pages switch bottom bar sheets add rename',
+      'Switch between the boards in a document from the tab list, add new ones, and group them into folders.',
+    keywords:
+      'tabs boards pages switch tab list tab stack active tab people here tab bar bottom line sheets add rename reorder',
     category: 'User Interface',
     categorySlug: 'user-interface',
   },
@@ -289,9 +290,9 @@ export const articles: Article[] = [
     slug: 'quick-controls',
     title: 'Quick Controls',
     description:
-      'The always-available Search, Settings and appearance controls at the end of the bottom bar.',
+      'The always-available Search, Report a Bug, Settings and appearance controls at the top right.',
     keywords:
-      'corner buttons actions settings search github bottom bar cluster appearance light dark',
+      'corner buttons actions group top line top right settings search report bug github cluster appearance light dark button labels',
     category: 'User Interface',
     categorySlug: 'user-interface',
   },
@@ -316,10 +317,11 @@ export const articles: Article[] = [
   },
   {
     slug: 'title-bar',
-    title: 'The Title Bar',
-    description: 'Rename the document, see who can see it, preview as a viewer, and Share or Copy.',
+    title: 'The Two Lines',
+    description:
+      'Where the controls sit, rename the document, see who can see it, preview as a viewer, and Share or Copy.',
     keywords:
-      'header top bar document name rename visibility private shared team public local only role pill editing viewing participating owner preview read only share copy make a copy account',
+      'two lines top line bottom line brand group actions group tools group document group back header title bar top bar document name rename visibility private shared team public local only role pill editing viewing participating owner preview read only share copy make a copy account',
     category: 'User Interface',
     categorySlug: 'user-interface',
   },
@@ -376,7 +378,7 @@ export const articles: Article[] = [
     slug: 'diagram-tour',
     title: 'The Diagram Tour',
     description:
-      'The interactive Diagram mode walkthrough, started from Start Diagram Tour in the bottom bar.',
+      'The interactive Diagram mode walkthrough, started from Start Diagram Tour at the top right.',
     keywords:
       'tour walkthrough guide onboarding show me around intro tutorial replay rerun steps welcome start tour button diagram mode palette',
     category: 'Getting Started',
@@ -914,7 +916,7 @@ export const articles: Article[] = [
     title: 'Mobile',
     description: 'The touch-friendly editor on a phone, with the toolbar strip and gestures.',
     keywords:
-      'phone iphone android touch gestures small screen toolbar dock mobile layout landscape sideways rotate header tabs hide fullscreen',
+      'phone iphone android touch gestures small screen toolbar dock mobile layout landscape sideways rotate header tabs hide fullscreen show controls hide controls',
     category: 'Supported Devices',
     categorySlug: 'supported-devices',
   },
@@ -991,7 +993,7 @@ export const articles: Article[] = [
     slug: 'avatar-tour',
     title: 'The Avatar Tour',
     description:
-      'A short, optional walkthrough of Avatar mode, started from Start Avatar Tour in the bottom bar.',
+      'A short, optional walkthrough of Avatar mode, started from Start Avatar Tour at the top right.',
     keywords:
       'avatar tour walkthrough onboarding intro introduction getting started guide tutorial first time learn character walk dress outfit hair behaviour reactions speech bubble message say talk chat push shove replay rerun settings',
     category: 'Selection Modes',
@@ -1611,7 +1613,7 @@ export const articles: Article[] = [
     slug: 'draw-tour',
     title: 'The Draw Tour',
     description:
-      "A short, optional walkthrough of Draw mode's dock, started from Start Draw Tour in the bottom bar.",
+      "A short, optional walkthrough of Draw mode's dock, started from Start Draw Tour at the top right.",
     keywords:
       'draw tour tour walkthrough onboarding intro introduction getting started guide tutorial first time learn draw mode whiteboard sketch pen pens marker markers highlighter eraser path tool shapes sticky dock settings background cursor shape recognition replay rerun settings accessibility',
     category: 'Canvas',
@@ -1622,7 +1624,7 @@ export const articles: Article[] = [
     slug: 'workshop-tour',
     title: 'The Workshop Tour',
     description:
-      'A short, optional walkthrough of Workshop mode, started from Start Workshop Tour in the bottom bar.',
+      'A short, optional walkthrough of Workshop mode, started from Start Workshop Tour at the top right.',
     keywords:
       'workshop tour facilitate tour tour walkthrough onboarding intro introduction show me around getting started guide tutorial first time learn workshop mode session retro workshop timer vote poll session strip collaborate share participant replay rerun settings accessibility',
     category: 'Canvas',
@@ -1633,7 +1635,7 @@ export const articles: Article[] = [
     slug: 'plan-tour',
     title: 'The Plan Tour',
     description:
-      'A guided walkthrough of Plan mode on your own board or sheet, started from Start Boards Tour or Start Sheets Tour in the bottom bar.',
+      'A guided walkthrough of Plan mode on your own board or sheet, started from Start Boards Tour or Start Sheets Tour at the top right.',
     keywords:
       'plan tour tour walkthrough onboarding intro introduction show me around getting started guide tutorial example board example cards example sheet first time learn plan mode kanban board cards spreadsheet spreadsheets sheet sheets formulas replay rerun settings accessibility',
     category: 'Canvas',
@@ -1763,7 +1765,7 @@ export const articles: Article[] = [
     slug: 'pages-tour',
     title: 'The Pages Tour',
     description:
-      'A short, optional walkthrough for each kind of page, started from Start Pages Tour in the bottom bar or Show Me on any page.',
+      'A short, optional walkthrough for each kind of page, started from Start Pages Tour at the top right or Show Me on any page.',
     keywords:
       'pages tour tour walkthrough onboarding intro introduction getting started guide tutorial first time learn pages mode pages page name cog page settings layout background add page slides slide deck add to slides present presentation infographic article logo show me replay rerun settings accessibility',
     category: 'Canvas',
@@ -1812,7 +1814,7 @@ export const articles: Article[] = [
   {
     slug: 'tab-folders',
     title: 'Tab Folders',
-    description: 'Group related tabs under one named folder chip on the tab bar.',
+    description: 'Group related tabs under one named folder in the tab list.',
     keywords: 'group tabs organise organize collapse nest sections fan chip',
     category: 'Tabs',
     categorySlug: 'tabs',
