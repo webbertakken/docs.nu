@@ -266,8 +266,9 @@ export function duplicateElements(
 
 // Re-point element-to-element references after a caller has renamed some
 // element ids (old → new in `idMap`): arrow endpoints pinned to an element or
-// hung off another arrow (docs/specs/008-canvas/arrow-to-arrow.md), a mind-map node's parent (docs/specs/009-elements/mind-node.md) and a
-// portal's partner (docs/specs/009-elements/portal-element.md). A reference whose target isn't in the map is
+// hung off another arrow (docs/specs/008-canvas/arrow-to-arrow.md), a mind-map node's parent (docs/specs/009-elements/mind-node.md), a
+// portal's partner (docs/specs/009-elements/portal-element.md) and an attached badge's, step's or pointer note's host
+// (docs/specs/009-elements/badge.md). A reference whose target isn't in the map is
 // left alone. Element links are deliberately NOT touched: a link names its
 // tab as well as its element, and that is still the source tab.
 //
@@ -304,13 +305,17 @@ export function remapElementRefs<E extends Element>(
     // A flowchart's id is its first step's, so it renames with it; so does a step's lane.
     const chart = el.flowchartId !== undefined ? idMap.get(el.flowchartId) : undefined;
     const lane = el.flowLaneId !== undefined ? idMap.get(el.flowLaneId) : undefined;
-    if (!parent && !portal && !chart && !lane) return el;
+    // An attached badge, step or pointer note follows its host's new id (docs/specs/009-elements/badge.md);
+    // missed, a duplicated tab's chips named hosts on the SOURCE tab and came loose from their copies.
+    const host = el.attachedTo !== undefined ? idMap.get(el.attachedTo) : undefined;
+    if (!parent && !portal && !chart && !lane && !host) return el;
     return {
       ...el,
       ...(parent ? { mindParentId: parent } : {}),
       ...(portal ? { portalTarget: portal } : {}),
       ...(chart ? { flowchartId: chart } : {}),
       ...(lane ? { flowLaneId: lane } : {}),
+      ...(host ? { attachedTo: host } : {}),
     };
   });
 }
