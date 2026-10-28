@@ -21,7 +21,7 @@ import {
   type ElementDelta,
 } from '@livedoc/document';
 import { formatA1, layoutIndex } from '@livedoc/sheets';
-import { findCommentHost, removeComment, threadsOfTab } from '../comments';
+import { ANONYMOUS_AUTHOR, findCommentHost, removeComment, threadsOfTab } from '../comments';
 import {
   getDocument,
   getParticipant,
@@ -132,8 +132,8 @@ export async function newComment(
     id: crypto.randomUUID(),
     text,
     createdAt: Date.now(),
-    authorName: writer?.name ?? 'Anonymous',
-    authorColor: writer?.color ?? '#94a3b8',
+    authorName: writer?.name ?? ANONYMOUS_AUTHOR.name,
+    authorColor: writer?.color ?? ANONYMOUS_AUTHOR.color,
     authorId: owner,
     ...(ctx.token ? { tokenId: ctx.token.id } : {}),
     ...(mentions ? { mentions } : {}),
