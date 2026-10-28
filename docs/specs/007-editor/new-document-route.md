@@ -552,6 +552,9 @@ it cannot tell the difference from a direct visit.
   tour's pending flag (`markTourPending`) is written before the swap and
   read by the editor on mount, as it was across the hard navigation.
 - A failed create never hands off: the retryable error card shows instead.
+- **Every step of the create can fail to that card.** Settling the owner's identity (signing a guest id) and
+  loading a template's tabs and seeds are part of the create: either failing shows the error card, never leaves
+  `/new` on its creating screen with no way on.
 
 ### The opening screen
 

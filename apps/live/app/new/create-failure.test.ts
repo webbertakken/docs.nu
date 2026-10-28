@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ApiError } from '@/lib/api-client';
-import { createFailureCopy, createIdsFor } from './create-failure';
+import { attemptCreate, createFailureCopy, createIdsFor } from './create-failure';
 
 // The card a failed create on /new shows (docs/specs/007-editor/new-document-route.md "Placement
 // rides the create"): a refused placement will not clear on a retry, so it says why and offers
@@ -59,5 +59,33 @@ describe('createIdsFor', () => {
   it('keeps the failed attempt’s ids for its Retry, so a create that landed is not made twice', () => {
     const first = createIdsFor(null);
     expect(createIdsFor(first)).toEqual(first);
+  });
+});
+
+// Every step of the create runs inside one attempt (docs/specs/007-editor/new-document-route.md "Every step of the
+// create can fail to that card"): settling identity and loading a template's seeds included.
+describe('attemptCreate', () => {
+  it('hands back what the create made', async () => {
+    await expect(attemptCreate(async () => 7)).resolves.toEqual({ ok: true, value: 7 });
+  });
+
+  it('turns a failed identity into the connection card, never a stuck creating screen', async () => {
+    const settleIdentity = () => Promise.reject(new TypeError('Failed to fetch'));
+    const result = await attemptCreate(async () => {
+      await settleIdentity();
+      return 'created';
+    });
+    expect(result).toEqual({ ok: false, failure: createFailureCopy(new TypeError('x')) });
+  });
+
+  it('turns a template seed chunk that fails to load into the card', async () => {
+    const loadSeeds = (): Promise<never> => Promise.reject(new Error('Loading chunk 42 failed'));
+    const result = await attemptCreate(async () => loadSeeds());
+    expect(result.ok).toBe(false);
+  });
+
+  it('keeps a refused placement as its own card', async () => {
+    const result = await attemptCreate(() => Promise.reject(refused('folder_not_found', 404)));
+    expect(result).toMatchObject({ ok: false, failure: { action: 'choose' } });
   });
 });

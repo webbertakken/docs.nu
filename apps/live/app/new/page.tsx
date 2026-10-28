@@ -23,12 +23,7 @@ import { AnimatedLinesBackdrop } from '@/components/canvas/AnimatedLinesBackdrop
 import { useAccountApiBootstrap } from '@/hooks/persistence/useAccountApiBootstrap';
 import { useCtaAttribution } from './useCtaAttribution';
 import { apiCreateDocument, apiLoadSelf, apiSaveSelf } from '@/lib/api-client';
-import {
-  createFailureCopy,
-  createIdsFor,
-  type CreateFailure,
-  type CreateIds,
-} from './create-failure';
+import { attemptCreate, createIdsFor, type CreateFailure, type CreateIds } from './create-failure';
 import { offlineCreateDocument } from '@/lib/offline/offline-store';
 import { offlineWriteItem } from '@/lib/offline/offline-items';
 import { seedAuthor } from '@/lib/seed-author';
@@ -309,27 +304,29 @@ export default function NewDocumentPage() {
     markNameConfirmed();
     // Never create as the 'pending' placeholder — see resolveSelf above.
     const settleIdentity = resolveSelf;
-    // A document in This Browser has no owner on the server to wait for (docs/specs/006-document/offline-mode.md
-    // "Instant open"): identity settles in the background while it opens. A cloud create needs the owner.
-    const cloudOwner = offline ? null : await settleIdentity();
-    if (offline) {
-      void settleIdentity().catch((err: unknown) =>
-        debugLog(`[new] background identity failed: ${String(err)}`),
-      );
-    }
-    // Read before the create, so the new document is not in it. A cloud create has just settled identity, so the
-    // count's fetch is in flight: wait for it rather than miss the tour on a quick pick. This Browser opens at once
-    // and takes the count only if it is already in.
-    const priorDocuments = await documentCount.settled(offline ? 0 : undefined);
+    // Every step runs inside one attempt (create-failure.ts): signing the guest id and loading a template's seeds
+    // can fail as the write can, and each must reach the error card, never leave /new on "Creating" for good.
+    const attempt = await attemptCreate(async () => {
+      // A document in This Browser has no owner on the server to wait for (docs/specs/006-document/offline-mode.md
+      // "Instant open"): identity settles in the background while it opens. A cloud create needs the owner.
+      const cloudOwner = offline ? null : await settleIdentity();
+      if (offline) {
+        void settleIdentity().catch((err: unknown) =>
+          debugLog(`[new] background identity failed: ${String(err)}`),
+        );
+      }
+      // Read before the create, so the new document is not in it. A cloud create has just settled identity, so the
+      // count's fetch is in flight: wait for it rather than miss the tour on a quick pick. This Browser opens at once
+      // and takes the count only if it is already in.
+      const priorDocuments = await documentCount.settled(offline ? 0 : undefined);
 
-    // The template's tabs, card types and example cards, or one blank tab (lib/new-document-content.ts).
-    const { tabs, tab, itemTypes, seedItems } = await newDocumentContent({
-      templateKind,
-      themeId,
-      tabId,
-      via: 'new',
-    });
-    try {
+      // The template's tabs, card types and example cards, or one blank tab (lib/new-document-content.ts).
+      const { tabs, tab, itemTypes, seedItems } = await newDocumentContent({
+        templateKind,
+        themeId,
+        tabId,
+        via: 'new',
+      });
       if (offline) {
         // Offline Mode (docs/specs/006-document/offline-mode.md): create the document in IndexedDB only. This
         // also registers its id so every later load / save routes local. A template's Sheets are made with it, as
@@ -373,17 +370,19 @@ export default function NewDocumentPage() {
           intent: creationIntentOf(tab, templateFamilyOf(templateKind)),
         });
       }
-    } catch (err) {
-      // Create FAILED (network / 5xx / a refused placement for cloud, or no IndexedDB for
-      // offline). Don't navigate to an editor for a document that was never persisted (that
-      // lands on a 404). Surface the error card instead: Retry re-runs this exact create from
-      // lastCreateArgs; a refused placement offers another place.
-      const failure = createFailureCopy(err);
-      debugLog(`[new] create failed action=${failure.action}`);
+      return priorDocuments;
+    });
+    if (!attempt.ok) {
+      // Create FAILED (identity, a template's seeds, network / 5xx / a refused placement for cloud, or no IndexedDB
+      // for offline). Don't navigate to an editor for a document that was never persisted (that lands on a 404).
+      // Surface the error card instead: Retry re-runs this exact create from lastCreateArgs; a refused placement
+      // offers another place.
+      debugLog(`[new] create failed action=${attempt.failure.action}`);
       setSubmitting(false);
-      setCreateError(failure);
+      setCreateError(attempt.failure);
       return;
     }
+    const priorDocuments = attempt.value;
     // Anonymous telemetry (docs/specs/017-telemetry/telemetry.md): a document was created. No id or name is
     // sent — the `type` records only whether it's an Offline or Cloud document
     // (docs/specs/006-document/offline-mode.md). The chosen theme is recorded separately below.
@@ -419,6 +418,8 @@ export default function NewDocumentPage() {
   // start closed (Skip, Start Blank, a blank's link). The ref holds a second choice off while the store resolves.
   const [preparing, setPreparing] = useState(false);
   const creating = useRef(false);
+  // Set when a default create failed before it reached commitNewDocument: its Retry starts it again.
+  const retryDefaultCreate = useRef<(() => void) | null>(null);
   const createByDefault = async (kind: TemplateKind, blank: boolean) => {
     if (creating.current || submitting) return;
     creating.current = true;
@@ -426,9 +427,22 @@ export default function NewDocumentPage() {
     const placement = placementParamsFromSearch(window.location.search);
     const placed = !!(placement.folderId || placement.teamId);
     try {
-      const saveLocation = await resolveSaveLocation(placed, resolveSelf);
+      // Deciding the store can settle identity, which can fail: that failure reaches the error card too, and its
+      // Retry decides again (docs/specs/007-editor/new-document-route.md "Every step of the create can fail").
+      const located = await attemptCreate(() => resolveSaveLocation(placed, resolveSelf));
+      if (!located.ok) {
+        debugLog(`[new] save location failed action=${located.failure.action}`);
+        retryDefaultCreate.current = () => void createByDefault(kind, blank);
+        setCreateError(located.failure);
+        return;
+      }
+      retryDefaultCreate.current = null;
       explicitBlank.current = blank;
-      await commitNewDocument(kind, { saveLocation, ...placement, placementChosen: placed });
+      await commitNewDocument(kind, {
+        saveLocation: located.value,
+        ...placement,
+        placementChosen: placed,
+      });
     } finally {
       creating.current = false;
       setPreparing(false);
@@ -482,6 +496,12 @@ export default function NewDocumentPage() {
                 return;
               }
               setCreateError(null);
+              const retryDefault = retryDefaultCreate.current;
+              if (retryDefault) {
+                retryDefaultCreate.current = null;
+                retryDefault();
+                return;
+              }
               const a = lastCreateArgs.current;
               if (a) void commitNewDocument(a.kind, a.settings, a.ids);
             }}
