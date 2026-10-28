@@ -323,10 +323,11 @@ export function useIdentityBootstrap(opts: {
     }
     const initialShareCode = initialUrl.searchParams.get('s');
     // No path id and no share code on the editor's own route → the user landed on the placeholder
-    // route directly. Hand off to /new for the welcome flow. Any other address (a mistyped or retired
-    // page the not-found slot serves the editor for) is not found, never a new document: see load().
+    // route directly. Hand off to /new for the welcome flow, in place of this page: Back from /new never lands here
+    // again, where it would only hand off once more. Any other address (a mistyped or retired page the not-found
+    // slot serves the editor for) is not found, never a new document: see load().
     if (!initialId && !initialShareCode && isEditorPath(initialUrl.pathname)) {
-      window.location.assign(`${window.location.origin}/new`);
+      window.location.replace(`${window.location.origin}/new`);
       return;
     }
     const watchdog = armWatchdog();

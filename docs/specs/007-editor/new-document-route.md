@@ -131,7 +131,9 @@ titled **Document not found**. The card stands alone under the app header, with
 no Explorer panel beside it: its buttons are the way on (Open Explorer goes to
 `/explorer`, New Document to `/new`). An embed shows the card with New Document
 only, opening the app in a new tab. Only the editor's own empty route (`/document`,
-`/document/placeholder`) hands off to `/new`. Before, every address without a
+`/document/placeholder`) hands off to `/new`, in place of itself
+(`location.replace`): Back from `/new` never lands on the empty route again,
+where it would only hand off once more. Before, every address without a
 document id went to `/new`, so a mistyped or retired page opened the New
 Document wizard with no word of what went wrong.
 

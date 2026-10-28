@@ -135,6 +135,9 @@ Routes inside `apps/live/`:
   is what a returning person wants first.
 - **`/get-started/`**: sign-up, the same methods with a name field first (one **name**, not first and last). Its
   default destination is the welcome flow (`POST_AUTH_DEFAULT`, `/new`).
+- **Leaving is in place.** A code sign-in or sign-up goes to its destination in place of the auth page
+  (`location.replace`), as a visitor already signed in does, so Back from the destination never lands on an auth page
+  that would only send the person on again.
 - **Google's round trip** ends at better-auth's own callback (`/api/auth/callback/google`), which redirects to the
   destination the page asked for. There is no separate callback page: the destination is passed as better-auth's
   `callbackURL` (and `newUserCallbackURL` for a first sign-in), and a failed round trip comes back to the page it
