@@ -255,7 +255,7 @@ describe('buildOpenApiDocument', () => {
       paths: Record<string, Record<string, { security: Record<string, string[]>[] }>>;
     };
     expect(doc.components.securitySchemes.Bearer!.description).toMatch(
-      /^A LiveDoc session token or an API token \(`lvd_…`\)\./,
+      /^A LiveDoc session token or an API token \(`livedoc_…`\)\./,
     );
     const securityOf = (auth: string) => {
       const route = ROUTE_MANIFEST.find((r) => r.auth === auth)!;

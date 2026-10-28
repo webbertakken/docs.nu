@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from './api/core';
 import { handoverFailureCopy, mintAndHandOver, type HandoverSteps } from './oauth-handover';
 
-const MINTED = { token: 'lvd_secret', id: 'tok-1', expiresAt: 1_800_000_000_000 };
+const MINTED = { token: 'livedoc_secret', id: 'tok-1', expiresAt: 1_800_000_000_000 };
 
 function steps(over: Partial<HandoverSteps<string>> = {}) {
   return {
