@@ -47,6 +47,7 @@ import { useSheetDeleteGuard } from '@/hooks/sheets/useSheetDeleteGuard';
 import type { View } from '@/lib/viewport-store';
 import { useKeyboardAvoidance } from '@/hooks/canvas/useKeyboardAvoidance';
 import {
+  use,
   useCallback,
   useContext,
   useEffect,
@@ -248,6 +249,7 @@ import { useEditorPersistence } from './editor-persistence';
 import { useEditorRealtime } from './editor-realtime';
 import { readEditorSeed } from './seed-pending-document';
 import { EditorSeedIdContext } from './editor-seed-context';
+import { browser } from 'react-dom';
 import { useAssignRef, useLatest } from '@/hooks/ui/useLatest';
 import { announcePageLocked, guardLockedPagesIn, type PageLockGuard } from '@/lib/page-lock-guard';
 import { usePageLockedIds } from '@/hooks/editor/usePageLockedIds';
@@ -282,6 +284,9 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   const surface = opts.surface ?? 'app';
   const { embedMode, workbenchMode, appChrome } = surfaceFlags(surface);
   const workbench = useWorkbenchDocumentSession();
+  // In the browser only (docs/specs/003-system-architecture/react-state-and-effects.md "Rendering in the browser
+  // only"): the prerender holds the opening screen, and the seed below reads the address.
+  use(browser());
   // A document just made opens from memory in this very first render (seed-pending-document.ts): no loading pass.
   const seedId = useContext(EditorSeedIdContext);
   const [seed] = useState(() =>
