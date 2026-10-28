@@ -82,7 +82,7 @@ export const NEW_DOCUMENT_BLANKS: readonly NewDocumentBlank[] = [
       'contact-list',
       'sales-pipeline',
     ],
-    picker: { mode: 'plan', group: 'spreadsheets' },
+    picker: { mode: 'plan', group: 'sheets' },
   },
   {
     id: 'board',

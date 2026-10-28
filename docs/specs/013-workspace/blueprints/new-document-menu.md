@@ -67,7 +67,7 @@ function startNewDocument(request: NewDocumentRequest): void;
 | diagram    | `blank`             | Start Diagramming's Recommended less its blank, then `swimlane`                                                 | `diagram` / `recommended`  |
 | whiteboard | `whiteboard`        | Start Drawing's Recommended less its blank, then `paper-prototype`                                              | `draw` / `recommended`     |
 | page       | `blank-article`     | `article`, `working-backwards`, `resume`, `recipe-card`                                                         | `pages` / `articles`       |
-| sheet      | `blank-spreadsheet` | `budget-planner`, `timesheet`, `invoice`, `expense-report`, `contact-list`, `sales-pipeline`                    | `plan` / `spreadsheets`    |
+| sheet      | `blank-spreadsheet` | `budget-planner`, `timesheet`, `invoice`, `expense-report`, `contact-list`, `sales-pipeline`                    | `plan` / `sheets`          |
 | board      | `blank-board`       | `kanban`, `bug-triage`, `weekly-planner`, `content-calendar`, `hiring-pipeline`, `feedback-board`               | `plan` / `boards`          |
 | slides     | `blank-slide-deck`  | `slide-deck`, `launch-keynote`, `quarterly-review`, `team-welcome`, `workshop-kickoff`                          | `pages` / `slides`         |
 | form       | `blank-form`        | `feedback-form`, `bug-report-form`, `feature-request-form`, `rsvp-form`, `job-application-form`, `contact-form` | `plan` / `forms`           |
@@ -132,8 +132,8 @@ function startNewDocument(request: NewDocumentRequest): void;
 - Face: `aria-label="New {name}"`. Caret: `aria-label="More new document choices"`, `aria-haspopup="menu"`,
   `aria-expanded`, `aria-controls`.
 - List: `role="menu"` `aria-label="New Document"`; rows `role="menuitem"`, `aria-label="{name}, blank"`,
-  `aria-keyshortcuts="{n}"`; the selected row is the roving tab stop. Pane: `role="group"`
-  `aria-label="{name} templates"`, cards are buttons.
+  `aria-keyshortcuts="{n}"`; the selected row is the roving tab stop. The pane's templates: `role="group"`
+  `aria-label="{name} templates"`; every card, the blank card and All templates are `menuitem`s.
 - Keys: `new-document-keys.ts` maps Up, Down (wrap), Home, End, Left (into the pane's first focusable), Right (from the
   pane's right column back to the selected row), Enter, digits, Escape. The pane's cards move as a 3-column grid.
 - Contrast: key caps and lines `text-slate-500` on white, `text-slate-400` on slate-900 (both at least 4.5:1); focus

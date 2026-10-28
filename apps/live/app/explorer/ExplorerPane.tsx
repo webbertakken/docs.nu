@@ -24,7 +24,6 @@ import { explorerPathFor } from './routes';
 import { rowLocation } from './row-location';
 import { paneHeaderActions } from './pane-header-actions';
 import { useTagsPage } from './tags/useTagsPage';
-import { assignAppLocation } from '@/lib/app-location';
 
 // The three layouts of a browse section, by the toggle.
 const VIEW_COMPONENTS = { list: ListView, card: CardView, details: DetailsView } as const;
@@ -225,9 +224,13 @@ export function ExplorerPane() {
 
   // Which of New document, New folder and Import from this section offers (pane-header-actions.ts).
   const offers = paneHeaderActions(selected.kind);
-  const newDocument = offers.newDocument
-    ? () => assignAppLocation(selected.kind === 'folder' ? `/new?folder=${selected.id}` : '/new')
-    : undefined;
+  // Where a new document goes: the folder shown, else no choice (docs/specs/013-workspace/new-document-menu.md
+  // "Where it goes"). Memoised so the menu's handlers keep their identity across renders.
+  const folderId = selected.kind === 'folder' ? selected.id : null;
+  const newDocumentPlace = useMemo(
+    () => (offers.newDocument ? (folderId ? { folderId } : {}) : undefined),
+    [offers.newDocument, folderId],
+  );
   // Imports sit beside New document: imported boards land where new documents do.
   const imports = useExplorerImport({
     ownerId,
@@ -301,7 +304,7 @@ export function ExplorerPane() {
         }
         viewMode={isBrowse ? viewMode : undefined}
         onSetViewMode={isBrowse ? setViewMode : undefined}
-        onCreateDocument={newDocument}
+        newDocumentPlace={newDocumentPlace}
         onCreateFolder={
           offers.newFolder
             ? () => void createFolder(selected.kind === 'folder' ? selected.id : null)

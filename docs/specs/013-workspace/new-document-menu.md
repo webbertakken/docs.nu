@@ -123,8 +123,8 @@ A blank is on screen, editable, **within 200 ms of the click**, and a template w
 ## Keyboard and screen readers
 
 - The face and the caret are buttons; the caret has `aria-haspopup="menu"` and `aria-expanded`.
-- The list is a `menu` of `menuitem`s named "<name>, blank" with `aria-keyshortcuts` 1 to 8. The pane's cards are
-  buttons in a labelled group ("Diagram templates").
+- The list is a `menu` of `menuitem`s named "<name>, blank" with `aria-keyshortcuts` 1 to 8. The pane's template
+  cards are `menuitem`s in a labelled `group` ("Diagram templates"), as are the blank card and All templates.
 - **Up and Down** move along the list, wrapping; **Home** and **End** reach its ends. **Enter** makes the selected
   blank. **1 to 8** make that blank from anywhere in the menu. **Left** moves into the pane (the blank card, then
   the templates, then All templates, as a grid), **Right** from the pane's right column back to the list. **Escape**
@@ -138,7 +138,7 @@ button at its end swaps the sheet to that blank's pane, with **Back**. New Folde
 
 ## The `/new` wizard
 
-The Explorer no longer goes to `/new`. The wizard stays for the links that ask for it (the public sites, `/new?mode=`,
+The New Document menu never goes through `/new`. The wizard stays for the links that ask for it (the public sites, `/new?mode=`,
 a blank's or template's link), unchanged ([New document route](../007-editor/new-document-route.md)).
 
 ## Telemetry
