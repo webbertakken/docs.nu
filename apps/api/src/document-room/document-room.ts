@@ -11,8 +11,11 @@ import {
   levelAtLeast,
   parseBuildId,
   parseStoredLevel,
+  ROOM_FULL_CLOSE,
+  ROOM_FULL_REASON,
   ROOM_PING,
   ROOM_PONG,
+  roomIsFull,
   type AccessLevel,
 } from '@livedoc/api-schema';
 import { opForTheWire, stampCommentAuthor } from '@livedoc/document';
@@ -390,6 +393,10 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     // owned by this Durable Object.
     const client = pair[0];
     const server = pair[1];
+    // A full room answers the upgrade and closes it at once (docs/specs/015-api/api.md "A room holds at most
+    // 100 connections"): the close code is the only thing a browser can read, an HTTP refusal reads as 1006.
+    if (this.turnAwayIfFull(server, request.headers.get(DOCUMENT_ID_HEADER)))
+      return new Response(null, { status: 101, webSocket: client });
     // Server-resolved facts (set by the api worker before forwarding the upgrade): room-session.ts.
     const v = verifiedSessionOf(request);
     this.acceptSession(
@@ -433,6 +440,17 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     console.info('[room-link] joined on a changed link', { kind: op.kind });
     this.sendTo(ws, { kind: 'op', from: 'system', op });
     this.closeSockets((each) => (each === ws ? [SHARE_LINK_CHANGED_CLOSE, op.kind] : null));
+  }
+
+  // Turn an upgrade away when the room already holds ROOM_MAX_CONNECTIONS sockets: accepted only to be closed
+  // with ROOM_FULL_CLOSE, never handed to the hibernation runtime, so it holds no session and receives nothing.
+  turnAwayIfFull(server: WebSocket, documentId: string | null = null): boolean {
+    const connections = this.state.getWebSockets().length;
+    if (!roomIsFull(connections)) return false;
+    console.warn('[room] full', { documentId, connections });
+    server.accept();
+    server.close(ROOM_FULL_CLOSE, ROOM_FULL_REASON);
+    return true;
   }
 
   // Admit one server-side socket into the room: pin its hibernation-proof

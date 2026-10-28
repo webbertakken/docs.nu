@@ -628,6 +628,7 @@ export * from './page-views';
 export * from './read-notes';
 export * from './poll';
 export * from './room-messages';
+export * from './room-capacity';
 export * from './changesets';
 export * from './items';
 export * from './sheets';
