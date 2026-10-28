@@ -285,6 +285,9 @@ type UserPreferences = {
   // Element tours (docs/specs/007-editor/element-tours.md): the toured element kinds whose offer has been answered
   // (Play or Cancel). Surfaced in Settings as Tours › Show Me, one switch per kind (inverted).
   elementTourKinds?: ElementTourKind[];
+  // The toured kinds whose element tour this person opted in to (a Settings switch turned on); none by default,
+  // so no element tour is offered until they opt in.
+  elementTourOffers?: ElementTourKind[];
   // Counts every element tour as answered while Power user mode is on; written by its preset.
   elementToursSeen?: boolean;
   // The presenter settings (docs/specs/012-collaboration/presentation-mode.md "Presenter settings"), as one object,
@@ -667,7 +670,9 @@ and the dialog stays as the one complete, browsable index of them.
   switches in the data model). The panel's other rows nest beneath the
   switch (`parent`) and are offered only while it is on, the way power
   user mode's rows follow that mode: a setting for a panel you have
-  turned off has nothing to act on. The Map's switch keeps its stored key
+  turned off has nothing to act on. A switch that only summarises its rows
+  (`summarisesChildren`: **Show Me on Every Element**) gates nothing; its rows
+  stay offered while it is off. The Map's switch keeps its stored key
   (`showMinimap`) and its telemetry tokens, only its label changed. A parent's sub-categories follow it directly in the catalogue. In the
   list the parent is an **accordion**: its sub-categories sit indented beneath
   it only while it is expanded, so they do not take up the list all the time.
@@ -805,9 +810,10 @@ and the dialog stays as the one complete, browsable index of them.
 
   Below the mode tours, **Show Me** (element tours, named Show Me in the interface) is its own section, a closed
   accordion naming how many are on ([Element tours](element-tours.md#settings)): **Show Me on Every Element**, built
-  as Plan Tours is (`tourTracksSwitch`) against `elementToursSeen` and `elementTourKinds`, with one switch per toured
-  kind nested under it, named for the element (**Sankey Diagram**). Element tours
-  need no relaunch: the offer shows the next time such an element is selected. A category may mark any section
+  against `elementToursSeen`, `elementTourKinds` and `elementTourOffers`, with one switch per toured kind nested
+  under it, named for the element (**Sankey Diagram**). Every one reads off until the person opts in: on opts the
+  kind in and forgets its answer, off answers it. Element tours need no relaunch: the offer shows the next time such
+  an element is selected. A category may mark any section
   closed this way (`collapsedSections`); Settings opened on one of its rows opens it.
 
   **Toggle groups.** Several related switches that share one description are

@@ -6,9 +6,9 @@ import { tourTrackSeen, withTracksAnswered } from './tour-tracks';
 import type { UserPreferences } from './user-preferences';
 
 // Element tours (docs/specs/007-editor/element-tours.md): a tour of one complex element type, offered beside the
-// selection toolbar the first time a person selects one. Each toured kind offers itself once ever: the synced
-// `elementTourKinds` lists the kinds answered (Play or Cancel); `elementToursSeen` counts them all only for a power
-// user (tourTrackSeen), as the Pages tour's kinds do.
+// selection toolbar only for the kinds a person opted in to (the synced `elementTourOffers`, Settings › Tours ›
+// Show Me), and then once: the synced `elementTourKinds` lists the kinds answered (Play or Cancel);
+// `elementToursSeen` counts them all only for a power user (tourTrackSeen), as the Pages tour's kinds do.
 
 export const ELEMENT_TOUR_KINDS = [
   'sankey',
@@ -130,7 +130,16 @@ export function canTourElement(
   }
 }
 
+/** Whether `kind` is offered no more: never opted in to, answered, or off for a power user. */
 export function elementTourSeen(
+  prefs: UserPreferences | null | undefined,
+  kind: ElementTourKind,
+): boolean {
+  if (!(prefs?.elementTourOffers ?? []).includes(kind)) return true;
+  return elementTourAnswered(prefs, kind);
+}
+
+function elementTourAnswered(
   prefs: UserPreferences | null | undefined,
   kind: ElementTourKind,
 ): boolean {
@@ -146,18 +155,33 @@ export function markElementTourSeen(
 }
 
 /**
- * The preferences with `kind` offered again (the Settings switch turned on): its answer forgotten, and the power
- * user's blanket flag lifted, which would otherwise keep counting it as seen. Every other kind answered stays so.
+ * The preferences with `kind` offered (its Settings switch turned on): opted in to, its answer forgotten, and the
+ * power user's blanket flag lifted, which would otherwise keep counting it as seen. Every other opted-in kind
+ * answered stays so.
  */
 export function offerElementTourAgain(
   prefs: UserPreferences,
   kind: ElementTourKind,
 ): UserPreferences {
-  const others = ELEMENT_TOUR_KINDS.filter((k) => k !== kind && elementTourSeen(prefs, k));
+  const others = (prefs.elementTourOffers ?? []).filter(
+    (k) => k !== kind && elementTourAnswered(prefs, k),
+  );
   const answered = (prefs.elementTourKinds ?? []).filter((k) => k !== kind);
   return {
     ...prefs,
     elementToursSeen: false,
     elementTourKinds: withTracksAnswered(answered, others),
+    elementTourOffers: withTracksAnswered(prefs.elementTourOffers, [kind]),
   };
+}
+
+/** The preferences with every kind offered (Show Me on Every Element turned on): all opted in, no answer kept. */
+export function offerEveryElementTour(prefs: UserPreferences): UserPreferences {
+  const { elementTourKinds: _answered, ...rest } = prefs;
+  return { ...rest, elementToursSeen: false, elementTourOffers: [...ELEMENT_TOUR_KINDS] };
+}
+
+/** The preferences with every kind answered (Show Me on Every Element turned off); who opted in stays recorded. */
+export function answerEveryElementTour(prefs: UserPreferences): UserPreferences {
+  return { ...prefs, elementToursSeen: true, elementTourKinds: [...ELEMENT_TOUR_KINDS] };
 }

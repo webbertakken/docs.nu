@@ -1,12 +1,15 @@
 # Element tours
 
 An **element tour** teaches one complex element type, on the element itself: what its parts mean, how to read it and
-how to change it. It is offered from a small toolbar beside the selected element's toolbar, the first time a person
-selects an element of that type, and it walks through the real element the person selected, not a sample.
+how to change it. It is offered from a small toolbar beside the selected element's toolbar, but only once a person
+has opted in to that type's tour in Settings (below): by default no offer ever sits beside the selection toolbar,
+which stays as quiet as the element's own buttons. It walks through the real element the person selected, not a
+sample.
 
 It sits between the mode tours (the [Diagram tour](editor-tour.md) and its siblings, which offer themselves once
 with a centred card) and [Show Me](show-me.md) (never offered, started from a button on one surface). An element
-tour offers itself, but quietly: a small toolbar that waits beside the selection, never a card over the canvas.
+tour offers itself only when asked to, and then quietly: a small toolbar that waits beside the selection, never a
+card over the canvas.
 
 The toured kinds: the [Sankey diagram](../009-elements/sankey.md), and the
 [concept graphics](../009-elements/concept-graphics.md) layer stack, pyramid, funnel, cycle, hub and spoke, onion and chevron process; the
@@ -52,19 +55,22 @@ section. "Element tour" is the code's and the specs' word only.
 - **When it shows**, all of these hold:
   - exactly one element is selected, of a toured kind, and its selection toolbar is showing;
   - the person may edit it (for a Sankey, `canEditSankey`: an Editor, on an unlocked diagram);
-  - the person has not answered this kind's tour (below);
+  - the person has opted in to this kind's tour in Settings, and not answered it since (below);
   - the editor is usable: hydrated, the synced preferences in, no welcome overlay, not an embed, not on a phone;
   - no guided tour is running (`useActiveTour`), no start panel is open, and no dialog is open (the modal guard,
     [Diagram tour](editor-tour.md) "Dialogs come first"): the offer comes back once the last dialog closes.
 - **It fades in** with the selection toolbar, and away with it (a move, a quick-connect ring).
 - **Play** answers the offer and starts the tour on its first step. **Cancel** answers it and the offer goes. Either
-  way, the kind is never offered again, on any device, until Settings offers it again. Simply deselecting is not an
+  way, the kind is never offered again, on any device, until its Settings switch is turned on again. Simply deselecting is not an
   answer: the offer comes back the next time an element of that kind is selected.
 
 ## Remembering answers
 
+- A synced user preference, `elementTourOffers`, lists the toured kinds the person opted in to (a Settings switch
+  turned on). It is empty by default, so a new person, and anyone who never opted in, is offered no element tour.
 - A synced user preference, `elementTourKinds`, lists the toured kinds whose offer has been answered (Play or
-  Cancel), so an answer follows the account ([User preferences](user-preferences.md)).
+  Cancel, or a Settings switch turned off), so an answer follows the account ([User preferences](user-preferences.md)).
+- A kind is offered only while it is opted in to and not answered (`elementTourSeen` counts it seen otherwise).
 - `elementToursSeen`, written only by [Power user mode](power-user-mode.md)'s preset, counts every kind as answered
   while the mode is on, as `pagesTourSeen` does for its kinds.
 
@@ -72,13 +78,16 @@ section. "Element tour" is the code's and the specs' word only.
 
 Settings' **Tours** category holds element tours in their own section, **Show Me**, below the mode tours'
 **Offer Again** section. It is a closed accordion (people rarely look for it): its header names the section and
-how many are on (`1 of 1 On`). Opened, it shows the section's line ("The first time you select a complex element, a
-small Show Me toolbar beside it offers to show how it works. Switch one back on to be offered it again."), then
-**Show Me on Every Element**, one switch over them all ("Every element’s Show Me at once": on while any is still
-offered; off answers every kind, on forgets every answer), with one switch per toured kind nested beneath it, named
-for the element alone: **Sankey Diagram** ("The first time you select a Sankey diagram.", linking the Sankey
-Diagram article). On means "offer it": switching one on forgets its answer, so the offer shows the next time such an
-element is selected. The accordion opens on its own when Settings is opened on one of its rows (a search result) or
+how many are on (`0 of 21 On` by default). Opened, it shows the section's line ("Off unless you switch one on. Then
+the next time you select that element, a small Show Me toolbar beside it offers to show how it works."), then
+**Show Me on Every Element**, one switch over them all ("Every element’s Show Me at once": on while any kind is opted
+in and still offered; on opts every kind in and forgets every answer, off answers every kind), with one switch per
+toured kind nested beneath it, named for the element alone: **Sankey Diagram** ("The next time you select a Sankey
+diagram.", linking the Sankey Diagram article). Every switch reads off until the person turns it on. The switch over
+them all only summarises its rows (`summarisesChildren`), so, unlike an enable switch, it never hides them: each
+element's switch is offered, and found by the Settings search, while it is off. On means "offer
+it": switching one on opts its kind in and forgets its answer, so the offer shows the next time such an element is
+selected; off answers it. The accordion opens on its own when Settings is opened on one of its rows (a search result) or
 on the section. Power user mode's readout lists the switch over them all as **Show Me on Every Element**.
 
 ## Menu steps
@@ -507,12 +516,12 @@ A new toured kind adds, in one change: its kind and name to `ELEMENT_TOUR_KINDS`
 edit gate (`apps/live/lib/element-tours.ts`); its entry in `ELEMENT_TOUR_DEFS` (token, eyebrow, help article, steps,
 what Done puts away; `apps/live/components/tour/element-tour-defs.ts`); its steps file; its switch under Element
 Tours in Settings; its token on the dashboard (`apps/telemetry/app/element-tour-kinds.ts`, its steps in
-`computed-emitters.ts`, its sentences in `event-explanations.ts`); its kind in the e2e fixture's answered list; its
-help article's tour section; and a section here.
+`computed-emitters.ts`, its sentences in `event-explanations.ts`); its help article's tour section; and a section
+here.
 
 ## Code
 
-- `apps/live/lib/element-tours.ts`: the toured kinds, their names, their edit gates, and the answered list.
+- `apps/live/lib/element-tours.ts`: the toured kinds, their names, their edit gates, the opt-in and answered lists.
 - `apps/live/lib/element-tour-offer.ts`: the offer the host publishes and the selection toolbar reads.
 - `apps/live/lib/element-keyed-store.ts`: the per-element module store behind the offer and what a step shows.
 - `apps/live/components/tour/ElementTourHost.tsx`: decides the offer, runs the tour, ends it.

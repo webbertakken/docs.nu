@@ -9,6 +9,7 @@ import { anyModalOpen, modalClosed, modalOpened } from '@/lib/modal-guard';
 import { createShape, type Element } from '@livedoc/document';
 import { SelectionStoreProvider } from '@/hooks/canvas/useSelectionStore';
 import { elementTourOffer } from '@/lib/element-tour-offer';
+import { ELEMENT_TOUR_KINDS } from '@/lib/element-tours';
 import { registerSankeyFlowsDialog } from '@/lib/sankey-flows-dialog-handle';
 import { createSelectionStore, type SelectionStore } from '@/lib/selection-store';
 import { setActiveTour, activeTour } from '@/lib/tour-active';
@@ -44,6 +45,9 @@ const sankey = { ...createShape('sankey', 0, 0), id: 'sk1' } as Element;
 const square = { ...createShape('square', 0, 0), id: 'sq1' } as Element;
 const stack = { ...createShape('layer-stack', 0, 0), id: 'ls1' } as Element;
 
+// Opted in to every Show Me (Settings › Tours › Show Me); nobody is offered one by default.
+const OPTED_IN = { elementTourOffers: [...ELEMENT_TOUR_KINDS] };
+
 const editor = (over: Record<string, unknown> = {}) => {
   ctx.current = {
     hydrated: true,
@@ -52,7 +56,7 @@ const editor = (over: Record<string, unknown> = {}) => {
     embedMode: false,
     can: { level: 'edit' },
     activeTab: { id: 'tab1', elements: [sankey, square, stack] },
-    userPreferences: {},
+    userPreferences: OPTED_IN,
     setUserPreferences,
     writeUserPreferences,
     selfParticipant: { id: 'me' },
@@ -113,8 +117,13 @@ describe('ElementTourHost offer', () => {
   });
 
   it.each([
-    ['answered', { userPreferences: { elementTourKinds: ['sankey'] } }],
-    ['a power user', { userPreferences: { powerUserMode: true, elementToursSeen: true } }],
+    ['never opted in (the default)', { userPreferences: {} }],
+    ['opted in to another kind only', { userPreferences: { elementTourOffers: ['flowchart'] } }],
+    ['answered', { userPreferences: { ...OPTED_IN, elementTourKinds: ['sankey'] } }],
+    [
+      'a power user',
+      { userPreferences: { ...OPTED_IN, powerUserMode: true, elementToursSeen: true } },
+    ],
     ['a Participant', { can: { level: 'participate' } }],
     ['a Viewer', { can: { level: 'view' } }],
     ['locked', { activeTab: { id: 'tab1', elements: [{ ...sankey, locked: true }] } }],
@@ -172,8 +181,11 @@ describe('ElementTourHost offer', () => {
     mount();
     act(() => store.setSelectedId('sk1'));
     act(() => elementTourOffer()!.dismiss());
-    expect(setUserPreferences).toHaveBeenCalledWith({ elementTourKinds: ['sankey'] });
-    expect(writeUserPreferences).toHaveBeenCalledWith({ elementTourKinds: ['sankey'] }, 'me');
+    expect(setUserPreferences).toHaveBeenCalledWith({ ...OPTED_IN, elementTourKinds: ['sankey'] });
+    expect(writeUserPreferences).toHaveBeenCalledWith(
+      { ...OPTED_IN, elementTourKinds: ['sankey'] },
+      'me',
+    );
     expect(track).toHaveBeenCalledWith('UI', 'Closed', 'SankeyTourOffer');
     expect(stage.engine?.active).toBe(false);
   });
@@ -185,7 +197,10 @@ describe('ElementTourHost tour', () => {
     mount();
     act(() => store.setSelectedId('sk1'));
     act(() => elementTourOffer()!.play());
-    expect(writeUserPreferences).toHaveBeenCalledWith({ elementTourKinds: ['sankey'] }, 'me');
+    expect(writeUserPreferences).toHaveBeenCalledWith(
+      { ...OPTED_IN, elementTourKinds: ['sankey'] },
+      'me',
+    );
     expect(track).toHaveBeenCalledWith('UI', 'Started', 'SankeyTour');
     expect(stage.engine?.active).toBe(true);
     expect(stage.engine?.hasWelcome).toBe(false);
@@ -275,7 +290,10 @@ describe('ElementTourHost with a layer stack', () => {
     expect(elementTourOffer()).toMatchObject({ elementId: 'ls1', kind: 'layer-stack' });
     expect(track).toHaveBeenCalledWith('UI', 'Opened', 'LayerStackTourOffer');
     act(() => elementTourOffer()!.play());
-    expect(writeUserPreferences).toHaveBeenCalledWith({ elementTourKinds: ['layer-stack'] }, 'me');
+    expect(writeUserPreferences).toHaveBeenCalledWith(
+      { ...OPTED_IN, elementTourKinds: ['layer-stack'] },
+      'me',
+    );
     expect(track).toHaveBeenCalledWith('UI', 'Started', 'LayerStackTour');
     expect(stage.engine?.step?.id).toBe('layers');
     expect(track).toHaveBeenCalledWith('UI', 'View', 'LayerStackTourStepLayers');
@@ -286,7 +304,7 @@ describe('ElementTourHost with a layer stack', () => {
   });
 
   it('answers each kind on its own: a Sankey answered still offers a layer stack', () => {
-    editor({ userPreferences: { elementTourKinds: ['sankey'] } });
+    editor({ userPreferences: { ...OPTED_IN, elementTourKinds: ['sankey'] } });
     mount();
     act(() => store.setSelectedId('sk1'));
     expect(elementTourOffer()).toBeNull();
