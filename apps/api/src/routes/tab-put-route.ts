@@ -89,7 +89,8 @@ export async function handleTabPut(
     // A tab-scoped link's save keeps its tab's structure (docs/specs/013-workspace/tab-scoped-share-links.md
     // "Structure"): the stored name, Plan elements and form targets, so it can neither rename its tab nor widen
     // what it reaches; the rest lands.
-    const kept = scope && existingTab ? keepStoredStructure(ledger.tab, existingTab, scope) : ledger.tab;
+    const kept =
+      scope && existingTab ? keepStoredStructure(ledger.tab, existingTab, scope) : ledger.tab;
     if (kept !== ledger.tab) console.info('[tabs] tab.structure.kept', { documentId: id, tabId });
     const body: Tab = { ...kept };
     // The name cap (docs/specs/006-document/name-length.md): a new or changed name is shortened;
