@@ -58,6 +58,11 @@ const DRIVE_OPEN_WITH_TYPES = tokensAfter(
   '{',
 );
 
+// The Inbox's filter tokens and row kinds (docs/specs/013-workspace/inbox.md §6), from its model.
+const INBOX_MODEL = read('live/components/panels/inbox/inbox-entries.ts');
+const INBOX_FILTER_TYPES = tokensAfter(INBOX_MODEL, 'export const INBOX_FILTER_TELEMETRY', '};');
+const INBOX_ROW_KINDS = tokensAfter(INBOX_MODEL, 'export type InboxEntryKind', ';');
+
 // The api's email templates: `export type EmailKind = 'Welcome' | ...;`.
 const EMAIL_KINDS = tokensAfter(read('api/src/email/templates.ts'), 'export type EmailKind', ';');
 
@@ -598,6 +603,12 @@ export const COMPUTED_EMITTERS: Record<string, ComputedValues> = {
   },
   'apps/live/components/palette/PaletteCategoryBrowser.tsx UI·Opened': {
     values: ['IconGroup', 'TechGroup', 'StickerGroup'],
+  },
+  'apps/live/components/panels/inbox/InboxPane.tsx Activity·Changed': {
+    values: INBOX_FILTER_TYPES,
+  },
+  'apps/live/components/panels/inbox/InboxReader.tsx Activity·Selected': {
+    values: INBOX_ROW_KINDS,
   },
   'apps/live/components/panels/SearchPanel.tsx UI·Opened': { values: SLUGS, open: SLUG_WHY },
   'apps/live/components/panels/SearchPanel.tsx Search·Selected': {
