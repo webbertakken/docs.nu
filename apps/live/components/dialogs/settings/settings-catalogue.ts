@@ -306,6 +306,7 @@ export type SettingsIdentityRowSpec = RowBase & { kind: 'identity' };
 export type SettingsDeleteAccountRowSpec = RowBase & { kind: 'deleteAccount' };
 // The account's name, sign-in methods and sessions (docs/specs/014-identity/auth-and-guest-access.md "Account settings").
 export type SettingsAccountNameRowSpec = RowBase & { kind: 'accountName' };
+export type SettingsPresenceColourRowSpec = RowBase & { kind: 'presenceColour' };
 export type SettingsSignInMethodsRowSpec = RowBase & { kind: 'signInMethods' };
 export type SettingsSessionsRowSpec = RowBase & { kind: 'sessions' };
 export type SettingsSignOutRowSpec = RowBase & { kind: 'signOut' };
@@ -349,6 +350,7 @@ export type SettingsRowSpec =
   | SettingsIdentityRowSpec
   | SettingsDeleteAccountRowSpec
   | SettingsAccountNameRowSpec
+  | SettingsPresenceColourRowSpec
   | SettingsSignInMethodsRowSpec
   | SettingsSessionsRowSpec
   | SettingsSignOutRowSpec
@@ -1622,6 +1624,16 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         label: 'Name',
         keywords: 'name rename display name account profile change',
         description: 'How collaborators see you on cursors, comments and the Timeline.',
+        available: (ctx) => ctx.signedIn,
+      },
+      {
+        kind: 'presenceColour',
+        key: 'presenceColour',
+        section: 'You',
+        label: 'Colour',
+        keywords:
+          'colour color presence cursor avatar name tag collaborators participant my colour change colour',
+        description: 'The colour collaborators see on your cursor, avatar and name tag.',
         available: (ctx) => ctx.signedIn,
       },
       {

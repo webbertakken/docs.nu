@@ -1172,6 +1172,8 @@ export const EXACT: Readonly<Record<string, string>> = {
     "Someone switched the editor's panel layout to Toolbar, in Settings > Editor. No longer recorded: Toolbar became the only layout.",
   'UI|Changed|PanelOpacity':
     'Someone adjusted how see-through the panels are, on the Panel Opacity slider in Settings > Editor.',
+  'UI|Changed|PresenceColour':
+    'Someone picked the colour collaborators see on their cursor, avatar and name tag, in Settings > Account.',
   'UI|Changed|UiScale':
     'Someone made the panels, the toolbar and the bottom-right buttons bigger or smaller together, on the UI Scale slider in Settings > Appearance.',
   'UI|Changed|UiScalePanels':

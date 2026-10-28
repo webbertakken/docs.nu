@@ -11,6 +11,7 @@ import { SettingsToggleGroupRow } from './SettingsToggleGroupRow';
 import { SettingsRow } from './SettingsRow';
 import { SettingsDeleteAccountRow } from './SettingsAccountRows';
 import { SettingsProfileCard } from './SettingsProfileCard';
+import { SettingsPresenceColourRow } from './SettingsPresenceColourRow';
 import {
   SettingsAccountNameRow,
   SettingsSessionsRow,
@@ -271,6 +272,8 @@ export function SettingsCategoryPane({
         return <SettingsDeleteAccountRow row={row} />;
       case 'accountName':
         return <SettingsAccountNameRow row={row} />;
+      case 'presenceColour':
+        return <SettingsPresenceColourRow row={row} />;
       case 'signInMethods':
         return <SettingsSignInMethodsRow row={row} />;
       case 'sessions':

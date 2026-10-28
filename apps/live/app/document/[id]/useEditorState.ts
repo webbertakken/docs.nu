@@ -209,6 +209,7 @@ import { useReactionBursts } from '@/hooks/canvas/useReactionBursts';
 import { useRoomConnection } from './useRoomConnection';
 import { useRoomResync } from './useRoomResync';
 import { useIdentityBootstrap } from './useIdentityBootstrap';
+import { useSelfColourUpdates } from './useSelfColourUpdates';
 import { useEditorHistory } from './useEditorHistory';
 import { useTemplateFlow } from './useTemplateFlow';
 import { createOwnElementWrites, type OwnElementWrites } from './own-element-writes';
@@ -986,6 +987,8 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // server. Status is in-memory only (the API doesn't store it) so
   // it doesn't count as a change.
   const lastPersistedSelfRef = useRef<{ name: string; color: string } | null>(null);
+  // A colour picked in Settings reaches this editor at once (useSelfColourUpdates).
+  useSelfColourUpdates(setSelfParticipant, lastPersistedSelfRef);
 
   // One-shot identity + document hydration. See useIdentityBootstrap.
   // Placed after the last-saved/loaded refs so they're declared before
