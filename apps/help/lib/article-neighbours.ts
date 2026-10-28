@@ -42,3 +42,14 @@ export function articleCategoryLink(article: Article): ArticleLink | undefined {
 export function articleLink(article: Article): ArticleLink {
   return { title: article.title, href: articleHref(article) };
 }
+
+const byHref = new Map(articles.map((a) => [articleHref(a), a]));
+
+/**
+ * A nested article's parent: the article at its `categorySlug` path, for an article whose MDX names no
+ * `parentArticle` (a mode's tour), so its breadcrumb names the parent rather than skipping a level.
+ */
+export function parentArticleOf(article: Article): Article | undefined {
+  if (!article.categorySlug.includes('/')) return undefined;
+  return byHref.get(categoryHref(article.categorySlug));
+}

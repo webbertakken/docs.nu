@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { parentRouteHref, routeHref } from './article-route';
+import { articleCrumbs, parentRouteHref, routeHref } from './article-route';
 
 describe('routeHref', () => {
   it('adds the trailing slash the help app serves', () => {
@@ -50,5 +50,72 @@ describe('sub-article parents', () => {
       );
     });
     expect(orphaned).toEqual([]);
+  });
+});
+
+// docs/specs/018-help/help-pages.md "Article pages": the trail is read off the route.
+describe('articleCrumbs', () => {
+  it('links the top category to its own landing, apart from a nested article’s parent', () => {
+    expect(
+      articleCrumbs({
+        pathname: '/developers/working-with-documents/edit-operations/',
+        title: 'Edit Operations Reference',
+        categoryTitle: 'Developers',
+        parentTitle: 'Working with Documents',
+      }),
+    ).toEqual([
+      { label: 'Developers', href: '/developers/' },
+      { label: 'Working with Documents', href: '/developers/working-with-documents/' },
+      { label: 'Edit Operations Reference' },
+    ]);
+  });
+
+  it('names a mode’s page as the parent of its tour, never the category', () => {
+    expect(
+      articleCrumbs({
+        pathname: '/canvas/draw-mode/draw-tour',
+        title: 'The Draw Tour',
+        categoryTitle: 'Canvas',
+        parentTitle: 'Draw Mode',
+      }),
+    ).toEqual([
+      { label: 'Canvas', href: '/canvas/' },
+      { label: 'Draw Mode', href: '/canvas/draw-mode/' },
+      { label: 'The Draw Tour' },
+    ]);
+  });
+
+  it('is the category then the article for a top-level article', () => {
+    expect(
+      articleCrumbs({ pathname: '/canvas/themes/', title: 'Themes', categoryTitle: 'Canvas' }),
+    ).toEqual([{ label: 'Canvas', href: '/canvas/' }, { label: 'Themes' }]);
+  });
+
+  it('leaves out a category that repeats the title or the parent', () => {
+    expect(
+      articleCrumbs({
+        pathname: '/selection-modes/slide-deck/presenting/',
+        title: 'Presenting',
+        categoryTitle: 'Slide Deck',
+        parentTitle: 'Slide Deck',
+      }),
+    ).toEqual([
+      { label: 'Slide Deck', href: '/selection-modes/slide-deck/' },
+      { label: 'Presenting' },
+    ]);
+    expect(
+      articleCrumbs({ pathname: '/about/about/', title: 'About', categoryTitle: 'About' }),
+    ).toEqual([{ label: 'About' }]);
+  });
+
+  it('never gives two crumbs one URL', () => {
+    const crumbs = articleCrumbs({
+      pathname: '/developers/workbenches/',
+      title: 'Workbenches',
+      categoryTitle: 'Developers',
+      parentTitle: 'Developers',
+    });
+    const hrefs = crumbs.flatMap((c) => (c.href ? [c.href] : []));
+    expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 });
