@@ -47,6 +47,21 @@ function tokensAfter(source: string, marker: string, close: string): string[] {
 }
 
 // The Drive mirror's inbound change types and Open with outcomes.
+// The Timeline's filter categories (packages/ui/src/timeline/eventCategory.ts), sent by a chip.
+const TIMELINE_CATEGORIES = [
+  'comments',
+  'new',
+  'edits',
+  'renames',
+  'deletions',
+  'sharing',
+  'actions',
+  'teams',
+  'filing',
+  'account',
+  'other',
+];
+
 const DRIVE_INBOUND_TYPES = tokensAfter(
   read('live/lib/drive/plan-inbound.ts'),
   'export type InboundType',
@@ -457,20 +472,10 @@ export const COMPUTED_EMITTERS: Record<string, ComputedValues> = {
     values: TEMPLATES,
     open: TEMPLATE_WHY,
   },
-  'apps/live/app/explorer/useTimelineFeed.ts Timeline·Selected': {
-    values: [
-      'comments',
-      'new',
-      'edits',
-      'renames',
-      'deletions',
-      'sharing',
-      'actions',
-      'teams',
-      'filing',
-      'account',
-      'other',
-    ],
+  'apps/live/app/explorer/useTimelineFeed.ts Timeline·Selected': { values: TIMELINE_CATEGORIES },
+  // A document's History chips (docs/specs/013-workspace/timeline.md §2.10): the same categories.
+  'apps/live/components/panels/DocumentHistoryDialog.tsx Timeline·Selected': {
+    values: TIMELINE_CATEGORIES,
   },
   // Which Trash (docs/specs/013-workspace/trash.md): lib/trash-groups.ts's
   // telemetryType, the one closed set every site sends.

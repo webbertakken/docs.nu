@@ -686,6 +686,14 @@ export const TIMELINE_STACKS_EXPANDED = chart(
   { types: ['Stack'] },
 );
 
+export const TIMELINE_HISTORY_RUNS = chart(
+  'Timeline',
+  'Opened',
+  'History Runs Expanded',
+  "A folded run of one kind of change in a document's History dealt out to show each one.",
+  { types: ['Run'] },
+);
+
 export const TIMELINE_ENTRIES_REMOVED = chart(
   'Timeline',
   'Removed',
@@ -767,6 +775,7 @@ export const TIMELINE_AND_ACTIVITY: MetricStack = {
     TIMELINE_VISITS,
     TIMELINE_MENUS,
     TIMELINE_STACKS_EXPANDED,
+    TIMELINE_HISTORY_RUNS,
     TIMELINE_ENTRIES_REMOVED,
     ACTIVITY_OPENED,
     ACTIVITY_THREADS,
