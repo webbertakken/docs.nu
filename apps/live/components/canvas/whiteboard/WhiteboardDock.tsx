@@ -35,7 +35,7 @@ import {
   SettingsFlyoutBody,
   SlotMenuBody,
 } from './dock-flyouts';
-import { DockDivider } from './DockToolbar';
+import { ToolbarDivider, ToolbarGroup } from '@/components/chrome/ToolbarGroup';
 import { DrawingToolsGroup } from './DrawingToolsGroup';
 import { SettingsGroup } from './SettingsGroup';
 import { ShapesFlyout } from './ShapesFlyout';
@@ -49,7 +49,6 @@ import { announceToastFloorChange } from '@/components/toast/toast-floor';
 import { useIsMobileViewport } from '@/hooks/ui/useIsMobileViewport';
 import { useUiScale } from '@/components/providers/ui-scale';
 import { toSurfacePx, uiScaleStyle } from '@/lib/ui-scale';
-import { TOOLBAR_CARD } from '@/components/chrome/toolbar-surface';
 
 // How long the "seven pinned" hint stays up.
 const HINT_MS = 4000;
@@ -248,7 +247,7 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
   const groups = (
     <>
       <DrawingToolsGroup model={model} ink={ink} fly={fly} pickAndClose={pickAndClose} />
-      <DockDivider data-dock-group-divider="" />
+      <ToolbarDivider data-dock-group-divider="" />
       <ShapesGroup
         model={model}
         pinned={pins.onBar}
@@ -258,7 +257,7 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
         refusing={refusing}
         pickAndClose={pickAndClose}
       />
-      <DockDivider data-dock-group-divider="" />
+      <ToolbarDivider data-dock-group-divider="" />
       <SettingsGroup fly={fly} />
       {drag ? (
         <SlotGhost dragKey={drag.source.key} x={drag.x} y={drag.y} refusing={refusing} />
@@ -365,13 +364,13 @@ function DockBody({
       {/* One card, the Toolbar layout strip's, the groups between hairlines; they scroll
           together inside it on a narrow screen. Scrolling moves the openers, so an open flyout
           follows its button. */}
-      <div
+      <ToolbarGroup
         data-dock-scroller=""
         onScroll={fly.reanchor}
-        className={`${TOOLBAR_CARD} pointer-events-auto animate-pop-in overflow-x-auto [scrollbar-width:none]`}
+        className="pointer-events-auto animate-pop-in overflow-x-auto [scrollbar-width:none]"
       >
         {groups}
-      </div>
+      </ToolbarGroup>
     </>
   );
 }

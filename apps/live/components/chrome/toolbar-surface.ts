@@ -47,3 +47,10 @@ export const TOOLBAR_CONTROL_REST =
   'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white';
 export const TOOLBAR_CONTROL_PRESSED =
   'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200';
+
+/** A button inside a toolbar group (docs/specs/004-interface-design/toolbar-group.md): flat, 36px tall, the hover fill,
+ *  no border of its own; a labelled one pads its label. 44px to tap on a touch screen, drawn the same. */
+export const TOOLBAR_BUTTON = `relative flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium transition outline-none touch-target-y focus-visible:ring-2 focus-visible:ring-brand-400 ${TOOLBAR_CONTROL_REST}`;
+
+/** The same button holding an icon alone: 36px square. */
+export const TOOLBAR_ICON_BUTTON = `${TOOLBAR_BUTTON} w-9 px-0 touch-target`;

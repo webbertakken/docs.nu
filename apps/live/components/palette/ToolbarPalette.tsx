@@ -24,6 +24,7 @@ import { track } from '@/lib/telemetry';
 import { SnapWidth } from '@/components/primitives/SnapWidth';
 import { PHONE_TOOLBAR_ITEMS } from '@/components/chrome/phone-toolbar-items';
 import { BAND_STRIP_FLUSH, BAND_TINT, TOOLBAR_CARD } from '@/components/chrome/toolbar-surface';
+import { ToolbarGroup } from '@/components/chrome/ToolbarGroup';
 import { PaletteTintProvider } from './palette-controls';
 import { PaletteGroupProvider } from './palette-group-state';
 import { PaletteDropdown, TOOLBAR_TRIGGER_TONE } from './PaletteDropdown';
@@ -111,6 +112,8 @@ type Props = Pick<
   };
 // The strip's card, and the leading card beside it on a phone.
 const CARD_CLASS = `${TOOLBAR_CARD} ${BAND_TINT} ${BAND_STRIP_FLUSH} ${PHONE_TOOLBAR_ITEMS}`;
+// The strip itself is a toolbar group (docs/specs/004-interface-design/toolbar-group.md), which brings the surface.
+const STRIP_CLASS = `${BAND_TINT} ${BAND_STRIP_FLUSH} ${PHONE_TOOLBAR_ITEMS}`;
 
 // On a phone's row, the menu card sits at the left gutter and the strip beside
 // it rather than centred (docs/specs/007-editor/toolbar-layout.md "On a phone");
@@ -475,7 +478,7 @@ export function ToolbarPalette(props: Props) {
                 <CardWidth swipe={swipe}>
                   {/* The tour's Palette anchor (docs/specs/007-editor/editor-tour.md) is the card, not the
                 full-width row around it, so the ring frames the strip. */}
-                  <div
+                  <ToolbarGroup
                     ref={cardRef}
                     data-tour-id="palette"
                     // Chrome, not canvas: a paste, a drop or a drag ghost over the strip treats it like
@@ -488,8 +491,8 @@ export function ToolbarPalette(props: Props) {
                     // selection mode, the category picker and More keep their size.
                     className={
                       swipe
-                        ? `${CARD_CLASS} min-w-0 [&>:not([data-strip-rail])]:shrink-0`
-                        : CARD_CLASS
+                        ? `${STRIP_CLASS} min-w-0 [&>:not([data-strip-rail])]:shrink-0`
+                        : STRIP_CLASS
                     }
                   >
                     {/* Event-storming boards hide the selection mode (docs/specs/021-event-storming/event-storming.md): the
@@ -632,7 +635,7 @@ export function ToolbarPalette(props: Props) {
                         </div>
                       </>
                     )}
-                  </div>
+                  </ToolbarGroup>
                 </CardWidth>
               )}
             </StripRow>
