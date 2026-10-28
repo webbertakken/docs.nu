@@ -31,11 +31,12 @@ import { handleTokens } from './tokens';
 const makeCtx = (
   method: string,
   path: string,
-  opts: { sessionAccountId?: string | null; body?: unknown } = {},
+  opts: { sessionAccountId?: string | null; body?: unknown; rawBody?: string } = {},
 ): RouteContext => {
   const sessionAccountId = opts.sessionAccountId === undefined ? 'user_1' : opts.sessionAccountId;
   return makeTestRouteContext(method, path, {
     body: opts.body,
+    rawBody: opts.rawBody,
     sessionAccountId,
     owner: sessionAccountId,
   });
@@ -43,7 +44,7 @@ const makeCtx = (
 
 beforeEach(() => {
   for (const fn of Object.values(db)) if (typeof fn === 'function') fn.mockReset();
-  db.mintApiToken.mockResolvedValue({ secret: 'lvd_x', id: 'tok_x', expiresAt: 1 });
+  db.mintApiToken.mockResolvedValue({ secret: 'livedoc_x', id: 'tok_x', expiresAt: 1 });
   db.listApiTokensByOwner.mockResolvedValue([]);
   db.revokeApiToken.mockResolvedValue(true);
   db.retractTimelineWarning.mockResolvedValue(undefined);
@@ -94,14 +95,21 @@ describe('handleTokens — list / create / revoke', () => {
   });
 
   it('mints a token and returns the secret once', async () => {
-    db.mintApiToken.mockResolvedValue({ secret: 'lvd_abc', id: 'tok_1', expiresAt: 123 });
+    db.mintApiToken.mockResolvedValue({ secret: 'livedoc_abc', id: 'tok_1', expiresAt: 123 });
     const res = await handleTokens(makeCtx('POST', '/api/tokens', { body: { name: 'CI' } }));
     expect(res.status).toBe(201);
     const out = (await res.json()) as { token: string; id: string };
-    expect(out.token).toBe('lvd_abc');
+    expect(out.token).toBe('livedoc_abc');
     expect(out.id).toBe('tok_1');
     // The route mints for the CALLER, under the name they gave.
     expect(db.mintApiToken).toHaveBeenCalledWith({}, { ownerId: 'user_1', name: 'CI' });
+  });
+
+  // A body cut short is no body (docs/specs/015-api/api.md "Request bodies"): nothing is minted.
+  it('400s a body cut short of valid JSON, minting nothing', async () => {
+    const res = await handleTokens(makeCtx('POST', '/api/tokens', { rawBody: '{"name":"C' }));
+    expect(res.status).toBe(400);
+    expect(db.mintApiToken).not.toHaveBeenCalled();
   });
 
   it('409s when the mint refuses at the per-account cap', async () => {

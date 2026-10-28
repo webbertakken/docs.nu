@@ -387,7 +387,17 @@ export type ShareRole = AccessLevel;
 
 // Lifetime chosen at link creation (docs/specs/013-workspace/share-link-expiry.md). 'never' is the default
 // and the pre-expiry behaviour: the link works until revoked.
-export type ShareLinkExpiry = 'never' | 'week' | 'month' | 'sixMonths';
+// The shortest new share password, counted after trimming (docs/specs/013-workspace/share-password.md "API"): the
+// api refuses fewer (`password_too_short`) and the Share dialog waits for them. A password saved before the rule keeps
+// working. Six is the floor upstream chose against guessing at 10 tries a minute; safe range 6 to 12.
+export const SHARE_PASSWORD_MIN = 6;
+
+export const SHARE_LINK_EXPIRIES = ['never', 'week', 'month', 'sixMonths'] as const;
+export type ShareLinkExpiry = (typeof SHARE_LINK_EXPIRIES)[number];
+
+export function isShareLinkExpiry(value: unknown): value is ShareLinkExpiry {
+  return (SHARE_LINK_EXPIRIES as readonly unknown[]).includes(value);
+}
 
 // The fixed lifetimes in ms, shared by the api worker (computing
 // `expiresAt` at create/extend time) and the live editor (rendering
@@ -628,6 +638,7 @@ export * from './page-views';
 export * from './read-notes';
 export * from './poll';
 export * from './room-messages';
+export * from './room-capacity';
 export * from './changesets';
 export * from './items';
 export * from './sheets';
@@ -709,3 +720,5 @@ export * from './pages-summary';
 export * from './mcp-origin';
 // Forms (docs/specs/030-forms/forms.md).
 export * from './forms';
+export { decodePathSegment } from './path-segment';
+export { KEY_ID_MAX, isKeyId } from './key-id';

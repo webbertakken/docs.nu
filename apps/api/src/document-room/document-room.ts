@@ -8,9 +8,14 @@ import {
   DOCUMENT_FORMAT,
   DOCUMENT_TRASHED_CLOSE,
   isRoomOpRef,
+  levelAtLeast,
   parseBuildId,
+  parseStoredLevel,
+  ROOM_FULL_CLOSE,
+  ROOM_FULL_REASON,
   ROOM_PING,
   ROOM_PONG,
+  roomIsFull,
   type AccessLevel,
 } from '@livedoc/api-schema';
 import { opForTheWire, stampCommentAuthor } from '@livedoc/document';
@@ -40,6 +45,7 @@ import { recheckAdmittedLink } from '../room-link-recheck';
 import { gateClientOp } from '../room-op-gate';
 import { getTab } from '../db/tabs';
 import { tabShowsEveryCard } from '@livedoc/items';
+import { RoomScopedStructure } from '../room-scoped-structure';
 import { answerInternal, type InternalRoom } from '../room-internal';
 import { rosterFrames, type RosterEntry } from '../room-roster';
 import { sessionMatchesAccessClose, type AccessCloseMatch } from '../room-access';
@@ -204,6 +210,8 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   private participantWrites: RoomParticipantWrites;
   // The document's content in this room's SQLite (room-content.ts).
   private readonly content: RoomContent;
+  // A tab-scoped session's structure check (docs/specs/013-workspace/tab-scoped-share-links.md "Structure").
+  private readonly scopedStructure = new RoomScopedStructure(() => this.content.tabStore());
 
   // The worker env is optional so unit tests can build a room from a fake state alone; without it the telemetry
   // emit (Document·Used·Multiplayer) is skipped.
@@ -390,6 +398,10 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     // owned by this Durable Object.
     const client = pair[0];
     const server = pair[1];
+    // A full room answers the upgrade and closes it at once (docs/specs/015-api/api.md "A room holds at most
+    // 100 connections"): the close code is the only thing a browser can read, an HTTP refusal reads as 1006.
+    if (this.turnAwayIfFull(server, request.headers.get(DOCUMENT_ID_HEADER)))
+      return new Response(null, { status: 101, webSocket: client });
     // Server-resolved facts (set by the api worker before forwarding the upgrade): room-session.ts.
     const v = verifiedSessionOf(request);
     const tabShowsAll = await this.scopedTabShowsAll(v.documentId, v.tabScope);
@@ -451,6 +463,17 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       return null;
     });
     return tabShowsEveryCard(tab?.elements ?? []);
+  }
+
+  // Turn an upgrade away when the room already holds ROOM_MAX_CONNECTIONS sockets: accepted only to be closed
+  // with ROOM_FULL_CLOSE, never handed to the hibernation runtime, so it holds no session and receives nothing.
+  turnAwayIfFull(server: WebSocket, documentId: string | null = null): boolean {
+    const connections = this.state.getWebSockets().length;
+    if (!roomIsFull(connections)) return false;
+    console.warn('[room] full', { documentId, connections });
+    server.accept();
+    server.close(ROOM_FULL_CLOSE, ROOM_FULL_REASON);
+    return true;
   }
 
   // Admit one server-side socket into the room: pin its hibernation-proof
@@ -801,13 +824,22 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         );
         return;
       }
+      // A tab-scoped session keeps its tab's structure (room-scoped-structure.ts), judged against the stored tab.
+      const admitted = session.tabScope
+        ? this.scopedStructure.admit(msg.op, {
+            documentId: session.documentId ?? null,
+            tabId: session.tabScope,
+          })
+        : { op: msg.op };
+      if (!admitted) return;
+      const clientOp = admitted.op;
       if (gate.participantAnswers) {
         this.participantWrites.scheduleAnswers(
           session.documentId ?? null,
-          (msg.op as { tabId?: unknown }).tabId,
+          (clientOp as { tabId?: unknown }).tabId,
         );
       }
-      const opKind = (msg.op as { kind?: unknown } | null | undefined)?.kind;
+      const opKind = (clientOp as { kind?: unknown } | null | undefined)?.kind;
       const isPresenceOp = gate.presence;
       // Running the session belongs to whoever holds the baton (docs/specs/012-collaboration/facilitator.md).
       // Only these two ops can be enforced here: a poll start / end is its own
@@ -826,14 +858,15 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       // the next hibernation and mis-place peers for every later joiner.
       // The live relay below still drives real-time updates for peers
       // already connected.
-      // Every selection is noted for the api's held check, whatever the role
-      // (docs/specs/024-agents/agent-changesets.md "Held elements"). The DO's output gate holds
+      // Every selection is noted for the api's held check, whatever the role; the check answers only
+      // the sessions that may change the content (liveSessions, docs/specs/024-agents/agent-changesets.md
+      // "Held elements"). The DO's output gate holds
       // what follows until the write lands.
       if (opKind === 'select') {
-        void this.selections.note(sender.id, selectionFromOp(msg.op)).catch(() => {});
+        void this.selections.note(sender.id, selectionFromOp(clientOp)).catch(() => {});
       }
       if (opKind === 'tab-focus') {
-        const { tabId, besideTabId } = msg.op as { tabId?: unknown; besideTabId?: unknown };
+        const { tabId, besideTabId } = clientOp as { tabId?: unknown; besideTabId?: unknown };
         if (typeof tabId === 'string') {
           sender.tabId = tabId.slice(0, MAX_TAB_ID_LEN);
           // The other pane of a side by side split (docs/specs/007-editor/split-view.md "Presence"),
@@ -847,7 +880,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       }
       // A follow is the room's to keep, never relayed: it tells the people followed, on their own sockets.
       if (opKind === 'follow') {
-        this.noteFollow(ws, session, sender, msg.op);
+        this.noteFollow(ws, session, sender, clientOp);
         return;
       }
       // Presence ops relay unordered (ephemeral, no catch-up). Mutation
@@ -865,26 +898,26 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         // Chained, so answers apply in the order they arrived even though each one is hashed first: a quick change
         // of mind must not lose to the answer it replaced.
         if (opKind === 'poll-answer') {
-          const op = msg.op;
+          const op = clientOp;
           this.pollAnswers = this.pollAnswers
             .then(() => this.relayPollAnswer(ws, op))
             .catch(() => {});
           return;
         }
         if (opKind === 'avatar-push') {
-          const targetId = (msg.op as { targetId?: unknown }).targetId;
+          const targetId = (clientOp as { targetId?: unknown }).targetId;
           if (typeof targetId === 'string') {
-            this.sendToPresence(targetId, { kind: 'op', from: sender.id, op: msg.op }, ws);
+            this.sendToPresence(targetId, { kind: 'op', from: sender.id, op: clientOp }, ws);
           }
           return;
         }
-        this.broadcast({ kind: 'op', from: sender.id, op: msg.op }, ws);
+        this.broadcast({ kind: 'op', from: sender.id, op: clientOp }, ws);
       } else {
         // No comment author id leaves the room, whatever a client sent: it is
         // the author's owner id, a guest's credential. And a posted comment
         // carries the name of the session that sent it, the one on its
         // cursor, not whatever the frame claimed (docs/specs/012-collaboration/collab-race-hardening.md).
-        const op = stampCommentAuthor(opForTheWire(msg.op), sender);
+        const op = stampCommentAuthor(opForTheWire(clientOp), sender);
         const seq = this.sequenceMutation(sender.id, op, ws);
         // The relay skips the sender, so tell it the seq its op took: its own
         // ops are already applied, and a reconnect must not replay them. The
@@ -1087,7 +1120,13 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       const session = this.readSession(ws);
       const p = session?.presence;
       if (!p) continue;
-      live.set(p.id, { name: p.name, color: p.color, personTag: session.personTag ?? null });
+      live.set(p.id, {
+        name: p.name,
+        color: p.color,
+        personTag: session.personTag ?? null,
+        // Only someone who may change the content holds what they select: never a Viewer.
+        holds: levelAtLeast(parseStoredLevel(p.role), 'participate'),
+      });
     }
     return live;
   }

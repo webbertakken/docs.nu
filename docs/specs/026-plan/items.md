@@ -314,7 +314,9 @@ Items follow the document's access ([Auth and guest access](../014-identity/auth
 
 - **Read** with any access to the document. A visitor on a **tab-scoped** link sees only the items that tab shows:
   the items its boards show and its Plan cards point at.
-- **Create, update, move, delete** with edit access.
+- **Create, update, move, delete** with edit access. A tab-scoped link creates cards only from a tab that shows every
+  card (a Plan board or plan view on it), where the new card stays in its reach; from any other tab, `403`, before any
+  named id is looked at ([Tab-scoped share links](../013-workspace/tab-scoped-share-links.md) "Structure").
 - **A tab-scoped link never adds a board or plan view** to its tab, since either shows every card: the api refuses
   the save (403 `tab_scope_widen`) and the room drops the op ([Tab-scoped share links](../013-workspace/tab-scoped-share-links.md)).
   A board already on the tab stays editable.

@@ -54,6 +54,17 @@ export function opForScope(op: unknown, tabScope: string | null): unknown {
   return typeof o.kind === 'string' && TAB_LESS_DELIVERED.has(o.kind) ? op : null;
 }
 
+// Whether a scoped session's op renames its tab: a `tab-meta` patch that sets `name` or clears it. A tab's name is
+// structure (docs/specs/013-workspace/tab-scoped-share-links.md "Structure").
+export function scopedRenames(op: unknown, tabScope: string | null): boolean {
+  if (tabScope === null) return false;
+  const o = op as { kind?: unknown; patch?: unknown; clear?: unknown } | null;
+  if (o?.kind !== 'tab-meta') return false;
+  const patch = o.patch;
+  if (typeof patch === 'object' && patch !== null && Object.hasOwn(patch, 'name')) return true;
+  return Array.isArray(o.clear) && o.clear.includes('name');
+}
+
 // Whether a session scoped to `tabScope` may put this op into the room: only an op about its own tab, and, unless the
 // tab already showed every card when it joined (`tabShowsAll`), never one carrying a board or plan view, which would
 // widen what the link reaches (docs/specs/026-plan/items.md "Who may do what").

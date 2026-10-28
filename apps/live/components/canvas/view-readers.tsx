@@ -16,7 +16,6 @@ import {
 import { useEffect, type ComponentProps } from 'react';
 import { useCanvasZoom } from '@/components/canvas/CanvasZoomContext';
 import { LaserOverlay } from '@/components/canvas/LaserOverlay';
-import { RemoteCursor } from '@/components/canvas/RemoteCursor';
 import { Minimap } from '@/components/canvas/Minimap';
 import { ZoomControls } from '@/components/chrome/ZoomControls';
 import { useViewportOf } from '@/hooks/canvas/useViewportStore';
@@ -25,10 +24,6 @@ import type { View } from '@/lib/viewport-store';
 const zoomOf = (v: View) => v.zoom;
 const SHEET_ZOOM_RANGE = { min: SHEET_ZOOM_MIN, max: SHEET_ZOOM_MAX };
 const wholeView = (v: View) => v;
-
-export function ZoomedRemoteCursor(props: Omit<ComponentProps<typeof RemoteCursor>, 'zoom'>) {
-  return <RemoteCursor {...props} zoom={useCanvasZoom()} />;
-}
 
 export function ZoomedLaserOverlay(props: Omit<ComponentProps<typeof LaserOverlay>, 'zoom'>) {
   return <LaserOverlay {...props} zoom={useCanvasZoom()} />;

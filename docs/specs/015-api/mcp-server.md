@@ -4,7 +4,7 @@
 verified end-to-end from Claude. Builds directly on [Public API and API tokens](public-api-and-tokens.md)
 (API tokens), which it picks up where §7 left off: [Public API and API tokens](public-api-and-tokens.md) deferred "OAuth /
 third-party app authorization" — this spec adds exactly that, scoped to one
-client (an MCP server), reusing the `lvd_` token as the credential it ultimately
+client (an MCP server), reusing the `livedoc_` token as the credential it ultimately
 mints. No new authorization model; an OAuth front door onto the existing token.
 
 ## 1. Goal
@@ -52,8 +52,8 @@ stays a pure REST/WS surface.
   schemas.
 - **Talks to `apps/api` over a Cloudflare service binding** (`API`), not public
   DNS. Every tool resolves to one or more `/api/*` calls carrying
-  `Authorization: Bearer lvd_…` — the caller's token, passed straight through.
-  The api worker already accepts `lvd_` tokens on every route
+  `Authorization: Bearer livedoc_…` — the caller's token, passed straight through.
+  The api worker already accepts `livedoc_` tokens on every route
   ([Public API and API tokens §3.3](public-api-and-tokens.md)), so **no api authorization
   changes are needed** for the tools themselves.
 - **Reuses `packages/document`** headless: element factories, `validate.ts`
@@ -74,9 +74,9 @@ stays a pure REST/WS surface.
 
 The MCP authenticates with **OAuth 2.1 + PKCE (S256) + dynamic client
 registration**, so a user gets a one-click "Connect" in their AI tool rather
-than pasting a raw token. The flow **mints an `lvd_` token** under the hood and
+than pasting a raw token. The flow **mints an `livedoc_` token** under the hood and
 hands it to the client; from then on every request is just
-`Authorization: Bearer lvd_…`. This deliberately reuses the entire token model
+`Authorization: Bearer livedoc_…`. This deliberately reuses the entire token model
 from [Public API and API tokens](public-api-and-tokens.md) — storage, hashing, 6-month expiry,
 per-account cap, revoke, account-deletion cascade, rate limiting — instead of
 inventing a parallel credential. An MCP-minted token is an ordinary API token;
@@ -129,7 +129,7 @@ This implements the OAuth flow Manager Toolkit uses:
    endpoint that requires a verified session (gated exactly like
    `/api/tokens`), and on success **reuses the existing token-mint path**
    (`generateApiToken` → `hashApiToken` → `createApiToken`,
-   `apps/api/src/auth/api-token.ts` + `db/api-tokens.ts`) to create an `lvd_`
+   `apps/api/src/auth/api-token.ts` + `db/api-tokens.ts`) to create an `livedoc_`
    token owned by that account, named for the connecting client (e.g. "Claude
    (MCP)"). It binds the PKCE challenge so only the holder of the verifier can
    redeem it. A minted token is never left orphaned: the page re-checks the
@@ -145,7 +145,7 @@ This implements the OAuth flow Manager Toolkit uses:
    (`apps/live/lib/oauth-handover.ts`).
 5. **Callback + token exchange** — the MCP redirects back to the client with a
    code; `POST /oauth/token` (with the PKCE `code_verifier`) exchanges it for the
-   `access_token` (= the `lvd_` secret). `expires_in` reflects the token's
+   `access_token` (= the `livedoc_` secret). `expires_in` reflects the token's
    remaining 6-month lifetime.
 
 **State storage.** Add a **KV namespace binding (`OAUTH_KV`) to `apps/mcp`** for
@@ -155,7 +155,7 @@ needs no KV — minting stays in D1 via the existing token table.
 **Why OAuth and not just token-paste.** A static-token-paste connector works in
 Claude Code / custom connectors, but the polished "Connect" button in claude.ai
 web connectors expects OAuth, and the user chose the OAuth path. Because it still
-resolves to an `lvd_` token, the heavy lifting (verification, gating, revoke,
+resolves to an `livedoc_` token, the heavy lifting (verification, gating, revoke,
 caps) is already built — OAuth is the front door, not a new lock.
 
 **Self-hosting / sign-in gating.** OAuth depends on the consent page authenticating
@@ -344,6 +344,14 @@ same list edit operations check, [Edit operations](../024-agents/edit-operations
 and an `iconId` that names no icon is refused with the icons like it and a
 pointer to `search_icons`. Each of these was once stored and drawn wrong in silence. The check passes every element
 of every template, so a tab read back as JSON writes again unchanged.
+
+Every refusal **names the element and the rule** it breaks, so a model can fix its own call: an element by its id,
+and one without an id by what it is to the call (`the added element` for an ops `add`, never its place in a
+one-element list such as "element 1"); an update by its target's id. A field's neighbours share its first word as
+written, so a camelCase `strokeColour` is offered `strokeColor`, `strokeWidth`. `create_document` names what is wrong
+with an element it cannot store (`element "svc": "tags" must be an array of at most 6 ...`, `element "svc": the id
+is used twice`) before the general "every element needs id/type/x/y/width/height" refusal, as `add_tab` and
+`update_document` do.
 
 ### 4.5 `list_templates`
 
@@ -956,7 +964,7 @@ and schema resource.
 ### 4.11 Read-only tokens (the one scope)
 
 A trust story for cautious users: the MCP consent screen offers a **"read-only
-access"** checkbox. When ticked, the minted `lvd_` token carries `read_only = 1`
+access"** checkbox. When ticked, the minted `livedoc_` token carries `read_only = 1`
 ([Public API and API tokens](public-api-and-tokens.md) §3.4, migration 0039), and the api worker rejects every write it
 presents — `POST`/`PUT`/`DELETE` → `403 read_only_token` — at a **single
 dispatch choke point** in `apps/api/src/index.ts`, so no write route can be
@@ -1298,7 +1306,7 @@ Worker (no DOM, no React).
 5. **OAuth** — `/api/oauth/exchange` on the api worker (reusing the token-mint
    path, session-gated like `/api/tokens`); `apps/live` consent page; the MCP
    OAuth endpoints + `OAUTH_KV`. Until this lands, the worker can be exercised
-   with a hand-pasted `lvd_` Bearer for development.
+   with a hand-pasted `livedoc_` Bearer for development.
 6. **Docs + help, shipped WITH the feature** (per the help-centre + docs rules in
    `AGENTS.md`):
    - A help article (e.g. `account-and-data/connect-ai-mcp`) — what the MCP is,

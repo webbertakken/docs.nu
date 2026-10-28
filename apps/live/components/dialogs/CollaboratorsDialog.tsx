@@ -5,6 +5,7 @@ import type { Tab } from '@livedoc/document';
 import { Button, DialogHeader, DialogCloseButton } from '@livedoc/ui';
 import { Dialog } from '@/components/dialogs/Dialog';
 import { FacilitatorButton } from '@/components/dialogs/CollaboratorFacilitatorButton';
+import { HideCursorsSwitch } from '@/components/dialogs/HideCursorsSwitch';
 import { HelpArticleLink } from '@/components/primitives/HelpArticleLink';
 import { ParticipantAvatar } from '@/components/primitives/ParticipantAvatar';
 import { useAppearance } from '@/hooks/ui/useAppearance';
@@ -209,6 +210,11 @@ export function CollaboratorsDialog({
             </ul>
           </section>
         ))}
+      </div>
+      {/* Hide Participant Cursors (docs/specs/012-collaboration/collaborator-enhancements.md §2): the Settings switch,
+          one click away when a session gets busy. Outside the scroller, so it stays put however long the room gets. */}
+      <div className="border-t border-slate-100 px-4 py-2 dark:border-slate-800">
+        <HideCursorsSwitch />
       </div>
     </Dialog>
   );

@@ -51,7 +51,7 @@ import {
   notFound,
   payloadTooLarge,
 } from '../responses';
-import { documentDates, isDocumentSource } from '@livedoc/api-schema';
+import { documentDates, isDocumentSource, isKeyId } from '@livedoc/api-schema';
 import { emailEnabled } from '../email/client';
 import { notifyMilestone } from '../email/notifications';
 import { recordDocumentCreated, recordDocumentSynced } from '../timeline';
@@ -107,6 +107,8 @@ export async function handleDocumentCollection(ctx: RouteContext): Promise<Respo
       if (!body.id || typeof body.name !== 'string') {
         return badRequest('missing id/name');
       }
+      // The id keys the document in paths, its room and every scope (docs/specs/015-api/api.md "Ids").
+      if (!isKeyId(body.id)) return badRequest('invalid id');
       // The document's own dates (docs/specs/015-api/api.md "Document dates"), refused whole when
       // invalid, before anything is written.
       const dates = documentDates(body, Date.now());

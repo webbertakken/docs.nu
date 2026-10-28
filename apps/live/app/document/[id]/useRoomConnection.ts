@@ -75,6 +75,9 @@ export function useRoomConnection(opts: {
   // A workbench session (docs/specs/013-workspace/blueprints/workbench-embeds.md): told when the room
   // ends it (close 4006), or when an access change does (4005, WB31), instead of reloading.
   onWorkbenchEnded?: () => void;
+  // The room turned this editor away as full (docs/specs/015-api/api.md "A room holds at most 100 connections"),
+  // once per spell; the connector keeps trying on its own.
+  onRoomFull?: () => void;
   // The document's team (docs/specs/013-workspace/team-shared-documents.md), null for a personal document. A team
   // document is a live room for its members even without a share link,
   // so presence opens for it the same way a shared document does.
@@ -200,6 +203,7 @@ export function useRoomConnection(opts: {
     documentServerStored,
     enabled = true,
     onWorkbenchEnded,
+    onRoomFull,
     documentTeamId,
     selfParticipant,
     sessionShareCode,
@@ -388,6 +392,10 @@ export function useRoomConnection(opts: {
       syncRemoteBesideTabs(participants, selfId);
       setRemoteSelections((prev) => pruneMapToPresent(prev, present));
       setRemoteCursors((prev) => pruneMapToPresent(prev, present));
+      // A departed peer's laser trail and camera go with them too: a follower or a "focus here"
+      // must not read the view of someone no longer in the room.
+      setRemoteLaserTrails((prev) => pruneMapToPresent(prev, present));
+      setRemoteViewports((prev) => pruneMapToPresent(prev, present));
       // A peer who disconnects takes their character with them (docs/specs/008-canvas/avatar-mode.md),
       // so a closed tab can't leave someone standing on the canvas forever.
       setRemoteAvatars((prev) => pruneMapToPresent(prev, present));
@@ -612,6 +620,7 @@ export function useRoomConnection(opts: {
     window.location.reload();
   });
   const roomWorkbenchEnded = useEffectEvent(() => onWorkbenchEnded?.());
+  const roomFull = useEffectEvent(() => onRoomFull?.());
   // A join turned away (docs/specs/013-workspace/trash.md): trashed between our load and our join, the room
   // refuses us instead of telling us. Ask the api once per refusal (one probe at a time); only a trashed
   // answer changes anything.
@@ -666,7 +675,12 @@ export function useRoomConnection(opts: {
     });
 
     const handlers: RoomHandlers = {
-      onPresence: (participants, agents) => roomPresence(participants, agents),
+      onPresence: (participants, agents) => {
+        // Buffered packets from anyone who has left go before the roster prunes their state, so
+        // the next frame's flush cannot bring a departed peer's cursor back.
+        presence.prune(new Set(participants.map((p) => p.id)));
+        roomPresence(participants, agents);
+      },
       // Elements in a former stored shape from a peer loaded before a deploy are migrated
       // before anything applies them (docs/specs/006-document/stroke-points.md); an op that is not the
       // shape its kind promises is dropped first (room-op-shape.ts).
@@ -685,6 +699,7 @@ export function useRoomConnection(opts: {
       // Reload so the access gates run again (a password prompt, a refusal page, or the editor).
       onAccessChanged: () => roomAccessChanged(),
       onWorkbenchEnded: () => roomWorkbenchEnded(),
+      onRoomFull: () => roomFull(),
       onRefused: () => roomRefused(),
       onResync: () => roomResync(),
     };

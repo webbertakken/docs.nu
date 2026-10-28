@@ -161,7 +161,7 @@ describe('WebSocket upgrade — trust headers', () => {
       makeTestRouteContext('GET', '/api/documents/d1/ws?s=CODE1234&p=guess', {
         owner: null,
         headers: { Upgrade: 'websocket', 'CF-Connecting-IP': '203.0.113.9' },
-        env: Object.assign(env, { SHARE_RATE_LIMITER: { limit } }),
+        env: Object.assign(env, { SHARE_GUESS_VISITOR_LIMITER: { limit } }),
       }),
     );
     expect(res?.status).toBe(403);
