@@ -2,6 +2,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { SectionsDrawer } from './SectionsDrawer';
+import { anyModalOpen } from '@/lib/modal-guard';
 
 // docs/specs/013-workspace/explorer-structure.md: the phone's Sections drawer is a modal like any other.
 describe('the Sections drawer', () => {
@@ -29,5 +30,16 @@ describe('the Sections drawer', () => {
     expect(onClose).toHaveBeenCalledTimes(2);
     fireEvent.click(container.querySelector('[aria-hidden]')!);
     expect(onClose).toHaveBeenCalledTimes(3);
+  });
+
+  it('counts as an open dialog while it is up, so window shortcuts stand down', () => {
+    const { unmount } = render(
+      <SectionsDrawer onClose={vi.fn()}>
+        <span>Tree</span>
+      </SectionsDrawer>,
+    );
+    expect(anyModalOpen()).toBe(true);
+    unmount();
+    expect(anyModalOpen()).toBe(false);
   });
 });

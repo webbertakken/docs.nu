@@ -234,7 +234,8 @@ The sidebar follows the WAI-ARIA tree pattern, one tree per group:
 Below the `sm` breakpoint the sidebar is hidden and the pane header's menu button opens it as a drawer from the left:
 the same groups, rows, rules and keyboard model. Picking a view, or New Team, closes the drawer; so do its Close button,
 the backdrop and Escape. It is a modal dialog named Sections: focus moves into it, Tab stays inside, and closing it
-hands focus back to the button that opened it.
+hands focus back to the button that opened it. Window shortcuts stand down while it is open, Search's Cmd/Ctrl+K and
+Cmd/Ctrl+. included ([Command palette](../007-editor/command-palette.md#shortcut)).
 
 ## The editor's Explorer
 

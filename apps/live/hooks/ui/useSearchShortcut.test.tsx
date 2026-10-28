@@ -53,6 +53,50 @@ describe('useSearchShortcut', () => {
     expect(open).not.toHaveBeenCalled();
   });
 
+  it('leaves text areas, selects and editable text alone', () => {
+    const open = vi.fn();
+    renderHook(() => useSearchShortcut(open));
+    const editable = document.createElement('div');
+    editable.contentEditable = 'true';
+    // jsdom does not derive isContentEditable from the attribute.
+    Object.defineProperty(editable, 'isContentEditable', { value: true });
+    const targets = [
+      document.createElement('textarea'),
+      document.createElement('select'),
+      editable,
+    ];
+    for (const target of targets) {
+      document.body.appendChild(target);
+      expect(press('.', { ctrlKey: true }, target).defaultPrevented).toBe(false);
+    }
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it('stands down while any aria-modal dialog is in the page', () => {
+    const open = vi.fn();
+    renderHook(() => useSearchShortcut(open));
+    const drawer = document.createElement('div');
+    drawer.setAttribute('role', 'dialog');
+    drawer.setAttribute('aria-modal', 'true');
+    document.body.appendChild(drawer);
+    expect(press('k').defaultPrevented).toBe(false);
+    expect(press('.', { ctrlKey: true }).defaultPrevented).toBe(false);
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it('stands aside for a key another handler already took', () => {
+    const open = vi.fn();
+    renderHook(() => useSearchShortcut(open));
+    const taker = (e: Event) => e.preventDefault();
+    window.addEventListener('keydown', taker, { capture: true });
+    try {
+      press('k');
+    } finally {
+      window.removeEventListener('keydown', taker, { capture: true });
+    }
+    expect(open).not.toHaveBeenCalled();
+  });
+
   it('stands down while a dialog is open', () => {
     const open = vi.fn();
     renderHook(() => useSearchShortcut(open));
