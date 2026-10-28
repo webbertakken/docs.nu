@@ -39,6 +39,7 @@ Specs live in numbered category folders: the reserved `001`–`005` first (visio
 - ./030-forms/README.md - when working on Form tabs: building forms, the public form link and its page, responses that become cards on a board
 - ./031-markdown/README.md - when working on markdown tabs: pages, the byte-faithful round trip to `.md` files, the live merge of text, text changesets
 - ./032-wikis/README.md - when working on wikis (global and project): what makes a folder one, the entry page, wiki health, search, links between pages
+- ./033-information-security/README.md - when working on the ISMS (ISO 27001-aligned): scope, policy, assets, risks, Annex A controls
 
 ## Workflow
 

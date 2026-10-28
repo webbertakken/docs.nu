@@ -82,7 +82,7 @@ NEXT_PUBLIC_API_BASE=
 1. **Rotate immediately** in the relevant provider (Cloudflare, Google, Resend, etc.).
 2. Update the secret in the env-var store (`wrangler secret put`, Pages dashboard).
 3. Force-push and `git filter-repo` are **not** sufficient — rotation comes first because Git history is forever public.
-4. Open a tracking note in specs (or wherever incidents live, TBD) to document what leaked, when, and what was rotated.
+4. Handle the rest as an incident: [Respond to a security incident](../../instructions/respond-to-a-security-incident.md).
 
 ## Tooling (to be added)
 
