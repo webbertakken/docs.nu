@@ -39,15 +39,22 @@ identity, share-code path) and [11-api](../015-api/api.md) (share links).
   memory for 10 minutes, at most 1,000 entries per isolate. The stored value is
   part of the key, so changing or removing the password invalidates it at once.
 - **Guessing is limited on every door.** Each derivation (a check the cache could
-  not answer) first spends one unit of the `SHARE_RATE_LIMITER` binding under the
-  key `share-pw:<network>`, where the network is the caller's IPv4 address or
-  IPv6 /64 (`clientRateKey`). Over the limit, the attempt is treated as wrong
-  without being checked, so the answer never reveals whether a guess was right.
-  This covers every share-code door (the resolve, `canReadDocument` /
-  `canEditDocument`, images, the room's `p`), not just the resolve. A correct
-  visitor is answered from the cache after their first check in an isolate, so
-  they spend almost nothing. The resolve read (`GET /api/share/:code`) keeps its
-  own per-network request throttle on the same binding.
+  not answer) is first counted twice, at Cloudflare's edge so the counts hold across
+  isolates: against the caller's network on `SHARE_GUESS_VISITOR_LIMITER` (10 a
+  minute, key `share-pw:<network>`, the caller's IPv4 address or IPv6 /64,
+  `clientRateKey`), and against the document from any network on
+  `SHARE_GUESS_ITEM_LIMITER` (30 a minute, key `share-pw-doc:<documentId>`), so a
+  guesser can't spread tries across addresses either. Over either, the attempt is
+  refused without being checked (`rate_limited`), so the answer never reveals
+  whether a guess was right. This covers every share-code door (the resolve,
+  `canReadDocument` / `canEditDocument`, images, the room's `p`), not just the
+  resolve. The resolve answers it `429 { error: 'password_rate_limited' }` with
+  `Retry-After: 60` (`SHARE_GUESS_RETRY_AFTER_S`); every other door refuses it as it
+  refuses a wrong password. A grant, a missing password and a document without one
+  spend nothing, and a correct visitor is answered from the cache after their first
+  check in an isolate, so a visitor already in spends almost nothing. The resolve
+  read (`GET /api/share/:code`) keeps its own per-network request throttle on
+  `SHARE_RATE_LIMITER`. With the bindings absent (self-host), every check runs.
 - It is **never** returned anywhere: not in the document DTO, and not to the
   owner either.
 - The **owner always bypasses** the password (identified by `ownerId` / the
@@ -69,7 +76,8 @@ identity, share-code path) and [11-api](../015-api/api.md) (share links).
 - `GET /api/share/:code` (viewer resolve): if the document has a password, return
   **401 `{ error: 'password_required' }`** when the request carries no
   `X-Share-Password`, **403 `{ error: 'password_invalid' }`** when it carries
-  the wrong one, and only record the visit + return the document on a match.
+  the wrong one, **429 `{ error: 'password_rate_limited' }`** with `Retry-After: 60` when the guess budget is
+  spent, and only record the visit + return the document on a match.
 - Every other share-code-authorised route is gated through
   `canReadDocument` / `canEditDocument` (`src/auth/document-access.ts`). Both gain a
   `sharePassword` argument: after the link + role check, if the document has a
@@ -146,7 +154,9 @@ full-screen card with a lock, a single password input, and an error line) rather
 than the canvas. On submit it calls `setSessionSharePassword(pw)` and re-runs
 the bootstrap (a retry counter in the bootstrap effect's deps); the retried
 `apiLoadShared` now carries the password and either hydrates the editor or
-re-shows the gate with `invalid`. Once past the gate the password is on every
+re-shows the gate with `invalid`, or, after a `429 password_rate_limited`, with
+`rateLimited`: the try was not checked, so instead of "That password didn't match" the gate says **Too many
+tries. Wait a minute, then try again.** (`role="alert"`). Once past the gate the password is on every
 HTTP call (via `apiHeaders`) and the WS (`connectRoom`), so reads, writes,
 images, and realtime all stay authorised.
 

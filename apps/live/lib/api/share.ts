@@ -43,7 +43,12 @@ async function _apiLoadShared(
   // 403 flags `invalid` so it can show an error line. The password the
   // visitor enters next is attached automatically by apiHeaders.
   if (res.status === 401 || res.status === 403) {
-    return { passwordRequired: true, invalid: res.status === 403 };
+    return { passwordRequired: true, invalid: res.status === 403, rateLimited: false };
+  }
+  // Too many tries at the password (429 password_rate_limited): the gate stays up and asks the visitor to wait. A
+  // plain 429 (the resolve's own request throttle) is not about the password and fails like any other error below.
+  if (res.status === 429 && (await errorCodeOf(res)) === 'password_rate_limited') {
+    return { passwordRequired: true, invalid: false, rateLimited: true };
   }
   const body = await expectOkOrNull<
     DocumentResponse & {
@@ -57,6 +62,14 @@ async function _apiLoadShared(
     role: parseStoredLevel(body.role),
     tabId: typeof body.tabId === 'string' ? body.tabId : null,
   };
+}
+
+async function errorCodeOf(res: Response): Promise<string | null> {
+  const body = (await res
+    .clone()
+    .json()
+    .catch(() => null)) as { error?: unknown } | null;
+  return typeof body?.error === 'string' ? body.error : null;
 }
 
 export const apiLoadShared = dedupeInFlight(
