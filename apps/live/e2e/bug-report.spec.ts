@@ -1,4 +1,5 @@
 import type { Page, Request } from '@playwright/test';
+import { giveOwnClientAddress } from './account/sign-in';
 import { expect, expectNoPageErrors, mintSignedGuest, ownerHeaders, test } from './fixtures';
 
 // Report a Bug (docs/specs/016-platform/bug-reports.md), end to end on a stack with no Bug Tracker configured, so
@@ -39,8 +40,12 @@ async function sendReport(page: Page, title: string) {
 
 test('a guest reports a bug from the bottom bar, with a screenshot', async ({
   page,
+  context,
+  baseURL,
   pageErrors,
 }) => {
+  // Reports are limited per network: each test reports from an address of its own.
+  await giveOwnClientAddress(context, baseURL!);
   const watched = watchReports(page);
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor();
@@ -101,6 +106,7 @@ test('a link visitor reports a bug, their share role attached', async ({
   const code = ((await share.json()) as { link: { code: string } }).link.code;
 
   const visitorContext = await browser.newContext({ colorScheme: 'dark' });
+  await giveOwnClientAddress(visitorContext, baseURL!);
   const visitor = await visitorContext.newPage();
   const watched = watchReports(visitor);
   await visitor.goto(`/document/shared?s=${code}`);
@@ -115,7 +121,10 @@ test('a link visitor reports a bug, their share role attached', async ({
 
 test("the help centre's contact page opens the form's own page, and closing goes back", async ({
   page,
+  context,
+  baseURL,
 }) => {
+  await giveOwnClientAddress(context, baseURL!);
   const watched = watchReports(page);
   await page.goto('/report-a-bug?from=/help/contact/');
   const dialog = page.getByRole('dialog', { name: 'Report a Bug' });
