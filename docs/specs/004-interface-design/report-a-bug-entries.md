@@ -24,6 +24,7 @@ Where the way to report a bug sits on each screen, and how it looks there. What 
 | Root error page                             | Under "Reload"                                                                        | Text link to `/report-a-bug`                     |
 | Not-found card                              | Under "New Document"                                                                  | Secondary button                                 |
 | Help centre contact page                    | The "Report a Bug" card, in place of the GitHub issues card                           | Secondary call-to-action link to `/report-a-bug` |
+| Help centre home, "Still stuck?"            | Beside "Contact us", in place of GitHub issues                                        | Outline button to `/report-a-bug`                |
 | Shared site footer                          | The Contact column, after Contact                                                     | Footer link to `/report-a-bug`                   |
 
 The bottom-bar entry stays on a phone (the bar is tight, but reporting is mid-task, unlike GitHub, which leaves the

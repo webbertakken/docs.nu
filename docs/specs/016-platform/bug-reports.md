@@ -35,7 +35,7 @@ context, which the form collects itself. Each entry is drawn in its neighbours' 
 | The account menu (signed in)                                                                    | A "Report a Bug" item above "Sign out"                    |
 | Every error card and crash panel (connection error, load error, area crash), the not-found card | A secondary "Report a Bug" button beside the retry action |
 | The root error page (`global-error`)                                                            | A "Report a Bug" link to `/report-a-bug`                  |
-| The help centre's contact page and the shared site footer                                       | A "Report a Bug" link to `/report-a-bug`                  |
+| The help centre's home and contact page, and the shared site footer                             | A "Report a Bug" link to `/report-a-bug`                  |
 
 The root error page has no app around it (the root layout itself failed), and the help centre, marketing site and
 telemetry dashboard are other apps: they link to **`/report-a-bug`**, a light page of the editor app that shows the
