@@ -74,7 +74,7 @@ stays a pure REST/WS surface.
 
 The MCP authenticates with **OAuth 2.1 + PKCE (S256) + dynamic client
 registration**, so a user gets a one-click "Connect" in their AI tool rather
-than pasting a raw token. The flow **mints an `livedoc_` token** under the hood and
+than pasting a raw token. The flow **mints a `livedoc_` token** under the hood and
 hands it to the client; from then on every request is just
 `Authorization: Bearer livedoc_…`. This deliberately reuses the entire token model
 from [Public API and API tokens](public-api-and-tokens.md) — storage, hashing, 6-month expiry,
@@ -129,7 +129,7 @@ This implements the OAuth flow Manager Toolkit uses:
    endpoint that requires a verified session (gated exactly like
    `/api/tokens`), and on success **reuses the existing token-mint path**
    (`generateApiToken` → `hashApiToken` → `createApiToken`,
-   `apps/api/src/auth/api-token.ts` + `db/api-tokens.ts`) to create an `livedoc_`
+   `apps/api/src/auth/api-token.ts` + `db/api-tokens.ts`) to create a `livedoc_`
    token owned by that account, named for the connecting client (e.g. "Claude
    (MCP)"). It binds the PKCE challenge so only the holder of the verifier can
    redeem it. A minted token is never left orphaned: the page re-checks the
@@ -155,7 +155,7 @@ needs no KV — minting stays in D1 via the existing token table.
 **Why OAuth and not just token-paste.** A static-token-paste connector works in
 Claude Code / custom connectors, but the polished "Connect" button in claude.ai
 web connectors expects OAuth, and the user chose the OAuth path. Because it still
-resolves to an `livedoc_` token, the heavy lifting (verification, gating, revoke,
+resolves to a `livedoc_` token, the heavy lifting (verification, gating, revoke,
 caps) is already built — OAuth is the front door, not a new lock.
 
 **Self-hosting / sign-in gating.** OAuth depends on the consent page authenticating

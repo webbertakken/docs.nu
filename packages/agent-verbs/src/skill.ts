@@ -28,7 +28,7 @@ export function renderSkill(): string {
     '',
     '# livedoc',
     '',
-    'Sign in with LIVEDOC_TOKEN (an livedoc_ API token), or `livedoc auth login`. The CLI never prompts.',
+    'Sign in with LIVEDOC_TOKEN (a livedoc_ API token), or `livedoc auth login`. The CLI never prompts.',
     '',
     'Start:',
     '',

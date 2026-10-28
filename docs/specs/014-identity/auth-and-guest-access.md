@@ -15,17 +15,17 @@ across devices, teams, tokens, collaborating under one name).
 
 ## Who is who
 
-| Term                  | What it is                                                                                                                                         |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **guest**             | A visitor without an account. Works fully, keyed to one browser.                                                                                   |
-| **guest id**          | The guest's owner id: a UUID the server mints, with an HMAC **guest signature** only the browser it was minted for holds.                          |
-| **account**           | A person who signed in. One row in LiveDoc's own identity tables, however many sign-in methods it has.                                             |
-| **account id**        | The account's owner id: `acct_` and 24 base62 characters, never a UUID, so the two shapes never meet.                                              |
-| **sign-in method**    | A way to prove who you are: Google, an email code (and later others). Several can belong to one account.                                           |
-| **session**           | A signed-in browser. A cookie on `/api/auth/*`, and the short-lived **session token** the browser sends to the rest of the api.                    |
-| **API token**         | An `livedoc_` secret for scripts, the CLI and MCP clients, owned by an account ([Public API and API tokens](../015-api/public-api-and-tokens.md)). |
-| **workbench session** | An `lvw_` credential for one framed editor, minted from a token ([Workbench embeds](../013-workspace/workbench-embeds.md)).                        |
-| **owner id**          | Whichever of guest id or account id owns a row. Every owner-keyed column holds one ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).       |
+| Term                  | What it is                                                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **guest**             | A visitor without an account. Works fully, keyed to one browser.                                                                                  |
+| **guest id**          | The guest's owner id: a UUID the server mints, with an HMAC **guest signature** only the browser it was minted for holds.                         |
+| **account**           | A person who signed in. One row in LiveDoc's own identity tables, however many sign-in methods it has.                                            |
+| **account id**        | The account's owner id: `acct_` and 24 base62 characters, never a UUID, so the two shapes never meet.                                             |
+| **sign-in method**    | A way to prove who you are: Google, an email code (and later others). Several can belong to one account.                                          |
+| **session**           | A signed-in browser. A cookie on `/api/auth/*`, and the short-lived **session token** the browser sends to the rest of the api.                   |
+| **API token**         | A `livedoc_` secret for scripts, the CLI and MCP clients, owned by an account ([Public API and API tokens](../015-api/public-api-and-tokens.md)). |
+| **workbench session** | An `lvw_` credential for one framed editor, minted from a token ([Workbench embeds](../013-workspace/workbench-embeds.md)).                       |
+| **owner id**          | Whichever of guest id or account id owns a row. Every owner-keyed column holds one ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).      |
 
 ## Deployment modes
 

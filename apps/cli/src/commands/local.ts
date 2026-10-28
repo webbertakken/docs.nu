@@ -90,7 +90,7 @@ export async function callApi(
   return { text: await res.text(), status: res.status };
 }
 
-// A token from stdin (`--with-token`): never read from a terminal, and only an livedoc_ token.
+// A token from stdin (`--with-token`): never read from a terminal, and only a livedoc_ token.
 async function tokenFromStdin(io: CliIo): Promise<string> {
   if (io.stdinIsTTY)
     throw new CliError({

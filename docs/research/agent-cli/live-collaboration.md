@@ -38,18 +38,18 @@ research) or **recalled** (from general knowledge; treat as indicative, check be
 
 ### 2.1 What exists and can be reused
 
-| Asset                                                                | Where                                                  | Why it matters here                                                             |
-| -------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| Element-level ops `add / update / remove / reorder`, applied by id   | `packages/document/src/element-ops.ts`                 | The unit an agent changeset is made of; `diffToElementOps` derives them         |
-| Per-field deltas (`comment-add`, `comment-resolve`, `check`, ...)    | `packages/document/src/element-deltas.ts`              | Comments from the agent travel as deltas and merge, never clobber               |
-| Ordered room: `seq` within a persisted `epoch`, bounded op log (256) | `apps/api/src/document-room/document-room.ts`          | Gives every agent change a total order and a cursor                             |
-| Collaboration ledger merged into tab PUTs after `X-Room-Cursor`      | `room-client.ts` `mergeRoomLedger`, `collab-ledger.ts` | The exact mechanism that can keep an agent's change alive through a race        |
-| Internal `POST /mutation` on the room (worker-originated op)         | `document-room.ts` (accepts only `el-delta` today)     | The seam a REST changeset enters the room through                               |
-| One-time room ticket minted over authenticated REST                  | `routes/document-room-routes.ts`                       | How a CLI process with an `livedoc_` token can open a socket for `wait`/`watch` |
-| Server-built presence (random presence id, clamped name and colour)  | `helloPresence` in `document-room-rules.ts`            | An agent presence entry slots into the same roster                              |
-| Room remembers per-session state in the socket attachment (`tabId`)  | `document-room.ts` `SessionAttachment`                 | Precedent for remembering each session's selection                              |
-| Follow-me viewport, bring focus                                      | `docs/specs/012-collaboration/follow-me-viewport.md`   | "Show me what you changed" for free                                             |
-| Comment endpoints (add, delete-own) that relay to the room           | `routes/document-subresource-routes.ts`                | Agent comments already go live                                                  |
+| Asset                                                                | Where                                                  | Why it matters here                                                            |
+| -------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Element-level ops `add / update / remove / reorder`, applied by id   | `packages/document/src/element-ops.ts`                 | The unit an agent changeset is made of; `diffToElementOps` derives them        |
+| Per-field deltas (`comment-add`, `comment-resolve`, `check`, ...)    | `packages/document/src/element-deltas.ts`              | Comments from the agent travel as deltas and merge, never clobber              |
+| Ordered room: `seq` within a persisted `epoch`, bounded op log (256) | `apps/api/src/document-room/document-room.ts`          | Gives every agent change a total order and a cursor                            |
+| Collaboration ledger merged into tab PUTs after `X-Room-Cursor`      | `room-client.ts` `mergeRoomLedger`, `collab-ledger.ts` | The exact mechanism that can keep an agent's change alive through a race       |
+| Internal `POST /mutation` on the room (worker-originated op)         | `document-room.ts` (accepts only `el-delta` today)     | The seam a REST changeset enters the room through                              |
+| One-time room ticket minted over authenticated REST                  | `routes/document-room-routes.ts`                       | How a CLI process with a `livedoc_` token can open a socket for `wait`/`watch` |
+| Server-built presence (random presence id, clamped name and colour)  | `helloPresence` in `document-room-rules.ts`            | An agent presence entry slots into the same roster                             |
+| Room remembers per-session state in the socket attachment (`tabId`)  | `document-room.ts` `SessionAttachment`                 | Precedent for remembering each session's selection                             |
+| Follow-me viewport, bring focus                                      | `docs/specs/012-collaboration/follow-me-viewport.md`   | "Show me what you changed" for free                                            |
+| Comment endpoints (add, delete-own) that relay to the room           | `routes/document-subresource-routes.ts`                | Agent comments already go live                                                 |
 
 ### 2.2 The gaps, verified
 
