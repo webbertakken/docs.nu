@@ -12,6 +12,7 @@ import { detachUserFromTeams } from './teams';
 import { migrateTagStatements } from './tags';
 import { imageGrantOwnerChangeStatement } from './image-grants';
 import { disconnectDrive } from '../drive/disconnect';
+import { deleteBugScreenshotsOf } from '../bug-reports/screenshots';
 import { uniqueLibraryName } from '@livedoc/api-schema';
 import type { Env } from '../types';
 
@@ -145,6 +146,10 @@ export async function deleteAccount(
   await env.DB.prepare('DELETE FROM form_reads WHERE owner_id = ?').bind(ownerId).run();
   // placement_defaults (docs/specs/013-workspace/default-folders.md): no foreign key reaches them.
   await env.DB.prepare('DELETE FROM placement_defaults WHERE owner_id = ?').bind(ownerId).run();
+  // bug_reports (docs/specs/016-platform/bug-reports.md "Screenshots"): their reports not yet filed, and every
+  // screenshot they sent, filed or not.
+  await env.DB.prepare('DELETE FROM bug_reports WHERE owner_id = ?').bind(ownerId).run();
+  await deleteBugScreenshotsOf(env, ownerId);
   // agent_changesets (docs/specs/024-agents/agent-changesets.md, CS27): those on their own documents go with the
   // documents' rooms (purgeRooms). Those they wrote on other people's documents are in those documents' rooms, out of
   // reach of one D1 statement; they go with the changeset retention there.
@@ -294,6 +299,12 @@ export async function migrateOwnerId(
       fromOwnerId,
     ),
     placementDrop: move('DELETE FROM placement_defaults WHERE owner_id = ?', fromOwnerId),
+    // bug_reports (docs/specs/016-platform/bug-reports.md "Screenshots"): a guest's stored reports are the account's.
+    bugReports: move(
+      "UPDATE bug_reports SET owner_id = ?, reporter_kind = 'account' WHERE owner_id = ?",
+      toOwnerId,
+      fromOwnerId,
+    ),
     // participants: the guest's name and colour. The id IS the owner id, so an
     // account that already has a row keeps it (a signed-in name comes from the
     // account anyway). The copy is stamped NOW: the account's participant row

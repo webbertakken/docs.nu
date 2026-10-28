@@ -48,6 +48,8 @@ const OWNER_COLUMNS: OwnerColumn[] = [
   // Explorer Home's opens (docs/specs/013-workspace/explorer-home.md): guests open documents too.
   { table: 'document_opens', column: 'owner_id', migrate: { kind: 'moves' } },
   { table: 'images', column: 'owner_id', migrate: { kind: 'moves' } },
+  // Stored bug reports (docs/specs/016-platform/bug-reports.md "Screenshots"): guests report too.
+  { table: 'bug_reports', column: 'owner_id', migrate: { kind: 'moves' } },
   { table: 'participants', column: 'id', migrate: { kind: 'moves' } },
   { table: 'timeline_events', column: 'actor_id', migrate: { kind: 'moves' } },
   {
@@ -159,6 +161,15 @@ function seedGuestHoldable(sql: DatabaseSync, id: string, peerDocument: string) 
     });
   }
   insert(sql, 'user_preferences', { owner_id: id, prefs: '{}', updated_at: T0 });
+  insert(sql, 'bug_reports', {
+    id: `br-${id}`,
+    owner_id: id,
+    reporter_kind: 'guest',
+    title: 'Save fails',
+    reason: 'unconfigured',
+    created_at: T0,
+    last_attempt_at: T0,
+  });
   insert(sql, 'placement_defaults', {
     owner_id: id,
     default_key: 'mode:draw',

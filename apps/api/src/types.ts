@@ -51,6 +51,14 @@ export type Env = {
   // api worker: when unbound, the image endpoints all return 503
   // and the live app hides the Image palette entry.
   IMAGES?: R2Bucket;
+  // Report a Bug (docs/specs/016-platform/bug-reports.md): the screenshots bucket (90-day lifecycle), the burst gate
+  // per network, and the Bug Tracker document and board tab reports are filed on. Each optional: without the bucket a
+  // report goes without its screenshot, without the limiter only the D1 window limits, and without the two ids every
+  // report is stored (reason `unconfigured`).
+  BUG_SCREENSHOTS?: R2Bucket;
+  BUG_REPORT_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
+  BUG_REPORT_DOCUMENT_ID?: string;
+  BUG_REPORT_TAB_ID?: string;
   // Cloudflare Workers Rate Limiting API binding. Caps per-owner
   // writes (POST / PUT / DELETE) at the configured limit/period in
   // wrangler.toml. Optional so self-host deployments without the
