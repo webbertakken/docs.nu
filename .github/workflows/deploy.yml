@@ -75,9 +75,9 @@ jobs:
       environment_name: production
       environment_url: https://docs.nu
       # docs.nu's own MCP host, so the live app never points at another
-      # deployment's. The worker itself waits until docs.nu turns it on (deploy_mcp).
+      # deployment's; the worker deploys with it (deploy_mcp).
       mcp_origin: https://mcp.docs.nu
-      deploy_mcp: false
+      deploy_mcp: true
     secrets:
       CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

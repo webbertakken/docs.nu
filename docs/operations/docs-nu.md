@@ -4,7 +4,7 @@ LiveDoc runs at [docs.nu](https://docs.nu) on its own Cloudflare account. The to
 
 ## Shape
 
-- Workers: `docs-nu-api`, `docs-nu-marketing`, `docs-nu-live`, `docs-nu-telemetry`, `docs-nu-help` and `docs-nu-router`. `docs-nu-mcp` is configured but not deployed (the deploy's MCP job is opt-in), so `mcp.docs.nu` does not answer yet.
+- Workers: `docs-nu-api`, `docs-nu-marketing`, `docs-nu-live`, `docs-nu-telemetry`, `docs-nu-help`, `docs-nu-router` and `docs-nu-mcp` (production deploys it: `deploy_mcp: true`). `mcp.docs.nu` is attached to `docs-nu-mcp` as a custom domain in the Cloudflare dashboard (Workers → docs-nu-mcp → Domains & Routes), not by the deploy.
 - Resources: D1 `docs-nu`, R2 `docs-nu-images` and `docs-nu-bug-screenshots` (western Europe), and the KV namespace `docs-nu-mcp-oauth` for the MCP worker.
 - Rate limiters use namespace ids `7001`-`7018`: the ids are account-wide, and other workers on the account hold `1001` onwards.
 - Hostnames: `docs.nu` is canonical. `www.docs.nu` is attached to the router too, and a zone redirect rule (301, path and query kept) sends it to the apex. The zone has Always Use HTTPS on. Both zone settings live in the dashboard, not in this repo.
@@ -195,7 +195,7 @@ LiveDoc publishes to npm under its own scope, `@livedoc`, an npm organisation ow
 - Why `@livedoc`: the `livedocs` scope belongs to an unrelated npm user account, and the unscoped `livedocs` and `livedoc` packages belong to other people.
 - Publishing goes through npm trusted publishing (OIDC) from `.github/workflows/cli-publish.yml`, with provenance. No npm token is stored anywhere.
 - The workflow runs on every push to `main` that changes `apps/cli/package.json`, and by hand. It publishes the version in that file unless npm already has it, so a version bump is a release.
-- The CLI's default host is `https://docs.nu`. Browser login (`livedoc auth login`) goes through the MCP worker's OAuth server, which docs.nu does not run yet; until it does, sign in with an API token made in the Settings dialog (`livedoc auth login --with-token`). Its local commands (`guide`, `skill install`, `graph lint`, offline views of pulled files, `--help`) need no sign-in.
+- The CLI's default host is `https://docs.nu`. Browser login (`livedoc auth login`, or `--device` for a code entered elsewhere) goes through the MCP worker's OAuth server at `https://mcp.docs.nu`, which the api names in `/api/capabilities` (`OAUTH_ISSUER`, a hosted var). An API token made in the Settings dialog still works (`livedoc auth login --with-token`). Its local commands (`guide`, `skill install`, `graph lint`, offline views of pulled files, `--help`) need no sign-in.
 
 ### Trusted publisher rules
 
