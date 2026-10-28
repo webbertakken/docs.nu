@@ -13,6 +13,10 @@ import {
 import { buildViewModel, commentHosts } from '@livedoc/document-views';
 import type { ParticipantDTO } from './types';
 
+// Who a comment is credited to when its writer has no participant record (a guest who never set a
+// name): the comment POST and the tab PUT credit them alike.
+export const ANONYMOUS_AUTHOR = { name: 'Anonymous', color: '#94a3b8' } as const;
+
 // Rewrite newly-added comments so the author fields come from the
 // server-trusted participant record, not whatever the client posted.
 // Compares each comment's id against the prior tab's comments by

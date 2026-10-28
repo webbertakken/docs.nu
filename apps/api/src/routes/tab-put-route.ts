@@ -11,7 +11,7 @@ import {
 } from '@livedoc/api-schema';
 import { isValidTab, migrateIncomingTab, preferNewerQaAll, type Tab } from '@livedoc/document';
 import { mergeChangesetsIntoSave } from '../changesets/merge-on-save';
-import { hasNewComments, rewriteCommentAuthors } from '../comments';
+import { ANONYMOUS_AUTHOR, hasNewComments, rewriteCommentAuthors } from '../comments';
 import { changesetMergePages, getParticipant, getTab, isTabRevStale, upsertTabAtRev } from '../db';
 import { emailEnabled } from '../email/client';
 import { notifyNewComment } from '../email/notifications';
@@ -115,17 +115,17 @@ export async function handleTabPut(
             pictureUrl: null,
           }
         : await getParticipant(env, owner);
-    const sanitised: Tab = writerParticipant
-      ? {
-          ...body,
-          elements: rewriteCommentAuthors(
-            body.elements,
-            existingTab?.elements ?? [],
-            writerParticipant,
-            commentAuthors,
-          ),
-        }
-      : body;
+    // With no participant record (a guest who never set a name) the writer is still the owner: the comments
+    // already stored stay locked and a new one is credited to them as Anonymous.
+    const sanitised: Tab = {
+      ...body,
+      elements: rewriteCommentAuthors(
+        body.elements,
+        existingTab?.elements ?? [],
+        writerParticipant ?? { id: owner, ...ANONYMOUS_AUTHOR, createdAt: 0, pictureUrl: null },
+        commentAuthors,
+      ),
+    };
     let rev = 0;
     try {
       // The merged tab may outgrow the request: the storage layer measures what it stores
