@@ -89,7 +89,7 @@ change)` (exactly `after` on `before`; otherwise deleted types removed, changed 
 - Agents (`packages/agent-verbs`): `changeCardTypes` reads the plan, applies its changes and saves naming
   `plan.itemTypesRev`; `bringBoardCardTypes` names the document's `itemTypesRev`. A stale refusal reads again and
   applies again, up to `CARD_TYPES_SAVE_ATTEMPTS` (3), then answers the `item_types_stale` refusal.
-- `PlanContext`: `types`, `itemTypes`, `editType(id | 'new')`; `usePlanSlice` holds `editingTypeId`.
+- `PlanContext`: `types`, `itemTypes`, `editType(id | 'new')`; `usePlanSlice` holds `editingType` (`ItemTypeEditing | null`).
 - Parent: `PARENT_FIELD_ID` (`'parent'`) and `PARENT_FIELD` (`{ id: 'parent', label: 'Parent', kind: 'card',
 linkType: 'project' }`) in item-types.ts; Task and the brought Bug and Story carry it in `custom`. The old grouping
   (`LEGACY_PARENT_GROUPING`, `swimlaneBy: 'parent'`) stays valid on boards, views and search filters and is read as
