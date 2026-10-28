@@ -2,6 +2,7 @@
 // link", "Who may do what"): a Form tab's link, as its document's people see and change it. Anyone who may read the
 // tab sees the response count; only an Editor sees the code and publishes, opens, closes or deletes the link.
 import type { FormLinkResponse } from '@livedoc/api-schema';
+import { formLinkShown } from '../forms/form-link-shown';
 import { FORM_SUSPENSIONS_MAX, destinationType, publishProblems } from '@livedoc/forms';
 import { typesOf } from '@livedoc/items';
 import {
@@ -25,11 +26,11 @@ import {
   missingDocument,
   readBody,
   requireOwner,
-  type RouteContext,
+  type DocumentRouteContext,
 } from './context';
 
 async function answer(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   tabId: string,
   owner: string,
@@ -58,7 +59,7 @@ async function answer(
 // Why a form may not take responses (publishing it, or opening it again): its tab gone (404), nowhere for responses
 // to go (409 form_destination_missing), or not ready to fill in (409 form_not_ready, with the problems). Null: it may.
 async function notReadyToOpen(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   tabId: string,
   types: ReturnType<typeof typesOf>,
@@ -75,7 +76,7 @@ async function notReadyToOpen(
   return problems.length ? json({ error: 'form_not_ready', problems }, { status: 409 }) : null;
 }
 
-export async function handleFormLinkRoutes(ctx: RouteContext): Promise<Response | null> {
+export async function handleFormLinkRoutes(ctx: DocumentRouteContext): Promise<Response | null> {
   const { request, env, segments } = ctx;
   if (!(
     segments.length === 6 &&
@@ -129,7 +130,9 @@ export async function handleFormLinkRoutes(ctx: RouteContext): Promise<Response 
     if (refused) return refused;
     if ((await countSuspendedFormLinks(env, documentId)) >= FORM_SUSPENSIONS_MAX)
       return forbidden('form_suspensions');
-    const made = await createFormLink(env, documentId, tabId, Date.now());
+    const formTab = await readFormTab(env, documentId, tabId);
+    const shown = formLinkShown(formTab?.tab.name ?? '', { form: formTab?.tab.form });
+    const made = await createFormLink(env, documentId, tabId, shown, Date.now());
     if (!made) return conflict('form_already_published');
     // The publisher has seen every response so far (none, or the suspended link's).
     await markFormSeen(env, made.code, owner);

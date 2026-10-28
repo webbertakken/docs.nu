@@ -1,4 +1,4 @@
-import { documentRoom } from '../room-client';
+import { documentRoom } from '../document-room/document-client';
 // /api/documents/<id>/room-ticket + /ws — realtime-room admission
 // (docs/specs/015-api/api.md), split out of documents.ts the same way the share family
 // owns document-share-routes.ts: the one-time WS ticket mint and the

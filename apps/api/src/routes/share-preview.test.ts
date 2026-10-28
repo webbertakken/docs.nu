@@ -21,6 +21,7 @@ import {
   BRAND_CARD_REDIRECT_CACHE,
   SHARE_CARD_CACHE,
   handleSharePreview,
+  shareCardImage,
   isSharePreviewPath,
 } from './share-preview';
 
@@ -60,7 +61,10 @@ function call(path: string, opts: { images?: ReturnType<typeof bucket>; method?:
     env,
     waitUntil: (p) => void waits.push(p),
   });
-  return { result: handleSharePreview(ctx), waits };
+  // The card's image is drawn by the document's room (shareCardImage), its text by the worker.
+  const code = path.split('/')[2] ?? '';
+  const result = path.endsWith('/image.png') ? shareCardImage(ctx, code) : handleSharePreview(ctx);
+  return { result, waits };
 }
 
 beforeEach(() => {

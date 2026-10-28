@@ -1,17 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { linkDocumentTab } from './legacy-test-schema';
-import { migrateFrom } from '../test-sqlite-d1';
-import { resetImageRefIndexMemo } from './image-refs';
-import { documentServesImage } from './image-grants';
+import { documentPlacesImage } from './image-refs';
 import { imageUsageByOwner } from './images';
 import { upsertTab } from './tabs';
-import { images, liveDoc, refsFor, setup, tabWith } from './test-image-fixtures';
+import { images, liveDoc, setup, tabWith } from './test-image-fixtures';
 
-// The usage map and the share-visitor read (docs/specs/009-elements/images.md,
-// "Reference index"): both answer from the index, never a tab body.
+// The usage map and the share-visitor read (docs/specs/009-elements/images.md, "Reference index"): the map reads the
+// placed images each room pushes to D1, the visitor read the room's own index; neither reads a tab body.
 
 afterEach(() => {
-  resetImageRefIndexMemo();
   vi.restoreAllMocks();
 });
 
@@ -34,31 +30,19 @@ describe('imageUsageByOwner', () => {
     });
   });
 
-  it('reads the index, never a body, once the index is complete', async () => {
+  it('reads what the rooms pushed, never a body', async () => {
     const db = setup();
     liveDoc(db.sql, 'A');
     await upsertTab(db.env, 'A', tabWith('t1', 'img'), 0);
-    db.sql.exec('DELETE FROM image_refs');
+    await db.flush();
+    db.sql.exec('DELETE FROM document_images');
     expect(await imageUsageByOwner(db.env, 'owner')).toEqual({});
-  });
-
-  it("indexes the owner's tabs first while the backfill is incomplete", async () => {
-    const db = setup({ before0050: true });
-    liveDoc(db.sql, 'A');
-    db.sql.exec(
-      `INSERT INTO tabs (id, name, data, updated_at) VALUES ('t1', 't1', '${JSON.stringify(tabWith('t1', 'img'))}', 0)`,
-    );
-    linkDocumentTab(db.sql, 'A', 't1');
-    images(db.sql, 0, 'img');
-    migrateFrom(db.sql, '0050');
-    expect(await imageUsageByOwner(db.env, 'owner')).toEqual({ img: [{ id: 'A', name: 'A' }] });
-    expect(refsFor(db.sql, 'img')).toBe(1);
   });
 });
 
 // docs/specs/013-workspace/tab-scoped-share-links.md: a tab-scoped visitor
 // may read an image only when THEIR tab uses it.
-describe('documentServesImage (placement)', () => {
+describe('documentPlacesImage', () => {
   async function twoTabs() {
     const db = setup();
     liveDoc(db.sql, 'A');
@@ -72,31 +56,19 @@ describe('documentServesImage (placement)', () => {
 
   it('looks across every tab of the document by default', async () => {
     const db = await twoTabs();
-    expect(await documentServesImage(db.env, 'A', 'i2')).toBe(true);
-    expect(await documentServesImage(db.env, 'A', 'i3')).toBe(false);
+    expect(await documentPlacesImage(db.env, 'A', 'i2', null)).toBe(true);
+    expect(await documentPlacesImage(db.env, 'A', 'i3', null)).toBe(false);
   });
 
   it('looks at one tab when scoped', async () => {
     const db = await twoTabs();
-    expect(await documentServesImage(db.env, 'A', 'i1', 't1')).toBe(true);
-    expect(await documentServesImage(db.env, 'A', 'i2', 't1')).toBe(false);
+    expect(await documentPlacesImage(db.env, 'A', 'i1', 't1')).toBe(true);
+    expect(await documentPlacesImage(db.env, 'A', 'i2', 't1')).toBe(false);
   });
 
-  it('answers from the index once it is complete', async () => {
+  it('answers from the index, never a body', async () => {
     const db = await twoTabs();
     db.sql.exec('DELETE FROM image_refs');
-    expect(await documentServesImage(db.env, 'A', 'i1')).toBe(false);
-  });
-
-  it("indexes the document's tabs first while the backfill is incomplete", async () => {
-    const db = setup({ before0050: true });
-    liveDoc(db.sql, 'A');
-    db.sql.exec(
-      `INSERT INTO tabs (id, name, data, updated_at) VALUES ('t1', 't1', '${JSON.stringify(tabWith('t1', 'img'))}', 0)`,
-    );
-    linkDocumentTab(db.sql, 'A', 't1');
-    images(db.sql, 0, 'img');
-    migrateFrom(db.sql, '0050');
-    expect(await documentServesImage(db.env, 'A', 'img')).toBe(true);
+    expect(await documentPlacesImage(db.env, 'A', 'i1', null)).toBe(false);
   });
 });

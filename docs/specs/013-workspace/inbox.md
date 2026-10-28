@@ -214,6 +214,15 @@ CREATE TABLE collab_threads (
   indexable, and it does not need to be: the read (§4) is bounded by
   the reader's own library before it ever looks at participants.
 
+- **Form links carry what the Inbox shows of their form.** A form's tab name, heading and board live in its tab,
+  in the room; the tab's push writes them onto the tab's `form_links` rows (`tab_name`, `heading`,
+  `board_tab_id`, migration 0110), and publishing a form writes them as it stands then. The Form Responses read
+  joins nothing else.
+- **Plan cards and their threads are pushed whole** (§2.4, §2.5): `inbox_cards` holds every card that is open and
+  assigned, or holds an open thread, with `board` (its place for an unscoped reader) and `boards` (every board on
+  each tab that shows its status or all cards, for a tab-scoped reader); a card's open thread sits in
+  `collab_threads` under the tab key `~cards`, its element id the item id.
+
 ### 2.1 Where the writes happen
 
 Every write to a tab in a room, whatever its path (the autosave, a comment through the api, a create, a copy, an

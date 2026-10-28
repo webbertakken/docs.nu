@@ -7,10 +7,16 @@ import { frontDoorOf } from '../changesets/front-door';
 import { writeAgentForm } from '../forms/agent-form-write';
 import { forbidden, json } from '../responses';
 import { authorOf, refreshAfterWrite } from './changesets';
-import { gateEdit, missingDocument, readBody, requireOwner, type RouteContext } from './context';
+import {
+  gateEdit,
+  missingDocument,
+  readBody,
+  requireOwner,
+  type DocumentRouteContext,
+} from './context';
 
 export async function handleTabForm(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   id: string,
   tabId: string,
 ): Promise<Response> {

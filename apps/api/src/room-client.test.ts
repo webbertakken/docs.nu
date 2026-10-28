@@ -1,13 +1,8 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import type { ShapeElement, Tab, TabLedger } from '@livedoc/document';
 import type { Env } from './types';
 import {
   broadcastShareOp,
-  documentRoom,
-  DOCUMENT_ID_HEADER,
   relayItems,
   relayItemTypes,
   relayElementDelta,
@@ -348,42 +343,5 @@ describe('relayElementDelta (agent-presence PR26)', () => {
       ],
     ]);
     warn.mockRestore();
-  });
-});
-
-describe('documentRoom', () => {
-  it('names the document on every call', async () => {
-    const seen: Headers[] = [];
-    const env = {
-      DOCUMENT_ROOM: {
-        idFromName: (n: string) => n,
-        get: () => ({
-          fetch: async (input: Request | string, init?: RequestInit) => {
-            seen.push(typeof input === 'string' ? new Headers(init?.headers) : input.headers);
-            return new Response('ok');
-          },
-        }),
-      },
-    } as unknown as Env;
-    const room = documentRoom(env, 'doc-9');
-    await room.fetch('https://room/broadcast', { method: 'POST', body: '{}' });
-    await room.fetch(
-      new Request('https://api/api/documents/doc-9/ws', { headers: { Upgrade: 'websocket' } }),
-    );
-    expect(seen.map((h) => h.get(DOCUMENT_ID_HEADER))).toEqual(['doc-9', 'doc-9']);
-    expect(seen[1]!.get('Upgrade')).toBe('websocket');
-  });
-
-  it('is the only place the worker stubs a room', () => {
-    const root = fileURLToPath(new URL('.', import.meta.url).href);
-    const offenders = readdirSync(root, { recursive: true })
-      .map(String)
-      .filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts') && f !== 'room-client.ts')
-      .filter((f) =>
-        readFileSync(join(root, f), 'utf8')
-          .split('\n')
-          .some((line) => !/^\s*(\/\/|\*)/.test(line) && line.includes('DOCUMENT_ROOM.get(')),
-      );
-    expect(offenders).toEqual([]);
   });
 });

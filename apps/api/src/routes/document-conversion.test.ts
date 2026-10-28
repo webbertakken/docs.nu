@@ -3,6 +3,12 @@ import { DOCUMENT_CONVERSION_HEADER } from '@livedoc/api-schema';
 import { makeTestRouteContext } from './test-route-context';
 import type { DocumentDTO } from '../types';
 
+// No document here owes its room a purge (G3 is room-purge.test.ts's).
+vi.mock('../room-purge-client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../room-purge-client')>()),
+  purgeOwed: vi.fn(async () => false),
+}));
+
 // Offline Mode conversions must be recorded as themselves (docs/specs/006-document/offline-mode.md + docs/specs/013-workspace/timeline.md).
 //
 // Both conversions reuse ordinary endpoints — "take offline" is a plain
@@ -53,6 +59,14 @@ const db = vi.hoisted(() => ({
   seedTabs: vi.fn(async () => {}),
 }));
 vi.mock('../db', () => db);
+// A create's content is its room's (docs/specs/006-document/blueprints/document-storage.md "Routing").
+const { createDocumentContent } = vi.hoisted(() => ({
+  createDocumentContent: vi.fn(async () => ({
+    ok: true,
+    summary: { v: 1, tabs: 0, firstTabCount: null, tabCounts: {}, stats: null, hasContent: false },
+  })),
+}));
+vi.mock('../document-room/document-create', () => ({ createDocumentContent }));
 vi.mock('../db/timeline', () => ({ markTimelineEventsDeletedBySource: vi.fn(async () => {}) }));
 vi.mock('../auth/document-access', () => ({
   canReadDocument: vi.fn(async () => true),

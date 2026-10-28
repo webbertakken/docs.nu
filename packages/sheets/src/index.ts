@@ -38,6 +38,7 @@ export * from './write-caps';
 export * from './a1-io';
 export * from './chart-data';
 export * from './sheet-metrics';
+export * from './search-inputs';
 export * from './fit-widths';
 export * from './sheet-starters';
 export * from './hyperlink';

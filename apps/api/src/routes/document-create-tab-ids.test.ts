@@ -2,15 +2,16 @@ import { describe, expect, it } from 'vitest';
 import type { DatabaseSync } from 'node:sqlite';
 import { DOCUMENT_CONVERSION_HEADER } from '@livedoc/api-schema';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
-import { linkTabToDocument, upsertTab } from '../db/tabs';
+import { upsertTab } from '../db/tabs';
+import { testDocumentRoom } from '../test-document-room';
+import type { DocumentSeed } from '../document-room/document-create';
+import type { Env } from '../types';
 import { makeTestRouteContext } from './test-route-context';
 import { handleDocuments } from './documents';
 
-// A created document never writes into a tab another document holds
-// (docs/specs/006-document/offline-mode.md, "Shared tabs fork"): a seeded tab
-// whose id is already taken outside this document is created under a fresh id.
-// That is what makes a synced-back offline copy a fork rather than an
-// overwrite, and what stops a create from rewriting someone else's tab.
+// A created document's tabs are its own room's (docs/specs/006-document/offline-mode.md, "A synced-back tab keeps its
+// id"): a seeded tab keeps the id it was sent with, and sits beside any other document's tab of that id, independent
+// of it. A create cannot reach another document's tabs at all, so it can never rewrite one.
 
 const T0 = 1_700_000_000_000;
 
@@ -43,13 +44,6 @@ function tabName(sql: DatabaseSync, id: string): string | undefined {
   return sql.prepare('SELECT name FROM tabs WHERE id = ?').get(id)?.name as string | undefined;
 }
 
-function linksOf(sql: DatabaseSync, tabId: string): string[] {
-  return sql
-    .prepare('SELECT document_id FROM document_tabs WHERE tab_id = ? ORDER BY document_id')
-    .all(tabId)
-    .map((r) => r.document_id as string);
-}
-
 function tabsOf(sql: DatabaseSync, documentId: string) {
   return sql
     .prepare(
@@ -68,15 +62,33 @@ async function seed(db: SqliteD1, documentId: string, id: string, name = id) {
   await upsertTab(db.env, documentId, { id, name, elements: [] }, 0);
 }
 
-describe('POST /api/documents with a tab id held elsewhere', () => {
-  it('syncs an offline fork back as its own tab, leaving the shared one alone', async () => {
+const seedOf = (tabs: DocumentSeed['tabs']): DocumentSeed => ({
+  identity: {
+    sessionAccountId: null,
+    verifiedAccountId: null,
+    accountEmail: null,
+    sessionAuthTime: null,
+    owner: 'owner',
+    token: null,
+    workbench: null,
+  },
+  owner: 'owner',
+  recommit: false,
+  savedAt: T0,
+  createdAt: T0,
+  presentation: null,
+  itemTypes: null,
+  tabs,
+  items: [],
+  sheets: [],
+});
+
+describe('POST /api/documents with tab ids', () => {
+  it('syncs an offline copy back with its own tab ids, its links and deck as it built them', async () => {
     const db = sqliteD1();
     liveDoc(db.sql, 'A', 'owner');
-    liveDoc(db.sql, 'B', 'owner');
-    await seed(db, 'A', 'shared', 'Glossary');
-    await seed(db, 'A', 'own');
-    await linkTabToDocument(db.env, 'B', 'shared');
-    // Take Offline removed A from the server; `shared` lives on in B.
+    await seed(db, 'A', 'glossary', 'Glossary');
+    // Take Offline removed A from the server.
     await handleDocuments(
       makeTestRouteContext('DELETE', '/api/documents/A', {
         env: db.env,
@@ -84,6 +96,9 @@ describe('POST /api/documents with a tab id held elsewhere', () => {
         headers: { [DOCUMENT_CONVERSION_HEADER]: 'offline' },
       }),
     );
+    const deck = JSON.stringify({
+      decks: [{ slides: [{ id: 's1', tabId: 'glossary', elementIds: ['g'] }] }],
+    });
 
     const res = await post(
       db,
@@ -92,63 +107,19 @@ describe('POST /api/documents with a tab id held elsewhere', () => {
         id: 'A',
         name: 'A',
         tabs: [
-          { id: 'shared', name: 'Glossary, edited offline', elements: [square('g')] },
-          { id: 'own', name: 'own', elements: [square('s', 'shared')] },
+          { id: 'glossary', name: 'Glossary, edited offline', elements: [square('g')] },
+          { id: 'own', name: 'own', elements: [square('s', 'glossary')] },
         ],
-        presentation: JSON.stringify({
-          decks: [{ slides: [{ id: 's1', tabId: 'shared', elementIds: ['g'] }] }],
-        }),
+        presentation: deck,
       },
       { [DOCUMENT_CONVERSION_HEADER]: 'sync' },
     );
 
     expect(res?.status).toBe(201);
-    expect(tabName(db.sql, 'shared')).toBe('Glossary');
-    expect(linksOf(db.sql, 'shared')).toEqual(['B']);
-    const [fork, own] = tabsOf(db.sql, 'A');
-    expect(fork!.id).not.toBe('shared');
-    expect(fork!.name).toBe('Glossary, edited offline');
-    // The copy's own navigation and deck follow the fork.
-    expect(own!.id).toBe('own');
-    expect(own!.data.elements[0]?.link?.tabId).toBe(fork!.id);
-    const deck = db.sql.prepare("SELECT presentation FROM documents WHERE id = 'A'").get();
-    expect(JSON.parse(deck!.presentation as string)).toHaveProperty(
-      ['decks', 0, 'slides', 0, 'tabId'],
-      fork!.id,
-    );
-  });
-
-  it('never rewrites a tab in someone else’s document', async () => {
-    const db = sqliteD1();
-    liveDoc(db.sql, 'V', 'victim');
-    await seed(db, 'V', 'vt', 'Plans');
-
-    const res = await post(db, 'attacker', {
-      id: 'X',
-      name: 'X',
-      tabs: [{ id: 'vt', name: 'Overwritten', elements: [] }],
-    });
-
-    expect(res?.status).toBe(201);
-    expect(tabName(db.sql, 'vt')).toBe('Plans');
-    expect(linksOf(db.sql, 'vt')).toEqual(['V']);
-    expect(tabsOf(db.sql, 'X').map((t) => t.name)).toEqual(['Overwritten']);
-  });
-
-  it('keeps the deck a synced offline copy carries', async () => {
-    const db = sqliteD1();
-    const deck = JSON.stringify({
-      decks: [{ slides: [{ id: 's1', tabId: 'n1', elementIds: [] }] }],
-    });
-
-    await post(db, 'owner', {
-      id: 'N',
-      name: 'N',
-      tabs: [{ id: 'n1', name: 'One', elements: [] }],
-      presentation: deck,
-    });
-
-    const row = db.sql.prepare("SELECT presentation FROM documents WHERE id = 'N'").get();
+    const [glossary, own] = tabsOf(db.sql, 'A');
+    expect(glossary).toMatchObject({ id: 'glossary', name: 'Glossary, edited offline' });
+    expect(own!.data.elements[0]?.link?.tabId).toBe('glossary');
+    const row = db.sql.prepare("SELECT presentation FROM document WHERE id = 'A'").get();
     expect(row!.presentation).toBe(deck);
   });
 
@@ -160,5 +131,17 @@ describe('POST /api/documents with a tab id held elsewhere', () => {
     await post(db, 'owner', body);
 
     expect(tabsOf(db.sql, 'N').map((t) => t.id)).toEqual(['n1']);
+  });
+});
+
+describe("a room's tabs", () => {
+  it('are its own: two documents each hold a tab of one id, independently', async () => {
+    const victim = testDocumentRoom({} as Env);
+    const other = testDocumentRoom({} as Env);
+    await victim.room.create('V', seedOf([{ id: 'vt', name: 'Plans', elements: [] }]));
+    await other.room.create('X', seedOf([{ id: 'vt', name: 'Overwritten', elements: [] }]));
+
+    expect(tabName(victim.sql, 'vt')).toBe('Plans');
+    expect(tabName(other.sql, 'vt')).toBe('Overwritten');
   });
 });

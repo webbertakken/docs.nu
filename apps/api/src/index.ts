@@ -1,9 +1,9 @@
+import { CONTENT_MOVE_CRON, sweepContentMoves } from './document-room/content-move-sweep';
 import {
   fromLegacyRequest,
   isLegacyDocumentsPath,
   toLegacyResponse,
 } from './legacy-documents-alias';
-import { runTabStatsBackfill } from './tab-stats-backfill';
 import { getAccountSession } from './auth/session-token';
 import { requireAccount } from './auth/account-gate';
 import { handleAuth } from './routes/auth';
@@ -17,7 +17,6 @@ import { runTimelineExpirySweep } from './timeline';
 import { runImageRetention } from './image-refs/retention';
 import {
   deleteOldEvents,
-  deleteOldChangesets,
   deleteOldNotifyEmailClaims,
   deleteOldTimelineEvents,
   purgeExpiredTrash,
@@ -26,7 +25,6 @@ import {
 } from './db';
 import {
   apiRouteLabel,
-  CHANGESET_RETENTION_MS,
   bearerTokenOf,
   errorTypeToken,
   isAccountIdShape,
@@ -81,6 +79,7 @@ import { handleTeams } from './routes/teams';
 import { handleShared } from './routes/shared';
 import { handleTelemetry } from './routes/telemetry';
 import { handleTrash } from './routes/trash';
+import { retryRoomPurges, roomCallBudget } from './room-purge-client';
 import { handleDrive } from './routes/drive';
 import { handleWorkbench } from './routes/workbench';
 import { resolveWorkbenchSession } from './auth/workbench-session';
@@ -88,7 +87,6 @@ import { workbenchRefusal } from './auth/workbench-confinement';
 import { sweepWorkbench } from './db/workbench';
 import { withServerRelease } from './server-release-header';
 import type { Env } from './types';
-import { runSheetExpiry } from './sheet-sweep';
 
 export { DocumentRoom, LegacyDocumentRoom };
 
@@ -499,7 +497,7 @@ const worker = {
   // `event.cron` for each pattern. Today's daily 03:00 UTC trigger
   // fires independent retention sweeps:
   //   - events,     60-day floor (docs/specs/017-telemetry/telemetry.md "Retention").
-  //   - images,     30-day floor, unused only, after the reference-index backfill
+  //   - images,     30-day floor, unused only, paused until every document has pushed its summary
   //                 (docs/specs/009-elements/images.md "Retention").
   //   - trash,      30 days after deletion (docs/specs/013-workspace/trash.md).
   //   - empty,      documents empty and unsaved for 30 days move to the Trash
@@ -541,16 +539,6 @@ const worker = {
         now - TIMELINE_RETENTION_MS,
         deleteOldDocumentOpens,
       );
-      // docs/specs/024-agents/agent-changesets.md "Revert": a changeset can be reverted while its
-      // record exists, as long as the Trash keeps a document (CS28).
-      scheduleSweep(
-        ctx,
-        env,
-        'changesets',
-        'rows',
-        now - CHANGESET_RETENTION_MS,
-        deleteOldChangesets,
-      );
       // docs/specs/012-collaboration/assigned-actions.md §4: a notify-email claim past its dedupe window
       // decides nothing any more.
       scheduleSweep(
@@ -560,10 +548,6 @@ const worker = {
         'rows',
         now - NOTIFY_EMAIL_DEDUPE_MS,
         deleteOldNotifyEmailClaims,
-      );
-      // docs/specs/029-sheets/sheet-store.md "Deleting a sheet": delete sheets unreferenced for 30 days.
-      ctx.waitUntil(
-        runSheetExpiry(env).catch((err) => console.error('[sheets] sheets.expired failed', err)),
       );
       // docs/specs/014-identity/transactional-email.md: send any due onboarding emails (welcome catch-up + week 1 / 2).
       // No-op when RESEND_API_KEY is unset.
@@ -586,12 +570,18 @@ const worker = {
           .then((count) => console.log(`timeline expiry sweep: emitted ${count} events`))
           .catch((err) => console.error('timeline expiry sweep failed', err)),
       );
-      // docs/specs/013-workspace/trash.md: purge what has been in the Trash for
-      // 30 days, oldest first, capped per run (TRASH_PURGE_MAX_BATCHES).
+      // docs/specs/013-workspace/trash.md: the purges rooms still owe first, then what has been in the Trash for
+      // 30 days, oldest first, capped per run (TRASH_PURGE_MAX_BATCHES). One budget of room calls for both, so the
+      // run stays inside the invocation's subrequests (room-purge-client.ts); what it leaves keeps its tombstone.
       ctx.waitUntil(
-        purgeExpiredTrash(env, now)
-          .then((count) => console.log(`trash sweep: purged ${count} documents`))
-          .catch((err) => console.error('trash sweep failed', err)),
+        (async () => {
+          const roomCalls = roomCallBudget();
+          await retryRoomPurges(env, now, roomCalls).catch((err: unknown) =>
+            console.error('[room-purge] retry failed', err),
+          );
+          const count = await purgeExpiredTrash(env, now, { roomCalls });
+          console.log(`trash sweep: purged ${count} documents`);
+        })().catch((err) => console.error('trash sweep failed', err)),
       );
       // docs/specs/013-workspace/empty-document-cleanup.md: move documents empty and
       // unsaved for 30 days to the Trash, stamped `now`, so the purge above
@@ -601,22 +591,24 @@ const worker = {
           .then((count) => console.log(`empty sweep: moved ${count} documents to the Trash`))
           .catch((err) => console.error('empty sweep failed', err)),
       );
-      // docs/specs/009-elements/images.md "Retention": advance the reference-index backfill,
+      // docs/specs/009-elements/images.md "Retention": once every document has pushed its images,
       // then reap unused images. runImageRetention logs its own outcome.
       ctx.waitUntil(runImageRetention(env, now));
-      // docs/specs/013-workspace/explorer-details-view.md "Counting the existing tabs": count the
-      // tabs written before tab stats existed, a bounded number a run. Logs its own outcome.
-      ctx.waitUntil(
-        runTabStatsBackfill(env)
-          .then(() => undefined)
-          .catch((err) => console.error('tab-stats: backfill failed', err)),
-      );
       // docs/specs/013-workspace/blueprints/workbench-embeds.md "Retention": spent tickets and requests,
       // sessions past their grace, pairings of tokens no longer live.
       ctx.waitUntil(
         sweepWorkbench(env, now)
           .then((count) => console.log(`workbench sweep: deleted ${count} rows`))
           .catch((err) => console.error('workbench sweep failed', err)),
+      );
+    }
+    // docs/specs/006-document/document-storage-move.md "The sweep": every minute, documents whose content is still
+    // in D1 move into their rooms.
+    if (event.cron === CONTENT_MOVE_CRON) {
+      ctx.waitUntil(
+        sweepContentMoves(env, Date.now()).catch((err: unknown) =>
+          console.error('[content-move] sweep failed', err),
+        ),
       );
     }
   },

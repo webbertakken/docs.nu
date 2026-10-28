@@ -15,7 +15,7 @@ import {
   type ItemRejection,
 } from '@livedoc/items';
 import { badRequest, forbidden, json } from '../responses';
-import { readBody, type RouteContext } from './context';
+import { readBody, type DocumentRouteContext } from './context';
 import {
   excludedStatus,
   forCaller,
@@ -48,7 +48,7 @@ function readPatches(raw: unknown): ItemPatchOf[] | Response {
   return out;
 }
 
-export async function patches(ctx: RouteContext, documentId: string): Promise<Response> {
+export async function patches(ctx: DocumentRouteContext, documentId: string): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'participate');
   if (caller instanceof Response) return caller;
   const body = await readBody(ctx);

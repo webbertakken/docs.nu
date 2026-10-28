@@ -1838,7 +1838,7 @@ export const articles: Article[] = [
   {
     slug: 'add-to-document',
     title: 'Add a Tab to Another Document',
-    description: 'Add the active tab to another document you own; both share the same live tab.',
+    description: 'Add the active tab to another document you own; edits in either reach the other.',
     keywords: 'reuse share tab sync across documents diagrams move copy live',
     category: 'Tabs',
     categorySlug: 'tabs',

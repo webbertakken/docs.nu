@@ -74,6 +74,7 @@ export async function planOf(query: Query): Promise<PlannedDocument[]> {
 type MoveRow = {
   document_id: string;
   status: string;
+  born: number;
   d1_tabs: number | null;
   room_tabs: number | null;
   d1_hash: string | null;
@@ -87,6 +88,8 @@ function problemOf(
 ) {
   if (!move) return 'not moved';
   if (move.status !== 'moved') return `status ${move.status}`;
+  // Created or copied in its room: D1 never held its content, so there is nothing to compare.
+  if (move.born === 1) return null;
   if (move.d1_hash !== move.room_hash) return 'room differs from D1';
   if (move.d1_tabs !== move.room_tabs) return 'tab counts differ';
   if (move.d1_hash !== now.hash) return 'D1 differs from the recorded move';
@@ -100,7 +103,7 @@ export async function verifyOf(
   plan: readonly PlannedDocument[],
 ): Promise<Verification> {
   const [moves] = await select(query, [
-    'SELECT document_id, status, d1_tabs, room_tabs, d1_hash, room_hash FROM content_moves',
+    'SELECT document_id, status, born, d1_tabs, room_tabs, d1_hash, room_hash FROM content_moves',
   ]);
   const byId = new Map(((moves ?? []) as unknown as MoveRow[]).map((m) => [m.document_id, m]));
   const planned = new Map(plan.map((p) => [p.id, p]));

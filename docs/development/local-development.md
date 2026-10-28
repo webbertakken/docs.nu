@@ -62,7 +62,7 @@ and writes real people's documents ([Preview deployments](../specs/016-platform/
 
 Without it the editor loads, the canvas works, and the first save fails with **“Couldn’t create the document”** — which reads like a broken api worker rather than a missing variable, so it is worth setting up front. `apps/telemetry` and `apps/help` read the same variable: the dashboard needs it to show anything on `:4003`, and the help centre only loses its telemetry posts without it. To work on the dashboard against real numbers without seeding a local database, point it at production's summary instead: `NEXT_PUBLIC_API_BASE=https://www.docs.nu/api` in `apps/telemetry/.env.local`. `GET /api/telemetry/summary` is public, read-only and allows any origin, and the dashboard only sends events itself when `NEXT_PUBLIC_TELEMETRY_ENABLED=true`, which local builds leave unset.
 
-The editor works in pure-guest mode without any auth setup: `pnpm dev` and open `http://localhost:4000/new`. Documents persist to the local D1 file the api worker creates on first start. (On `http://localhost:4002/new` instead, set `NEXT_PUBLIC_API_BASE` first — see the note above.)
+The editor works in pure-guest mode without any auth setup: `pnpm dev` and open `http://localhost:4000/new`. Documents persist locally: their listing in the local D1 file, their content in their rooms' SQLite, both under `apps/api/.wrangler/state/v3/` ([Document storage](../specs/006-document/document-storage.md)). (On `http://localhost:4002/new` instead, set `NEXT_PUBLIC_API_BASE` first — see the note above.)
 
 ## Scoping commands to one workspace
 
@@ -233,6 +233,8 @@ to the in-browser model and says so ([Event storming](../specs/021-event-stormin
 
 - **`/about/licences` needs its generated data.** `pnpm dev` does not run the generator (it takes about 20 seconds), so the marketing dev server fails that one page with `LicencesManifestMissing` until you run `pnpm licences` once. Don't run `pnpm licences` while a `next build` of the editor, help centre or telemetry dashboard is running: Next's analyzer shares an app's Turbopack build cache (`.next/cache`), and two processes on it corrupt it. `pnpm build` orders them for you.
 
-- **The api worker's local D1 file lives at `apps/api/.wrangler/state/v3/d1/`.** Delete the folder to start over with an empty database.
+- **The api worker's local state lives under `apps/api/.wrangler/state/v3/`**: D1 in `d1/`, each document's room (and its content) in `do/`. Delete `state/` to start over; deleting only `d1/` leaves rooms whose documents no longer exist, and only `do/` leaves documents with no content.
+
+- **Local state from before the rooms** moves when a document is opened. `wrangler dev` runs no cron by itself, so to move the rest run the api worker as `pnpm --filter @livedoc/api exec wrangler dev --test-scheduled` (in place of its usual dev server) and call `curl "http://localhost:8787/__scheduled?cron=*+*+*+*+*"` (25 documents a call). From `apps/api`, `node --import ../../scripts/ts-source-hooks.mjs scripts/content-move.ts plan --local --out plan.json` before and `... verify --local --plan plan.json` after check it ([Moving content into rooms](../specs/006-document/document-storage-move.md)).
 
 - **Open the editor on `localhost`, not on the machine's LAN address.** Over plain `http` from any other address (`http://192.168.x.x:4002`, `http://<machine-name>:4002`) the browser is not in a secure context, withholds `crypto.randomUUID`, and the editor fails to load with "This page couldn't load". A known gap, not yet fixed: the editor calls `crypto.randomUUID` directly in about 75 places. Testing from a phone or a second laptop needs https (a tunnel, or a dev certificate) until it is.

@@ -378,22 +378,23 @@ export async function apiSetThreadResolved(
   await expectOkVoid(res, `${verb} thread`);
 }
 
-// Link an existing tab into another of the caller's documents
-// (docs/specs/006-document/tab-document-many-to-many.md). After this returns, the tab body is shared: edits
-// from either document write to the same `tabs.data` row. Returns
-// the target document's summary view of the now-attached tab so
-// the caller can update its TabBar without a full document
-// refetch.
+// Share a tab of `fromDocumentId` into another of the caller's documents
+// (docs/specs/006-document/tab-document-many-to-many.md). Afterwards both documents hold the tab, each its own copy
+// under the same id, and an edit in either reaches the other. Answers the tab as the target now holds it, so the
+// caller can show it without refetching the document. A target holding an unrelated tab of that id refuses it
+// (409 `tab_id_taken`).
 export async function apiLinkTab(
   ownerId: string,
   documentId: string,
   tabId: string,
+  fromDocumentId: string,
 ): Promise<TabSummary> {
   const res = await apiFetch(
     `${API_BASE}/documents/${encodeURIComponent(documentId)}/tabs/${encodeURIComponent(tabId)}/link`,
     {
       method: 'POST',
-      headers: await apiHeaders(ownerId),
+      headers: await apiHeaders(ownerId, { body: true }),
+      body: JSON.stringify({ from: fromDocumentId }),
     },
   );
   return expectOk<{ tab: TabSummary }>(res, 'link tab').then((b) => b.tab);

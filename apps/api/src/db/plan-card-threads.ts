@@ -1,47 +1,43 @@
-// The Inbox's Plan card comment threads (docs/specs/013-workspace/inbox.md §2.5). A card's thread
-// lives in its item (`fields.comments`), not in tab JSON, so the read filters `items` directly, as the Plan cards
-// read does (§2.4), and places each card on a board the same way (`itemPlacementCtes`).
+// The Inbox's Plan card comment threads (docs/specs/013-workspace/inbox.md §2.5). A card's thread lives in its
+// item (`fields.comments`), in the document's room, which pushes each open thread to `collab_threads` under the tab
+// key `~cards` with the card itself in `inbox_cards` (document-room/inbox-cards.ts); the read filters those rows
+// and places each card as the cards read does.
 
 import type { ActivityCardThread } from '@livedoc/api-schema';
-import { itemPlacementCtes } from './plan-board-index';
-
-// The thread's comments, and the comments' mentions, as rows SQLite can test.
-const COMMENTS = `json_each(i.fields, '$.comments.comments')`;
-const LATEST = `'$.comments.comments[#-1]`;
+import { CARD_BOARD_SQL, CARD_IN_SCOPE_SQL } from './plan-board-index';
 
 // Appended to the Activity read's scope CTEs (?1 owner, ?2 now, ?3 limit; `me` and `my_members` from there). A
-// thread is listed while it holds a comment and is not resolved, on a card neither archived nor in the Trash,
-// when the reader wrote in it, is mentioned in it, or owns the document. Author ids stay in the worker: only the
-// latest author's name and colour leave it.
-export const CARD_THREADS_CTES = itemPlacementCtes({
-  match: `json_extract(i.fields, '$.comments.resolved') = 0
-       AND json_array_length(i.fields, '$.comments.comments') > 0
-       AND json_extract(i.fields, '$.archived') IS NOT 1
-       AND json_extract(i.fields, '$.status') IS NOT 'trash'`,
-  cols: `json_array_length(i.fields, '$.comments.comments') AS comment_count,
-           json_extract(i.fields, ${LATEST}.text') AS latest_text,
-           json_extract(i.fields, ${LATEST}.authorName') AS latest_author_name,
-           json_extract(i.fields, ${LATEST}.authorColor') AS latest_author_color,
-           json_extract(i.fields, ${LATEST}.createdAt') AS latest_at,
-           json_extract(i.fields, '$.comments.comments[0].createdAt') AS first_at,
-           CASE WHEN EXISTS (SELECT 1 FROM ${COMMENTS} c
-                              WHERE json_extract(c.value, '$.authorId') IN (SELECT id FROM me))
-                THEN 1 ELSE 0 END AS you_commented,
+// thread is listed when the reader wrote in it, is mentioned in it, or owns the document. Author ids stay in the
+// worker: only the latest author's name and colour leave it.
+export const CARD_THREADS_CTES = `,
+  cards AS (
+    SELECT ic.document_id, ic.item_id AS id, ic.item_key, ic.type, ic.title,
+           v.name AS document_name, v.team_id AS document_team_id, v.via, v.share_code,
+           ${CARD_BOARD_SQL} AS board,
+           ct.comment_count, ct.latest_text, ct.latest_author_name, ct.latest_author_color,
+           ct.latest_at, ct.first_at,
+           CASE WHEN EXISTS (SELECT 1 FROM json_each(ct.participant_ids) je
+                              WHERE je.value IN (SELECT id FROM me)) THEN 1 ELSE 0 END AS you_commented,
            CASE WHEN v.owner_id = ?1 THEN 1 ELSE 0 END AS on_your_document,
-           CASE WHEN EXISTS (SELECT 1 FROM ${COMMENTS} c, json_each(c.value, '$.mentions') m
-                              WHERE json_extract(m.value, '$.userId') IN (SELECT id FROM me)
-                                 OR json_extract(m.value, '$.memberId') IN (SELECT id FROM my_members))
-                THEN 1 ELSE 0 END AS mentions_you`,
-  keep: 'on_your_document = 1 OR you_commented = 1 OR mentions_you = 1',
-  order: 'latest_at',
-});
+           CASE WHEN EXISTS (SELECT 1 FROM json_each(ct.mentioned_ids) jm
+                              WHERE jm.value IN (SELECT id FROM me)
+                                 OR jm.value IN (SELECT id FROM my_members)) THEN 1 ELSE 0 END AS mentions_you
+      -- From the reader's documents to their card threads (CROSS JOIN fixes the order), as the element threads.
+      FROM visible v
+      CROSS JOIN collab_threads ct ON ct.document_id = v.id AND ct.tab_id = '~cards'
+      JOIN inbox_cards ic ON ic.document_id = ct.document_id AND ic.item_id = ct.element_id
+     WHERE ct.resolved = 0
+       AND ${CARD_IN_SCOPE_SQL}
+  )`;
 
 export const CARD_THREADS_SELECT = `
   SELECT document_id, id, item_key, type, title, document_name, document_team_id, via, share_code, board,
          comment_count, latest_text, latest_author_name, latest_author_color, latest_at, first_at,
          you_commented, on_your_document, mentions_you
-    FROM placed
-   ORDER BY latest_at DESC`;
+    FROM cards
+   WHERE on_your_document = 1 OR you_commented = 1 OR mentions_you = 1
+   ORDER BY latest_at DESC
+   LIMIT ?3`;
 
 export type CardThreadRow = {
   document_id: string;

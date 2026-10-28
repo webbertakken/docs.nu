@@ -1,5 +1,6 @@
-import type { RouteContext, WorkbenchContext } from './context';
-import type { Env } from '../types';
+import type { DocumentRouteContext, WorkbenchContext } from './context';
+import { withTestDocumentRooms } from '../test-document-room';
+import type { DocumentEnv, Env } from '../types';
 
 // Shared test builder for RouteContext (docs/specs/003-system-architecture/testing.md). Eight route test
 // files used to hand-roll the same URL → segments → JSON Request →
@@ -41,7 +42,7 @@ export function makeTestRouteContext(
     // default where `ctx.waitUntil?.(...)` skips its argument.
     waitUntil?: (promise: Promise<unknown>) => void;
   } = {},
-): RouteContext {
+): DocumentRouteContext {
   const url = new URL(`https://api.test${path}`);
   const segments = url.pathname.replace(/^\//, '').split('/');
   const request = new Request(url, {
@@ -52,9 +53,14 @@ export function makeTestRouteContext(
   const sessionAccountId = opts.sessionAccountId ?? null;
   const verifiedAccountId =
     opts.verifiedAccountId === undefined ? sessionAccountId : opts.verifiedAccountId;
+  // A path under /api/documents/:id/ is handed to the document's room, which runs the same handlers
+  // (test-document-room.ts).
+  // A room handler's context too: its env is whatever the test passed (with DOCUMENT_DB when it has rooms).
+  const env = (opts.env ?? ({} as Env)) as DocumentEnv;
+  withTestDocumentRooms(env, undefined, opts.waitUntil);
   return {
     request,
-    env: opts.env ?? ({} as Env),
+    env,
     url,
     segments,
     sessionAccountId,
