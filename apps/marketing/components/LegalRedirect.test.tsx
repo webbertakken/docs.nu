@@ -17,7 +17,7 @@ describe('LegalRedirect', () => {
     const replace = vi.fn();
     vi.spyOn(window, 'location', 'get').mockReturnValue({
       ...window.location,
-      hash: '#cookies',
+      hash: '#what-we-store',
       replace,
     });
     const host = document.body.appendChild(document.createElement('div'));
@@ -30,6 +30,6 @@ describe('LegalRedirect', () => {
         />,
       ),
     );
-    expect(replace).toHaveBeenCalledWith('/help/policies/privacy-policy/#cookies');
+    expect(replace).toHaveBeenCalledWith('/help/policies/privacy-policy/#what-we-store');
   });
 });
