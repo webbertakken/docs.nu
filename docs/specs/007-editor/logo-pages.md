@@ -119,9 +119,9 @@ article), above the name, on a logo page only. Show Me runs a guided tour of the
 pressed for; it is never offered or started on its own. The same steps run as the [Pages tour](pages-tour.md)'s Logo track
 from the bottom bar's **Start Pages Tour** button. Each step rings a real control of that page, which stays
 usable. The steps: **Start From a Logo Layout** (the panel, reopened on Layouts; closed again on leaving the step),
-**Draw on Guides** (the Guides button), **Mirror As You Draw** (the Mirror button), **Combine Shapes** (the
-selection toolbar's Combine when two or more shapes were selected as it started, otherwise a centred card saying
-where Combine appears), then a closing card, **That Is a Logo Page**, which points at Export's Logo Kit and links
+**Draw on Guides** (the Guides button), **Mirror As You Draw** (the Mirror button), **Combine Shapes** (a square and a
+circle the tour places overlapping on the page, selected so Combine shows), **Four Ways to Combine** (its menu
+opened), **One Shape** (the two united, as Unite does; they go when the tour ends), then a closing card, **That Is a Logo Page**, which points at Export's Logo Kit and links
 the Logo Pages article. Only someone who may edit the page has its cog, so only they see Show Me. Telemetry:
 `UI` · `Started` · `LogoTour`, and `UI` · `Ended` · `LogoTourCompleted` or `LogoTourSkipped`.
 

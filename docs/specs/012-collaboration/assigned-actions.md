@@ -365,9 +365,9 @@ notifyActionAssigned?: boolean; // someone assigns me an action
 
 - Server-side it joins `NotificationPrefs`
   (`apps/api/src/db/notification-prefs.ts`), read by the notify dispatcher.
-- Client-side the profile page (`ProfilePane.tsx`, [Account settings & email notifications](../014-identity/profile-and-email-notifications.md)) gains a
-  `NotificationRow`: "Someone assigns me an action", gated with the others
-  on `emailEnabled`, flipping through the same `setFlag` round-trip.
+- Client-side the Settings dialog's Email section ([Account settings & email notifications](../014-identity/profile-and-email-notifications.md))
+  carries the row **Someone Assigns Me an Action** (`emailSwitch('notifyActionAssigned', ...)` in
+  `settings-catalogue.ts`), shown like the others only when email is enabled and the person is signed in.
 
 This is the recipient-side kill switch the dialog checkbox cannot be: the
 checkbox is the assigner's courtesy, the preference is the assignee's

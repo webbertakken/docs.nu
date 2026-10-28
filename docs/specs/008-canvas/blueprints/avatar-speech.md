@@ -44,8 +44,10 @@ Synonyms banned: "chat", "comment" (a different feature), "emote".
 
 States: `closed` → `open` (Enter, or the tour never) → `closed` (Escape; send; blur while empty). Guards:
 
-- Opens only when `active && canSpeak && !composer.open && !modalOpen && !isTypingTarget(e.target)`, on a plain
-  `Enter` (no modifier, not a repeat). `preventDefault` so no other Enter handler sees it.
+- Opens only when `speaking` (`active && canSpeak && feet !== null`) and the composer is closed, the target is
+  neither a typing target (`isTypingTarget`) nor a control Enter acts on (`isEnterActivatedTarget`), and no modal is
+  open (`anyModalOpen()`), on a plain `Enter` (no modifier, not a repeat), heard in the capture phase.
+  `preventDefault` and `stopPropagation` so no other Enter handler sees it.
 - While open, the composer's input is a typing target, so `useAvatarKeys` and every editor shortcut ignore keys.
 - `Enter` in the composer sends; `Shift+Enter` also sends (no newlines); `Escape` closes and drops the draft
   (`stopPropagation`, so the mode itself is not left).
