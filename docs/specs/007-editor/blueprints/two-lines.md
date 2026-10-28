@@ -6,23 +6,23 @@ blueprint places the groups and says what each holds.
 
 ## Domain and naming
 
-| Term (spec)           | Identifier                                                       | File (`apps/live/components/`)          |
-| --------------------- | ---------------------------------------------------------------- | --------------------------------------- |
-| the top line          | the canvas chrome's top row (no component of its own)            | `canvas/CanvasChrome.tsx` places it     |
-| the bottom line       | `BottomLine`                                                     | `chrome/lines/BottomLine.tsx`           |
-| the brand group       | `BrandGroup`                                                     | `chrome/lines/BrandGroup.tsx`           |
-| Back (caret and mark) | `BrandBack`                                                      | `chrome/lines/BrandBack.tsx`            |
-| the menu button       | `ToolbarExplorerButton` (the ☰ alone)                           | `chrome/ToolbarExplorerButton.tsx`      |
-| the actions group     | `ActionsGroup`                                                   | `chrome/lines/ActionsGroup.tsx`         |
-| the document actions  | `DocumentActions` (Copy, Present, Share or Share Form)           | `chrome/lines/DocumentActions.tsx`      |
-| the tools group       | the `data-zoom-cluster` box, drawn as a `ToolbarGroup`           | `canvas/CanvasChrome.tsx`               |
-| the document group    | `DocumentGroup`                                                  | `chrome/lines/DocumentGroup.tsx`        |
-| the document's name   | `DocumentName` (share-state icon, name, role pill)               | `chrome/lines/DocumentName.tsx`         |
-| the active tab        | `ActiveTabSegment`                                               | `chrome/lines/ActiveTabSegment.tsx`     |
-| the tab stack         | `TabStackButton`                                                 | `chrome/lines/TabListButtons.tsx`       |
-| the contributors      | `ContributorsButton`                                             | `chrome/lines/TabListButtons.tsx`       |
-| the tab list          | `TabList` (popover), `TabListRow`, `TabListFolder`               | `chrome/lines/TabList*.tsx`             |
-| what the lines need   | `EditorLinesContext` (`actions`, `document` nodes from the page) | `chrome/lines/editor-lines-context.tsx` |
+| Term (spec)           | Identifier                                                       | File                                                         |
+| --------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------ |
+| the top line          | the canvas chrome's top row (no component of its own)            | `apps/live/components/canvas/CanvasChrome.tsx` places it     |
+| the bottom line       | `BottomLine`                                                     | `apps/live/components/chrome/lines/BottomLine.tsx`           |
+| the brand group       | `BrandGroup`                                                     | `apps/live/components/chrome/lines/BrandGroup.tsx`           |
+| Back (caret and mark) | `BrandBack`                                                      | `apps/live/components/chrome/lines/BrandBack.tsx`            |
+| the menu button       | `ToolbarExplorerButton` (the ☰ alone)                           | `apps/live/components/chrome/ToolbarExplorerButton.tsx`      |
+| the actions group     | `ActionsGroup`                                                   | `apps/live/components/chrome/lines/ActionsGroup.tsx`         |
+| the document actions  | `DocumentActions` (Copy, Present, Share or Share Form)           | `apps/live/components/chrome/lines/DocumentActions.tsx`      |
+| the tools group       | the `data-zoom-cluster` box, drawn as a `ToolbarGroup`           | `apps/live/components/canvas/CanvasChrome.tsx`               |
+| the document group    | `DocumentGroup`                                                  | `apps/live/components/chrome/lines/DocumentGroup.tsx`        |
+| the document's name   | `DocumentName` (share-state icon, name, role pill)               | `apps/live/components/chrome/lines/DocumentName.tsx`         |
+| the active tab        | `ActiveTabSegment`                                               | `apps/live/components/chrome/lines/ActiveTabSegment.tsx`     |
+| the tab stack         | `TabStackButton`                                                 | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
+| the contributors      | `ContributorsButton`                                             | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
+| the tab list          | `TabList` (popover), `TabListRow`, `TabListFolder`               | `chrome/lines/TabList*.tsx`                                  |
+| what the lines need   | `EditorLinesContext` (`actions`, `document` nodes from the page) | `apps/live/components/chrome/lines/editor-lines-context.tsx` |
 
 `EditorHeader` and `TabBar` are retired: their parts move into the groups above, their tests with them. `TabPill`,
 `TabFolderChip` and `OutOfScopeTabPill` go with the tab bar; their behaviour (select, rename, drag to reorder, folder,
@@ -178,7 +178,7 @@ alone ([gate a feature by share role](../../../instructions/gate-a-feature-by-sh
 ## Performance and limits
 
 - The tab list mounts only while open. The rows are plain buttons, no virtualisation: documents carry at most
-  `MAX_TABS` tabs ([Tabs](../../006-document/tabs.md)), well under what a scrolling menu draws in a frame.
+  a few dozen tabs, well under what a scrolling menu draws in a frame.
 - `ContributorsButton` reads the presence map the presence rows already fold; no extra subscription.
 
 ## Presentation and UX
@@ -231,20 +231,25 @@ alone ([gate a feature by share role](../../../instructions/gate-a-feature-by-sh
 
 ## Testing
 
-| Rule                                                  | Test                                               |
-| ----------------------------------------------------- | -------------------------------------------------- |
-| Back links to the Explorer, mark only, caret          | `chrome/lines/BrandBack.test.tsx`                  |
-| Back in a frame calls back; doc scope draws no link   | `chrome/lines/BrandBack.test.tsx`                  |
-| Brand group order (Back, divider, ☰, mode switch)    | `chrome/lines/BrandGroup.test.tsx`                 |
-| Actions group order and roles                         | `chrome/lines/ActionsGroup.test.tsx`               |
-| Document group order, roles, no name on a phone       | `chrome/lines/DocumentGroup.test.tsx`              |
-| Active segment renames, menu only for an Editor       | `chrome/lines/ActiveTabSegment.test.tsx`           |
-| Stack count in scope; contributors up to 3 then +N    | `chrome/lines/TabListButtons.test.tsx`             |
-| Tab list rows, folders, filter above 5, switch, close | `chrome/lines/TabList.test.tsx`                    |
-| Tab list keyboard, focus return, rename, reorder      | `chrome/lines/TabList.keyboard.test.tsx`           |
-| Strip clearance from both groups                      | `lib/top-line-clearance.test.ts`                   |
-| The lines in the editor, every mode, phone, frame     | `e2e/two-lines.spec.ts` (dark)                     |
-| The tours still ring their targets                    | `e2e/editor-tour.spec.ts`, `e2e/draw-tour.spec.ts` |
+| Rule                                                         | Test                                                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Back links to the Explorer, mark only, caret                 | `apps/live/components/chrome/lines/BrandBack.test.tsx`                                |
+| Back in a frame calls back; document scope draws no link     | `apps/live/components/chrome/lines/BrandBack.test.tsx`                                |
+| Brand group order (Back, divider, ☰, mode switch)           | `apps/live/components/chrome/lines/BrandGroup.test.tsx`                               |
+| Actions group order and roles, Share or Copy, the welcome    | `apps/live/components/chrome/lines/ActionsGroup.test.tsx`                             |
+| A screen with no document: Back and the account alone        | `apps/live/components/chrome/lines/StatusTopLine.test.tsx`                            |
+| The document's name, its rename, no name on a phone          | `apps/live/components/chrome/lines/DocumentName.test.tsx`                             |
+| Document group order and roles; active segment; stack count  | `apps/live/components/chrome/lines/DocumentGroup.test.tsx`                            |
+| Contributors up to 3 then +N; one list from either opener    | `apps/live/components/chrome/lines/DocumentGroup.test.tsx`                            |
+| Tab list rows, folders, filter above 5, switch, drop, scope  | `apps/live/components/chrome/lines/TabList.test.tsx`                                  |
+| Tab list keyboard, F2 rename, Escape                         | `apps/live/components/chrome/lines/TabList.test.tsx`                                  |
+| Strip clearance from both side groups                        | `apps/live/lib/top-line-clearance.test.ts`                                            |
+| The name gives way first                                     | `apps/live/components/chrome/lines/line-room.test.ts`                                 |
+| Draw's dock on its line, or its own row                      | `apps/live/components/canvas/whiteboard/dock-line-placement.test.ts`                  |
+| The top corners follow a centre toolbar on its own row       | `apps/live/hooks/ui/centre-row-store.test.tsx`                                        |
+| Bottom corners clear the bottom line                         | `apps/live/lib/panel-layout.test.ts`                                                  |
+| The lines in the editor: layout, Back, dividers, list, phone | `apps/live/e2e/two-lines.spec.ts` (dark)                                              |
+| A tab-scoped visitor's list; a frame's one Back              | `apps/live/e2e/tab-scoped-share.spec.ts`, `apps/live/e2e/workbench-workspace.spec.ts` |
 
 ## Constants and configuration
 

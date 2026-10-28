@@ -26,9 +26,9 @@ Scope, by file:
 | `apps/live/app/document/[id]/useEditorState.ts`                                              | `isReadOnly` includes the preview; wires the offer and the shortcut count        |
 | `apps/live/hooks/persistence/useEditorPreferences.ts`                                        | `prefsSettled`: the server copy merged, or failed to arrive                      |
 | `apps/live/app/document/[id]/EditorView.tsx`                                                 | Provides the flag; places the pill / icon; gates the notices                     |
-| `apps/live/components/chrome/EditorHeader.tsx`                                               | `rolePill` slot after the visibility badge                                       |
+| `apps/live/components/chrome/lines/DocumentName.tsx`                                         | `rolePill` slot after the share-state icon and the name                          |
 | `apps/live/components/chrome/TopCenterChrome.tsx`                                            | The visitor owner / role badge is removed                                        |
-| `apps/live/components/chrome/TabBar.tsx`                                                     | `roleIcon` slot first; "Tabs" label and control labels under the flag            |
+| `apps/live/app/document/[id]/EditorView.tsx`                                                 | Minimal chrome: `RoleStatusIcon` in the pill's place; the actions group unnamed  |
 | `apps/live/components/palette/PaletteIconButton.tsx`                                         | Icon-only tile with a Tooltip under the flag                                     |
 | `apps/live/components/primitives/MovablePanelHeader.tsx`                                     | Title visually hidden, `?` removed under the flag                                |
 | `apps/live/components/primitives/MovablePanel.tsx`                                           | Same, for the popover header                                                     |
