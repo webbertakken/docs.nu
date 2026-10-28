@@ -1,6 +1,6 @@
 import { MAX_TAB_ID_LEN } from './document-room-rules';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DOCUMENT_FORMAT } from '@livedoc/api-schema';
+import { DOCUMENT_FORMAT, ROOM_FULL_CLOSE, ROOM_MAX_CONNECTIONS } from '@livedoc/api-schema';
 import type { ParticipantPresence, RoomIncoming } from '@livedoc/api-schema';
 import {
   MUTATION_OP_KINDS,
@@ -2729,6 +2729,32 @@ describe('DocumentRoom agent presence (docs/specs/024-agents/agent-presence.md)'
 
 // docs/specs/012-collaboration/realtime-conflict-resolution.md "Keepalive": the runtime answers the client's ping
 // itself, so a keepalive never wakes the room.
+// docs/specs/015-api/api.md "A room holds at most 100 connections".
+describe('DocumentRoom capacity', () => {
+  const upgrade = () => {
+    const server = { accept: vi.fn(), close: vi.fn() };
+    return { server, ws: server as unknown as WebSocket };
+  };
+
+  it('admits up to ROOM_MAX_CONNECTIONS and turns the next one away with ROOM_FULL_CLOSE, logging it', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { room, state } = newRoom();
+    for (let i = 0; i < ROOM_MAX_CONNECTIONS - 1; i++) seedSession(state, makeSocket(), null);
+    const last = upgrade();
+    expect(room.turnAwayIfFull(last.ws)).toBe(false);
+    expect(last.server.close).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    seedSession(state, makeSocket(), null);
+    const over = upgrade();
+    expect(room.turnAwayIfFull(over.ws)).toBe(true);
+    expect(over.server.accept).toHaveBeenCalled();
+    expect(over.server.close).toHaveBeenCalledWith(ROOM_FULL_CLOSE, 'room-full');
+    expect(warn).toHaveBeenCalledWith('[room] full', expect.objectContaining({ connections: 100 }));
+    // Never admitted: the room still holds exactly the cap.
+    expect(state.getWebSockets()).toHaveLength(ROOM_MAX_CONNECTIONS);
+  });
+});
+
 describe('DocumentRoom keepalive', () => {
   afterEach(() => vi.unstubAllGlobals());
 
