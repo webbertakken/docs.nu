@@ -541,6 +541,8 @@ function tourTracksSwitch(
 ): SettingsToggleRowSpec {
   return {
     ...tourSwitch(key, row, section),
+    // It only summarises its tracks: a track's own row stays offered while this reads off, so one can come back alone.
+    summarisesChildren: true,
     read: owed,
     write: (p, v) => {
       if (!v) return { ...p, [key]: true, [tracksKey]: [...tracks] };

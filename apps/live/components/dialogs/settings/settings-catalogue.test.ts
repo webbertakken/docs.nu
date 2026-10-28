@@ -1,3 +1,5 @@
+import { PLAN_TOUR_TRACKS } from '@/lib/plan-tour';
+import { PAGES_TOUR_KINDS } from '@/lib/pages-tour';
 import { setPowerUserMode } from '@/lib/power-user-mode';
 import { describe, expect, it } from 'vitest';
 import { HELP_ARTICLES } from '@/lib/help-articles';
@@ -430,6 +432,28 @@ describe('settings catalogue', () => {
     const panels = visibleCategories(false, { ...ctx, preferences: { layersPanelEnabled: false } });
     const layers = panels.find((c) => c.id === 'layers');
     expect(layers?.rows.filter((r) => r.parent).length ?? 0).toBe(0);
+  });
+
+  // docs/specs/007-editor/user-preferences.md "Tours": Plan Tours and Pages Tours switch every track at once, and
+  // "one track back on leaves the others taken", so a track's own row stays offered once every track is taken.
+  it('offers each Plan and Pages track switch once every track is taken', () => {
+    const ctx = {
+      emailEnabled: true,
+      signedIn: true,
+      preferences: {
+        planTourTracks: [...PLAN_TOUR_TRACKS],
+        pagesTourKinds: [...PAGES_TOUR_KINDS],
+      },
+    };
+    const tours = visibleCategories(false, ctx).find((c) => c.id === 'tours')!;
+    const read = (key: string) => {
+      const row = tours.rows.find((r) => r.key === key);
+      return row?.kind === 'toggle' ? row.read(ctx.preferences) : undefined;
+    };
+    expect(read('planTourSeen')).toBe(false);
+    expect(read('planTourSeen-sheets')).toBe(false);
+    expect(read('pagesTourSeen')).toBe(false);
+    expect(read('pagesTourSeen-slide')).toBe(false);
   });
 
   it('hides the AI category until the worker advertises the capability', () => {
