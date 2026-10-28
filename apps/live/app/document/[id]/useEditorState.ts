@@ -661,6 +661,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     unresolveThread,
   } = useEditorComments({
     applyElementDelta,
+    activeTabId: activeId,
     selfParticipant,
     // Bound below, once the teams the mention list comes from have loaded.
     onMentioned: (text, mentions) => mentionNotifyRef.current(text, mentions),
