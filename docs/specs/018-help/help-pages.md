@@ -119,3 +119,15 @@ figures, cutting off Media and Search, so the strip is spaced to fit beside the 
 
 The help centre is public static content with no document in it; there is nothing an Editor, Participant or
 Viewer could do differently, so no role gates apply.
+
+## The contact form
+
+LiveDoc's one way to reach the team, besides GitHub, is a **LiveDoc form** on docs.nu itself: a Form tab
+([Forms](../030-forms/forms.md)) in a document of Webber's, published at `https://docs.nu/form/<code>` and named once,
+as `CONTACT_FORM_URL` in `packages/ui/src/site.ts`. Every page that offers it (the help centre's contact page, home
+page and article pager, the FAQ, the status page, the privacy policy and the terms) links that constant or its value.
+
+- It starts from the **Contact** starter: Name, Email and Subject (required), a **How can we help?** choice (a question,
+  a problem, or a suggestion or feature request) and the Message. Each response becomes a card on the document's board,
+  to assign and close, and its owner is emailed for each one.
+- It is never another product's form; the [brand guard](../../../apps/help/lib/brand-name-guard.test.ts) fails on one.
