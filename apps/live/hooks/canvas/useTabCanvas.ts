@@ -75,24 +75,21 @@ export function useTabCanvas(deps: TabCanvasDeps) {
   const scheduleCanvasTelemetry = useDebouncedCanvasTelemetry();
 
   // A tidier that would change nothing or damage the drawing is refused with a notice
-  // (docs/specs/008-canvas/layout-cleanup.md "A tidy never trashes the work"). The Tidy Up popover
-  // judges first and greys such a tidier out, so its presses arrive `judged`; the command palette's
-  // are judged here, on the live tab (no preview is on screen there). The tidiers load on demand
-  // (lib/tidy-engine.ts): already there after the popover opens, fetched at the press otherwise.
-  const refused = (engine: TidyEngine, kind: CleanupKind, judged: boolean | undefined): boolean => {
-    if (judged) return false;
+  // (docs/specs/008-canvas/layout-cleanup.md "A tidy never trashes the work"), judged here on the live
+  // tab. The tidiers load on demand (lib/tidy-engine.ts), fetched at the first press.
+  const refused = (engine: TidyEngine, kind: CleanupKind): boolean => {
     const verdict = engine.assessCleanup(activeTab.elements, kind, activeTab.layers);
-    const name = kind === 'align' ? 'Auto-align' : AUTO_LAYOUT_CHOICES[kind].tileName;
+    const name = kind === 'align' ? 'Auto-align' : AUTO_LAYOUT_CHOICES[kind].name;
     const notice = engine.verdictNotice(name, verdict);
     if (notice) notify?.(notice);
     return notice !== null;
   };
 
-  const autoAlignTab = (opts: { judged?: boolean } = {}) => {
+  const autoAlignTab = () => {
     if (editsBlocked) return;
     if (activeTab.elements.length === 0) return;
     withTidyEngine((engine) => {
-      if (refused(engine, 'align', opts.judged)) return;
+      if (refused(engine, 'align')) return;
       // `commit` snapshots the pre-align state, so undo restores it.
       commit((els) => engine.cleanupElements(els, 'align', activeTab.layers));
       track('Tab', 'Aligned');
@@ -106,15 +103,13 @@ export function useTabCanvas(deps: TabCanvasDeps) {
   // flowchart, tree, or mindmap. The tidy profile lands the laid-out block
   // where the shapes were, clear of what it does not move, with centres on the
   // grid. One undoable op via `commit`.
-  const autoLayoutTab = (choice: AutoLayoutChoice = 'smart', opts: { judged?: boolean } = {}) => {
+  const autoLayoutTab = (choice: AutoLayoutChoice = 'smart') => {
     if (editsBlocked) return;
     if (activeTab.elements.length === 0) return;
     withTidyEngine((engine) => {
-      if (refused(engine, choice, opts.judged)) return;
-      // Everything the layout needs, including the origin it pins to, is read
-      // inside the updater from the elements it is given: a commit taken while a
-      // hover preview is on screen (docs/specs/008-canvas/layout-cleanup.md) composes after the preview's revert,
-      // so `current` is the true pre-hover state and undo returns there.
+      if (refused(engine, choice)) return;
+      // Everything the layout needs, including the origin it pins to, is read inside the updater
+      // from the elements it is given, so it composes with any update queued before it.
       commit((current) => engine.cleanupElements(current, choice, activeTab.layers));
       track('Tab', 'Aligned', AUTO_LAYOUT_CHOICES[choice].telemetryType);
     });

@@ -66,7 +66,7 @@ export type AutoLayoutOptions = {
   lockedIds?: ReadonlySet<ElementId>;
   // Edges (`from->to`) whose target ranks level with its source and sits just after it across the flow: a
   // decision's side step (docs/specs/015-api/mcp-server.md §4.7 "Side steps sit level with their decision").
-  // Graph input only; Tidy Up never passes it.
+  // Graph input only; the tidy profile never passes it.
   flatEdges?: ReadonlySet<string>;
   // Tree style: parents whose leaf children stack in a column under them (auto-layout-tree.ts). Graph input only.
   stackedParents?: ReadonlySet<ElementId>;
@@ -214,7 +214,7 @@ function positionComponent(
   const crossSize = (id: ElementId) =>
     lanes.has(id) ? LANE_WIDTH : dir === 'TB' ? size.get(id)!.w : size.get(id)!.h;
 
-  // The gap after each rank fits the labels of the edges crossing it, as Tidy Up's does (auto-layout-tidy-flow.ts):
+  // The gap after each rank fits the labels of the edges crossing it, as the tidy profile's does (auto-layout-tidy-flow.ts):
   // left to right, a label's width; top to bottom, its line height either side of the jog there. A label longer
   // than the gap otherwise sat on the box it pointed at. Top to bottom one line (64 px) fits LAYER_GAP (90) today,
   // so only a left-to-right layout widens; the rule is kept so a narrower gap stays safe.

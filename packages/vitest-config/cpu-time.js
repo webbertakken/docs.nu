@@ -35,7 +35,7 @@ export async function cpuMsOfAsync(fn) {
 
 /**
  * How much slower a CI runner runs the same work than a developer's machine. CI's shared
- * two-core runners run the editor suite under v8 coverage, and measured the Tidy Up hover at
+ * two-core runners run the editor suite under v8 coverage, and measured an Auto Layout press at
  * 101 to 104 ms of CPU where an M-series Mac takes 24 (main, 2026-10-14): about 4x. A budget
  * set for a person's device sits at the line there and turned main red at random.
  */
@@ -59,7 +59,7 @@ export const UNDER_COVERAGE_ENV = 'LIVEDOC_COVERAGE';
  * images export to turn CI behaviour off, is a developer's machine). The written number stays the
  * product's own budget and holds wherever it is meaningful; CI still fails a slide past three times
  * it. Three is enough beside a 4x slower runner because a budget is written with its own room over
- * the local timing (Tidy Up: 100 ms against 24 measured). The same headroom applies under coverage
+ * the local timing (Auto Layout: 100 ms against 24 measured). The same headroom applies under coverage
  * (`UNDER_COVERAGE_ENV`, the pre-push hook's run): the instrumentation is what slows the work.
  *
  * @param {number} ms

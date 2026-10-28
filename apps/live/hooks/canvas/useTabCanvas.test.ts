@@ -174,12 +174,4 @@ describe('useTabCanvas tidiers', () => {
     expect(h.commit).not.toHaveBeenCalled();
     expect(notify.mock.calls[0]![0]).toMatch(/^Mindmap needs a centre to branch from/);
   });
-
-  it('runs a judged press from the popover without judging it again', () => {
-    const notify = vi.fn();
-    const h = setup(tidy, false, notify);
-    h.api.autoAlignTab({ judged: true });
-    expect(h.commit).toHaveBeenCalledTimes(1);
-    expect(notify).not.toHaveBeenCalled();
-  });
 });

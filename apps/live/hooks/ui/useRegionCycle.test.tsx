@@ -30,7 +30,7 @@ function Editor({ viewer = false }: { viewer?: boolean }) {
         </div>
         <div data-region="controls">
           <button disabled>Undo</button>
-          <button>Tidy Up</button>
+          <button>Layers</button>
         </div>
       </main>
       <nav data-region="tabs">
@@ -54,7 +54,7 @@ describe('F6 between regions', () => {
       seen.push(focused());
     }
     // The canvas lands on itself; the others on their first enabled control.
-    expect(seen).toEqual(['Title', 'Shapes', 'Canvas', 'Tidy Up', 'Tab 1', 'Title']);
+    expect(seen).toEqual(['Title', 'Shapes', 'Canvas', 'Layers', 'Tab 1', 'Title']);
   });
 
   it('walks back with Shift+F6', () => {
@@ -63,7 +63,7 @@ describe('F6 between regions', () => {
     press(true);
     expect(focused()).toBe('Tab 1');
     press(true);
-    expect(focused()).toBe('Tidy Up');
+    expect(focused()).toBe('Layers');
   });
 
   it('skips a region not on screen (a viewer has no palette)', () => {

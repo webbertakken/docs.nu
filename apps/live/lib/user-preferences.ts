@@ -168,9 +168,9 @@ export type UserPreferences = {
   // Missing / undefined / true === on, the default. Flipped from the
   // panel's settings gear (desktop-only chrome, like the hover itself).
   layerHoverPreview?: boolean;
-  // Whether the bottom-right cluster names its buttons beside their icons on a wide desktop
-  // (docs/specs/007-editor/live-app.md "Named on a wide desktop"). Missing === on; a phone never
-  // names them, whatever this says. Read through useDockNames.
+  // Button Labels: whether the footer bar names its buttons (Search, Settings, the theme) beside their
+  // icons (docs/specs/007-editor/user-preferences.md). Missing === on; a phone never names them, and the
+  // bottom-right cluster is icons alone, whatever this says. Read through useButtonLabelsSetting.
   dockButtonNames?: boolean;
   // Email notifications (docs/specs/014-identity/profile-and-email-notifications.md). Account-level settings flipped from the
   // Settings dialog; the api worker reads them server-side before

@@ -1,5 +1,5 @@
-// The editor's Tidy Up profile of Auto Layout (docs/specs/008-canvas/layout-cleanup.md "Tidy Up
-// keeps a flowchart a flowchart"). Graph input (the MCP, imports) hands the layout a bare graph;
+// The editor's tidy profile of Auto Layout (docs/specs/008-canvas/layout-cleanup.md "The tidy
+// profile keeps a flowchart a flowchart"). Graph input (the MCP, imports) hands the layout a bare graph;
 // the editor hands it an author's drawing, which already says a lot the layout must keep:
 //
 //   - Sizes stay as drawn. Peer sizing squared every diamond into a box twice its height and grew
@@ -83,8 +83,8 @@ export function tidyMindmapFits(elements: Element[], lockedIds?: ReadonlySet<Ele
   return rects.size > 2 && pairs.size === rects.size - comps.length;
 }
 
-// The editor's Tidy Up (docs/specs/008-canvas/layout-cleanup.md "Tidy Up keeps a flowchart a
-// flowchart"): an author's own drawing, not graph input. A separate entry from autoLayoutElements so
+// The editor's tidy profile (docs/specs/008-canvas/layout-cleanup.md "The tidy profile keeps a
+// flowchart a flowchart"): an author's own drawing, not graph input. A separate entry from autoLayoutElements so
 // the graph-input callers (the AI apply path, imports) never load it. Origin options are ignored:
 // the flow's first shape anchors the block.
 export function tidyLayoutElements(

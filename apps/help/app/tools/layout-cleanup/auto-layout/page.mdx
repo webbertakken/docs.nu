@@ -35,37 +35,32 @@ Auto Layout is the structural tidier (the command palette calls it "Auto Layout 
 
 ## Layout styles
 
-One arrangement doesn't fit every diagram, so alongside the smart default there is a style for each shape of diagram, each a picture on the **Tidy Up** panel and a command in the palette. All of them read the same arrow graph and differ only in the shape of the result:
+One arrangement doesn't fit every diagram, so alongside the smart default there is a style for each shape of diagram, each a command in the palette. All of them read the same arrow graph and differ only in the shape of the result:
 
 - **Auto Layout (tidy up)** (the smart default): a layered arrangement with the direction inferred from where your shapes roughly sit now.
 - **Auto Layout: Flowchart (down)** and **Auto Layout: Flowchart (right)**: the same layered arrangement, but with the direction forced top-to-bottom or left-to-right, whatever your current positions suggest.
 - **Auto Layout: Tree**: an org-chart arrangement. Roots sit at the top and every parent is centred over its own children, so hierarchies read cleanly level by level.
 - **Auto Layout: Mindmap**: a radial arrangement. The most-connected shape becomes the hub in the centre and its branches fan out around it, with each level on a wider ring.
 
-If a diagram isn't a perfect tree (a shape with two parents), Tree still works: it lays out the main skeleton and reconnects the extra arrows across it. Mindmap is for ideas that branch out from a centre, so it isn't offered when your arrows loop back on themselves.
+If a diagram isn't a perfect tree (a shape with two parents), Tree still works: it lays out the main skeleton and reconnects the extra arrows across it. Mindmap is for ideas that branch out from a centre, so it won't run when your arrows loop back on themselves.
 
-## When a style isn't offered
+## When a style won't run
 
-Every style is tried before you see it, and one that wouldn't help is greyed out on the **Tidy Up** panel with the reason in place of its description:
+Every style is tried before it moves anything, and one that wouldn't help leaves the tab as it is, with a short notice saying why:
 
 - **Already tidy**: it would change nothing.
 - **Would cover a shape**: it would put a shape on top of another one.
-- **Would pull shapes out of their lanes** or **Would rearrange your lanes**: your shapes sit in lanes or panels that would come apart. A swimlane keeps the lanes you built, so only Auto-Align is offered there.
-- **For ideas that branch, not loop**: Mindmap on a diagram with loops.
-
-Run a style that isn't offered from the command palette and nothing moves; a short notice says why instead.
+- **Would pull shapes out of their lanes** or **would rearrange your lanes**: your shapes sit in lanes or panels that would come apart. A swimlane keeps the lanes you built, so only Auto-Align runs there.
+- **Needs a centre to branch from**: Mindmap on a diagram whose arrows loop.
 
 ## Running it
 
 <Step n={1}>
-  In Diagram mode, press the **Tidy Up** button in the bottom-right corner, just left of Layers.
+  Open the [command palette](/help/search-panel/the-search-panel/command-palette/) (⌘K / Ctrl+K)
+  and type **Auto Layout**.
 </Step>
 
-<Step n={2}>
-  Rest the mouse on a style to see the tab laid out that way, then click the one you want. From the
-  [command palette](/help/search-panel/the-search-panel/command-palette/) (⌘K / Ctrl+K), type **Auto
-  Layout** and choose **Auto Layout (tidy up)** or one of the styles under **Actions**.
-</Step>
+<Step n={2}>Choose **Auto Layout (tidy up)** or one of the styles under **Actions**.</Step>
 
 <Step n={3}>The whole tab is laid out anew in a single undoable step.</Step>
 

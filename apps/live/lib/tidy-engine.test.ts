@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-// docs/specs/008-canvas/blueprints/tidy-up.md "Performance and limits": the tidiers stay out of the first load
+// docs/specs/008-canvas/blueprints/layout-cleanup.md "Performance and limits": the tidiers stay out of the first load
 // and arrive on demand; a command run before they arrive runs once they do.
 
 async function freshEngine() {
@@ -13,12 +13,10 @@ const COLD_IMPORT_MS = 30_000;
 
 describe('tidy engine', () => {
   it(
-    'is not there until asked for, then is the same engine every time',
+    'is the same engine every time it is asked for',
     async () => {
       const m = await freshEngine();
-      expect(m.tidyEngine()).toBeNull();
       const a = await m.loadTidyEngine();
-      expect(m.tidyEngine()).toBe(a);
       expect(await m.loadTidyEngine()).toBe(a);
       expect(typeof a.cleanupElements).toBe('function');
     },

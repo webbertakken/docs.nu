@@ -1,4 +1,4 @@
-import { useButtonLabelsSetting } from '@/hooks/ui/useDockNames';
+import { useButtonLabelsSetting } from '@/hooks/ui/useButtonLabelsSetting';
 import dynamic from 'next/dynamic';
 import { tabDataRows } from './tab-data-rows';
 import { hasPlanContent } from '@/hooks/plan/usePlanNeeded';

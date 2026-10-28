@@ -1,4 +1,4 @@
-import { lucideBrushCleaning, lucideLayers, lucideSlidersHorizontal } from '@livedoc/icons/lucide';
+import { lucideLayers, lucideSlidersHorizontal } from '@livedoc/icons/lucide';
 
 import { Glyph, type IconProps } from './Glyph';
 import { lucideGlyph } from './lucide-glyph';
@@ -42,9 +42,6 @@ export function ThemeLookIcon({ size = 20, ...rest }: IconProps = {}) {
 
 // The Layers button in the bottom-right cluster (20px).
 export const LayersStackIcon = lucideGlyph(lucideLayers, 20);
-
-// The Tidy Up button, left of Layers in Diagram mode (docs/specs/008-canvas/layout-cleanup.md): a broom (20px).
-export const TidyUpIcon = lucideGlyph(lucideBrushCleaning, 20);
 
 // Settings: two sliders, never a cog (a cog's spokes read as a sun, the appearance toggle).
 export const SettingsIcon = lucideGlyph(lucideSlidersHorizontal, 16);

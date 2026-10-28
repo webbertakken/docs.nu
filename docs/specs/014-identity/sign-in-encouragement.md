@@ -55,7 +55,7 @@ dismiss it to reach the timer or the vote. It is drawn over the canvas, and is a
   signed in / embed / dismissed) and zen only hides the card at render, and
 - while a **tour's offer or last card** is up ([Editor tour](../007-editor/editor-tour.md)): they take the same place
   at the bottom, so the banner steps aside until the card goes (`data-tour-card-open` on the body), and
-- while a **panel opened from the chrome** is open (Tidy Up, Layers, Style and the rest of the bottom-right cluster, the
+- while a **panel opened from the chrome** is open (Layers and the rest of the bottom-right cluster, the
   Explorer panel): they reach up into the banner's band and it lay over their lower rows, so it steps aside until the
   panel closes (a `[data-dock-button]` control with `aria-expanded="true"`).
 
