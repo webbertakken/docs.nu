@@ -227,6 +227,8 @@ A route whose body is required reads it with `readBody`: `400 invalid json` when
 - An absent or empty body, and a JSON value that is not an object (`null`, a string, an array), read as no fields: `{}`.
 - A body that does not read to its end (the stream broke off: a client gone mid-upload) is `400 body_unreadable`, logged as `[request] body unreadable`; a body that does not parse (cut short of valid JSON) is `400 invalid json`. Neither is ever `{}`: on these routes `{}` is a choice (no share password, an edit link to every tab), so a broken request must not make it.
 
+A path segment the api decodes (a template kind, an element kind, a placement default key) that carries a malformed percent-escape (`%`, `%E0%A4%A`) names nothing: it answers as an unknown name does, `404`, never a `500` from the decoder (`decodePathSegment`, `@livedoc/api-schema`).
+
 ### Document dates
 
 A document's dates are its `createdAt` (shown as created) and `savedAt` (last
