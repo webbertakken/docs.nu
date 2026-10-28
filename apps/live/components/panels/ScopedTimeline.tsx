@@ -64,6 +64,7 @@ export function ScopedTimeline({
         onRetry={feed.retry}
         hasMore={feed.hasMore}
         loadingMore={feed.loadingMore}
+        loadMoreFailed={feed.loadMoreFailed}
         onLoadMore={feed.loadMore}
         // No unread markers here. "Since I was last here" is a question
         // about one reader and one feed; a shared team history has no

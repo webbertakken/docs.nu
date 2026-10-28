@@ -472,7 +472,11 @@ the mode buttons in §2.2.
   header in both modes — doing nothing at all in one of them.
 
 - **Show More** appends the next page when the read returns a cursor.
-  Page size 50, capped server-side at 200.
+  Page size 50, capped server-side at 200. **A next page that fails**
+  keeps the cursor (the history is never claimed to end there), says
+  "Couldn't load older events." above the button, and the button reads
+  **Try Again**, reading the page once per press; nothing reads it on its
+  own. The editor's Explorer panel says the same over its Show Earlier.
 
 **The Filter dot means "this feed is narrowed", whichever control did
 it** — a reader wondering why the page looks short needs one signal, not

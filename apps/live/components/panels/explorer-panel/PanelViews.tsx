@@ -292,6 +292,11 @@ export function TimelineSection({ ownerId }: { ownerId: string }) {
           </PaneList>
         </PaneSection>
       ))}
+      {feed.hasMore && feed.loadMoreFailed && !feed.loadingMore ? (
+        <p role="status" className="text-center text-xs text-slate-600 dark:text-slate-300">
+          Couldn’t load older events.
+        </p>
+      ) : null}
       {feed.hasMore ? (
         <button
           type="button"
@@ -299,7 +304,7 @@ export function TimelineSection({ ownerId }: { ownerId: string }) {
           disabled={feed.loadingMore}
           className="mx-auto cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
         >
-          {feed.loadingMore ? 'Loading…' : 'Show Earlier'}
+          {feed.loadingMore ? 'Loading…' : feed.loadMoreFailed ? 'Try Again' : 'Show Earlier'}
         </button>
       ) : null}
     </div>

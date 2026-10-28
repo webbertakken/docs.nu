@@ -66,3 +66,20 @@ describe('Timeline filtered-empty state', () => {
     expect(screen.queryByRole('button', { name: 'Show More' })).toBeNull();
   });
 });
+
+// A failed next page (docs/specs/013-workspace/timeline.md §2.3) says so and offers Try again, never a silent button.
+describe('Timeline next page', () => {
+  it('says a failed next page failed, with Try again reading it once per press', () => {
+    const controls = filteredToNothing();
+    const onLoadMore = vi.fn();
+
+    render(
+      <Timeline controls={controls} viewerId={ME} hasMore loadMoreFailed onLoadMore={onLoadMore} />,
+    );
+
+    expect(screen.getByText('Couldn’t load older events.').getAttribute('role')).toBe('status');
+    fireEvent.click(screen.getByRole('button', { name: 'Try Again' }));
+    expect(onLoadMore).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('button', { name: 'Show More' })).toBeNull();
+  });
+});

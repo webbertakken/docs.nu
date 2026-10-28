@@ -50,6 +50,8 @@ export type TimelineFeed = {
   controls: TimelineControlsState;
   loading: boolean;
   loadingMore: boolean;
+  /** The last next-page read failed: the cursor is kept, and Show More becomes Try Again (§2.3). */
+  loadMoreFailed: boolean;
   hasMore: boolean;
   loadMore: () => void;
   /** The last read FAILED (docs/specs/013-workspace/timeline.md §2.4) — not the same as no events. */
@@ -76,6 +78,7 @@ export function useTimelineFeed(
   const [cursor, setCursor] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreFailed, setLoadMoreFailed] = useState(false);
   // The read failed, which is NOT the same as the feed being empty
   // (docs/specs/013-workspace/timeline.md §2.4). Conflating the two is what told people with years
   // of history that nothing had ever happened to them.
@@ -320,14 +323,15 @@ export function useTimelineFeed(
   const loadMore = useCallback(() => {
     if (!cursor || loadingMore || !ownerId) return;
     setLoadingMore(true);
+    setLoadMoreFailed(false);
     void apiListTimeline(ownerId, { cursor, limit: TIMELINE_PAGE_SIZE, scope: stableScope }).then(
       (page) => {
         if (!page) {
-          // The cursor is kept, so Show More simply comes back and the
-          // reader can press it again. No error state for this one: the
-          // feed above it is intact, and a failed page is not a claim
-          // that the history ended here.
+          // The cursor is kept, so the history is never claimed to end here, and the button says the page failed
+          // with Try Again (one read per press). The feed above it stays: no whole-feed error for this one.
+          console.warn('[timeline] next page failed');
           setLoadingMore(false);
+          setLoadMoreFailed(true);
           return;
         }
         setEvents((prev) => {
@@ -383,6 +387,7 @@ export function useTimelineFeed(
     controls,
     loading,
     loadingMore,
+    loadMoreFailed,
     hasMore: Boolean(cursor),
     loadMore,
     error,
