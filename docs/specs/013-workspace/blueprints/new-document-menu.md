@@ -319,7 +319,7 @@ Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetr
 | Seeded from memory, every tab loaded, baseline set           | `seed-pending-document.test.ts`                                      |
 | Held saves flush once; failed create keeps edits             | `usePendingCreate.test.tsx`, `useAutosave.test.tsx`                  |
 | Editor shown on its address; Back hides; kept until settled  | `InPlaceEditor.test.tsx`                                             |
-| Signed-in cloud create within budget                         | e2e `account/new-document-open-budget.spec.ts`                       |
+| Signed-in cloud create within budget                         | e2e `apps/live/e2e/account/new-document-open-budget.spec.ts`                       |
 | Hold resolves on landing, never on failure; url matching     | `pending-documents.test.ts`, `core.test.ts`, `offline-ids.test.ts`   |
 | Opened from memory before auth, nothing fetched              | `useIdentityBootstrap.pending.test.ts`                               |
 | Not-saved banner: Try again or Save to My Documents          | `NotSavedBanner.test.tsx`                                            |
