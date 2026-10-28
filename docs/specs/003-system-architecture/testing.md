@@ -106,6 +106,16 @@ export default defineProject({ test: { environment: 'jsdom' } });
   with `applyMigration`, and compare every row. A rebuilt **parent** table
   cascades into its children on `DROP TABLE`, so this is the only test that
   can see that loss.
+- **Every test database refuses what D1 refuses.** D1 caps a compound SELECT
+  at **five terms** at one level (`too many terms in compound SELECT`), where
+  `node:sqlite` allows 500, and a Durable Object's SQLite holds the same limit;
+  so a query can pass its tests and fail in production. Every stand-in calls
+  `assertD1Compound` (`src/test-d1-compound.ts`) on each statement it prepares
+  or runs, migrations included: `test-d1.ts` checks the text, `test-sqlite-d1.ts`
+  and the room's `test-document-sql.ts` check it before SQLite sees it. The
+  guard counts `UNION`, `UNION ALL`, `INTERSECT` and `EXCEPT` per level of
+  parentheses and per statement, ignores what sits in quotes and comments,
+  and throws D1's own message. It is test-only: no Worker imports it.
 
 ## Scripts
 

@@ -1,5 +1,6 @@
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import type { DocumentSql, DocumentSqlCursor } from './document-room/document-db';
+import { assertD1Compound } from './test-d1-compound';
 
 // `ctx.storage.sql` for node tests: SqlStorage's `exec` over a node:sqlite database, for a room's SQLite
 // (docs/specs/006-document/blueprints/document-storage.md). Like SqlStorage, a call without bindings may hold several
@@ -19,6 +20,8 @@ function isScript(query: string): boolean {
 export function nodeDocumentSql(db: DatabaseSync): DocumentSql {
   return {
     exec(query: string, ...bindings: unknown[]): DocumentSqlCursor {
+      // A room's SQLite holds D1's query limits: a compound SELECT of more than five terms is refused.
+      assertD1Compound(query);
       if (bindings.length === 0 && isScript(query)) {
         db.exec(query);
         return { toArray: () => [], columnNames: [] };
