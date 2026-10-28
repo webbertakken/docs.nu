@@ -270,6 +270,8 @@ answers after it cannot write it back as pending, whatever KV's cross-region sta
 - `wait --for change` finishes after the first mutation-class or `changeset` op that is not a comment delta, once
   `WAIT_SETTLE_MS` passes without another, so a burst of edits is one change.
 - Ops on other tabs count unless `--tab` is given.
+- `--timeout` is `WAIT_DEFAULT_TIMEOUT_S` when not given; above `WAIT_MAX_TIMEOUT_S` exits 2 with
+  `--timeout: at most 3600 seconds` before the stream opens.
 - `--timeout` passing prints `nothing new in <n> s` on stdout and exits 0; SIGINT ends `wait` with exit 1 and
   `watch` with exit 0, both after closing the socket.
 - The room-ticket mint is outside the token write choke point, so a token of any role opens the stream; the room
@@ -1030,11 +1032,11 @@ WebSocket) with a fixed clock; none waits on a real timer or the network.
 | Export every document, each format                                                            | `apps/cli/src/commands/export-views.test.ts`                                                                                                                                    |
 | Render prints path and size, never bytes; MCP and CLI draw alike                              | `apps/cli/src/commands/render.test.ts`; `packages/render-png/src/index.test.ts` (size, text drawn in Inter, bold in Inter Bold, one wasm initialisation, a failed load retried) |
 | `graph lint` and `graph render` write nothing                                                 | `packages/agent-verbs/src/verbs/graph.test.ts`, `apps/cli/src/main.test.ts` (fetch never called)                                                                                |
-| `wait` blocks, prints, exits, settles a burst, times out; `watch` streams                     | `apps/cli/src/room/room-stream.test.ts`, `room-events.test.ts`, `apps/cli/src/commands/stream-commands.test.ts`                                                                 |
+| `wait` blocks, prints, exits, settles a burst, times out (default, longest); `watch` streams  | `apps/cli/src/room/room-stream.test.ts`, `room-events.test.ts`, `apps/cli/src/commands/stream-commands.test.ts`                                                                 |
 | Any token role mints a room ticket                                                            | `apps/api/src/index.test.ts` (choke point)                                                                                                                                      |
 | One catalogue: parity of verbs and tools                                                      | `packages/agent-verbs/src/catalogue.test.ts`; `apps/mcp/src/verb-parity.test.ts`, `packages/agent-verbs/src/verbs/mcp-tools.test.ts`                                            |
 | Descriptions are facts                                                                        | `packages/agent-verbs/src/catalogue.test.ts` (the MCP's §4.15 checks over every verb)                                                                                           |
-| Bundle: one ESM file, wasm, font, Node 22, size                                               | `apps/cli/scripts/build.test.ts` (planned); CI `npm pack --dry-run`                                                                                                             |
+| Bundle: one ESM file, wasm, font, Node 22, size                                               | `apps/cli/scripts/build.test.ts` (`build.mjs --out` a temporary directory); CI `npm pack --dry-run`                                                                             |
 | Update check: once a day, stderr, skipped in CI, non-TTY, opt-out                             | `apps/cli/src/update-check.test.ts` (planned)                                                                                                                                   |
 | Telemetry: after success only, profile's api, opt-outs, flip first, notice once, no arguments | `apps/cli/src/telemetry.test.ts`                                                                                                                                                |
 | Every emitted event has a chart and a sentence; `Token·Created·Cli`                           | `apps/telemetry` `metric-emitters.test.ts`, `event-explanation.test.ts`; `apps/live/lib/mcp-consent-session.test.ts`                                                            |

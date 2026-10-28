@@ -14,10 +14,11 @@ import {
 } from '@livedoc/api-schema';
 import { baseFromCopy, recordCopy } from './copies';
 import { VerbRefusal, type VerbContext } from './define';
+import { WAIT_MAX_TIMEOUT_S } from './verbs/shared';
 
 export const HELD_RETRY_INTERVAL_MS = 2000;
-// `--wait-held` waits at most as long as `wait` may (WAIT_MAX_TIMEOUT_S).
-const WAIT_HELD_MAX_S = 3600;
+// `--wait-held` waits at most as long as `wait` may.
+const WAIT_HELD_MAX_S = WAIT_MAX_TIMEOUT_S;
 
 export const writeFlags = {
   dryRun: z.boolean().optional().describe('Plan and print the result without writing'),

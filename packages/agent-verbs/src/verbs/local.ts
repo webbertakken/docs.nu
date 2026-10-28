@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { GUIDE_TOPIC_NAMES } from '../guides';
 import { defineVerb } from '../define';
 import { writeFlags } from '../write';
-import { columns } from './shared';
+import { columns, WAIT_DEFAULT_TIMEOUT_S, WAIT_MAX_TIMEOUT_S } from './shared';
 
 export const guide = defineVerb({
   id: 'guide',
@@ -195,7 +195,14 @@ export const waitFor = defineVerb({
     doc: z.string().describe('A name, id prefix or LiveDoc URL'),
     for: z.enum(['comment', 'change']).describe('What to wait for: a comment, or a change'),
     tab: z.string().optional().describe('A tab name or id prefix; every tab when omitted'),
-    timeout: z.coerce.number().positive().optional().describe('Seconds to wait at most'),
+    timeout: z.coerce
+      .number()
+      .positive()
+      .max(WAIT_MAX_TIMEOUT_S, `at most ${WAIT_MAX_TIMEOUT_S} seconds`)
+      .default(WAIT_DEFAULT_TIMEOUT_S)
+      .describe(
+        `Seconds to wait at most; ${WAIT_DEFAULT_TIMEOUT_S} by default, ${WAIT_MAX_TIMEOUT_S} at most`,
+      ),
   }),
   output: streamOutput,
   text: ({ lines }) => lines,
@@ -203,7 +210,10 @@ export const waitFor = defineVerb({
   exitCode: ({ exit }) => exit,
   cli: {
     positionals: ['doc'],
-    examples: ['livedoc wait "Shop" --for comment', 'livedoc wait 3f9c --for change --timeout 600'],
+    examples: [
+      'livedoc wait "Shop" --for comment',
+      'livedoc wait 3f9c --for change --timeout 1800',
+    ],
     prints: 'the comment\u2019s thread, the change, or that nothing came',
   },
 });
