@@ -24,6 +24,8 @@ const DROP: OpGate = { kind: 'drop' };
 export type GateSender = {
   role: unknown;
   tabScope: string | null;
+  // The scoped tab already shows every card (room-session.ts): its ops may carry the board.
+  tabShowsAll?: boolean;
   key: string | undefined;
 };
 
@@ -45,7 +47,7 @@ export function gateClientOp(op: unknown, sender: GateSender): OpGate {
   if (isSystemOpKind(opKind)) return DROP;
   // A tab-scoped session acts on its own tab only, and never on the
   // document's structure (docs/specs/013-workspace/tab-scoped-share-links.md).
-  if (!scopedSenderMayRelay(op, sender.tabScope)) return DROP;
+  if (!scopedSenderMayRelay(op, sender.tabScope, sender.tabShowsAll ?? false)) return DROP;
   const presence = isPresenceOpKind(opKind);
   // The level ladder (docs/specs/013-workspace/share-roles.md): presence from anyone; a Participant's dots,
   // responses and ideas relay like an Editor's; its `el` op goes through the participant content rule and

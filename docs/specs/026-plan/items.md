@@ -315,6 +315,9 @@ Items follow the document's access ([Auth and guest access](../014-identity/auth
 - **Read** with any access to the document. A visitor on a **tab-scoped** link sees only the items that tab shows:
   the items its boards show and its Plan cards point at.
 - **Create, update, move, delete** with edit access.
+- **A tab-scoped link never adds a board or plan view** to its tab, since either shows every card: the api refuses
+  the save (403 `tab_scope_widen`) and the room drops the op ([Tab-scoped share links](../013-workspace/tab-scoped-share-links.md)).
+  A board already on the tab stays editable.
 - **Who a card can be assigned to**: you and the joined members of the teams you are part of (by their profile
   name, else their invite address's local part), fetched once a document has Plan content. A guest, who has no
   teams, can assign only themselves, and the editor never asks for a guest's teams (the request could only fail). A card already assigned to someone outside that list keeps them, shown in its

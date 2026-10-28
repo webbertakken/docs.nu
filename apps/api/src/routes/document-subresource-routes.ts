@@ -123,7 +123,8 @@ export async function handleDocumentSubresources(ctx: RouteContext): Promise<Res
       // Owner or edit-role share visitor only, and a tab-scoped visitor on their own tab only.
       const allowed = await gateEdit(ctx, id, saving.ownerId, saving.teamId, tabId);
       if (!allowed) return forbidden();
-      return handleTabPut(ctx, saving, tabId, owner);
+      const tabScoped = (await gateGrant(ctx, id, saving.ownerId, saving.teamId))?.tabScope != null;
+      return handleTabPut(ctx, saving, tabId, owner, tabScoped);
     }
     const existing = await getDocument(env, id);
     if (!existing) return missingDocument(ctx, id);

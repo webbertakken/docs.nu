@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CHANGESET_MERGE_WINDOW_MS } from '@livedoc/api-schema';
 import { elementFingerprint, type Element, type ElementOp } from '@livedoc/document';
+import { presetSetup } from '@livedoc/items';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import type { Env } from '../types';
 import type { ChangesetRecord } from '../db/changesets';
@@ -323,5 +324,52 @@ describe("someone else's tab id", () => {
       body: { id: 't1', name: 'Board', elements: [box('a', 'Edited')] },
     });
     expect(again.status).toBeLessThan(300);
+  });
+});
+
+// docs/specs/026-plan/items.md "Who may do what": a board or plan view shows every card, so a link confined to one
+// tab may not add the first one to it; a board already there stays theirs to edit around.
+describe('a tab-scoped link and boards', () => {
+  const board = {
+    id: 'b1',
+    type: 'shape',
+    shape: 'plan-board',
+    x: 0,
+    y: 0,
+    width: 800,
+    height: 400,
+    planBoard: presetSetup('kanban'),
+  } as unknown as Element;
+  const asVisitor = (db: SqliteD1, elements: Element[]) =>
+    handleDocuments(
+      makeTestRouteContext('PUT', '/api/documents/D/tabs/t1', {
+        env: db.env,
+        owner: 'v',
+        sessionAccountId: 'v',
+        verifiedAccountId: 'v',
+        token: null,
+        headers: { 'X-Share-Code': 'TAB1' },
+        body: { id: 't1', name: 'Board', elements },
+      }),
+    );
+
+  it('refuses the first board from the link, and lets it edit a tab that already has one', async () => {
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    const db = await documentWith([box('a')]);
+    db.sql
+      .prepare(
+        "INSERT INTO share_links (code, document_id, role, tab_id, created_at) VALUES ('TAB1', 'D', 'edit', 't1', 1)",
+      )
+      .run();
+    const refused = await asVisitor(db, [box('a'), board]);
+    expect(refused.status).toBe(403);
+    expect(await refused.json()).toEqual({ error: 'tab_scope_widen' });
+    expect(stored(db).map((e) => e.id)).toEqual(['a']);
+    // A plain edit from the link still saves.
+    expect((await asVisitor(db, [box('a', 'moved')])).status).toBe(200);
+    // The owner adds the board; the link may then save the tab with it.
+    expect((await save(db, [box('a', 'moved'), board])).status).toBe(200);
+    expect((await asVisitor(db, [box('a', 'again'), board])).status).toBe(200);
+    expect(stored(db).map((e) => e.id)).toEqual(['a', 'b1']);
   });
 });

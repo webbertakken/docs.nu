@@ -416,6 +416,9 @@ replays the write with the keys the first write was given. Votes push nothing.
 ## Security and trust
 
 - Every write passes the document gate; tab-scoped links are confined by `itemIdsShownOnTab`.
+- A tab-scoped link never widens its reach: a tab save adding the tab's first board or plan view (`tabShowsEveryCard`) is
+  403 `tab_scope_widen` (`tab-put-route.ts`), and the room drops such an op unless the tab showed every card when the
+  session joined (`scopedSenderMayRelay`, `tabShowsAll` on the session; `room-scope.test.ts`, `tab-put-route.test.ts`).
 - Items never change from a client socket; `items` is a system op.
 - Field values are validated and bounded; text is drawn as text, never HTML.
 - Vote budget is a facilitation aid enforced in the editor only (stated, not a trust boundary).

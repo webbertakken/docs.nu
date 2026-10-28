@@ -9,6 +9,7 @@ import {
   TAB_SAVE_CAS_ATTEMPTS,
   parseChangesetSeen,
 } from '@livedoc/api-schema';
+import { tabShowsEveryCard } from '@livedoc/items';
 import { isValidTab, migrateIncomingTab, preferNewerQaAll, type Tab } from '@livedoc/document';
 import { mergeChangesetsIntoSave } from '../changesets/merge-on-save';
 import { hasNewComments, rewriteCommentAuthors } from '../comments';
@@ -24,7 +25,7 @@ import { emailEnabled } from '../email/client';
 import { notifyNewComment } from '../email/notifications';
 import { MAX_TAB_BYTES, bodyExceedsCap, storeTab } from '../limits';
 import { capStoredName } from '../names';
-import { badRequest, conflict, json, payloadTooLarge } from '../responses';
+import { badRequest, conflict, forbidden, json, payloadTooLarge } from '../responses';
 import { applyRoomLedger, fetchRoomLedger } from '../room-client';
 import { recordTabSave } from '../timeline';
 import type { TabSaveDocument } from '../db/tab-save-document';
@@ -57,6 +58,9 @@ export async function handleTabPut(
   existing: TabSaveDocument,
   tabId: string,
   owner: string,
+  // The caller holds a link confined to this tab: it may not add the tab's first board or plan view, which would show
+  // it every card (docs/specs/026-plan/items.md "Who may do what").
+  tabScoped = false,
 ): Promise<Response> {
   const { request, env } = ctx;
   const id = existing.id;
@@ -111,6 +115,14 @@ export async function handleTabPut(
       request.headers.get('X-Allow-Empty') !== '1'
     ) {
       return conflict('empty_tab_overwrite_blocked');
+    }
+    // The save as sent, not the merge: a board the owner added in the room meanwhile is theirs, not the visitor's.
+    if (
+      tabScoped &&
+      tabShowsEveryCard(received.elements) &&
+      !tabShowsEveryCard(existingTab?.elements ?? [])
+    ) {
+      return forbidden('tab_scope_widen');
     }
     // A Q&A board's notes are owned by the qa endpoint (docs/specs/012-collaboration/qa-board.md):
     // keep whichever copy has the higher `qaRev`.
