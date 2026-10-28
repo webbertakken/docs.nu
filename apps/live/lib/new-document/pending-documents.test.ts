@@ -4,6 +4,8 @@ import {
   addPendingDocument,
   attachPendingEditor,
   forgetPendingDocument,
+  notePendingPainted,
+  OPEN_PAINT_WAIT_MS,
   isPendingSettled,
   pendingDocument,
   resetPendingDocumentsForTests,
@@ -41,22 +43,29 @@ function controlledWrite() {
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
+// Added, then painted by its editor, as an open does: the write starts after the paint.
+async function addPainted(...args: Parameters<typeof addPendingDocument>) {
+  addPendingDocument(...args);
+  notePendingPainted(args[0].id);
+  await flush();
+}
+
 afterEach(() => {
   resetPendingDocumentsForTests();
   resetCreateHoldsForTests();
 });
 
 describe('pending documents', () => {
-  it('registers a document as creating and starts its write at once', () => {
+  it('registers a document as creating and starts its write once the editor has painted', async () => {
     const { write } = controlledWrite();
-    addPendingDocument(input(), write, { folderId: 'f1' });
+    await addPainted(input(), write, { folderId: 'f1' });
     expect(pendingDocument(ID)?.create).toEqual({ status: 'creating' });
     expect(write).toHaveBeenCalledWith({ folderId: 'f1' });
   });
 
   it('holds requests naming the document until the create lands', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, {});
+    await addPainted(input(), write, {});
     expect(heldDocumentIn(`/api/documents/${ID}/tabs/t1`)).toBe(ID);
     const held = whenDocumentCreated(ID);
     let released = false;
@@ -71,8 +80,8 @@ describe('pending documents', () => {
     expect(heldDocumentIn(`/api/documents/${ID}`)).toBeNull();
   });
 
-  it('never holds the create itself or another document', () => {
-    addPendingDocument(input(), controlledWrite().write, {});
+  it('never holds the create itself or another document', async () => {
+    await addPainted(input(), controlledWrite().write, {});
     expect(heldDocumentIn('/api/documents')).toBeNull();
     expect(heldDocumentIn('/api/documents/another-id/tabs')).toBeNull();
     expect(whenDocumentCreated('another-id')).toBeNull();
@@ -80,7 +89,7 @@ describe('pending documents', () => {
 
   it('keeps holding after a failure, with its copy, and releases on a retry that lands', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input({ teamId: 'team-1' }), write, { teamId: 'team-1' });
+    await addPainted(input({ teamId: 'team-1' }), write, { teamId: 'team-1' });
     let released = false;
     void whenDocumentCreated(ID)!.then(() => (released = true));
     calls[0]!.reject(new ApiError('create document', 403, 'team_forbidden'));
@@ -101,7 +110,7 @@ describe('pending documents', () => {
 
   it('retries with the same place unless told to drop it', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, { folderId: 'f1' });
+    await addPainted(input(), write, { folderId: 'f1' });
     calls[0]!.reject(new Error('network'));
     await flush();
     retryPendingDocument(ID, { withoutPlacement: false });
@@ -110,7 +119,7 @@ describe('pending documents', () => {
 
   it('ignores a retry while the create is still running or has landed', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, {});
+    await addPainted(input(), write, {});
     retryPendingDocument(ID, { withoutPlacement: false });
     expect(write).toHaveBeenCalledTimes(1);
     calls[0]!.resolve();
@@ -123,7 +132,7 @@ describe('pending documents', () => {
     const { write, calls } = controlledWrite();
     const listener = vi.fn();
     const stop = subscribePendingDocuments(listener);
-    addPendingDocument(input(), write, {});
+    await addPainted(input(), write, {});
     calls[0]!.resolve();
     await flush();
     expect(listener).toHaveBeenCalledTimes(2);
@@ -132,7 +141,7 @@ describe('pending documents', () => {
 
   it('is settled once landed and its editor holds nothing unsaved', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, {});
+    await addPainted(input(), write, {});
     let unsaved = true;
     attachPendingEditor(ID, () => unsaved);
     expect(isPendingSettled(ID)).toBe(false);
@@ -143,10 +152,21 @@ describe('pending documents', () => {
     expect(isPendingSettled(ID)).toBe(true);
   });
 
-  it('reads a forgotten or unknown document as settled', () => {
-    addPendingDocument(input(), controlledWrite().write, {});
+  it('reads a forgotten or unknown document as settled', async () => {
+    await addPainted(input(), controlledWrite().write, {});
     forgetPendingDocument(ID);
     expect(pendingDocument(ID)).toBeNull();
     expect(isPendingSettled(ID)).toBe(true);
+  });
+
+  it('starts no write before the editor has painted, or the wait runs out', async () => {
+    vi.useFakeTimers();
+    const { write } = controlledWrite();
+    addPendingDocument(input(), write, {});
+    await vi.advanceTimersByTimeAsync(OPEN_PAINT_WAIT_MS - 1);
+    expect(write).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(write).toHaveBeenCalledOnce();
+    vi.useRealTimers();
   });
 });

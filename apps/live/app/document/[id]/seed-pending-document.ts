@@ -5,6 +5,7 @@ import { documentIdFromPath } from '@/lib/legacy-editor-path';
 import { setLoadStep } from '@/lib/load-progress';
 import { ensureCollabKey, hasConfirmedName } from '@/lib/local-identity';
 import {
+  notePendingPainted,
   pendingDocument,
   standbyDocument,
   type PendingDocument,
@@ -64,8 +65,8 @@ export function readEditorSeed(
   return doc && doc.tabs.length > 0 ? pendingEditorSeed(doc, placeholder) : null;
 }
 
-// The open of a seeded document, once it is on screen: the load is done, and the open is timed from the click
-// (NewDocumentOpen), logged `[new-document] opened ms=`.
+// The open of a seeded document, once it is on screen: the load is done, the open is timed from the click
+// (NewDocumentOpen), logged `[new-document] opened ms=`, and the create starts after that first frame.
 export function notePendingOpened(doc: PendingDocument): void {
   debugLog('[load] open from memory of a document just made');
   setLoadStep('done');
@@ -73,4 +74,6 @@ export function notePendingOpened(doc: PendingDocument): void {
   startEditorTiming('NewDocumentOpen', { from: doc.startedAt }).endAfterPaint((ms) =>
     debugLog(`[new-document] opened ms=${Math.round(ms)}`),
   );
+  // Once that frame is on screen, the create may start (pending-documents.ts, D207).
+  requestAnimationFrame(() => setTimeout(() => notePendingPainted(doc.id), 0));
 }

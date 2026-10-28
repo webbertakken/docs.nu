@@ -32,10 +32,16 @@ export type PendingDocument = PendingDocumentInput & { create: PendingCreate };
 
 type Entry = {
   doc: PendingDocument;
+  // Resolved once the editor has painted the document (notePendingPainted), or after OPEN_PAINT_WAIT_MS.
+  painted: Promise<void>;
+  markPainted: () => void;
   write: (place: NewDocumentPlace) => Promise<void>;
   place: NewDocumentPlace;
   hasUnsavedChanges: (() => boolean) | null;
 };
+
+// The longest a create waits for the editor's first paint (D207).
+export const OPEN_PAINT_WAIT_MS = 1000;
 
 const entries = new Map<string, Entry>();
 const listeners = new Set<() => void>();
@@ -78,14 +84,32 @@ export function addPendingDocument(
   place: NewDocumentPlace,
 ): void {
   holdDocument(input.id);
+  let markPainted!: () => void;
+  const painted = new Promise<void>((resolve) => {
+    markPainted = resolve;
+  });
   entries.set(input.id, {
     doc: { ...input, create: { status: 'creating' } },
+    painted,
+    markPainted,
     write,
     place,
     hasUnsavedChanges: null,
   });
   notify();
-  runWrite(input.id, place);
+  // The create starts once the editor has painted the document (D207): one that lands at once (This Browser's) would
+  // otherwise re-render the editor inside its first frame. A page that never paints (a background tab) waits at most
+  // OPEN_PAINT_WAIT_MS. Nothing is lost meanwhile: saves are held until it lands.
+  const timer = setTimeout(markPainted, OPEN_PAINT_WAIT_MS);
+  void painted.then(() => {
+    clearTimeout(timer);
+    runWrite(input.id, place);
+  });
+}
+
+// The editor has painted the document: its create may start.
+export function notePendingPainted(id: string): void {
+  entries.get(id)?.markPainted();
 }
 
 export function pendingDocument(id: string | null): PendingDocument | null {

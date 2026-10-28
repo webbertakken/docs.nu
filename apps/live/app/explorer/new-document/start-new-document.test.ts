@@ -43,6 +43,7 @@ import {
 } from './start-new-document';
 import { bindNewDocumentCreator } from '@/lib/new-document/new-document-creator';
 import {
+  notePendingPainted,
   pendingDocument,
   resetPendingDocumentsForTests,
   standbyDocument,
@@ -58,8 +59,12 @@ const request = (over: Partial<NewDocumentRequest> = {}): NewDocumentRequest => 
 });
 
 // Until the open has happened: the address moved to the new document.
-const opened = () =>
-  vi.waitFor(() => expect(window.location.pathname).toMatch(/^\/document\/[0-9a-f-]{36}$/));
+// The editor paints it at once in the app; here nothing renders, so the test says it has (notePendingPainted).
+const opened = async () => {
+  await vi.waitFor(() => expect(window.location.pathname).toMatch(/^\/document\/[0-9a-f-]{36}$/));
+  notePendingPainted(window.location.pathname.split('/').pop()!);
+  await new Promise((r) => setTimeout(r, 0));
+};
 const openedId = () => window.location.pathname.split('/').pop()!;
 
 let unbind: () => void = () => {};

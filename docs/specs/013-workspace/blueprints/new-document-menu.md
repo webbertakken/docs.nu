@@ -225,7 +225,8 @@ heldDocumentIn(url): string | null; // a pending id the url names
 5. The location: LiveDoc when placed, else `defaultSaveLocationFor({ signedIn, signInOffered: signInOfferedHere() === true })`.
 6. The content: `newDocumentContent({ templateKind, themeId: NEW_DOCUMENT_THEME_ID, tabId, via: 'explorer' })`.
 7. `await loadEditorPage()` (already in from the prefetch in practice).
-8. `addPendingDocument`, which starts `writeNewDocument` without awaiting it.
+8. `addPendingDocument`, which starts `writeNewDocument` once the editor has painted the document
+   (`notePendingPainted`, at most `OPEN_PAINT_WAIT_MS` later), without awaiting it (D207).
 9. `history.pushState(null, '', '/document/<id>')`, then `openInPlace(id)`.
 
 ### The editor's bootstrap branch
@@ -358,7 +359,8 @@ Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetr
 | --------------------------------- | ----- | -------------------------------------- | ----------- |
 | `IN_PLACE_SETTLE_POLL_MS`         | 250   | D198                                   | 100 to 1000 |
 | `STANDBY_IDLE_TIMEOUT_MS`         | 2000  | D205                                   | 500 to 5000 |
+| `OPEN_PAINT_WAIT_MS`              | 1000  | D207                                   | 250 to 2000 |
 
 ## Defaults ledger
 
-D191 to D193 and D195 to D206 in [DEFAULTS.md](DEFAULTS.md).
+D191 to D193 and D195 to D207 in [DEFAULTS.md](DEFAULTS.md).
