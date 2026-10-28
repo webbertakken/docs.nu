@@ -2,12 +2,15 @@ import type { Metadata } from 'next';
 import { BrowsePage } from '@/components/BrowsePage';
 import { CategoryCard } from '@/components/CategoryCard';
 import { featureCategories } from '@/lib/articles';
+import { featuresDescription } from '@/lib/features-description';
 import { helpMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = helpMetadata({
   title: 'Features',
-  description:
-    'Browse LiveDoc feature guides by area: User Interface, Explorer, Palette, Canvas, Tabs, Collaboration, and Tools.',
+  description: featuresDescription(
+    'LiveDoc',
+    featureCategories.map((c) => c.title),
+  ),
   path: '/help/features/',
 });
 
