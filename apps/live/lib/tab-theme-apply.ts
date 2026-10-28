@@ -3,7 +3,7 @@
 // theme (useTabTheme.setTheme) and picking a look (useTabCanvas.applyTabLook) both run it, so a look's theme lands
 // exactly as picking that theme does.
 import {
-  opensInOf,
+  labelsFollowCanvas,
   viewElementInTheme,
   withReadableLabelInks,
   type Appearance,
@@ -92,13 +92,6 @@ export function withThemeApplied(
     prevTheme,
     theme,
   );
-}
-
-/** Whether a tab's labels sit on its canvas and panels: not a Pages tab's, whose pages have their own paper. */
-export function labelsFollowCanvas(
-  tab: Pick<Tab, 'opensIn' | 'kind' | 'layers' | 'pages'>,
-): boolean {
-  return opensInOf(tab) !== 'pages' && !(Array.isArray(tab.pages) && tab.pages.length > 0);
 }
 
 // A stored canvas colour as the applier sees it: the theme's, in their half; any other colour as it is.

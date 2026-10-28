@@ -11,6 +11,7 @@
 // viewer's plain page on the dark paper the canvas shows (PAGE_PAPER_DARK), not an export's white.
 import { useMemo } from 'react';
 import {
+  elementAsSeen,
   pageIsDark,
   themedForTab,
   type Appearance,
@@ -21,7 +22,6 @@ import type { PageLayoutId } from '@livedoc/templates';
 import { trustedHtml, useAppearance } from '@livedoc/ui';
 import { useIconCatalogs } from '@/hooks/ui/useIconCatalogs';
 import { renderTabToSvg } from '@/lib/export-tab';
-import { elementAsSeen } from '@/lib/stock-colour-projector';
 import { themeViewMap } from '@/lib/themes';
 import { buildPageLayout } from '@livedoc/templates';
 import { withSamplePictures } from './layout-sample-pictures';
