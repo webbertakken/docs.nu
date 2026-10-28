@@ -27,7 +27,8 @@ export function reachIndex(elements: readonly object[] | undefined): Map<string,
   return out;
 }
 
-function sameReach(a: Map<string, string>, b: Map<string, string>): boolean {
+/** Whether two reach indexes pull in the same cards: the same Plan elements, each with the same reach. */
+export function sameReach(a: ReadonlyMap<string, string>, b: ReadonlyMap<string, string>): boolean {
   if (a.size !== b.size) return false;
   for (const [id, reach] of a) if (b.get(id) !== reach) return false;
   return true;

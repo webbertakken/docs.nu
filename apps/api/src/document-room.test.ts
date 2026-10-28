@@ -2196,8 +2196,11 @@ describe('DocumentRoom tab-scoped sessions', () => {
     sendFrame(room, scoped, { kind: 'op', op: { kind: 'el', tabId: 't1', op: {} } });
     sendFrame(room, scoped, { kind: 'op', op: { kind: 'document-meta', name: 'x', tabs: [] } });
     expect(ops(owner)).toEqual([]);
-    sendFrame(room, scoped, { kind: 'op', op: { kind: 'el', tabId: 't2', op: {} } });
-    expect(ops(owner)).toEqual([{ kind: 'el', tabId: 't2', op: {} }]);
+    sendFrame(room, scoped, {
+      kind: 'op',
+      op: { kind: 'el', tabId: 't2', op: { kind: 'reorder', ids: [] } },
+    });
+    expect(ops(owner)).toEqual([{ kind: 'el', tabId: 't2', op: { kind: 'reorder', ids: [] } }]);
   });
 
   it('filters the catch-up replay the same way', () => {

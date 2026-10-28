@@ -412,7 +412,7 @@ Besides `op`, the room speaks a few non-op frames: `hello`, `sync` and `facilita
 
 ### What the room does to a frame
 
-In order, for every inbound frame: a frame over 256 KiB is dropped; a per-session sliding-window rate cap (240 frames per second) drops a flood; an op from a session that hasn't said `hello` is dropped; a system-kind op from a client is dropped; a tab-scoped session may only touch its own tab and never the document's structure (`scopedSenderMayRelay`); a non-presence op from a session whose verified role isn't `edit` is dropped; `poll-start` / `poll-end` must come from the baton holder when one is held. Then:
+In order, for every inbound frame: a frame over 256 KiB is dropped; a per-session sliding-window rate cap (240 frames per second) drops a flood; an op from a session that hasn't said `hello` is dropped; a system-kind op from a client is dropped; a tab-scoped session may only touch its own tab and never the document's structure (`scopedSenderMayRelay`), nor rename its tab (`scopedRenames`); a non-presence op from a session whose verified role isn't `edit` is dropped; `poll-start` / `poll-end` must come from the baton holder when one is held; a tab-scoped session's op that would change its tab's reach or point its form off the tab is dropped, judged against the stored tab, and its whole-`tab` op goes out under the stored name (`RoomScopedStructure`, [Tab-scoped share links](../013-workspace/tab-scoped-share-links.md#realtime)). Then:
 
 - **Presence ops** relay to every other socket (or, for `avatar-push`, to the one addressed socket).
 - **Mutation ops** are rewritten before they go anywhere: `opForTheWire` strips every comment `authorId` (a guest's credential), and `stampCommentAuthor` sets a posted comment's author name and colour to the sending session's presence, whatever the frame claimed. The rewritten op gets the next `seq`, lands in the catch-up log, relays to every other socket, is recorded in the ledger when it is an `el-delta` or `vote`, and the sender receives a `cursor` frame naming the `seq` its own op took, echoing the op frame's `ref` when it carried one (a positive integer), so the sender knows that op is sequenced.
@@ -435,7 +435,7 @@ The document's content, in the room's SQLite ([Document storage](../006-document
 
 Per-session state (presence id, verified role, owner bit, tab scope, admitting share code, presence) lives in each socket's serialized attachment, so it survives hibernation; only the rate-cap windows and the catch-up log reset on a wake.
 
-The room's other parts each have a module beside `document-room/document-room.ts`: the session attachment and the verified upgrade headers (`room-session.ts`), the role gate on client ops (`room-op-gate.ts`, the [Share roles](../013-workspace/share-roles.md) level ladder), the worker-only internal endpoints (`room-internal.ts`) and the presence roster each socket is sent (`room-roster.ts`).
+The room's other parts each have a module beside `document-room/document-room.ts`: the session attachment and the verified upgrade headers (`room-session.ts`), the role gate on client ops (`room-op-gate.ts`, the [Share roles](../013-workspace/share-roles.md) level ladder), a tab-scoped session's structure check (`room-structure-gate.ts`, `room-scoped-structure.ts`), the worker-only internal endpoints (`room-internal.ts`) and the presence roster each socket is sent (`room-roster.ts`).
 
 ### What the room writes to D1
 
