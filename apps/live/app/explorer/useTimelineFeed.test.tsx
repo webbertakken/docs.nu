@@ -183,6 +183,24 @@ describe('useTimelineFeed failure handling', () => {
     expect(result.current.events.map((e) => e.id)).toEqual(['a']);
     expect(result.current.hasMore).toBe(true);
   });
+
+  it('says a later page failed, keeping what is shown and its cursor', async () => {
+    apiListTimeline.mockResolvedValueOnce({ events: [event('a', 10)], nextCursor: '10:a' });
+    const { result } = renderHook(() => useTimelineFeed('me', true));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    apiListTimeline.mockResolvedValueOnce(null);
+    act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.loadMoreFailed).toBe(true));
+    expect(result.current.events.map((e) => e.id)).toEqual(['a']);
+    expect(result.current.hasMore).toBe(true);
+    expect(result.current.error).toBe(false);
+
+    apiListTimeline.mockResolvedValueOnce({ events: [event('b', 5)], nextCursor: undefined });
+    act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.loadMoreFailed).toBe(false));
+    expect(result.current.events.map((e) => e.id)).toEqual(['a', 'b']);
+  });
 });
 
 // Returning to a tab that has been open since yesterday (docs/specs/013-workspace/timeline.md §2.4a).
