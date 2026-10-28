@@ -1,11 +1,4 @@
-import {
-  dismissQuickTour,
-  expect,
-  guestSigFor,
-  mintSignedGuest,
-  ownerHeaders,
-  test,
-} from './fixtures';
+import { expect, guestSigFor, mintSignedGuest, ownerHeaders, test } from './fixtures';
 
 // A Sheet on a Plan tab (docs/specs/029-sheets/sheet.md): typed into in Plan mode, its formula worked out on
 // the grid and kept in the sheet store, and maximised and restored like a board.
@@ -89,7 +82,6 @@ test('a Sheet tab takes a formula, works it out, keeps it, and fills the tab', a
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`/document/${id}`);
   await page.locator(CANVAS).waitFor();
-  await dismissQuickTour(page);
   await expect(page.locator('[data-editor-mode]')).toHaveAttribute('data-editor-mode', 'plan');
 
   const grid = page.getByRole('grid', { name: 'Budget grid' });

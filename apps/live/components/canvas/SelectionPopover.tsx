@@ -87,8 +87,8 @@ type SelectionPopoverProps = {
   // read-only, or a kind that shows none (a Plan board or card, an
   // annotation), so the toolbar sits closer without overlapping anything.
   compact?: boolean;
-  // A separate small toolbar to the left of this one (the element tour offer, away from Delete at the right end,
-  // docs/specs/007-editor/element-tours.md), placed and nudged with it as one group.
+  // A separate small toolbar to the left of this one (away from Delete at the right end), placed and nudged with it
+  // as one group.
   aside?: ReactNode;
 };
 

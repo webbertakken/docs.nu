@@ -75,26 +75,13 @@ const OUTRO: DashboardTourStep = {
   body: 'Run this again from Dashboard Settings › Show Me.',
 };
 
-// The offer, the first time an Editor has a dashboard open (DashboardTour.tsx, docs/specs/026-plan/plan-tour.md).
-const WELCOME: DashboardTourStep = {
-  id: 'welcome',
-  card: 'welcome',
-  title: 'Getting started with Dashboards?',
-  body: 'A quick look at rows of slots, filling them, and the dashboard’s settings? Nothing on it changes.',
-};
-
-// The steps for this dashboard: Fill only with an empty slot to fill, the slot step only with a filled one; led by
-// the offer when the tour offers itself (not when Show Me runs it).
-export function dashboardTourSteps(
-  { hasEmpty, hasFilled }: { hasEmpty: boolean; hasFilled: boolean },
-  offered = false,
-): DashboardTourStep[] {
-  return [
-    ...(offered ? [WELCOME] : []),
-    ROWS,
-    ...(hasEmpty ? [FILL] : []),
-    ...(hasFilled ? [SLOT] : []),
-    SETTINGS,
-    OUTRO,
-  ];
+// The steps for this dashboard: Fill only with an empty slot to fill, the slot step only with a filled one.
+export function dashboardTourSteps({
+  hasEmpty,
+  hasFilled,
+}: {
+  hasEmpty: boolean;
+  hasFilled: boolean;
+}): DashboardTourStep[] {
+  return [ROWS, ...(hasEmpty ? [FILL] : []), ...(hasFilled ? [SLOT] : []), SETTINGS, OUTRO];
 }

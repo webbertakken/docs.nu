@@ -1,4 +1,4 @@
-import { dismissQuickTour, expect, expectNoPageErrors, startBlankDocument, test } from './fixtures';
+import { expect, expectNoPageErrors, startBlankDocument, test } from './fixtures';
 
 // The canvas never scrolls (docs/specs/008-canvas/canvas-and-palette.md "The canvas never scrolls"):
 // editing a label past its bottom edge used to scroll the canvas's box to reveal the editor, and the
@@ -8,7 +8,6 @@ test('editing a label at the bottom edge leaves the corner chrome where it is', 
   pageErrors,
 }) => {
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   const viewport = page.viewportSize()!;
   const cluster = page.locator('[data-zoom-cluster]');
   const before = await cluster.boundingBox();

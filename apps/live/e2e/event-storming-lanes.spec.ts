@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test';
 import {
-  dismissQuickTour,
   expect,
   expectNoPageErrors,
   startEventStormingRow,
@@ -86,7 +85,6 @@ async function viewportOf(page: Page) {
 
 async function openRow(page: Page) {
   await startEventStormingRow(page);
-  await dismissQuickTour(page);
   const notes = page.locator('[data-canvas-a11y-root]').getByRole('img', { name: /^Sticky note/ });
   await expect(notes).toHaveCount(3);
   await page.waitForTimeout(500);

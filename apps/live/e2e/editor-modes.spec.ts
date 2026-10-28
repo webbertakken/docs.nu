@@ -1,12 +1,5 @@
 import type { Page } from '@playwright/test';
-import {
-  createInMode,
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  test,
-  pageOwnerHeaders,
-} from './fixtures';
+import { createInMode, expect, expectNoPageErrors, test, pageOwnerHeaders } from './fixtures';
 
 // Editor modes end to end (docs/specs/007-editor/editor-modes.md), in dark mode: the switch beside the menu button and
 // an empty tab's start always agree, the tab menu offers none; a tab with content switches beside the menu button
@@ -49,27 +42,6 @@ const sketches = (page: Page) => page.locator(CANVAS).getByRole('img', { name: /
 async function openInMode(page: Page, name: 'diagram' | 'draw' | 'plan') {
   await page.setViewportSize({ width: 1600, height: 900 });
   await page.emulateMedia({ colorScheme: 'dark' });
-  // The Plan and Workshop tours offer themselves 800 ms into their modes (OFFER_DELAY_MS), and their overlay
-  // takes the presses these specs make there on a slow runner; it has its own unit tests.
-  await page.addInitScript(() => {
-    const key = 'livedoc:user-preferences:v1';
-    try {
-      const prefs = JSON.parse(localStorage.getItem(key) ?? '{}') as Record<string, unknown>;
-      // The Plan tour offers each track once (lib/tour-tracks.ts): both answered.
-      if (!Array.isArray(prefs.planTourTracks) || prefs.workshopTourSeen !== true)
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            ...prefs,
-            planTourSeen: true,
-            planTourTracks: ['boards', 'sheets'],
-            workshopTourSeen: true,
-          }),
-        );
-    } catch {
-      // No storage: nothing to mark.
-    }
-  });
   await createInMode(page, name);
 }
 
@@ -208,7 +180,6 @@ test.describe('editor modes', () => {
     await other.setViewportSize({ width: 1600, height: 900 });
     await other.goto(page.url());
     await other.locator(CANVAS).waitFor({ timeout: 30_000 });
-    await dismissQuickTour(other);
     await expect(mode(other)).toHaveAttribute('data-editor-mode', 'diagram');
 
     await chooseOnStart(page, 'Draw');

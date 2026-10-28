@@ -1,5 +1,5 @@
 import { DARK_CANVAS_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR } from '@livedoc/document';
-import { expect, test, dismissQuickTour, expectNoPageErrors, paletteTile } from './fixtures';
+import { expect, test, expectNoPageErrors, paletteTile } from './fixtures';
 
 // Appearance (docs/specs/007-editor/live-app.md) end to end: the three settings on the real control, and
 // the thing the merge was for — a tab on the Default theme repainting
@@ -17,7 +17,6 @@ async function startBlank(page: import('@playwright/test').Page): Promise<void> 
   // Straight to a blank canvas: the /new?blank=1 bypass (Start Blank).
   await page.goto('/new?blank=1');
   await page.locator(CANVAS).waitFor();
-  await dismissQuickTour(page);
 }
 const DARK_CANVAS = DARK_CANVAS_BACKGROUND_COLOR;
 const LIGHT_CANVAS = DEFAULT_BACKGROUND_COLOR;

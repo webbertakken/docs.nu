@@ -94,7 +94,7 @@ proved the better introduction.
 None. A brand-new user's first create once set a sessionStorage flag (`livedoc:v2:tour-pending`) that the editor
 read to show the offer banner; with the button as the one way in there is nothing to hand over, and `/new` no
 longer waits for the document count on create. The Settings rerun crosses no navigation, so it is a window event
-(`livedoc:tour-relaunch`, `lib/diagram-tour.ts`).
+(`livedoc:tour-relaunch`, `apps/live/lib/diagram-tour.ts`).
 
 ## The steps
 

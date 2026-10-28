@@ -8,8 +8,9 @@ import { revealInScrollers } from './tour-reveal';
 import { hasAnchor, type TourStepOf } from './tour-step';
 
 // The step runner every guided tour shares (docs/specs/007-editor/editor-tour.md "Mechanics",
-// docs/specs/026-plan/blueprints/plan-tour.md "Engine"): the Diagram, Plan and Workshop tours each own
-// their offer, their steps and what ending means, and hand this the rest. Each step runs prepare
+// docs/specs/026-plan/blueprints/plan-tour.md "Engine"): each tour's host owns its way in (the bottom bar's Start
+// Tour button, tour-offer.ts; a Show Me button), its steps and what ending means, and hands this the rest. Each step
+// runs prepare
 // (opening the real panel / dropdown / menu it explains), waits for its target node, then reports a
 // rect for the dimming highlight ring, scrolling the target into view first when it sits below a panel's fold
 // (tour-reveal.ts). A watcher re-measures the target every 150ms so the highlight
@@ -32,7 +33,7 @@ const TRACK_MS = 150;
 // us directly.
 export type TourTargetRect = { left: number; top: number; width: number; height: number };
 
-export type TourOutcome = 'completed' | 'skipped' | 'declined';
+export type TourOutcome = 'completed' | 'skipped';
 
 // Whether a found target belongs to a dialog the tour is showing: a step drawn over a dialog, or a target inside one.
 function inTourDialog<Api>(step: TourStepOf<Api>, el: HTMLElement): boolean {
@@ -134,11 +135,11 @@ export function useTourEngine<Api>({
   steps: readonly TourStepOf<Api>[];
   // Rebuilt every render by the host so step callbacks always see fresh handlers.
   apiRef: RefObject<Api>;
-  // Once per step entry (a Back re-entry counts); never for the welcome card, whose view is the offer.
+  // Once per step entry (a Back re-entry counts), the last card included.
   onStepView: (step: TourStepOf<Api>) => void;
-  // The welcome card's accept: the tour proper starts.
+  // The tour starts (start: the bottom bar's Start Tour button, a Show Me press).
   onStart?: () => void;
-  // The tour ran out (completed), was skipped mid-way, or was declined at the welcome card.
+  // The tour ran out (completed) or was skipped mid-way.
   onFinish: (outcome: TourOutcome) => void;
 }) {
   const [active, setActive] = useState(false);
@@ -195,13 +196,13 @@ export function useTourEngine<Api>({
     if (!active) return;
     const step = steps[stepIndex];
     if (!step) return; // an empty list: nothing to run
-    if (step.card !== 'welcome') onStepViewRef.current(step);
+    onStepViewRef.current(step);
     const token = ++runTokenRef.current;
     let cancelled = false;
     void (async () => {
       const api = apiRef.current;
       if (!hasAnchor(step)) {
-        // Anchorless (welcome / outro) card: centred, no highlight. Its prepare still runs.
+        // Anchorless card (the last card, a step about the whole page): centred, no highlight. Its prepare still runs.
         targetElRef.current = null;
         setTargetRect(null);
         setAwaitingTarget(false);
@@ -226,10 +227,10 @@ export function useTourEngine<Api>({
       setAwaitingTarget(false);
       if (!el) {
         // Target never appeared: skip on the way the person was going. Going back, past it to the step before
-        // (never onto the welcome card, which would start the tour over); else forward, finishing from the last.
+        // (never before the first); else forward, finishing from the last.
         step.cleanup?.(apiRef.current);
         const before = steps[stepIndex - 1];
-        if (stepDirRef.current === 'backward' && before && before.card !== 'welcome') {
+        if (stepDirRef.current === 'backward' && before) {
           setStepIndex(stepIndex - 1);
         } else if (stepIndex < steps.length - 1) {
           setStepDir('forward');
@@ -332,11 +333,12 @@ export function useTourEngine<Api>({
 
   const start = () => {
     reset();
-    // The dialogs open as it starts are its own (Show Me run from inside one); an offered tour waits for none.
+    // The dialogs open as it starts are its own (Show Me run from inside one).
     setModalBaseline(openModalCount());
     setStepIndex(0);
     setStepDir('forward');
     setActive(true);
+    onStart?.();
   };
 
   const step = active ? steps[Math.min(stepIndex, steps.length - 1)] : undefined;
@@ -349,7 +351,6 @@ export function useTourEngine<Api>({
 
   const next = () => {
     leaveStep();
-    if (step?.card === 'welcome') onStart?.();
     setStepDir('forward');
     if (stepIndex < steps.length - 1) setStepIndex(stepIndex + 1);
     else finish('completed');
@@ -363,7 +364,7 @@ export function useTourEngine<Api>({
 
   const skip = () => {
     leaveStep();
-    finish(step?.card === 'welcome' ? 'declined' : 'skipped');
+    finish('skipped');
   };
 
   return {
@@ -378,8 +379,6 @@ export function useTourEngine<Api>({
     landed: active && landedIndex === stepIndex && !awaitingTarget,
     // The bookend cards sit outside the step count: "1 of N" is the first real step.
     countableSteps: steps.filter((s) => !s.card).length,
-    // Whether the tour opens on a welcome card (an offered tour) or straight on its first step (Show Me).
-    hasWelcome: steps[0]?.card === 'welcome',
     start,
     stop,
     next,

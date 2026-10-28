@@ -73,7 +73,7 @@ how many are on (`0 of 21 On` by default). Opened, it shows the section's line (
 while you select that element, Start Tour in the bottom bar shows how it works."), then **Show Me on Every Element**,
 one switch over them all ("Every element’s Show Me at once": on while any kind is opted in and not answered; on
 opts every kind in and forgets every answer, off answers every kind), with one switch per toured kind nested beneath
-it, named for the element alone: **Sankey Diagram** ("While a Sankey diagram is selected.", linking the Sankey
+it, named for the element alone: **Sankey Diagram** ("With a Sankey diagram selected.", linking the Sankey
 Diagram article). Every switch reads off until the person turns it on. The switch over them all only summarises its
 rows (`summarisesChildren`), so, unlike an enable switch, it never hides them: each element's switch is offered, and
 found by the Settings search, while it is off. On means "on the button": switching one on opts its kind in and
