@@ -105,6 +105,10 @@ One Google key without the other logs `[auth] google_half_configured`. The email
   `BETTER_AUTH_SECRETS` when set). Static, never the dynamic `allowedHosts` form: each deployment has one canonical
   host, and the dynamic form answers an unlisted host with 500 and trusts every listed host as an origin.
 - `trustedOrigins: [origin of APP_BASE_URL]`.
+- `disabledPaths: UNUSED_CODE_PATHS`: the email-otp plugin's routes other than sending a code and signing in with it
+  (`check-verification-otp`, `verify-email`, the password-reset and email-change code routes) answer 404.
+  `check-verification-otp` checks a code without spending it and counts a wrong guess in a read and a separate write,
+  so guesses sent at once would all count as one.
 - `advanced`: `useSecureCookies` true unless `APP_BASE_URL` is `http://localhost…` (D13); `cookiePrefix: 'livedoc'`;
   `ipAddress.ipAddressHeaders: ['cf-connecting-ip']`; `database.generateId` for the user model only →
   `generateAccountId()`, other models the default; `database.validateSchema: false` (the schema is checked in CI, D11); No `backgroundTasks` handler: better-auth would then send a code in the background and answer success whatever
@@ -117,7 +121,9 @@ One Google key without the other logs `[auth] google_half_configured`. The email
   would also refuse listing sessions; the freshness gates below are LiveDoc's, on `FRESH_SESSION_AGE_S`);
   cookie cache off (a revoked session must stop at once).
 - `account: { accountLinking: { enabled: true, allowDifferentEmails: false, requireLocalEmailVerified: true,
-updateUserInfoOnLink: false }, encryptOAuthTokens: true }`. Google's access and refresh tokens are not stored
+updateUserInfoOnLink: false }, encryptOAuthTokens: true }`, with no `trustedProviders`: a Google sign-in on an
+  address that already has an account joins it only when Google says it verified the address (`email_verified`); a
+  trusted provider would join on an address it never verified. Google's access and refresh tokens are not stored
   (`mapProfileToUser` keeps name, email, picture; the account row's token columns are written null by an
   `account.create.before` hook).
 - `user: { deleteUser: { enabled: false } }`: deletion is LiveDoc's own route. `changeEmail` off (first release).
@@ -467,6 +473,7 @@ Never logged: tokens, codes, emails, names, IPs.
 | Capabilities name the methods and the outbox                                           | `routes/capabilities.test.ts`, `index.auth.test.ts`                                                                           |
 | Credential order, refusals, fall-through                                               | `index.auth.test.ts`                                                                                                          |
 | Session token verify (good, expired, wrong iss/aud/alg, kid rotation, non-account sub) | `auth/session-token.test.ts` (keys minted in the test)                                                                        |
+| Code checked only by signing in; unused code routes 404; Google never trusted          | `auth/identity.test.ts`                                                                                                       |
 | Account id shape; refused as guest header                                              | `request-auth.test.ts`, `index.auth.test.ts`                                                                                  |
 | Guest signing key derived, kept across a rotation, enforced whenever it exists         | `auth/guest-key.test.ts`, `auth/guest-rest.test.ts`, `auth/owner-signature.test.ts`                                           |
 | Migration (signature, account-shaped source, idempotent, end to end)                   | `routes/migrate.test.ts`, `index.auth.test.ts`                                                                                |

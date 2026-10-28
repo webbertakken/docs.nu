@@ -50,10 +50,12 @@ across devices, teams, tokens, collaborating under one name).
 Two methods ship first:
 
 - **Google.** "Continue with Google" on both auth pages. The account takes Google's verified email, name and picture.
+  On an address that already has an account it joins that account only when Google verified the address.
   It is proven end to end against a fake Google on the signed-in e2e stack
   ([Signed-in specs](../003-system-architecture/e2e-smoke.md#signed-in-specs)).
 - **Email code.** Type an email, receive a 6-digit code valid for 5 minutes, type it. Three wrong tries spend the
-  code. The first sign-in with a new address creates the account with that address verified.
+  code. A code is checked only by signing in with it: no other route reads one, so guesses sent at once can't race the
+  count of tries. The first sign-in with a new address creates the account with that address verified.
 - **Not in the first release:** passwords (they need hashing budget on the worker and a reset flow), magic links (a
   second email method for the same job), Google One Tap, passkeys and two-factor. Each is a later addition to this list.
 
