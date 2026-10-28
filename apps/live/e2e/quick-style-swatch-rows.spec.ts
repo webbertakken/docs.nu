@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { dismissQuickTour, expect, expectNoPageErrors, openStartBlank, test } from './fixtures';
+import { expect, expectNoPageErrors, openStartBlank, test } from './fixtures';
 
 // A swatch row never wraps and is never clipped (docs/specs/008-canvas/quick-style-panel.md "Where
 // it sits"): the panel's width counts the targets, their gaps, the padding and the border exactly.
@@ -72,7 +72,6 @@ test.describe('swatch rows', () => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/new?template=whiteboard');
     await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-    await dismissQuickTour(page);
     // Eight strokes, each in its own custom colour picked with +, so the tab uses eight.
     const marker2 = page.getByRole('button', { name: /^Marker 2/ });
     for (const [i, hex] of YOURS.entries()) {

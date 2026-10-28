@@ -1,11 +1,4 @@
-import {
-  dismissQuickTour,
-  expect,
-  guestSigFor,
-  mintSignedGuest,
-  ownerHeaders,
-  test,
-} from './fixtures';
+import { expect, guestSigFor, mintSignedGuest, ownerHeaders, test } from './fixtures';
 
 // A Sheet on a Plan tab (docs/specs/029-sheets/sheet.md): typed into in Plan mode, its formula worked out on
 // the grid and kept in the sheet store, and maximised and restored like a board.
@@ -79,17 +72,12 @@ test('a Sheet tab takes a formula, works it out, keeps it, and fills the tab', a
       localStorage.setItem('livedoc:v2:self-id', o);
       if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
       localStorage.setItem('livedoc:v2:name-confirmed', '1');
-      localStorage.setItem(
-        'livedoc:user-preferences:v1',
-        JSON.stringify({ planTourSeen: true, planTourTracks: ['boards', 'sheets'] }),
-      );
     },
     { o: owner, sig: guestSigFor(owner) },
   );
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`/document/${id}`);
   await page.locator(CANVAS).waitFor();
-  await dismissQuickTour(page);
   await expect(page.locator('[data-editor-mode]')).toHaveAttribute('data-editor-mode', 'plan');
 
   const grid = page.getByRole('grid', { name: 'Budget grid' });

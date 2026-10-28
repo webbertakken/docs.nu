@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ITEM_TYPES } from '@livedoc/items';
 import { VerbRefusal } from '../define';
 import { contextOf, DOC_A, fakeApi, library, tabsOfA } from '../testing/fake-api';
-import { boardAdd, boardSet } from './board';
+import { boardAdd, boardSet, sortLevels } from './board';
 import { typeApply, typeLs } from './card-type';
 
 // The board and card type verbs (docs/specs/026-plan/plan-agents.md; docs/specs/015-api/cli.md "Commands").
@@ -122,7 +122,8 @@ describe('board set', () => {
       ctx,
       boardSet.input.parse({ doc: DOC_A, board: 'sprint', columns: 'To Do, Done', types: 'Task' }),
     );
-    expect(boardSet.text!(out)).toEqual(['~ board "Sprint": To Do · Done (takes Task)']);
+    // Done counts as done by its name (docs/specs/026-plan/plan-board.md "Done columns").
+    expect(boardSet.text!(out)).toEqual(['~ board "Sprint": To Do · Done ✓ (takes Task)']);
     expect(boardSet.quiet!(out)).toEqual(['b1']);
     expect(sent[0]).toMatchObject({ operations: [{ op: 'set', target: 'id:"b1"' }] });
     const every = await boardSet.run!(
@@ -133,6 +134,52 @@ describe('board set', () => {
     expect(boardSet.text!({ ...every, takes: [] })).toEqual([
       '~ board "S2": To Do (takes no type)',
     ]);
+    // --done names the done columns, whole; none turns them all off.
+    const done = await boardSet.run!(
+      ctx,
+      boardSet.input.parse({ doc: DOC_A, board: 'b1', done: 'To Do' }),
+    );
+    expect(done.columns).toEqual([expect.objectContaining({ name: 'To Do', done: true })]);
+    const none = await boardSet.run!(
+      ctx,
+      boardSet.input.parse({ doc: DOC_A, board: 'b1', done: 'none' }),
+    );
+    expect(none.columns[0]).not.toHaveProperty('done');
+  });
+
+  it('sorts the board from --sort, and prints the sort', async () => {
+    const { ctx, sent } = ctxWith();
+    const out = await boardSet.run!(
+      ctx,
+      boardSet.input.parse({ doc: DOC_A, board: 'sprint', sort: 'Priority desc, Due Date' }),
+    );
+    expect(sent[0]).toMatchObject({
+      operations: [
+        {
+          fields: {
+            planBoard: {
+              sortBy: [
+                { field: 'priority', dir: 'desc' },
+                { field: 'due', dir: 'asc' },
+              ],
+            },
+          },
+        },
+      ],
+    });
+    expect(boardSet.text!(out)[0]).toContain(
+      ', sorted by Priority (Highest First), then Due Date (Earliest First)',
+    );
+  });
+
+  it('reads --sort levels, each direction optional, none as none', () => {
+    expect(sortLevels('Priority descending, Value ASC, Due Date')).toEqual([
+      { field: 'Priority', direction: 'descending' },
+      { field: 'Value', direction: 'ascending' },
+      { field: 'Due Date' },
+    ]);
+    expect(sortLevels(' None ')).toEqual([]);
+    expect(sortLevels(' , ')).toEqual([]);
   });
 
   it('refuses a board it cannot find', async () => {

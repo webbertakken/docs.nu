@@ -32,7 +32,7 @@ Scope, by file:
 | `apps/live/components/canvas/ElementEllipsisMenu.tsx`       | Element quick menu (`kind="command"`) or session settings (`kind="control"`)                |
 | `apps/live/components/canvas/LockedElementMenu.tsx`         | Command menu, no trigger                                                                    |
 | `apps/live/components/chrome/ZoomMenu.tsx`                  | Hover-open command menu with a button of its own                                            |
-| `apps/live/components/chrome/editor-mode/ModeMenuChip.tsx`  | One-of-a-set command menu; its own key handling deleted                                     |
+| `apps/live/components/chrome/editor-mode/ModeMenuChip.tsx`  | One-of-a-set command menu (beside the menu button and on a start's rail); own keys deleted  |
 | `apps/live/components/chrome/AuthControls.tsx`              | Account command menu                                                                        |
 | `apps/live/components/chrome/EmbedChrome.tsx`               | Embed tab command menu                                                                      |
 | `apps/live/components/dialogs/ShareCopyMenu.tsx`            | Command menu, or control menu when it carries a header control                              |

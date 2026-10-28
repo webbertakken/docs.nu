@@ -545,6 +545,28 @@ describe('who may do what', () => {
     ).toBe(404);
   });
 
+  // A card made from a tab that shows only some cards would land on boards on other tabs, past the link's reach.
+  it('lets a tab-scoped link create cards only from a tab that shows every card', async () => {
+    const make = () =>
+      call({
+        path: '/items?tabId=t1',
+        owner: 'v',
+        code: 'TAB1',
+        body: { type: 'task', fields: { title: 'From the link' } },
+      });
+    expect((await make()).status).toBe(201);
+    sql.sql.prepare(`UPDATE tabs SET data = ?, rev = rev + 1 WHERE id = 't1'`).run(
+      JSON.stringify({
+        elements: [{ id: 'x', type: 'shape', shape: 'square', x: 0, y: 0, width: 10, height: 10 }],
+      }),
+    );
+    const before = (await call<ItemsResponse>({ method: 'GET', path: '/items' })).body.items.length;
+    expect((await make()).status).toBe(403);
+    expect((await call<ItemsResponse>({ method: 'GET', path: '/items' })).body.items).toHaveLength(
+      before,
+    );
+  });
+
   it('answers 405 for a wrong method', async () => {
     expect((await call({ method: 'PUT', path: '/items' })).status).toBe(405);
     expect((await call({ method: 'GET', path: '/items/bulk' })).status).toBe(405);

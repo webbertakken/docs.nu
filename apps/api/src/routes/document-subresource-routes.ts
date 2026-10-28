@@ -42,6 +42,7 @@ import {
   missingDocument,
   requireOwner,
   shareCodeOf,
+  tabScopeOf,
   type DocumentRouteContext,
 } from './context';
 import { answerTabView, parseViewQuery } from './document-views-route';
@@ -122,7 +123,7 @@ export async function handleDocumentSubresources(
       // Owner or edit-role share visitor only, and a tab-scoped visitor on their own tab only.
       const allowed = await gateEdit(ctx, id, saving.ownerId, saving.teamId, tabId);
       if (!allowed) return forbidden();
-      return handleTabPut(ctx, saving, tabId, owner);
+      return handleTabPut(ctx, saving, tabId, owner, await tabScopeOf(ctx, saving));
     }
     const existing = await getDocument(env, id);
     if (!existing) return missingDocument(ctx, id);
@@ -165,11 +166,16 @@ export async function handleDocumentSubresources(
       // "opened by a visitor · Someone with the share link" and files under the
       // sharing filter, so an owner saw that for a document they had never
       // shared a link for, once per teammate per day.
+      //
+      // A visitor is someone the grant admitted through a link, never merely a request carrying a share header:
+      // a teammate following a share link is still a teammate.
       if (owner !== existing.ownerId && shareCodeOf(request) !== null) {
         ctx.waitUntil?.(
-          getParticipant(env, owner).then((p) =>
-            recordVisitorOpened(env, existing, owner, p?.name ?? null),
-          ),
+          gateGrant(ctx, existing.id, existing.ownerId, existing.teamId).then(async (grant) => {
+            if (!grant?.shareCode) return;
+            const p = await getParticipant(env, owner);
+            await recordVisitorOpened(env, existing, owner, p?.name ?? null);
+          }),
         );
       }
       // docs/specs/013-workspace/explorer-home.md "Opens": the reader's own open, for their Home.

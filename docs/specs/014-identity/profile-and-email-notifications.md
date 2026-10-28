@@ -71,7 +71,11 @@ longest-standing remaining joined member, admins first — so shared team work
 survives the account (mirrors [Team shared documents](../013-workspace/team-shared-documents.md)'s "deleting a team must never destroy
 members' work"), and the heir is **promoted to admin** when the deleted user
 was the only one. The user's own `shared_with` references (rows for OTHER
-people's documents they visited) are wiped too.
+people's documents they visited) are wiped too. So are the invitations to the
+account's address it turned down from the email before ever claiming them
+(rows keyed by the address alone), so no members list keeps the address of
+someone who has gone; an invitation still waiting is the inviter's, to an
+address rather than to the account, and stays.
 
 ## 2. Capabilities gains `emailEnabled`
 

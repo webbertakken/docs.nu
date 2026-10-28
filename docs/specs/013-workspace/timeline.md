@@ -1408,7 +1408,8 @@ share link"_, under the **sharing** filter, for a document they had never
 shared a link for — once per teammate per day, so a twelve-person library
 could put eleven false cards a day on one document. Duplicating a
 team-library document reported _"copied by a visitor"_, which is simply
-untrue. Both now require a share code to have been presented. The
+untrue. Both now require the reader's grant to have come through a share link (`DocumentGrant.shareCode`), not
+merely a share header: a teammate following a share link is still a teammate. The
 teammate's own `document_duplicated` event is unaffected: they really did
 copy it.
 

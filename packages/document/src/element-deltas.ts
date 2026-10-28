@@ -73,7 +73,8 @@ export type ElementDelta =
   // Comment threads (docs/specs/008-canvas/canvas-and-palette.md): append, delete, the server's id replacing the
   // local one, and resolve / unresolve. `cell` names a Sheet cell's thread (docs/specs/029-sheets/sheet.md "Cell
   // comments") instead of the element's own; a remove or a rekey finds its comment in whichever thread holds it.
-  | { kind: 'comment-add'; comment: Comment; cell?: string }
+  // `before`: a refused delete put back ahead of the comment that followed it (useEditorComments).
+  | { kind: 'comment-add'; comment: Comment; cell?: string; before?: string }
   | { kind: 'comment-remove'; commentId: string }
   | { kind: 'comment-rekey'; from: string; to: string }
   | { kind: 'comment-resolve'; resolved: boolean; cell?: string }
@@ -172,7 +173,8 @@ export function applyElementDelta(el: Element, delta: ElementDelta): Element {
       if (cell !== undefined && !thread) {
         if (Object.keys(cellThreadsOf(el) ?? {}).length >= CELL_THREADS_MAX) return el;
       }
-      const next = threadWithComment(thread, delta.comment, COMMENTS_MAX);
+      const before = typeof delta.before === 'string' ? delta.before : undefined;
+      const next = threadWithComment(thread, delta.comment, COMMENTS_MAX, before);
       return next === thread ? el : withThreadAt(el, cell, next);
     }
     case 'comment-remove': {

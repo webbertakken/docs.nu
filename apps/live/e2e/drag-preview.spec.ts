@@ -1,12 +1,5 @@
 import type { Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  seedTab,
-  test,
-  pageOwnerHeaders,
-} from './fixtures';
+import { expect, expectNoPageErrors, seedTab, test, pageOwnerHeaders } from './fixtures';
 
 // docs/specs/008-canvas/drag-preview.md: while a drag lasts, the moved box and the arrow pinned to it
 // move on screen while nothing is written; the document changes once, on release; Escape puts the box
@@ -71,7 +64,6 @@ async function openBoard(page: Page) {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/new?blank=1');
   await page.locator(CANVAS).waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
   await seedTab(page, BOARD);
   await page.keyboard.press('v');
   await expect(box(page, 'a')).toBeVisible();

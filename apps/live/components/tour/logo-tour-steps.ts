@@ -10,13 +10,6 @@ import { elementSelector } from '@/lib/canvas-selectors';
 
 type LogoTourStep = PageTourStep;
 
-export const LOGO_WELCOME: LogoTourStep = {
-  id: 'welcome',
-  card: 'welcome',
-  title: 'Getting started with Logos?',
-  body: 'A quick look at logo layouts, guides, mirror drawing and combining shapes?',
-};
-
 const titleButton = (name: string) => (api: PageTourApi) =>
   `[data-logo-title-bar="${api.pageId}"] button[aria-label="${name}"]`;
 

@@ -1696,6 +1696,29 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
     ],
     "type": "string"
   },
+  "BoardSortDir": {
+    "enum": [
+      "asc",
+      "desc"
+    ],
+    "type": "string"
+  },
+  "BoardSortLevel": {
+    "additionalProperties": false,
+    "properties": {
+      "dir": {
+        "$ref": "#/components/schemas/BoardSortDir"
+      },
+      "field": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "field",
+      "dir"
+    ],
+    "type": "object"
+  },
   "BoardWidgetKind": {
     "enum": [
       "count",
@@ -11224,6 +11247,12 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       "kind": {
         "$ref": "#/components/schemas/PlanBoardKind"
       },
+      "sortBy": {
+        "items": {
+          "$ref": "#/components/schemas/BoardSortLevel"
+        },
+        "type": "array"
+      },
       "tabId": {
         "type": "string"
       },
@@ -11300,6 +11329,12 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       "hideWriting": {
         "type": "boolean"
       },
+      "sortBy": {
+        "items": {
+          "$ref": "#/components/schemas/BoardSortLevel"
+        },
+        "type": "array"
+      },
       "swimlaneBy": {
         "$ref": "#/components/schemas/SwimlaneBy"
       },
@@ -11351,6 +11386,9 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       "color": {
         "type": "string"
       },
+      "done": {
+        "type": "boolean"
+      },
       "id": {
         "type": "string"
       },
@@ -11377,6 +11415,10 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
   "PlanColumnOutline": {
     "additionalProperties": false,
     "properties": {
+      "done": {
+        "const": true,
+        "type": "boolean"
+      },
       "name": {
         "type": "string"
       },

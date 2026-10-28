@@ -18,7 +18,8 @@ does too, so the editor never asks anyone to switch mode to suit a tab.
   multi-colour palette and its root, and each shape kind's colours in a per-shape theme (UML).
 - **Contrast.** Both halves meet WCAG 2.2 AA: text on its fill at 4.5:1 or more, outlines and arrows against the canvas
   at 3:1 or more. Where a derived (or a native) colour falls short, its lightness is moved away from what it sits on
-  until it passes, keeping its hue.
+  until it passes, keeping its hue; where the range runs out first (white on a mid grey just darker than the turn,
+  #777777, stuck at 4.48:1), it is walked the other way, past what it sits on.
   `packages/document/src/theme-halves-contrast.test.ts` checks every theme in both halves, and
   `apps/live/lib/tab-looks-contrast.test.ts` every look as a light- and a dark-mode viewer sees it (box text, outline
   and arrow).
@@ -78,6 +79,19 @@ does too, so the editor never asks anyone to switch mode to suit a tab.
 - Everything that draws a tab for a person follows their half: the canvas, the Map, layer and slide thumbnails,
   exports made from the editor, the palette's tile tint, the theme and look previews in Tab Style, and the quick
   style swatches. Server-made images (thumbnails, the MCP's inline renders) have no viewer and draw what is stored.
+
+## Colours an agent writes
+
+The editor's pickers store `#rrggbb`, but agents and imports write colours the way CSS does: `#fff`, `#fff8`,
+`#0ea5e980`, `red`, `SlateGray`. Every readability rule above reads all of them as the colour they name
+(`hexToRgb` in `packages/document/src/colors.ts`, over the one parser in `packages/document/src/css-colour.ts`): the
+shorthand `#rgb` and `#rgba` (the `#` required, as in CSS), `#rrggbb` and `#rrggbbaa` (the `#` optional),
+surrounding spaces ignored, and the 148 CSS named colours (any case, trimmed). An alpha digit is set aside when an ink
+is judged, and a translucent fill is not taken for the surface under a label (`colourIsOpaque`). `transparent`,
+`rgb()` strings and anything else stay unread, and an unread colour is drawn as written with its label left alone. A
+colour that is mixed (a tint, a shade, a table header band, a lifted accent) mixes as its `#rrggbb`. So a box an agent
+fills `#fff` gets the deep label a `#ffffff` box gets, and one filled `navy` gets white. The stored value is never
+rewritten. Named colours are a map read built once, since the parse runs for every label drawn.
 
 ## The match prompt is gone
 

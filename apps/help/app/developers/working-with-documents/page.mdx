@@ -181,8 +181,9 @@ To rebuild a whole tab, send `"replace"` instead of `"operations"`, with `elemen
 <Note>
   Every tab read returns the tab's `rev`. Send it back as `"base": { "rev": 7 }` and the changeset is
   refused with `409 changeset_conflict` if an element it touches changed since you read it, so
-  nothing you didn't see gets overwritten. An element somebody has selected in the editor is left
-  alone too: the changeset is refused with `409 elements_held`, naming who holds it.
+  nothing you didn't see gets overwritten. An element somebody who can change the document has selected in the editor
+  is left alone too: the changeset is refused with `409 elements_held`, naming who holds it. A viewer's selection
+  holds nothing.
 </Note>
 
 To rename a tab, `PUT` its name: `PUT /documents/$DOC/tabs/$TAB/name` with `{ "name": "Overview" }`. The whole-tab `PUT` the editor saves with is not open to tokens; it answers `405 use_changesets`.

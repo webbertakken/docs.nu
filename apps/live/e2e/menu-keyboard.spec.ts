@@ -2,7 +2,6 @@ import { mkdirSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { apiBase } from './audit-screens';
 import {
-  dismissQuickTour,
   expect,
   expectNoPageErrors,
   guestSigFor,
@@ -135,7 +134,6 @@ test.describe('menus by keyboard', () => {
     pageErrors,
   }) => {
     await startBlankDocument(page);
-    await dismissQuickTour(page);
     await (await paletteTile(page, 'Add Square')).click();
     await page.locator('[data-canvas-a11y-root]').click({ position: { x: 520, y: 360 } });
     const square = page.getByRole('img', { name: 'Square', exact: true });
@@ -190,7 +188,6 @@ test.describe('menus by keyboard', () => {
     pageErrors,
   }) => {
     await startBlankDocument(page);
-    await dismissQuickTour(page);
 
     const tabMenu = page.getByRole('button', { name: 'Tab menu' });
     await expect(tabMenu).toHaveAttribute('aria-haspopup', 'dialog');

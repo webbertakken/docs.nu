@@ -22,10 +22,9 @@ export async function handleOauthExchange(ctx: RouteContext): Promise<Response> 
   }
   const owner = sessionAccountId;
 
-  const body = (await readOptionalBody(request)) as {
-    clientName?: string;
-    readOnly?: boolean;
-  };
+  const read = await readOptionalBody(request);
+  if (read instanceof Response) return read;
+  const body = read as { clientName?: string; readOnly?: boolean };
   const raw = typeof body.clientName === 'string' ? body.clientName.trim() : '';
   if (raw.length > MAX_NAME_LEN) return badRequest('client name too long');
   // Default name keeps the token identifiable in the user's token list even if

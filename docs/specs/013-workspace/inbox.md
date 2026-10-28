@@ -320,6 +320,8 @@ the Collaborate Panel already applies (`elementDisplayLabel`, moved
 into `packages/document` so the panel and the index cannot disagree on
 what a row is called).
 
+**Comment times.** A thread's place in the Inbox is its latest comment's time, and that time is the writer's clock. A save (an autosave or an agent's changeset) carrying a comment timed later than the server's now plus `FUTURE_SLACK_MS` (five minutes, a device clock a little ahead) stores it at now when the comment is new, and at its stored time when it is the author's own, edited (`rewriteCommentAuthors`, `apps/api/src/comments.ts`). Without the cap, one comment from a clock running fast, or a bad value, would sit on top of everyone's Inbox for good.
+
 ### 2.2 Identity across sign-up: `owner_aliases`
 
 Comment `authorId`s and self-assigned `assignee.userId`s are written
@@ -372,8 +374,8 @@ read filters that table; the rules below are what the push keeps. Two pieces mak
   `me` set (§2.2) and the read matches the index with `IN`.
 - **`plan_board_statuses`: which statuses a board shows, and which of
   them are Done.** Whether a card is open is a property of the boards,
-  not of the card: a status is Done when a board's done column, or a
-  column after it, holds it ([Plan views](../026-plan/plan-views.md) "What a plan view reads"). The
+  not of the card: a status is Done when one of a board's done columns holds it
+  ([Done columns](../026-plan/plan-board.md#done-columns)) ([Plan views](../026-plan/plan-views.md) "What a plan view reads"). The
   boards live in tab JSON, so they get the same treatment as actions:
   a per-tab projection written in the tab save's batch by
   `collabIndexStatements` (so every path in §2.1 writes it, and the copy
@@ -384,7 +386,7 @@ CREATE TABLE plan_board_statuses (
   tab_id TEXT NOT NULL, element_id TEXT NOT NULL,
   board_title TEXT NOT NULL,
   status TEXT NOT NULL,      -- a column's status; '*' for an All Cards board
-  done INTEGER NOT NULL,     -- 1 when the column is the done column or after it
+  done INTEGER NOT NULL,     -- 1 when the column counts as done (isDoneColumn)
   board_order INTEGER NOT NULL, -- the board's index among the tab's boards
   position INTEGER NOT NULL, -- the column's index on its board
   PRIMARY KEY (tab_id, status, element_id), -- the Done check seeks (tab, status)
@@ -628,8 +630,7 @@ Never an action name, comment text, document name, or any identity.
 - `collab-deep-link.test.ts`: the fragment parser (tab only, tab +
   element, unknown `open`, junk, a card's `item` with and without a
   board).
-- `plan-board-rows.test.ts`: the board projection (done column and
-  after, All Cards `'*'`, Archive skipped, junk set-ups).
+- `plan-board-rows.test.ts`: the board projection (each done column, All Cards `'*'`, Archive skipped, junk set-ups).
 - `activity-cards.test.ts` (db, against real SQLite): assigned to me
   and to an alias, someone else's card, archived, trashed, Done on any
   board, stray status still open, place preference, scoped share,

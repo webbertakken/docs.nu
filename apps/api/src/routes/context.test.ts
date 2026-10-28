@@ -22,7 +22,7 @@ const { access } = vi.hoisted(() => ({
 vi.mock('../auth/document-access', () => access);
 
 import type { RouteContext } from './context';
-import { ownsDocument, requireOwner, sharePasswordOf } from './context';
+import { ownsDocument, readOptionalBody, requireOwner, sharePasswordOf } from './context';
 
 function makeCtx(
   opts: { owner?: string | null; headers?: Record<string, string> } = {},
@@ -102,5 +102,50 @@ describe('ownsDocument', () => {
       false,
     );
     expect(await ownsDocument(makeCtx({ owner: null }), { ownerId: 'x', teamId: 't' })).toBe(false);
+  });
+});
+
+describe('readOptionalBody', () => {
+  const post = (body: BodyInit | null) =>
+    new Request('https://api.test/x', { method: 'POST', body });
+
+  // A body that broke off mid-read (a client gone mid-upload).
+  function brokenOff(): Request {
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"password":'));
+        controller.error(new Error('connection reset'));
+      },
+    });
+    return new Request('https://api.test/x', {
+      method: 'POST',
+      body: stream,
+      // @ts-expect-error -- undici needs `duplex` for a streamed body; the DOM RequestInit type does not name it.
+      duplex: 'half',
+    });
+  }
+
+  it('reads an absent or empty body as no fields', async () => {
+    expect(await readOptionalBody(post(null))).toEqual({});
+    expect(await readOptionalBody(post('  '))).toEqual({});
+  });
+
+  it('reads a JSON object, and any other JSON value as no fields', async () => {
+    expect(await readOptionalBody(post('{"role":"view"}'))).toEqual({ role: 'view' });
+    expect(await readOptionalBody(post('null'))).toEqual({});
+    expect(await readOptionalBody(post('[1]'))).toEqual({});
+  });
+
+  it('answers 400 for a body cut short of valid JSON, never no fields', async () => {
+    const answer = await readOptionalBody(post('{"password":'));
+    expect(answer).toBeInstanceOf(Response);
+    expect((answer as Response).status).toBe(400);
+  });
+
+  it('answers 400 for a body whose stream broke off, never no fields', async () => {
+    const answer = await readOptionalBody(brokenOff());
+    expect(answer).toBeInstanceOf(Response);
+    expect((answer as Response).status).toBe(400);
+    expect(await (answer as Response).json()).toMatchObject({ error: 'body_unreadable' });
   });
 });

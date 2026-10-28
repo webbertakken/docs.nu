@@ -42,8 +42,10 @@ The endpoint is **SSRF-safe** (public, self-hostable repo):
 - Accepts only `http:` / `https:`; rejects everything else.
 - Blocks non-public hosts before fetching: `localhost` / `*.local`, loopback,
   private ranges (10/8, 172.16/12, 192.168/16, 127/8, CGNAT 100.64/10), and
-  link-local / cloud-metadata (`169.254.0.0/16`, incl. `169.254.169.254`), plus
-  IPv6 ULA / link-local. Re-validates the **final** post-redirect URL.
+  link-local / cloud-metadata (`169.254.0.0/16`, incl. `169.254.169.254`), multicast
+  and reserved IPv4, plus IPv6 ULA / link-local / multicast / NAT64. An IPv6 range is matched
+  on an IPv6 address only: a domain that starts with the same letters (`fdic.gov`,
+  `fcbarcelona.com`) is public and gets its card. Re-validates the **final** post-redirect URL.
 - 8s `AbortController` timeout, ~512 KB read cap, HTML-only `Accept`, a
   descriptive `User-Agent`. Parses with **`HTMLRewriter`** (streaming — there's
   no DOMParser in Workers): `<title>`, `og:title|image|site_name|description`,

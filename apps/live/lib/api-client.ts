@@ -29,6 +29,7 @@ export type {
 // catch it to branch on `err.status` / `err.code` (the api worker's
 // snake_case error token), so it belongs in the public surface.
 export { ApiError, SessionTokenUnavailableError } from './api/core';
+export type { SharePasswordAsk } from './api/core';
 export { reportSaveFailure, setApiErrorReporter, setApiWarningReporter } from './api/error-report';
 export {
   API_BASE,

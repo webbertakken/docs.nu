@@ -25,10 +25,9 @@ export async function handleMigrate(ctx: RouteContext): Promise<Response> {
   if (request.method !== 'POST') return notFound();
   if (!sessionAccountId) return refused('no_session', missingAuth());
 
-  const body = (await readOptionalBody(request)) as {
-    guestOwnerId?: unknown;
-    guestSignature?: unknown;
-  };
+  const read = await readOptionalBody(request);
+  if (read instanceof Response) return refused('unreadable_body', read);
+  const body = read as { guestOwnerId?: unknown; guestSignature?: unknown };
   const fromOwnerId = typeof body.guestOwnerId === 'string' ? body.guestOwnerId.trim() : '';
   if (!fromOwnerId) return refused('no_guest_id', badRequest('guestOwnerId is required'));
   if (fromOwnerId === sessionAccountId) return moved(ZERO);

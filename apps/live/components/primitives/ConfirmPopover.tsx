@@ -12,7 +12,7 @@ import { usePopoverLayer } from './popover-stack';
 // Portal-rendered (so its `position: fixed` is relative to the viewport,
 // not a transformed ancestor like the tab menu) and tagged with
 // `data-confirm-popover` so a host menu's outside-click handler can
-// exclude it. Esc cancels, Enter confirms. Sits at `--z-modal` (above the
+// exclude it. Esc cancels, Enter confirms (on a focused button, Enter presses that button). Sits at `--z-modal` (above the
 // `--z-overlay` context menus that spawn it) so the "are you sure?" prompt
 // is never hidden behind the menu it was opened from.
 
@@ -113,6 +113,9 @@ export function ConfirmPopover({
       e.stopPropagation();
       onCancel();
     } else if (e.key === 'Enter') {
+      // A focused button presses itself: Enter on Cancel cancels. Taking every Enter as Confirm deleted
+      // the thing a keyboard user had just tabbed to Cancel to keep.
+      if (e.target instanceof HTMLButtonElement && ref.current?.contains(e.target)) return;
       e.preventDefault();
       onConfirm();
     }

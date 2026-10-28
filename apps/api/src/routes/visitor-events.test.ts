@@ -47,7 +47,14 @@ vi.mock('../db/timeline', () => ({ markTimelineEventsDeletedBySource: vi.fn(asyn
 const access = vi.hoisted(() => ({
   canReadDocument: vi.fn(async () => true),
   canEditDocument: vi.fn(async () => true),
-  resolveDocumentGrant: vi.fn(async () => ({ role: 'edit' as const, tabScope: null })),
+  // A grant names the link it came through: a stranger's is the code they present, a teammate's none at all.
+  resolveDocumentGrant: vi.fn(
+    async (_env: unknown, _id: unknown, owner: string | null, shareCode: string | null) => ({
+      role: 'edit' as const,
+      tabScope: null,
+      shareCode: owner === 'stranger' ? shareCode : null,
+    }),
+  ),
 }));
 vi.mock('../auth/document-access', () => access);
 
@@ -91,6 +98,18 @@ describe('GET /documents/:id/tabs/:tabId — who counts as a visitor', () => {
     expect(timeline.recordVisitorOpened).not.toHaveBeenCalled();
   });
 
+  // The grant says how they came in, not the header: a teammate following a share link is still a teammate.
+  it('records nothing for a joined teammate who presents a share code too', async () => {
+    const { ctx, settle } = ctxWith('GET', path, {
+      owner: 'bob',
+      sessionAccountId: 'bob',
+      ...SHARE,
+    });
+    expect((await handleDocumentSubresources(ctx))?.status).toBe(200);
+    await settle();
+    expect(timeline.recordVisitorOpened).not.toHaveBeenCalled();
+  });
+
   it('records the open when a share code was presented', async () => {
     const { ctx, settle } = ctxWith('GET', path, { owner: 'stranger', ...SHARE });
     expect((await handleDocumentSubresources(ctx))?.status).toBe(200);
@@ -128,6 +147,18 @@ describe('POST /documents/:id/copy — who counts as a visitor', () => {
     expect(timeline.recordVisitorCopied).not.toHaveBeenCalled();
     // Their own "Diagram Duplicated" event is unaffected — they did copy it.
     expect(timeline.recordDocumentDuplicated).toHaveBeenCalledTimes(1);
+  });
+
+  it('records no visitor copy when a joined teammate presents a share code too', async () => {
+    const { ctx, settle } = ctxWith('POST', path, {
+      owner: 'bob',
+      sessionAccountId: 'bob',
+      body: {},
+      ...SHARE,
+    });
+    await handleDocuments(ctx);
+    await settle();
+    expect(timeline.recordVisitorCopied).not.toHaveBeenCalled();
   });
 
   it('records a visitor copy when a share-code holder forks it', async () => {

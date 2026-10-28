@@ -6,6 +6,7 @@ import {
   redactCommentAuthorIds,
   redactTabDataAuthors,
   removeComment,
+  FUTURE_SLACK_MS,
   rewriteCommentAuthors,
 } from './comments';
 import type { ParticipantDTO } from './types';
@@ -388,5 +389,50 @@ describe('a comment’s token id (docs/specs/024-agents/agent-presence.md I7)', 
       (redactCommentAuthorIds(els, 'someone')[0] as ShapeElement).commentThread!.comments[0]!
         .tokenId,
     ).toBeUndefined();
+  });
+});
+
+describe('rewriteCommentAuthors: a comment time from a clock running fast', () => {
+  const now = 1_700_000_000_000;
+  const at = (els: Element[]) =>
+    ((els[0] as ShapeElement).commentThread?.comments ?? []).map((c) => c.createdAt);
+
+  // The Inbox orders threads by their latest comment's time: one far in the future would sit on top of everyone's
+  // Inbox for good.
+  it("takes a new comment's time past now plus FUTURE_SLACK_MS as now", () => {
+    const sent = { ...mkComment('c1', 'x', '#000'), createdAt: 1e15 };
+    const out = rewriteCommentAuthors(
+      [mkShape('e1', [sent])],
+      [mkShape('e1', [])],
+      writer,
+      new Map(),
+      now,
+    );
+    expect(at(out)).toEqual([now]);
+  });
+
+  it('keeps a time within the slack, as a device clock a little ahead sends it', () => {
+    const sent = { ...mkComment('c1', 'x', '#000'), createdAt: now + FUTURE_SLACK_MS };
+    const out = rewriteCommentAuthors(
+      [mkShape('e1', [sent])],
+      [mkShape('e1', [])],
+      writer,
+      new Map(),
+      now,
+    );
+    expect(at(out)).toEqual([now + FUTURE_SLACK_MS]);
+  });
+
+  it("keeps an author's own comment at its stored time when they send one in the future", () => {
+    const stored = { ...mkComment('c1', 'x', '#000', 't', writer.id), createdAt: 5 };
+    const sent = { ...stored, text: 'edited', createdAt: 1e15 };
+    const out = rewriteCommentAuthors(
+      [mkShape('e1', [sent])],
+      [mkShape('e1', [stored])],
+      writer,
+      new Map(),
+      now,
+    );
+    expect(at(out)).toEqual([5]);
   });
 });

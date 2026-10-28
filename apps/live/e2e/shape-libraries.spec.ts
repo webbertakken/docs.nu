@@ -2,14 +2,7 @@ import { deflateRawSync } from 'node:zlib';
 import type { StoredDocument, StoredTab } from './stored';
 import { join } from 'node:path';
 import type { Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  startBlankDocument,
-  test,
-  pageOwnerHeaders,
-} from './fixtures';
+import { expect, expectNoPageErrors, startBlankDocument, test, pageOwnerHeaders } from './fixtures';
 
 // Shape libraries end to end (docs/specs/013-workspace/shape-libraries.md): a synthesised draw.io
 // library imported from the Explorer becomes a named library, its shapes are placed from the
@@ -88,7 +81,6 @@ test('a draw.io library becomes a shape library, placed from My shapes', async (
   // The whole journey: two editors, three Explorer pages and an import, ~20 s alone on a CI runner.
   test.setTimeout(60_000);
   await startBlankDocument(page);
-  await dismissQuickTour(page);
 
   // Import: one library file imports straight away and is named in the report.
   await page.goto('/explorer/recent');

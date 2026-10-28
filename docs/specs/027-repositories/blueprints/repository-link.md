@@ -272,7 +272,9 @@ rewritten.
 
 - **New file.** `mirrorPathFor(document, folderPath, taken)`: `<dir>/<folder path>/<slug>.livedoc.json` with
   `slug = fileSlug(document.name, document.id)`; when that path is held by a file naming another document (or a
-  `local-new` file), `<slug>-<idSlug(id)>`, then the whole id (CLI27, CLI85).
+  `local-new` file), `<slug>-<idSlug(id)>`, then the whole id (CLI27, CLI85). An id is the server's, so every
+  part of a file name taken from one (`idSlug`, the whole id, a slug's fallback) keeps it to `[A-Za-z0-9_-]`, any
+  other character a `-` (`nameSafeId`): an id holding `/` or `..` never names another folder.
 - **Held back.** Walking those candidates in order, one held by a `conflicted` or `invalid` file is the document's
   mirror path, broken: the `new` document is not written at any path; its action is `refuse` with reason `held`
   (spec "A broken file holds its document back").
@@ -789,7 +791,8 @@ for tab "<name>"`, exit 7 (as `pull`).
 - **Never follows symbolic links** inside `dir` while scanning (`CliFiles.list` reports them as `link`), so a
   hostile repository cannot point a scan at the home directory. Nor through one when writing: before every write,
   move or removal the nearest existing directory above the path inside `dir` must resolve inside `dir`'s real path,
-  else the pass stops with `invalid_dir` and nothing is written there.
+  and a path with no existing directory between it and `dir` must have been below `dir` at all (`../elsewhere` is
+  not), else the pass stops with `invalid_dir` and nothing is written there.
 - **Remote names stay on their line.** An author's, a tab's or an element's name in a `watch`, `wait` or `sync`
   line has its control characters (line breaks, terminal escapes) printed as spaces, so it cannot forge another
   line or drive the terminal.
@@ -879,6 +882,7 @@ absent.
 | Unknown keys refused by name at every level; `[[sources]]` contents not judged                                             | `link-file.test.ts` (one case per table; did-you-mean)                                 |
 | Every rejection of the table, with its exit and copy                                                                       | `link-file.test.ts` (table-driven over the rejection table)                            |
 | `mirror.dir` stays inside the link root, symbolic links included                                                           | `link-file.test.ts`, `apps/cli/src/commands/sync.test.ts` (E18)                        |
+| Ids kept name-safe in file names; a write never leaves the mirror directory                                                | `apps/cli/src/link/mirror-paths.test.ts`, `apps/cli/src/link/mirror-tree.test.ts`      |
 | `link init` writes the file byte for byte; refuses an existing one; resolves folder and docs                               | `apps/cli/src/commands/link.test.ts`                                                   |
 | Nearest link at or above; `--all` below, skipping hidden, `node_modules`, nested links' dirs                               | `apps/cli/src/link/find-links.test.ts`                                                 |
 | Host absent is the profile's; another host refused naming the profile; no request before                                   | `apps/cli/src/commands/sync.test.ts` (fetch log empty on refusal)                      |

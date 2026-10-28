@@ -1,12 +1,5 @@
 import type { Browser, Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  guestSigFor,
-  mintSignedGuest,
-  ownerHeaders,
-  test,
-} from './fixtures';
+import { expect, guestSigFor, mintSignedGuest, ownerHeaders, test } from './fixtures';
 
 // docs/specs/008-canvas/drag-preview.md "Live movement for collaborators": while the owner drags a box,
 // a collaborator on an edit link sees it move (and the arrow on it follow) before anything is saved,
@@ -99,8 +92,6 @@ test('a collaborator sees a drag live, and where it lands', async ({ page, brows
   const peerPage = await openAs(browser, baseURL!, `/document/shared?s=${code}`, null);
   await peerPage.getByRole('button', { name: /^join$/i }).click();
   await peerPage.locator(CANVAS).waitFor();
-  await dismissQuickTour(ownerPage);
-  await dismissQuickTour(peerPage);
   await expect
     .poll(() => ownerPage.locator('[role="img"][aria-label$="(Online)"]').count())
     .toBeGreaterThanOrEqual(2);

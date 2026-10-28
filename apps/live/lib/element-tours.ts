@@ -5,10 +5,12 @@ import { canEditSequence } from './sequence-edit';
 import { tourTrackSeen, withTracksAnswered } from './tour-tracks';
 import type { UserPreferences } from './user-preferences';
 
-// Element tours (docs/specs/007-editor/element-tours.md): a tour of one complex element type, offered beside the
-// selection toolbar only for the kinds a person opted in to (the synced `elementTourOffers`, Settings › Tours ›
-// Show Me), and then once: the synced `elementTourKinds` lists the kinds answered (Play or Cancel);
-// `elementToursSeen` counts them all only for a power user (tourTrackSeen), as the Pages tour's kinds do.
+// Element tours (docs/specs/007-editor/element-tours.md): a tour of one complex element type, on the bottom bar's
+// Start Tour button while one is selected, but only for the kinds a person opted in to (the synced
+// `elementTourOffers`, Settings › Tours › Show Me) and has not switched off since: the synced `elementTourKinds` lists
+// the kinds answered (a switch turned off). Taking a tour answers nothing, so it stays on the button to be taken
+// again. `elementToursSeen` counts them all as answered only for a power user (tourTrackSeen), as the Pages tour's
+// kinds do.
 
 export const ELEMENT_TOUR_KINDS = [
   'sankey',

@@ -3,7 +3,7 @@ import { sqliteD1 } from '../test-sqlite-d1';
 import { handleAuth } from '../routes/auth';
 import { handlePreviewOutbox } from '../routes/preview-outbox';
 import type { Env } from '../types';
-import { createIdentity, identityOptions } from './identity';
+import { createIdentity, identityOptions, UNUSED_CODE_PATHS } from './identity';
 import { getAccountSession, resetSessionKeyCache } from './session-token';
 
 const ORIGIN = 'https://docs.test';
@@ -205,6 +205,59 @@ describe('identity', () => {
       env,
     );
     expect(res.status).toBe(400);
+  });
+
+  it('checks a code only by signing in with it, so guesses can\u2019t race the attempt count', async () => {
+    const { env } = sqliteD1(SIGN_IN_ENV);
+    const email = 'ada@example.com';
+    await handleAuth(
+      post('/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }),
+      env,
+    );
+    const otp = await codeFor(env, email);
+    const wrong = otp === '000000' ? '111111' : '000000';
+    const guesses = await Promise.all(
+      Array.from({ length: 12 }, () =>
+        handleAuth(
+          post('/api/auth/email-otp/check-verification-otp', {
+            email,
+            type: 'sign-in',
+            otp: wrong,
+          }),
+          env,
+        ),
+      ),
+    );
+    expect(guesses.map((r) => r.status)).toEqual(Array(12).fill(404));
+    const check = await handleAuth(
+      post('/api/auth/email-otp/check-verification-otp', { email, type: 'sign-in', otp }),
+      env,
+    );
+    expect(check.status).toBe(404);
+    const signedIn = await handleAuth(post('/api/auth/sign-in/email-otp', { email, otp }), env);
+    expect(signedIn.status).toBe(200);
+  });
+
+  it('turns off every code route but sending one and signing in with it', async () => {
+    const { env } = sqliteD1(SIGN_IN_ENV);
+    for (const path of UNUSED_CODE_PATHS) {
+      const res = await handleAuth(
+        post(`/api/auth${path}`, { email: 'bea@example.com', otp: '123456', type: 'sign-in' }),
+        env,
+      );
+      expect(res.status, path).toBe(404);
+    }
+  });
+
+  it('joins a Google sign-in to an account only when Google verified the address', () => {
+    const options = identityOptions({
+      ...SIGN_IN_ENV,
+      GOOGLE_AUTH_CLIENT_ID: 'id',
+      GOOGLE_AUTH_CLIENT_SECRET: 'secret',
+    } as Env);
+    // A trusted provider is linked on an address it never verified; Google is never one.
+    expect(options.account?.accountLinking?.trustedProviders ?? []).toEqual([]);
+    expect(options.account?.accountLinking?.enabled).toBe(true);
   });
 
   it('answers 502 EMAIL_SEND_FAILED when the code cannot be sent', async () => {

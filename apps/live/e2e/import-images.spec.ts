@@ -1,14 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Page } from '@playwright/test';
-import {
-  test,
-  expect,
-  dismissQuickTour,
-  expectNoPageErrors,
-  startBlankDocument,
-  pageOwnerHeaders,
-} from './fixtures';
+import { test, expect, expectNoPageErrors, startBlankDocument, pageOwnerHeaders } from './fixtures';
 
 // Excalidraw import brings its images through the import image pipeline
 // (docs/specs/020-import-export/import-image-pipeline.md): resized in the browser, stored in the
@@ -68,7 +61,6 @@ test('an Excalidraw scene brings its images into the gallery and reports them', 
   pageErrors,
 }) => {
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   await importExcalidrawFile(page, 'board.excalidraw', boardWithImages());
 
   const report = page.getByTestId('import-image-report');
@@ -94,7 +86,6 @@ test('a full gallery leaves placeholders and says so, never failing the import',
   pageErrors,
 }) => {
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   await page.route('**/api/images', (route) =>
     route.request().method() === 'POST'
       ? route.fulfill({
@@ -125,7 +116,6 @@ test('a PNG exported from Excalidraw with the scene embedded imports its content
   pageErrors,
 }) => {
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   await importExcalidrawFile(
     page,
     'board.excalidraw.png',
@@ -162,7 +152,6 @@ test('without canvas WebP, images are still stored as WebP via the WASM encoder'
     if (/webp_enc(_simd)?\.[^/]*wasm$/.test(new URL(r.url()).pathname)) wasmRequests.push(r.url());
   });
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   // Nothing is fetched until an image needs encoding.
   expect(wasmRequests).toEqual([]);
   await importExcalidrawFile(page, 'board.excalidraw', boardWithImages());

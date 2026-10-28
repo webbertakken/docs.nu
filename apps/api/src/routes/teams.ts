@@ -13,6 +13,7 @@
 // deletion) additionally requires the interactive session: a leaked
 // token must not be able to manage membership.
 
+import { isKeyId } from '@livedoc/api-schema';
 import {
   acceptTeamMember,
   addTeamMember,
@@ -82,8 +83,6 @@ import type { RouteContext } from './context';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const TEAM_NAME_MAX = 80;
-// A team id is client-minted (a UUID); anything far past one is not an id.
-const TEAM_ID_MAX = 64;
 const ORGANISATION_MAX = 120;
 
 function normaliseEmail(raw: string): string {
@@ -168,7 +167,8 @@ export async function handleTeams(ctx: RouteContext): Promise<Response> {
       } | null;
       const name = typeof body?.name === 'string' ? body.name.trim() : '';
       if (typeof body?.id !== 'string' || !body.id || !name) return badRequest('missing id/name');
-      if (body.id.length > TEAM_ID_MAX) return badRequest('invalid id');
+      // The id keys the team in paths and scopes (docs/specs/015-api/api.md "Ids").
+      if (!isKeyId(body.id)) return badRequest('invalid id');
       if (name.length > TEAM_NAME_MAX) return badRequest('name too long');
       const rawOrganisation = body.organisation ?? null;
       if (rawOrganisation !== null && typeof rawOrganisation !== 'string')

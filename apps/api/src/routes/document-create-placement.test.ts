@@ -180,4 +180,15 @@ describe('POST /documents placement', () => {
     expect(stored()).toEqual({ owner_id: 'user_alice', folder_id: 't1-folder', team_id: 't1' });
     expect(logs).toContain('placement: skipped reason=existing');
   });
+
+  // docs/specs/013-workspace/team-shared-documents.md: a team document stops answering to its maker once they leave.
+  it('refuses a re-commit of a team document by a maker who has left the team', async () => {
+    await create(asUser('user_alice'), { teamId: 't1', folderId: 't1-folder' });
+    db.sql
+      .prepare(`DELETE FROM team_members WHERE team_id = 't1' AND user_id = 'user_alice'`)
+      .run();
+    const res = await create(asUser('user_alice'), {});
+    expect(res.status).toBe(403);
+    expect(stored()).toEqual({ owner_id: 'user_alice', folder_id: 't1-folder', team_id: 't1' });
+  });
 });

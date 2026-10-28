@@ -14,6 +14,7 @@ import {
   moveFolder,
   renameFolder,
 } from '../db';
+import { isKeyId } from '@livedoc/api-schema';
 import type { FolderDTO } from '../types';
 import { badRequest, conflict, forbidden, json, noContent, notFound } from '../responses';
 import { requireOwner, type RouteContext, readBody } from './context';
@@ -58,6 +59,8 @@ export async function handleFolders(ctx: RouteContext): Promise<Response> {
       const body = read;
       const newId = body.id;
       if (typeof newId !== 'string' || !newId) return badRequest('missing id/name');
+      // The id keys the folder in paths and scopes (docs/specs/015-api/api.md "Ids").
+      if (!isKeyId(newId)) return badRequest('invalid id');
       const name = readFolderName(body.name);
       if (name === undefined) return badRequest('missing id/name');
       if (name instanceof Response) return name;

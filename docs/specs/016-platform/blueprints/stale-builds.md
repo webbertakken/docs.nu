@@ -38,7 +38,7 @@ Derived from [Stale builds](../stale-builds.md).
 | `apps/router/src/cache-policy.ts`                       | The caching rules: `cacheRule`, `applyCachePolicy`, `isBuildAsset`                                                                                        |
 | `apps/router/src/index.ts`                              | Applies the caching rules to every site's response (the api's excepted)                                                                                   |
 | `apps/live/lib/stale-html-guard.ts`                     | `STALE_HTML_GUARD_SCRIPT` (static source) and `STALE_HTML_GUARD_ATTRIBUTES` (its settings as data): the pre-boot guard, first script in the layout's head |
-| `apps/live/lib/reload-guard.ts`                         | The one reload guard: `claimReloadIn`, `claimReload`, `RELOAD_GUARD_KEY`, `APP_RECOVERY_FLAG`                                                             |
+| `apps/live/lib/reload-guard.ts`                         | The one reload guard: `claimReloadIn`, `claimReload`, `releaseReload`, `RELOAD_GUARD_KEY`, `APP_RECOVERY_FLAG`                                            |
 | `apps/live/lib/api/base.ts`                             | `API_BASE`, browser-free, for the guard                                                                                                                   |
 | `scripts/e2e-stack.mjs`                                 | Production's caching, the router's rules, and the deploy simulation                                                                                       |
 
@@ -97,6 +97,8 @@ windowMs)`, self-contained so the pre-boot guard embeds its source (`claimReload
   `RELOAD_GUARD_KEY` (`livedoc:stale-chunk-reloads`) of page (`url` without its hash) to time;
   true, and recorded, when the page has no entry inside `RELOAD_GUARD_WINDOW_MS`; entries older than
   the window are pruned on write; junk restarts the map; a read or write that throws refuses.
+  `releaseReload(url, storage, at)` gives back the claim made at `at` when the chunk recovery ends
+  `unsaved` (no reload happened); a newer claim for the page, junk or unreadable storage is left alone.
 - **Hand-over:** `installStaleBuildNavigation` sets `window[APP_RECOVERY_FLAG]`
   (`__livedocChunkRecovery`), removed on cleanup; the pre-boot guard's `error` listener
   returns early while it is set.
@@ -200,6 +202,7 @@ The build id grants nothing; a forged value can only make navigations full page 
 | A stale build in the browser (Playwright)                                         | `apps/live/e2e/stale-builds.spec.ts`                                                                                           |
 | Caching rules: pages, build assets, missing assets, the api untouched             | `apps/router/src/cache-policy.test.ts`, `apps/router/src/index.test.ts`                                                        |
 | Pre-boot guard: failed assets, look-back at DOMContentLoaded, bfcache, loop guard | `apps/live/lib/stale-html-guard.test.ts`                                                                                       |
+| A recovery that never reloads gives its claim back                                | `apps/live/lib/stale-chunks.test.ts`, `apps/live/lib/reload-guard.test.ts`                                                     |
 | One reload guard shared by both paths; the guard stands down for the running app  | `apps/live/lib/reload-guard.test.ts`, `apps/live/lib/stale-html-guard.test.ts`, `apps/live/lib/stale-build-navigation.test.ts` |
 | Back after a deploy, real browser cache (Playwright)                              | `apps/live/e2e/stale-html.spec.ts`                                                                                             |
 

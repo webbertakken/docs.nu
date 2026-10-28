@@ -327,6 +327,17 @@ describe('layer opacity / clear / hide others', () => {
     expect(clearLayerElements(out, 'top')).toBe(out);
   });
 
+  it('clearLayerElements takes an arrow hung off a cascaded connector too', () => {
+    // docs/specs/008-canvas/arrow-to-arrow.md: the cascade carries on past the connector a deleted box takes.
+    const pinned = arrow('ar', { from: { kind: 'pinned', elementId: 'doomed', anchor: 'e' } });
+    const hung = arrow('hung', { to: { kind: 'on-arrow', arrowId: 'ar', t: 0.5 } });
+    const t = tab(
+      [box('doomed', { layerId: 'top' }), box('safe'), pinned, hung],
+      [L(DEFAULT_LAYER_ID), L('top')],
+    );
+    expect(ids(clearLayerElements(t, 'top').elements)).toEqual(['safe']);
+  });
+
   it('hideOtherLayers leaves only the target visible', () => {
     const t = tab([], [L('a'), L('b', { visible: false }), L('c')]);
     const out = hideOtherLayers(t, 'b');

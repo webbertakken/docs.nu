@@ -3,14 +3,7 @@ import type { StoredDocument, StoredTab } from './stored';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  startBlankDocument,
-  test,
-  pageOwnerHeaders,
-} from './fixtures';
+import { expect, expectNoPageErrors, startBlankDocument, test, pageOwnerHeaders } from './fixtures';
 
 // draw.io import end to end (docs/specs/020-import-export/drawio-import.md): pick a
 // file from the fixture corpus through the real Import dialog, and check the
@@ -81,7 +74,6 @@ test('a multi-page draw.io file becomes a tab per page, with a summary', async (
   pageErrors,
 }) => {
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   await importFile(page, 'multi-page.drawio');
 
   const summary = page.getByTestId('import-image-report');
@@ -131,7 +123,6 @@ for (const file of [
 ]) {
   test(`imports ${file}`, async ({ page, pageErrors }) => {
     await startBlankDocument(page);
-    await dismissQuickTour(page);
     await importFile(page, file);
     const summary = page.getByTestId('import-image-report');
     // A clean import closes the dialog; one that changed anything summarises.
@@ -179,7 +170,6 @@ test('a draw.io file keeps its routes: shared ends, curves, ends on arrows', asy
   pageErrors,
 }) => {
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   await importFile(page, 'routes.drawio');
   // A clean import closes the dialog; one that changed anything summarises.
   const summary = page.getByTestId('import-image-report');
@@ -283,7 +273,6 @@ test.describe('importing draw.io files from the Explorer', () => {
 
   test('each diagram becomes its own document, after the list', async ({ page, pageErrors }) => {
     await startBlankDocument(page);
-    await dismissQuickTour(page);
     await page.goto('/explorer/recent');
     await page
       .getByRole('toolbar', { name: 'Import from' })

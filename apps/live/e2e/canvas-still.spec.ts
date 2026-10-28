@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { dismissQuickTour, expect, expectNoPageErrors, seedTab, test } from './fixtures';
+import { expect, expectNoPageErrors, seedTab, test } from './fixtures';
 
 // docs/specs/008-canvas/canvas-performance.md "A still canvas does nothing": with a board open and a
 // selection showing its toolbar (and, on a whiteboard, the Quick Style panel), a still second asks
@@ -41,7 +41,6 @@ async function openStill(page: Page, path: string) {
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
   await page.goto(path);
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
   await seedTab(page, BOARD);
   await page.keyboard.press('v');
   await page.locator('[data-element-id="sq-9"]').first().click();

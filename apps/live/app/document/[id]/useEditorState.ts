@@ -183,7 +183,12 @@ import { useCanvasPinchZoom } from '@/hooks/canvas/useCanvasPinchZoom';
 import { useCapabilities } from '@/hooks/persistence/useCapabilities';
 import { participantKey, type Participant } from '@/lib/identity';
 import { markNameConfirmed } from '@/lib/local-identity';
-import { apiNotifyActionAssigned, apiSaveDocumentMeta, apiSaveSelf } from '@/lib/api-client';
+import {
+  apiNotifyActionAssigned,
+  apiSaveDocumentMeta,
+  apiSaveSelf,
+  ROOM_FULL_NOTICE,
+} from '@/lib/api-client';
 import {
   actionRowsFromElements,
   commentRowsFromElements,
@@ -662,6 +667,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     unresolveThread,
   } = useEditorComments({
     applyElementDelta,
+    activeTabId: activeId,
     selfParticipant,
     // Bound below, once the teams the mention list comes from have loaded.
     onMentioned: (text, mentions) => mentionNotifyRef.current(text, mentions),
@@ -1278,6 +1284,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     // A workbench session that ended stops the room (blueprint "The workbench page" step 6).
     enabled: !workbench?.ended,
     onWorkbenchEnded: workbench ? () => workbench.end('revoked') : undefined,
+    onRoomFull: () => toast.warning(ROOM_FULL_NOTICE),
     documentTeamId,
     selfParticipant,
     sessionShareCode,
@@ -3716,6 +3723,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     editingId,
     setEditingId,
     activeTab,
+    layerLockedIds,
     commit,
     setSelectedId,
     setMultiSelectedIds,

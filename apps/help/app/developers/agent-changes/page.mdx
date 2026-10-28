@@ -34,7 +34,7 @@ The note reads _name_ changed _n_ elements, followed by the summary the agent ga
 
 The note stays until you close it. Changes from the same token within ten seconds of each other share one note, with the counts added up and the latest summary, and **Undo** on it reverts each of them, newest first. A newer burst from the same token replaces the note.
 
-Your own Undo shortcut (`Ctrl+Z` or `⌘Z`) never takes back an agent's change: it only ever undoes your own edits. Anything you change while the agent works is kept, and an element you have selected is off limits to it: the changeset is refused and the agent is told who holds it.
+Your own Undo shortcut (`Ctrl+Z` or `⌘Z`) never takes back an agent's change: it only ever undoes your own edits. Anything you change while the agent works is kept, and an element you have selected is off limits to it: the changeset is refused and the agent is told who holds it. Only someone who can change the document holds what they select; a viewer's selection never stops an agent.
 
 The note is an information message, so switching off **In-Editor Notifications** in [Settings](/help/user-interface/settings/) hides it; the outline still shows. Undo needs edit access to the tab, so Viewers and Participants see changes arrive but can't revert them.
 

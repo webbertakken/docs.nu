@@ -184,7 +184,7 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
     date field, saved as one step when the field is left or Enter pressed (the count follows as it is typed); a new
     one is two weeks out. No date: "No date set."
   - **Links**: a heading ("Links") over labelled links, each to a site (opened in a new browser tab, `noopener`; only
-    http, https or mailto, "https://" added to a bare host, anything else refused as "Enter a web address, an email
+    http, https or mailto, "https://" added to a bare host (a host with a port, `example.com:8080`, among them), anything else refused as "Enter a web address, an email
     (mailto:) or a tab’s name") or to one of this document's tabs (opened here). Each link is a row: its kind's icon in
     a small well (a globe for a site, an envelope for an email, the tab's own tab-bar icon for a tab), its label and,
     muted under it, the site's host and path, the email's address ("Email" when that is the label), or "Tab in this
@@ -393,7 +393,7 @@ Metrics**, offered only while the document has a Form tab. Six figures (`form-me
 | **New Responses**  | How many are new to the reader ("new to you since you last looked")                                                                                              |
 | **Form Status**    | A pill: **Accepting** (green), **Closed** (amber; also past its Close On or at its Response Limit), **Not Published**, **Suspended** (red), or **Draft** offline |
 | **Response Limit** | "42 / 100" with a bar toward the limit (amber once reached) and how many to go; **No limit** without one                                                         |
-| **Closes**         | Days until it closes ("3 days", **Today**), its date beneath; **Closed** once past; **No date** without one                                                      |
+| **Closes**         | Calendar days until it closes ("3 days", "1 day" for tomorrow at any hour, **Today**), its date beneath; **Closed** once past; **No date** without one           |
 | **Form Link**      | The link to copy (**Copy**, an Editor's) once published; "Not published yet." before                                                                             |
 
 Placed, it reads the document's first Form tab; an Editor changes the form from the select at the card's foot while
@@ -511,8 +511,9 @@ hover while the step is up; only when a slot holds something), **Dashboard Setti
 closing card, **That Is a Dashboard**, with a link to the Dashboards article. Which steps it has is fixed when it
 starts, so filling the empty slot mid-tour keeps the count. Only an Editor has the cog, so only an Editor sees Show
 Me; a locked tab has no cog, so none. Telemetry: `UI` · `Started` · `DashboardTour`, and `UI` · `Ended` ·
-`DashboardTourCompleted` or `DashboardTourSkipped`. The same steps, behind a welcome card, are offered once as the Dashboards tour the first time an Editor has a
-dashboard open ([Plan tour](plan-tour.md) "The Dashboards tour").
+`DashboardTourCompleted` or `DashboardTourSkipped`. The same steps are the Dashboards tour, started from the bottom bar's **Start Dashboards Tour** button while an
+Editor has a dashboard open ([Plan tour](plan-tour.md) "The Dashboards tour"); its cards read Show Me either way, and
+only a run from the footer marks the `dashboards` track taken.
 
 ## A row that fills the page
 

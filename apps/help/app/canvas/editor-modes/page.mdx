@@ -16,7 +16,7 @@ export const metadata = helpMetadata({
   categorySlug="canvas"
 >
 
-An **editor mode** is how you work on a tab right now. There are five: **Diagram**, **Draw**, **Workshop**, **Pages** and **Plan**. A mode decides which tools are in front of you. You choose it when a tab is new and empty; once something is on the tab, the tab keeps its mode. To work on the same ideas another way, add a tab in the other mode.
+An **editor mode** is how you work on a tab right now. There are five: **Diagram**, **Draw**, **Workshop**, **Pages** and **Plan**. A mode decides which tools are in front of you. You choose it from the switch beside the menu button, on any tab, or from the top of a new tab's start, and everything on the tab stays exactly where it is.
 
 Three words describe how documents and tabs differ, and they mean different things:
 
@@ -36,39 +36,34 @@ Every mode is on for everyone, with nothing to turn on in Settings.
 
 ## Choosing a Mode
 
-You choose a tab's mode while the tab is empty, on its start (**Start Diagramming**, **Start Drawing**, **Start a Workshop**, **Start Making Pages** or **Start Planning**). The mode switch sits at the top of the start's list and shows the mode you are in. Press it to open the mode menu: the five modes down the left, the current one ticked, and beside them a preview of the mode under your pointer, with a picture, a line on what it is for and its main tools. Choosing a mode in the list (a click, or **Enter** on the highlighted one) switches the tab and its start at once; **Escape** or a click elsewhere closes the menu without switching. On a narrow screen the preview is left out and each mode shows its line under its name.
+The mode switch sits right of the menu button at the top left, on every tab, and shows the mode you are in (on a phone, its icon alone). A new, empty tab also shows it at the top of its start's list (**Start Diagramming**, **Start Drawing**, **Start a Workshop**, **Start Making Pages** or **Start Planning**); the two always agree, so a change in either shows in both. Press it to open the mode menu: the five modes down the left, the current one ticked, and beside them a preview of the mode under your pointer, with a picture, a line on what it is for and its main tools. Choosing a mode in the list (a click, or **Enter** on the highlighted one) switches the tab and its start at once; **Escape** or a click elsewhere closes the menu without switching. On a narrow screen the preview is left out and each mode shows its line under its name.
 
 <Figure caption="The mode switch at the top of Start Diagramming, open: the five modes, Diagram ticked, and a preview of Draw with ⇧D and its tools.">
   <ModeSwitchScene />
 </Figure>
 
-**Shift+D** moves an empty tab to the next mode: Diagram, then Draw, Workshop, Pages, Plan and back to Diagram. The preview shows **⇧D** on the mode it leads to, and screen readers announce the mode you land in ("Draw mode"). Shift+D is listed under **Settings** › **Keyboard**, and it stops working with every other shortcut when you [turn shortcuts off](/help/tips-and-tricks/keyboard-shortcuts/#turning-shortcuts-off).
+**Shift+D** moves the tab to the next mode: on an empty tab Diagram, then Draw, Workshop, Pages, Plan and back to Diagram; on a tab with something on it, the same round without Plan, and on a Plan tab it does nothing. The preview shows **⇧D** on the mode it leads to, and screen readers announce the mode you land in ("Draw mode"). Shift+D is listed under **Settings** › **Keyboard**, and it stops working with every other shortcut when you [turn shortcuts off](/help/tips-and-tricks/keyboard-shortcuts/#turning-shortcuts-off).
 
-**Once a tab has something on it, it keeps its mode.** There is no mode switch beside the menu button and no mode in the tab menu, and Shift+D does nothing. To carry on in another mode:
-
-- **Add a tab in that mode.** A new tab opens in the mode of the tab you were on, on its start, where you can pick another mode before you begin.
-- **Show it in a [Tab Window](/help/canvas/pages-mode/tab-windows/)** on another tab, for example on a slide in Pages, which follows every change live.
-
-If you empty a tab (with **Clear** in its tab menu), its start comes back and you can choose again.
+**A tab with something on it changes mode beside the menu button.** The palette and the tab's icon follow at once, and every element stays where it is. Plan is the exception: a tab with content never moves into or out of Plan, so choosing it (or, on a Plan tab, another mode) offers a new tab in that mode instead.
 
 ## One Mode for Everyone
 
 - **The mode belongs to the tab.** Everyone on a tab works in the same mode at once, so what you see always matches what your collaborators see.
-- **Switching switches everyone.** When you choose a new mode for an empty tab, everyone on it follows straight away, and a message tells them who switched ("Ada switched this tab to Draw."). Anything they were typing is kept.
+- **Switching switches everyone.** When you choose a new mode for a tab, everyone on it follows straight away, and a message tells them who switched ("Ada switched this tab to Draw."). Anything they were typing is kept.
 - **Undo switches back.** Switching is one step in your [undo history](/help/canvas/undo/): **Undo** puts the tab back in the mode it was in, exactly as it was, for everyone, and **Redo** switches again.
-- **The tab pill shows the tab's mode.** Each tab in the tab bar starts with the icon of its mode, the same icon the start's switch uses.
+- **The tab pill shows the tab's mode.** Each tab in the tab bar starts with the icon of its mode, the same icon the mode switch uses.
 - **A tab opens in its mode**, for everyone, Diagram unless something set it otherwise.
 - **New documents open in the mode you choose** in the New Document wizard, and **new tabs open in the mode of the tab you were on**, on that mode's own start (a Pages tab's **+** makes a Pages tab on **Start Making Pages**, a Plan tab's makes a Plan tab on **Start Planning**), unless the template you pick opens somewhere else: **Blank Whiteboard** opens in Draw, **Blank Illustration** in Pages, **Blank Plan** in Plan, and **Blank Session** and the session templates (the retrospectives, Town Hall Q&A, Lean Coffee, Crazy Eights and Meeting Agenda, plus the boards with a dot vote: Affinity map, Prioritization matrix and Risk matrix) in Workshop.
 - In the Explorer, the **Opens in** filter finds documents by the mode they were created to open in. See [Filters](/help/explorer/filters/).
 
 ## On a Phone
 
-A phone chooses a mode the same way, from the switch at the top of an empty tab's start. On a phone every mode starts on the [Hand](/help/selection-modes/hand/) tool, so a drag moves the canvas.
+A phone chooses a mode the same way, from the switch beside the menu button (its icon alone) or at the top of an empty tab's start. On a phone every mode starts on the [Hand](/help/selection-modes/hand/) tool, so a drag moves the canvas.
 
 ## Who Can Switch
 
-- **Editors** of a general tab get the start's switch and Shift+D while the tab is empty.
-- **People who can only view** a tab follow its mode, with no switch, and Shift+D does nothing.
+- **Editors** of a general tab get the mode switch and Shift+D. **Participants** follow the tab's mode, with no switch.
+- **People who can only view** a tab follow its mode, with no switch, and Shift+D does nothing for them.
 - On a [locked tab](/help/tabs/locking-tabs/) nobody can switch: the tab stays in its mode until it is unlocked.
 - **Event Storming boards** have no modes: they keep their own tools and notation, and show no switch.
 

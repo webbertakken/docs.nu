@@ -7,6 +7,9 @@ type SharePasswordGateProps = {
   // True when the visitor already submitted a wrong password (vs the
   // first prompt), so we show an error line.
   invalid: boolean;
+  // True after too many tries (429 password_rate_limited): the try was not checked, so the visitor is asked to wait
+  // instead of told it was wrong.
+  rateLimited: boolean;
   // The document owner's display name, for context ("X's document"), or
   // null when we don't know it yet.
   ownerName: string | null;
@@ -18,7 +21,12 @@ type SharePasswordGateProps = {
 // Submitting hands the password up; the editor stashes it on the
 // session and re-runs the bootstrap, which either hydrates or re-shows
 // this gate with `invalid` set.
-export function SharePasswordGate({ invalid, ownerName, onSubmit }: SharePasswordGateProps) {
+export function SharePasswordGate({
+  invalid,
+  rateLimited,
+  ownerName,
+  onSubmit,
+}: SharePasswordGateProps) {
   const [value, setValue] = useState('');
 
   const submit = () => {
@@ -58,8 +66,12 @@ export function SharePasswordGate({ invalid, ownerName, onSubmit }: SharePasswor
           aria-label="Document password"
           aria-invalid={invalid}
         />
-        {invalid ? (
-          <p className="-mt-2 text-xs font-medium text-rose-600">
+        {rateLimited ? (
+          <p role="alert" className="-mt-2 text-xs font-medium text-rose-600 dark:text-rose-400">
+            Too many tries. Wait a minute, then try again.
+          </p>
+        ) : invalid ? (
+          <p className="-mt-2 text-xs font-medium text-rose-600 dark:text-rose-400">
             That password didn&apos;t match. Try again.
           </p>
         ) : null}

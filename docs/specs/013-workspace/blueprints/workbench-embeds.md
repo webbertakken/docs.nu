@@ -653,7 +653,7 @@ string | null }`. `workspaceFramePath(place)`:
 | any other view  | `/embed/workbench` + the view's `explorerPathFor` path and query |
 | a document      | `/embed/workbench/document/<id>[?s=<code>][&tab=<tabId>]`        |
 
-`workspacePlaceOf(pathname, search)` is its inverse; an address it cannot read is `home`. One static page,
+`workspacePlaceOf(pathname, search)` is its inverse; an address it cannot read is `home`, a document or folder segment with a malformed percent-escape (`%`, `%E0%A4%A`, `decodePathSegment`) included, never a URIError that takes the frame down. One static page,
 `app/embed/workbench/explorer/page.tsx`, backs every frame path: the live worker (`isWorkspaceFramePath`) and the e2e
 stack serve `/embed/workbench/explorer/**` and `/embed/workbench/document/**` from it, and the App Router reads the
 real address. Every frame path is under `/embed`, so frameable.
