@@ -908,7 +908,7 @@ summary) in `packages/ui/src/timeline/history.ts`.
   the fixed header, summary and chips; edge to edge and full height on a
   phone. Light and dark. Hover transitions are `duration-micro`; a run dealt
   out fades in, not under reduced motion. Escape closes and focus returns to
-  where it was.
+  the row the menu was opened from.
 - **Speed.** The days, runs, chips and summary are worked out once per loaded
   page and filter (memoised); 1,000 loaded events group well inside a frame
   (a test keeps a 16 ms budget).
