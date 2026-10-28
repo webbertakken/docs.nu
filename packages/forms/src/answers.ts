@@ -4,6 +4,7 @@ import { isEmailAddress } from '@livedoc/items';
 import { OTHER_MAX, PARAGRAPH_MAX, SHORT_ANSWER_MAX } from './limits';
 import { shownQuestions } from './branching';
 import type { FormDefinition, FormQuestion } from './model';
+import { withUrlScheme } from './link-scheme';
 
 export type AnswerValue = string | number | boolean | string[];
 
@@ -44,7 +45,7 @@ export function isDateAnswer(v: string): boolean {
 // A link as a Link field keeps it: an https:// address. A bare "example.com" is taken as https.
 export function normaliseLink(v: string): string | null {
   const raw = v.trim();
-  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`;
+  const withScheme = withUrlScheme(raw);
   if (!/^https:\/\//i.test(withScheme)) return null;
   try {
     const u = new URL(withScheme);

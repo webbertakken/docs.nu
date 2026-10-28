@@ -184,7 +184,7 @@ in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked 
     date field, saved as one step when the field is left or Enter pressed (the count follows as it is typed); a new
     one is two weeks out. No date: "No date set."
   - **Links**: a heading ("Links") over labelled links, each to a site (opened in a new browser tab, `noopener`; only
-    http, https or mailto, "https://" added to a bare host, anything else refused as "Enter a web address, an email
+    http, https or mailto, "https://" added to a bare host (a host with a port, `example.com:8080`, among them), anything else refused as "Enter a web address, an email
     (mailto:) or a tab’s name") or to one of this document's tabs (opened here). Each link is a row: its kind's icon in
     a small well (a globe for a site, an envelope for an email, the tab's own tab-bar icon for a tab), its label and,
     muted under it, the site's host and path, the email's address ("Email" when that is the label), or "Tab in this

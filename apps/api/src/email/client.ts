@@ -73,7 +73,7 @@ export async function sendEmailNow(env: Env, msg: EmailMessage): Promise<SendOut
   // its own failure.
   if (!outcome.ok) {
     console.error(
-      `[email] send failed provider=${provider} status=${outcome.status} kind=${msg.kind} to=${redact(msg.to)}`,
+      `[email] send failed provider=${provider} status=${outcome.status} kind=${msg.kind} to=${redactAddress(msg.to)}`,
     );
     await reportServerEvent(env, 'Error', 'Api', sendFailureType(outcome.status));
     return outcome;
@@ -91,9 +91,10 @@ function sendFailureType(status: string): string {
 }
 
 // Log addresses partially so `wrangler tail` stays useful without dumping full
-// emails into the log stream.
-function redact(email: string): string {
+// emails into the log stream. A short local part keeps fewer characters, so at
+// least one is always hidden (`j***@`, `***@`).
+export function redactAddress(email: string): string {
   const at = email.indexOf('@');
   if (at < 1) return '***';
-  return `${email.slice(0, 2)}***${email.slice(at)}`;
+  return `${email.slice(0, Math.min(2, at - 1))}***${email.slice(at)}`;
 }
