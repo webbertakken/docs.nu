@@ -14,5 +14,6 @@ Follow the references below only as needed; never upfront.
 - ./toasts.md - when implementing or changing the toast stack, its queue, timer, floor, card or motion
 - ./brand-motion.md - when implementing or changing the logo's assembly, fan, press or the homepage's every-kind cycle
 - ./brand-media.md - when adding, regenerating or serving a brand asset: every icon, logo, share card and email mark, its size, path and generator
+- ./toolbar-group.md - when implementing or changing ToolbarGroup, ToolbarPart, ToolbarDivider or the toolbar button classes
 - ./DEFAULTS.md - when an interface-design blueprint applies a default the spec leaves open
 - ./COMPLETENESS.md - when checking which completeness categories an interface-design blueprint covers
