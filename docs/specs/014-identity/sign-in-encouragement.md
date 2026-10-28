@@ -43,22 +43,22 @@ top instead of landing on its words, as a "Document deleted · Undo" once did.
 **Editor** (`app/document/[id]/EditorView.tsx`): shown only **after a
 ~5 minute delay** into the session (`SIGNIN_BANNER_DELAY_MS`), so it
 never greets someone the instant they open a document. It **stands on the
-bottom chrome**, 8px above the tab bar, the bottom-right cluster (Undo / Redo, the
-Session strip's Timer, Vote and Poll, Layers, Zoom) and the whiteboard dock, measured as
+bottom chrome**, 8px above the editor's bottom line: the tools group (Undo / Redo, the
+Session strip's Timer, Vote and Poll, Layers, Zoom), the document group and the whiteboard dock, measured as
 the toast stack measures its floor (`useChromeFloor`, `BOTTOM_CHROME_SELECTOR`), so it never
-covers a control. It once sat over that cluster, and a guest Editor running a session had to
+covers a control. It once sat over those controls, and a guest Editor running a session had to
 dismiss it to reach the timer or the vote. It is drawn over the canvas, and is additionally hidden:
 
 - in **embed** mode (the read-only `/embed` iframe, [Read-only embeds (`/embed`)](../013-workspace/embeds.md)), and
 - in **zen** mode ([Zen mode](../007-editor/zen-mode.md)), but entering/leaving zen does **not**
   restart the delay; the timer runs on the stable gate (sign-in offered /
   signed in / embed / dismissed) and zen only hides the card at render, and
-- while a **panel opened from the chrome** is open (Layers and the rest of the bottom-right cluster, the
+- while a **panel opened from the chrome** is open (Layers and the rest of the tools group, the
   Explorer panel): they reach up into the banner's band and it lay over their lower rows, so it steps aside until the
   panel closes (a `[data-dock-button]` control with `aria-expanded="true"`).
 
 Until 28 October 2026 it also stepped aside while a tour's offer or last card was up, since those were banners in
-the same place at the bottom (`data-tour-card-open` on the body). Tours now start from the bottom bar's Start Tour
+the same place at the bottom (`data-tour-card-open` on the body). Tours now start from the actions group's Start Tour
 button and every card is drawn in the tour's popover ([Diagram tour](../007-editor/editor-tour.md) "Where it
 appears"), so there is nothing to step aside for.
 

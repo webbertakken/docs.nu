@@ -19,19 +19,19 @@ proved the better introduction.
 
 ## Where it appears
 
-- **The bottom bar's Start Tour button is the one way in.** Every tour (this one, the mode tours, the element
-  tours, the avatar, Plan, Forms, Pages and Dashboards tours) is started from one button in the editor's bottom
-  bar, immediately left of Search: a contained chip with a play glyph in a small accent disc, reading **Start
+- **The actions group's Start Tour button is the one way in.** Every tour (this one, the mode tours, the element
+  tours, the avatar, Plan, Forms, Pages and Dashboards tours) is started from one button in the editor's actions
+  group, top right ([Toolbar layout](toolbar-layout.md#the-top-line)): a contained chip with a play glyph in a small accent disc, reading **Start
   Diagram Tour** (`TourOfferButton`, `apps/live/components/tour`). It is as tall as its neighbours and set in their
   type, its hover runs at `duration-micro`, it has a visible focus ring, and it has light and dark looks. On a phone
   (below `sm`), and wherever its neighbours drop their words, it shows the glyph alone and keeps **Start Diagram
-  Tour** as its accessible name; it never widens the bar past the screen. A tour never starts, prompts or offers
+  Tour** as its accessible name; it never widens the group past the screen. A tour never starts, prompts or offers
   itself on its own: no banner, no card, no toolbar beside an element. This replaced the offer banners ("Getting
   started with Diagrams?"), which people found they had to keep turning down.
-- **First of the bar's controls.** The button leads the bar's right-hand cluster, in the same place on a
-  computer, a narrow window and a phone: **Start Tour**, then **Search**, then **Settings** and the appearance
-  switch (`ChromeControls`). So the button comes and goes at the cluster's left edge, by the tabs, without moving
-  Search, Settings or the appearance switch.
+- **First of the document actions.** The button leads the actions group's document actions, after **Search**,
+  **Settings** and the appearance switch (`ChromeControls`) and a divider, in the same place on a computer, a
+  narrow window and a phone: **Start Tour**, then Make a Copy, Present and Share. So the button comes and goes
+  without moving Search, Settings or the appearance switch.
 - **Which tour it offers.** Each tour's host publishes its tour while the person could take it (`useOfferTour`,
   `tour-offer.ts`), and the button offers the most specific one (`TOUR_OFFER_RANK`): the selected element's own
   tour first, then a tool in hand or a surface on the tab (the Avatar tour, the Dashboards tour, a card type's
@@ -119,7 +119,8 @@ words too (`touchBody`), which a touch screen (a coarse pointer) reads instead: 
    with no history and taken away, with its selection, when the tour ends however it ends (`useTourSquare`), so
    a fresh document is left as it was and Undo never brings it back. On touch it reads "Long-press anything to style
    it, or add a note, link or comment."
-5. **Tabs**: opens the active tab's ⋯ menu and highlights it with the tab pill (an `alsoHighlight` union): each
+5. **Tabs**: opens the active tab's ⋯ menu and highlights it with the active tab segment, bottom right (an
+   `alsoHighlight` union): each
    tab holds its own work in its own mode; + adds one; the menu renames, duplicates, locks, exports or sets it
    side by side. The menu closes as the step ends.
 6. **Theme & Canvas** (desktop only): opens Tab Style from the Style (painter's palette) dock button, which the step's copy names as **the Style button**

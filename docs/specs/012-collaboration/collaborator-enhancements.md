@@ -3,14 +3,15 @@
 Status: shipped
 
 Improvements to how you see and reach the other people in a document, centred
-on the presence avatars in the tab bar and what they open. Each improvement is
+on the presence avatars in the tab list and the document group, and what they open. Each improvement is
 its own numbered section, so later ones land here rather than in a new spec.
 
 ## 1. The Collaborators modal
 
 ### The problem
 
-The presence stack on each tab ([Live app](../007-editor/live-app.md)) answers "who is on
+The presence stack on each tab's row in the tab list
+([Toolbar layout](../007-editor/toolbar-layout.md#the-tab-list)) answers "who is on
 _this_ tab", three avatars at a time, and nothing more. To learn where everyone
 is you had to hover every tab in turn, and a folder's hidden members only showed
 as a merged stack on the chip. Clicking an avatar did one thing, start following
@@ -19,12 +20,14 @@ result for a click whose obvious meaning is "tell me about this person".
 
 ### The behaviour
 
-- **Clicking any avatar in a tab's presence stack opens the Collaborators
-  modal**, including your own avatar, the "+N" overflow badge, and the stack on
-  a folder chip ([Tab folders](../006-document/tab-folders.md)). The "+N" popover that listed the
+- **Clicking any avatar in a tab row's presence stack opens the Collaborators
+  modal**, including your own avatar and the "+N" overflow badge. The document
+  group's contributors (everyone else here, bottom right) open the tab list
+  instead, where each row's stack opens the modal
+  ([Toolbar layout](../007-editor/toolbar-layout.md#the-bottom-line)). The "+N" popover that listed the
   hidden participants is gone: the modal lists everyone, so it replaces it.
 - The modal lists **every person in the document, grouped by the tab they are
-  on**, in tab-bar order. A tab nobody is on is left out. People on a tab that
+  on**, in the tab list's order. A tab nobody is on is left out. People on a tab that
   no longer exists (a peer's focus can briefly point at a tab just deleted) are
   grouped under **Another Tab** rather than dropped.
 - Each group heading shows the tab's accent dot and name, **You're Here** on
@@ -40,7 +43,7 @@ result for a click whose obvious meaning is "tell me about this person".
   ([Per-participant responses](participant-responses.md)), so presence collapses on it: your
   own other tabs are left out, and a peer connected more than once appears
   once, on the tab of their most recently active connection. This applies to
-  the tab-bar stacks too, since both read the same per-tab map. Two different
+  the tab list's stacks too, since both read the same per-tab map. Two different
   browsers or devices have different keys, so they still show separately.
 - Within a group: you first, then by status (online, away, offline), then by
   name.
@@ -56,7 +59,7 @@ result for a click whose obvious meaning is "tell me about this person".
   already allowed for them ([Follow-me viewport](follow-me-viewport.md)).
 - Available wherever the presence stack is, which is only a shared or team
   document (a private document has no stack, [Live app](../007-editor/live-app.md)). Hidden in embed mode, like
-  the tab bar.
+  both of the editor's lines.
 - **Also reachable by name from the search panel** ([Canvas and palette](../008-canvas/canvas-and-palette.md)),
   as the `collaborators` command. The presence stack is the discoverable entry
   point but it is easy to miss and, on a private document, absent — so the modal
@@ -69,7 +72,7 @@ result for a click whose obvious meaning is "tell me about this person".
 ### Implementation notes
 
 - `apps/live/lib/collaborator-roster.ts` builds the grouped roster from the
-  same `participantsByTab` map the tab bar already renders, so the modal and
+  same `participantsByTab` map the tab list already renders, so the modal and
   the stacks cannot disagree about who is where.
 - `CollaboratorsDialog` is its own dialog file on the shared `Dialog` shell;
   its open flag and the clicked participant id live in `useEditorDialogs`.

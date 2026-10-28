@@ -55,7 +55,7 @@ Isometric is **navigation-only**, modelled on the Hand tool:
   parallel (isometric) projection throughout, never a perspective camera.
 - **An orbit button in the zoom bar** offers the same orbit without a held
   modifier: while the isometric tool is active an orbit-icon button appears in
-  the bottom-right zoom controls, **after the zoom buttons (before the Zen
+  the tools group's zoom controls, **after the zoom buttons (before the Zen
   toggle when that shows)**.
   Click-dragging it runs the identical orbit drag (same azimuth / elevation
   deltas, reusing `useIsometricCamera.startOrbit`), and a plain **click**

@@ -15,7 +15,7 @@ and from [Avatar tour](../avatar-tour.md).
 | `apps/live/hooks/canvas/useAvatarSpeech.ts`            | Composer state, cooldown, the floating bubbles, send and receive                                  |
 | `apps/live/components/canvas/AvatarSpeechLayer.tsx`    | The composer and the bubbles, in canvas space at reading size; the live region                    |
 | `apps/live/components/canvas/AvatarSpeechBubble.tsx`   | One bubble's look (tail, name, text), shared by the composer and a floating bubble                |
-| `apps/live/components/canvas/AvatarClusterButton.tsx`  | The Avatar button in the bottom-right cluster                                                     |
+| `apps/live/components/canvas/AvatarClusterButton.tsx`  | The Avatar button in the tools group                                                              |
 | `apps/live/components/panels/AvatarPanel.tsx`          | The panel, now a popover, with Send a Message                                                     |
 | `apps/live/components/panels/AvatarMessagePopover.tsx` | The panel's message popover                                                                       |
 | `apps/live/hooks/collab/useEditorBroadcast.ts`         | `broadcastAvatarSay`                                                                              |
@@ -107,7 +107,7 @@ closes the composer, tracks `Canvas · Used · AvatarMessage` or `AvatarMessageP
 
 ### Tour
 
-As the Draw tour's host (`DrawTourHost`), with: on offer on the bottom bar's Start Tour button in Avatar mode, at
+As the Draw tour's host (`DrawTourHost`), with: on offer on the actions group's Start Tour button in Avatar mode, at
 `TOUR_OFFER_RANK.tool`; `canWork` without the
 `isReadOnly` and lock gates; steps filtered by `{ canSpeak, mobile }`; `prepare` of `character` clicks the Avatar
 button when the popover is closed and waits for `avatar-character`; `prepare` of `push` closes the popover;

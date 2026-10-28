@@ -2,7 +2,7 @@
 
 A facilitator-run **poll**: ask the room a question, everyone viewing the
 document gets a prompt, answers tally live, and when the host ends it the whole
-thing evaporates. Sits beside the timer and dot-vote in the bottom bar's
+thing evaporates. Sits beside the timer and dot-vote in the tools group's
 [Session strip](session-tools.md#the-session-strip) (Diagram mode only) but is deliberately **not** built like them.
 
 ## Why it is NOT a session tool on the Tab
@@ -173,7 +173,7 @@ when an op arrives so a hand-crafted frame can't blow up a peer's panel:
 
 3. **Results.** A **`PollPanel`** built on the shared `MovablePanel`, opened as a popover
    from the **Poll button** of the [Session strip](session-tools.md#the-session-strip) in the
-   bottom-right cluster, on a desktop and a phone alike. While no poll runs the same button
+   tools group, on a desktop and a phone alike. While no poll runs the same button
    opens the poll composer, and the Vote button works the same way. Shown to the host and to anyone who has responded — so
    answering is what buys you the tally, and a participant who hasn't yet
    can't be nudged by the running numbers. The panel updates live and reports

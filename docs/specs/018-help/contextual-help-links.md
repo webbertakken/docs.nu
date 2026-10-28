@@ -5,8 +5,8 @@ Status: accepted
 ## Problem
 
 The help centre ([Help app](help-app.md)) holds 130+ articles, but the editor only exposes
-**one** entry point to it: the global Help icon in the editor header
-(`EditorHeader.tsx`, to the right of the Share button). A user looking at a specific dialog (Share expiry, password
+**one** entry point to it: the global Help link
+([Live app](../007-editor/live-app.md#layout)). A user looking at a specific dialog (Share expiry, password
 gate, export formats) or a specific toggle (auto-attach arrows, AI assistant)
 has no in-context path to the article that explains it; they have to open the
 help centre and search for it by hand.
@@ -82,13 +82,13 @@ Grouped by priority; each links the keyed article.
 
 > **Floating-panel headers carry no help icon.** The Explorer, Palette,
 > Activity (since removed), Comments, and AI panels previously each had a bare-glyph
-> `HelpArticleLink` in their header. These were removed: the editor header
-> already has a prominent global Help icon, and a `?` on every panel made the
+> `HelpArticleLink` in their header. These were removed: the editor
+> already has a global Help link, and a `?` on every panel made the
 > canvas chrome noisy. Contextual links now live only in dialogs, in-panel
 > settings (the Settings dialog's rows), and **empty-state messages** (the
 > empty-canvas card keeps its link). The articles themselves
 > (`explorerPanel`, `palette`, `comments`, `ai-tools`)
-> stay in the registry, reachable from the help centre and the header.
+> stay in the registry, reachable from the help centre and the global Help link.
 
 **High priority**
 

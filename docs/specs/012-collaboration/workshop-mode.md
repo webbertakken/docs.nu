@@ -10,7 +10,7 @@ Diagram, so Diagram is about diagrams.
 
 Diagram was the first mode, so it collected everything: shapes and arrows, and beside them a
 whole workshop kit (34 Collaborate tiles, a sticker catalogue, a Session strip of Timer, Vote and
-Poll in the bottom bar). Someone drawing an architecture diagram meets a fist-of-five gauge and
+Poll in the tools group). Someone drawing an architecture diagram meets a fist-of-five gauge and
 confetti; someone running a retro has to know those tools hide in the last category of a diagram
 palette. A mode for running a session gives each audience its own surface, the way Plan did for
 boards.
@@ -223,7 +223,7 @@ as for a viewer, as every mode does.
   registered per [Register a help article](../../instructions/register-a-help-article.md), and
   **Editor Modes** covers five modes.
 - The Session tools article says the set-up lives in Workshop (and Plan).
-- An optional [Workshop tour](workshop-tour.md) shows the mode, from the bottom bar's **Start Workshop Tour** button.
+- An optional [Workshop tour](workshop-tour.md) shows the mode, from the actions group's **Start Workshop Tour** button.
 
 ## Existing tabs
 

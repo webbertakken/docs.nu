@@ -2,7 +2,7 @@
 
 Per-user editor preference flags that toggle behaviour without
 changing document content. Most are exposed through a small
-Settings dialog launched from the footer (the **Application settings**
+Settings dialog launched from the actions group, top right (the **Application settings**
 gear button to the left
 of the dark-mode toggle); a small number are per-tool toggles
 that live next to the tool they affect (see the UI placement
@@ -177,7 +177,7 @@ type UserPreferences = {
   // popover branch (so the Explorer, Layers and Collaborate
   // popovers follow it too), the Map, the Quick style panel and the
   // Toolbar strip. Buttons are not panels: the
-  // bottom-right cluster buttons and the zoom controls stay opaque.
+  // tools group's buttons stay opaque.
   // Defaults to 1 (fully opaque).
   panelOpacity?: number;
 
@@ -190,8 +190,8 @@ type UserPreferences = {
   uiScalePanels?: number;
   uiScaleToolbar?: number;
   uiScaleCornerButtons?: number;
-  // Button Labels (Settings › Appearance): the names beside the footer bar's buttons' icons (Search,
-  // Settings, the theme). The bottom-right cluster is icons alone whatever it says (live-app.md).
+  // Button Labels (Settings › Appearance): the names beside the actions group's Search, Settings and
+  // appearance icons. The tools group is icons alone whatever it says (live-app.md).
   // Missing / true === shown; a phone never shows them. Read through useButtonLabelsSetting.
   dockButtonNames?: boolean;
 
@@ -253,7 +253,7 @@ type UserPreferences = {
 
   // The Diagram tour's taken record (docs/specs/007-editor/editor-tour.md; named for the welcome tour it
   // was until October 2026). True once a run has ended (completed or skipped; until 28 October 2026
-  // also declined, when it hid the offer). It no longer hides the bottom bar's Start Tour button: it only
+  // also declined, when it hid the offer). It no longer hides the actions group's Start Tour button: it only
   // feeds Settings' Tours › "Diagram Tour" row (inverted); turning it on and closing
   // Settings reruns the tour when it is on offer. Missing / undefined === not seen.
   tourSeen?: boolean;
@@ -261,7 +261,7 @@ type UserPreferences = {
   // mode is on (lib/tour-tracks.ts); set with every track by Power user mode.
   planTourSeen?: boolean;
   // The Plan tour tracks (Boards, Sheets, Dashboards) taken (a run completed or skipped). It picks which track the
-  // bottom bar's Start Tour button names; Settings' Boards Tour, Sheets Tour and Dashboards Tour rows each add or
+  // actions group's Start Tour button names; Settings' Boards Tour, Sheets Tour and Dashboards Tour rows each add or
   // remove their own track.
   planTourTracks?: PlanTourTrack[];
   // The Workshop tour's taken record (docs/specs/012-collaboration/workshop-tour.md), as `planTourSeen`.
@@ -403,8 +403,8 @@ Missing key === undefined === default behaviour. Concretely:
   row along its bottom edge; `'off'` hides them
   ([Element indicators](../008-canvas/element-indicators.md)). Emits `UI`/`Changed`/
   `ElementIndicatorsTop`, `ElementIndicatorsFooter` or `ElementIndicatorsOff`.
-- `dockButtonNames` undefined / true → the footer bar's buttons (Search,
-  Settings, the theme) named beside their icons on a desktop (the default). `false` leaves them icons
+- `dockButtonNames` undefined / true → the actions group's Search,
+  Settings and appearance toggle named beside their icons on a desktop (the default). `false` leaves them icons
   alone, each still named in its hover card. A phone shows icons alone
   whatever it says, so its Settings row is desktop only. Emits
   `UI`/`Toggled`/`DockButtonNames{On,Off}`.
@@ -512,7 +512,7 @@ that is the only control.
   preference had a row in the dialog, those were five second homes for
   settings that already had one. A handful of preferences DO keep a second,
   in-context control where that control is the thing itself rather than a
-  settings menu: the Appearance cycle button in the footer, and each of those rows says
+  settings menu: the Appearance cycle button in the actions group, and each of those rows says
   **"Also in ..."** so the pair reads as deliberate.
 - There are no per-tool preferences left: the one there was
   (`recogniseShapes`, flipped from the pencil's banner) became two palette
@@ -541,10 +541,10 @@ and the dialog stays as the one complete, browsable index of them.
 - **Settings dialog**: `apps/live/components/dialogs/SettingsDialog.tsx`,
   lazy-loaded via `next/dynamic` (matches the other on-demand
   modals: ShareDialog, ExportTabDialog, ImagePicker). Trigger: a
-  gear-icon button in the TabBar footer, sitting between Search and the
+  gear-icon button in the actions group, top right, sitting between Search and the
   dark-mode toggle. The "Keyboard Shortcuts" command in search
   ([Command palette (⌘K)](command-palette.md)) opens it on the **Keyboard** category; that category replaced the standalone
-  Shortcuts dialog and the footer's keyboard button. Settings can also open on a **section**
+  Shortcuts dialog and the old keyboard button. Settings can also open on a **section**
   of a category (the Google Drive connect flow returns to Account > Cloud Sync): the section
   scrolls into view and its heading takes focus. The Explorer and the editor both take
   `?settings=<category>&section=<section>` in their URL: it opens Settings there on load, and
@@ -776,7 +776,7 @@ and the dialog stays as the one complete, browsable index of them.
   **Article Tour** and **Logo Tour**), each with a line saying where it is on offer and a **Learn more**
   to its article, under one **Offer Again** section note: switch one back on
   and close Settings to take it again, straight away if it is on offer where you
-  are, otherwise from the bottom bar's Start Tour button when you get there. (Until
+  are, otherwise from the actions group's Start Tour button when you get there. (Until
   28 October 2026 each tour offered itself once, and the switch decided whether
   it would offer itself again; now every tour is on the Start Tour button whenever
   it could run, taken or not, and the switch is a record of whether it was taken,
@@ -832,9 +832,9 @@ and the dialog stays as the one complete, browsable index of them.
   construction guides" read as clutter.
 
   **Button Labels** (Appearance › Interface, `dockButtonNames`, on by default)
-  names the footer bar's buttons beside their icons: Search, Settings and the
-  theme. The bottom-right cluster is icons alone whatever it says
-  ([Live app](live-app.md)). Off, the bottom bar's buttons are icons alone, each
+  names the actions group's buttons beside their icons: Search, Settings and the
+  appearance toggle ([Toolbar layout](toolbar-layout.md#the-top-line)). The tools group is icons alone whatever it
+  says ([Live app](live-app.md)). Off, those three are icons alone, each
   still named in its hover card. A phone always shows
   icons alone, so the row is desktop only there.
 

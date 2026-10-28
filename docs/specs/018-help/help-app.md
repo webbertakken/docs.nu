@@ -75,7 +75,7 @@ There is **no Presentation Mode guide**: [Presentation mode](../012-collaboratio
 
 Articles were text-heavy, so each section that benefits from a picture carries a
 **figure**: an inline SVG mock of the real editor surface it describes (the
-palette, a dialog, the tab bar, a flow of shapes, live cursors, ...). They are
+palette, a dialog, the tab list, a flow of shapes, live cursors, ...). They are
 SVG, not screenshots, so they stay crisp, theme with the brand ramp, add zero
 binary assets to the static export, and never drift from a UI rebrand the way a
 captured screenshot would.
@@ -303,7 +303,8 @@ One rule for every public page, shared with the marketing site ([Marketing site]
 
 ## In-editor entry point
 
-The editor's `TabBar` gains a **Help** link on its right edge, beside the existing GitHub link — a plain `<a href="/help/" target="_blank">` (same convention as the GitHub link, no editor-page wiring). It fires `track('UI', 'Opened', 'Help')` (see [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md); reuses existing `UI`/`Opened` enum pair). A "Help" link also lives in the help app's own header/footer.
+The editor's **Help** link sits in the Explorer panel's footer
+([The editor's Explorer](../013-workspace/explorer-structure.md#the-editors-explorer)): a plain `<a href="/help/" target="_blank">` (same convention as the GitHub link, no editor-page wiring). It fires `track('UI', 'Opened', 'Help')` (see [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md); reuses existing `UI`/`Opened` enum pair). A "Help" link also lives in the help app's own header/footer.
 
 ### Help in global search
 

@@ -1,6 +1,6 @@
 # Tab-scoped share links
 
-A share link ([Auth + guest access](../014-identity/auth-and-guest-access.md), [API app](../015-api/api.md)) has a **scope**: either **All tabs** (the whole document) or **one tab**. A tab-scoped link opens only its tab. The other tabs stay visible in the visitor's tab bar as nameless "Not shared" pills, and the server never sends their content. That covers REST and the realtime room.
+A share link ([Auth + guest access](../014-identity/auth-and-guest-access.md), [API app](../015-api/api.md)) has a **scope**: either **All tabs** (the whole document) or **one tab**. A tab-scoped link opens only its tab. The other tabs stay visible in the visitor's [tab list](../007-editor/toolbar-layout.md#the-tab-list) as nameless "Not shared" rows, and the server never sends their content. The tab stack counts only the tabs in scope. That covers REST and the realtime room.
 
 ## Why
 
@@ -102,7 +102,7 @@ For a scoped session:
 - **Structure** ([Structure](#structure)): the room drops a scoped session's `tab-meta` patch that sets or clears `name`, and sends its whole-`tab` op out under the tab's stored name, since every receiver merges that op name and all. It drops a scoped session's op that would change what pulls cards onto the tab (an element added, updated or removed whose reach changes, or an element patch touching `shape`, `planBoard` or `planCard`) or point the form off the tab, and an `el` op of no kind it knows (`room-structure-gate.ts`). Adding a Plan element is refused from the op alone; the rest is judged against the tab in the room's own SQLite as the frame arrives, so no op waits and order is kept (`room-scoped-structure.ts`). That stored tab trails the live one by the autosave. Where the room stores no such tab yet, the op passes as sent, name included, logged `[room] scoped structure unjudged`: the save that writes the tab keeps its structure (`keepStoredStructure`). A store that cannot be read refuses the op (`[room] scoped check failed`); a drop logs `[room] scoped structure dropped` with `why`, a name put back `[room] scoped tab op renamed back`. Sessions without a scope never read the store.
 - **Payload keeps to its tab** (from anyone, scoped or not): a whole-`tab` op whose payload names another tab id than its envelope's `tabId`, and a `tab-meta` patch that carries `id`, `elements` or `articles`, are dropped. Receivers merge a `tab` payload over their tab and spread a `tab-meta` patch over it, so a payload naming another id would renumber the tab on every peer, and their next save would write it over that other tab, past the sender's scope. The editor also keeps its own tab's id whatever a `tab` or `tab-meta` op carries.
 - **Freeing a held selection** (the facilitator's unlock): a scoped session may free only a selection held by someone working on its own tab.
-- Presence entries still carry each peer's tab id, so avatars can stack on "Not shared" pills. An id is not content.
+- Presence entries still carry each peer's tab id, so avatars can stack on "Not shared" rows. An id is not content.
 
 ### Revoke closes the socket
 
@@ -124,8 +124,8 @@ A session's scope and code come from its room ticket, minted a moment before the
 ## Visitor experience
 
 - A scoped visitor lands **on their tab**, whatever tab the document last had open.
-- Other tabs render as **"Not shared" pills**: greyed, an eye-off glyph, the label "Not shared", not clickable, not draggable, no context menu. The hover card reads "This tab isn't shared with you". They never sit inside a tab folder (the folder name is withheld too).
-- Everything that works across tabs, or on the tab bar itself, is off for a scoped visitor: the add-tab button, the mode menu's New Tab offer (a mode that would open a new tab is shown but inert), the tab menu (so rename, duplicate, delete, lock and the tab's session tools too), drag-reordering, tab folders, document rename, and the slide deck (picking it says "The slide deck isn't shared with you").
+- Other tabs render as **"Not shared" rows** in the tab list: greyed, an eye-off glyph, the label "Not shared", not switchable, not draggable, no tab menu. The hover card reads "This tab isn't shared with you". They never sit inside a tab folder (the folder name is withheld too).
+- Everything that works across tabs, or on the tab list itself, is off for a scoped visitor: the add-tab button, the mode menu's New Tab offer (a mode that would open a new tab is shown but inert), the tab menu (so rename, duplicate, delete, lock and the tab's session tools too), drag-reordering, tab folders, document rename, and the slide deck (picking it says "The slide deck isn't shared with you").
 - An element link, search result or keyboard switch pointing at a tab outside the scope does nothing but show the toast "That tab isn't shared with you".
 - Make a copy takes their tab only.
 
@@ -153,5 +153,5 @@ Following the [Telemetry + public transparency dashboard](../017-telemetry/telem
 ## Out of scope
 
 - A link scoped to several tabs (a subset). One tab or all of them.
-- Hiding that other tabs exist. The pills are deliberately visible, so the visitor knows there's more.
+- Hiding that other tabs exist. The rows are deliberately visible, so the visitor knows there's more.
 - Assigned actions: assigning an action on another tab to a scoped visitor doesn't widen their scope. The email names the action, which the owner wrote deliberately, and the deep link 404s for them.

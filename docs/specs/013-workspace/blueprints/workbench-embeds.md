@@ -696,15 +696,14 @@ else (`blank`, `start`, `mode`, `q`, none) a blank document of the default mode;
 template's untitled name and `creationIntentOf`; then the document place, pushed. A refused create shows the
 Explorer's toast "Couldn’t create the document. Try again." and stays; logged `[workbench] create-failed { status }`.
 
-**Back** (`WorkbenchBackButton`, WB59): shown on a document place, in the canvas's top-left card
-(`ToolbarMenuCard`, the card the app's Explorer menu button uses, which a workbench otherwise leaves empty), level
-with the palette strip at `top-3 left-3`. The card carries `data-toolbar-menu`, so the strip keeps clear of it as it
-does of the menu button (`useStripCrowded`, `useBarLabels`, `useStripTileLimit`); on a phone it rides in the
-strip's row (`inline`, the glyph alone). `EditorCanvasHost` passes the frame's hooks to `Canvas` as
-`workbenchBack`, and `CanvasChrome` renders the card first of its controls, so Back is the first stop after the
-canvas itself; the card is the editor's Header region for F6 (`data-region="header"`). It shows when a phone is held
-sideways, where the Explorer's button does not, and zen hides it with the rest of the chrome. The tab bar holds no
-Back. The status screens put the same card at `EmbedShell`'s top left. The document entry's `history.state` carries
+**Back** (WB59): shown on a document place, as the brand group's Back
+([Toolbar layout](../../007-editor/toolbar-layout.md#the-top-line)): the caret and the mark, one link, first in the
+brand group at the top left, which in a workbench has no menu button. `EditorCanvasHost` passes the frame's hooks to
+`Canvas` as `workbenchBack`, so Back is the first stop after the canvas itself; the brand group is the editor's
+Header region for F6 (`data-region="header"`). It shows when a phone is held sideways, where the Explorer's button
+does not, and zen hides it with the rest of the chrome. There is no separate Back button. On a document scope frame
+the brand group shows the mark without the caret, not a link. The status screens put Back at `EmbedShell`'s top
+left. The document entry's `history.state` carries
 `workbenchFrom` (the frame path it was pushed from); Back calls `history.back()` when the entry before is that path
 (`workbenchFrom` set by `navigate`), else pushes Home. Browser back and forward walk the same entries.
 
@@ -1234,10 +1233,10 @@ CREATE TABLE workbench_session_rooms (
 | `ended` (trashed)                 | `DocumentTrashedCard` with `restorable={false}`                                                                                                |
 | `failed`                          | `LoadErrorCard embed`                                                                                                                          |
 
-The status screens use `EmbedShell` (no header, no Explorer). **Open in LiveDoc** (`WorkbenchOpenLink`): the last
-control at the right end of the tab bar, after Search and Settings, styled as they are: the external-link glyph and
+The status screens use `EmbedShell` (no header, no Explorer). **Open in LiveDoc** (`WorkbenchOpenLink`): in the
+actions group, top right, after Search and Settings, styled as the group's labelled buttons: the external-link glyph and
 the words "Open in LiveDoc" (the glyph alone on a phone, as its neighbours), linking to `/document/<id>` with
-`target="_blank" rel="noopener noreferrer"`, shown while `mounted` and `ended` (WB34). In a workbench the tab bar
+`target="_blank" rel="noopener noreferrer"`, shown while `mounted` and `ended` (WB34). In a workbench the actions group
 offers no Appearance control (WB15). The Reconnect line is `WorkbenchReconnectLine`.
 
 ### The pairing page (`/workbench/pair?code=`)
@@ -1425,7 +1424,7 @@ The workspace scope's tests:
 | New document in place: folder, team, template, blank, refused                                                                                                                                                                                                                                                      | `create-in-place.test.ts`                                                                               |
 | The address's scope; mismatch both ways; renewal scope check                                                                                                                                                                                                                                                       | `workbench-fragment.test.ts`, `workbench-machine.test.ts`, `useWorkbenchRenewal.test.ts`                |
 | The frame: Explorer on Home and on a folder, document with Back, trashed back to the Explorer, `place` on moves, `open`                                                                                                                                                                                            | `WorkspaceFrame.test.tsx`, `useWorkspacePlaceMessages.test.ts`                                          |
-| Back's card: top left, alone, the strip's `data-toolbar-menu`, the Header region, inline on a phone; the tab bar has no Back                                                                                                                                                                                       | `WorkbenchChrome.test.tsx`, `TabBar.workbench.test.tsx`                                                 |
+| Back: the brand group's Back, top left, the Header region; no separate Back button                                                                                                                                                                                                                                 | `WorkbenchChrome.test.tsx`, `TabBar.workbench.test.tsx`                                                 |
 | Explorer surface flags and gates                                                                                                                                                                                                                                                                                   | `apps/live/app/explorer/explorer-surface.test.tsx`                                                      |
 | Pairing page workspace copy; Settings scope                                                                                                                                                                                                                                                                        | `PairWorkbench.test.tsx`, `SettingsTokenPairings.test.tsx`                                              |
 | Worker serves the frame page for frame paths, frameable                                                                                                                                                                                                                                                            | `apps/live/src/worker.test.ts`                                                                          |

@@ -3,7 +3,7 @@
 Follow the references below only as needed; never upfront.
 
 - ./design-principles.md - before designing any screen: the principles every interface decision answers to
-- ./appearance.md - when touching light / dark / system: one origin-wide setting, the no-flash boot script, the header toggle
+- ./appearance.md - when touching light / dark / system: one origin-wide setting, the no-flash boot script, the toggle
 - ./color-scheme.md - when working on Theme: Brand color and visual design tokens
 - ./brand-mark.md - when touching the logo, the wordmark, favicons, PWA icons or any brand media: the Page Stack, its two drawings, light and dark, the theme tint and the hover fan
 - ./destructive-actions.md - when styling a delete, trash or remove control: never red, styled as its neighbours

@@ -1,6 +1,6 @@
 # Workshop tour ("Start Workshop Tour")
 
-A short, optional guided tour of [Workshop mode](workshop-mode.md), started from the bottom bar's **Start Workshop Tour**
+A short, optional guided tour of [Workshop mode](workshop-mode.md), started from the actions group's **Start Workshop Tour**
 button. It is the [Diagram tour](../007-editor/editor-tour.md)'s sibling, as the
 [Plan tour](../026-plan/plan-tour.md) is: the same Start Tour button, anchored step cards, glide, dimming ring,
 Skip, Back and closing card, driven by the same engine. Where this spec is silent, the Plan tour's rules hold.
@@ -14,7 +14,7 @@ Skip, Back and closing card, driven by the same engine. Where this spec is silen
 
 ## Where it appears
 
-- **On the Start Tour button, in Workshop mode.** The bottom bar's button, left of Search
+- **On the Start Tour button, in Workshop mode.** The actions group's button, leading the document actions
   ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Workshop Tour** while the open tab
   is in Workshop on a tab the person may edit, unless something more specific is on offer (a selected element's own
   tour). The editor has to be usable, as for the Diagram tour (hydrated, no welcome overlay, no start on screen, not

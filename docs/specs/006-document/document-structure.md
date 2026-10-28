@@ -17,7 +17,7 @@ Document
 
 - A document has **one or more tabs**. New documents start with a single empty tab.
 - Each tab has its own independent canvas — elements, layout, theme, background pattern, optional lock state.
-- Tabs are **ordered**; users can drag-reorder them in the tab bar.
+- Tabs are **ordered**; users can drag-reorder them in the tab list.
 - A tab has a name (default `"Tab 1"`, `"Tab 2"`, etc.) and is renameable.
 - **Auto-rename on first edit.** While a tab still has its default name (matching `^Tab \d+$`), editing the label of its first element renames the tab to that label. The rename only fires once: as soon as the tab name diverges from the default pattern (auto-rename or manual rename), subsequent label edits leave the tab name alone. This mirrors the document-name auto-fill from the default `Untitled document`.
 
@@ -152,8 +152,8 @@ Element IDs are document-scoped so cross-tab links are stable even if elements m
 
 ## UI implications
 
-- The tab bar sits at the **bottom** of the editor (see [07-live-app.md](../007-editor/live-app.md)). The active tab fills the canvas area.
-- A `+` button on the tab bar adds a new empty tab and switches to it.
-- **Rename** a tab by double-clicking its label (inline input — Enter commits, Escape cancels). Also available via the per-tab ellipsis menu.
+- The active tab sits in the document group at the editor's **bottom** right, and every tab is in the tab list it opens (see [Toolbar layout](../007-editor/toolbar-layout.md#the-bottom-line)). The active tab fills the canvas area.
+- A `+` button in the document group adds a new empty tab and switches to it.
+- **Rename** a tab by clicking the active tab's name, or double-clicking a row in the tab list (inline input — Enter commits, Escape cancels). Also available via the per-tab ellipsis menu.
 - **Reorder** tabs by dragging a tab to a new position in the bar.
 - **Create a link** from the element's right-click context menu, click "Link Element", and pick a target (tab, element, another document, or an external URL); the link follows the element if it's moved.

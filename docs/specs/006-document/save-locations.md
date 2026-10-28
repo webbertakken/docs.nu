@@ -10,7 +10,7 @@ has no Location step: every new document is stored in the default location for w
 moves between the two afterwards with [Offline Mode](offline-mode.md)'s **Sync Document** and **Take Offline**.
 (The wizard used to end on a Location step with a Save location chooser, a tile per location, the This Browser
 data-loss warning and a folder browser; it was removed, as most people answered it with the default before they had
-anything on the canvas. A document in This Browser still says what it is on the document itself: the editor header's
+anything on the canvas. A document in This Browser still says what it is on the document itself: the editor document group's
 **This Browser** badge and its legend, [Offline Mode](offline-mode.md#this-browser-badge--explorer).)
 
 | Location         | What it means                                                                                                |

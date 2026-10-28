@@ -250,7 +250,7 @@ Top to bottom:
 1. **The panel header**: "Explorer", the `⋯` menu ([Folders](folders.md#the-editors-explorer-editor--new)) and Help;
    a phone's sheet drops the `⋯` menu, every entry of it a tap away there already.
 2. **The Current Document card**, when a document is open: its thumbnail, the label "Current Document", the
-   document's **name**, "Updated <relative time>". The document's **visibility badge** (the editor header's badge:
+   document's **name**, "Updated <relative time>". The document's **visibility badge** (the badge leading the editor's document group:
    Private, Shared, Team or This Browser, with its legend, [Offline Mode](../006-document/offline-mode.md)) sits
    at the right of the label's row and its `⋯` (the document menu) at the right of the date's, so the name has the
    card's whole width. The badge's legend opens over everything, right-aligned under it, never clipped
@@ -262,7 +262,7 @@ Top to bottom:
 3. **The rail and the pane**, side by side on a desktop: the rail on the left lists the sections, the pane on the right
    shows the picked one.
 4. **The footer**: the product's surfaces as links, one row: **Home** (the landing page), **Explorer** (the Explorer
-   page), **Help**, **Telemetry**. No header carries a product menu ([Live app: header](../007-editor/live-app.md)), so the
+   page), **Help**, **Telemetry**. No header carries a product menu ([Live app: layout](../007-editor/live-app.md#layout)), so the
    surfaces are reached from footer links: this row in the editor, the same row (`ProductNavLinks`, the current surface left out) on the
    left of the Explorer page's bottom bar (not in a workspace frame), and the site footer on the public sites.
 5. **The sign-in note** for a signed-out guest: one quiet line under the Current Document card ("Keep your work. A free
@@ -331,7 +331,7 @@ compact size, skeleton rows while loading, and one line with **Try Again** when 
 
 ### On a phone
 
-The panel is a **sheet** under the menu button: the canvas's full width, edge to edge, reaching down to the tab bar,
+The panel is a **sheet** under the menu button: the canvas's full width, edge to edge, reaching down to the editor's bottom line,
 and it **opens on Home every time** (a pick lasts while it is open and is not remembered). The rail becomes a **row of
 section chips** under the Current Document card, scrolling sideways, the picked chip filled and scrolled into view;
 the chips are squared (rounded corners, not pills), 36 px to the eye with a 44 px tap. The pane fills the rest of the
@@ -361,7 +361,7 @@ row and card of one, wherever it is listed (folders, This Browser, Recent and Fa
 editor's Explorer, the Trash), carries the **This Browser** pill
 ([Offline Mode: This Browser pill](../006-document/offline-mode.md#this-browser-pill)).
 
-The editor header names such a document with the matching **This Browser** badge. Home's "Jump Back In" carries the
+The editor's document group names such a document with the matching **This Browser** badge. Home's "Jump Back In" carries the
 same pill (`ThisBrowserPill`) on the document's thumbnail ([Explorer Home](explorer-home.md)).
 
 ## Telemetry

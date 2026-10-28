@@ -1,6 +1,6 @@
 # Avatar tour ("Start Avatar Tour")
 
-A short, optional guided tour of [Avatar mode](avatar-mode.md), started from the bottom bar's **Start Avatar Tour**
+A short, optional guided tour of [Avatar mode](avatar-mode.md), started from the actions group's **Start Avatar Tour**
 button. It is the [Draw tour](../023-draw-mode/draw-tour.md)'s sibling: the same Start Tour button, anchored step
 cards, glide, dimming ring, Skip, Back and closing card, driven by the same engine. Where this spec is silent, the
 Draw tour's rules hold.
@@ -16,7 +16,7 @@ Draw tour's rules hold.
 ## Where it appears
 
 - **On the Start Tour button, in Avatar mode**, which a person enters by pressing a
-  [Selection Mode button](../009-elements/mode-button.md) set to Avatar. The bottom bar's button, left of Search
+  [Selection Mode button](../009-elements/mode-button.md) set to Avatar. The actions group's button, leading the document actions
   ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Avatar Tour** while the avatar is
   the tool in hand: ahead of the tab's mode tour, behind a selected element's own tour (`TOUR_OFFER_RANK.tool`). The
   editor has to be usable (hydrated, no welcome overlay, no start panel on screen, not an embed). Unlike the Draw tour
@@ -67,8 +67,8 @@ element by its `data-tour-id`. The exact strings live in `apps/live/components/t
 
 ## Phone
 
-The same steps; step 4's body names the button only (a phone has no Enter key), and the cards sit above the
-bottom bar as the other tours' do.
+The same steps; step 4's body names the button only (a phone has no Enter key), and the cards sit clear of the
+two lines as the other tours' do.
 
 ## Share roles
 

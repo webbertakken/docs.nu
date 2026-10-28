@@ -64,9 +64,9 @@ pointing at the button that opened it, on the edge facing the dock, over its but
 
 - **Hidden in Draw mode:** the Toolbar strip (the dock replaces it), the format painter, the Highlighter tile with the palette's catalogue (a whiteboard's pens are its markers), the Theme &
   canvas brush and the theme-mode banner, the tool panels (the eraser's
-  settings live in the dock's flyout instead) and the empty-canvas banner (the dock is the hint). The header,
-  tab bar, Explorer (its menu button keeps its corner on a phone),
-  collaboration, comments, layers, undo / redo and zoom controls stay, because
+  settings live in the dock's flyout instead) and the empty-canvas banner (the dock is the hint). The two lines'
+  other groups ([Toolbar layout](../007-editor/toolbar-layout.md#the-two-lines)), the Explorer (its menu button in
+  the brand group), collaboration, comments, layers, undo / redo and zoom controls stay, because
   they are about the document, not about drawing.
 - **The quick style panel stays** ([Quick style panel](../008-canvas/quick-style-panel.md)):
   it is how a shape, line or text box gets another colour or width once
@@ -146,9 +146,9 @@ pointing at the button that opened it, on the edge facing the dock, over its but
        picks one, which arms it like a dock shape (plain ink, the tool style
        of its kind, drawn with a drag or dropped with a click) and closes the
        flyout; **Escape** closes it without picking.
-- **No Undo or Redo in the dock:** the bottom-right cluster and the keyboard
+- **No Undo or Redo in the dock:** the tools group and the keyboard
   already carry them in every mode, so the dock does not repeat them. The
-  cluster is chrome, never canvas: a press on it with a pen held (or any other
+  tools group is chrome, never canvas: a press on it with a pen held (or any other
   tool armed) inks nothing, so Undo takes back the last stroke.
 - **The sticky note is a shape here, not a drawing tool.** It has no button
   in the drawing tools bar; it is one of the shapes: found in the Shapes
@@ -180,7 +180,7 @@ pointing at the button that opened it, on the edge facing the dock, over its but
 
 ## Where the dock sits
 
-- **Top by default**, centred across the top of the canvas, where the
+- **Top by default**, centred on the top line, where the
   Toolbar strip sits in Diagram mode
   ([Toolbar layout](../007-editor/toolbar-layout.md)), so a whiteboard's tools
   are where the rest of the product keeps them.
@@ -195,20 +195,19 @@ pointing at the button that opened it, on the edge facing the dock, over its but
   `whiteboardDockPosition`; unset, or any value but `bottom`, is the top. A
   change applies at once, on every tab in Draw mode.
 - **At the top:**
-  - it keeps clear of the Explorer's menu card in the top-left corner (the menu button and the editor mode
-    switch beside it, [Editor modes](../007-editor/editor-modes.md#the-mode-switch)): on
-    a phone or a tablet it starts 8 px to the card's right, whatever the card holds, so a tablet in
-    portrait still shows the whole dock, and when it scrolls sideways its tools
-    stay clear of the menu card rather than sliding under it; from 1024 px wide it is centred with
-    the same clearance on both sides;
+  - it sits between the brand group and the actions group (Back, the menu button and the editor mode switch,
+    [Editor modes](../007-editor/editor-modes.md#the-mode-switch); Search, Settings and the document's actions),
+    centred, and runs out of room as the strip does: when the line has no room for it, it takes its own row just
+    under the top line ([Toolbar layout](../007-editor/toolbar-layout.md#when-a-line-runs-out-of-room)), and when
+    it scrolls sideways its tools stay clear of the groups rather than sliding under them;
   - its flyouts and the "Seven shapes are pinned" hint open **below** it;
   - the top-centre banners (follow-me, mode banners, timer, vote) sit
     **beneath** it, as they sit beneath the Toolbar strip;
-  - panels docked in a top corner move **below** it when it would reach
-    into them, as they do for the Toolbar strip.
-- **At the bottom:** its flyouts and hint open **above** it, and it is lifted
-  above the bottom-right controls (history, layers, zoom) until the window is
-  wide enough for both on one line.
+  - panels docked in a top corner sit **below** the top line, and below the dock's own row while it has one, as
+    they do for the Toolbar strip.
+- **At the bottom:** it sits on the bottom line, between the tools group and the document group, not lifted
+  above them, and its flyouts and hint open **above** it. When the line has no room for it, it takes its own row
+  just above the line ([Toolbar layout](../007-editor/toolbar-layout.md#when-a-line-runs-out-of-room)).
 - **Telemetry:** `UI` · `Changed` · `WhiteboardDockPositionTop` /
   `WhiteboardDockPositionBottom`, fired by the Settings row like every choice
   row, and charted with the Editor settings.

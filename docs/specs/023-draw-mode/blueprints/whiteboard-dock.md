@@ -64,7 +64,7 @@ slots are Most used and Recent), "More shapes" (merged into Shapes), "toolbar" f
 ### Groups
 
 - Order: Drawing tools, Shapes, Settings, always all three. The dock carries no Undo or Redo:
-  the bottom-right cluster and the keyboard keep them in every mode, so `WhiteboardDock` takes
+  the tools group and the keyboard keep them in every mode, so `WhiteboardDock` takes
   only `{ model, ink }`.
 - **Where the groups live** (spec "What a whiteboard shows"): `CanvasChrome` renders the dock when
   `whiteboard && whiteboardDock && !readOnly && !chromeHidden`.
@@ -376,14 +376,13 @@ Keys come from a closed catalogue and are validated on read; telemetry carries f
   12 px from the edge ([UI scale blueprint](../../007-editor/blueprints/ui-scale.md)). Its flyouts
   are portalled out of the zoomed wrapper, so they draw at design size, like every menu opened
   from a scaled surface.
-- Wrapper at the **top** (the default): `top-3`; on a phone (`phone:`) `left-[4.125rem]` with
-  `max-w-[calc(100%-4.875rem)]`, 8 px after the Explorer menu card (12 + 46 px at the phone's fixed
-  100% UI scale) and 12 px from the right; on a tablet, below `lg`, `left-[7.5rem]` with
-  `max-w-[calc(100%-8.25rem)]`, room for the card at a raised UI scale; from `lg` centred with
-  `max-w-[calc(100%-15rem)]`, the same clearance both sides (D33). Top corner stacks drop to
-  68 px when it reaches them (D34); the top-centre stack starts at `top-[4.25rem]`, as under the strip.
-- Wrapper at the **bottom**: bottom centre, `bottom-4` from 1760 px wide (D9), lifted above the
-  bottom-right cluster below it.
+- Wrapper at the **top** (the default): on the top line, centred between the brand group and the actions group;
+  when the line has no room for it, its own row just under the line
+  ([Toolbar layout](../../007-editor/toolbar-layout.md#when-a-line-runs-out-of-room)). Top corner stacks start below
+  the top line, and below the dock's own row while it has one; the top-centre stack starts below the dock, as under
+  the strip.
+- Wrapper at the **bottom**: on the bottom line, centred between the tools group and the document group, never
+  lifted above them; when the line has no room for it, its own row just above the line.
 - Either way: one card, the strip's (`TOOLBAR_CARD`), that is also the horizontal scroller
   (`data-dock-scroller`, `overflow-x-auto`, no bleed), the groups inside it with a `DockDivider`
   (`TOOLBAR_DIVIDER`) between each; buttons (`DockButton`) 36 × 36 px (`h-9 w-9 rounded-md`, the
@@ -473,28 +472,26 @@ to measure` (warn).
 
 ## Constants and configuration
 
-| Constant                      | Value    | Provenance                | Safe range        |
-| ----------------------------- | -------- | ------------------------- | ----------------- |
-| `PINNED_SHAPES_MAX`           | 7        | spec                      | 7                 |
-| `DEFAULT_PINNED_SHAPES`       | 2 kinds  | spec                      |                   |
-| `SLOTS_PER_ROW`               | 3        | spec                      | 3                 |
-| `SHAPE_PICKS_PROTECTED`       | 5        | D16                       | 3 to 8            |
-| `SLOT_BAR_REACH_PX`           | 44       | D22                       | 24 to 64          |
-| `DockButton` size             | 36 px    | spec (the strip's tile)   | 36                |
-| `DOCK_ICON_PX`                | 18 px    | the strip's glyph size    | 18                |
-| `OFF_DOCK_GAP_PX`             | 8 px     | D36                       | 4 to 12           |
-| `VIEWPORT_MARGIN_PX`          | 12 px    | the flyouts' clamp margin | 8 to 16           |
-| `TIP_INSET_PX`                | 14 px    | D37 (card radius 12 + 2)  | 12 to 20          |
-| Tip size                      | 10 px    | D37                       | 8 to 12           |
-| `SHAPE_SEARCH_LIMIT`          | 6        | spec                      | 6                 |
-| `SHAPE_GRID_COLUMNS`          | 3        | six as two rows of three  | 3                 |
-| `SHAPE_PICKS_KEPT`            | 20       | spec (e.g. 20), D16       | 12 to 30          |
-| `SHAPE_SLOT_DRAG_PX`          | 6        | spec                      | 4 to 10           |
-| `HINT_MS`                     | 4000     | D17                       | 3000 to 6000      |
-| Group separator               | hairline | D18                       | `TOOLBAR_DIVIDER` |
-| Dock drops beside the cluster | 1760 px  | D9 (widest dock 858 px)   | at least 1720     |
-| Top dock's side clearance     | 4.25rem  | D33 (menu button 12 + 46) | at least 4rem     |
+| Constant                | Value    | Provenance                | Safe range        |
+| ----------------------- | -------- | ------------------------- | ----------------- |
+| `PINNED_SHAPES_MAX`     | 7        | spec                      | 7                 |
+| `DEFAULT_PINNED_SHAPES` | 2 kinds  | spec                      |                   |
+| `SLOTS_PER_ROW`         | 3        | spec                      | 3                 |
+| `SHAPE_PICKS_PROTECTED` | 5        | D16                       | 3 to 8            |
+| `SLOT_BAR_REACH_PX`     | 44       | D22                       | 24 to 64          |
+| `DockButton` size       | 36 px    | spec (the strip's tile)   | 36                |
+| `DOCK_ICON_PX`          | 18 px    | the strip's glyph size    | 18                |
+| `OFF_DOCK_GAP_PX`       | 8 px     | D36                       | 4 to 12           |
+| `VIEWPORT_MARGIN_PX`    | 12 px    | the flyouts' clamp margin | 8 to 16           |
+| `TIP_INSET_PX`          | 14 px    | D37 (card radius 12 + 2)  | 12 to 20          |
+| Tip size                | 10 px    | D37                       | 8 to 12           |
+| `SHAPE_SEARCH_LIMIT`    | 6        | spec                      | 6                 |
+| `SHAPE_GRID_COLUMNS`    | 3        | six as two rows of three  | 3                 |
+| `SHAPE_PICKS_KEPT`      | 20       | spec (e.g. 20), D16       | 12 to 30          |
+| `SHAPE_SLOT_DRAG_PX`    | 6        | spec                      | 4 to 10           |
+| `HINT_MS`               | 4000     | D17                       | 3000 to 6000      |
+| Group separator         | hairline | D18                       | `TOOLBAR_DIVIDER` |
 
 ## Defaults ledger
 
-See [DEFAULTS.md](DEFAULTS.md): D9, D16 to D22, D33, D34, D36, D37 (D38 retired).
+See [DEFAULTS.md](DEFAULTS.md): D16 to D22, D36, D37 (D9, D33, D34 and D38 retired).

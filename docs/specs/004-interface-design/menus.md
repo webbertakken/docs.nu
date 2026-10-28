@@ -188,19 +188,22 @@ Each menu, how it opens, what it holds, and what the keyboard could do before th
 
 ### Control menus
 
-| Menu                  | Opens from                                                               | Holds                                                                   |
-| --------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| Element menu          | Right-click, long press or Shift+F10 on an element; an element's ⋯       | Accordions, tiles, sliders, colour rows, fields, flyouts, session panes |
-| Selection menu        | The same on a multi-selection                                            | Accordions, tiles, sliders, colour rows, flyouts                        |
-| Cell menu             | Right-click on a table cell                                              | Text toggles, colour rows, tiles                                        |
-| Tab menu, Canvas menu | ⋯ on the active tab; right-click on the canvas; the footer canvas button | Tool buttons, accordions, canvas sections                               |
-| Layer menu            | ⋯ on a layer row                                                         | Tool buttons, an opacity slider, accordion tiles                        |
-| Session tool settings | ⋯ on a timer, stopwatch, vote or poll element                            | The session pane for that tool                                          |
-| Live image copy menu  | Live image on a share pass, with more than one tab                       | A tab select, copy rows                                                 |
-| Settings cog          | The cog on a board, Sheet or chart header, a Dashboard slot or page      | Collapsible sections of fields, tiles and pictures                      |
+| Menu                  | Opens from                                                                                          | Holds                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Element menu          | Right-click, long press or Shift+F10 on an element; an element's ⋯                                  | Accordions, tiles, sliders, colour rows, fields, flyouts, session panes |
+| Selection menu        | The same on a multi-selection                                                                       | Accordions, tiles, sliders, colour rows, flyouts                        |
+| Cell menu             | Right-click on a table cell                                                                         | Text toggles, colour rows, tiles                                        |
+| Tab menu, Canvas menu | ⋯ on the active tab or its tab list row; right-click on the canvas; the tools group's canvas button | Tool buttons, accordions, canvas sections                               |
+| Layer menu            | ⋯ on a layer row                                                                                    | Tool buttons, an opacity slider, accordion tiles                        |
+| Session tool settings | ⋯ on a timer, stopwatch, vote or poll element                                                       | The session pane for that tool                                          |
+| Live image copy menu  | Live image on a share pass, with more than one tab                                                  | A tab select, copy rows                                                 |
+| Settings cog          | The cog on a board, Sheet or chart header, a Dashboard slot or page                                 | Collapsible sections of fields, tiles and pictures                      |
+| Tab list              | The tab stack or the contributors in the editor's document group                                    | Find a tab (above five tabs), folder headings, tab rows, New Tab        |
 
 Before this spec every one of them was `role="menu"`, so their sliders, fields and toggles sat inside
 a menu that may not own them, and opening one from the keyboard left focus behind.
+The tab list was never one: it holds a field (Find a tab), so it is a control menu from the start, its rows walked
+with the arrow keys, Enter switching and Escape closing it ([The tab list](../007-editor/toolbar-layout.md#the-tab-list)).
 
 A panel opened from inside another (a cog's Style section opening a colour picker, a Delete asking in a
 `ConfirmPopover`) sits on top of it: **Escape closes only the top one**, focus going back to the control that opened

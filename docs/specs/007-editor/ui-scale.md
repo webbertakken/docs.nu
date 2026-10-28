@@ -27,17 +27,17 @@ each be sized on their own (see "The setting"):
 **Toolbar** (`toolbar`):
 
 - **The Toolbar strip** ([Toolbar layout](toolbar-layout.md)) and the
-  top-left Explorer menu button. The strip's More popover does not scale: it is a menu opened
+  top-left brand group. The strip's More popover does not scale: it is a menu opened
   from the strip, so it stays at its design size like every other menu (see below).
 
 **Corner buttons** (`cornerButtons`):
 
-- **The bottom-right cluster**: Undo / Redo, the
+- **The tools group**: Undo / Redo, the
   Layers and Collaborate buttons, the Theme & Canvas button, the Zoom
   controls and the off-screen content hint.
 
 Nothing else scales: not the canvas or its elements (the canvas has its
-own zoom), the tab bar and footer, the editor header, dialogs (Settings
+own zoom), the actions group and the document group, dialogs (Settings
 included), context menus, tooltips and hover cards, toasts, the selection
 toolbars that sit on elements. (Draw mode's dock is the strip's twin and
 draws at the **toolbar** scale, its flyouts at design size.) Menus and tooltips
@@ -123,7 +123,7 @@ value as a percentage ("110%"):
 - **Drag, docking and snap guides** work at every scale: a dragged panel
   follows the pointer exactly, and corner snapping measures the panel at its
   scaled size.
-- **What makes room for a scaled surface moves with it**: the bottom-right
-  corner's panel stack clears the zoom cluster at the corner buttons' scale,
+- **What makes room for a scaled surface moves with it**: the bottom-left
+  corner's panel stack clears the tools group at the corner buttons' scale,
   the top corners clear the Toolbar strip at the toolbar's scale, the strip fits fewer tiles before More, and a
   popover opened from a button stays inside the window at its scaled width.

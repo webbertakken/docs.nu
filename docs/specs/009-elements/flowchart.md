@@ -225,7 +225,7 @@ on a type change; `Element` · `Added` · `FlowchartLane` on Add Lane; `Element`
 
 ## Element tour
 
-While an Editor has a flowchart step selected (not on a phone), once its kind is opted in to (Settings › Tours › Show Me), the bottom bar's **Start Flowchart Tour** button offers the
+While an Editor has a flowchart step selected (not on a phone), once its kind is opted in to (Settings › Tours › Show Me), the actions group's **Start Flowchart Tour** button offers the
 [Flowchart tour](../007-editor/element-tours.md#the-flowchart-tour): Add Step and Add Branch (with Tab and Enter),
 Step Type, Lane on a laned chart, and the Flowchart menu.
 

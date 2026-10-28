@@ -37,7 +37,7 @@ never changes, because every email ever sent points at it.
 
 ## Theme accent
 
-In the editor the mark and the wordmark's `Live` take the active tab's theme accent (its element stroke). One accent
+In the editor the mark, drawn without the wordmark, takes the active tab's theme accent (its element stroke). One accent
 becomes a whole prism palette: the brand palette's shape (how much lighter, darker, more or less vivid and how far round
 the hue wheel each stop sits from `vivid`) is carried onto the accent. So a pink theme gives a pink glass stack with
 the same depth as the blue one.
@@ -69,10 +69,13 @@ with a small gap between them:
 | Size | Where                     | Mark | Wordmark | Gap  |
 | ---- | ------------------------- | ---- | -------- | ---- |
 | `sm` | The marketing hero's mock | 20px | 16px     | 8px  |
-| `md` | Site and editor headers   | 28px | 18px     | 10px |
+| `md` | Site headers              | 28px | 18px     | 10px |
 | `lg` | The site footer           | 40px | 24px     | 12px |
 
-The mark moves in four ways, each once and each kept to the logo in the site and editor headers unless named; the
+The editor has no header: its logo is the mark alone, 24px, **without the wordmark**, after the back caret in the
+brand group ([Toolbar layout](../007-editor/toolbar-layout.md#the-top-line)).
+
+The mark moves in four ways, each once and each kept to the logo in the site headers and the editor's brand group unless named; the
 wordmark holds still through all of them:
 
 **Assemble, as a page loads.** On a full load or a refresh, the header logo builds itself from nothing, before any
@@ -123,8 +126,10 @@ The files, their sizes and their paths are listed in the [brand media blueprint]
 ## Links
 
 The header and footer logos link to the homepage, except in the editor app, where each logo goes up
-one level: the editor header's logo opens the Explorer home (`/explorer/home`), and the Explorer
-header's logo opens the homepage. A logo link to the page already open (the footer
+one level: the editor's logo is a back link (**Back**, the brand group's caret and mark) to the Explorer home
+(`/explorer/home`), and the Explorer header's logo opens the homepage. In a workspace workbench frame Back goes
+where the document was opened from; where there is nowhere to go back to (a document scope frame) the mark has no
+caret and is not a link ([Workbench embeds](../013-workspace/workbench-embeds.md#what-renders)). A logo link to the page already open (the footer
 on the homepage, either logo there) scrolls back to the top, smoothly unless reduced motion is on,
 rather than reloading. A modified click (new tab or window) keeps the browser's behaviour.
 

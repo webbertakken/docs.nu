@@ -68,7 +68,7 @@ transform moves text after the snap, so the snap follows the layout, not the tra
   chip's leading edge as from its top and bottom, and the trailing side may be roomier
   ([Colour scheme](color-scheme.md#usage-rules)).
 - **A stack row shares one line.** Every stack in a row reserves the same icon slot (**20px** in the
-  editor header), whatever it holds: an icon, an avatar, a spinner. Labels in a row share one
+  Explorer header's actions), whatever it holds: an icon, an avatar, a spinner. Labels in a row share one
   baseline and icons share one centre.
 - **SVG text centres on its cap band too.** Text drawn in SVG (canvas badges, the export, marketing
   art) sits on the alphabetic baseline, placed half the face's cap height below the shape's centre.

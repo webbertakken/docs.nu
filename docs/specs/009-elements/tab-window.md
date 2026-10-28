@@ -72,8 +72,8 @@ A tab the person may not see is never fetched or drawn: the window says it is no
 
 **Choose a Tab** (the empty window's button, and the menu's **Tab Window** section, offered only where the session
 may edit and the window is not locked) opens a list of the tabs a window
-may show, in tab-bar order, each its mode icon and name, the current one marked. A press shows that tab (one edit,
-one undo). With no tab to offer it says "No other tab to show yet." The list follows the tab bar live (a tab added,
+may show, in the tab list's order, each its mode icon and name, the current one marked. A press shows that tab (one edit,
+one undo). With no tab to offer it says "No other tab to show yet." The list follows the tab list live (a tab added,
 renamed or deleted).
 
 ## Opening the tab
@@ -151,5 +151,5 @@ building a deck puts a window onto the tab it drew the diagram on rather than co
 
 ## Element tour
 
-The **Tab Window tour** is on the bottom bar's Start Tour button (**Start Tab Window Tour**) while an Editor has a tab window selected, once its kind is opted in to (Settings › Tours › Show Me), on an unlocked element, and walks through it on the element
+The **Tab Window tour** is on the actions group's Start Tour button (**Start Tab Window Tour**) while an Editor has a tab window selected, once its kind is opted in to (Settings › Tours › Show Me), on an unlocked element, and walks through it on the element
 itself ([Element tours](../007-editor/element-tours.md) "The Tab Window tour").

@@ -219,7 +219,7 @@ DashedAddButton.tsx`, shared with `AddCardTypeButton`) labelled **Start From Scr
   the page's cog, `prepare` opens the panel on Layouts through `requestPagePanel`, `cleanup` closes it), `guides` and
   `mirror` (the page's `[data-logo-title-bar]` buttons by name), `combine`, `combine-menu` and `combine-unite`
   (two shapes the tour places on the page with `placeCombineDemo`, selected so the Combine button rings, its menu
-  opened, then united by `uniteCombineDemo`; `PagesTourHost` calls `clearCombineDemo` when the tour ends), `outro`. The same steps are the Pages tour's Logo track, started from the bottom bar's Start Pages Tour button, with no welcome card before them.
+  opened, then united by `uniteCombineDemo`; `PagesTourHost` calls `clearCombineDemo` when the tour ends), `outro`. The same steps are the Pages tour's Logo track, started from the actions group's Start Pages Tour button, with no welcome card before them.
 - `UI · Started · LogoTour` on the press; `UI · Ended · LogoTourCompleted` / `LogoTourSkipped` on
   finish.
 

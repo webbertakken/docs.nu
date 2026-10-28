@@ -61,13 +61,13 @@ account across devices. Its default is one named constant,
 
 ## 5. Where it shows, and to whom
 
-| Surface                                                                                 | You (own chrome) | Signed-in collaborators | Anonymous share-link visitors |
-| --------------------------------------------------------------------------------------- | ---------------- | ----------------------- | ----------------------------- |
-| Header account button, Settings > Account card                                          | always           | n/a                     | n/a                           |
-| Presence avatars (header, tab bar, Collaborators, and every roster built from presence) | always           | when your switch is on  | initials                      |
-| Live cursor labels                                                                      | n/a              | when your switch is on  | initials                      |
-| Comment authors (thread popover, on-canvas bubbles)                                     | always           | when your switch is on  | initials                      |
-| Team member lists                                                                       | always           | when your switch is on  | n/a (teams are signed-in)     |
+| Surface                                                                                                  | You (own chrome) | Signed-in collaborators | Anonymous share-link visitors |
+| -------------------------------------------------------------------------------------------------------- | ---------------- | ----------------------- | ----------------------------- |
+| Header account button, Settings > Account card                                                           | always           | n/a                     | n/a                           |
+| Presence avatars (the document group, the tab list, Collaborators, and every roster built from presence) | always           | when your switch is on  | initials                      |
+| Live cursor labels                                                                                       | n/a              | when your switch is on  | initials                      |
+| Comment authors (thread popover, on-canvas bubbles)                                                      | always           | when your switch is on  | initials                      |
+| Team member lists                                                                                        | always           | when your switch is on  | n/a (teams are signed-in)     |
 
 **Signed-in collaborator** means a viewer whose own session is a verified
 account: a teammate, or a signed-in person who opened a share link.

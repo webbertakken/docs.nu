@@ -20,7 +20,7 @@ Scope, by file:
 | `apps/live/hooks/ui/useAppearance.ts`                                                        | Logs and tracks every explicit pick                                              |
 | `apps/live/app/explorer/ExplorerShell.tsx`                                                   | Passes `powerUser` to its bottom bar                                             |
 | `apps/live/components/chrome/ChromeControls.tsx`                                             | `TabBar` and the Explorer pass `powerUser` through to the toggle                 |
-| `apps/live/components/chrome/RoleIndicator.tsx`                                              | `RolePill` (title bar) and `RoleStatusIcon` (status bar)                         |
+| `apps/live/components/chrome/RoleIndicator.tsx`                                              | `RolePill` and `RoleStatusIcon` (both in the document group)                     |
 | `apps/live/app/document/[id]/useViewPreview.ts`                                              | `viewPreview`, `canToggleRole`, `toggleViewPreview`                              |
 | `apps/live/app/document/[id]/useRoleIndicator.ts`                                            | Role in force, owner name and toggle, for the pill and the icon                  |
 | `apps/live/app/document/[id]/useEditorState.ts`                                              | `isReadOnly` includes the preview; wires the offer and the shortcut count        |
@@ -71,7 +71,7 @@ One term, one identifier. The left column is the only spelling used in code, tes
 | Day              | `localDayKey(date)`                                      | `YYYY-MM-DD` in local time (D3)                                |
 | Shortcut used    | `recordShortcut(counters)`, `onShortcutUsed`             | A key the editor shortcut handler claimed (D4)                 |
 | Role pill        | `RolePill`                                               | Title-bar pill: Editing / Viewing, owner in its Tooltip        |
-| Role status icon | `RoleStatusIcon`                                         | Minimal chrome's pencil / eye, first in the status bar         |
+| Role status icon | `RoleStatusIcon`                                         | Minimal chrome's pencil / eye, in the document group           |
 | View preview     | `viewPreview`, `setViewPreview`                          | Local read-only preview for someone who may edit               |
 | Touch device     | `useCoarsePointer()` (`(hover: none)`)                   | Keeps More and the bin                                         |
 | Quick switch     | `oppositeAppearanceSetting(appearance)`                  | The explicit setting opposite the painted appearance           |
@@ -168,7 +168,7 @@ where `role` is the role in force (`isReadOnly ? 'view' : 'edit'`).
   editing".
 - Without: a `<span tabIndex={0}>` with the visible role word and the owner phrase as visually hidden text.
 
-`RoleStatusIcon` props: `{ role; onToggle? }`: a 28px square, the status bar's control box (`ICON_BOX`: `CHROME_BTN` without its slate colour), pencil or eye glyph,
+`RoleStatusIcon` props: `{ role; onToggle? }`: a 28px square, the document group's control box (`ICON_BOX`: `CHROME_BTN` without its slate colour), pencil or eye glyph,
 `aria-label` "Editing" / "Viewing (read-only)", Tooltip the same words, a button when `onToggle` is given.
 
 ### Selection toolbars
@@ -317,7 +317,7 @@ export function AppearanceToggle(props: { labelled?: boolean; quick?: boolean })
 - Role pill: `rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider`, the visibility badge's
   shape; emerald for Editing, amber for Viewing (the colours the old badge used); a toggle pill adds a hover ring and
   `cursor-pointer`.
-- Role status icon: the status bar control box, emerald 700 / 300 glyph for Editing, amber 700 / 300 for Viewing.
+- Role status icon: the document group's control box, emerald 700 / 300 glyph for Editing, amber 700 / 300 for Viewing.
 - Panel headers: the button cluster carries `ml-auto`, so it stays at the right when the title is hidden.
 - Palette tiles under the flag: `h-9 w-full`, so the icon stays centred in the cell the captioned tile filled; the
   Toolbar strip's fixed tiles and its always-visible shortcut letters are unchanged.
@@ -334,8 +334,8 @@ export function AppearanceToggle(props: { labelled?: boolean; quick?: boolean })
 
 ## Accessibility
 
-- Hidden labels: each control keeps its `aria-label` (tiles, status bar controls, help, bin); the hint shows the words
-  (tiles switch to `Tooltip`; status bar controls keep their hover cards, whose title is the name).
+- Hidden labels: each control keeps its `aria-label` (tiles, actions group controls, help, bin); the hint shows the words
+  (tiles switch to `Tooltip`; actions group controls keep their hover cards, whose title is the name).
 - Panel titles: `sr-only` span in place of the visible one; the header keeps its height from its buttons.
 - Selection toolbar: `role="toolbar"`, `aria-label` the caption text.
 - Role pill: WCAG 2.5.3 label-in-name holds (the accessible name starts with the visible word); 4.1.2 via button
@@ -390,7 +390,7 @@ export function AppearanceToggle(props: { labelled?: boolean; quick?: boolean })
 | Mode on / off with a changed and an untouched setting     | same                                                           |
 | Opposite setting and quick name                           | `packages/ui/src/appearance/appearance-cycle.test.ts`          |
 | Quick switch table (mode off / on, click / context menu)  | `components/chrome/AppearanceToggle.test.tsx` (jsdom)          |
-| Quick switch in the real status bar                       | `e2e/power-user-mode.spec.ts` (dark mode)                      |
+| Quick switch in the real actions group                    | `e2e/power-user-mode.spec.ts` (dark mode)                      |
 
 ## Constants and configuration
 

@@ -107,7 +107,7 @@ its flyouts at design size).
   its `max-h-[calc(100dvh-14rem)]` all apply as written.
 - **`SnapWidth`**: divides measured widths by the element's
   `currentCSSZoom` (1 where unsupported), so it writes surface px.
-- **The bottom-right cluster** (`[data-zoom-cluster]`): zoom on the root;
+- **The tools group** (`[data-zoom-cluster]`): zoom on the root;
   `right` / `bottom` inline `toSurfacePx(16)` so it keeps its 16px corner gap.
 - **`ToolbarExplorerButton`**: zoom on the root; its corner inset is restored
   the same way. Inline in the phone strip it takes no zoom of its own.
