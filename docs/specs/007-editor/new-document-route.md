@@ -44,8 +44,9 @@ each one own a clean state model without conditional gates.
   `?s=` URLs and never has to consider "do I mint an id?".
 - Visiting `/live` with no params redirects to `/new` instead
   of trying to be both surfaces at once.
-- "New Document" buttons (Explorer + NotFound CTA) navigate to
-  `/new`. Existing share / open flows stay on `/live`.
+- The NotFound CTA's "New Document" navigates to `/new`. Existing share / open flows stay on `/live`.
+  The Explorer's New Document makes the document itself, without `/new`
+  ([New Document menu](../013-workspace/new-document-menu.md)).
 
 ## Non-goals
 
@@ -166,7 +167,10 @@ knowing about when adding another.
 
 ### Owner creates a new document
 
-1. User clicks **New Document** in the Explorer (or lands on `/live`).
+From the Explorer, **New Document** makes the document and opens it in place, without `/new`
+([New Document menu](../013-workspace/new-document-menu.md)). From a link that asks for the wizard:
+
+1. User follows a link to `/new` (or lands on `/live`).
 2. Browser navigates to `/new`.
 3. `/new` renders the welcome card immediately — no spinner.
 4. User picks a mode, which creates the document at once, where new documents go by default
@@ -656,7 +660,7 @@ theme for a new tab.
 - `/document/<id>` (existing) → editor hydrates as before.
 - `/document/shared?s=<code>` (visitor) → editor + identity-confirm modal.
 - NotFound CTA → goes to `/new`.
-- "New Document" from Explorer → goes to `/new`.
+- "New Document" from the Explorer → the editor, in place, never `/new`.
 - `/new` from the home page, Escape → back on the home page, no document created.
 - `/new` typed in, Escape → the home page.
 - `/new`, choose a mode → the document is created at once, This Browser for a guest, filed in the

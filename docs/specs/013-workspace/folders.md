@@ -419,10 +419,9 @@ it stays in view as the dashboard scrolls; Settings opens the same synced
   folder, inside a folder section), except Home, which carries none; and on
   [Shape libraries](shape-libraries.md), where draw.io libraries are imported. It is as tall as Help; below the `sm`
   breakpoint the "Import from" label hides first, leaving the icons.
-- **Create:** a single floating action button at the bottom-right
-  opens a popover with "New Document" and "New folder" (or "New
-  subfolder" when a folder is focused). The documents-page FAB on the
-  editor / new-document routes is unrelated.
+- **Create:** the pane header's [New Document menu](new-document-menu.md): a split button whose face makes a blank
+  and whose menu lists every blank, then "New Folder" (or "New Subfolder" when a folder is focused) where the
+  section offers it.
 - **Drag-and-drop:** any document the reader can move (their own, a
   team's, one in this browser) drags from its list row or card; a
   document shared with them does not, nor one being renamed. It drops on

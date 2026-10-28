@@ -97,9 +97,9 @@ Participant at what they may add.
 A new tab opens on its mode's start (`newTabOpening` in `apps/live/lib/new-tab-seed.ts`).
 
 An **explicit blank** opens with its start already closed (`closeStartForBlank`): a document made by Skip, Start
-Blank's `/new?blank=1`, a blank's `/new?template=` link, or a mode chosen after the public sites' Start Blank
-(`/new?start=blank`, [New document route](new-document-route.md) "Start Blank after a mode"). Plan keeps Start
-Planning.
+Blank's `/new?blank=1`, a blank's `/new?template=` link, a mode chosen after the public sites' Start Blank
+(`/new?start=blank`, [New document route](new-document-route.md) "Start Blank after a mode"), or a blank of the
+Explorer's [New Document menu](../013-workspace/new-document-menu.md). Plan keeps Start Planning.
 
 ## Bringing it back
 
@@ -198,6 +198,13 @@ Sheet, where the Plan tour has nothing to show, so it needs no hold.
 A `/new?q=<words>` link (the marketing site's **Build yours**, a gallery search) chooses a mode in the wizard, and
 its words become the search of that mode's start on the new document, so the templates it meant are the ones shown.
 They are kept for the browser tab only and read once (`start-query.ts`).
+
+## Group handed over
+
+The New Document menu's **All templates** ([New Document menu](../013-workspace/new-document-menu.md)) makes its
+mode's blank and hands over its **picker group** (Articles, Slides, Spreadsheets, Boards, Forms, or Recommended): the
+new document's start opens on that group instead of Recommended. Start Planning reads it too. Kept for the browser
+tab only and read once (`start-group.ts`); an unknown group opens on Recommended.
 
 ## Look
 
