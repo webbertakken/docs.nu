@@ -8,13 +8,14 @@
 // The retraction of the "expires soon" warning at each site has its own suite
 // (expiry-retraction.test.ts); this one covers the routes' own behaviour.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { verifySharePassword } from '../auth/share-password-hash';
+import { hashSharePassword, verifySharePassword } from '../auth/share-password-hash';
 import type { Env } from '../types';
 
 const { db } = vi.hoisted(() => ({
   db: {
     createShareLink: vi.fn(),
     deleteShareLink: vi.fn(),
+    dropDocumentVisits: vi.fn(),
     extendShareLink: vi.fn(),
     generateShareCode: vi.fn(() => 'CODE1234'),
     getDocument: vi.fn(),
@@ -479,7 +480,55 @@ describe('PUT /api/documents/:id/share-password (docs/specs/013-workspace/share-
     });
     expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
   });
+});
 
+// docs/specs/013-workspace/share-password.md "Existing viewers": a new or changed password holds for everyone who
+// came in through a link before it.
+describe('PUT /api/documents/:id/share-password: earlier link visitors', () => {
+  it('drops every link visit to the document when a password is set, and none when it is cleared', async () => {
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: 'hunter2' },
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
+    expect(db.dropDocumentVisits).toHaveBeenCalledWith({}, 'd_1');
+
+    db.dropDocumentVisits.mockClear();
+    const off = ctxFor('PUT', '/api/documents/d_1/share-password', { body: { password: null } });
+    await handleDocumentShareRoutes(off.ctx);
+    expect(db.dropDocumentVisits).not.toHaveBeenCalled();
+  });
+
+  it('drops the visits when the password changes', async () => {
+    db.getDocumentSharePassword.mockResolvedValue(await hashSharePassword('hunter2'));
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: 'otters42' },
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
+    expect(db.setDocumentSharePassword).toHaveBeenCalled();
+    expect(db.dropDocumentVisits).toHaveBeenCalledWith({}, 'd_1');
+  });
+
+  // Nothing changed, so nobody is sent back to the gate: no new hash (which would void every grant), no visit
+  // dropped, no session closed.
+  it('sends no one away when the same password is saved again', async () => {
+    db.getDocumentSharePassword.mockResolvedValue(await hashSharePassword('hunter2'));
+    const room = roomEnv();
+    const { ctx, settled } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: ' hunter2 ' },
+      env: room.env,
+      waitUntil: true,
+    });
+    const res = await handleDocumentShareRoutes(ctx);
+    expect(res!.status).toBe(200);
+    expect(await res!.json()).toEqual({ passwordSet: true });
+    await settled();
+    expect(db.setDocumentSharePassword).not.toHaveBeenCalled();
+    expect(db.dropDocumentVisits).not.toHaveBeenCalled();
+    expect(room.broadcasts).toEqual([]);
+  });
+});
+
+describe('PUT /api/documents/:id/share-password limits', () => {
   it('400s a password past the limit, storing nothing', async () => {
     const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
       body: { password: 'x'.repeat(MAX_PASSWORD_LEN + 1) },

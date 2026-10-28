@@ -15,6 +15,7 @@ import { MAX_PASSWORD_LEN } from '../limits';
 import {
   createShareLink,
   deleteShareLink,
+  dropDocumentVisits,
   extendShareLink,
   generateShareCode,
   getDocumentSharePassword,
@@ -29,7 +30,7 @@ import { emailEnabled } from '../email/client';
 import { notifyFirstShare } from '../email/notifications';
 import { badRequest, json, noContent, notFound } from '../responses';
 import type { ShareRole } from '../types';
-import { hashSharePassword } from '../auth/share-password-hash';
+import { hashSharePassword, verifySharePassword } from '../auth/share-password-hash';
 import { closeShareCodeSessions } from '../room-access-client';
 import { broadcastShareOp } from '../room-client';
 import { recordShareLinkCreated } from '../timeline';
@@ -151,11 +152,25 @@ export async function handleDocumentShareRoutes(
           { status: 400 },
         );
       }
+      if (trimmed) {
+        // Saved unchanged: nothing to write, and nobody is sent away (a new hash would void every grant).
+        const current = await getDocumentSharePassword(env, id);
+        if (current && (await verifySharePassword(current, trimmed)).ok) {
+          console.info('[share-password] unchanged', { documentId: id });
+          return json({ passwordSet: true });
+        }
+      }
       const stored = trimmed ? await hashSharePassword(trimmed) : null;
       await setDocumentSharePassword(env, id, stored);
-      // Visitors a share code admitted before this password meet the gate again
-      // (docs/specs/013-workspace/share-password.md). Clearing it widens access, so closes nobody.
-      if (stored !== null) ctx.waitUntil?.(closeShareCodeSessions(env, id));
+      // A new or changed password holds for everyone a share code admitted before it
+      // (docs/specs/013-workspace/share-password.md "Existing viewers"): their visits go, so the document leaves
+      // Shared With Me until they enter it, and the room closes their sessions so they meet the gate again.
+      // Clearing it widens access, so it drops and closes nothing.
+      if (stored !== null) {
+        await dropDocumentVisits(env, id);
+        ctx.waitUntil?.(closeShareCodeSessions(env, id));
+        console.info('[share-password] set; earlier visitors cut off', { documentId: id });
+      }
       return json({ passwordSet: stored !== null });
     }
   }

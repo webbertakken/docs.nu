@@ -154,9 +154,12 @@ Existing viewers when the owner sets or changes a password: the room closes ever
 session a share code admitted (close code 4005, "access changed"), whether it
 joined with the code itself or with a ticket a share-code visitor minted. Their
 editor reloads, the reload meets the gate, and they are prompted for the new
-password. The owner and team members are untouched: their sessions were not
-admitted by a code. Clearing the password closes nobody, since it only widens
-access. The close is best-effort and off the response path: the password is
+password. Their visits go too (`dropDocumentVisits`, every `shared_with` row of the document): the document
+leaves their Shared With Me list, their Inbox and every other leg that reads a visit, until they enter the
+password, which records the visit again. The owner and team members are untouched: their sessions were not
+admitted by a code. Clearing the password closes and drops nothing, since it only widens access, and saving the
+same password again (checked against the stored hash) writes nothing and sends no one away: a new hash would void
+every grant for no change. The close is best-effort and off the response path: the password is
 already stored, and every later API call and room join is gated on it either way.
 
 The editor also defers two ancillary fetches behind the gate so a visitor on the
