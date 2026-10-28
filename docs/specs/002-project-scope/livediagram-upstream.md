@@ -30,8 +30,10 @@ it, ports it, and it lands through a LiveDoc pull request like any other change.
 
 ## The git remote
 
-The upstream remote is fetch-only in every LiveDoc checkout: its push URL is disabled, so nothing reaches livediagram
-by accident.
+Every LiveDoc checkout has two remotes: `origin`, LiveDoc's own repository, and `liveworkspace`, the upstream
+project. `liveworkspace` is fetch-only: its push URL is disabled, so nothing reaches livediagram by accident. GitHub
+records LiveDoc as a fork of the upstream, so `gh` is pointed at `origin` (`gh repo set-default webbertakken/livedoc`);
+otherwise it opens pull requests against the upstream.
 
 ## The name
 
