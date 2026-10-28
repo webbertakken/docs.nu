@@ -40,7 +40,8 @@ import { LayerSelectionChrome } from '@/components/canvas/LayerSelectionChrome';
 import { useSheetChartRenderer, type BoxedShared } from '@/components/canvas/sheet-chart-renderer';
 import type { CanvasSelectionInput } from '@/hooks/canvas/useCanvasSelectionView';
 import { usePhotoDraftView } from '@/lib/photo-draft-preview';
-import { ZoomedLaserOverlay, ZoomedRemoteCursor } from '@/components/canvas/view-readers';
+import { ZoomedLaserOverlay } from '@/components/canvas/view-readers';
+import { RemoteCursors } from '@/components/canvas/RemoteCursor';
 import { useInsertShift } from '@/hooks/canvas/useInsertShift';
 import type { CanvasProps } from '@/components/canvas/Canvas.types';
 import { PageClip } from '@/components/canvas/PageClip';
@@ -657,9 +658,7 @@ export function CanvasElementsLayer(props: CanvasElementsLayerProps) {
           above the elements, beneath the remote cursors. */}
             <AgentFocusOverlay elements={elements} />
 
-            {remoteCursors.map((c) => (
-              <ZoomedRemoteCursor key={c.id} cursor={c} />
-            ))}
+            <RemoteCursors cursors={remoteCursors} />
 
             {/* Laser overlay sits inside the viewport-transformed wrapper
             so trail coordinates (canvas-space) pan + zoom with
