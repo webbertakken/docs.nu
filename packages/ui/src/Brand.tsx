@@ -19,7 +19,6 @@ import { prismPalette } from './brand-prism';
 import { useBrandAssembled } from './useBrandAssembled';
 import { useBrandFan, type BrandFanTargets } from './useBrandFan';
 import { useBrandPress } from './useBrandPress';
-import { useBrandShimmer } from './useBrandShimmer';
 
 type BrandSize = 'sm' | 'md' | 'lg';
 
@@ -56,17 +55,6 @@ const markClasses: Record<BrandSize, string> = {
   lg: 'size-10',
 };
 
-// The wordmark's one-off gleam: a highlight band clipped to the letters, white
-// over light-mode ink, sky-300 over dark mode's near-white (white would vanish).
-const SHIMMER_CLASS =
-  'pointer-events-none absolute inset-0 bg-clip-text text-transparent opacity-0 [--ldm-shine:rgba(255,255,255,0.9)] dark:[--ldm-shine:#7dd3fc]';
-const SHIMMER_STYLE: React.CSSProperties = {
-  backgroundImage:
-    'linear-gradient(105deg, transparent 38%, var(--ldm-shine) 50%, transparent 62%)',
-  backgroundSize: '300% 100%',
-  backgroundPosition: '100% 0',
-};
-
 // A logo link to the page already open scrolls back to its top instead of
 // reloading (the footer's on the homepage, the header's anywhere). Modified
 // clicks (new tab, new window) keep the browser's own behaviour.
@@ -91,19 +79,11 @@ export function Brand({
   wordmarkClassName = '',
   assemble = false,
 }: BrandProps) {
-  // Pointing at the logo (or reaching it by keyboard) fans the stack open.
-  // Each start also counts a hover, which runs the wordmark's gleam once.
+  // Pointing at the logo (or reaching it by keyboard) fans the stack open; the wordmark holds still.
   const [fanning, setFanning] = useState(false);
-  const [hovers, setHovers] = useState(0);
-  const shimmer = useRef<HTMLSpanElement>(null);
-  useBrandShimmer(hovers, shimmer);
   useBrandAssembled(assemble);
   const pressHandlers = useBrandPress();
-  const start = () => {
-    if (fanning) return;
-    setFanning(true);
-    setHovers((n) => n + 1);
-  };
+  const start = () => setFanning(true);
   const fanHandlers = {
     onPointerEnter: (e: React.PointerEvent) => e.pointerType !== 'touch' && start(),
     onPointerLeave: (e: React.PointerEvent<HTMLElement>) => {
@@ -134,7 +114,7 @@ export function Brand({
       />
       {/* A logotype: WCAG 1.4.3 sets text that is part of a logo no contrast minimum, and the
           contrast audits skip it by this mark. */}
-      <span className={`relative ${wordmarkClassName}`.trim()} data-logotype="">
+      <span className={wordmarkClassName || undefined} data-logotype="">
         <span
           className={accentColor ? '' : 'text-brand-700 dark:text-sky-400'}
           style={
@@ -146,9 +126,6 @@ export function Brand({
           Live
         </span>
         <span>Doc</span>
-        <span ref={shimmer} aria-hidden="true" className={SHIMMER_CLASS} style={SHIMMER_STYLE}>
-          <span>Live</span>Doc
-        </span>
       </span>
     </>
   );

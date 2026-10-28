@@ -16,10 +16,7 @@ const stops = (container: HTMLElement) =>
 describe('Brand', () => {
   it('marks its wordmark as a logotype', () => {
     const { container } = render(<Brand />);
-    const wordmark = container.querySelector('[data-logotype]')!.cloneNode(true) as HTMLElement;
-    // The gleam overlay repeats the letters but is hidden from assistive tech.
-    wordmark.querySelector('[aria-hidden="true"]')?.remove();
-    expect(wordmark.textContent).toBe('LiveDoc');
+    expect(container.querySelector('[data-logotype]')!.textContent).toBe('LiveDoc');
   });
 
   it('accents "Live", brand-700 in light and sky-400 in dark, with "Doc" in ink', () => {
@@ -148,40 +145,16 @@ describe('the hover fan', () => {
   });
 });
 
-describe('the wordmark gleam', () => {
-  it('sweeps once per hover, finishing even if the pointer leaves', async () => {
-    const { act, fireEvent } = await import('@testing-library/react');
-    const frames: FrameRequestCallback[] = [];
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-      frames.push(cb);
-      return frames.length;
-    });
-    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as never;
-    const { container } = render(<Brand href="/" />);
-    const gleam = container.querySelector<HTMLElement>('[data-logotype] [aria-hidden="true"]')!;
-    const link = container.querySelector('a')!;
-    const step = (at: number) => act(() => frames.splice(0).forEach((cb) => cb(at)));
-
-    expect(gleam.style.opacity).toBe('');
-    fireEvent.pointerEnter(link, { pointerType: 'mouse' });
-    step(performance.now() + 300);
-    expect(gleam.style.opacity).toBe('1');
-    fireEvent.pointerLeave(link);
-    step(performance.now() + 5000);
-    expect(gleam.style.opacity).toBe('0');
-    expect(gleam.style.backgroundPosition).toBe('0% 0px');
-    vi.restoreAllMocks();
-  });
-
-  it('ignores touch, which has no hover', async () => {
+describe('the wordmark', () => {
+  it('holds still when the logo is pointed at: only the mark moves', async () => {
     const { fireEvent } = await import('@testing-library/react');
-    const raf = vi.spyOn(window, 'requestAnimationFrame');
     window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as never;
     const { container } = render(<Brand href="/" />);
-    fireEvent.pointerEnter(container.querySelector('a')!, { pointerType: 'touch' });
-    expect(raf).not.toHaveBeenCalled();
-    raf.mockRestore();
+    const wordmark = container.querySelector<HTMLElement>('[data-logotype]')!;
+    const before = wordmark.outerHTML;
+    fireEvent.pointerEnter(container.querySelector('a')!, { pointerType: 'mouse' });
+    expect(wordmark.querySelector('[aria-hidden="true"]')).toBeNull();
+    expect(wordmark.outerHTML).toBe(before);
   });
 });
 

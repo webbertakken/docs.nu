@@ -1,7 +1,8 @@
 /* The logo's assembly as a page loads (docs/specs/004-interface-design/brand-mark.md "Size and motion"; the numbers
    are in docs/specs/004-interface-design/blueprints/brand-motion.md "Assemble"). A content stylesheet: it plays
    from the first paint of the static HTML, before any script, on logos marked `data-assemble`, until
-   useBrandAssembled marks the page assembled, so it plays once per load. */
+   useBrandAssembled marks the page assembled, so it plays once per load. Only the mark moves; the wordmark is
+   still. */
 
 @keyframes ldm-drop {
   from {
@@ -44,17 +45,6 @@
   }
   to {
     transform: translate(96px, 0) rotate(45deg) scaleY(1) rotate(-45deg) translate(-96px, 0);
-  }
-}
-
-@keyframes ldm-arrive {
-  from {
-    transform: translateX(-14px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
   }
 }
 
@@ -107,24 +97,15 @@ html:not([data-brand-assembled]) [data-assemble] [data-fold] {
   animation: ldm-fold 360ms cubic-bezier(0.4, 0, 0.2, 1) 760ms backwards;
 }
 
-html:not([data-brand-assembled]) [data-assemble] [data-logotype] > span:not([aria-hidden]) {
-  display: inline-block;
-  animation: ldm-arrive 500ms cubic-bezier(0.2, 0.8, 0.2, 1) 520ms backwards;
-}
-html:not([data-brand-assembled]) [data-assemble] [data-logotype] > span:not([aria-hidden]) + span {
-  animation-delay: 610ms;
-}
-
-/* Reduced motion: the logo fades in once, nothing moves. */
+/* Reduced motion: the mark fades in once, nothing moves. */
 @media (prefers-reduced-motion: reduce) {
   html:not([data-brand-assembled]) [data-assemble] [data-sheet-motion],
   html:not([data-brand-assembled]) [data-assemble] [data-cell],
   html:not([data-brand-assembled]) [data-assemble] [data-line],
-  html:not([data-brand-assembled]) [data-assemble] [data-fold],
-  html:not([data-brand-assembled]) [data-assemble] [data-logotype] > span:not([aria-hidden]) {
+  html:not([data-brand-assembled]) [data-assemble] [data-fold] {
     animation: none;
   }
-  html:not([data-brand-assembled]) [data-assemble] {
+  html:not([data-brand-assembled]) [data-assemble] [data-mark-art] {
     animation: ldm-fade-in 250ms ease-out backwards;
   }
 }
