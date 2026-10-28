@@ -67,7 +67,7 @@ import { BrowseMemoryContext, useBrowseMemory } from './PaletteCategoryBrowser';
 import { CATEGORY_BAR_MODES } from './category-flyout-groups';
 import { setPalettePopoverOpen } from '@/lib/palette-popover-open';
 import { useBarLabels } from './useBarLabels';
-import { useStripCrowded } from './useStripCrowded';
+import { useStripPlacement } from './useStripPlacement';
 import { SessionBrowse } from './session-category';
 import { barCategoriesFor } from './bar-categories';
 import { CategoryBarButtons, CategoryBarFlyout, useCategoryBar } from './CategoryBar';
@@ -284,7 +284,8 @@ export function ToolbarPalette(props: Props) {
   });
   const leadingRef = useRef<HTMLDivElement>(null);
   // Too wide to centre between the menu card's sides (a tablet): the strip sits at the right instead.
-  const crowded = useStripCrowded(cardRef, leading == null);
+  // On the top line, centred or off centre between its side groups, or its own row (useStripPlacement).
+  const { crowded, shift } = useStripPlacement(cardRef, leading == null);
   // Crowded, it takes its own row under the top line, and the top corners follow (centre-row-store).
   useReportCentreOwnRow(crowded && !props.hidden);
   const stripLimit = useStripTileLimit(cardRef, {
@@ -455,7 +456,12 @@ export function ToolbarPalette(props: Props) {
         ...(scale === 1 ? {} : uiScaleStyle(scale)),
         top: toSurfacePx(crowded || phoneRow ? secondRowTopPx(scale) : 12, scale),
         alignItems: crowded ? 'center' : 'var(--plan-strip-align, center)',
-        paddingRight: 'var(--plan-strip-end, 0px)',
+        // Off centre between the side groups: padding twice the shift on one side moves the centred card by it.
+        ...(shift > 0
+          ? { paddingLeft: toSurfacePx(2 * shift, scale) }
+          : shift < 0
+            ? { paddingRight: toSurfacePx(-2 * shift, scale) }
+            : { paddingRight: 'var(--plan-strip-end, 0px)' }),
       }}
       // While one of its popovers is open (a category's flyout, More, Search) the strip rises to the popover layer,
       // so what hangs from it sits over everything on the canvas, an element's toolbar and menus included.

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-// The Undo / Redo strip in the bottom-right cluster: two buttons, each
+// The Undo / Redo strip in the tools group: two buttons, each
 // wired to its handler and disabled when there is nothing to undo / redo.
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';

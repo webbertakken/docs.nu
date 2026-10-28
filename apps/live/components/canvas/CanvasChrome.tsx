@@ -41,7 +41,7 @@ import { usePublishCardTypesTaken } from '@/hooks/plan/card-types-taken';
 import { usePlanVoting } from '@/hooks/plan/usePlanVoting';
 import { useCanvasCovered, usePlanTabKind } from '@/hooks/plan/plan-cover-store';
 
-// How far the bottom-right cluster moves in and up over a covering board or Sheet: the cover's padding (12 px) and a
+// How far the tools group moves in and up over a covering board or Sheet: the cover's padding (12 px) and a
 // little more in, and past the element's bottom scrollbar up.
 const COVERED_CLUSTER_INSET = { x: 16, y: 20 };
 const NO_CLUSTER_INSET = { x: 0, y: 0 };
@@ -416,7 +416,7 @@ export function CanvasChrome(props: CanvasChromeProps) {
   });
 
   // UI scale (docs/specs/007-editor/ui-scale.md): the strip, the panels and the
-  // bottom-right cluster are drawn at it, so the clearances around them follow.
+  // tools group are drawn at it, so the clearances around them follow.
   const toolbarScale = useUiScale('toolbar');
   const panelScale = useUiScale('panels');
   const cornerScale = useUiScale('cornerButtons');

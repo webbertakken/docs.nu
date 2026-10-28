@@ -6,7 +6,7 @@ import { CLUSTER_CONTROL_REST } from '@/components/canvas/cluster-strip';
 import { ClusterPopoverSegment, ClusterStrip } from './ClusterPopoverButton';
 import { ThemeLookIcon } from '@/components/palette/palette-icons';
 
-// Layers and the Theme & canvas button, one strip in the bottom-right cluster
+// Layers and the Theme & canvas button, one strip in the tools group
 // (docs/specs/007-editor/live-app.md): both shape how the tab looks rather than what is on it, so
 // they sit together in every mode. A mode without Layers (Plan, Pages) or a session without
 // the Theme & canvas button (a view-only visitor, a whiteboard) keeps whichever of the two it has.

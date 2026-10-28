@@ -9,9 +9,12 @@ describe('docNameRoom', () => {
     expect(docNameRoom({ line: 1416, tools: 300, document: 500, name: 200, dock: 0 })).toBe(808);
   });
 
-  it('shortens the name so Draw’s dock fits centred between the groups', () => {
-    // Half the line less half the dock, less the gap: (1416 - 540) / 2 - 8 = 430; the group holds 300 besides its name.
-    expect(docNameRoom({ line: 1416, tools: 170, document: 500, name: 200, dock: 540 })).toBe(130);
+  it('shortens the name so Draw’s dock fits between the groups', () => {
+    // The line less the tools, the dock and two gaps: 1416 - 300 - 700 - 16 = 400; the group holds 300 besides its
+    // name.
+    expect(docNameRoom({ line: 1416, tools: 300, document: 500, name: 200, dock: 700 })).toBe(100);
+    // With room to spare for the dock, the name keeps the room beside the tools.
+    expect(docNameRoom({ line: 1416, tools: 300, document: 500, name: 200, dock: 300 })).toBe(500);
   });
 
   it('never shortens the name under 72px', () => {

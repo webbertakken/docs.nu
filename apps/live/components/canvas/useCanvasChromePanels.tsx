@@ -413,7 +413,7 @@ export function useCanvasChromePanels({
 
   // Layers panel (docs/specs/006-document/layers.md). Edit sessions only (a viewer can't manage
   // layers; visibility / lock still shape what they see via the render
-  // path). A popover over its bottom-right cluster button, always mounted so
+  // path). A popover over its tools group button, always mounted so
   // that button can pop it open (popoverOpen gates the actual render).
   // Its Settings switch removes it outright; layers themselves keep applying.
   const layersOpen = activeDockPanel === 'layers';

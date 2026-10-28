@@ -74,6 +74,10 @@ async function importPhoto(page: Page, notes: WallNote[]) {
     .waitFor({ state: 'hidden', timeout: 20_000 })
     .catch(() => {});
   await add.click();
+  // The review's Add sits over the bottom line's document group: the pointer moves on from it, as a person's does, so
+  // the document name's hover card it would rest on does not stand over the draft bar's Add.
+  const canvas = (await page.locator('[data-canvas-a11y-root]').boundingBox())!;
+  await page.mouse.move(canvas.x + canvas.width / 2, canvas.y + canvas.height / 2);
 }
 
 // Pan the canvas with Space + drag (the editor's own pan, whatever tool is

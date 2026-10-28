@@ -2,7 +2,7 @@
 
 // The Card Types panel (docs/specs/026-plan/item-types.md "The Card Types panel"): the document's item
 // types, each with its glyph and colour, its name and how many items have it. A popover hanging above
-// its button in Plan mode's bottom-right cluster. Edit and Add New Card Type open the type editor, Duplicate opens it on a
+// its button in Plan mode's tools group. Edit and Add New Card Type open the type editor, Duplicate opens it on a
 // new type filled from that one; Add Default Types adds any of the five default types the document lacks. One list:
 // no type is set apart from another. Someone who may only view sees the list.
 import { AddCardTypeButton } from './AddCardTypeButton';

@@ -75,12 +75,18 @@ the contributors), arrow at that button, kept 12 px inside the canvas, in the me
 
 ### When a line runs out of room
 
-Each line is one row while its groups fit side by side with an 8 px gap. When they do not:
+Each line is one row while its groups fit side by side with an 8 px gap. A line's **centre toolbar** (the Palette strip
+or Draw's dock on the top line, Draw's dock on the bottom line) sits on the line between the line's two side groups,
+by one rule for both lines:
 
-1. the document name shortens, down to 72 px, with an ellipsis;
-2. then the Palette's tiles drop as they already do ("Decided in review");
-3. then the centre toolbar (the Palette or Draw's dock) moves to a row of its own, just inside the line, and the
-   side groups keep their corners.
+1. **Centred** on the line, while it fits centred: 8 px or more clear of both side groups.
+2. Else **between the groups, off centre**: as near the centre as it can be while it keeps 8 px clear of each side
+   group, still on the line.
+3. Else the document name shortens (bottom line), down to 72 px, with an ellipsis, and the Palette's tiles drop as
+   they already do ("Decided in review"), until the toolbar fits between the groups, still on the line.
+4. Only when even the Palette's fewest tiles (or the whole of Draw's dock) do not fit between the groups does the
+   centre toolbar move to a row of its own, just inside the line (under the top line, above the bottom line),
+   centred, and the side groups keep their corners.
 
 The active tab never shortens. On a phone ("On a phone") the same order runs, and the document name is not drawn.
 

@@ -6,7 +6,7 @@ import { ClusterPopoverButton } from './ClusterPopoverButton';
 
 const AvatarIcon = lucideGlyph(lucideUser, 16);
 
-// Avatar in the bottom-right cluster, while Avatar mode is on (docs/specs/008-canvas/avatar-mode.md "The Avatar
+// Avatar in the tools group, while Avatar mode is on (docs/specs/008-canvas/avatar-mode.md "The Avatar
 // Panel"): the character sheet one press away, for every role and on a phone too. Named beside its icon on a
 // desktop; its icon alone on a phone. Someone who may not speak is not told they can.
 export function AvatarClusterButton(props: {

@@ -11,7 +11,7 @@
 // `from: 'button'` opens DOWN from the button: the Toolbar layout's menu
 // button in the top-left corner (docs/specs/007-editor/toolbar-layout.md).
 //
-// `from: 'above'` opens UP from a button in the bottom-right cluster (Layers,
+// `from: 'above'` opens UP from a button in the tools group (Layers,
 // Activity, Collaborate), and `bottom` (the distance from the canvas's bottom
 // edge to the button's top) tells the panel to hang there.
 // How far below the canvas's top the Toolbar strip ends, with a gap: where what sits under the strip

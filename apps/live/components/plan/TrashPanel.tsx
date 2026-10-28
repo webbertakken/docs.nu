@@ -3,7 +3,7 @@
 // The Trash (docs/specs/026-plan/items.md "Trash"): the cards moved there, newest change first. Each row
 // carries its type's stripe and glyph, its number and title (two lines), and where it came from and when;
 // Restore puts it back in that status, Delete deletes it for good after asking (the workspace Trash's
-// ConfirmPopover). Empty Trash deletes them all at once. A popover above its button in Plan mode's bottom-right cluster, like Card Types.
+// ConfirmPopover). Empty Trash deletes them all at once. A popover above its button in Plan mode's tools group, like Card Types.
 import { useMemo, useState } from 'react';
 import { TRASHED_FROM_FIELD, isTrashed, itemTitle, statusLabel, typeIn } from '@livedoc/items';
 import { Button, CountBadge, EmptyState, relativeSince, TrashIcon } from '@livedoc/ui';

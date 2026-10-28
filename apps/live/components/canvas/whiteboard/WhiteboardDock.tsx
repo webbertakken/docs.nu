@@ -7,14 +7,7 @@
 // flyouts open on its board side; on a narrow screen the groups scroll sideways together. One
 // flyout at a time, and nothing moves under the pointer when a tool is picked.
 
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useDockLinePlacement } from './useDockLinePlacement';
 import { useReportCentreOwnRow } from '@/hooks/ui/centre-row-store';
 import { useCanvasSurface } from '@/components/canvas/CanvasSurfaceContext';
@@ -53,15 +46,13 @@ import { toSurfacePx, uiScaleStyle } from '@/lib/ui-scale';
 // How long the "seven pinned" hint stays up.
 const HINT_MS = 4000;
 
-// Where the wrapper sits (docs/specs/023-draw-mode/draw-mode.md "Where the dock sits"): on its line, centred between
-// the line's side groups with the same clearance on both sides (`--dock-clear`, useDockLinePlacement), or on a row of
-// its own just inside the line when it does not fit there, and always on a phone, 12px from the canvas's sides. The
-// dock is one card that scrolls inside itself, with no bleed. Its top or bottom is set inline (the line's 12px, or the
-// row past the line).
-const WRAPPER_PLACEMENT = {
-  onLine: 'left-1/2 -translate-x-1/2 max-w-[calc(100%-2*var(--dock-clear,7.5rem))]',
-  ownRow: 'left-1/2 -translate-x-1/2 max-w-[calc(100%-1.5rem)]',
-};
+// Where the wrapper sits (docs/specs/023-draw-mode/draw-mode.md "Where the dock sits"): on its line, centred, or off
+// centre between the line's side groups while it fits there (its left edge and room set inline, useDockLinePlacement),
+// or on a row of its own just inside the line, centred, 12px from the canvas's sides (and always on a phone). The dock
+// is one card that scrolls inside itself, with no bleed. Its top or bottom is set inline too.
+const WRAPPER_OWN_ROW = 'left-1/2 -translate-x-1/2 max-w-[calc(100%-1.5rem)]';
+// Until measured: centred, as wide as it likes short of the canvas's sides.
+const WRAPPER_UNMEASURED = WRAPPER_OWN_ROW;
 
 type WhiteboardDockProps = {
   model: WhiteboardDockModel;
@@ -279,15 +270,18 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
         e.stopPropagation();
       }}
       style={{
-        ...(placement === null
-          ? {}
-          : ({ '--dock-clear': `${toSurfacePx(placement.clear, scale)}px` } as CSSProperties)),
+        ...(placement && !placement.ownRow
+          ? {
+              left: toSurfacePx(placement.left, scale),
+              maxWidth: toSurfacePx(placement.room, scale),
+            }
+          : {}),
         ...(scale === 1 ? {} : uiScaleStyle(scale)),
         // Restated in the dock's own units, so it keeps its distance however it is zoomed.
         [model.position]: toSurfacePx(edge, scale),
       }}
       data-dock-row={placement?.ownRow ? 'own' : 'line'}
-      className={`pointer-events-none absolute z-[var(--z-toolbar)] w-max ${placement?.ownRow ? WRAPPER_PLACEMENT.ownRow : WRAPPER_PLACEMENT.onLine}`}
+      className={`pointer-events-none absolute z-[var(--z-toolbar)] w-max ${placement && !placement.ownRow ? '' : placement ? WRAPPER_OWN_ROW : WRAPPER_UNMEASURED}`}
     >
       <DockBody below={below} hint={hint} fly={fly} open={open} groups={groups} />
     </div>

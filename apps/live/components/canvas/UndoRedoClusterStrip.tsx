@@ -3,7 +3,7 @@
 import { HoverCard, RedoIcon, UndoIcon } from '@livedoc/ui';
 import { CLUSTER_STRIP } from '@/components/canvas/cluster-strip';
 
-// The Undo / Redo strip in the bottom-right cluster: the leftmost item,
+// The Undo / Redo strip in the tools group: the leftmost item,
 // before Layers + Theme & Canvas. Edit sessions only: undo / redo aren't
 // actionable for a view-role visitor, so the caller renders nothing for
 // them.

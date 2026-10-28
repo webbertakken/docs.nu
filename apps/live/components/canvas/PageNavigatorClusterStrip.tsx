@@ -1,7 +1,7 @@
 'use client';
 
 // The page navigator (docs/specs/007-editor/pages-mode.md "Getting around the pages"): in the
-// bottom-right cluster, right of Undo / Redo, while the tab has two pages or more: previous, the
+// tools group, right of Undo / Redo, while the tab has two pages or more: previous, the
 // place of the page someone is on ("2 of 5"), next. An arrow fits the neighbouring page in the view,
 // as a press on its label does. For everyone who can see the pages.
 import { lucideChevronLeft, lucideChevronRight } from '@livedoc/icons/lucide';

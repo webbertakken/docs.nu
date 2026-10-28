@@ -65,7 +65,7 @@ export function pageOrPopover(pageId: string, name: string): string {
   return document.querySelector(titlePopover(name)) ? titlePopover(name) : pageButton(pageId, name);
 }
 
-// The Slide Deck, opened from the Slides button in the bottom-right cluster. The anchor is the button itself
+// The Slide Deck, opened from the Slides button in the tools group. The anchor is the button itself
 // (ClusterPopoverSegment) or, in an older layout, its wrapper: matched either way, as missing it left out every deck
 // step (and Present) without a sign.
 export const SLIDES_BUTTON =

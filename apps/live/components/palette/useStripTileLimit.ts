@@ -4,7 +4,7 @@
 // (docs/specs/007-editor/toolbar-layout.md "Twelve tiles is enough"): the chrome around the tiles (the
 // pickers, More, dividers, padding: whatever they measure today, in whatever
 // category), one tile's pitch, and the room the centred strip may take (the
-// window less the Explorer menu button on both sides; on a phone, the window
+// room between the top line's side groups, lib/line-centre; on a phone, the window
 // less its gutters and the menu card beside the strip). Nothing is assumed about how wide a picker is, so a
 // longer category name or a new control keeps fitting.
 //
@@ -16,7 +16,7 @@
 import { useLayoutEffect, useState, type RefObject } from 'react';
 import { fitStripTiles } from './toolbar-strip-tiles';
 import { editorViewportOf } from '@/lib/editor-viewport';
-import { measureTopLineClearance } from '@/lib/top-line-clearance';
+import { measureTopLine } from '@/lib/top-line-clearance';
 
 const PHONE_GUTTERS_PX = 24;
 
@@ -58,7 +58,6 @@ export function useStripTileLimit(
       // the minimum, so keep the last good answer instead.
       if (tileWidth <= 0 || cardWidth <= 0) return;
       const gap = parseFloat(getComputedStyle(tile.parentElement!).columnGap) || 0;
-      const pitch = tileWidth + gap;
       // The rail's share of the card is its width plus its (negative) side
       // margins, which give its pressed rings room inside the clip.
       const railStyle = getComputedStyle(rail);
@@ -67,6 +66,10 @@ export function useStripTileLimit(
         (parseFloat(railStyle.marginLeft) || 0) +
         (parseFloat(railStyle.marginRight) || 0);
       const chrome = cardWidth - railShare;
+      // A tile's pitch, as the rail lays them out: tiles a fixed divider follows are wider, so the mean of those drawn,
+      // never less than a bare tile and its gap. The bare tile alone underestimated a rail with dividers, which then
+      // ran one tile past the room between the top line's groups.
+      const pitch = Math.max(tileWidth + gap, (railShare + gap) / items.length);
       // The room is the editor's: the window, or its pane in a side by side split
       // (docs/specs/007-editor/split-view.md), measured from the pane's own left edge.
       const view = editorViewportOf(card);
@@ -77,9 +80,9 @@ export function useStripTileLimit(
         if (leadingRef?.current)
           available = vw - PHONE_GUTTERS_PX / 2 - (card.getBoundingClientRect().left - view.left);
       } else {
-        // Clear of both side groups of the top line (lib/top-line-clearance).
-        const clear = measureTopLineClearance(view);
-        available = vw - 2 * clear;
+        // Between the top line's side groups, centred or not (lib/line-centre): tiles drop only once the strip no
+        // longer fits between them.
+        available = measureTopLine(view, cardWidth).room;
       }
       setMeasured(fitStripTiles({ available, chrome, pitch }));
     };

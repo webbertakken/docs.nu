@@ -1,7 +1,7 @@
 // Where the paste notice sits (docs/specs/020-import-export/board-scene.md "In the editor"): its own
 // slot just above the whiteboard dock, so it never covers a dock button at any width. With no dock
 // (a diagram tab, a read-only board) it takes the slot a dock would have: lifted above the
-// bottom-right cluster's line until the window is wide enough for both side by side, as the dock
+// tools group's line until the window is wide enough for both side by side, as the dock
 // is (WhiteboardDock: bottom 4.25rem, 1rem from 1760 px; whiteboard-dock blueprint D9).
 
 // The gap between the notice and what it sits above.

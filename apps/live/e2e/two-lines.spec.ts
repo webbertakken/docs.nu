@@ -50,6 +50,24 @@ test.describe('the two lines', () => {
     expectNoPageErrors(pageErrors);
   });
 
+  // docs/specs/007-editor/toolbar-layout.md "When a line runs out of room": centred while it fits centred, then off
+  // centre between the groups, then fewer tiles, all on the line; its own row only after.
+  test('keeps the strip on the top line at 1024, off centre between the groups', async ({
+    page,
+    pageErrors,
+  }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await openStartBlank(page);
+    const b = await box(brand(page));
+    const a = await box(actions(page));
+    await expect.poll(async () => Math.round((await box(strip(page))).y)).toBe(Math.round(b.y));
+    const s = await box(strip(page));
+    expect(s.x).toBeGreaterThanOrEqual(b.x + b.width + 7);
+    expect(s.x + s.width).toBeLessThanOrEqual(a.x - 7);
+    await page.screenshot({ path: 'test-results/two-lines-1024.png' });
+    expectNoPageErrors(pageErrors);
+  });
+
   test('Back goes to the Explorer, caret and mark, no wordmark', async ({ page, pageErrors }) => {
     await openStartBlank(page);
     const back = brand(page).getByRole('link', { name: 'Back to the Explorer' });

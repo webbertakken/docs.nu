@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { HoverCard } from '@livedoc/ui';
 import { CLUSTER_STRIP, CLUSTER_CONTROL_REST } from '@/components/canvas/cluster-strip';
 
-// A bottom-right cluster button that opens a panel as a popover hanging ABOVE it, as the Layers
+// A tools group button that opens a panel as a popover hanging ABOVE it, as the Layers
 // button does, and shows pressed while it is open: Slides in Pages mode, Card Types in Plan
 // mode, each where Layers sits in the other modes. Two or more can share one frame, as Undo and Redo
 // do (ClusterStrip of ClusterPopoverSegments): Plan's Find a Card and Card Types.

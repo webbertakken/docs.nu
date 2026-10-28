@@ -5,7 +5,7 @@ import { useUiScale } from '@/components/providers/ui-scale';
 
 // The panels that open as popovers off a button: the Toolbar layout's
 // Explorer, from its menu button (docs/specs/007-editor/toolbar-layout.md), and Layers / Activity /
-// Collaborate, from their bottom-right cluster buttons (docs/specs/007-editor/live-app.md). One is open
+// Collaborate, from their tools group buttons (docs/specs/007-editor/live-app.md). One is open
 // at a time. This hook owns which (if any), the resolved popover anchor, and
 // the toggle handler. The anchor math is the pure computeDockAnchor (tested
 // in lib/canvas-chrome.test.ts); the DOM-rect reads stay here.
@@ -83,7 +83,7 @@ export function useDockPopovers(mainRef: Ref<HTMLElement>) {
 
   // Toggle a panel's popover from the button that owns it. The popover hangs
   // from the button (computeDockAnchor's 'button'), or, with `above`, opens
-  // up from a button in the bottom-right cluster. Tapping the open panel's
+  // up from a button in the tools group. Tapping the open panel's
   // button closes it.
   const handleDockButtonClick = (id: DockPanel, button: HTMLElement, above = false) => {
     if (activeDockPanel === id) {

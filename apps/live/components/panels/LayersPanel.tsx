@@ -199,7 +199,7 @@ export function LayersPanel({
     <MovablePanel
       helpArticle="layers"
       title="Layers"
-      // A popover over its bottom-right cluster button (docs/specs/006-document/layers.md): never placed or dragged.
+      // A popover over its tools group button (docs/specs/006-document/layers.md): never placed or dragged.
       position={null}
       defaultCorner="bottom-right"
       width="w-auto sm:w-80"

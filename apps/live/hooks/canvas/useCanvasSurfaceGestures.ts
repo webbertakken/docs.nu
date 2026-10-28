@@ -24,7 +24,7 @@ import { isPanThrough, panThroughTap } from '@/hooks/canvas/pan-through';
 
 type PanAndMarquee = ReturnType<typeof useCanvasPanAndMarquee>;
 
-// The bottom-right cluster (Undo / Redo, Layers, Theme & Canvas, Zoom) is chrome, never canvas.
+// The tools group (Undo / Redo, Layers, Theme & Canvas, Zoom) is chrome, never canvas.
 // Its buttons stop the press only in the bubble phase, after the capture intercept: without this,
 // a held Draw mode marker inked a dot under Undo and the click then undid that dot instead of the
 // stroke the person meant (and an armed eraser, shape or spotlight acted under the button too).
@@ -186,7 +186,7 @@ export function useCanvasSurfaceGestures({
     // start a gesture at the click point and drop the pending shape
     // behind the panel. Bail before any canvas gesture starts.
     if ((e.target as Element | null)?.closest?.('[data-floating-panel]')) return;
-    // The bottom-right cluster is chrome too (see inCornerCluster).
+    // The tools group is chrome too (see inCornerCluster).
     if (inCornerCluster(e.target)) return;
     // A maximised or tab-filling Plan board covers the canvas (docs/specs/026-plan/plan-board.md "Maximised board"):
     // a press on it, or on the cover around it, is the board's or nothing, never a canvas gesture.

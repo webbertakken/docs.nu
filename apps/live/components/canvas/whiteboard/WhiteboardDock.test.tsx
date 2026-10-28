@@ -423,16 +423,10 @@ describe('WhiteboardDock position', () => {
     expect(refusePin().dataset.side).toBe('above');
   });
 
-  it('sits centred on its line, clear of the side groups on both sides', () => {
+  it('sits centred until it is measured onto its line', () => {
     renderDock(model('select', { pinnedShapes: [...SEVEN] }));
     const cls = dock().className.split(' ');
-    expect(cls).toEqual(
-      expect.arrayContaining([
-        'left-1/2',
-        '-translate-x-1/2',
-        'max-w-[calc(100%-2*var(--dock-clear,7.5rem))]',
-      ]),
-    );
+    expect(cls).toEqual(expect.arrayContaining(['left-1/2', '-translate-x-1/2']));
     expect(dock().dataset.dockRow).toBe('line');
   });
 

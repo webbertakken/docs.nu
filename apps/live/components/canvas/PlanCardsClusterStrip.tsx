@@ -7,7 +7,7 @@ import { TrashDropTarget, TrashSegment, usePlanCardDragging } from './TrashClust
 import { NewCardSegment } from './NewCardClusterButton';
 import { usePlan } from '@/components/plan/PlanContext';
 
-// Plan mode's buttons in the bottom-right cluster, one strip as Undo and Redo are, where Layers sits in the other
+// Plan mode's buttons in the tools group, one strip as Undo and Redo are, where Layers sits in the other
 // modes: the **Trash** on its left (docs/specs/026-plan/items.md "Trash"; given only off a phone, to an editor),
 // then **New Card** (an editor's +, items.md "New Card"), then **Find a Card** (items.md "Finding a card"), the search over every card in the document, then **Card
 // Types** (docs/specs/026-plan/item-types.md "The Card Types panel"). Each opens its own panel above it. While a

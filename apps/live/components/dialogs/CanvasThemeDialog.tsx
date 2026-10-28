@@ -200,7 +200,7 @@ export function CanvasThemeDialog({
             anchor
               ? {
                   ...uiScaleStyle(panelScale),
-                  right: toSurfacePx(anchor.right, panelScale),
+                  left: toSurfacePx(anchor.left, panelScale),
                   bottom: toSurfacePx(anchor.bottom, panelScale),
                   maxHeight: `calc(100% - ${toSurfacePx(anchor.bottom + 16, panelScale)}px)`,
                   transformOrigin: 'bottom right',
@@ -328,25 +328,26 @@ export function CanvasThemeDialog({
   );
 }
 
-// The paintbrush's place: how far the panel's right edge and bottom sit from the window's, so it sits just above the
-// brush with its right edge on the bottom-right cluster's (the screen's right-hand side), keeping as much of the work
-// as it can in view. Null without a brush on screen, or on a phone (below 640 px), where it stays a dialog.
+// The paintbrush's place: where the panel's left edge and bottom sit, so it sits just above the brush with its left
+// edge on the tools group's (the canvas's bottom-left corner, docs/specs/011-theme/canvas-and-theme-dialog.md),
+// keeping as much of the work as it can in view. Null without a brush on screen, or on a phone (below 640 px), where
+// it stays a dialog.
 const BRUSH_GAP_PX = 8;
-function useBrushAnchor(): { right: number; bottom: number } | null {
+function useBrushAnchor(): { left: number; bottom: number } | null {
   // Read once as it opens, in the browser only (use(browser())): the brush does not move while it is open.
   use(browser());
-  const [anchor] = useState<{ right: number; bottom: number } | null>(() => {
+  const [anchor] = useState<{ left: number; bottom: number } | null>(() => {
     if (window.innerWidth < 640) return null;
     const brush = document.querySelector<HTMLElement>('[data-tour-id="canvas-theme"]');
     const box = brush?.getBoundingClientRect();
     if (!box || box.width === 0) return null;
-    // The cluster's right edge (the zoom controls end it), else the brush's own.
-    const cluster = document
+    // The tools group's left edge (its outer end), else the brush's own.
+    const group = document
       .querySelector<HTMLElement>('[data-zoom-cluster]')
       ?.getBoundingClientRect();
-    const edge = cluster && cluster.width > 0 ? Math.max(cluster.right, box.right) : box.right;
+    const edge = group && group.width > 0 ? Math.min(group.left, box.left) : box.left;
     return {
-      right: Math.max(8, Math.round(window.innerWidth - edge)),
+      left: Math.max(8, Math.round(edge)),
       bottom: Math.round(window.innerHeight - box.top + BRUSH_GAP_PX),
     };
   });

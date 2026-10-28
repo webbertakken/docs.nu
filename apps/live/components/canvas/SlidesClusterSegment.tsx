@@ -9,7 +9,7 @@ export function showsSlidesButton(pages: readonly { kind?: string }[]): boolean 
   return pages.some((p) => p.kind === 'slide');
 }
 
-// The Slides button in the bottom-right cluster, in Pages mode (docs/specs/007-editor/
+// The Slides button in the tools group, in Pages mode (docs/specs/007-editor/
 // pages-mode.md "Slides"): an infographic is likely to be presented, so its deck sits one
 // press away, where Layers sits in the other modes. The second segment of the pages strip
 // (PagesClusterStrip), after Contents.

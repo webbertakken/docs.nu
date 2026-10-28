@@ -31,7 +31,6 @@ export function useDockLinePlacement(
       const [start, end] = SIDES[position].map((s) => find(s)?.getBoundingClientRect() ?? null);
       const line = position === 'bottom' ? find('[data-bottom-line]') : find(BRAND_GROUP_SELECTOR);
       const next = dockLinePlacement({
-        position,
         view,
         start: start ?? null,
         end: end ?? null,
@@ -42,7 +41,8 @@ export function useDockLinePlacement(
       setPlacement((prev) =>
         prev &&
         prev.ownRow === next.ownRow &&
-        Math.round(prev.clear) === Math.round(next.clear) &&
+        prev.left === next.left &&
+        prev.room === next.room &&
         Math.round(prev.edge) === Math.round(next.edge)
           ? prev
           : next,

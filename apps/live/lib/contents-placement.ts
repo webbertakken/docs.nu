@@ -1,6 +1,6 @@
 // Where Pages mode's Contents sits on a desktop (docs/specs/007-editor/pages-mode.md "Contents"):
 // docked as a sidebar down the canvas's left, the way a slide editor shows its slides, or minimised
-// to the Contents button in the bottom-right cluster. The person's own choice, kept in their synced
+// to the Contents button in the tools group. The person's own choice, kept in their synced
 // preferences (lib/user-preferences.ts) so it follows them across devices. A phone always has the
 // button.
 import type { UserPreferences } from './user-preferences';
@@ -24,7 +24,7 @@ export function withContentsPlacement(
 export const CONTENTS_SIDEBAR_SELECTOR = '[data-contents-sidebar]';
 // Its width in px, at the panels' UI scale. It sits flush against the canvas's edge, no gap.
 export const CONTENTS_SIDEBAR_WIDTH = 236;
-// The resting inset the corner panels and the bottom-right cluster keep from what is beside them.
+// The resting inset the corner panels and the tools group keep from what is beside them.
 const CONTENTS_SIDEBAR_GAP = 16;
 
 // The sidebar is docked with more than one page: a single page has nothing to find its way round,
@@ -42,7 +42,7 @@ export function readContentsSide(stored: string | null): ContentsSide {
   return stored === 'right' ? 'right' : 'left';
 }
 
-// How far the corner stacks and the bottom-right cluster on the sidebar's side start from the
+// How far the corner stacks and the tools group on the sidebar's side start from the
 // canvas's edge while it is docked: past it, with their usual inset.
 export function contentsSidebarClearancePx(panelScale: number): number {
   return CONTENTS_SIDEBAR_WIDTH * panelScale + CONTENTS_SIDEBAR_GAP;

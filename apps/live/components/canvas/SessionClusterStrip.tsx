@@ -8,7 +8,7 @@ import { useNow } from '@/hooks/ui/useNow';
 import { CLUSTER_CONTROL_REST } from '@/components/canvas/cluster-strip';
 import { ClusterPopoverSegment, ClusterStrip } from './ClusterPopoverButton';
 
-// The Session strip in the bottom-right cluster (docs/specs/012-collaboration/session-tools.md "The Session
+// The Session strip in the tools group (docs/specs/012-collaboration/session-tools.md "The Session
 // strip"): Timer, Vote and Poll in one strip left of Layers, as Plan mode's buttons share one. Each
 // opens its tool above it, set-up while idle and the live tool while it runs. An editor always has
 // the three; a view-role visitor, who cannot start anything, gets only the ones running. The Timer

@@ -60,7 +60,7 @@ function setup(
       preventDefault: vi.fn(),
       stopPropagation: vi.fn(),
     } as unknown as ReactPointerEvent);
-  // The bottom-right cluster's Undo button, inside <main> as CanvasChrome renders it.
+  // The tools group's Undo button, inside <main> as CanvasChrome renders it.
   const cluster = document.createElement('div');
   cluster.setAttribute('data-zoom-cluster', '');
   const undo = document.createElement('button');
@@ -110,9 +110,9 @@ describe('whiteboard pen versus touch', () => {
   });
 });
 
-// A held marker must not ink under the bottom-right cluster: pressing Undo drew a dot there, and
+// A held marker must not ink under the tools group: pressing Undo drew a dot there, and
 // the click then undid the dot instead of the stroke (docs/specs/023-draw-mode/draw-mode.md "Pens").
-describe('the bottom-right cluster is chrome, not canvas', () => {
+describe('the tools group is chrome, not canvas', () => {
   it('starts no stroke when Undo is pressed with a marker held', () => {
     const s = setup(true);
     s.press('mouse', s.undo);
