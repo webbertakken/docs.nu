@@ -18,12 +18,13 @@ const VIEW_LOADERS = {
   health: () => import('./HealthView').then((m) => m.HealthView),
   search: () => import('./MetricSearch').then((m) => m.MetricSearch),
 };
-// While a view's code downloads, its skeleton holds the tab's place (without one, `dynamic` draws nothing).
-const viewOptions = { ssr: false, loading: () => <DashboardSkeleton variant="view" /> } as const;
-const FeaturesView = dynamic(VIEW_LOADERS.features, viewOptions);
-const PagesHelpView = dynamic(VIEW_LOADERS.pages, viewOptions);
-const HealthView = dynamic(VIEW_LOADERS.health, viewOptions);
-const MetricSearch = dynamic(VIEW_LOADERS.search, viewOptions);
+// While a view's code downloads, its skeleton holds the tab's place (without one, `dynamic` draws nothing). Each
+// call spells its options out: next/dynamic takes only an object literal.
+const ViewSkeleton = () => <DashboardSkeleton variant="view" />;
+const FeaturesView = dynamic(VIEW_LOADERS.features, { ssr: false, loading: ViewSkeleton });
+const PagesHelpView = dynamic(VIEW_LOADERS.pages, { ssr: false, loading: ViewSkeleton });
+const HealthView = dynamic(VIEW_LOADERS.health, { ssr: false, loading: ViewSkeleton });
+const MetricSearch = dynamic(VIEW_LOADERS.search, { ssr: false, loading: ViewSkeleton });
 
 // Fetch every other view's code once the page is idle (a timeout where requestIdleCallback is missing).
 export function prefetchViews(): () => void {

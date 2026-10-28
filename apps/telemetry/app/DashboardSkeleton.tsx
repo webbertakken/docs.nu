@@ -7,7 +7,7 @@ import { WINDOW_META } from './windows';
 // `page`: the whole dashboard before the summary answers (WindowPanel, ViewTabs, the Dashboard tab's first groups).
 // `view`: a Detail tab's place while its code downloads (its groups of cards alone).
 
-const PULSE = 'animate-pulse bg-slate-200/70 motion-reduce:animate-none dark:bg-slate-800/70';
+const PULSE = 'animate-pulse bg-slate-200/70 motion-reduce:animate-none dark:bg-slate-700/60';
 const CARD = 'rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900';
 // MetricCards' grid.
 const GRID = 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3';
