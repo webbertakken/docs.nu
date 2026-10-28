@@ -80,7 +80,9 @@ Every write takes what a person would say, and stores the ids:
   only on a tab in Plan. Add a Board tab with add_tab and template "kanban" (or another board template).), read with
   the tab the board is placed beside, so it costs no extra request.
 - It is placed as the palette places one: a column named like a status the document's boards already use takes
-  that status, so its cards show on both boards; any other column gets a status of its own and starts empty.
+  that status, so its cards show on both boards; any other column gets a status of its own and starts empty. Each
+  column's status is made from its unique id, so two names that shorten to one id ("Waiting A" and "Waiting B" cut
+  to one slug, or two names in a script the slug drops) still make two columns.
 - It goes on the tab named, else the first tab that already has a board, else the first tab, to the right of
   everything the tab holds (tops aligned), as one changeset an agent can revert.
 - It brings its preset's card types, as placing it in the editor does

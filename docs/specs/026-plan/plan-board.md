@@ -35,7 +35,8 @@ Stored on the element, shared by everyone, undone like any element edit:
   takes both back); a board someone titled differently keeps its title, and a tab that already had a name of its own
   renames no board.
 - **Columns**: each a **status** value and a display name, an optional **WIP limit** and an optional colour. A board
-  has 1 to 12 columns. The first column is where new items land when no column is chosen.
+  has 1 to 12 columns. A column's status is read trimmed, as a card's status is, so a card moved into it lands in
+  it. The first column is where new items land when no column is chosen.
 - **Done column**: optionally one column is marked done: its cards draw muted and count as finished in the
   header's progress.
 - **The header's controls** run Focus, Maximise, then the cog. There is no ⋯: the cog is the board's menu.
@@ -718,8 +719,9 @@ to import. Import CSV reads files up to 5 MB." Each row after it becomes a new c
 - **Start**, **Due** and a custom date field: YYYY-MM-DD, or a day-first D/M/YYYY (also with `-` or `.`, and a
   two-digit year in this century); a date that is not a real day is left empty.
 - **Labels**: split at commas and semicolons, as many as a card holds. **Description**: plain text, cut to its limit.
-- Custom fields of the row's type by label: a number as a number, a checkbox from Yes/True/1/X, a choice only as one
-  of its options; a Card field is not imported.
+- Custom fields of the row's type by label: a number as a number, a Currency as the amount a card stores (a
+  number of up to two decimals, "£1,200.456" read as 1200.46), an Email only when it is an email address, a checkbox
+  from Yes/True/1/X, a choice only as one of its options; a Card field is not imported.
 - A field the row's type does not offer is ignored, as is a value that does not fit its field.
 
 The rows go in as **one write and one undo step**, each card at the end of its column in file order. At most as many
