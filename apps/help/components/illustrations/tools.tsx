@@ -2,18 +2,16 @@
 // mode, Markdown import, and the two layout tidiers (Auto-Align, Auto Layout).
 // Composed only from the shared primitives so the house style holds.
 
-import { useId } from 'react';
+import { Scene, Shape, Arrow, SelectionBox, Panel, Label, TextBar, Button } from './primitives';
 import {
-  Scene,
-  Shape,
-  Arrow,
-  SelectionBox,
-  Panel,
-  Tile,
-  Label,
-  TextBar,
-  Button,
-} from './primitives';
+  ActionsGroup,
+  BRAND_W,
+  BrandGroup,
+  DocumentGroup,
+  MiniStrip,
+  ToolsGroup,
+  actionsGroupWidth,
+} from './editor-lines';
 
 // --- AI ---------------------------------------------------------------------
 
@@ -91,174 +89,66 @@ export function AiPanel() {
 
 // --- Zen mode ---------------------------------------------------------------
 
-/** The editor with full chrome (header, tab bar, palette, zoom dock) over the
- *  canvas, before zen mode is turned on. */
+/** The editor with its full chrome over the canvas, before zen mode is turned on: the brand group, the strip and
+ *  the actions group along the top; the tools group with the zoom and the document group along the bottom. */
 export function ZenBefore() {
-  const grid = `grid-zenbefore-${useId().replace(/:/g, '')}`;
+  const sc = 0.62;
+  const VW = 420 / sc;
+  const VH = 240 / sc;
+  const stripX = 12 + BRAND_W + 10;
   return (
-    <Scene w={420} h={240} bg="none">
-      <rect x={0} y={0} width={420} height={240} className="fill-slate-50" />
-      {/* Header */}
-      <rect
-        x={0}
-        y={0}
-        width={420}
-        height={26}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <Label x={14} y={14} size={11} weight={700} tone="strong">
-        LiveDoc
-      </Label>
-      {/* Canvas */}
-      <rect x={0} y={26} width={420} height={192} fill={`url(#${grid})`} />
-      {/* Tab bar, along the bottom */}
-      <rect
-        x={0}
-        y={218}
-        width={420}
-        height={22}
-        className="fill-slate-100 stroke-slate-200"
-        strokeWidth={1}
-      />
-      <rect x={10} y={222} width={64} height={14} rx={4} className="fill-brand-500" />
-      <rect
-        x={80}
-        y={222}
-        width={64}
-        height={14}
-        rx={4}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1}
-      />
-      <defs>
-        <pattern id={grid} width="16" height="16" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" className="fill-slate-200" />
-        </pattern>
-      </defs>
-      <Shape x={96} y={108} w={80} h={44} label="A" />
-      <Shape x={232} y={108} w={80} h={44} accent label="B" />
-      <Arrow from={[176, 130]} to={[232, 130]} />
-      {/* Palette: one horizontal strip pinned to the top centre */}
-      <rect
-        x={140}
-        y={34}
-        width={140}
-        height={30}
-        rx={8}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <Tile x={170} y={49} active size={22}>
-        <rect
-          x={-6}
-          y={-6}
-          width={12}
-          height={12}
-          rx={2}
-          className="stroke-white"
-          strokeWidth={2}
-          fill="none"
-        />
-      </Tile>
-      <Tile x={210} y={49} size={22}>
-        <circle r={6} className="stroke-brand-500" strokeWidth={2} fill="none" />
-      </Tile>
-      <Tile x={250} y={49} size={22}>
-        <path
-          d="M0 -7 L7 0 L0 7 L-7 0 Z"
-          className="stroke-brand-500"
-          strokeWidth={2}
-          fill="none"
-        />
-      </Tile>
-      {/* Undo / Redo and Layers, left of the zoom dock */}
-      <rect
-        x={218}
-        y={186}
-        width={74}
-        height={24}
-        rx={7}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <path
-        d="M232 198 a5 5 0 1 1 3 4.5 M232 198 l-2.5 -3 M232 198 l3.5 -1.5"
-        className="fill-none stroke-slate-400"
-        strokeWidth={1.4}
-        strokeLinecap="round"
-      />
-      <path
-        d="M256 198 a5 5 0 1 0 -3 4.5 M256 198 l2.5 -3 M256 198 l-3.5 -1.5"
-        className="fill-none stroke-slate-400"
-        strokeWidth={1.4}
-        strokeLinecap="round"
-      />
-      <path
-        d="M272 195 l8 -4 l8 4 l-8 4 Z M272 200 l8 4 l8 -4"
-        className="fill-none stroke-slate-400"
-        strokeWidth={1.3}
-        strokeLinejoin="round"
-      />
-      {/* Zoom dock */}
-      <rect
-        x={300}
-        y={186}
-        width={104}
-        height={24}
-        rx={7}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <Label x={314} y={199} size={13} weight={700} tone="muted">
-        −
-      </Label>
-      <Label x={352} y={199} size={10} weight={600} tone="body" anchor="middle">
-        100%
-      </Label>
-      <Label x={388} y={199} size={13} weight={700} tone="muted">
-        +
-      </Label>
+    <Scene w={420} h={240}>
+      <Shape x={96} y={98} w={80} h={44} label="A" />
+      <Shape x={232} y={98} w={80} h={44} accent label="B" />
+      <Arrow from={[176, 120]} to={[232, 120]} />
+      <g transform={`scale(${sc})`}>
+        <BrandGroup x={12} y={12} />
+        <MiniStrip x={stripX} y={12} w={VW - 12 - actionsGroupWidth({}) - 10 - stripX} />
+        <ActionsGroup right={VW - 12} y={12} />
+        <ToolsGroup x={12} y={VH - 44} />
+        <DocumentGroup right={VW - 12} y={VH - 44} people={[]} />
+      </g>
     </Scene>
   );
 }
 
-/** Zen mode on: every panel hidden, just the canvas and the lone zoom dock
- *  (now an exit control). */
+/** Zen mode on: every panel hidden, just the canvas and the zoom at the bottom left (now with its exit control). */
 export function ZenAfter() {
   return (
     <Scene w={420} h={240}>
       <Shape x={96} y={96} w={80} h={44} label="A" />
       <Shape x={232} y={96} w={80} h={44} accent label="B" />
       <Arrow from={[176, 118]} to={[232, 118]} />
-      {/* Lone zoom dock with the exit-zen control */}
-      <rect
-        x={282}
-        y={204}
-        width={122}
-        height={26}
-        rx={8}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <Label x={296} y={218} size={14} weight={700} tone="muted">
-        −
-      </Label>
-      <Label x={330} y={218} size={10} weight={600} tone="body" anchor="middle">
-        100%
-      </Label>
-      <Label x={362} y={218} size={14} weight={700} tone="muted">
-        +
-      </Label>
-      {/* Compress / exit-zen glyph */}
-      <g transform="translate(388 217)">
-        <path
-          d="M-5 -2 h3 v-3 M2 -5 v3 h3 M5 2 h-3 v3 M-2 5 v-3 h-3"
-          className="stroke-brand-500"
-          strokeWidth={1.6}
-          fill="none"
-          strokeLinecap="round"
+      {/* Lone zoom dock with the exit-zen control, where the tools group was */}
+      <g transform="translate(-266 0)">
+        <rect
+          x={282}
+          y={204}
+          width={122}
+          height={26}
+          rx={8}
+          className="fill-white stroke-slate-200"
+          strokeWidth={1.5}
         />
+        <Label x={296} y={218} size={14} weight={700} tone="muted">
+          −
+        </Label>
+        <Label x={330} y={218} size={10} weight={600} tone="body" anchor="middle">
+          100%
+        </Label>
+        <Label x={362} y={218} size={14} weight={700} tone="muted">
+          +
+        </Label>
+        {/* Compress / exit-zen glyph */}
+        <g transform="translate(388 217)">
+          <path
+            d="M-5 -2 h3 v-3 M2 -5 v3 h3 M5 2 h-3 v3 M-2 5 v-3 h-3"
+            className="stroke-brand-500"
+            strokeWidth={1.6}
+            fill="none"
+            strokeLinecap="round"
+          />
+        </g>
       </g>
     </Scene>
   );
@@ -313,7 +203,7 @@ function MonitorGlyph({ x, y }: { x: number; y: number }) {
   );
 }
 
-/** One labelled chrome button (glyph + text) as the tab bar draws it. */
+/** One labelled chrome button (glyph + text), as Button Labels draws it. */
 function ChromeButton({
   x,
   y,
@@ -356,51 +246,48 @@ function ChromeButton({
   );
 }
 
-/** The Appearance button in the tab bar's right-hand cluster, beside Search
- *  and Settings, and the Light → Dark → System cycle each click steps through. */
+/** The Appearance button in the actions group at the top right, after Search, Report a Bug and Settings, and the
+ *  Light → Dark → System cycle each click steps through. */
 export function LightDarkToggle() {
+  const right = 408;
+  const sunX = right - actionsGroupWidth({}) + 6 + 77;
   return (
-    <Scene w={420} h={210} bg="canvas">
-      {/* The tab bar along the bottom of the editor. */}
+    <Scene w={420} h={170} bg="canvas">
+      <ActionsGroup right={right} y={14} />
       <rect
-        x={0}
-        y={150}
-        width={420}
-        height={44}
-        className="fill-slate-50 stroke-slate-200"
+        x={sunX - 13}
+        y={11}
+        width={26}
+        height={38}
+        rx={8}
+        fill="none"
+        className="stroke-brand-400"
         strokeWidth={1.5}
+        strokeDasharray="4 3"
       />
-      <rect
-        x={14}
-        y={159}
-        width={70}
-        height={26}
-        rx={7}
-        className="fill-brand-500 stroke-brand-600"
-        strokeWidth={1.5}
-      />
-      <Label x={49} y={173} size={11} weight={600} anchor="middle" tone="onAccent">
-        Tab 1
-      </Label>
-      <ChromeButton x={190} y={159} w={66} label="Search" />
-      <ChromeButton x={262} y={159} w={70} label="Settings" />
-      <ChromeButton x={338} y={159} w={70} label="Light" glyph="sun" />
-      {/* The cycle each click walks through. */}
-      <ChromeButton x={58} y={44} w={74} label="Light" glyph="sun" on />
-      <Arrow from={[138, 57]} to={[168, 57]} tone="muted" />
-      <ChromeButton x={174} y={44} w={72} label="Dark" glyph="moon" />
-      <Arrow from={[252, 57]} to={[282, 57]} tone="muted" />
-      <ChromeButton x={288} y={44} w={84} label="System" glyph="monitor" />
       <path
-        d="M330 76 V96 H95 V82"
+        d={`M${sunX} 52 V70`}
+        fill="none"
+        className="stroke-slate-300"
+        strokeWidth={1.5}
+        strokeDasharray="3 3"
+      />
+      {/* The cycle each click walks through. */}
+      <ChromeButton x={58} y={84} w={74} label="Light" glyph="sun" on />
+      <Arrow from={[138, 97]} to={[168, 97]} tone="muted" />
+      <ChromeButton x={174} y={84} w={72} label="Dark" glyph="moon" />
+      <Arrow from={[252, 97]} to={[282, 97]} tone="muted" />
+      <ChromeButton x={288} y={84} w={84} label="System" glyph="monitor" />
+      <path
+        d="M330 116 V136 H95 V122"
         fill="none"
         className="stroke-slate-300"
         strokeWidth={2}
         strokeDasharray="5 4"
         strokeLinecap="round"
       />
-      <path d="M90 84 L95 76 L100 84 Z" className="fill-slate-300" />
-      <Label x={212} y={110} size={10} tone="muted" anchor="middle">
+      <path d="M90 124 L95 116 L100 124 Z" className="fill-slate-300" />
+      <Label x={212} y={152} size={10} tone="muted" anchor="middle">
         Each click moves to the next setting
       </Label>
     </Scene>

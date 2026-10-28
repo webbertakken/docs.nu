@@ -1,5 +1,6 @@
 import { ArticleLayout } from '@/components/ArticleLayout';
 import { helpMetadata } from '@/lib/seo';
+import { TabListOverview } from '@/components/illustrations/user-interface';
 
 export const metadata = helpMetadata({
   title: 'The Tab List',
@@ -30,6 +31,10 @@ The tab list is the one place every tab is seen and switched to. It opens above 
 - **Find a tab**, when the document has more than five tabs: type to narrow the list by name.
 - Every tab, in the document's order, each with its icon, its name and a small stack of avatars showing who is on it right now. [Tab folders](/help/tabs/tab-folders/) are headings, with their tabs indented under them. The active tab's row is tinted and carries its **⋯** menu.
 - At the foot, **New Tab**.
+
+<Figure caption="The tab list, open above the tab stack: every tab in order with who is on it, a folder heading over its tabs, the active tab tinted with its ⋯, and New Tab.">
+  <TabListOverview />
+</Figure>
 
 Click a row to switch to that tab; the list closes. From the keyboard, the arrow keys move between the rows, `Enter` switches, and `Escape` closes the list and puts you back on the button that opened it.
 

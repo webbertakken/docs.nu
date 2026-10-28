@@ -1,6 +1,6 @@
 import { ArticleLayout } from '@/components/ArticleLayout';
 import { helpMetadata } from '@/lib/seo';
-import { AddToFolderMenu } from '@/components/illustrations/tabs';
+import { TabFolderStates, AddToFolderMenu } from '@/components/illustrations/tabs';
 
 export const metadata = helpMetadata({
   title: 'Tab Folders',
@@ -30,6 +30,10 @@ Open the tab list from the tab stack (or the people here) at the bottom right, a
 - **Click a tab** under a heading to switch to it; the list closes.
 - **The tab you are on stays visible.** When the active tab lives in a folder, its row is tinted under the folder's heading, and the active tab at the bottom right names it, so you can always see where you are.
 - **Presence comes along.** Each tab's row shows the avatars of the collaborators on it, inside a folder as anywhere else.
+
+<Figure caption="A folder in the tab list: its heading with the count, its tabs indented under it, and the tab you are on tinted.">
+  <TabFolderStates />
+</Figure>
 
 ## Putting tabs in folders
 

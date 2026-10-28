@@ -20,6 +20,7 @@ import {
   Menu,
 } from './primitives';
 import { MenuCard, Strip } from './toolbar-layout';
+import { DocumentGroup, ToolsGroup } from './editor-lines';
 import { ModeMark } from './mode-mark';
 
 // --- Shared bits -------------------------------------------------------------------------------
@@ -257,11 +258,10 @@ function TabStylePanel({
 
 // --- The canvas and its palette ----------------------------------------------------------------
 
-/** The canvas with the menu button and tab name top-left, the palette strip across the top
- *  (the canvas-tool and category dropdowns, the tiles, More and Search) and the bottom-right
- *  cluster (Undo and Redo, Layers beside the Theme & canvas paintbrush, then the zoom controls). */
+/** The canvas with the brand group top-left, the palette strip across the top (the canvas-tool and category
+ *  dropdowns, the tiles, More and Search), the tools group bottom-left (Undo and Redo, Layers beside the Theme &
+ *  canvas paintbrush, then the zoom controls) and the document group bottom-right. */
 export function CanvasPaletteOverview() {
-  const ink = { className: 'stroke-slate-500', strokeWidth: 1.4, fill: 'none' } as const;
   return (
     <Scene w={420} h={240}>
       <MenuCard x={8} y={14} />
@@ -271,58 +271,18 @@ export function CanvasPaletteOverview() {
       <Shape x={168} y={146} w={76} h={36} accent label="Done" />
       <Arrow from={[136, 93]} to={[176, 93]} />
       <Arrow from={[206, 120]} to={[206, 146]} />
-      {/* Bottom-right cluster: Undo and Redo, Layers and the paintbrush, then the zoom controls. */}
-      <rect
-        x={150}
+      {/* The bottom line: the tools group (Undo and Redo, Layers and the paintbrush, the zoom) at the left, the
+          document group at the right. */}
+      <ToolsGroup x={8} y={198} />
+      <DocumentGroup
+        right={412}
         y={198}
-        width={60}
-        height={30}
-        rx={7}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
+        name={null}
+        role={false}
+        tab="Tab 1"
+        count={1}
+        people={[]}
       />
-      <line x1={180} y1={204} x2={180} y2={222} className="stroke-slate-200" strokeWidth={1.2} />
-      <path d="M170 209 h-8 l3 -3 M162 209 l3 3 M162 209 h5 a4.5 4.5 0 0 1 0 9 h-2" {...ink} />
-      <path d="M190 209 h8 l-3 -3 M198 209 l-3 3 M198 209 h-5 a4.5 4.5 0 0 0 0 9 h2" {...ink} />
-      <rect
-        x={218}
-        y={198}
-        width={66}
-        height={30}
-        rx={7}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <line x1={251} y1={204} x2={251} y2={222} className="stroke-slate-200" strokeWidth={1.2} />
-      <path
-        d="M228 211 L235 208 L242 211 L235 214 Z M228 215 L235 218 L242 215"
-        {...ink}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M260 220 c3 0 4 -2 4 -4 l7 -9 a2 2 0 0 1 3 2 l-8 8 c0 2 -2 3 -6 3 Z"
-        className="fill-brand-400 stroke-slate-500"
-        strokeWidth={1.2}
-        strokeLinejoin="round"
-      />
-      <rect
-        x={292}
-        y={198}
-        width={114}
-        height={30}
-        rx={7}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      <Label x={310} y={214} anchor="middle" size={14} weight={700} tone="muted">
-        −
-      </Label>
-      <Label x={349} y={214} anchor="middle" size={11} weight={600} tone="body">
-        100%
-      </Label>
-      <Label x={388} y={214} anchor="middle" size={14} weight={700} tone="muted">
-        +
-      </Label>
     </Scene>
   );
 }

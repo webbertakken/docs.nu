@@ -164,7 +164,7 @@ function PageIcons({ cogX, cy }: { cogX: number; cy: number }) {
 
 /** Two pages in a row: each with its label above its top-left corner and its buttons and cog
  *  above its top-right, the + and the any-kind button after the last, and the page navigator in
- *  the bottom-right cluster beside Undo / Redo. */
+ *  the tools group, bottom left, beside Undo / Redo. */
 export function PagesScene() {
   return (
     <Scene w={480} h={250}>
@@ -247,8 +247,8 @@ export function PagesScene() {
           strokeWidth={1}
         />
       </g>
-      {/* The bottom-right cluster: Undo / Redo, then the page navigator */}
-      <g>
+      {/* The tools group at the bottom left: Undo / Redo, then the page navigator */}
+      <g transform="translate(-270 0)">
         <rect
           x={286}
           y={214}

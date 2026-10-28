@@ -83,8 +83,8 @@ export function ShortcutsToggle() {
   );
 }
 
-/** The palette strip across the top of the canvas as the category bar (Workshop, Pages), with the menu button and
- *  the tab's name in their card to its left. */
+/** The palette strip across the top of the canvas as the category bar (Workshop, Pages), with the brand group (Back,
+ *  the menu button and the mode switch) to its left. */
 export function CommandPalette() {
   return (
     <Scene w={420} h={190}>
@@ -109,28 +109,30 @@ export function ZenMode() {
       <Arrow from={[140, 108]} to={[184, 68]} kind="elbow" />
       <Arrow from={[226, 92]} to={[226, 140]} />
       <Arrow from={[268, 164]} to={[314, 108]} kind="curved" />
-      {/* Zoom controls, bottom-right, the one chrome Zen mode keeps, with Exit zen mode at the
-          right end of the same pill, behind a divider (ZoomControls). */}
-      <Panel x={276} y={194} w={128} h={30}>
-        <Label x={292} y={210} size={13} weight={700} tone="muted">
-          −
-        </Label>
-        <Label x={324} y={210} size={10} weight={600} tone="body" anchor="middle">
-          100%
-        </Label>
-        <Label x={354} y={210} size={13} weight={700} tone="muted">
-          +
-        </Label>
-        <line x1={370} y1={200} x2={370} y2={218} className="stroke-slate-200" strokeWidth={1} />
-        <path
-          d="M378 203 l4 4 M378 207 h4 v-4 M394 215 l-4 -4 M394 211 h-4 v4"
-          className="stroke-brand-500"
-          strokeWidth={1.6}
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Panel>
+      {/* Zoom controls, bottom-left where the tools group sits, the one chrome Zen mode keeps, with Exit zen
+          mode at the right end of the same pill, behind a divider (ZoomControls). */}
+      <g transform="translate(-260 0)">
+        <Panel x={276} y={194} w={128} h={30}>
+          <Label x={292} y={210} size={13} weight={700} tone="muted">
+            −
+          </Label>
+          <Label x={324} y={210} size={10} weight={600} tone="body" anchor="middle">
+            100%
+          </Label>
+          <Label x={354} y={210} size={13} weight={700} tone="muted">
+            +
+          </Label>
+          <line x1={370} y1={200} x2={370} y2={218} className="stroke-slate-200" strokeWidth={1} />
+          <path
+            d="M378 203 l4 4 M378 207 h4 v-4 M394 215 l-4 -4 M394 211 h-4 v4"
+            className="stroke-brand-500"
+            strokeWidth={1.6}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Panel>
+      </g>
     </Scene>
   );
 }

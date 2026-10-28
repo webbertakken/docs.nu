@@ -1,5 +1,5 @@
 // Plan mode illustrations (docs/specs/026-plan/): a board with its header widgets and columns, the
-// bottom-right cluster Plan mode brings, a column's cog, the board picker, the card panel, the card menu,
+// tools group Plan mode brings, a column's cog, the board picker, the card panel, the card menu,
 // the Card Types panel and one item on two boards. Composed from the shared primitives so the house style
 // holds; the labels are the editor's own (PlanColumnPopover, ItemPanel, PlanCardMenu, CardTypesPanel...).
 
@@ -242,7 +242,7 @@ function ClusterButton({
         width={34}
         height={34}
         rx={9}
-        className="fill-white stroke-slate-200"
+        className="fill-transparent stroke-transparent"
         strokeWidth={1.5}
       />
       <g transform={`translate(${x + 17} ${y + 17})`}>{children}</g>
@@ -265,15 +265,36 @@ function StripSegment({ x, label, children }: { x: number; label: string; childr
   );
 }
 
-/** Plan mode's bottom-right cluster, as CanvasChrome lays it out: Undo and Redo, then the Plan strip
+/** Plan mode's tools group, bottom left, as CanvasChrome lays it out: Undo and Redo, then the Plan strip
  *  where Layers sits in the other modes (the Trash with its grey count, New Card, Cards and Card
- *  Types), then the Theme paintbrush and the zoom controls. */
+ *  Types), then the Theme paintbrush and the zoom controls, each part after a divider. */
 export function PlanClusterScene() {
   const ink = 'stroke-slate-600';
   const seg = 50;
   const strip = { x: 92, w: seg * 4 };
   return (
     <Scene w={468} h={130} bg="canvas">
+      {/* The tools group: one card, its parts parted by dividers. */}
+      <rect
+        x={10}
+        y={42}
+        width={448}
+        height={38}
+        rx={10}
+        className="fill-white stroke-slate-200"
+        strokeWidth={1.5}
+      />
+      {[87, 297, 341].map((dx) => (
+        <line
+          key={dx}
+          x1={dx}
+          y1={50}
+          x2={dx}
+          y2={72}
+          className="stroke-slate-200"
+          strokeWidth={1.2}
+        />
+      ))}
       {/* Undo / Redo strip. */}
       <rect
         x={14}
@@ -281,7 +302,7 @@ export function PlanClusterScene() {
         width={68}
         height={34}
         rx={9}
-        className="fill-white stroke-slate-200"
+        className="fill-transparent stroke-transparent"
         strokeWidth={1.5}
       />
       <line x1={48} y1={50} x2={48} y2={72} className="stroke-slate-200" strokeWidth={1.5} />
@@ -312,7 +333,7 @@ export function PlanClusterScene() {
         width={strip.w}
         height={34}
         rx={9}
-        className="fill-white stroke-slate-200"
+        className="fill-transparent stroke-transparent"
         strokeWidth={1.5}
       />
       {[1, 2, 3].map((i) => (
@@ -381,7 +402,7 @@ export function PlanClusterScene() {
         width={108}
         height={34}
         rx={9}
-        className="fill-white stroke-slate-200"
+        className="fill-transparent stroke-transparent"
         strokeWidth={1.5}
       />
       <Label x={362} y={62} size={14} anchor="middle" tone="body">
@@ -398,7 +419,7 @@ export function PlanClusterScene() {
       </Label>
 
       <Label x={14} y={20} size={11} weight={600} tone="body">
-        In Plan mode, bottom right
+        In Plan mode, the tools group (bottom left)
       </Label>
     </Scene>
   );
@@ -960,7 +981,7 @@ export function PlanCardTypesScene() {
           + Add New Card Type
         </Label>
       </Panel>
-      {/* Its button, in the bottom-right cluster. */}
+      {/* Its button, in the tools group. */}
       <rect
         x={203}
         y={240}

@@ -1,11 +1,20 @@
 // Supported-devices illustrations (docs/specs/018-help/help-app.md): the editor framed inside a desktop
 // monitor, a tablet, and a phone, each with the chrome that screen size brings
-// (the full strip and corner controls on desktop, the swiping strip on mobile). Composed only
+// (the two lines on desktop and tablet, wrapped to the width on a phone). Composed only
 // from the shared primitives so the house style holds.
 
 import { type ReactNode } from 'react';
 
 import { Scene, Shape, Arrow, Panel, Label } from './primitives';
+import {
+  ActionsGroup,
+  BRAND_W,
+  BrandGroup,
+  DocumentGroup,
+  MiniStrip,
+  ToolsGroup,
+  actionsGroupWidth,
+} from './editor-lines';
 
 // A tiny stand-in flow drawn at any origin / scale, so the same diagram can sit
 // inside a roomy monitor or a cramped phone without redrawing it per frame.
@@ -39,133 +48,56 @@ function MiniFlow({
   );
 }
 
-// The editor's fixed chrome in miniature: the bottom bar (a tab pill or two at
-// the left, the quick-control icons at the right) and the bottom-right corner
-// cluster (undo/redo, layers, the paintbrush, zoom), drawn inside a screen.
-function MiniBottomBar({ x, y, w }: { x: number; y: number; w: number }) {
+/** The editor's two lines in miniature inside a screen `w` × `h` at (x, y), drawn at full size and scaled by
+ *  `s`: the brand group, the Palette strip and the actions group along the top; the tools group and the
+ *  document group along the bottom. On a `phone` the strip takes its own row under the top line, the document
+ *  group has no name and wraps above the tools group, and the zoom is Fit alone. */
+function ScreenLines({
+  x,
+  y,
+  w,
+  h,
+  s,
+  phone = false,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  s: number;
+  phone?: boolean;
+}) {
+  const W = w / s;
+  const H = h / s;
+  const actionsW = actionsGroupWidth({});
+  const stripX = 12 + BRAND_W + 10;
   return (
-    <g>
-      <rect x={x} y={y} width={w} height={16} className="fill-white" />
-      <line x1={x} y1={y} x2={x + w} y2={y} className="stroke-slate-200" strokeWidth={1} />
-      <rect
-        x={x + 6}
-        y={y + 3}
-        width={40}
-        height={10}
-        rx={3}
-        className="fill-white stroke-brand-400"
-        strokeWidth={1}
-      />
-      <rect x={x + 50} y={y + 3} width={28} height={10} rx={3} className="fill-slate-100" />
-      {[0, 1, 2].map((i) => (
-        <circle key={i} cx={x + w - 30 + i * 10} cy={y + 8} r={2.6} className="fill-slate-300" />
-      ))}
-    </g>
-  );
-}
-
-function MiniCornerCluster({ x, y }: { x: number; y: number }) {
-  // Undo, Redo, then Layers beside the theme brush, then the zoom pill ending in Fit.
-  return (
-    <g>
-      {[0, 1, 2, 3].map((i) => (
-        <rect
-          key={i}
-          x={x + i * 15 + (i >= 2 ? 3 : 0)}
-          y={y}
-          width={13}
-          height={14}
-          rx={3}
-          className="fill-white stroke-slate-200"
-          strokeWidth={1}
-        />
-      ))}
-      <rect
-        x={x + 66}
-        y={y}
-        width={58}
-        height={14}
-        rx={3}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1}
-      />
-      <Label x={x + 85} y={y + 8} anchor="middle" size={10} weight={600} tone="body">
-        100%
-      </Label>
-      <line x1={x + 106} y1={y + 2} x2={x + 106} y2={y + 12} className="stroke-slate-200" />
-      <path
-        d={`M${x + 110} ${y + 5} v-2 h3 M${x + 120} ${y + 3} h-3 M${x + 120} ${y + 3} v2 M${x + 110} ${y + 9} v2 h3 M${x + 120} ${y + 11} h-3 M${x + 120} ${y + 11} v-2`}
-        className="fill-none stroke-slate-400"
-        strokeWidth={1}
-      />
-    </g>
-  );
-}
-
-/** The editor's top row in miniature, `w` wide from (x, y): the menu button card, then the
- *  palette strip (its two dropdowns, a run of tiles, More and Search). */
-function MiniTopRow({ x, y, w }: { x: number; y: number; w: number }) {
-  const sx = x + 26;
-  const sw = w - 26;
-  const tiles = Math.max(0, Math.floor((sw - 84) / 14));
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={20}
-        height={18}
-        rx={4}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.2}
-      />
-      <path
-        d={`M${x + 6} ${y + 5.5}h8M${x + 6} ${y + 9}h8M${x + 6} ${y + 12.5}h8`}
-        className="stroke-slate-500"
-        strokeWidth={1.2}
-        strokeLinecap="round"
-      />
-      <rect
-        x={sx}
-        y={y}
-        width={sw}
-        height={18}
-        rx={5}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.2}
-      />
-      <rect x={sx + 4} y={y + 4} width={14} height={10} rx={2.5} className="fill-brand-100" />
-      <rect x={sx + 22} y={y + 4} width={26} height={10} rx={2.5} className="fill-brand-100" />
-      {Array.from({ length: tiles }, (_, i) => (
-        <rect
-          key={i}
-          x={sx + 56 + i * 14}
-          y={y + 5}
-          width={8}
-          height={8}
-          rx={1.5}
-          className={i === 0 ? 'fill-brand-500' : 'fill-none stroke-slate-400'}
-          strokeWidth={1}
-        />
-      ))}
-      {[0, 1, 2].map((i) => (
-        <circle key={i} cx={sx + sw - 24 + i * 3} cy={y + 9} r={0.9} className="fill-brand-500" />
-      ))}
-      <circle
-        cx={sx + sw - 9}
-        cy={y + 8.5}
-        r={3}
-        className="fill-none stroke-slate-500"
-        strokeWidth={1.1}
-      />
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <BrandGroup x={12} y={12} named={!phone} />
+      <ActionsGroup right={W - 12} y={12} />
+      {phone ? (
+        <MiniStrip x={12} y={52} w={W - 24} />
+      ) : (
+        <MiniStrip x={stripX + 44} y={12} w={W - 12 - actionsW - 10 - stripX - 44} />
+      )}
+      {phone ? (
+        <>
+          <DocumentGroup right={W - 12} y={H - 84} name={null} role={false} />
+          <ToolsGroup x={12} y={H - 44} />
+        </>
+      ) : (
+        <>
+          <ToolsGroup x={12} y={H - 44} />
+          <DocumentGroup right={W - 12} y={H - 44} />
+        </>
+      )}
     </g>
   );
 }
 
 // --- Desktop -----------------------------------------------------------------
 
-/** A monitor showing the full editor: the menu button and palette strip, the diagram, the
- *  bottom-right cluster with the zoom, and the bottom bar with the tabs. */
+/** A monitor showing the full editor: the two lines over the diagram. */
 export function DesktopEditor() {
   return (
     <Scene w={420} h={240} bg="plain">
@@ -184,11 +116,9 @@ export function DesktopEditor() {
       <g transform="translate(48 50) scale(0.92)">
         <MiniFlow x={0} y={0} />
       </g>
-      {/* The menu button and the palette strip across the top */}
-      <MiniTopRow x={40} y={32} w={300} />
-      {/* Corner cluster bottom-right, above the bottom bar with the tabs */}
-      <MiniCornerCluster x={258} y={158} />
-      <MiniBottomBar x={30} y={178} w={360} />
+      {/* The two lines: the brand group, the strip and the actions group along the top; the tools group and
+          the document group along the bottom. */}
+      <ScreenLines x={30} y={26} w={360} h={168} s={0.5} />
       {/* Monitor stand */}
       <rect x={196} y={204} width={28} height={16} className="fill-slate-200" />
       <rect x={166} y={220} width={88} height={7} rx={3.5} className="fill-slate-300" />
@@ -260,10 +190,8 @@ export function TabletLandscape() {
       <g transform="translate(70 56) scale(0.92)">
         <MiniFlow x={0} y={0} />
       </g>
-      {/* The menu button and the palette strip, like desktop */}
-      <MiniTopRow x={60} y={42} w={280} />
-      <MiniCornerCluster x={250} y={150} />
-      <MiniBottomBar x={52} y={168} w={330} />
+      {/* The two lines, like desktop */}
+      <ScreenLines x={52} y={36} w={330} h={148} s={0.46} />
       <Label x={210} y={210} anchor="middle" size={10} weight={600} tone="muted">
         Full layout, as on a computer
       </Label>
@@ -273,9 +201,8 @@ export function TabletLandscape() {
 
 // --- Mobile ------------------------------------------------------------------
 
-/** A phone running the touch editor: the menu card and the palette strip
- *  across the top, the diagram opened zoomed out, the
- *  Fit button and the bottom bar, and a finger interacting with the canvas. */
+/** A phone running the touch editor: the two lines wrapped to its width, the diagram opened zoomed out, and a
+ *  finger interacting with the canvas. */
 export function MobileEditor() {
   return (
     <Scene w={420} h={240} bg="plain">
@@ -291,89 +218,10 @@ export function MobileEditor() {
       />
       <rect x={188} y={22} width={44} height={5} rx={2.5} className="fill-slate-200" />
       <rect x={158} y={34} width={104} height={172} rx={6} className="fill-slate-50" />
-      {/* The menu button (Explorer) in its own card, then the palette strip
-          (docs/specs/007-editor/toolbar-layout.md): selection
-          mode, category, a couple of tiles, More, and Search at the end. */}
-      <rect
-        x={162}
-        y={40}
-        width={14}
-        height={18}
-        rx={4}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.2}
-      />
-      <path
-        d="M166 45.5h6M166 49h6M166 52.5h6"
-        className="stroke-slate-500"
-        strokeWidth={1.2}
-        strokeLinecap="round"
-      />
-      <rect
-        x={179}
-        y={40}
-        width={79}
-        height={18}
-        rx={5}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1.2}
-      />
-      <rect x={182} y={44} width={9} height={10} rx={2.5} className="fill-brand-100" />
-      <rect x={193} y={44} width={9} height={10} rx={2.5} className="fill-brand-100" />
-      <circle cx={186.5} cy={49} r={2} className="fill-brand-500" />
-      <path d="M195 47h5M195 49h5M195 51h5" className="stroke-brand-500" strokeWidth={1} />
-      <rect
-        x={206}
-        y={46}
-        width={6}
-        height={6}
-        rx={1}
-        className="fill-none stroke-slate-500"
-        strokeWidth={1}
-      />
-      <circle cx={219} cy={49} r={3.2} className="fill-none stroke-slate-500" strokeWidth={1} />
-      {/* More */}
-      <circle cx={229} cy={49} r={0.9} className="fill-brand-500" />
-      <circle cx={232} cy={49} r={0.9} className="fill-brand-500" />
-      <circle cx={235} cy={49} r={0.9} className="fill-brand-500" />
-      {/* Search, last */}
-      <circle cx={246} cy={48.5} r={3} className="fill-none stroke-slate-500" strokeWidth={1.1} />
-      <path
-        d="M248.2 50.7l2.3 2.3"
-        className="stroke-slate-500"
-        strokeWidth={1.1}
-        strokeLinecap="round"
-      />
-      {/* The Fit button, bottom-right, and the bottom bar with the tabs. */}
-      <rect
-        x={232}
-        y={172}
-        width={24}
-        height={13}
-        rx={3}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1}
-      />
-      <path
-        d="M236 176v-2h3M252 176v-2h-3M236 181v2h3M252 181v2h-3"
-        className="stroke-slate-500"
-        strokeWidth={1}
-        fill="none"
-      />
-      <rect x={158} y={190} width={104} height={16} className="fill-white" />
-      <line x1={158} y1={190} x2={262} y2={190} className="stroke-slate-200" strokeWidth={1} />
-      <rect
-        x={163}
-        y={193}
-        width={34}
-        height={10}
-        rx={3}
-        className="fill-white stroke-brand-400"
-        strokeWidth={1}
-      />
-      {[0, 1, 2].map((i) => (
-        <circle key={i} cx={232 + i * 9} cy={198} r={2.4} className="fill-slate-300" />
-      ))}
+      {/* The two lines, wrapped to the phone's width (docs/specs/007-editor/toolbar-layout.md "On a phone"):
+          the brand group and the actions group, the strip on its own row under them; the document group (no
+          name) above the tools group. */}
+      <ScreenLines x={158} y={34} w={104} h={172} s={0.25} phone />
       {/* Diagram, opened zoomed out */}
       <g transform="translate(164 78) scale(0.5)">
         <MiniFlow x={0} y={0} showLabels={false} />

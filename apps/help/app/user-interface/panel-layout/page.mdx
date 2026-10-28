@@ -1,5 +1,6 @@
 import { ArticleLayout } from '@/components/ArticleLayout';
 import { helpMetadata } from '@/lib/seo';
+import { PanelLayout } from '@/components/illustrations/user-interface';
 
 export const metadata = helpMetadata({
   title: 'Panel Layout',
@@ -16,6 +17,10 @@ export const metadata = helpMetadata({
 >
 
 Everything around the canvas is a toolbar, a **panel** or a fixed control. The canvas itself fills the screen, and the rest sits on top of it at the edges rather than taking fixed slots in a rigid layout, so what is on the canvas always has room to breathe. The layout is much the same on a computer, a tablet and a phone.
+
+<Figure caption="The canvas fills the screen: the brand group, the palette strip and the actions group along the top, the AI panel docked top-right, the Map over the tools group bottom-left, and the document group bottom-right.">
+  <PanelLayout />
+</Figure>
 
 ## What sits where
 
