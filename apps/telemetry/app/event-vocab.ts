@@ -74,6 +74,8 @@ const CATEGORY_COLORS: Record<TelemetryCategory, string> = {
   Explorer: '#155e75',
   // Deep teal-green, a stopwatch: apart from Email's teal and Cta's green.
   Timing: '#047857',
+  // Deep pink, a raised hand: apart from Error's red and every rose.
+  Feedback: '#9d174d',
 };
 export const categoryColor = (c: string, appearance: Appearance = 'light') =>
   forAppearance(CATEGORY_COLORS[c as TelemetryCategory] ?? '#94a3b8', appearance);
