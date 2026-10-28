@@ -60,7 +60,9 @@ identity, share-code path) and [11-api](../015-api/api.md) (share links).
   whether a password is in force.
 - `PUT /api/documents/:id/share-password` (owner, or a joined team member on a team document). Body
   `{ password: string | null }`. A null / empty / whitespace-only value clears
-  the password; anything else is trimmed, then hashed and stored. The visitor's
+  the password; anything else is trimmed, then hashed and stored. A new password shorter than
+  `SHARE_PASSWORD_MIN` (6, `@livedoc/api-schema`) after trimming is refused, `400 { error: 'password_too_short' }`,
+  storing nothing; a shorter password saved before the rule keeps working, since the gate never asks its length. The visitor's
   gate trims what is typed too, so a password saved with a stray leading or
   trailing space is still the one a visitor can enter. Returns
   `{ passwordSet: boolean }`.
@@ -174,7 +176,10 @@ beneath the passes (see [Live app → Share dialog](../007-editor/live-app.md#sh
 it applies to all links), hinting that everyone opening a pass must enter it,
 embeds included ([Read-only embeds (`/embed`)](embeds.md)). Switched on with no
 password yet, it reveals a `type="text"` input (the owner sees what they type)
-with **Save** (Enter also saves). Once a password is saved the field is replaced
+with **Save** (Enter also saves). A new password needs `SHARE_PASSWORD_MIN` (6) characters after trimming:
+until the field holds them, **Save** and Enter wait and a hint under the field reads **At least 6 characters.**
+(named by the field's `aria-describedby`). The api's own refusal is worded too: "A share password needs at least
+6 characters." Once a password is saved the field is replaced
 by a **Password Set** line with **Replace** and **Remove**: the server keeps only
 a hash, so the saved password cannot be shown again. **Replace** brings back the
 empty field with **Save** and **Cancel**. Switching it off with a password saved

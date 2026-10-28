@@ -18,7 +18,7 @@ import {
   type ShareLinkExpiry,
   type ShareRole,
 } from '@/lib/api-client';
-import { LEVEL_TELEMETRY_TYPE } from '@livedoc/api-schema';
+import { LEVEL_TELEMETRY_TYPE, SHARE_PASSWORD_MIN } from '@livedoc/api-schema';
 import { track } from '@/lib/telemetry';
 import { useToast } from '@/hooks/ui/useToast';
 import type { Participant } from '@/lib/identity';
@@ -178,8 +178,13 @@ export function useShareLinks(deps: ShareLinksDeps) {
       // Telemetry (docs/specs/017-telemetry/telemetry.md): the `type` is a preset, never the password.
       track('Document', 'Shared', passwordSet ? 'PasswordSet' : 'PasswordCleared');
       return passwordSet;
-    } catch {
-      toast.error('Could not update the share password. Try again.');
+    } catch (err) {
+      // A new password under SHARE_PASSWORD_MIN is the owner's to fix, not a failure to retry.
+      toast.error(
+        (err as { code?: unknown }).code === 'password_too_short'
+          ? `A share password needs at least ${SHARE_PASSWORD_MIN} characters.`
+          : 'Could not update the share password. Try again.',
+      );
       return undefined;
     }
   };

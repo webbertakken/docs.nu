@@ -1,3 +1,4 @@
+import { SHARE_PASSWORD_MIN } from '@livedoc/api-schema';
 import { Button, LockIcon } from '@livedoc/ui';
 import { useRef, useState } from 'react';
 import { SettingsRow } from '@/components/dialogs/settings/SettingsRow';
@@ -14,6 +15,9 @@ import { SettingsRow } from '@/components/dialogs/settings/SettingsRow';
 // The api keeps only a hash, so a saved password cannot be shown again: once
 // one is set the field gives way to a "Password Set" line with Replace and
 // Remove, and Replace brings back an empty field.
+//
+// A new password needs SHARE_PASSWORD_MIN characters after trimming (the api refuses fewer): until then Save waits
+// and a hint under the field says so.
 type SharePasswordSectionProps = {
   sharePasswordSet: boolean;
   // Resolves to whether a password is now set on success (`false` = cleared)
@@ -28,6 +32,9 @@ type SharePasswordSectionProps = {
 // guide rule, so it reads as the switch's detail rather than a stray row.
 const DETAIL_ROW =
   'ml-3.5 flex animate-fade-in items-center gap-2 border-l-2 border-slate-200 py-0.5 pl-3 dark:border-slate-700';
+
+// The too-short hint, named by the field (aria-describedby) while it shows. One Share dialog is open at a time.
+const HINT_ID = 'share-password-hint';
 
 export function SharePasswordSection({
   sharePasswordSet,
@@ -113,7 +120,9 @@ export function SharePasswordSection({
   };
 
   const showSetLine = sharePasswordSet && !replacing;
-  const canSave = !busy && pw.trim().length > 0;
+  const typed = pw.trim();
+  const tooShort = typed.length > 0 && typed.length < SHARE_PASSWORD_MIN;
+  const canSave = !busy && typed.length > 0 && !tooShort;
 
   return (
     <div
@@ -174,6 +183,7 @@ export function SharePasswordSection({
               }}
               placeholder={replacing ? 'Choose a new password' : 'Choose a password'}
               aria-label="Share password"
+              aria-describedby={tooShort ? HINT_ID : undefined}
               autoComplete="off"
               spellCheck={false}
               className="w-full rounded-lg border border-slate-200 bg-white py-1.5 pr-2 pl-8 font-mono text-sm text-slate-800 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -193,6 +203,14 @@ export function SharePasswordSection({
             </Button>
           ) : null}
         </div>
+      ) : null}
+      {switchOn && !showSetLine && tooShort ? (
+        <p
+          id={HINT_ID}
+          className="ml-3.5 border-l-2 border-slate-200 pl-3 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400"
+        >
+          At least {SHARE_PASSWORD_MIN} characters.
+        </p>
       ) : null}
     </div>
   );

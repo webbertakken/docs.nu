@@ -5,7 +5,12 @@
 // broadcast so hydrated visitors hard-redirect), and re-arming an
 // expiring link.
 
-import { DEFAULT_LINK_LEVEL, isAccessLevel, isShareLinkExpiry } from '@livedoc/api-schema';
+import {
+  DEFAULT_LINK_LEVEL,
+  isAccessLevel,
+  isShareLinkExpiry,
+  SHARE_PASSWORD_MIN,
+} from '@livedoc/api-schema';
 import { MAX_PASSWORD_LEN } from '../limits';
 import {
   createShareLink,
@@ -135,6 +140,17 @@ export async function handleDocumentShareRoutes(
       // value: the visitor's gate trims what is typed, so an untrimmed hash
       // could never be matched.
       const trimmed = password?.trim() ?? '';
+      // A new one is at least SHARE_PASSWORD_MIN long; one stored before the rule keeps working (the gate never asks).
+      if (trimmed && trimmed.length < SHARE_PASSWORD_MIN) {
+        console.info('[share-password] too short', { documentId: id });
+        return json(
+          {
+            error: 'password_too_short',
+            message: `a share password is at least ${SHARE_PASSWORD_MIN} characters`,
+          },
+          { status: 400 },
+        );
+      }
       const stored = trimmed ? await hashSharePassword(trimmed) : null;
       await setDocumentSharePassword(env, id, stored);
       // Visitors a share code admitted before this password meet the gate again

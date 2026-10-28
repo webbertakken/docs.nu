@@ -97,7 +97,12 @@ export async function apiSetSharePassword(
     headers: await apiHeaders(ownerId, { body: true }),
     body: JSON.stringify({ password }),
   });
-  const { passwordSet } = await expectOk<SharePasswordResponse>(res, 'set share password');
+  // A too-short new password is the owner's to fix, worded by the dialog: not an error to report.
+  const { passwordSet } = await expectOk<SharePasswordResponse>(
+    res,
+    'set share password',
+    (code) => code === 'password_too_short',
+  );
   return passwordSet === true;
 }
 

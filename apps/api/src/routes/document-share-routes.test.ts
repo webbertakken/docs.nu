@@ -465,6 +465,21 @@ describe('PUT /api/documents/:id/share-password (docs/specs/013-workspace/share-
     expect(cleared.broadcasts).toEqual([]);
   });
 
+  // A new password is at least SHARE_PASSWORD_MIN characters after trimming; an older, shorter one keeps working.
+  it('400s a new password under six characters, storing nothing', async () => {
+    for (const password of ['abc', '  abcde  ']) {
+      const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', { body: { password } });
+      const res = await handleDocumentShareRoutes(ctx);
+      expect(res!.status).toBe(400);
+      expect(await res!.json()).toMatchObject({ error: 'password_too_short' });
+    }
+    expect(db.setDocumentSharePassword).not.toHaveBeenCalled();
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: 'abcdef' },
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
+  });
+
   it('400s a password past the limit, storing nothing', async () => {
     const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
       body: { password: 'x'.repeat(MAX_PASSWORD_LEN + 1) },

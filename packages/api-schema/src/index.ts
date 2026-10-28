@@ -387,6 +387,11 @@ export type ShareRole = AccessLevel;
 
 // Lifetime chosen at link creation (docs/specs/013-workspace/share-link-expiry.md). 'never' is the default
 // and the pre-expiry behaviour: the link works until revoked.
+// The shortest new share password, counted after trimming (docs/specs/013-workspace/share-password.md "API"): the
+// api refuses fewer (`password_too_short`) and the Share dialog waits for them. A password saved before the rule keeps
+// working. Six is the floor upstream chose against guessing at 10 tries a minute; safe range 6 to 12.
+export const SHARE_PASSWORD_MIN = 6;
+
 export const SHARE_LINK_EXPIRIES = ['never', 'week', 'month', 'sixMonths'] as const;
 export type ShareLinkExpiry = (typeof SHARE_LINK_EXPIRIES)[number];
 
