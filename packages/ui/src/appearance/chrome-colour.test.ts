@@ -26,14 +26,14 @@ afterEach(() => {
 
 // docs/specs/004-interface-design/appearance.md "The browser's chrome".
 describe('the chrome surfaces', () => {
-  it('header is the editor header and site footer: white, and Steel slate-900 in dark', () => {
+  it("header is the editor's toolbar groups and the site footer: white, and Steel slate-900 in dark", () => {
     expect(CHROME_SURFACES.header).toMatchObject({
       light: '#ffffff',
       dark: steel('--color-slate-900'),
     });
     for (const surface of [
       source('../SiteFooter.tsx'),
-      source('../../../../apps/live/components/chrome/EditorHeader.tsx'),
+      source('../../../../apps/live/components/chrome/toolbar-surface.ts'),
     ])
       expect(surface).toMatch(/bg-white[^"]*dark:bg-slate-900/);
   });

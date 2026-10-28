@@ -18,8 +18,8 @@ Every app's root layout inlines the same tiny script, before first paint, that a
 The browser's own chrome (an installed app's title bar, a phone's status bar and URL bar) wears the colour at the top
 of the page, so the window reads as one piece. That is one of two surfaces:
 
-- **Header**, in the editor app (the editor, the Explorer, the account pages): the header's and the site footer's
-  colour. White in light; in dark `slate-900` as painted now: Steel's `#131b26`, a themed tab's tinted surface, or
+- **Header**, in the editor app (the editor, the Explorer, the account pages): the colour of the editor's toolbar
+  groups ([Toolbar group](toolbar-group.md)), the Explorer's header and the site footer. White in light; in dark `slate-900` as painted now: Steel's `#131b26`, a themed tab's tinted surface, or
   Midnight's navy.
 - **Ground**, on the public sites (marketing, help, telemetry): their translucent header shows the page ground.
   `slate-50` (`#f8fafc`) in light; in dark `slate-950` as painted, Steel's `#0b0f16`.
