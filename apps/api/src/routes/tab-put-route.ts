@@ -21,6 +21,7 @@ import { badRequest, conflict, json, payloadTooLarge } from '../responses';
 import { applyRoomLedger, fetchRoomLedger } from '../room-client';
 import { recordTabSave } from '../timeline';
 import type { TabSaveDocument } from '../db/tab-save-document';
+import { keepStoredStructure } from '../tab-structure';
 import { readBody, type DocumentRouteContext } from './context';
 
 // Fields of the stored record, not of the tab body; a client echoing them back never stores them
@@ -50,6 +51,8 @@ export async function handleTabPut(
   existing: TabSaveDocument,
   tabId: string,
   owner: string,
+  // The one tab the caller's grant reaches, or null: a scoped save keeps the tab's structure as stored.
+  scope: string | null = null,
 ): Promise<Response> {
   const { request, env } = ctx;
   const id = existing.id;
@@ -83,7 +86,12 @@ export async function handleTabPut(
     const ledger = applyRoomLedger(merge.tab, fetchedLedger);
     const commentAuthors = ledger.commentAuthors;
     // A copy: each attempt starts again from the save as sent.
-    const body: Tab = { ...ledger.tab };
+    // A tab-scoped link's save keeps its tab's structure (docs/specs/013-workspace/tab-scoped-share-links.md
+    // "Structure"): the stored name, Plan elements and form targets, so it can neither rename its tab nor widen
+    // what it reaches; the rest lands.
+    const kept = scope && existingTab ? keepStoredStructure(ledger.tab, existingTab, scope) : ledger.tab;
+    if (kept !== ledger.tab) console.info('[tabs] tab.structure.kept', { documentId: id, tabId });
+    const body: Tab = { ...kept };
     // The name cap (docs/specs/006-document/name-length.md): a new or changed name is shortened;
     // an autosave echoing the stored name unchanged keeps it.
     body.name = capStoredName(body.name, existingTab?.name ?? null, 'tab');

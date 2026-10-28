@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { sentJson } from '@livedoc/vitest-config/sent-request';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import type { Env } from '../types';
+import { createShareLink } from '../db/share';
 import { makeTestRouteContext } from './test-route-context';
 import { handleDocuments } from './documents';
 
@@ -106,5 +107,25 @@ describe('the tab rename route', () => {
     expect(
       (await call(db, 'PUT', '/api/documents/D/tabs/t1/name', { name: 'A' }, 'user_x')).status,
     ).toBe(403);
+  });
+  // docs/specs/013-workspace/tab-scoped-share-links.md "Structure": a tab's name is structure.
+  it('refuses a tab-scoped editor, even on its own tab, and leaves the name alone', async () => {
+    const { db, room } = await setUp();
+    await createShareLink(db.env, 'D', 'SCOPED01', 'edit', 'never', 't1');
+    room.bodies.splice(0);
+    const res = await handleDocuments(
+      makeTestRouteContext('PUT', '/api/documents/D/tabs/t1/name', {
+        env: db.env,
+        owner: 'guest_v',
+        body: { name: 'Mine now' },
+        headers: { 'X-Share-Code': 'SCOPED01' },
+      }),
+    );
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: 'tab_structure' });
+    expect(db.sql.prepare("SELECT name FROM tabs WHERE id = 't1'").get()).toEqual({
+      name: 'Board',
+    });
+    expect(room.bodies).toEqual([]);
   });
 });

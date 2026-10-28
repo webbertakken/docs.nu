@@ -42,6 +42,7 @@ import {
   missingDocument,
   requireOwner,
   shareCodeOf,
+  tabScopeOf,
   type DocumentRouteContext,
 } from './context';
 import { answerTabView, parseViewQuery } from './document-views-route';
@@ -122,7 +123,7 @@ export async function handleDocumentSubresources(
       // Owner or edit-role share visitor only, and a tab-scoped visitor on their own tab only.
       const allowed = await gateEdit(ctx, id, saving.ownerId, saving.teamId, tabId);
       if (!allowed) return forbidden();
-      return handleTabPut(ctx, saving, tabId, owner);
+      return handleTabPut(ctx, saving, tabId, owner, await tabScopeOf(ctx, saving));
     }
     const existing = await getDocument(env, id);
     if (!existing) return missingDocument(ctx, id);

@@ -317,6 +317,35 @@ describe('submitting a changeset', () => {
   });
 });
 
+// docs/specs/013-workspace/tab-scoped-share-links.md "Structure": a link to one tab changes its content, never what
+// pulls cards onto it.
+describe('a tab-scoped link', () => {
+  it('lands a content change, and refuses a Plan card added to its tab with 403 tab_structure', async () => {
+    quiet();
+    const { db } = await setUp();
+    await createShareLink(db.env, 'D', 'SCOPED01', 'edit', 'never', 't1');
+    const who = { owner: 'guest-1', headers: { 'X-Share-Code': 'SCOPED01' } };
+    expect((await submit(db, { operations: 'set a label=A1' }, who)).status).toBe(200);
+    const made = (await (
+      await call(db, 'POST', '/api/documents/D/items', { type: 'task', fields: { title: 'Card' } })
+    ).json()) as { item: { id: string } };
+    const card = {
+      id: 'pc',
+      type: 'shape',
+      shape: 'plan-card',
+      x: 400,
+      y: 0,
+      width: 240,
+      height: 120,
+      planCard: { itemId: made.item.id, size: 'compact' },
+    };
+    const res = await submit(db, { operations: [{ op: 'add', element: card }] }, who);
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: 'tab_structure' });
+    expect(stored(db).map((e) => e.id)).not.toContain('pc');
+  });
+});
+
 describe('held elements', () => {
   it("refuses a token's changeset on an element a person holds, naming them, and writes nothing", async () => {
     quiet();

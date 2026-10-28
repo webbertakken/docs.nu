@@ -225,6 +225,17 @@ export function gateGrant(
 
 // The resolved owner id, or the 400 to return when neither a credential
 // nor X-Owner-Id identifies the caller.
+// The one tab a request's grant confines it to (docs/specs/013-workspace/tab-scoped-share-links.md), or null: the
+// owner, a team member and an All-tabs link reach every tab. Only a share code can confine a request, so one without
+// costs no read: the owner's autosave pays nothing.
+export async function tabScopeOf(
+  ctx: RouteContext,
+  doc: { id: string; ownerId: string; teamId: string | null },
+): Promise<string | null> {
+  if (shareCodeOf(ctx.request) === null) return null;
+  return (await gateGrant(ctx, doc.id, doc.ownerId, doc.teamId))?.tabScope ?? null;
+}
+
 export function requireOwner(ctx: RouteContext): string | Response {
   return ctx.resolveOwner() ?? missingAuth();
 }
