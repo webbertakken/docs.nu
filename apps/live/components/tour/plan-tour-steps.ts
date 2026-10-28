@@ -2,8 +2,9 @@
 // card panel → the header → card types) or Spreadsheets (sheet → cells → formulas → the toolbar → Sheet
 // Settings), then that track's outro. The tour runs on the person's own board or Sheet (the tour subject), the one
 // they see: its steps point at its body wherever it is drawn (on the canvas, maximised, filling a Board or Sheet tab),
-// never at its canvas node, which sits hidden under a maximised or tab-filling body. It changes nothing on it: its
-// steps only point, and the one thing they open is a card's panel, closed again on leaving the step.
+// never at its canvas node, which sits hidden under a maximised or tab-filling body. The Boards track adds its own
+// example card, "Your First Card", moves it and opens its panel (closed again on leaving the step), and takes it away
+// when the tour ends; every other step only points.
 
 import type { BoardSheetTrack } from '@/lib/plan-tour';
 import { stepTelemetryType, type TourStepOf } from './tour-step';

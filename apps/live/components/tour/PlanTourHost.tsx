@@ -56,8 +56,9 @@ const NO_SUBJECT: Subject = { boardId: null, sheetId: null };
 // EditorView beside TourHost. While the person can work on a tab with a board or Sheet on it, it offers the tour on
 // the bottom bar's Start Tour button ("Start Boards Tour", "Start Sheets Tour": a track not yet taken first, Boards
 // between equals); a press there, or the Settings row, starts it on the board or Sheet the person sees, the tour
-// subject. It changes nothing on it: the steps only point, and the one thing they open is a card's panel. It never
-// starts or prompts on its own.
+// subject. The Boards track adds its own example card, "Your First Card", moves it a column and opens its panel, and
+// takes it away however the tour ends; nothing else on the subject changes, as the steps only point. It never starts
+// or prompts on its own.
 export function PlanTourHost() {
   const ctx = useEditorContext();
   const [subject, setSubject] = useState<Subject>(NO_SUBJECT);
