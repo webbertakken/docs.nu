@@ -18,6 +18,7 @@ import {
 import { ChevronIcon } from '@/components/primitives/ChevronIcon';
 import { TIMELINE_RENDERERS } from '@/app/explorer/timeline/renderers';
 import { track } from '@/lib/telemetry';
+import { eventPersonKey } from '@/app/explorer/timeline/event-person';
 import { HistoryPerson } from './HistoryPerson';
 import { historyWords } from './history-words';
 import { HISTORY_LINK, MUTED, isoInstant } from './history-styles';
@@ -95,8 +96,8 @@ export const HistoryEntry = memo(function HistoryEntry({
           <p className={`mt-0.5 flex min-w-0 items-center gap-1.5 text-xs ${MUTED}`}>
             {words.who ? (
               <HistoryPerson
-                event={event}
                 name={words.who}
+                colourKey={eventPersonKey(event, viewerId) ?? words.who}
                 mine={event.actorId === viewerId}
                 size={16}
               />

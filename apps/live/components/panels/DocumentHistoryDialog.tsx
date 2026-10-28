@@ -8,7 +8,7 @@
 // first down a rail under sticky day headings, a run of one type by one person folded into one
 // entry. The feed's one paged read, scoped to the document; nothing else is asked for.
 
-import { useId, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useId, useMemo, useState, type ReactNode } from 'react';
 import {
   CATEGORY_LABELS,
   CompactEmptyState,
@@ -21,11 +21,13 @@ import {
   lucideGlyph,
   summariseHistory,
   type TimelineCategory,
+  type TimelineEvent,
 } from '@livedoc/ui';
 import { lucideHistory } from '@livedoc/icons/lucide';
 import { TIMELINE_PAGE_SIZE } from '@livedoc/api-schema';
 import { Dialog } from '@/components/dialogs/Dialog';
 import { useTimelineFeed } from '@/app/explorer/useTimelineFeed';
+import { eventPersonKey } from '@/app/explorer/timeline/event-person';
 import type { PaneDocument } from '@/app/explorer/views';
 import { track } from '@/lib/telemetry';
 import { HistoryChips } from './document-history/HistoryChips';
@@ -105,11 +107,13 @@ function DocumentHistory({
   // The feed's same-day create rule (§2.1a) holds here too.
   const events = useMemo(() => collapseSameDayCreate(feed.events), [feed.events]);
   const chips = useMemo(() => historyCategories(events), [events]);
-  const summary = useMemo(() => summariseHistory(events), [events]);
+  // Who is who: the reader by id, everyone else by the name the event carries (§2.10).
+  const personKey = useCallback((e: TimelineEvent) => eventPersonKey(e, ownerId), [ownerId]);
+  const summary = useMemo(() => summariseHistory(events, personKey), [events, personKey]);
   const active = category && chips.some((c) => c.category === category) ? category : null;
   const days = useMemo(
-    () => buildHistory(filterHistory(events, active), now),
-    [events, active, now],
+    () => buildHistory(filterHistory(events, active), now, personKey),
+    [events, active, now, personKey],
   );
   const railId = useId();
 

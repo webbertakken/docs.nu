@@ -112,7 +112,8 @@ describe('DocumentHistoryDialog', () => {
           event('a'),
           event('b', {
             eventType: 'comment_added',
-            actorId: 'ada',
+            // A document feed hides every id but the reader's.
+            actorId: null,
             snapshot: { authorName: 'Ada Lovelace' },
           }),
         ],
@@ -162,7 +163,7 @@ describe('DocumentHistoryDialog', () => {
           eventType: 'comment_added',
           title: 'Comment Added',
           description: 'Ship it?',
-          actorId: 'ada',
+          actorId: null,
           snapshot: { documentId: 'd1', authorName: 'Ada Lovelace' },
         }),
         event('b', {
@@ -205,12 +206,30 @@ describe('DocumentHistoryDialog', () => {
     expect(track).toHaveBeenCalledWith('Timeline', 'Opened', 'Run');
   });
 
+  it('keeps apart comments by people the feed names only in words', async () => {
+    const by = (id: string, name: string, at: number) =>
+      event(id, {
+        eventType: 'comment_added',
+        title: 'Comment Added',
+        actorId: null,
+        occurredAt: at,
+        snapshot: { documentId: 'd1', authorName: name },
+      });
+    apiListTimeline.mockResolvedValue(
+      page([by('a', 'Ada Lovelace', NOW), by('b', 'Grace Hopper', NOW - 1000)]),
+    );
+    const dialog = open();
+    await waitFor(() => expect(entries(dialog)).toHaveLength(2));
+    const summary = dialog.querySelector('[data-history-summary]') as HTMLElement;
+    expect(within(summary).getByText('2')).toBeTruthy();
+  });
+
   it('filters by kind with toggle chips', async () => {
     apiListTimeline.mockResolvedValue(
       page([
         event('a'),
         event('b', { eventType: 'share_link_created', occurredAt: NOW - 1000 }),
-        event('c', { occurredAt: NOW - 2000, actorId: 'ada' }),
+        event('c', { occurredAt: NOW - 2000, actorId: null }),
       ]),
     );
     const dialog = open();

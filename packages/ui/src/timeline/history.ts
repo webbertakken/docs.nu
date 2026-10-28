@@ -36,25 +36,35 @@ export type HistoryRun = { key: string; events: TimelineEvent[] };
 
 export type HistoryDay = { key: string; label: string; runs: HistoryRun[]; count: number };
 
-const sameRun = (a: TimelineEvent, b: TimelineEvent) =>
-  a.eventType === b.eventType && (a.actorId ?? '') === (b.actorId ?? '');
+/** Who an event is by, as the host tells people apart (an id, a name), or null when it names
+ *  nobody. A document's feed hides other actors' ids, so the host decides, not the actor id. */
+export type HistoryPersonKey = (event: TimelineEvent) => string | null;
 
 /** Newest-first events into local days, each day's consecutive events of one type by one person
- *  folded into a run. One pass, linear in the events. */
-export function buildHistory(events: readonly TimelineEvent[], now: number): HistoryDay[] {
+ *  folded into a run; events that name nobody count as one person. One pass, linear in the
+ *  events. */
+export function buildHistory(
+  events: readonly TimelineEvent[],
+  now: number,
+  personKey: HistoryPersonKey,
+): HistoryDay[] {
   const days: HistoryDay[] = [];
   let day: HistoryDay | null = null;
   let run: HistoryRun | null = null;
+  let runPerson: string | null = null;
   for (const event of events) {
+    const person = personKey(event);
     const key = dateKey(event.occurredAt);
     if (!day || day.key !== key) {
       day = { key, label: historyDayLabel(key, now), runs: [], count: 0 };
       days.push(day);
       run = null;
     }
-    if (run && sameRun(run.events[0]!, event)) run.events.push(event);
-    else {
+    if (run && run.events[0]!.eventType === event.eventType && runPerson === person) {
+      run.events.push(event);
+    } else {
       run = { key: event.id, events: [event] };
+      runPerson = person;
       day.runs.push(run);
     }
     day.count += 1;
@@ -87,14 +97,18 @@ export function filterHistory(
 
 export type HistorySummary = {
   count: number;
-  /** The people who took part, newest first: one event each, the one that names them. */
+  /** The people the events name, newest first: one event each, the newest that names them. */
   people: TimelineEvent[];
 };
 
-export function summariseHistory(events: readonly TimelineEvent[]): HistorySummary {
+export function summariseHistory(
+  events: readonly TimelineEvent[],
+  personKey: HistoryPersonKey,
+): HistorySummary {
   const seen = new Map<string, TimelineEvent>();
   for (const event of events) {
-    if (event.actorId && !seen.has(event.actorId)) seen.set(event.actorId, event);
+    const person = personKey(event);
+    if (person !== null && !seen.has(person)) seen.set(person, event);
   }
   return { count: events.length, people: [...seen.values()] };
 }

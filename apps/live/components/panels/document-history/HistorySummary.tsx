@@ -5,7 +5,7 @@
 
 import type { TimelineEvent } from '@livedoc/ui';
 import { eventCountLabel, relativeSince } from '@livedoc/ui';
-import { eventPersonName } from '@/app/explorer/timeline/event-person';
+import { eventPersonKey, eventPersonName } from '@/app/explorer/timeline/event-person';
 import { HistoryPerson } from './HistoryPerson';
 import { INSET, MUTED, isoInstant } from './history-styles';
 
@@ -64,9 +64,9 @@ export function HistorySummary({
             <span className="flex -space-x-1" aria-hidden>
               {people.slice(0, AVATARS_SHOWN).map((e) => (
                 <HistoryPerson
-                  key={e.actorId}
-                  event={e}
+                  key={e.id}
                   name={eventPersonName(e, viewerId) ?? 'Someone'}
+                  colourKey={eventPersonKey(e, viewerId) ?? e.id}
                   mine={e.actorId === viewerId}
                   size={22}
                   ring
