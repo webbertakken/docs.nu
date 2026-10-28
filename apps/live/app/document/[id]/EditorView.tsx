@@ -288,13 +288,15 @@ export function EditorView() {
     track('UI', 'Opened', 'Share');
   };
   // The actions group, top right: the chrome trio, the document actions, the account. Through the welcome flow the
-  // account control alone, so the first-paint chrome stays minimal.
+  // account control alone, so the first-paint chrome stays minimal; in a workbench frame the chrome and Open in
+  // LiveDoc alone (no app surroundings); never in an embed.
   const actionsGroup =
-    zenMode || !appChrome ? null : (
+    zenMode || embedMode ? null : (
       <LandscapeBarFold shown={landscapeBars.shown}>
         <AreaErrorBoundary area="Actions" fallback="panel">
           <ActionsGroup
             documentActions={!anyWelcomeOpen}
+            appSurroundings={appChrome}
             onOpenSearch={() => openSearchWithPrefetch(setSearchOpen, loadAllTabs)}
             onOpenSettings={() => {
               // Preferences are the person's, not the document's, so every role may open them (a Viewer opting out

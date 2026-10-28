@@ -141,8 +141,17 @@ describe('ActionsGroup', () => {
     expect(parts()).toEqual([['Account menu']]);
   });
 
-  it('carries Open in LiveDoc in a workbench, and no appearance toggle there', () => {
-    renderGroup({ workbenchOpenHref: '/document/d1' });
+  // docs/specs/013-workspace/blueprints/workbench-embeds.md: a workbench frame has no app surroundings (no Share, no
+  // account), only the chrome and its way out to the full app.
+  it('in a workbench, holds the chrome and Open in LiveDoc, no document actions, no account, no appearance', () => {
+    renderGroup({
+      workbenchOpenHref: '/document/d1',
+      appSurroundings: false,
+      present: { slideCount: 1, starting: false, onPresent: vi.fn() },
+    });
+    expect(screen.queryByRole('button', { name: 'Share' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Present' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Account menu' })).toBeNull();
     expect(
       screen
         .getByRole('link', { name: 'Open in LiveDoc (opens in a new tab)' })

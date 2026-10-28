@@ -23,6 +23,9 @@ export type ActionsGroupProps = DocumentActionsProps & {
   // In a workbench: Open in LiveDoc, the app's own address for what the frame shows. The appearance follows the
   // workbench there, so no toggle.
   workbenchOpenHref?: string;
+  // The app's surroundings (docs/specs/013-workspace/blueprints/workbench-embeds.md): the document actions and the
+  // account. False in a workbench frame, which keeps the chrome and Open in LiveDoc alone.
+  appSurroundings?: boolean;
   onOpenAccount?: () => void;
 };
 
@@ -37,6 +40,7 @@ export function ActionsGroup({
   labelled = false,
   documentActions,
   workbenchOpenHref,
+  appSurroundings = true,
   onOpenAccount,
   ...actions
 }: ActionsGroupProps) {
@@ -76,16 +80,18 @@ export function ActionsGroup({
           </ToolbarPart>
           <ToolbarPart>
             <TourOfferButton labelled={labelled} />
-            <DocumentActions {...actions} />
+            {appSurroundings ? <DocumentActions {...actions} /> : null}
             {workbenchOpenHref ? (
               <WorkbenchOpenLink href={workbenchOpenHref} labelled={labelled} />
             ) : null}
           </ToolbarPart>
         </>
       ) : null}
-      <ToolbarPart>
-        <AuthControls onOpenAccount={onOpenAccount} />
-      </ToolbarPart>
+      {appSurroundings ? (
+        <ToolbarPart>
+          <AuthControls onOpenAccount={onOpenAccount} />
+        </ToolbarPart>
+      ) : null}
     </ToolbarGroup>
   );
 }

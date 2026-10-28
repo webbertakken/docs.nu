@@ -94,7 +94,11 @@ export function discover(args: { attr: string; shape: typeof SHAPE; tol: number 
     // The rect is the em box under any `text-box` trim, so this is the layout baseline exactly.
     const host = node.parentElement!;
     const cs = getComputedStyle(host);
-    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    // Inside a CSS `zoom` (the toolbars draw at their UI scale) the text's rects are on screen, zoomed, while the
+    // computed font size is not: the metrics are taken at the size the glyphs are drawn at, or a zoomed label reads
+    // as off-centre by its ascent times the zoom's excess.
+    const zoom = (host as Element & { currentCSSZoom?: number }).currentCSSZoom ?? 1;
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${parseFloat(cs.fontSize) * zoom}px ${cs.fontFamily}`;
     const m = ctx.measureText('H');
     const range = document.createRange();
     range.selectNodeContents(node);

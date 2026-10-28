@@ -93,8 +93,11 @@ test('a collaborator sees a drag live, and where it lands', async ({ page, brows
   await peerPage.getByRole('button', { name: /^join$/i }).click();
   await peerPage.locator(CANVAS).waitFor();
   await expect
-    .poll(() => ownerPage.locator('[role="img"][aria-label$="(Online)"]').count())
-    .toBeGreaterThanOrEqual(2);
+    // The peer among the contributors (docs/specs/007-editor/toolbar-layout.md "The bottom line").
+    .poll(() =>
+      ownerPage.locator('[data-contributors] [role="img"][aria-label$="(Online)"]').count(),
+    )
+    .toBeGreaterThanOrEqual(1);
   await expect(box(peerPage, 'a')).toBeVisible();
   expect(await leftOf(peerPage, 'a')).toBe(300);
   const peerPath = await peerPage

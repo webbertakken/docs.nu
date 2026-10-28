@@ -41,7 +41,15 @@ test('an agent shows its status and focus to its owner, expires on its ttl, and 
     ttl: 60_000,
   });
   expect(set.status()).toBe(200);
-  const avatar = page.getByRole('img', { name: /, Adding the payment flow$/ });
+  // His avatar on the tab's row in the tab list (docs/specs/007-editor/toolbar-layout.md "The tab list").
+  const tabList = page.getByRole('dialog', { name: 'Tabs' });
+  const openTabList = async () => {
+    if (await tabList.count()) return;
+    await page.locator('[data-document-group] [data-tab-stack]').click();
+    await expect(tabList).toBeVisible();
+  };
+  await openTabList();
+  const avatar = tabList.getByRole('img', { name: /, Adding the payment flow$/ });
   await expect(avatar.first()).toBeVisible();
   await expect(page.locator('[data-agent-focus-id="api"]')).toBeVisible();
   await avatar.first().hover();
@@ -65,6 +73,7 @@ test('an agent shows its status and focus to its owner, expires on its ttl, and 
 
   // A short ttl: the room takes the entry away on its own, and the ring with it.
   expect((await setPresence(page, s, { status: 'Almost done', ttl: 1_000 })).status()).toBe(200);
+  await openTabList();
   await expect(page.getByRole('img', { name: /, Almost done$/ }).first()).toBeVisible();
   await expect(page.getByRole('img', { name: /, Almost done$/ })).toHaveCount(0, {
     timeout: 10_000,
