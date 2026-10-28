@@ -9,7 +9,7 @@
 // content (data attributes), never in the DOM text.
 
 import type { ReactNode } from 'react';
-import { fnv1aString, type TextAnimation } from '@livedoc/document';
+import { fnv1aString, graphemes, type TextAnimation } from '@livedoc/document';
 
 // Every unit is restyled each frame its label's progress moves, at about 10 µs a unit in the
 // editor (measured), so a label is held to a few dozen units: a title or a label types letter by
@@ -43,15 +43,6 @@ const REVEALS = new Set<TextAnimation>([
   'highlighter',
   'underline',
 ]);
-
-const segmenter =
-  typeof Intl !== 'undefined' && 'Segmenter' in Intl
-    ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
-    : null;
-
-function graphemes(text: string): string[] {
-  return segmenter ? Array.from(segmenter.segment(text), (s) => s.segment) : Array.from(text);
-}
 
 const isSpace = (s: string) => /^\s+$/.test(s);
 const wordsOf = (text: string) => text.split(/(\s+)/).filter((s) => s.length > 0);
