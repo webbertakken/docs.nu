@@ -731,13 +731,11 @@ and the dialog stays as the one complete, browsable index of them.
   switches as one row of chips, see **Toggle groups** below), `appearance` (the one row
   backed by the device-local store, not `UserPreferences`), and `tokens` (the
   API token manager).
-  A toggle row's control is one `role="switch"` button, named by the label
-  (`aria-labelledby`) and described by the description; its `::after`
-  stretches over the whole cell so a click anywhere on the row flips it, while
-  the help link and the illustration sit above that layer and keep their own
-  clicks. The `ToggleSwitch` inside is wrapped `aria-hidden`, because
-  `presentational` still exposes `role="switch"` and would otherwise offer a
-  screen reader two nested switches of the same name.
+  A toggle row's control is the shared `Switch` at size `sm`, one `role="switch"`
+  button named by the label (`aria-labelledby`) and described by the description;
+  `coversRow` stretches it over the whole cell so a click anywhere on the row flips
+  it, while the help link and the illustration sit above that layer and keep their
+  own clicks. A toggle group's chips are `SwitchChip`s.
 
   Settings whose effect is **visual** carry a small **before/after
   illustration** drawn from the real editor, which **rings the state

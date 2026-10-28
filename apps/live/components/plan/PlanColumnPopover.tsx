@@ -21,9 +21,9 @@ import {
   TrashIcon,
   useClickOutside,
   useEscape,
+  SwitchRow,
 } from '@livedoc/ui';
 import { plural } from '@livedoc/document';
-import { SwitchRow } from '@/components/primitives/SwitchRow';
 import { Portal, Tooltip, lucideGlyph } from '@livedoc/ui';
 import { lucideBetweenVerticalEnd } from '@livedoc/icons/lucide';
 

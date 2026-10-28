@@ -1,22 +1,15 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ToggleSwitch } from '@/components/palette/palette-controls';
+import { SwitchRow } from '@livedoc/ui';
 
-// One on/off row in a settings popover: a label, a line of hint text under it,
-// and a switch on the right, with the whole row as the hit target.
+// One on/off row in an editor's settings popover (the palette's, Layers, Map, Activity): a label, a line of hint
+// text under it, and the compact switch on the right, with the whole row as the hit target.
 //
-// Every settings popover in the editor had this. Three of them had already
-// pulled it into a local component and given it three different names —
-// SettingRow in the palette's, ToggleRow in the AI one, SettingsRow in the
-// Layers one — while Map, Activity, and (despite owning one of those three)
-// Layers still had rows typed out inline. Seven copies of one idea.
-//
-// The whole row is the button, not just the switch. That is deliberate and
-// easy to lose when it is retyped: `role="switch"` plus `aria-checked` on the
-// button is what makes the label, the hint and the switch one control to a
-// screen reader, and the ToggleSwitch inside is `presentational` precisely so
-// it does not announce itself a second time.
+// Every settings popover had this. The whole row is the switch, not
+// just the track: `role="switch"` plus `aria-checked` on the row (SwitchRow) is what makes the label, the hint and
+// the switch one control to a screen reader, and the track inside is a picture, so it does not announce itself a
+// second time.
 export function SettingsToggleRow({
   label,
   hint,
@@ -38,23 +31,20 @@ export function SettingsToggleRow({
   disabled?: boolean;
 }) {
   const row = (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
+    <SwitchRow
+      checked={checked}
+      onChange={() => onToggle()}
       aria-disabled={disabled || undefined}
       disabled={disabled}
-      onClick={onToggle}
-      className={`flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left transition ${
-        disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+      className={`px-2 py-1.5 transition ${
+        disabled ? '' : 'hover:bg-slate-50 dark:hover:bg-slate-800'
       }`}
     >
       <span className="flex min-w-0 flex-col">
         <span className="text-xs font-medium text-slate-700 dark:text-slate-200">{label}</span>
         <span className="text-[10px] leading-snug text-slate-500 dark:text-slate-400">{hint}</span>
       </span>
-      <ToggleSwitch checked={checked} label={label} presentational />
-    </button>
+    </SwitchRow>
   );
   if (!help) return row;
   return (
