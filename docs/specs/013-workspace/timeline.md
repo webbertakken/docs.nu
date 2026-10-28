@@ -825,6 +825,82 @@ which takes that one card off the reader's feed.
 (§6.2a). Telemetry: `Timeline` / `Removed` / `Entry` for a card, `Stack`
 for a run (§10).
 
+### 2.10 A document's History
+
+One document's own story is **History** on its menu, from an Explorer row, a
+Home card or a Timeline card (§3.4). It is a dialog rather than a page,
+because "what happened to this?" is asked while looking at the row. It does
+not reuse the feed's cards: one document's events read best as a rail, the
+way a changelog does, where the feed's cards and calendar answer "what
+happened everywhere". It lives in
+`apps/live/components/panels/DocumentHistoryDialog.tsx` and its parts in
+`components/panels/document-history/`; the pure rules (days, runs, chips,
+summary) in `packages/ui/src/timeline/history.ts`.
+
+- **Whose history.** The header shows the document itself: its thumbnail
+  (the Explorer's `DocumentThumbnail`, the undrawn sketch when nothing is
+  drawn), its name as the dialog's heading, and its owner as the Explorer's
+  Owner column words it ("You", the team, or the sharer's name). There is
+  no kind word: LiveDoc is one product and a document has no kind
+  ([Domain language](../003-system-architecture/domain-language.md)).
+- **At a glance.** A strip under the header: when it was made, when it last
+  changed (relative, "2 hours ago"), how many people took part (their
+  initials avatars, up to three, and the count) and how many events are
+  loaded ("50+ events" while older ones remain). Made is the document's
+  `createdAt`, else a loaded Document Created event; with neither it is left
+  out rather than guessed. The strip is shown once events have loaded.
+- **Filter.** One chip per kind of event present in what is loaded, the
+  feed's own categories and labels (Comments, New documents, Edits,
+  Sharing, Organisation, ...) in their fixed order, each with its count, and
+  **All** first; shown only when two or more kinds are present. One chip at
+  a time, each a toggle button (`aria-pressed`). With nothing matching, the
+  list says so and offers **Show all**.
+- **The rail.** Events newest first on a vertical rail, one ordered list per
+  local day under a sticky day heading with the day's count: **Today**,
+  **Yesterday**, the weekday within the last week, then the date ("Tue, 5
+  Aug", with its year when not this year's). Each heading and time is a
+  `<time datetime>`. The same-day create rule (§2.1a) applies, as it does on
+  the feed.
+- **An event.** Its type's glyph (the feed's own, §2) in a disc on the rail,
+  in its tone, always beside the reason line in words ("Comment Added"), so
+  colour is never the only signal. Then who did it: an initials avatar in
+  the person's stable colour (`colorForKey` on their id) and their name, or
+  "You" on the brand fill; a system event (an expiry warning) names nobody.
+  Then the detail the renderer gives ("To Launches", "Copy of Q3"), without
+  a "by ..." the avatar line already says, and a comment's or action's words
+  quoted beneath. Names come from the event itself (its author, member,
+  actor or visitor name); a person the event does not name is "Someone". No
+  other request is made for names.
+- **Runs.** Consecutive events of one type by one person on one day fold into
+  one entry ("Document Edited, 3 times", with the first and last times);
+  **Show all 3** (`aria-expanded`) deals the run out beneath it, each with
+  its detail and time.
+- **Paging.** The feed's one paged read (`GET /api/timeline` with the
+  document scope, pages of 50, `useTimelineFeed`). **Show older events**
+  under the rail reads the next page and says how many are shown (polite
+  live region); it is gone at the end, where "The beginning of its history"
+  closes a history longer than one page.
+- **States.** Loading: a rail-shaped skeleton (`aria-busy`). Nothing yet: the
+  shared empty state, "Nothing has happened yet". A failed first read says
+  "Couldn't load its history" with **Try again**, never "nothing has
+  happened" (§2.4); a failed later page keeps what is shown, says "Couldn't
+  load older events" and the button reads **Try again**.
+- **Not here.** No card menus, no Remove from Timeline, no unread markers and
+  no calendar: those act on a reader's feed, and this is the document's
+  record.
+- **Fit.** A centred panel 36 rem wide on a desktop, its body scrolling under
+  the fixed header, summary and chips; edge to edge and full height on a
+  phone. Light and dark. Hover transitions are `duration-micro`; a run dealt
+  out fades in, not under reduced motion. Escape closes and focus returns to
+  where it was.
+- **Speed.** The days, runs, chips and summary are worked out once per loaded
+  page and filter (memoised); 1,000 loaded events group well inside a frame
+  (a test keeps a 16 ms budget).
+- **Roles.** History reads the document's own scope, whose gate is the
+  document's (§3.4): whoever may open the document may read its history,
+  Editor, Participant or Viewer alike. It changes nothing, so no role gates
+  anything inside it.
+
 ## 3. Data model
 
 <!-- legacy-names -->
@@ -932,7 +1008,7 @@ The join table and the free-text `scope_type` were the forward plan, and
 two of the three have since shipped:
 
 - **A per-document timeline** (`scope_type = 'document'`) — every document
-  keeps its own history, surfaced from the row menu as **History**. It
+  keeps its own history, surfaced from the row menu as **History** (§2.10). It
   carries _document-level_ events (rename, share toggle, theme change),
   never element diffs. Its read gate defers to
   the document's OWN gate rather than re-deriving one, which is what lets
@@ -1510,6 +1586,7 @@ stacking.ts              bucket + alias rules (pure)
 sameDayCreate.ts         hide the edit that shares a day with the create (pure, §2.1a)
 eventTone.ts             event type -> tone, and the tone colour vars
 monthCells.ts            month-grid arithmetic (pure)
+history.ts               a document's History: day labels, runs, chips, summary (pure, §2.10)
 sourceTypeMeta.ts        chip label + fallback glyph per source type
 types.ts                 TimelineEvent, renderer contracts
 ```
@@ -1523,8 +1600,9 @@ route. The one thing a renderer can't supply, the ⋯ menu, comes in
 through the separate `cardSlots` hook (§2.8), because it needs the
 Explorer's loaded lists and handlers rather than the event alone.
 
-This split is what lets a per-document timeline (§3.4) adopt the same
-components without inheriting Explorer-specific copy.
+This split is what lets a team's activity (§3.4) adopt the same
+components, and a document's History (§2.10) the same renderers, without
+inheriting Explorer-specific copy.
 
 **Colour.** Each tone gets a CSS variable pair
 (`--ld-timeline-<tone>` and `--ld-timeline-<tone>-soft`) defined in the
@@ -1631,8 +1709,10 @@ New category `Timeline` in the closed enum in
   the page load started on it, `Nav` when reached from elsewhere (the
   sidebar's Timeline row, or Home's See Timeline link).
 - `Timeline`/`Changed` with `type` `List` | `Calendar` — mode switch.
-- `Timeline`/`Selected` with `type` the source type — a filter chip
-  toggled.
+- `Timeline`/`Selected` with `type` the category id — a filter chip
+  toggled, on the feed's filter or a document's History (§2.10).
+- `Timeline`/`Opened` with `type` `Run` — a folded run in a document's
+  History dealt out (§2.10).
 - `Timeline`/`Opened` with `type` `Stack` — a stacked run expanded.
   Tells us whether stacking thresholds are right.
 - `Timeline`/`Loaded` with `type` `More` — Show More.
