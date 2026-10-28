@@ -101,12 +101,29 @@ export const EXACT: Readonly<Record<string, string>> = {
   'Action|Resolved|WontDo':
     "Someone closed an assigned action as Won't Do: decided against, closed without being done.",
   'Action|Unresolved|': 'Someone reopened an assigned action that had been marked done.',
+  'Activity|Added|Reply':
+    "Someone replied to a comment thread from the Explorer's Inbox reading pane, without opening the document.",
+  'Activity|Changed|All': "Someone chose All in the Explorer's Inbox filter bar.",
+  'Activity|Changed|AssignedByMe':
+    "Someone chose Assigned by Me in the Explorer's Inbox filter bar: the actions they handed out.",
+  'Activity|Changed|Comments':
+    "Someone chose Comments in the Explorer's Inbox filter bar: the threads they're in.",
+  'Activity|Changed|FormResponses':
+    "Someone chose Form Responses in the Explorer's Inbox filter bar.",
+  'Activity|Changed|MyActions':
+    "Someone chose My Actions in the Explorer's Inbox filter bar: the work assigned to them.",
   'Activity|Loaded|Retry':
     'Someone clicked "Try again" after the Explorer\'s Inbox failed to load, retrying the read.',
   'Activity|Opened|':
     "Someone opened the Explorer's Inbox, which lists open actions and Plan cards assigned to them, actions they assigned to others, and comment threads they're in. Counted once per visit, not on every re-fetch.",
+  'Activity|Resolved|Action':
+    "Someone marked an action done from the Inbox in the editor's Explorer panel.",
+  'Activity|Resolved|Thread':
+    "Someone resolved a comment thread from the Explorer's Inbox reading pane.",
   'Activity|Selected|Action':
     "Someone clicked an action row in the Explorer's Inbox, jumping to the element it's assigned on.",
+  'Activity|Selected|CardThread':
+    "Someone opened a Plan card's comment thread from the Explorer's Inbox, jumping to the card.",
   'Activity|Selected|Card':
     "Someone clicked a Plan card row in the Explorer's Inbox, jumping to the card on its board.",
   'Activity|Selected|FormResponses':
@@ -2404,9 +2421,13 @@ export const BY_ACTION: Readonly<Record<string, string>> = {
   'Action|Opened': 'Someone opened the popover for an action already assigned to an element.',
   'Action|Resolved': 'Someone marked an assigned action as done.',
   'Action|Unresolved': 'Someone reopened an assigned action that had been marked done.',
+  'Activity|Added': "Someone replied to a comment thread from the Explorer's Inbox.",
+  'Activity|Changed': "Someone chose a filter over the Explorer's Inbox.",
   'Activity|Loaded':
     "Something happened while loading the Explorer's Inbox (the list of outstanding actions and comment threads).",
   'Activity|Opened': "Someone opened or interacted with the Explorer's Inbox.",
+  'Activity|Resolved':
+    "Someone resolved a thread or marked an action done from the Explorer's Inbox.",
   'Form|Created': 'Someone started a form from Start Planning.',
   'Form|Added': 'Someone added a question to a form.',
   'Form|Linked':
