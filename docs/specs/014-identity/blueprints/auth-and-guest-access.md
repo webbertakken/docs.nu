@@ -397,21 +397,43 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 - Already signed in on arrival: the "Redirecting…" card, then the destination.
 - Deleting the account: the dialog's copy is in [Deletion](#deletion); its verify step reads "You signed in a while ago,
   so confirm it's you before anything is deleted."
-- Settings > Account, signed in, under the identity card (`SettingsAccountManageRows.tsx` (planned)), each row only
+- Settings > Account opens on the profile card (`SettingsProfileCard.tsx`, the `identity` row): a banner
+  (`ProfileBanner`, decorative, `aria-hidden`) drawn as a dotted canvas with the person's cursor and name tag in
+  their presence colour; the avatar disc (picture, else initials on `identityVars(colour)`, 72px, a ring the card
+  colour); the name as an `h3`; the email (signed in) or "Not signed in" (guest); then a list labelled "About this
+  account" of chips: "LiveDoc Account" (brand tone, shield glyph) or "Guest · This Browser Only", "Joined <Month
+  Year>" when known, "Colour: <name>" with its swatch (`presenceColourName`: the palette name, "Custom" off it).
+  The colour is read from the participant record (`apiLoadSelf`); until it answers the chip and the cursor hold
+  the neutral swatch, so nothing moves when it lands. A guest's card adds a box headed "Sign in to make this
+  yours" with three lines ("Keep your documents and settings on every device.", "Choose the name and colour
+  collaborators see on your cursor.", "Share with your team, and get an email when someone comments.") and
+  **Sign In** (primary) and **Create Account** (secondary), both returning to Settings (`authHrefWithReturn`).
+- Settings > Account, signed in, under the profile card (`SettingsAccountManageRows.tsx`), each row only
   when signed in:
   - **Name** (`accountName`): a text field holding the account's name and a **Save** button, enabled once the
     field differs and is not blank (at most 100 characters). Saving calls `update-user`, then the auth bridge
     re-reads the session (`refreshSession`) and tells the other tabs. Status line: "Saved." or "Couldn't save your
-    name. Try again."
+    name. Try again."; editing the field clears a refusal's line, so it never stands beside the stored name.
+  - **Colour** (`presenceColour`, `SettingsPresenceColourRow.tsx`): the Row skin of the one colour picker
+    ([Colour picker](../../004-interface-design/colour-picker.md)): "Colour" with the colour in force on its
+    right, opening the picker in a popover offering the ten presence colours (`PARTICIPANT_COLORS`) under
+    "Presence Colours", by name, and no custom colours (`custom={false}`). A pick shows at once on the row,
+    the card and the open editor (`SELF_COLOUR_EVENT`), then saves the participant record (`apiSaveSelf`);
+    refused, it puts back the colour the server last took (newest wins, `createNewestWins`) and says
+    "Couldn't save your colour. Try again."
   - **Sign-in methods** (`signInMethods`): one line per method. "Email code" with the account's address, always.
     "Google" when the host offers Google: **Connected** with **Remove** when an `identity_accounts` row has
     `providerId` google, else **Connect Google** (`link-social`, returning to Settings). Removing asks for a fresh
     sign-in when `403 SESSION_NOT_FRESH`: "For your safety, sign in again first." with a **Sign In Again** link
     (`/sign-in?redirect_url=<here>`).
-  - **Sessions** (`sessions`): every session of the account, newest activity first: "<Browser> on <System>" (from
+  - **Where You're Signed In** (`sessions`): every session of the account, newest activity first: "<Browser> on <System>" (from
     the user agent, `describeUserAgent`; "Unknown browser" when it says nothing), "Last active <date>", "This
     browser" on the current one. **Sign Out** on each other one (`revoke-session`) and **Sign Out Everywhere
-    Else** (`revoke-other-sessions`) when there is more than one.
+    Else** (`revoke-other-sessions`) when there is more than one. While a sign-out is on its way its button is
+    busy ("Signing Out…") and disabled; once it succeeds, the session (every other one, for Everywhere Else)
+    leaves the list at once and the list is read again without blanking.
+  - **Sign Out** (`signOut`): "Ends this browser's session. Your documents stay in your account." and a **Sign
+    Out** button, which signs out as the account menu does (`useDeferredAuth().signOut`, landing on `/`).
   - Loading: the rows show "Loading…" until the lists answer; a failed read says "Couldn't load this. Try again."
     with a **Try Again** button.
 - Empty states: a sessions list always holds this browser; sign-in methods always hold one.
