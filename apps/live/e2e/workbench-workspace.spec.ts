@@ -94,9 +94,10 @@ test('a workspace frame is its own approval, browses the Explorer, and opens doc
       documentName: 'Home screen',
       role: 'edit',
     });
-  // Back is the first thing at the frame's top left (WB59): level with the palette strip and clear of it, outside
-  // the tab bar, and the first of the canvas's controls for the keyboard.
-  const back = frame.getByRole('button', { name: /^Back to / });
+  // Back is the brand group's, the first thing at the frame's top left (WB59; docs/specs/007-editor/toolbar-layout.md
+  // "The top line"): level with the palette strip and clear of it, and the first of the canvas's controls for the
+  // keyboard.
+  const back = frame.getByRole('button', { name: 'Back', exact: true });
   const frameBox = (await page.locator('#frame').boundingBox())!;
   const backBox = (await back.boundingBox())!;
   const stripBox = (await frame.locator('[data-region="palette"] > *').first().boundingBox())!;
@@ -106,9 +107,8 @@ test('a workspace frame is its own approval, browses the Explorer, and opens doc
   const backMiddle = backBox.y + backBox.height / 2;
   expect(backMiddle).toBeGreaterThan(stripBox.y);
   expect(backMiddle).toBeLessThan(stripBox.y + stripBox.height);
-  await expect(
-    frame.locator('[data-editor-tabbar]').getByRole('button', { name: /^Back/ }),
-  ).toHaveCount(0);
+  // One Back only: no second one anywhere else in the frame.
+  await expect(frame.getByRole('button', { name: /^Back/ })).toHaveCount(1);
   // The first tab stop after the canvas itself; from the canvas, Shift+F6 twice (the Palette, then the Header
   // region it stands for).
   const firstStop = await back.evaluate((el) => {

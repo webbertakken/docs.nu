@@ -37,7 +37,7 @@ test.describe('whiteboard dock position', () => {
     await expect(flyout).toHaveCount(0);
     await expect(opener).toBeFocused();
 
-    await page.getByRole('button', { name: 'Settings' }).last().click();
+    await page.getByRole('button', { name: 'Application settings' }).click();
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: 'Editor', exact: true }).click();
     await dialog

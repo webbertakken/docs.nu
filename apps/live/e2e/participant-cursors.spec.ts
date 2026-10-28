@@ -70,8 +70,11 @@ test.describe('participant cursors', () => {
     const { peer } = await room(page, browser, baseURL!);
     const cursors = page.locator('[data-remote-cursor]');
 
-    // The Collaborators modal, from the presence stack: the switch sits at its foot.
+    // The Collaborators modal, from a presence stack in the tab list the contributors open: the switch sits at its
+    // foot.
+    await page.locator('[data-document-group] [data-contributors]').click();
     await page
+      .getByRole('dialog', { name: 'Tabs' })
       .getByRole('button', { name: /^Collaborators, showing/ })
       .first()
       .click();

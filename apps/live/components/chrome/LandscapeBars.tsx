@@ -4,12 +4,12 @@ import type { ReactNode } from 'react';
 import { Glyph, Tooltip, atLeastInset } from '@livedoc/ui';
 import { BAND_BLEND, BAND_TINT, TOOLBAR_CARD, TOOLBAR_CONTROL_REST } from './toolbar-surface';
 
-// A phone held sideways (docs/specs/007-editor/live-app.md "A phone held sideways"): the header and
-// the tab bar fold away there so the canvas fills the screen, and a handle at the canvas's top-right
+// A phone held sideways (docs/specs/007-editor/live-app.md "A phone held sideways"): the actions group
+// and the document group fold away there so the canvas has the room, and a handle at the canvas's top-right
 // corner shows them again. Both are CSS-gated on the `landscape-phone:` variant, so no script watches
 // the screen; on every other device the wrapper is `display: contents` and the handle is not drawn.
 
-/** Wraps one bar (the header, the tab bar). Folded, it hides on a phone held sideways, unless focus is
+/** Wraps one group (the actions group, the document group). Folded, it hides on a phone held sideways, unless focus is
  *  inside it (a name being typed keeps its bar). `display: contents` otherwise, so the editor's column
  *  lays out exactly as it does without it. */
 export function LandscapeBarFold({ shown, children }: { shown: boolean; children: ReactNode }) {
@@ -28,8 +28,10 @@ export function LandscapeBarFold({ shown, children }: { shown: boolean; children
  *  `--landscape-handle-room` on the row, which adds it to its right gutter. */
 export const LANDSCAPE_HANDLE_ROOM = 'landscape-phone:[--landscape-handle-room:3.375rem]';
 
-export const SHOW_BARS_LABEL = 'Show Header and Tabs';
-export const HIDE_BARS_LABEL = 'Hide Header and Tabs';
+// What the handle folds: the actions group and the document group (docs/specs/007-editor/live-app.md "A phone held
+// sideways").
+export const SHOW_BARS_LABEL = 'Show Controls';
+export const HIDE_BARS_LABEL = 'Hide Controls';
 
 /** The bars handle: a chevron card at the canvas's top-right corner, drawn only on a phone held
  *  sideways. Placed in the editor's column right after the header, in a zero-height row, so it sits

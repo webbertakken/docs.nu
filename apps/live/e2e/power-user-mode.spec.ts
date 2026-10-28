@@ -15,8 +15,9 @@ const TOOLTIP = '[role="tooltip"][data-hint="tooltip"]';
 const PREFS_KEY = 'livedoc:user-preferences:v1';
 
 const dialog = (page: Page) => page.getByRole('dialog', { name: 'Settings' });
-const tabBar = (page: Page) => page.locator('[data-editor-tabbar]');
-const header = (page: Page) => page.locator('header');
+// The two lines' groups (docs/specs/007-editor/toolbar-layout.md "The two lines").
+const actions = (page: Page) => page.locator('[data-toolbar-actions]');
+const documentGroup = (page: Page) => page.locator('[data-document-group]');
 
 async function openEditor(page: Page) {
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -59,12 +60,12 @@ async function keyboardFocus(page: Page, selector: ReturnType<Page['locator']>) 
 }
 
 test.describe('Role pill', () => {
-  test('sits in the title bar for the owner and toggles a read-only preview', async ({
+  test('sits in the document group for the owner and toggles a read-only preview', async ({
     page,
     pageErrors,
   }) => {
     await openEditor(page);
-    const pill = header(page).getByRole('button', { name: 'Editing. Owned by you' });
+    const pill = documentGroup(page).getByRole('button', { name: 'Editing. Owned by you' });
     await expect(pill).toBeVisible();
     await expect(page.getByRole('button', { name: 'Palette category' })).toBeVisible();
 
@@ -73,12 +74,12 @@ test.describe('Role pill', () => {
 
     // Each click steps the preview: Editing, Participating, Viewing, back to Editing (live-app.md "Role pill").
     await pill.click();
-    const participating = header(page).getByRole('button', {
+    const participating = documentGroup(page).getByRole('button', {
       name: 'Participating. Owned by you',
     });
     await expect(participating).toBeVisible();
     await participating.click();
-    const viewing = header(page).getByRole('button', { name: 'Viewing. Owned by you' });
+    const viewing = documentGroup(page).getByRole('button', { name: 'Viewing. Owned by you' });
     await expect(viewing).toBeVisible();
     // Read-only: the palette's categories are gone.
     await expect(page.getByRole('button', { name: 'Palette category' })).toHaveCount(0);
@@ -92,8 +93,8 @@ test.describe('Role pill', () => {
 test.describe('Power user mode', () => {
   test('Minimal chrome hides words, keeps names and controls', async ({ page, pageErrors }) => {
     await openEditor(page);
-    await expect(tabBar(page).getByText('Tabs', { exact: true })).toBeVisible();
-    await expect(tabBar(page).getByText('Search', { exact: true })).toBeVisible();
+    await expect(documentGroup(page).locator('[data-role-pill]')).toBeVisible();
+    await expect(actions(page).getByRole('button', { name: 'Search' })).toBeVisible();
 
     await setPowerUserMode(page, true);
     // The mode's children, nested beneath it: Minimal Chrome, then what the preset set.
@@ -112,25 +113,26 @@ test.describe('Power user mode', () => {
     await expect(page.getByText('Tab 1 is empty')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Show Templates' })).toBeVisible();
 
-    // Status bar: icons only, names kept.
-    await expect(tabBar(page).getByText('Tabs', { exact: true })).toHaveCount(0);
-    await expect(tabBar(page).getByText('Search', { exact: true })).toHaveCount(0);
-    await expect(tabBar(page).getByRole('button', { name: 'Search' })).toBeVisible();
+    // The actions group: icons only, names kept.
+    await expect(actions(page).getByText('Search', { exact: true })).toHaveCount(0);
+    await expect(actions(page).getByRole('button', { name: 'Search' })).toBeVisible();
 
-    // The role pill became the status bar's first control.
-    await expect(header(page).locator('[data-role-pill]')).toHaveCount(0);
-    const roleIcon = tabBar(page).getByRole('button', { name: 'Editing', exact: true });
+    // The role pill became its status icon in the document group.
+    await expect(documentGroup(page).locator('[data-role-pill]')).toHaveCount(0);
+    const roleIcon = documentGroup(page).getByRole('button', { name: 'Editing', exact: true });
     await expect(roleIcon).toBeVisible();
     await roleIcon.hover();
     await page.waitForTimeout(400);
     await expect(page.locator(TOOLTIP)).toHaveCount(0);
     await expect(page.locator(TOOLTIP)).toHaveText('Editing', { timeout: 1_500 });
     await roleIcon.click();
-    await tabBar(page).getByRole('button', { name: 'Participating', exact: true }).click();
+    await documentGroup(page).getByRole('button', { name: 'Participating', exact: true }).click();
     await expect(
-      tabBar(page).getByRole('button', { name: 'Viewing (read-only)', exact: true }),
+      documentGroup(page).getByRole('button', { name: 'Viewing (read-only)', exact: true }),
     ).toBeVisible();
-    await tabBar(page).getByRole('button', { name: 'Viewing (read-only)', exact: true }).click();
+    await documentGroup(page)
+      .getByRole('button', { name: 'Viewing (read-only)', exact: true })
+      .click();
 
     // Palette tile, in Shapes' flyout: no caption; the name comes back on keyboard focus.
     const square = await paletteTile(page, 'Add Square');
@@ -213,8 +215,8 @@ test.describe('Power user mode', () => {
     expect(prefs.alignmentGuides).toBe(false);
     // Changed: the user's change stays.
     expect(prefs.autoRebindArrows).toBe(false);
-    // Minimal chrome is off with the mode.
-    await expect(tabBar(page).getByText('Search', { exact: true })).toBeVisible();
+    // Minimal chrome is off with the mode: the role pill is back.
+    await expect(documentGroup(page).locator('[data-role-pill]')).toBeVisible();
     expectNoPageErrors(pageErrors);
   });
 
@@ -223,7 +225,7 @@ test.describe('Power user mode', () => {
     pageErrors,
   }) => {
     await openEditor(page);
-    const appearance = tabBar(page).getByRole('button', { name: /^Appearance: / });
+    const appearance = actions(page).getByRole('button', { name: /^Appearance: / });
     const painted = () =>
       page.evaluate(() => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'));
     // Outside the mode: the three-step cycle, System first on this dark device.

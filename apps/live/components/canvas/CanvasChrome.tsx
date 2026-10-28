@@ -24,6 +24,7 @@ import { pickPaletteAddHandlers } from '@/components/palette/palette-add-handler
 import { BrandGroup } from '@/components/chrome/lines/BrandGroup';
 import { BottomLine } from '@/components/chrome/lines/BottomLine';
 import { TopLine } from '@/components/chrome/lines/TopLine';
+import { useCentreOwnRow } from '@/hooks/ui/centre-row-store';
 import { useEditorLines } from '@/components/chrome/lines/editor-lines-context';
 import { ToolbarGroup } from '@/components/chrome/ToolbarGroup';
 import { getTheme } from '@/lib/themes';
@@ -422,8 +423,10 @@ export function CanvasChrome(props: CanvasChromeProps) {
   // Beside Pages mode's Contents sidebar when it is pinned (useContentsChrome), never under it.
   const contentsWidth = CONTENTS_SIDEBAR_WIDTH * panelScale;
   // The centre toolbar (the strip, or Draw's dock at the top) on a row of its own under the top line: always on a
-  // phone (docs/specs/007-editor/toolbar-layout.md "When a line runs out of room").
-  const centreOwnRow = isMobile && (stripShown || dockOnTop);
+  // phone, and wherever it does not fit between the side groups (docs/specs/007-editor/toolbar-layout.md "When a line
+  // runs out of room"; the toolbar reports it).
+  const centreReportsOwnRow = useCentreOwnRow();
+  const centreOwnRow = (stripShown || dockOnTop) && (isMobile || centreReportsOwnRow);
   // Bucketing keys off the persisted placement ONLY (not which panel is
   // mid-drag): a dragged panel must stay in the same DOM parent for the
   // whole gesture — reparenting it would remount the component and drop

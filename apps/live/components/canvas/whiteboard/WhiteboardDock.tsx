@@ -16,6 +16,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useDockLinePlacement } from './useDockLinePlacement';
+import { useReportCentreOwnRow } from '@/hooks/ui/centre-row-store';
 import { useCanvasSurface } from '@/components/canvas/CanvasSurfaceContext';
 import type { WhiteboardDockModel } from '@/hooks/canvas/useWhiteboard';
 import { whiteboardShapeEntry } from '@/lib/whiteboard-shape-catalogue';
@@ -84,6 +85,8 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
   const phone = useIsMobileViewport();
   const placement = useDockLinePlacement(wrapper, model.position, phone);
   const edge = placement?.edge ?? 12;
+  // A top dock on its own row moves the top corners a row lower (centre-row-store).
+  useReportCentreOwnRow(model.position === 'top' && !!placement?.ownRow);
   const pins = phone
     ? splitPhonePins(model.pinnedShapes)
     : { onBar: model.pinnedShapes, inMenu: [] };
