@@ -1710,6 +1710,22 @@ describe('DocumentRoom freeing a selection lock (docs/specs/007-editor/live-app.
     expect(released(holder)).toHaveLength(1);
   });
 
+  // docs/specs/013-workspace/tab-scoped-share-links.md "Realtime": a link to one tab frees a hold on that tab only.
+  it('lets a tab-scoped session free only a hold by someone working on its own tab', () => {
+    const { room, state } = newRoom();
+    const scoped = makeSocket();
+    const near = makeSocket();
+    const far = makeSocket();
+    seedSession(state, scoped, { ...presence('scoped', 'edit'), tabId: 't1' });
+    scoped.attachment = { ...(scoped.attachment as object), tabScope: 't1' };
+    seedSession(state, near, { ...presence('near', 'edit'), tabId: 't1' });
+    seedSession(state, far, { ...presence('far', 'edit'), tabId: 't2' });
+    sendFrame(room, scoped, unlock('far'));
+    expect(released(far)).toEqual([]);
+    sendFrame(room, scoped, unlock('near'));
+    expect(released(near)).toHaveLength(1);
+  });
+
   it('ignores an unlock aimed at yourself', () => {
     const { room, host } = room3();
     sendFrame(room, host, unlock('host'));
