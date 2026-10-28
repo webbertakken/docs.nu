@@ -24,7 +24,7 @@ const stars = () =>
   db.sql
     .prepare('SELECT owner_id, document_id FROM favourites ORDER BY owner_id, document_id')
     .all()
-    .map((r) => `${r['owner_id']}:${r['document_id']}`);
+    .map((r) => `${String(r['owner_id'])}:${String(r['document_id'])}`);
 
 beforeEach(() => {
   db = sqliteD1();

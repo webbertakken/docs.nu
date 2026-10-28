@@ -36,7 +36,7 @@ const carolsRows = (db: ReturnType<typeof world>) =>
       `SELECT id, status FROM team_members WHERE user_id = 'acct_c' OR email = 'carol@example.com' ORDER BY id`,
     )
     .all()
-    .map((r) => `${r['id']}:${r['status']}`);
+    .map((r) => `${String(r['id'])}:${String(r['status'])}`);
 
 describe('closing an account and its team rows', () => {
   it('takes its address off every row it had, invitations it turned down included', async () => {
