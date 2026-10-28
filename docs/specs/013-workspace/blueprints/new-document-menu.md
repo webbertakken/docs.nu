@@ -171,7 +171,6 @@ The contract `startNewDocument` meets.
 | `apps/live/app/document/[id]/seed-pending-document.ts`            | Seeds the editor's state from a pending document, every tab loaded                                                                          |
 | `apps/live/app/document/[id]/usePendingCreate.ts`                 | The editor's view of its create: `held`, the landing, the not-saved actions                                                                 |
 | `apps/live/components/chrome/NotSavedBanner.tsx`                  | The not-saved notice in the top-centre stack                                                                                                |
-| `apps/live/components/start/initial-start-group.ts`               | Pure `initialStartGroup(taken, groupIds)`: a handed group, or Recommended                                                                   |
 
 ### Pending documents
 
@@ -217,7 +216,7 @@ heldDocumentIn(url): string | null; // a pending id the url names
 
 1. Busy (a start in progress): ignored, logged `[new-document] busy`.
 2. Inside a workspace frame (`interceptAppNavigation` takes the `/new?template=…&folder=…&team=…` href): the frame's
-   own create in place makes it (All templates sends no template, so it opens on its start). Done.
+   own create in place makes it. Done.
 3. No creator bound (not on the Explorer, or the guest id not resolved yet): `assignAppLocation` to the same href,
    the `/new` path, logged `[new-document] no-creator`. Done.
 4. Mint `documentId`, `tabId`; a blank closes its tab's start (`closeStartForBlank`); a cloud blank hands its
@@ -271,11 +270,6 @@ heldDocumentIn(url): string | null; // a pending id the url names
 - The editor's chunk is fetched on idle by `InPlaceEditor` and on pointer enter or focus of the button
   (`prefetchNewDocumentOpen`, which also fetches the Plan template seeds' chunk).
 
-### Start group
-
-- `StartFromTemplates` and `StartPlanning` open on `initialStartGroup(takeStartGroup(), groupIds)`, read once on
-  mount: a known id is logged `[start] group=<id>`; an unknown one opens Recommended and logs `[start] group-unknown`.
-
 ## Errors and edge cases
 
 | Case                                      | Handling                                                              |
@@ -325,7 +319,6 @@ Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetr
 | Seeded from memory, every tab loaded, baseline set           | `seed-pending-document.test.ts`                                    |
 | Held saves flush once; failed create keeps edits             | `usePendingCreate.test.tsx`, `useAutosave.test.tsx`                |
 | Editor shown on its address; Back hides; kept until settled  | `InPlaceEditor.test.tsx`                                           |
-| Known group opens; unknown is Recommended                    | `initial-start-group.test.ts`                                      |
 | Signed-in cloud create within budget                         | e2e `account/new-document-open-budget.spec.ts`                     |
 | Hold resolves on landing, never on failure; url matching     | `pending-documents.test.ts`, `core.test.ts`, `offline-ids.test.ts` |
 | Opened from memory before auth, nothing fetched              | `useIdentityBootstrap.pending.test.ts`                             |
@@ -347,4 +340,4 @@ Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetr
 
 ## Defaults ledger
 
-D191 to D193 and D195 to D204 in [DEFAULTS.md](DEFAULTS.md).
+D191 to D193 and D195 to D203 in [DEFAULTS.md](DEFAULTS.md).

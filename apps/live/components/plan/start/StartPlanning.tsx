@@ -4,9 +4,7 @@
 // categories (Recommended, Boards, Spreadsheets, Dashboards, Inspiration) beside a grid of large cards, each a picture
 // of what it makes over its name, line and (a board's) card types; a search across all of them, and across every other
 // mode's templates (otherModeMatches). Choosing a card acts at once. In the tab's own light or dark look (planPalette).
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { takeStartGroup } from '@/components/start/start-group';
-import { initialStartGroup } from '@/components/start/initial-start-group';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { DASHBOARD_PRESETS } from '@livedoc/document';
 import { lucideGlyph } from '@livedoc/ui';
 import {
@@ -203,13 +201,6 @@ export function StartPlanning({
     icon: RAIL_ICONS[c.id],
     below: c.id === 'inspiration',
   }));
-  // The group the New Document menu's All templates handed over (Boards, Spreadsheets, Forms), taken once.
-  const [initialGroup] = useState(() =>
-    initialStartGroup(
-      takeStartGroup(),
-      categories.map((c) => c.id),
-    ),
-  );
   const choose = (id: string) => {
     const item = items.find((i) => i.id === id);
     if (!item) return;
@@ -231,7 +222,7 @@ export function StartPlanning({
       helpArticle="planBoards"
       palette={palette}
       categories={categories}
-      initialCategory={initialGroup}
+      initialCategory="recommended"
       cardsIn={(category) =>
         itemsIn(items, category).map((item) => toCard(item, palette, category === 'recommended'))
       }

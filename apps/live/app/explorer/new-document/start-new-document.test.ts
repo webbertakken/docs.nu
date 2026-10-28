@@ -104,12 +104,9 @@ describe('startNewDocument', () => {
     );
   });
 
-  it('leaves a template’s and All templates’ start alone', async () => {
+  it('leaves a template’s start alone', async () => {
     startNewDocument(request({ choice: 'template', template: 'flowchart' }));
     await opened();
-    await new Promise((r) => setTimeout(r, 0));
-    startNewDocument(request({ choice: 'all-templates', template: 'blank' }));
-    await vi.waitFor(() => expect(mocks.openInPlace).toHaveBeenCalledTimes(2));
     expect(mocks.closeStart).not.toHaveBeenCalled();
   });
 
@@ -140,8 +137,8 @@ describe('startNewDocument', () => {
 
   it('leaves a workspace frame to make it its own way', () => {
     mocks.intercept.mockReturnValueOnce(true);
-    startNewDocument(request({ choice: 'all-templates', place: { folderId: 'f1' } }));
-    expect(mocks.intercept).toHaveBeenCalledWith('/new?folder=f1', false);
+    startNewDocument(request({ place: { folderId: 'f1' } }));
+    expect(mocks.intercept).toHaveBeenCalledWith('/new?template=blank&folder=f1', false);
     expect(mocks.openInPlace).not.toHaveBeenCalled();
   });
 
@@ -158,9 +155,5 @@ describe('newDocumentHref', () => {
     expect(newDocumentHref(request({ place: { folderId: 'f1' } }))).toBe(
       '/new?template=blank&folder=f1',
     );
-  });
-
-  it('names no template for All templates in a frame', () => {
-    expect(newDocumentHref(request({ choice: 'all-templates' }), true)).toBe('/new');
   });
 });

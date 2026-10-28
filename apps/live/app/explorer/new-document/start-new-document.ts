@@ -1,7 +1,7 @@
 // The one way the New Document menu makes a document (docs/specs/013-workspace/new-document-menu.md "What each choice
-// does", "Opening at once"; blueprint "Instant open"). A blank opens with its start closed, a template on the template,
-// and All templates on its mode's start at the picker group handed over (start-group.ts). The document is made in the
-// browser and opened in the Explorer's place at once; its create runs behind it (pending-documents.ts).
+// does", "Opening at once"; blueprint "Instant open"). A blank opens with its start closed, a template on the template.
+// The document is made in the browser and opened in the Explorer's place at once; its create runs behind it
+// (pending-documents.ts).
 import {
   isBlankTemplate,
   untitledNameForTemplate,
@@ -32,26 +32,24 @@ import {
 import { closeStartForBlank } from '@/components/start/close-start-for-blank';
 import { openInPlace } from '@/app/explorer/in-place-editor/in-place-editor-store';
 
-export type NewDocumentChoice = 'blank' | 'template' | 'all-templates';
+export type NewDocumentChoice = 'blank' | 'template';
 
 export type NewDocumentRequest = {
   choice: NewDocumentChoice;
   blank: NewDocumentBlankId;
-  // The blank's own for 'blank', the card's for 'template', the picker mode's blank for 'all-templates'.
+  // The blank's own for 'blank', the card's for 'template'.
   template: TemplateKind;
   // The section's place; absent is no choice, where a default folder may answer.
   place: NewDocumentPlace;
 };
 
-// The /new address for the same request: the way when the document cannot open here. All templates names no template
-// to a workspace frame, whose blank then opens on its start (D201).
-export function newDocumentHref(request: NewDocumentRequest, inFrame = false): string {
+// The /new address for the same request: the way when the document cannot open here, and a workspace frame's own.
+export function newDocumentHref(request: NewDocumentRequest): string {
   const params = new URLSearchParams();
-  if (!(inFrame && request.choice === 'all-templates')) params.set('template', request.template);
+  params.set('template', request.template);
   if (request.place.folderId) params.set('folder', request.place.folderId);
   if (request.place.teamId) params.set('team', request.place.teamId);
-  const qs = params.toString();
-  return qs ? `/new?${qs}` : '/new';
+  return `/new?${params.toString()}`;
 }
 
 // Where a new document is stored: LiveDoc when placed, else the default for who is creating
@@ -85,7 +83,7 @@ export function startNewDocument(request: NewDocumentRequest): void {
     return;
   }
   // A workspace frame makes it its own way, in the frame (useWorkspaceNavigation).
-  if (interceptAppNavigation(newDocumentHref(request, true), false)) return;
+  if (interceptAppNavigation(newDocumentHref(request), false)) return;
   const creator = newDocumentCreator();
   if (!creator) {
     debugLog('[new-document] no-creator');

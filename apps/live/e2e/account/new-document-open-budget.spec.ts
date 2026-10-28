@@ -12,7 +12,7 @@ import { signIn } from './sign-in';
 
 // Opening at once on a host that offers sign-in (docs/specs/013-workspace/new-document-menu.md "Opening at once"):
 // a signed-in person's new document is made on the server behind the open editor, and a guest's in This Browser;
-// either way a blank is editable within 200 ms of the click and a template within 500 ms (D203).
+// either way a blank is editable within 200 ms of the click and a template within 500 ms (D202).
 
 const RUNS = 3;
 
