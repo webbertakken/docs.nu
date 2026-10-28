@@ -12,6 +12,8 @@
 //   - via: 'own', then 'team', then 'shared';
 //   - share_code: for 'shared', the oldest live code at the person's role and tab scope;
 //   - scope_tab_id: for 'shared', the one tab their link opens (null = every tab).
+//   - share_level: the level they reach it at (docs/specs/013-workspace/share-roles.md): 'edit' for their own and
+//     a joined team's, else the level their visit was granted (its link's).
 // A shared row whose live code is gone (expired or revoked) is dropped: there is nowhere to go.
 //
 // CTE bodies only, to follow a WITH (or a comma). Binds: ?1 = the person's owner id, ?2 = now
@@ -37,7 +39,9 @@ export const VISIBLE_DOCUMENTS_CTES = `
            CASE WHEN d.owner_id = ?1 OR d.team_id IN (SELECT team_id FROM my_teams) THEN NULL
                 ELSE ${visitLinkSql('?2')} END AS share_code,
            CASE WHEN d.owner_id = ?1 OR d.team_id IN (SELECT team_id FROM my_teams) THEN NULL
-                ELSE s.tab_id END AS scope_tab_id
+                ELSE s.tab_id END AS scope_tab_id,
+           CASE WHEN d.owner_id = ?1 OR d.team_id IN (SELECT team_id FROM my_teams) THEN 'edit'
+                ELSE COALESCE(s.level, s.role) END AS share_level
       FROM visible_ids vi
       JOIN documents d ON d.id = vi.id
       LEFT JOIN shared_with s ON s.document_id = d.id AND s.owner_id = ?1

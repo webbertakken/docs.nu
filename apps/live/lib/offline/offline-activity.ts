@@ -158,6 +158,9 @@ function collector(reader: OfflineReader) {
           // The reader owns every document in This Browser.
           onYourDocument: true,
           mentionsYou: t.mentionedIds.some((id) => me.has(id)),
+          // No page but the editor reaches the browser's store, so the Inbox offers no verb here
+          // (docs/specs/013-workspace/inbox.md §1.5).
+          canComment: false,
         });
       }
       for (const b of planBoardRowsFromElements(elements)) {
