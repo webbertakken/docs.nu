@@ -141,6 +141,12 @@ function startNewDocument(request: NewDocumentRequest): void;
 - The menu's code is a lazy chunk; `NewDocumentButton` imports it on pointer enter or focus of the button, and on
   idle (D195). Previews draw only while open.
 - Opening at once: [Instant open](#instant-open).
+- **Web Experience.** The click is the interaction and the editor is its next paint, so INP is the open itself, inside
+  the 200 ms budget; no page load means no LCP to pay again; the editor replaces the Explorer whole in one commit, so
+  nothing shifts (CLS 0).
+- **Data and persistence.** A pending document lives in memory only and is never written by itself: the create
+  writes it (`writeNewDocument`, the same rows `/new` writes); saves are held, not queued; a reload while held with
+  changes asks first. Nothing new is stored, so there is no snapshot, restore or migration to define.
 
 ## Instant open
 
@@ -151,20 +157,21 @@ The contract `startNewDocument` meets.
 
 ### Modules
 
-| File                                                              | Role                                                                                                       |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `apps/live/app/explorer/new-document/start-new-document.ts`       | The seam: the steps below, the busy guard, `prefetchNewDocumentOpen`                                       |
-| `apps/live/lib/new-document/pending-documents.ts`                 | The registry of **pending documents** (made in the browser, create not landed) and the hold                |
-| `apps/live/lib/new-document/write-new-document.ts`                | `writeNewDocument`, `trackNewDocumentCreated`: the one create `/new`, the workbench and the Explorer share |
-| `apps/live/lib/new-document/create-failure.ts`                    | The failure copy (moved from `app/new/`), shared by `/new` and the not-saved banner                        |
-| `apps/live/lib/new-document/new-document-creator.ts`              | Who is creating, bound by the Explorer shell: `bindNewDocumentCreator`, `newDocumentCreator`               |
-| `apps/live/lib/editor-page-loader.ts`                             | `loadEditorPage()`, `loadedEditorPage()`: the editor's chunk, fetched once                                 |
-| `apps/live/app/explorer/in-place-editor/InPlaceEditor.tsx`        | Wraps the Explorer shell in its layout; renders the editor in its place                                    |
-| `apps/live/app/explorer/in-place-editor/in-place-editor-store.ts` | Which document the Explorer shows in place: `openInPlace`, `closeInPlace`, `useInPlaceDocument`            |
-| `apps/live/app/document/[id]/seed-pending-document.ts`            | Seeds the editor's state from a pending document, every tab loaded                                         |
-| `apps/live/app/document/[id]/usePendingCreate.ts`                 | The editor's view of its create: `held`, the landing, the not-saved actions                                |
-| `apps/live/components/chrome/NotSavedBanner.tsx`                  | The not-saved notice in the top-centre stack                                                               |
-| `apps/live/components/start/initial-start-group.ts`               | Pure `initialStartGroup(taken, groupIds)`: a handed group, or Recommended                                  |
+| File                                                              | Role                                                                                                                                        |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/live/app/explorer/new-document/start-new-document.ts`       | The seam: the steps below, the busy guard, `prefetchNewDocumentOpen`                                                                        |
+| `apps/live/lib/new-document/pending-documents.ts`                 | The registry of **pending documents** (made in the browser, create not landed)                                                              |
+| `apps/live/lib/new-document/create-hold.ts`                       | The hold: `holdDocument`, `releaseDocument`, `whenDocumentCreated`, `heldDocumentIn`; free of imports, read by `apiFetch` and `isOfflineId` |
+| `apps/live/lib/new-document/write-new-document.ts`                | `writeNewDocument`, `trackNewDocumentCreated`: the one create `/new`, the workbench and the Explorer share                                  |
+| `apps/live/lib/new-document/create-failure.ts`                    | The failure copy (moved from `app/new/`), shared by `/new` and the not-saved banner                                                         |
+| `apps/live/lib/new-document/new-document-creator.ts`              | Who is creating, bound by the Explorer shell: `bindNewDocumentCreator`, `newDocumentCreator`                                                |
+| `apps/live/lib/editor-page-loader.ts`                             | `loadEditorPage()`, `loadedEditorPage()`: the editor's chunk, fetched once                                                                  |
+| `apps/live/app/explorer/in-place-editor/InPlaceEditor.tsx`        | Wraps the Explorer shell in its layout; renders the editor in its place                                                                     |
+| `apps/live/app/explorer/in-place-editor/in-place-editor-store.ts` | Which document the Explorer shows in place: `openInPlace`, `closeInPlace`, `useInPlaceDocument`                                             |
+| `apps/live/app/document/[id]/seed-pending-document.ts`            | Seeds the editor's state from a pending document, every tab loaded                                                                          |
+| `apps/live/app/document/[id]/usePendingCreate.ts`                 | The editor's view of its create: `held`, the landing, the not-saved actions                                                                 |
+| `apps/live/components/chrome/NotSavedBanner.tsx`                  | The not-saved notice in the top-centre stack                                                                                                |
+| `apps/live/components/start/initial-start-group.ts`               | Pure `initialStartGroup(taken, groupIds)`: a handed group, or Recommended                                                                   |
 
 ### Pending documents
 
@@ -193,6 +200,7 @@ retryPendingDocument(id, { withoutPlacement }): void; // the same ids, the same 
 attachPendingEditor(id, hasUnsavedChanges): () => void;
 isPendingSettled(id): boolean; // landed, and the editor holds nothing unsaved
 forgetPendingDocument(id): void;
+// create-hold.ts
 whenDocumentCreated(id): Promise<void> | null; // null once landed or never pending
 heldDocumentIn(url): string | null; // a pending id the url names
 ```
@@ -212,7 +220,8 @@ heldDocumentIn(url): string | null; // a pending id the url names
    own create in place makes it (All templates sends no template, so it opens on its start). Done.
 3. No creator bound (not on the Explorer, or the guest id not resolved yet): `assignAppLocation` to the same href,
    the `/new` path, logged `[new-document] no-creator`. Done.
-4. Mint `documentId`, `tabId`; a blank closes its tab's start (`closeStartForBlank`).
+4. Mint `documentId`, `tabId`; a blank closes its tab's start (`closeStartForBlank`); a cloud blank hands its
+   template pick (`handTemplatePick`), as `/new` does; `markNameConfirmed`.
 5. The location: LiveDoc when placed, else `defaultSaveLocationFor({ signedIn, signInOffered: signInOfferedHere() === true })`.
 6. The content: `newDocumentContent({ templateKind, themeId: NEW_DOCUMENT_THEME_ID, tabId, via: 'explorer' })`.
 7. `await loadEditorPage()` (already in from the prefetch in practice).
@@ -296,29 +305,33 @@ Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetr
 
 ## Testing
 
-| Rule                                                         | Test                                                      |
-| ------------------------------------------------------------ | --------------------------------------------------------- |
-| Eight blanks, in order, each a known blank of its mode       | `new-document-blanks.test.ts`                             |
-| Groups as the start lists them; each template once, no blank | `pane-groups.test.ts`                                     |
-| Page and Slides one group; Sheet, Board, Form a Plan family  | `pane-groups.test.ts`                                     |
-| Last blank round trip, unknown, no storage                   | `last-blank.test.ts`                                      |
-| Menu aim triangle                                            | `menu-aim.test.ts`                                        |
-| Keys                                                         | `new-document-keys.test.ts`                               |
-| Face makes the last blank; caret opens on it; digits; Escape | `NewDocumentButton.test.tsx`                              |
-| A template card's request; the pane lists the blank's groups | `NewDocumentButton.test.tsx`                              |
-| New Folder in the list where offered                         | `NewDocumentButton.test.tsx`, `PaneHeader.test.tsx`       |
-| Blank opens with its start closed; template not              | e2e `new-document-menu.spec.ts`                           |
-| Folder section files into the folder                         | e2e `new-document-menu.spec.ts`                           |
-| Click to editable within budget                              | e2e `new-document-open-budget.spec.ts` (production build) |
-| Hold resolves on landing, never on failure; url matching     | `pending-documents.test.ts`                               |
-| Retry uses the same ids; Save to My Documents drops place    | `pending-documents.test.ts`, `start-new-document.test.ts` |
-| Busy guard; frame; no creator; blank closes its start        | `start-new-document.test.ts`                              |
-| One create for both stores; telemetry on landing             | `write-new-document.test.ts`                              |
-| Seeded from memory, every tab loaded, baseline set           | `seed-pending-document.test.ts`                           |
-| Held saves flush once; failed create keeps edits             | `usePendingCreate.test.tsx`, `useAutosave.test.tsx`       |
-| Editor shown on its address; Back hides; kept until settled  | `InPlaceEditor.test.tsx`                                  |
-| Known group opens; unknown is Recommended                    | `initial-start-group.test.ts`                             |
-| Signed-in cloud create within budget                         | e2e `account/new-document-open-budget.spec.ts`            |
+| Rule                                                         | Test                                                               |
+| ------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Eight blanks, in order, each a known blank of its mode       | `new-document-blanks.test.ts`                                      |
+| Groups as the start lists them; each template once, no blank | `pane-groups.test.ts`                                              |
+| Page and Slides one group; Sheet, Board, Form a Plan family  | `pane-groups.test.ts`                                              |
+| Last blank round trip, unknown, no storage                   | `last-blank.test.ts`                                               |
+| Menu aim triangle                                            | `menu-aim.test.ts`                                                 |
+| Keys                                                         | `new-document-keys.test.ts`                                        |
+| Face makes the last blank; caret opens on it; digits; Escape | `NewDocumentButton.test.tsx`                                       |
+| A template card's request; the pane lists the blank's groups | `NewDocumentButton.test.tsx`                                       |
+| New Folder in the list where offered                         | `NewDocumentButton.test.tsx`, `PaneHeader.test.tsx`                |
+| Blank opens with its start closed; template not              | e2e `new-document-menu.spec.ts`                                    |
+| Folder section files into the folder                         | e2e `new-document-menu.spec.ts`                                    |
+| Click to editable within budget                              | e2e `new-document-open-budget.spec.ts` (production build)          |
+| Retry uses the same ids; Save to My Documents drops place    | `pending-documents.test.ts`, `start-new-document.test.ts`          |
+| Busy guard; frame; no creator; blank closes its start        | `start-new-document.test.ts`                                       |
+| One create for both stores; telemetry on landing             | `write-new-document.test.ts`                                       |
+| Seeded from memory, every tab loaded, baseline set           | `seed-pending-document.test.ts`                                    |
+| Held saves flush once; failed create keeps edits             | `usePendingCreate.test.tsx`, `useAutosave.test.tsx`                |
+| Editor shown on its address; Back hides; kept until settled  | `InPlaceEditor.test.tsx`                                           |
+| Known group opens; unknown is Recommended                    | `initial-start-group.test.ts`                                      |
+| Signed-in cloud create within budget                         | e2e `account/new-document-open-budget.spec.ts`                     |
+| Hold resolves on landing, never on failure; url matching     | `pending-documents.test.ts`, `core.test.ts`, `offline-ids.test.ts` |
+| Opened from memory before auth, nothing fetched              | `useIdentityBootstrap.pending.test.ts`                             |
+| Not-saved banner: Try again or Save to My Documents          | `NotSavedBanner.test.tsx`                                          |
+| Creator bound by the shell; editor chunk loaded once         | `new-document-creator.test.ts`, `editor-page-loader.test.ts`       |
+| `NewDocumentOpen` timing reports its duration                | `timing.test.ts` (telemetry-client)                                |
 
 ## Constants and configuration
 
@@ -334,4 +347,4 @@ Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetr
 
 ## Defaults ledger
 
-D191 to D193 and D195 to D203 in [DEFAULTS.md](DEFAULTS.md).
+D191 to D193 and D195 to D204 in [DEFAULTS.md](DEFAULTS.md).

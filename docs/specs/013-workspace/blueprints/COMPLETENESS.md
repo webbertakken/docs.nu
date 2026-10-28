@@ -288,13 +288,13 @@
 - [x] Domain and naming
 - [x] Behaviour and state
 - [x] Interfaces and contracts
-- [ ] Data and persistence
+- [x] Data and persistence
 - [x] Errors and edge cases
 - [x] Security and trust
-- [ ] Performance and limits
+- [x] Performance and limits
 - [x] Presentation and UX
 - [x] Accessibility
-- [ ] Web Experience
+- [x] Web Experience
 - [x] Observability
 - [x] Testing
 - [x] Constants and configuration

@@ -113,7 +113,8 @@ A blank is on screen, editable, **within 200 ms of the click**, and a template w
   to `/document/<id>` with a new history entry, so Back returns to the Explorer where it was.
 - **No server wait.** The document is made in the browser and the editor opens it from memory. The server's create
   runs behind it; the room connects, and what was done meanwhile is saved, once the create has landed. A document in
-  This Browser is written to the browser first, as it is today ([Offline mode](../006-document/offline-mode.md#instant-open)).
+  This Browser opens the same way, its write to this browser running behind it, and its saves held until that write
+  has landed ([Offline mode](../006-document/offline-mode.md#instant-open)).
 - **Nothing to fetch first.** The editor's code is fetched while the Explorer is idle, and again when the pointer
   reaches the button.
 - **A create that fails loses nothing.** The editor stays open with what was done, says the document is not saved

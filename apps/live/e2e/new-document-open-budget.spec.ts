@@ -37,10 +37,11 @@ test('a blank opens editable within its budget, its start closed, and Back retur
     await page.goBack();
     await expect(page).toHaveURL(/\/explorer\/home$/);
     await expect(page.getByRole('button', { name: 'New Diagram' })).toBeVisible();
+    // Landed before the next page load, which would cut the create short.
+    await expect.poll(() => landed.length).toBe(run + 1);
   }
   console.log(`[budget] guest blank ms=${times.join(',')}`);
   expect(median(times)).toBeLessThanOrEqual(NEW_DOCUMENT_OPEN_BUDGET_MS);
-  await expect.poll(() => landed.length).toBe(RUNS);
   expectNoPageErrors(pageErrors);
 });
 

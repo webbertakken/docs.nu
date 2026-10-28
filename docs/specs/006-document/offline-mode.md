@@ -135,6 +135,8 @@ auth has settled, the path names a document registered in the local index
   creating This Browser, the create writes to IndexedDB and hands off without
   waiting on auth, the guest id or the participant, which resolve in the
   background (`commitNewDocument` in `app/new/page.tsx`).
+- **The Explorer's New Document menu** opens a new This Browser document from memory, before its IndexedDB write
+  lands, and holds its saves until it has ([New Document menu](../013-workspace/new-document-menu.md#opening-at-once)).
 - The editor reads back the record `/new` has just written rather than taking
   the tabs across in memory: the read is one IndexedDB get, small beside the
   waits removed, and keeps one load path.
