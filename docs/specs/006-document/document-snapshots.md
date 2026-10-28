@@ -114,7 +114,12 @@ document renders lazily.
   (`lib/thumbnail-cache.ts`). A remount (a view switch, a folder, coming
   back to the Explorer) paints from it at once, and two thumbnails of one
   document share one request. The cache owns each blob URL and revokes it
-  on eviction.
+  on eviction. **A mounted thumbnail's picture is never the one evicted**:
+  each thumbnail holds its entry while it is mounted, the cache grows past
+  200 to the number held (at most 1,000, `THUMBNAIL_CACHE_HELD_MAX`) and
+  shrinks back as they unmount. Evicting a picture still on screen once
+  made its box ask for it again, which evicted another: a fetch loop with
+  more than 200 previews mounted.
 - While the snapshot is on its way the box shows the **loader**: the
   placeholder's three-node sketch drawing itself in the placeholder's own
   slate, so it never reads as a real preview. On a 5.4s loop the first
