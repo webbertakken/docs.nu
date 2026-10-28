@@ -3,7 +3,7 @@
 Follow the references below only as needed; never upfront.
 
 - ./explorer-structure.md - when working on the Explorer sidebar or the editor's Explorer panel: places vs views, the Overview / Spaces / More groups, page titles that follow the rows, visibility rules, titles vs separators (Minimal chrome), alignment, ARIA tree keyboard model, mobile drawer, documents in This Browser
-- ./new-document-menu.md - when working on the Explorer's New Document menu: the split button, the blanks with six templates each, All templates handing a picker group to the start, and opening a new document in place within 200 ms
+- ./new-document-menu.md - when working on the Explorer's New Document menu: the split button and last blank, the eight blanks each beside every one of its templates in groups, menu aim, and opening a new document in place within 200 ms
 - ./folders.md - when working on Folders: Nested folders for documents in the Explorer; documents with no folder sit at the root of their space; deleting a folder moves its contents up to its parent
 - ./share-roles.md - when working on what a share link, embed or API token may do: Viewer, Participant, Editor; ownership powers
 - ./share-password.md - when working on Share password: Optional per-document password gating share-link view + edit access; the visitor's per-share-code password cache in localStorage
