@@ -11,6 +11,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Within this many days a heading says the weekday; past it, the date.
 const WEEKDAY_SPAN_DAYS = 7;
+// Built once (see useTimelineGrouping DAY_PARTS): a formatter per heading cost a frame on its own.
+const WEEKDAY = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
 
 /** "Today", "Yesterday", the weekday within the last week, then "Tue, 5 Aug" (with its year when
  *  not this year's). A forward-dated day (an expiry warning) is dated. */
@@ -25,7 +27,7 @@ export function historyDayLabel(key: string, now: number): string {
   const ago = Math.round((midnight - day.getTime()) / DAY_MS);
   if (ago === 1) return 'Yesterday';
   if (ago > 1 && ago < WEEKDAY_SPAN_DAYS) {
-    return day.toLocaleDateString('en-GB', { weekday: 'long' });
+    return WEEKDAY.format(day);
   }
   const { label, year } = formatDay(key);
   return year !== String(today.getFullYear()) ? `${label} ${year}` : label;

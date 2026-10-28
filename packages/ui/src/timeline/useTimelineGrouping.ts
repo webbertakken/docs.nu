@@ -78,6 +78,14 @@ export function useTimelineGrouping(events: TimelineEvent[], now?: number): Time
   return useMemo(() => groupByDay(events, now), [events, now]);
 }
 
+// Built once: constructing an Intl formatter loads its locale data, which cost a frame's budget on its own when
+// every day heading built its own (history.test.ts "inside a frame").
+const DAY_PARTS = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+});
+
 export function formatDay(key: string): { label: string; year: string } {
   // Parsed as local midnight (no trailing Z), matching how dateKey
   // built it. `new Date('2026-08-05')` would be parsed as UTC and could
@@ -89,11 +97,7 @@ export function formatDay(key: string): { label: string; year: string } {
   // ICU 72 and below emit "Tue 5 Aug" while 73+ emit "Tue, 5 Aug", and
   // a label that differs between a developer's machine and CI is a
   // snapshot test that fails for no reason.
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  }).formatToParts(date);
+  const parts = DAY_PARTS.formatToParts(date);
   const weekday = parts.find((p) => p.type === 'weekday')?.value ?? '';
   const day = parts.find((p) => p.type === 'day')?.value ?? '';
   const month = parts.find((p) => p.type === 'month')?.value ?? '';
