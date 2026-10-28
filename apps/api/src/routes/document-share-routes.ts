@@ -5,7 +5,7 @@
 // broadcast so hydrated visitors hard-redirect), and re-arming an
 // expiring link.
 
-import { DEFAULT_LINK_LEVEL, isAccessLevel, type ShareLinkExpiry } from '@livedoc/api-schema';
+import { DEFAULT_LINK_LEVEL, isAccessLevel, isShareLinkExpiry } from '@livedoc/api-schema';
 import { MAX_PASSWORD_LEN } from '../limits';
 import {
   createShareLink,
@@ -53,11 +53,9 @@ export async function handleDocumentShareRoutes(
       return json({ links, passwordSet });
     }
     if (request.method === 'POST') {
-      const body = (await readOptionalBody(request)) as {
-        role?: unknown;
-        expiry?: ShareLinkExpiry;
-        tabId?: unknown;
-      };
+      const read = await readOptionalBody(request);
+      if (read instanceof Response) return read;
+      const body = read as { role?: unknown; expiry?: unknown; tabId?: unknown };
       // Reject a garbage role rather than silently granting edit (the prior
       // `=== 'view' ? 'view' : 'edit'` turned any typo into an edit link).
       // An OMITTED role still defaults to 'edit', the documented behaviour; the three levels are
@@ -69,12 +67,16 @@ export async function handleDocumentShareRoutes(
         return badRequest('invalid role');
       }
       const role: ShareRole = body.role ?? DEFAULT_LINK_LEVEL;
-      // Expiry (docs/specs/013-workspace/share-link-expiry.md): unknown / missing value falls back to the
-      // pre-expiry behaviour, a link that works until revoked.
-      const expiry: ShareLinkExpiry =
-        body.expiry === 'week' || body.expiry === 'month' || body.expiry === 'sixMonths'
-          ? body.expiry
-          : 'never';
+      // Expiry (docs/specs/013-workspace/share-link-expiry.md): left out, a link that works until revoked. A
+      // present expiry it does not know is refused like a bad role: read as never, it would mint more reach than
+      // was asked for.
+      const expiry = body.expiry === undefined ? 'never' : body.expiry;
+      if (!isShareLinkExpiry(expiry)) {
+        console.warn('[share-links] invalid expiry', {
+          value: typeof expiry === 'string' ? expiry.slice(0, 40) : typeof expiry,
+        });
+        return badRequest('invalid expiry');
+      }
       // Scope (docs/specs/013-workspace/tab-scoped-share-links.md): one of this document's tabs, or All tabs.
       const tabId = parseScope(body.tabId, access.tabs);
       if (tabId === INVALID_SCOPE) return badRequest('invalid tab');
@@ -121,7 +123,9 @@ export async function handleDocumentShareRoutes(
     if (access instanceof Response) return access;
 
     if (request.method === 'PUT') {
-      const body = (await readOptionalBody(request)) as { password?: string | null };
+      const read = await readOptionalBody(request);
+      if (read instanceof Response) return read;
+      const body = read as { password?: unknown };
       const password = typeof body.password === 'string' ? body.password : null;
       if (password !== null && password.length > MAX_PASSWORD_LEN) {
         return badRequest('password too long');
@@ -176,6 +180,7 @@ export async function handleDocumentShareRoutes(
         return notFound();
       }
       const body = await readOptionalBody(request);
+      if (body instanceof Response) return body;
       if (!('tabId' in body)) return badRequest('invalid tab');
       const tabId = parseScope(body.tabId, access.tabs);
       if (tabId === INVALID_SCOPE) return badRequest('invalid tab');

@@ -387,7 +387,12 @@ export type ShareRole = AccessLevel;
 
 // Lifetime chosen at link creation (docs/specs/013-workspace/share-link-expiry.md). 'never' is the default
 // and the pre-expiry behaviour: the link works until revoked.
-export type ShareLinkExpiry = 'never' | 'week' | 'month' | 'sixMonths';
+export const SHARE_LINK_EXPIRIES = ['never', 'week', 'month', 'sixMonths'] as const;
+export type ShareLinkExpiry = (typeof SHARE_LINK_EXPIRIES)[number];
+
+export function isShareLinkExpiry(value: unknown): value is ShareLinkExpiry {
+  return (SHARE_LINK_EXPIRIES as readonly unknown[]).includes(value);
+}
 
 // The fixed lifetimes in ms, shared by the api worker (computing
 // `expiresAt` at create/extend time) and the live editor (rendering

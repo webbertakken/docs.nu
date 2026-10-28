@@ -18,7 +18,7 @@ import type { SharePasswordAttempt } from '../auth/share-access';
 import type { WorkbenchReach } from '../db/workbench';
 import { clientRateKey } from '../client-ip';
 import { getDocument, getMembership, getTrashedDocumentMeta } from '../db';
-import { badRequest, documentTrashed, forbidden, missingAuth, notFound } from '../responses';
+import { badRequest, documentTrashed, forbidden, json, missingAuth, notFound } from '../responses';
 import type { DocumentDTO, DocumentEnv, Env } from '../types';
 
 // A workbench session as the choke point resolved it (blueprint "A request bearing lvw_", "The choke point by
@@ -336,11 +336,33 @@ export async function deniedParticipate(
   return forbidden();
 }
 
-// A body whose every field is optional: the JSON object, or `{}` for an empty, unparseable or non-object body
-// (`null`, a string, an array), so reading a field off it never throws. An absent body is the documented
-// default on these routes, so anything that is not an object reads the same way.
-export async function readOptionalBody(request: Request): Promise<Record<string, unknown>> {
-  return objectOrEmpty(await request.json().catch(() => null));
+// A body whose every field is optional: the JSON object, or `{}` for an absent or empty body and for any JSON value
+// that is not an object (`null`, a string, an array), so reading a field off it never throws. A body that does not
+// read to its end (the stream broke off: a client gone mid-upload) or does not parse is no body at all, never `{}`:
+// on these routes `{}` is a choice (no share password, an edit link to every tab), so a broken request must not make
+// it. Answered 400 `body_unreadable` / `invalid json`.
+export async function readOptionalBody(
+  request: Request,
+): Promise<Record<string, unknown> | Response> {
+  let text: string;
+  try {
+    text = await request.text();
+  } catch (err) {
+    console.warn('[request] body unreadable', {
+      path: new URL(request.url).pathname,
+      err: String(err),
+    });
+    return json(
+      { error: 'body_unreadable', message: 'the request body broke off before it was read' },
+      { status: 400 },
+    );
+  }
+  if (text.trim() === '') return {};
+  try {
+    return objectOrEmpty(JSON.parse(text));
+  } catch {
+    return badRequest('invalid json');
+  }
 }
 
 // The request's JSON body as an object, or the 400 to return: `invalid json` when it doesn't

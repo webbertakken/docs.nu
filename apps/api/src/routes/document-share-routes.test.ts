@@ -68,6 +68,7 @@ function ctxFor(
   path: string,
   opts: {
     body?: unknown;
+    rawBody?: string;
     owner?: string | null;
     sessionAccountId?: string | null;
     env?: Env;
@@ -77,6 +78,7 @@ function ctxFor(
   const dispatched: Promise<unknown>[] = [];
   const ctx = makeTestRouteContext(method, path, {
     body: opts.body,
+    rawBody: opts.rawBody,
     owner: opts.owner === undefined ? 'user_1' : opts.owner,
     sessionAccountId: opts.sessionAccountId,
     env: opts.env,
@@ -284,8 +286,8 @@ describe('POST /api/documents/:id/share — minting a link', () => {
     expect(db.createShareLink).not.toHaveBeenCalled();
   });
 
-  it('accepts each known expiry and falls back to never for anything else', async () => {
-    for (const expiry of ['week', 'month', 'sixMonths'] as const) {
+  it('accepts each known expiry, and never when none is given', async () => {
+    for (const expiry of ['week', 'month', 'sixMonths', 'never'] as const) {
       const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { expiry } });
       await handleDocumentShareRoutes(ctx);
       expect(db.createShareLink).toHaveBeenLastCalledWith(
@@ -297,18 +299,34 @@ describe('POST /api/documents/:id/share — minting a link', () => {
         null,
       );
     }
-    // An unknown token is not an error: it degrades to the pre-expiry
-    // behaviour, a link that works until revoked.
-    const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { expiry: 'fortnight' } });
+    const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { role: 'view' } });
     await handleDocumentShareRoutes(ctx);
     expect(db.createShareLink).toHaveBeenLastCalledWith(
       {},
       'd_1',
       'CODE1234',
-      'edit',
+      'view',
       'never',
       null,
     );
+  });
+
+  // A link that lasts for ever is more reach than was asked for: a wrong expiry is refused, like a wrong role.
+  it('400s an expiry it does not recognise instead of minting a permanent link', async () => {
+    for (const expiry of ['fortnight', 'weekly', 7, null, '']) {
+      const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { expiry } });
+      const res = await handleDocumentShareRoutes(ctx);
+      expect(res!.status, JSON.stringify(expiry)).toBe(400);
+      expect(await res!.json()).toMatchObject({ message: 'invalid expiry' });
+    }
+    expect(db.createShareLink).not.toHaveBeenCalled();
+  });
+
+  // A body cut short is no body: read as {} it would mint the widest link, an edit link to every tab.
+  it('400s a body cut short of valid JSON, minting nothing', async () => {
+    const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { rawBody: '{"role":"vi' });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(400);
+    expect(db.createShareLink).not.toHaveBeenCalled();
   });
 
   it('mints from a request with no readable body at all', async () => {
@@ -412,6 +430,15 @@ describe('PUT /api/documents/:id/share-password (docs/specs/013-workspace/share-
     const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password');
     expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
     expect(db.setDocumentSharePassword).toHaveBeenCalledWith({}, 'd_1', null);
+  });
+
+  // A body cut short is no body: read as {}, it would remove the password and answer 200.
+  it('400s a body cut short of valid JSON, leaving the password as it is', async () => {
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      rawBody: '{"password":',
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(400);
+    expect(db.setDocumentSharePassword).not.toHaveBeenCalled();
   });
 
   // docs/specs/013-workspace/share-password.md: visitors a code admitted before the password meet
