@@ -188,10 +188,10 @@ picked after creation"). The move loads only at the pick (`useTemplatePickMove`,
 
 ## The tours wait
 
-A tour's welcome never lands over a start: while one is on screen the Diagram, Workshop, Draw and Pages
-tours hold their offer, and make it once a template is picked or the start closed (`start-panel-open.ts`,
-`useStartPanelOpen`). Start Planning shows only on a tab with no board or Sheet, where the Plan tour has nothing to
-show, so it needs no hold.
+A tour never lands over a start: while one is on screen the Diagram, Workshop, Draw, Avatar and Pages tours are not
+on offer, so the bottom bar's Start Tour button does not show them, and they come onto it once a template is picked
+or the start closed (`start-panel-open.ts`, `useStartPanelOpen`). Start Planning shows only on a tab with no board or
+Sheet, where the Plan tour has nothing to show, so it needs no hold.
 
 ## Search handed over
 
