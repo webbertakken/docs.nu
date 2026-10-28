@@ -328,6 +328,6 @@ The ink audit is the arbiter: a site that fails it joins the migration.
 | Utilities                                | `optical-utilities.test.ts`                                                           |
 | Primitives and their invariants          | `optical.test.tsx`                                                                    |
 | Button labels and edges                  | `Button.test.tsx`                                                                     |
-| Actions group row                        | `lines/ActionsGroup.test.tsx`                                                         |
+| Actions group row                        | `apps/live/components/chrome/lines/ActionsGroup.test.tsx`                             |
 | SVG text on its cap band                 | `svg-cap-band.test.ts`, `svg-cap-band-render.test.ts`, `sticker-badge-centre.test.ts` |
 | Primitives are the one implementation    | `optical-guard.test.ts` (the checker) and each workspace's `optical-guard.test.ts`    |
