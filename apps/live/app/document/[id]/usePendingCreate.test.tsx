@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   addPendingDocument,
+  notePendingPainted,
   pendingDocument,
   resetPendingDocumentsForTests,
   type PendingDocumentInput,
@@ -33,6 +34,13 @@ function controlledWrite() {
   return { write, calls };
 }
 
+// Added and painted by its editor, as an open does: the write starts after the paint.
+async function addPainted(...args: Parameters<typeof addPendingDocument>) {
+  addPendingDocument(...args);
+  notePendingPainted(args[0].id);
+  await act(async () => {});
+}
+
 function render(selfId = 'owner-1', documentId: string | null = ID) {
   const deps = {
     setDocumentServerStored: vi.fn(),
@@ -54,7 +62,7 @@ afterEach(() => {
 });
 
 describe('usePendingCreate', () => {
-  it('never holds a document the editor fetched', () => {
+  it('never holds a document the editor fetched', async () => {
     const { result, deps } = render();
     expect(result.current.held).toBe(false);
     expect(deps.setDocumentServerStored).not.toHaveBeenCalled();
@@ -62,7 +70,7 @@ describe('usePendingCreate', () => {
 
   it('holds saves until the create lands, then makes a LiveDoc document server-stored once', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, { teamId: 'team-1' });
+    await addPainted(input(), write, { teamId: 'team-1' });
     const { result, deps, rerender } = render();
     expect(result.current.held).toBe(true);
     expect(deps.setDocumentServerStored).not.toHaveBeenCalled();
@@ -78,7 +86,7 @@ describe('usePendingCreate', () => {
 
   it('keeps a This Browser document off the server when it lands', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input({ location: 'browser', teamId: null }), write, {});
+    await addPainted(input({ location: 'browser', teamId: null }), write, {});
     const { result, deps } = render();
     await act(async () => calls[0]!.resolve());
     expect(result.current.held).toBe(false);
@@ -87,7 +95,7 @@ describe('usePendingCreate', () => {
 
   it('holds a LiveDoc document while its reader is still the placeholder', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, {});
+    await addPainted(input(), write, {});
     const { result, rerender } = render('self');
     await act(async () => calls[0]!.resolve());
     expect(result.current.held).toBe(true);
@@ -97,7 +105,7 @@ describe('usePendingCreate', () => {
 
   it('keeps holding through a failure, offers Try again, and lands on the same write', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, { teamId: 'team-1' });
+    await addPainted(input(), write, { teamId: 'team-1' });
     const { result, deps } = render();
     await act(async () => calls[0]!.reject(new Error('network')));
     expect(result.current.held).toBe(true);
@@ -114,7 +122,7 @@ describe('usePendingCreate', () => {
 
   it('saves to My Documents with no placement, no longer in the team', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, { teamId: 'team-1' });
+    await addPainted(input(), write, { teamId: 'team-1' });
     const { result, deps } = render();
     await act(async () => calls[0]!.reject(new Error('refused')));
     act(() => result.current.saveToMyDocuments());
@@ -125,7 +133,7 @@ describe('usePendingCreate', () => {
 
   it('forgets a landed document when the editor goes', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, {});
+    await addPainted(input(), write, {});
     const { unmount } = render();
     await act(async () => calls[0]!.resolve());
     unmount();
