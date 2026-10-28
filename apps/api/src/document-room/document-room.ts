@@ -57,6 +57,8 @@ import { RoomContent, RoomIdMismatchError, RoomNotReadyError } from './room-cont
 import type { MoveOutcome } from './content-move';
 import type { DocumentRoomRpc } from './document-rpc';
 import type { Item } from '@livedoc/items';
+import type { BugReportFiling } from '@livedoc/api-schema';
+import type { BugReportFileOutcome } from '../bug-reports/room-file';
 import type { ContentSummary } from '../db/content-summary';
 import type { DocumentCopy, DocumentOutline } from './document-content';
 import type { CreateOutcome, DocumentSeed } from './document-create';
@@ -1243,6 +1245,14 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     identity: RouteIdentity,
   ): Promise<Response> {
     return this.answer(documentId, (rpc) => rpc.respondToForm(documentId, request, identity));
+  }
+
+  async fileBugReport(
+    documentId: string,
+    tabId: string,
+    filing: BugReportFiling,
+  ): Promise<BugReportFileOutcome> {
+    return (await this.content.rpc(documentId)).fileBugReport(documentId, tabId, filing);
   }
 
   // A tab shared between documents (tab-shares.ts): a joining document's copy, the join recorded, and what another
