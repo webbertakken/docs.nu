@@ -43,9 +43,9 @@ globs = ["**/*.ttf", "**/*.otf"]
 AI_ALLOWED_ORIGINS = "https://docs.nu"
 
 # The CLI signs in through the MCP worker's OAuth server (docs/specs/015-api/cli.md "Authentication"); the
-# api names it in /api/capabilities. CLI_MIN_VERSION (unset until a release needs a floor) refuses writes
-# from an older CLI. Blank: docs.nu's MCP worker is not deployed yet.
-OAUTH_ISSUER = ""
+# api names it in /api/capabilities as OAUTH_ISSUER, a hosted var (hosted-vars.json): docs.nu's is
+# https://mcp.docs.nu, and a fork without an MCP worker leaves it unset. CLI_MIN_VERSION (unset until a release
+# needs a floor) refuses writes from an older CLI.
 
 # Google Drive mirror (docs/specs/022-drive-mirror/drive-mirror.md). No binding
 # of its own: it rides the D1 database above (drive_connections, drive_items).

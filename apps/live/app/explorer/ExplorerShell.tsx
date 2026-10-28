@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { dropSettingsLink } from '@/lib/settings-link';
 import { usePathname } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { Brand, ProductNav, ProductNavLinks } from '@livedoc/ui';
+import { Brand, ProductNavLinks } from '@livedoc/ui';
 import { AuthControls } from '@/components/chrome/AuthControls';
 import { LensField } from './lens/LensField';
 import { LensAnnouncer } from './lens/LensStates';
@@ -183,7 +183,6 @@ function ShellChrome({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-[var(--z-chrome)] flex shrink-0 flex-wrap items-center justify-between gap-x-4 border-y border-slate-200 bg-white/85 pl-4 pr-0 backdrop-blur sm:h-14 sm:flex-nowrap lg:grid lg:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] dark:border-slate-700 dark:bg-slate-900/85">
           <div className="flex h-14 items-center gap-3 lg:col-start-1">
             <Brand href="/" size="md" assemble />
-            <ProductNav current="explorer" showOnMobile />
           </div>
           <div className="order-last w-full pb-2 pr-4 sm:order-none sm:ml-auto sm:w-auto sm:pb-0 sm:pr-0 lg:col-start-2 lg:ml-0">
             <LensField lens={lens} subjects={lensResult.subjects} />
@@ -200,8 +199,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
           </div>
         </header>
       ) : (
-        // A workspace frame keeps the Explorer's field in a slim bar of its own (WB61): no brand, product nav or
-        // account.
+        // A workspace frame keeps the Explorer's field in a slim bar of its own (WB61): no brand or account.
         <div className="sticky top-0 z-[var(--z-chrome)] flex h-12 shrink-0 items-center border-b border-slate-200 bg-white/85 px-4 backdrop-blur dark:border-slate-700 dark:bg-slate-900/85">
           <div className="w-full sm:mx-auto sm:max-w-md">
             <LensField lens={lens} subjects={lensResult.subjects} />
@@ -267,7 +265,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
         className="sticky bottom-0 z-[var(--z-chrome)] flex h-12 shrink-0 items-center justify-end gap-2 border-t border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900"
       >
         {/* The footer links (docs/specs/013-workspace/explorer-structure.md "Layout"): Home, the Editor, Help and
-            Telemetry, which the apps menu no longer lists. Left out in a workspace frame, like GitHub. */}
+            Telemetry. Left out in a workspace frame, like GitHub. */}
         {surface.appLinks ? (
           <ProductNavLinks
             current="explorer"

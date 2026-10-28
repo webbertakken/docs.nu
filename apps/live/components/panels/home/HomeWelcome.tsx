@@ -21,10 +21,7 @@ import {
   welcomeStartHref,
 } from '@/app/explorer/home/first-run-starts';
 import { HomeSection } from './HomeSection';
-import { CARD_SURFACE, FOCUS_RING, MUTED, PANEL_SURFACE } from './home-styles';
-
-/** A start's preview: the column's width and 80 px high, as Jump Back In's thumbnails. */
-const PREVIEW = 'h-20 w-full';
+import { CARD_SURFACE, FOCUS_RING, GRID_THUMB, MUTED, PANEL_SURFACE } from './home-styles';
 import { assignAppLocation } from '@/lib/app-location';
 
 export function HomeWelcome({
@@ -105,7 +102,7 @@ function StartTile({ kind, blank }: { kind: TemplateKind; blank: boolean }) {
       >
         <span
           aria-hidden
-          className={`block overflow-hidden rounded-md p-1 ${PREVIEW} ${CARD_SURFACE}`}
+          className={`block overflow-hidden rounded-md p-1 ${GRID_THUMB} ${CARD_SURFACE}`}
         >
           <TemplatePicture kind={kind} />
         </span>

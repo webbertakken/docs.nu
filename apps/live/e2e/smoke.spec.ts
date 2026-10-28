@@ -43,6 +43,11 @@ test('the explorer renders for a guest', async ({ page, pageErrors }) => {
   // (docs/specs/013-workspace/explorer-structure.md).
   await expect(page.getByRole('treeitem', { name: /^Home/ })).toBeVisible();
   await expect(page.getByRole('treeitem', { name: /^Shared With Me/ })).toBeVisible();
+  // The header's logo and wordmark stand alone: no section menu beside them
+  // (docs/specs/013-workspace/explorer-structure.md "Layout").
+  const header = page.locator('header').first();
+  await expect(header.locator('a[href="/"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: /^switch section/i })).toHaveCount(0);
   expectNoPageErrors(pageErrors);
 });
 

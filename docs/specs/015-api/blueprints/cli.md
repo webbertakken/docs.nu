@@ -1092,7 +1092,7 @@ WebSocket) with a fixed clock; none waits on a real timer or the network.
 Environment the CLI reads: `LIVEDOC_TOKEN`, `LIVEDOC_HOST`, `LIVEDOC_PROFILE`, `LIVEDOC_TELEMETRY`,
 `DO_NOT_TRACK`, `LIVEDOC_NO_UPDATE_CHECK`, `LIVEDOC_DEBUG`, `CI`, `XDG_CONFIG_HOME`, `XDG_CACHE_HOME`.
 Api worker vars: `OAUTH_ISSUER` (hosted `https://mcp.docs.nu`) and `CLI_MIN_VERSION` (unset until a
-release needs a floor), in `[vars]`, so
+release needs a floor); `OAUTH_ISSUER` is a hosted var (`hosted-vars.json`), `CLI_MIN_VERSION` in `[vars]`, so
 `pnpm deploy:check` holds; both documented in `docs/operations/self-hosting.md`. No new secret, binding or migration.
 
 ## Assets and external resources
