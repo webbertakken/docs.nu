@@ -262,9 +262,8 @@ Top to bottom:
 3. **The rail and the pane**, side by side on a desktop: the rail on the left lists the sections, the pane on the right
    shows the picked one.
 4. **The footer**: the product's surfaces as links, one row: **Home** (the landing page), **Explorer** (the Explorer
-   page), **Help**, **Telemetry**. The editor header carries no product menu ([Live app: header](../007-editor/live-app.md)),
-   and the product menu elsewhere lists only the Editor and the Explorer, so Home, Help and Telemetry are reached
-   from footer links: this row in the editor, the same row (`ProductNavLinks`, the current surface left out) on the
+   page), **Help**, **Telemetry**. No header carries a product menu ([Live app: header](../007-editor/live-app.md)), so the
+   surfaces are reached from footer links: this row in the editor, the same row (`ProductNavLinks`, the current surface left out) on the
    left of the Explorer page's bottom bar (not in a workspace frame), and the site footer on the public sites.
 5. **The sign-in note** for a signed-out guest: one quiet line under the Current Document card ("Keep your work. A free
    account saves it across devices." with **Sign in**, on a phone "Keep your work." with **Sign in** alone so it stays one

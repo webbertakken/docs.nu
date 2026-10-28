@@ -37,6 +37,15 @@ describe('SiteHeader', () => {
     expect(html).toMatch(/<span class="max-\[379px\]:hidden">Choose <\/span>Template/);
   });
 
+  it('stands the brand alone on the left, with no section menu', () => {
+    expect(html).not.toMatch(/switch section/i);
+    const left =
+      html.match(/<div class="flex shrink-0 items-center gap-2\.5">([\s\S]*?)<\/div><div/)?.[1] ??
+      '';
+    expect([...left.matchAll(/<a /g)]).toHaveLength(1);
+    expect(left).toContain('href="/"');
+  });
+
   it('no longer says Just Draw anywhere', () => {
     expect(html).not.toMatch(/just draw/i);
   });

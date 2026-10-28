@@ -1,5 +1,5 @@
 // The editor's title bar for the User Interface › The Title Bar article (docs/specs/018-help/help-app.md).
-// Drawn from the live header (apps/live/components/chrome/EditorHeader.tsx): the logo and section menu,
+// Drawn from the live header (apps/live/components/chrome/EditorHeader.tsx): the logo and wordmark,
 // the document name, the visibility pill (SharedBadge), the role pill (RoleIndicator), Share and the
 // account button; and the visibility pill's legend (VisibilityLegend). Labels are the real UI strings,
 // in capitals where the editor prints them in capitals.
@@ -119,7 +119,7 @@ function Callout({
   );
 }
 
-/** The title bar as the owner of a shared document sees it: logo and section menu, the
+/** The title bar as the owner of a shared document sees it: logo and wordmark, the
  *  document name, the SHARED visibility pill, the EDITING role pill, a solid Share button and
  *  the account button. */
 export function TitleBarParts() {
@@ -136,7 +136,7 @@ export function TitleBarParts() {
         className="stroke-slate-200"
         strokeWidth={1.2}
       />
-      {/* Logo and the section menu (ProductNav), which reads "Editor" here. */}
+      {/* The logo and its wordmark. */}
       <rect x={10} y={y + 10} width={20} height={20} rx={5} className="fill-brand-500" />
       <path
         d={`M15 ${y + 23} l4 -6 l3 4 l3 -3`}
@@ -147,15 +147,8 @@ export function TitleBarParts() {
         strokeLinejoin="round"
       />
       <Label x={40} y={y + 21} size={10} weight={600} tone="body">
-        Editor
+        LiveDoc
       </Label>
-      <path
-        d={`M76 ${y + 19} l3 3 l3 -3`}
-        className="stroke-slate-400"
-        fill="none"
-        strokeWidth={1.3}
-        strokeLinecap="round"
-      />
       {/* The document name: click to rename. */}
       <Label x={118} y={y + 21} size={11} tone="body">
         Checkout Flow
