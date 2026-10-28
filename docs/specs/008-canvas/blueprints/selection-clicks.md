@@ -78,7 +78,9 @@ release through `useRightClickRelease` (Windows, macOS, X11 and the macOS Ctrl+c
 latter after `cancelPressGesture`); a right press that travels past its slop opens nothing and keeps
 the selection. The canvas long-press (`useLongPress`, touch only) lives in this hook now and is
 returned as `canvasLongPress` for the hold ring `Canvas` draws; it calls `cancelPressGesture`, then
-`openCanvasMenu`. With no canvas menu to open (view role) it still deselects. The spotlight,
+`openCanvasMenu`. Unmounting mid-hold lets the armed press go: its timers clear and its window
+`pointermove`, `pointerup` and `pointercancel` listeners come off at once, never on the finger's lift. With no
+canvas menu to open (view role) it still deselects. The spotlight,
 isometric and avatar tools open nothing and keep the selection. A right-click on an element never
 reaches the canvas (the element stops it), so the element menu keeps its own selection rules.
 
