@@ -64,14 +64,13 @@ export const BRAND_APPLE_WEB_APP: NonNullable<Metadata['appleWebApp']> = {
   statusBarStyle: 'default',
 };
 
-// Mobile chrome + colour-scheme signal for the public sites: brand-500 tints
-// Android Chrome's URL bar, the iOS PWA status bar and the Windows tile, and
-// 'light dark' says the pages paint both appearances. The painted one is the
+// Colour-scheme signal for the public sites: 'light dark' says the pages paint both appearances. No themeColor: the
+// browser's chrome wears the header colour, which the appearance script writes before first paint
+// (appearance/chrome-colour.ts), since only it knows the reader's pick. The painted one is the
 // CSS `color-scheme` the shared theme sets from the `dark` class, which outranks
 // this hint (docs/specs/004-interface-design/appearance.md). The editor has its own
 // viewport (pinned zoom, docs/specs/007-editor/live-app.md) and doesn't use this.
 export const PUBLIC_VIEWPORT: Viewport = {
-  themeColor: '#0EA5E9',
   colorScheme: 'light dark',
 };
 

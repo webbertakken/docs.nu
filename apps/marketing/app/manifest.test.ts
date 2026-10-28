@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PUBLIC_VIEWPORT } from '@livedoc/ui';
 import manifest from './manifest';
 
 // docs/specs/004-interface-design/brand-mark.md "Icons and media": Android's icons, each with its purpose.
@@ -8,6 +9,15 @@ describe('web app manifest', () => {
 
   it('names LiveDoc', () => {
     expect(manifest()).toMatchObject({ name: 'LiveDoc', short_name: 'LiveDoc' });
+  });
+
+  // docs/specs/004-interface-design/appearance.md "The browser's chrome": the title bar wears the header's colour.
+  it('starts an installed app on the homepage ground, never the brand blue', () => {
+    expect(manifest()).toMatchObject({ start_url: '/', theme_color: '#f8fafc' });
+  });
+
+  it('leaves theme-color to the appearance script, which knows light from dark', () => {
+    expect(PUBLIC_VIEWPORT).not.toHaveProperty('themeColor');
   });
 
   it('lists the SVG and the 192 and 512px transparent marks for any launcher', () => {

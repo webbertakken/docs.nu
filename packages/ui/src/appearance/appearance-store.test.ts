@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { APPEARANCE_STORAGE_KEY } from './appearance-storage';
+import { CHROME_SURFACES } from './chrome-colour';
 import {
   applyAppearance,
   getAppearanceSetting,
@@ -20,8 +21,8 @@ import {
 //
 // These run in the node environment, so `window` and `document` are stubs. The
 // stubs are the smallest thing the store actually touches: a localStorage pair,
-// a classList, and one media query. Anything more elaborate would be testing
-// the stub.
+// a classList, one media query, and the theme-color meta the browser's chrome
+// reads. Anything more elaborate would be testing the stub.
 
 type Store = Record<string, string>;
 let store: Store = {};
@@ -33,6 +34,8 @@ let osPrefersDark = false;
 let mediaListeners: (() => void)[] = [];
 /** Queries asked of matchMedia, so a test can assert it was never consulted. */
 let mediaQueries: string[] = [];
+/** The theme-color meta the boot script wrote, which the store keeps on the header colour. */
+let themeColor: { content: string };
 
 /** Flip the OS preference and fire the change the way a real MediaQueryList does. */
 function setOsPrefersDark(next: boolean): void {
@@ -47,7 +50,9 @@ beforeEach(() => {
   osPrefersDark = false;
   mediaListeners = [];
   mediaQueries = [];
+  themeColor = { content: '' };
   const g = globalThis as Record<string, unknown>;
+  g.getComputedStyle = () => ({ getPropertyValue: () => '' });
   g.window = {
     localStorage: {
       getItem: (k: string) => (k in store ? store[k]! : null),
@@ -72,8 +77,11 @@ beforeEach(() => {
     },
   };
   g.document = {
+    head: { querySelector: () => themeColor },
     documentElement: {
+      getAttribute: () => null,
       classList: {
+        contains: (c: string) => classes.has(c),
         add: (c: string) => {
           domCalls.push(`add:${c}`);
           classes.add(c);
@@ -211,6 +219,15 @@ describe('the OS changing under a System setting', () => {
     setOsPrefersDark(false);
     expect(classes.has('dark')).toBe(false);
     expect(calls).toBe(3);
+  });
+
+  // docs/specs/004-interface-design/appearance.md "The browser's chrome".
+  it('repaints the browser chrome with the header colour', () => {
+    setAppearance('system');
+    setOsPrefersDark(true);
+    expect(themeColor.content).toBe(CHROME_SURFACES.header.dark);
+    setAppearance('light');
+    expect(themeColor.content).toBe(CHROME_SURFACES.header.light);
   });
 
   it('is ignored once the user picks a side', () => {

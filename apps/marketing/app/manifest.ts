@@ -1,4 +1,4 @@
-import { SITE_DESCRIPTION } from '@livedoc/ui';
+import { CHROME_SURFACES, SITE_DESCRIPTION } from '@livedoc/ui';
 import type { MetadataRoute } from 'next';
 
 // Required for `output: 'export'`: route handlers must declare
@@ -23,9 +23,9 @@ export const dynamic = 'force-static';
 // monochrome silhouette is for Android's themed icons, which keep only its alpha. An opaque, iOS-friendly
 // home-screen tile is app/apple-icon.tsx (iOS renders transparency as black).
 //
-// theme_color matches the viewport export in layout.tsx so the
-// installed-app chrome stays brand-blue. background_color paints the
-// splash screen behind the icon at launch.
+// theme_color is the homepage's light ground, where start_url opens: an installed app's title bar starts there, then
+// the appearance script points the page's theme-color meta at the page's top as painted (docs/specs/004-interface-design/appearance.md "The
+// browser's chrome"). background_color paints the splash screen behind the icon at launch.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'LiveDoc',
@@ -33,7 +33,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: SITE_DESCRIPTION,
     start_url: '/',
     display: 'standalone',
-    theme_color: '#0EA5E9',
+    theme_color: CHROME_SURFACES.ground.light,
     background_color: '#ffffff',
     icons: [
       { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },

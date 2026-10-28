@@ -13,6 +13,23 @@
 
 Every app's root layout inlines the same tiny script, before first paint, that applies the stored setting (System consulting the OS). A first-time visitor on a dark machine therefore lands dark on their very first load. The script never throws (storage denied, no `matchMedia`); it degrades to light.
 
+## The browser's chrome
+
+The browser's own chrome (an installed app's title bar, a phone's status bar and URL bar) wears the colour at the top
+of the page, so the window reads as one piece. That is one of two surfaces:
+
+- **Header**, in the editor app (the editor, the Explorer, the account pages): the header's and the site footer's
+  colour. White in light; in dark `slate-900` as painted now: Steel's `#131b26`, a themed tab's tinted surface, or
+  Midnight's navy.
+- **Ground**, on the public sites (marketing, help, telemetry): their translucent header shows the page ground.
+  `slate-50` (`#f8fafc`) in light; in dark `slate-950` as painted, Steel's `#0b0f16`.
+
+A layout whose top is the ground says so with `data-chrome-surface="ground"` on `<html>`; without it, the header
+applies. It is one `<meta name="theme-color">`, written by the No flash script before first paint, then kept current
+whenever the appearance, a tab's theme tint or Midnight changes. It is never set through Next's viewport, so no copy
+carries the brand blue. The web app manifest's `theme_color` is the homepage's light ground, where an installed app
+opens, so it starts there before the page says otherwise.
+
 ## The control
 
 - One button that **cycles Light → Dark → System**, showing the CURRENT setting (sun / moon / monitor); its accessible name says where the next click goes.
