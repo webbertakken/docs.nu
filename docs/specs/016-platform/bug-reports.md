@@ -39,8 +39,9 @@ context, which the form collects itself. Each entry is drawn in its neighbours' 
 
 The root error page has no app around it (the root layout itself failed), and the help centre, marketing site and
 telemetry dashboard are other apps: they link to **`/report-a-bug`**, a light page of the editor app that shows the
-form on its own, with a link back to where the reporter came from. A link from another site carries its page as
-`?from=<path>` (a page path as `pageViewPath` reduces it, so never an id); the context names it as **from**.
+form on its own; closing it goes back in the browser's history to where the reporter came from, else home. A link from
+another site carries its page as `?from=<path>` (a page path as `pageViewPath` reduces it, so never an id); the context
+names it as **from**, and it never decides where the browser goes (no redirect from a query).
 
 Every entry has `aria-haspopup="dialog"` (links excepted), and focus returns to it when the form closes (to the account
 menu's button for the menu item, which is gone by then). Every icon entry carries `data-bug-report-entry`, by which a

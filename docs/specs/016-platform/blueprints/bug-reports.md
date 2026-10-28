@@ -157,8 +157,8 @@ first; each `fileBugReport`, filed → delete row, refused → `noteBugReportAtt
 Copy is the spec's, verbatim. The bottom-bar button uses `CHROME_BTN` and `HoverCard` ("Report a Bug" / "Tell us what
 went wrong. Opens a short form."); the error-card button is `Button variant="secondary"`; links use the host's link
 class. The screenshot preview is `max-h-48 w-auto rounded border object-contain`. The counter shows `n/200` from 160
-characters on. `/report-a-bug` shows the form open over a plain page with "Back" (to `from` when given, else `/`);
-closing the form goes back the same way.
+characters on. `/report-a-bug` shows the form open over a plain page with a "Report a Bug" button to open it again; closing
+the form calls `history.back()` when there is history, else loads `/` (`leaveReportPage`), never a URL from the query.
 
 ## Accessibility
 

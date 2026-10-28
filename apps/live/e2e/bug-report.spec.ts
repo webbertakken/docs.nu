@@ -119,19 +119,22 @@ test('a link visitor reports a bug, their share role attached', async ({
   await visitorContext.close();
 });
 
-test("the help centre's contact page opens the form's own page, and closing goes back", async ({
+test("the form's own page names where it came from, and closing goes back", async ({
   page,
   context,
   baseURL,
 }) => {
   await giveOwnClientAddress(context, baseURL!);
   const watched = watchReports(page);
+  await page.goto('/new?blank=1');
+  await page.locator('[data-canvas-a11y-root]').waitFor();
+  const cameFrom = page.url();
   await page.goto('/report-a-bug?from=/help/contact/');
   const dialog = page.getByRole('dialog', { name: 'Report a Bug' });
   await expect(dialog).toBeVisible();
   await sendReport(page, 'A broken link on the FAQ');
   expect(watched.sent[0]?.context).toMatchObject({ route: '/report-a-bug', from: '/help/contact' });
-  await expect(page).toHaveURL(/\/help\/contact\/$/);
+  await expect(page).toHaveURL(cameFrom);
 });
 
 test('an error card offers Report a Bug beside Try again', async ({ page }) => {

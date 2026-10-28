@@ -1,16 +1,16 @@
 'use client';
 
 // The standalone Report a Bug page (docs/specs/016-platform/bug-reports.md "Entries"): the form opens at once over a
-// plain page; closing it goes back where the reporter came from (`?from=`, a page on this origin), else home.
+// plain page; closing it goes back to the page the reporter came from, else home. `?from=` only names that page in
+// the report's context; it never decides where the browser goes.
 import { useEffect, useRef } from 'react';
 import { Brand, Button } from '@livedoc/ui';
 import { BUG_REPORT_COPY as COPY } from './bug-report-copy';
 import { useOpenBugReport } from './BugReportProvider';
 
-// Only a path on this origin, never another site.
-export function backTarget(search: string): string {
-  const from = new URLSearchParams(search).get('from');
-  return from && /^\/(?!\/)[^\s\\]*$/.test(from) ? from : '/';
+export function leaveReportPage(view: Pick<Window, 'history' | 'location'> = window): void {
+  if (view.history.length > 1) view.history.back();
+  else view.location.assign('/');
 }
 
 export function ReportABugPage() {
@@ -21,10 +21,7 @@ export function ReportABugPage() {
   useEffect(() => {
     if (opened.current) return;
     opened.current = true;
-    open({
-      trigger: reopenRef.current,
-      onClosed: () => window.location.assign(backTarget(window.location.search)),
-    });
+    open({ trigger: reopenRef.current, onClosed: () => leaveReportPage() });
   }, [open]);
 
   return (
@@ -36,12 +33,7 @@ export function ReportABugPage() {
         ref={reopenRef}
         variant="secondary"
         aria-haspopup="dialog"
-        onClick={(e) =>
-          open({
-            trigger: e.currentTarget,
-            onClosed: () => window.location.assign(backTarget(window.location.search)),
-          })
-        }
+        onClick={(e) => open({ trigger: e.currentTarget, onClosed: () => leaveReportPage() })}
       >
         {COPY.name}
       </Button>
