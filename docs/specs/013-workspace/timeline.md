@@ -739,10 +739,9 @@ returning `{ title?, menu? }`; the card places `menu` in its title row
 and stops the card's own click from firing under it, and renders
 `title` in place of the subject when given (the inline rename input).
 The live app's `useTimelineCardSlots` implements it against the Explorer
-context. `ScopedTimeline` (a team's activity, a document's history) passes
-nothing and gets plain cards: those surfaces sit outside the Explorer
-context that supplies the handlers, and on a document's own history page
-every card is the same document.
+context. `ScopedTimeline` (a team's activity) passes nothing and gets
+plain cards: it sits outside the Explorer context that supplies the
+handlers. A document's History (§2.10) has no cards to put a menu on.
 
 **A folder card carries the Explorer's folder menu**, by the same
 argument and the same mechanism: `FolderActionsMenu`, the one the

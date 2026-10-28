@@ -1,7 +1,7 @@
 'use client';
 
 // A Timeline for something other than the reader's own feed (docs/specs/013-workspace/timeline.md
-// §3.4) — a team's activity, or one document's history.
+// §3.4): a team's activity. One document's history is its own dialog (DocumentHistoryDialog, §2.10).
 //
 // Self-contained, unlike the Explorer's landing pane: it owns its
 // controls as well as its data, because it drops into a card on a
@@ -57,9 +57,9 @@ export function ScopedTimeline({
             description={emptyMessage}
           />
         }
-        // A team's activity or a document's history can fail to read for
+        // A team's activity can fail to read for
         // exactly the reasons the landing feed can, and "nothing has
-        // happened to this document yet" is just as wrong an answer.
+        // happened to this team yet" is just as wrong an answer.
         error={feed.error}
         onRetry={feed.retry}
         hasMore={feed.hasMore}
@@ -75,7 +75,7 @@ export function ScopedTimeline({
   );
 }
 
-// Convenience wrappers so call sites don't re-type the scope shape or
+// A convenience wrapper so call sites don't re-type the scope shape or
 // the empty copy.
 export function TeamTimeline({ ownerId, teamId }: { ownerId: string; teamId: string }) {
   return (
@@ -84,17 +84,6 @@ export function TeamTimeline({ ownerId, teamId }: { ownerId: string; teamId: str
       scope={{ scopeType: 'team', scopeId: teamId }}
       title="Team Activity"
       emptyMessage="What the team does will show here."
-    />
-  );
-}
-
-export function DocumentTimeline({ ownerId, documentId }: { ownerId: string; documentId: string }) {
-  return (
-    <ScopedTimeline
-      ownerId={ownerId}
-      scope={{ scopeType: 'document', scopeId: documentId }}
-      title="History"
-      emptyMessage="What happens to this document will show here."
     />
   );
 }
