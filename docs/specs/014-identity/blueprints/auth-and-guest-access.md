@@ -19,6 +19,7 @@ a throwaway worker under wrangler 4.148 with a local D1. Everything else about L
 | `apps/api/src/auth/identity-config.ts`                                               | Pure: `identityConfigOf(env)` → `{ enabled, methods, googleClientId }`; `versionedSecrets`, `MIN_SECRET_LENGTH`                                                               |
 | `apps/api/src/auth/identity.ts`                                                      | `createIdentity(env, ctx)`: the better-auth instance for one request, or null when off                                                                                        |
 | `apps/api/src/auth/identity-hooks.ts`                                                | `databaseHooks`: account id, telemetry, welcome email, IP blanking                                                                                                            |
+| `apps/api/src/auth/identity-logger.ts`                                               | better-auth's `logger`: undecryptable JWT keys logged `[auth] jwks_undecryptable`; every other line passed through at its level                                               |
 | `apps/api/src/auth/session-token.ts`                                                 | `getAccountSession(env, token)` verifies a session token in-process                                                                                                           |
 | `apps/api/src/auth/account-id.ts`                                                    | `generateAccountId()`                                                                                                                                                         |
 | `apps/api/src/auth/account-gate.ts`                                                  | Administration routes refuse a session token whose account row is gone (`401 account_not_found`)                                                                              |
@@ -126,6 +127,7 @@ updateUserInfoOnLink: false }, encryptOAuthTokens: true }`, with no `trustedProv
   trusted provider would join on an address it never verified. Google's access and refresh tokens are not stored
   (`mapProfileToUser` keeps name, email, picture; the account row's token columns are written null by an
   `account.create.before` hook).
+- `logger: identityLogger`: better-auth's lines pass through, but undecryptable JWT keys log `[auth] jwks_undecryptable`.
 - `user: { deleteUser: { enabled: false } }`: deletion is LiveDoc's own route. `changeEmail` off (first release).
 - `socialProviders.google` when on: `clientId`, `clientSecret`, `prompt: 'select_account'`, scopes
   `openid email profile` only.
@@ -480,6 +482,7 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 | `[auth] account_not_found route=<seg>`                                                            | an administration call from a deleted account's token             |
 | `[auth] guest_signature_refused route=<seg>`                                                      | a guest header without a valid signature on an owner-scoped route |
 | `[auth] jwks_reloaded reason=<kid_miss\|ttl>`                                                     | the local JWKS cache refilled                                     |
+| `[auth] jwks_undecryptable`                                                                       | the JWT keys do not decrypt with the secret                       |
 | `[migrate] moved rows=<n>` / `refused reason=<no_session\|no_guest_id\|account_id\|signature>`    | guest migration                                                   |
 | `[auth] session_read status=<s>` (browser, debug)                                                 | each session read the bridge settles                              |
 | `[auth] session_ended source=token` (browser, debug)                                              | the token endpoint answered 401                                   |
@@ -507,6 +510,7 @@ Never logged: tokens, codes, emails, names, IPs.
 | Deletion removes data then identity, then says goodbye once                            | `db/account.test.ts` (seeded identity rows), `index.auth.test.ts`                                                             |
 | Code send failure surfaces                                                             | `email/transport.test.ts`, `routes/auth.test.ts`                                                                              |
 | Hooks: SignedUp once, SignedIn not on sign-up; no IP stored                            | `auth/identity-hooks.test.ts`                                                                                                 |
+| Undecryptable JWT keys: 500, logged `[auth] jwks_undecryptable`                        | `auth/identity-logger.test.ts`, `routes/auth.test.ts`                                                                         |
 | Telemetry off                                                                          | `auth/identity.test.ts` asserts `telemetry.enabled === false`                                                                 |
 | Schema in step with better-auth                                                        | `identity-schema.test.ts`                                                                                                     |
 | Session read, token provider caching, hint, tab nudge                                  | `packages/account-session/src/*.test.ts` (100 % coverage)                                                                     |

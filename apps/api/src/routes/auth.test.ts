@@ -23,6 +23,9 @@ function post(path: string, body: unknown, headers: Record<string, string> = {})
   });
 }
 
+const get = (path: string, cookie: string) =>
+  new Request(`${ORIGIN}${path}`, { headers: { Cookie: cookie } });
+
 let env: Env;
 
 beforeEach(() => {
@@ -106,6 +109,17 @@ describe('handleAuth', () => {
     );
     expect(res.status).toBe(403);
     expect(await res.json()).toMatchObject({ code: 'SESSION_NOT_FRESH' });
+  });
+
+  it('logs [auth] jwks_undecryptable when the secret changed under the session-token keys', async () => {
+    const first = await signedInCookie();
+    expect((await handleAuth(get('/api/auth/token', first), env)).status).toBe(200);
+    env = { ...env, BETTER_AUTH_SECRET: 't'.repeat(40) };
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const second = await signedInCookie();
+    const res = await handleAuth(get('/api/auth/token', second), env);
+    expect(res.status).toBe(500);
+    expect(error).toHaveBeenCalledWith('[auth] jwks_undecryptable');
   });
 
   it('passes a fresh session through to better-auth', async () => {
