@@ -7,7 +7,7 @@
 // to edit again. A workspace frame's **Back** is the brand group's (lines/BrandBack).
 import type { WorkbenchEndReason } from '@livedoc/api-schema';
 import { HoverCard } from '@livedoc/ui';
-import { CHROME_BTN, CHROME_BTN_LABELLED, ChromeLabel } from './chrome-button';
+import { ChromeLabel, useChromeButtonClass } from './chrome-button';
 import { OpenExternalIcon } from './EmbedChrome';
 
 function reconnectLine(workbenchName: string): string {
@@ -24,6 +24,7 @@ export function WorkbenchOpenLink({
   labelled: boolean;
   description?: string;
 }) {
+  const buttonClass = useChromeButtonClass(labelled);
   return (
     <HoverCard title="Open in LiveDoc" description={description}>
       <a
@@ -31,7 +32,7 @@ export function WorkbenchOpenLink({
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Open in LiveDoc (opens in a new tab)"
-        className={labelled ? `${CHROME_BTN} ${CHROME_BTN_LABELLED}` : CHROME_BTN}
+        className={buttonClass}
       >
         <OpenExternalIcon />
         <ChromeLabel show={labelled}>Open in LiveDoc</ChromeLabel>

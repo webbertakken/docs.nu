@@ -61,7 +61,13 @@ describe('ActionsGroup', () => {
   it('holds the chrome trio, the document actions, then the account, each a part', () => {
     renderGroup({ present: { slideCount: 2, starting: false, onPresent: vi.fn() } });
     const [trio, actions, account] = parts();
-    expect(trio).toEqual(['Search', 'Application settings', expect.stringMatching(/^Appearance/)]);
+    // Report a Bug rides with Search (docs/specs/004-interface-design/report-a-bug-entries.md).
+    expect(trio).toEqual([
+      'Search',
+      'Report a Bug',
+      'Application settings',
+      expect.stringMatching(/^Appearance/),
+    ]);
     expect(actions).toEqual(['Present', 'Share']);
     expect(account).toEqual(['Account menu']);
   });
@@ -142,7 +148,7 @@ describe('ActionsGroup', () => {
         .getByRole('link', { name: 'Open in LiveDoc (opens in a new tab)' })
         .getAttribute('href'),
     ).toBe('/document/d1');
-    expect(parts()[0]).toEqual(['Search', 'Application settings']);
+    expect(parts()[0]).toEqual(['Search', 'Report a Bug', 'Application settings']);
   });
 
   it('opens Settings on Account in place from the account menu', () => {

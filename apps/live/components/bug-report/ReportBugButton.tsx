@@ -4,13 +4,15 @@
 // its neighbours' style, all opening the one form. Every entry carries `data-bug-report-entry`, so a screenshot
 // leaves it out, and names the dialog it opens.
 import { BugIcon, Button, HoverCard, type ButtonSize } from '@livedoc/ui';
-import { CHROME_BTN, CHROME_BTN_LABELLED, ChromeLabel } from '@/components/chrome/chrome-button';
+import { ChromeLabel, useChromeButtonClass } from '@/components/chrome/chrome-button';
 import { BUG_REPORT_COPY as COPY } from './bug-report-copy';
 import { useOpenBugReport } from './BugReportProvider';
 
-// The bottom bars' icon button (ChromeControls), in the cluster's chrome style.
+// The chrome controls' icon button (ChromeControls): the editor's actions group, the Explorer's bottom bar, in the
+// style of the controls beside it.
 export function ReportBugButton({ labelled = false }: { labelled?: boolean }) {
   const open = useOpenBugReport();
+  const buttonClass = useChromeButtonClass(labelled);
   return (
     <HoverCard title={COPY.name} description={COPY.entryDescription}>
       <button
@@ -19,7 +21,7 @@ export function ReportBugButton({ labelled = false }: { labelled?: boolean }) {
         aria-haspopup="dialog"
         aria-label={COPY.name}
         onClick={(e) => open({ trigger: e.currentTarget })}
-        className={labelled ? `${CHROME_BTN} ${CHROME_BTN_LABELLED}` : CHROME_BTN}
+        className={buttonClass}
       >
         <BugIcon />
         <ChromeLabel show={labelled}>{COPY.name}</ChromeLabel>
