@@ -37,3 +37,11 @@ export function dockLinePlacement(input: {
   const edge = ownRow ? LINE_INSET_PX + input.lineHeight + TOP_LINE_GAP_PX : LINE_INSET_PX;
   return { clear, ownRow, edge };
 }
+
+/** The dock's full width on screen with every button showing: its scroller's content and border, at the dock's UI
+ *  scale (the wrapper is zoomed, so its box over its layout width). */
+export function dockNaturalWidth(dock: HTMLElement): number {
+  const scroller = dock.querySelector<HTMLElement>('[data-dock-scroller]');
+  const scale = dock.getBoundingClientRect().width / Math.max(1, dock.offsetWidth) || 1;
+  return ((scroller?.scrollWidth ?? 0) + 2) * scale;
+}

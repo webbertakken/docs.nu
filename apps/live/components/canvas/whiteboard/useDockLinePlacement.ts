@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useState, type RefObject } from 'react';
 import { ACTIONS_GROUP_SELECTOR, BRAND_GROUP_SELECTOR } from '@/lib/top-line-clearance';
-import { dockLinePlacement, type DockLinePlacement } from './dock-line-placement';
+import { dockLinePlacement, dockNaturalWidth, type DockLinePlacement } from './dock-line-placement';
 
 // The line's side groups the dock sits between, by where it is.
 const SIDES = {
@@ -29,15 +29,13 @@ export function useDockLinePlacement(
       // Not laid out yet (or hidden): nothing to measure.
       if (view.width <= 0) return;
       const [start, end] = SIDES[position].map((s) => find(s)?.getBoundingClientRect() ?? null);
-      const scroller = own.querySelector<HTMLElement>('[data-dock-scroller]');
-      const scale = own.getBoundingClientRect().width / Math.max(1, own.offsetWidth) || 1;
       const line = position === 'bottom' ? find('[data-bottom-line]') : find(BRAND_GROUP_SELECTOR);
       const next = dockLinePlacement({
         position,
         view,
         start: start ?? null,
         end: end ?? null,
-        dockWidth: ((scroller?.scrollWidth ?? 0) + 2) * scale,
+        dockWidth: dockNaturalWidth(own),
         lineHeight: line?.getBoundingClientRect().height ?? 46,
         phone,
       });

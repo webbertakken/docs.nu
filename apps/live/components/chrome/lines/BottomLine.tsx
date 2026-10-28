@@ -1,6 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
+import { useLineRoom } from './useLineRoom';
 import { atLeastInset } from '@livedoc/ui';
 
 // The bottom line (docs/specs/007-editor/toolbar-layout.md "The bottom line"): the tools group at the left, the
@@ -12,13 +13,19 @@ export function BottomLine({
   tools,
   document,
   inset = { left: 0, right: 0, bottom: 0 },
+  dockKey = '',
 }: {
   tools: ReactNode;
   document: ReactNode;
   inset?: { left: number; right: number; bottom: number };
+  // Where Draw's dock is ('bottom', 'top' or none), so the name's room follows it.
+  dockKey?: string;
 }) {
+  const line = useRef<HTMLDivElement>(null);
+  useLineRoom(line, dockKey);
   return (
     <div
+      ref={line}
       data-bottom-line=""
       style={{
         left: atLeastInset(`${12 + inset.left}px`, 'left'),

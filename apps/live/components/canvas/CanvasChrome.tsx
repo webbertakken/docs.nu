@@ -630,6 +630,7 @@ export function CanvasChrome(props: CanvasChromeProps) {
           bottom: clusterInset.y,
         }}
         document={zenMode ? null : lines?.document}
+        dockKey={dockShown ? (props.whiteboardDock?.position ?? '') : ''}
         tools={
           <ToolbarGroup
             label="Tools"
