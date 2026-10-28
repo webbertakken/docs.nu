@@ -192,7 +192,7 @@ type UserPreferences = {
   uiScaleCornerButtons?: number;
   // Button Labels (Settings › Appearance): the names beside the actions group's Search, Settings and
   // appearance icons. The tools group is icons alone whatever it says (live-app.md).
-  // Missing / true === shown; a phone never shows them. Read through useButtonLabelsSetting.
+  // Missing === off, true === shown; a phone never shows them. Read through buttonLabelsOn.
   dockButtonNames?: boolean;
 
   // Panel switches (the Panels sub-categories, see "Settings dialog"
@@ -831,10 +831,11 @@ and the dialog stays as the one complete, browsable index of them.
   today; six near-identical rows each saying "Shows the X among a logo page's
   construction guides" read as clutter.
 
-  **Button Labels** (Appearance › Interface, `dockButtonNames`, on by default)
-  names the actions group's buttons beside their icons: Search, Settings and the
+  **Button Labels** (Appearance › Interface, `dockButtonNames`, off by default,
+  so the top line leaves the Palette strip its room) names the actions group's
+  chrome buttons beside their icons: Search, Report a Bug, Settings and the
   appearance toggle ([Toolbar layout](toolbar-layout.md#the-top-line)). The tools group is icons alone whatever it
-  says ([Live app](live-app.md)). Off, those three are icons alone, each
+  says ([Live app](live-app.md)). Off, they are icons alone, each
   still named in its hover card. A phone always shows
   icons alone, so the row is desktop only there.
 
