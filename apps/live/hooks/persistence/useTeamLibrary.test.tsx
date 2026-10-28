@@ -23,7 +23,13 @@ vi.mock('@/lib/duplicate-document', () => ({
   duplicateDocument: (...a: Parameters<typeof duplicateDocument>) => duplicateDocument(...a),
 }));
 vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));
-const toast = vi.hoisted(() => ({ error: vi.fn(), success: vi.fn(), info: vi.fn() }));
+const toast = vi.hoisted(() => ({
+  error: vi.fn(),
+  success: vi.fn(),
+  info: vi.fn(),
+  action: vi.fn(),
+  dismissAction: vi.fn(),
+}));
 vi.mock('@/hooks/ui/useToast', () => ({ useToast: () => toast }));
 
 afterEach(() => vi.clearAllMocks());
@@ -139,5 +145,24 @@ describe('useTeamLibrary when the server refuses', () => {
     await result.current.renameDocument('t1-d', 'Doc');
     await result.current.duplicateDocument('t1-d');
     expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  // docs/specs/004-interface-design/toasts.md "Naming what it acted on".
+  it('says where a moved document went, with an Undo that moves it back', async () => {
+    apiGetTeamLibrary.mockResolvedValue(lib('t1'));
+    apiSetDocumentFolder.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useTeamLibrary('u1', 't1'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await result.current.moveDocument('t1-d', 't1-f');
+    expect(toast.action).toHaveBeenCalledOnce();
+    const offer = toast.action.mock.calls[0]![0];
+    expect(offer.message).toBe('“D” moved to “F”');
+    offer.actions[0].onSelect();
+    expect(toast.dismissAction).toHaveBeenCalledWith(offer.key);
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('“D” moved back to the team library'),
+    );
+    expect(apiSetDocumentFolder).toHaveBeenLastCalledWith('u1', 't1-d', null, 't1');
+    expect(toast.action).toHaveBeenCalledOnce();
   });
 });

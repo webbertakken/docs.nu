@@ -24,7 +24,12 @@ import { markDocumentDeleted, unmarkDocumentDeleted } from '@/lib/document-tombs
 import { handOffDeleteUndo, offerDeleteUndo, type DeletedTrash } from '@/lib/document-delete-undo';
 import { logMoveFailure } from '@/lib/move-failure';
 import { DOCUMENT_FAILURE, FOLDER_FAILURE } from '@/lib/write-failure-copy';
-import { documentDuplicatedMessage, documentMovedMessage } from '@/lib/document-toast-copy';
+import {
+  documentDuplicatedMessage,
+  documentMovedBackMessage,
+  type MoveDestination,
+} from '@/lib/document-toast-copy';
+import { offerMoveUndo } from '@/lib/document-move-undo';
 import { OFFLINE_OWNER_ID } from '@/lib/offline/offline-store';
 import { folderDeleteConfirmation } from '@/lib/folder-delete-confirmation';
 import { folderDefaultKeys } from '@/lib/placement-defaults/default-destination';
@@ -262,21 +267,41 @@ export function useDocumentListActions(deps: DocumentListActionsDeps) {
     return false;
   };
 
+  // Move a document to a folder (null: My Documents). Once the api took it, the toast names the document and where
+  // it went, with an Undo that moves it back (docs/specs/004-interface-design/toasts.md "Naming what it acted on").
+  // Undo is a move like any other, said without another Undo.
   const moveDocumentToFolder = (id: string, folderId: string | null) => {
-    if (!ownerId) return;
     const moved = documentList.find((d) => d.id === id);
-    const write = placements.begin(id, moved?.folderId ?? null, folderId);
+    move(id, folderId, { name: moved?.name, from: moved?.folderId ?? null, undo: false });
+  };
+
+  const move = (
+    id: string,
+    folderId: string | null,
+    at: { name: string | undefined; from: string | null; undo: boolean },
+  ) => {
+    if (!ownerId) return;
+    const write = placements.begin(id, at.from, folderId);
     setDocumentList((prev) => prev.map((d) => (d.id === id ? { ...d, folderId } : d)));
     void apiSetDocumentFolder(ownerId, id, folderId)
       .then(() => {
         placements.accept(id, write);
-        // The row leaves the current view (it's now under the target
-        // folder / the root), so confirm where it went — only once the
-        // server actually accepted the move.
-        const folderName = folders.find((f) => f.id === folderId)?.name ?? '';
-        toast.success(
-          documentMovedMessage(moved?.name, folderId ? { folder: folderName } : 'my-documents'),
-        );
+        // The row leaves the current view (it's now under the target folder / the root), so confirm where it went:
+        // only once the server actually accepted the move.
+        const dest: MoveDestination = folderId
+          ? { folder: folders.find((f) => f.id === folderId)?.name ?? '' }
+          : 'my-documents';
+        if (at.undo) {
+          toast.success(documentMovedBackMessage(at.name, dest));
+          track('Document', 'Moved', 'Undo');
+          return;
+        }
+        offerMoveUndo(toast, {
+          id,
+          name: at.name,
+          dest,
+          moveBack: () => move(id, at.from, { name: at.name, from: folderId, undo: true }),
+        });
         track('Document', 'Moved');
       })
       .catch((err: unknown) => {
@@ -286,7 +311,7 @@ export function useDocumentListActions(deps: DocumentListActionsDeps) {
         const shown = placements.refuse(id, write);
         if (shown !== undefined)
           setDocumentList((prev) => prev.map((d) => (d.id === id ? { ...d, folderId: shown } : d)));
-        toast.error(DOCUMENT_FAILURE.move(moved?.name));
+        toast.error(DOCUMENT_FAILURE.move(at.name));
       });
   };
 

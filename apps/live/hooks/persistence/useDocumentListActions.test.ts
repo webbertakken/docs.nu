@@ -107,11 +107,17 @@ describe('deleteDocument from a list', () => {
 
 // docs/specs/013-workspace/folders.md "A move that fails says so".
 describe('moveDocumentToFolder', () => {
-  it('says where it went once the api accepted it', async () => {
+  // docs/specs/004-interface-design/toasts.md "Naming what it acted on": the move names the document and where it
+  // went, with an Undo that moves it back.
+  it('says where it went once the api accepted it, with an Undo', async () => {
     vi.mocked(apiSetDocumentFolder).mockResolvedValueOnce(undefined);
     const { actions, toast } = setup();
     actions.moveDocumentToFolder('b', 'f1');
-    await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith('“Doc b” moved to “Plans”'));
+    await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
+    const offer = toast.action.mock.calls[0]![0];
+    expect(offer.message).toBe('“Doc b” moved to “Plans”');
+    expect(offer.actions.map((a: { label: string }) => a.label)).toEqual(['Undo']);
+    expect(offer.actions[0].ariaLabel).toBe('Undo: move “Doc b” back');
     expect(track).toHaveBeenCalledWith('Document', 'Moved');
   });
 
@@ -120,8 +126,25 @@ describe('moveDocumentToFolder', () => {
     const { actions, toast } = setup();
     actions.moveDocumentToFolder('b', null);
     await vi.waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith('“Doc b” moved to My Documents'),
+      expect(toast.action.mock.calls[0]?.[0].message).toBe('“Doc b” moved to My Documents'),
     );
+  });
+
+  it('moves it back to where it was on Undo, and says so without another Undo', async () => {
+    vi.mocked(apiSetDocumentFolder).mockResolvedValue(undefined);
+    const { actions, toast, folderOf } = setup();
+    actions.moveDocumentToFolder('b', 'f1');
+    await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
+    const offer = toast.action.mock.calls[0]![0];
+    offer.actions[0].onSelect();
+    expect(toast.dismissAction).toHaveBeenCalledWith(offer.key);
+    expect(folderOf('b')).toBeNull();
+    expect(vi.mocked(apiSetDocumentFolder)).toHaveBeenLastCalledWith('owner-1', 'b', null);
+    await vi.waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('“Doc b” moved back to My Documents'),
+    );
+    expect(toast.action).toHaveBeenCalledOnce();
+    expect(track).toHaveBeenCalledWith('Document', 'Moved', 'Undo');
   });
 
   it('puts the row back, says so and logs it when the move fails', async () => {
