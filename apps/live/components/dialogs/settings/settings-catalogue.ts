@@ -949,7 +949,7 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         label: 'Theme',
         description:
           'Light or dark editor chrome, or System to follow your device. Saved on this device only.',
-        alsoIn: 'the editor’s footer bar',
+        alsoIn: 'the editor’s actions group, at the top right',
         illustration: 'appearance',
       },
       {

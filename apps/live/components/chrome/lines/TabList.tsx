@@ -20,6 +20,7 @@ import {
   TAB_LIST_WIDTH_PX,
 } from './line-constants';
 import { TabListRow } from './TabListRow';
+import { track } from '@/lib/telemetry';
 import type { TabsChrome, TabsChromeProps } from './tabs-chrome';
 import { peopleHereLabel } from './TabListButtons';
 
@@ -95,6 +96,7 @@ export function TabList({
       onClose();
       return;
     }
+    track('Tab', 'Selected', 'TabList');
     tabs.onSelect(tabId);
     onClose();
   };

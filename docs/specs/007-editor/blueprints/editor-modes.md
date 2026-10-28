@@ -257,9 +257,9 @@ lockedReason?, onLockedPick? })` (`ModeMenu.tsx`), opened by `ModeMenuChip`:
     tint, the name with `ModeKeyHint` when `shown === keyLeadsTo && !lockedReason`, the
     description and `MODE_TOOLS` chips; no button (choosing is the row's alone).
 - Placement: only on a start panel's rail (`StartFromTemplates`, `StartPlanning`), never in `ToolbarExplorerButton`,
-  the `TabPortalMenu`, the `TabBar` or the `Explorer`.
+  the `TabPortalMenu`, the tab list or the `Explorer`.
 - `TabModeIcon({ tab, style? })`: its mode's `EDITOR_MODE_ICONS` entry (a Board, Sheet, Dashboard or Form tab: its kind's icon), 12 px, `aria-hidden`;
-  `TabPill` passes `style={{ color: legibleTabAccent(tab, isDark) }}`.
+  `TabListRow` passes `style={{ color: legibleTabAccent(tab, isDark) }}`.
 - `templateOpensIn(overrides: Pick<Tab, 'opensIn' | 'kind'>): EditorMode | undefined`.
 - Wire: `Tab.opensIn` and `TextElement.sizing` are in the OpenAPI schema
   (`EditorMode`, `TextSizing`); `TabKind` is `'diagram' | 'event-storming'`.

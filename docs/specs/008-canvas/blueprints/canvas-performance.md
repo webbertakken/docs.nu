@@ -232,7 +232,7 @@ queryElementGrid(grid, arrowBounds))`. `arrowViewPropsEqual` compares `frame` wi
 
 ### Opening animates nothing across the board
 
-- The editor fade-in rule in `globals.css` lists `[data-floating-panel]`, `[data-editor-tabbar]`
+- The editor fade-in rule in `globals.css` lists `[data-floating-panel]` (every toolbar group on the two lines carries it)
   and `[data-zoom-cluster]` only; the canvas world carries no marker and no animation.
 - `CanvasArrivalProvider` (`CanvasArrivalContext.tsx`) wraps the element layer in `Canvas`, given
   `activeTabId`. It holds `settledTab`, a ref set in an effect after each commit that shows a tab

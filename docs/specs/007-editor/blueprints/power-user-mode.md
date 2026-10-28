@@ -19,7 +19,7 @@ Scope, by file:
 | `apps/live/components/chrome/AppearanceToggle.tsx`                                           | Quick appearance switch: click flips, right-click sets System                    |
 | `apps/live/hooks/ui/useAppearance.ts`                                                        | Logs and tracks every explicit pick                                              |
 | `apps/live/app/explorer/ExplorerShell.tsx`                                                   | Passes `powerUser` to its bottom bar                                             |
-| `apps/live/components/chrome/ChromeControls.tsx`                                             | `TabBar` and the Explorer pass `powerUser` through to the toggle                 |
+| `apps/live/components/chrome/ChromeControls.tsx`                                             | `ActionsGroup` and the Explorer pass `powerUser` through to the toggle           |
 | `apps/live/components/chrome/RoleIndicator.tsx`                                              | `RolePill` and `RoleStatusIcon` (both in the document group)                     |
 | `apps/live/app/document/[id]/useViewPreview.ts`                                              | `viewPreview`, `canToggleRole`, `toggleViewPreview`                              |
 | `apps/live/app/document/[id]/useRoleIndicator.ts`                                            | Role in force, owner name and toggle, for the pill and the icon                  |
@@ -179,7 +179,7 @@ where `role` is the role in force (`isReadOnly ? 'view' : 'edit'`).
 
 ### Quick appearance switch
 
-`EditorView` (via `TabBar`) and `ExplorerShell` pass `powerUser={isPowerUserMode(prefs)}` to `ChromeControls`, which
+`EditorView` (via `ActionsGroup`) and `ExplorerShell` pass `powerUser={isPowerUserMode(prefs)}` to `ChromeControls`, which
 hands it to `AppearanceToggle` as `quick`; both default to `false`, so any other host keeps the cycle:
 
 | Mode | Gesture      | Setting before | Result                                                             |

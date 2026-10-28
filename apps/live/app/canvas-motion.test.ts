@@ -41,11 +41,7 @@ describe('the editor fade-in rule', () => {
   };
 
   it('fades the chrome in, never the board', () => {
-    expect(rule()).toEqual([
-      '[data-floating-panel]',
-      '[data-editor-tabbar]',
-      '[data-zoom-cluster]',
-    ]);
+    expect(rule()).toEqual(['[data-floating-panel]', '[data-zoom-cluster]']);
   });
 });
 

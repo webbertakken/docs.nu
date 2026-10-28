@@ -127,7 +127,7 @@ hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-
 | `TOAST_MAX_WIDTH_PX`       | 576   | `sm:max-w-[36rem]`                           | 400 to 640    |
 | `TOAST_PHONE_MAX_PX`       | 639   | Below Tailwind `sm`                          | = `sm` - 1    |
 
-`TOAST_FLOOR_SELECTOR`: `[data-toast-floor], [data-editor-tabbar], [data-zoom-cluster], [data-whiteboard-dock]`. The
+`TOAST_FLOOR_SELECTOR`: `[data-toast-floor], [data-document-group], [data-zoom-cluster], [data-whiteboard-dock]`. The
 Explorer bottom bar and the sign-in banner's card carry `data-toast-floor`.
 
 ## Floor

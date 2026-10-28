@@ -9,7 +9,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Tab } from '@livedoc/document';
 import type { Participant } from '@/lib/identity';
 
-vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));
+const track = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/telemetry', () => ({ track }));
 
 const { TabList } = await import('./TabList');
 const { useTabsChrome } = await import('./tabs-chrome');
@@ -121,6 +122,7 @@ describe('TabList', () => {
     fireEvent.click(within(list).getByRole('button', { name: 'Roadmap' }));
     expect(props.onSelect).toHaveBeenCalledWith('g');
     expect(onClose).toHaveBeenCalledOnce();
+    expect(track).toHaveBeenCalledWith('Tab', 'Selected', 'TabList');
   });
 
   it('offers Find a Tab above five tabs, narrowing the rows by name', () => {

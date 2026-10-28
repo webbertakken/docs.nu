@@ -290,8 +290,8 @@ upright phone whose layout shrinks for its keyboard (an older Android) from fold
   the phone's swiping row.
 - **The bars handle.** A small card at the canvas's top-right corner (12px in, and past a landscape
   notch's side inset and below the top inset; a 36px button with a 44px tap area) holds a chevron:
-  **Show Header and Tabs**. Pressing it brings both groups back where they always are, over the canvas.
-  The button turns into **Hide Header and Tabs** (`aria-expanded` says which) and folds them again. So
+  **Show Controls**. Pressing it brings both groups back where they always are, over the canvas.
+  The button turns into **Hide Controls** (`aria-expanded` says which) and folds them again. So
   what lives in the two groups stays one press away: Share or Make a Copy, the document's name and
   badges, the role pill, the active tab and its menu, the tab stack and its tab list, Add Tab, Search, Settings and the appearance
   toggle. The strip's row keeps the handle's 54px clear on its right (`LANDSCAPE_HANDLE_ROOM`: the

@@ -28,7 +28,7 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
   active tour as blocking and publishes itself with `setActiveTour` while active.
 - **Steps:** `collaborate` (`band-collaborate` with `alsoHighlight`
   `option-collab-navigate`: the band's heading to its last tile; opens the picker, closes it on cleanup) → `session-strip` (`session-tools`) → `share` (`share`, the
-  `EditorHeader` Share button) → `outro` (card). `share` is filtered out
+  actions group's Share button) → `outro` (card). `share` is filtered out
   when `findTour('share')` is null as the tour starts.
 - **End** (any outcome) writes `workshopTourSeen: true` through `rebaseUserPreferences`, then
   `setUserPreferences` and `writeUserPreferences`.

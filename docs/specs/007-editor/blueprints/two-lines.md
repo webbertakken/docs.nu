@@ -21,7 +21,7 @@ blueprint places the groups and says what each holds.
 | the active tab        | `ActiveTabSegment`                                               | `apps/live/components/chrome/lines/ActiveTabSegment.tsx`     |
 | the tab stack         | `TabStackButton`                                                 | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
 | the contributors      | `ContributorsButton`                                             | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
-| the tab list          | `TabList` (popover), `TabListRow`, `TabListFolder`               | `chrome/lines/TabList*.tsx`                                  |
+| the tab list          | `TabList` (popover), `TabListRow`, `FolderRows`                  | `chrome/lines/TabList*.tsx`                                  |
 | what the lines need   | `EditorLinesContext` (`actions`, `document` nodes from the page) | `apps/live/components/chrome/lines/editor-lines-context.tsx` |
 
 `EditorHeader` and `TabBar` are retired: their parts move into the groups above, their tests with them. `TabPill`,
@@ -38,30 +38,34 @@ presence, the tab menu, out of scope) is the tab list's. `TabPresenceStack`, `El
   runs the full height (`h-dvh`). The page builds the actions group's and the document group's contents and hands
   them to the canvas chrome through `EditorLinesContext`, so `CanvasChrome` places every group and measures them
   together, and no group's props run through `Canvas`.
-- Top line, inside the canvas box: the brand group at `left-3 top-3` (`ToolbarMenuCard`, `data-toolbar-menu`), the
-  Palette strip or Draw's top dock centred as now, the actions group at `right-3 top-3` (`data-toolbar-actions`).
-- Bottom line (`BottomLine`): one box, `absolute inset-x-3 bottom-3`, `flex flex-wrap-reverse items-end gap-2`,
-  holding the tools group first and the document group last (`ml-auto`). Draw's bottom dock is centred on the same
-  line by its own positioning (`bottom-3`).
+- Top line (`TopLine`): one box, `absolute` 12 px (or the safe area) from the canvas's top and sides, `flex
+justify-between gap-2`, holding the brand group (`data-toolbar-menu`) and the actions group (`data-toolbar-actions`,
+  `ml-auto`; on a phone it swipes sideways rather than run under the brand group; held sideways it keeps left of the
+  bars handle). The Palette strip or Draw's top dock is drawn on its own layer, placed by the centre toolbar rule
+  ("When a line runs out of room"). A screen with no document yet draws `StatusTopLine` (Back and the account).
+- Bottom line (`BottomLine`): one box, 12 px (or the safe area) from the canvas's bottom and sides, plus the inset a
+  covering board or Pages' pinned Contents asks for, `flex flex-wrap-reverse items-end gap-2`, holding the tools group
+  first and the document group last (`ml-auto`). Draw's bottom dock is placed on the same line by the same rule.
 - Corner stacks: the top corners start at `toolbarTopClearancePx` always (the top line is always there), one more
-  row when the strip takes a row of its own; `bottom-left` and `bottom-right` start above the bottom line
-  (`cornerBottomInset`, measured from the line's own height, so a wrapped line lifts them too).
+  row while the centre toolbar has a row of its own (`centre-row-store`); `bottom-left` and `bottom-right` start
+  above the bottom line (`cornerBottomInset`).
 
 ### What hides each group
 
-| State                           | Brand group | Actions group             | Tools group        | Document group |
-| ------------------------------- | ----------- | ------------------------- | ------------------ | -------------- |
-| Editing                         | shown       | shown                     | shown              | shown          |
-| Welcome flow (`anyWelcomeOpen`) | shown       | the account control alone | as now (none)      | not drawn      |
-| Zen                             | not drawn   | not drawn                 | Zoom alone, as now | not drawn      |
-| Presenting                      | not drawn   | not drawn                 | not drawn          | not drawn      |
-| Embed (`embedMode`)             | not drawn   | not drawn                 | as now             | not drawn      |
-| Phone held sideways, folded     | shown       | not drawn                 | shown              | not drawn      |
+| State                           | Brand group | Actions group                | Tools group        | Document group |
+| ------------------------------- | ----------- | ---------------------------- | ------------------ | -------------- |
+| Editing                         | shown       | shown                        | shown              | shown          |
+| Welcome flow (`anyWelcomeOpen`) | shown       | the account control alone    | as now (none)      | not drawn      |
+| Workbench frame (`workbench`)   | frame Back  | chrome trio, Open in LiveDoc | shown              | shown          |
+| Zen                             | not drawn   | not drawn                    | Zoom alone, as now | not drawn      |
+| Presenting                      | not drawn   | not drawn                    | not drawn          | not drawn      |
+| Embed (`embedMode`)             | not drawn   | not drawn                    | as now             | not drawn      |
+| Phone held sideways, folded     | shown       | not drawn                    | shown              | not drawn      |
 
 ### The brand group
 
 - `BrandBack`: an `<a>` to `EXPLORER_LANDING_PATH` (in a workbench frame, a `<button>` calling the frame's
-  `back`), the caret (`BACK_CARET`) then `Brand` with `wordmark={false}`, `size` 24 px, `accentColor` the tab
+  `back`), the caret (`BACK_CARET_PATH`) then `Brand` with `wordmark={false}`, `size` 24 px, `accentColor` the tab
   theme's stroke (as the header's did). Accessible name "Back to the Explorer" ("Back" in a frame), with a hover
   card of the same title. A frame with document scope (`workbenchBack` absent but `workbench` present): the mark
   alone in a `<span>`, no caret, not focusable.
@@ -87,7 +91,7 @@ drawn only between two parts that both render (`ToolbarGroup` parts, see the gro
    change the tabs. Tinted: `bg-slate-100` (`dark:bg-slate-800`) and an inset 1 px ring of the accent at 45%. A click
    on the name renames in place for someone who may (the `active-tab-name-store` rename); a double-click does too.
    Keeps `data-tour-id="active-tab"`.
-3. `TabStackButton`: the stack glyph and the count (`tabsInScope.length`), `aria-haspopup="menu"`,
+3. `TabStackButton`: the stack glyph and the count (`tabsInScope.length`), `aria-haspopup="dialog"`,
    `aria-expanded`, name "All tabs (n)". Always drawn.
 4. `ContributorsButton`: up to `CONTRIBUTORS_SHOWN` avatars of the remote people present (agents folded as the
    presence rows fold them), then "+N"; name "n people here". Not drawn while nobody else is here.
@@ -123,14 +127,14 @@ drawn only between two parts that both render (`ToolbarGroup` parts, see the gro
 
 ## Interfaces and contracts
 
-- `EditorLinesContext`: `{ actions: ReactNode; document: ReactNode; foldable: boolean }`; `null` outside the editor
+- `EditorLinesContext`: `{ actions: ReactNode; document: ReactNode }`; `null` outside the editor
   page (an embed, a test), where the chrome draws neither group.
 - `DocumentGroup` takes the tab props `TabBar` took (minus `onOpenSettings`, `onOpenSearch`, `workbenchLink`,
   `powerUser`) plus the document-name props `EditorHeader` took (`documentName`, `shareable`, `teamDocument`,
   `offline`, `showShare`, `onOpenShare`, `onRename`, `renameNonce`, `readOnly`, `rolePill`).
 - `ActionsGroup` takes `ChromeControls`' props and `DocumentActions`' (`onMakeCopy`, `copying`, `present`, `showShare`,
   `shareable`, `onOpenShare`), `onOpenAccount`, `workbenchOpenHref`, `documentActions` (false through the welcome flow).
-- `BrandBack`: `{ href?: string; onBack?: () => void; label: string; accent?: string }`; neither `href` nor `onBack`
+- `BrandBack`: `{ target: BackTarget; accent?: string }`, `BackTarget` one of `explorer`, `frame` (`back`, `backTitle`) or `none` (from `useBackTarget`, the workbench session); `none`
   draws the mark alone.
 
 ## Share roles
@@ -215,7 +219,7 @@ alone ([gate a feature by share role](../../../instructions/gate-a-feature-by-sh
   fields beside its rows; its triggers use `useMenuButton`. The rows are a `role="list"` of `role="listitem"`s,
   each a button (the active one `aria-current="page"`); folder headings are text, their counts `aria-hidden`. The
   arrow keys move a roving focus over the rows. Focus returns to the opener on close.
-- `TabStackButton` / `ContributorsButton`: `aria-haspopup="menu"`, `aria-expanded`, `aria-controls` the list id.
+- `TabStackButton` / `ContributorsButton`: `aria-haspopup="dialog"` (the list is a control menu), `aria-expanded`.
 - Every button keeps a 44 px touch target (`touch-target`) and a visible focus ring; contrast as the palette strip
   (the same tokens).
 - Motion: the list fades in with `animate-fade-in`, none under reduced motion.
@@ -270,7 +274,7 @@ In `apps/live/components/chrome/lines/line-constants.ts`:
 | `TAB_LIST_GAP_PX`      | 10                                          | Mock-up F: the arrow's gap above the button | 6 to 12    |
 | `TAB_LIST_EDGE_PX`     | 12                                          | Spec: 12 px inside the canvas               | 8 to 16    |
 | `DOC_NAME_MIN_PX`      | 72                                          | Spec: the name shortens down to 72 px       | 48 to 120  |
-| `BACK_CARET`           | 8 × 14, stroke 1.75, `M6.5 1.5 1.5 7l5 5.5` | Spec / mock-up F                            | fixed      |
+| `BACK_CARET_PATH`      | 8 × 14, stroke 1.75, `M6.5 1.5 1.5 7l5 5.5` | Spec / mock-up F                            | fixed      |
 
 ## Defaults ledger
 

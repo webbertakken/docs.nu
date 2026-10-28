@@ -1,6 +1,6 @@
 # Toolbar layout
 
-Status: the two lines specified, not yet built; the rest shipped
+Status: shipped
 
 ## The two lines
 
