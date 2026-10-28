@@ -26,9 +26,12 @@ describe('SiteFooter', () => {
       'Report a Vulnerability',
       'Licences',
       'Contact',
+      'Report a Bug',
       'GitHub',
     ]);
     expect(footerNav).toContain('href="/help/policies/report-a-vulnerability/"');
+    // docs/specs/004-interface-design/report-a-bug-entries.md: the editor app's form page, after Contact.
+    expect(footerNav).toContain('href="/report-a-bug"');
     expect(footerNav).toContain('href="/about/licences"');
   });
 

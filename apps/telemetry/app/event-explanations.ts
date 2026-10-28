@@ -761,6 +761,10 @@ export const EXACT: Readonly<Record<string, string>> = {
     'A returning guest (not signed in) reopened the app on a later day, counted once per day.',
   'Participant|Returned|Authenticated':
     'A returning signed-in user reopened the app on a later day, counted once per day.',
+  // Report a Bug (docs/specs/016-platform/bug-reports.md "Telemetry").
+  'Feedback|Opened|Bug': 'Someone opened the Report a Bug form.',
+  'Feedback|Completed|Bug':
+    "Someone sent a bug report: filed on the team's private board, or kept to be filed shortly.",
   'Form|Created|Blank': 'Someone started a form from Start Planning: a blank one.',
   'Form|Created|BugReport': 'Someone started a form from the Bug Report starter.',
   'Form|Created|Feedback': 'Someone started a form from the Feedback starter.',
@@ -2401,6 +2405,8 @@ export const EXACT: Readonly<Record<string, string>> = {
 };
 
 export const BY_ACTION: Readonly<Record<string, string>> = {
+  'Feedback|Opened': 'Someone opened the Report a Bug form.',
+  'Feedback|Completed': 'Someone sent a bug report.',
   'Timing|Measured':
     'A key moment was timed: a document opening, a tab switch, a save, the live room connecting, or a page loading. Only the range it fell in is recorded, never the exact time.',
   'Editor|Changed': 'Someone switched a tab between Diagram mode and Draw mode.',

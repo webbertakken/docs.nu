@@ -3,6 +3,7 @@
 // A filed card's screenshot (docs/specs/016-platform/bug-reports.md "Screenshots"): fetched with the viewer's identity
 // once their session is known, shown when the api serves it (to the Bug Tracker's owner only), else one plain line.
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { debugLog } from '@/lib/debug-log';
 import { Brand } from '@livedoc/ui';
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
 import { API_BASE, apiFetch, apiHeaders } from '@/lib/api/core';
@@ -35,7 +36,7 @@ export function BugScreenshotPage() {
         url = URL.createObjectURL(await res.blob());
         if (live) setFetched({ kind: 'shown', url });
       } catch (error) {
-        console.info('[bug-reports] screenshot.unavailable', { error: String(error) });
+        debugLog('[bug-reports] screenshot.unavailable', { error: String(error) });
         if (live) setFetched({ kind: 'missing' });
       }
     })();

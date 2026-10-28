@@ -2,6 +2,7 @@
 // every api call carries it, else without one, since a report never waits on sign-in. Every answer comes back as a
 // value the form can say.
 import type { BugReportFiledResponse, BugReportSubmission } from '@livedoc/api-schema';
+import { debugLog } from '@/lib/debug-log';
 import { API_BASE } from '@/lib/api/base';
 
 export type BugReportSendResult =
@@ -42,11 +43,11 @@ export async function sendBugReport(
   }
   if (res.status === 201) {
     const { number } = (await res.json()) as BugReportFiledResponse;
-    console.info('[bug-reports] sent', { number });
+    debugLog('[bug-reports] sent', { number });
     return { kind: 'filed', number };
   }
   if (res.status === 202) {
-    console.info('[bug-reports] sent', { stored: true });
+    debugLog('[bug-reports] sent', { stored: true });
     return { kind: 'stored' };
   }
   console.warn('[bug-reports] send.failed', { status: res.status });

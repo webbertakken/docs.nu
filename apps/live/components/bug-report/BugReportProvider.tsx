@@ -4,6 +4,7 @@
 // from anywhere through useOpenBugReport(). The form itself loads on the first opening, so no page pays for it up
 // front. Focus returns to the control that opened it.
 import dynamic from 'next/dynamic';
+import { debugLog } from '@/lib/debug-log';
 import {
   createContext,
   useCallback,
@@ -41,7 +42,7 @@ export function BugReportProvider({ children }: { children: ReactNode }) {
       options.trigger ??
       (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     pending.current = { ...options, trigger };
-    console.info('[bug-reports] opened');
+    debugLog('[bug-reports] opened');
     track('Feedback', 'Opened', 'Bug');
     setOpening(Date.now());
   }, []);

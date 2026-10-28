@@ -122,6 +122,9 @@ export const EMITTED_EVENT_PAIRS: readonly string[] = [
   'Folder·Deleted',
   'Folder·Moved',
   'Folder·Renamed',
+  // Report a Bug (docs/specs/016-platform/bug-reports.md "Telemetry").
+  'Feedback·Opened',
+  'Feedback·Completed',
   'Form·Added',
   'Form·Created',
   'Form·Sent',
