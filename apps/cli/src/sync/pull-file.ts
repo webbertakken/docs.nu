@@ -42,10 +42,14 @@ export function fileSlug(name: string, id: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .slice(0, SLUG_MAX)
     .replace(/^-+|-+$/g, '');
-  return slug || id.slice(0, ID_SLUG_LENGTH);
+  return slug || idSlug(id);
 }
 
-export const idSlug = (id: string) => id.slice(0, ID_SLUG_LENGTH);
+// An id as part of a file name. Ids are the server's: kept to name-safe characters, so an id holding `/` or `..`
+// never names another folder.
+export const nameSafeId = (id: string) => id.replace(/[^A-Za-z0-9_-]/g, '-');
+
+export const idSlug = (id: string) => nameSafeId(id).slice(0, ID_SLUG_LENGTH);
 
 export function pullFileText(file: PullFile): string {
   return `${JSON.stringify(file, null, 2)}\n`;
