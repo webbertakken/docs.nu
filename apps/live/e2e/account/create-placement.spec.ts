@@ -7,7 +7,8 @@ import { signIn } from './sign-in';
 // the document there in the one create, with no follow-up placement request, and a refused
 // placement shows its own card instead of a document filed somewhere else.
 
-const NEW_EDITOR = /\/document\/[0-9a-f-]{36}$/;
+// The editor's address; it pins the open tab (`#t=`) as soon as it has one, so the fragment may already be there.
+const NEW_EDITOR = /\/document\/[0-9a-f-]{36}(#t=[^#]*)?$/;
 
 // Pat, signed in to the page's context, with the editor's first-run prompts already seen; returns the headers a
 // seeding call as Pat sends.
@@ -47,7 +48,7 @@ test('a create into a team folder lands there in one write', async ({ page, base
 
   await page.goto(`/new?blank=1&team=${teamId}&folder=${folderId}`);
   await expect(page).toHaveURL(NEW_EDITOR, { timeout: 20_000 });
-  const documentId = page.url().split('/').pop()!;
+  const documentId = new URL(page.url()).pathname.split('/').pop()!;
 
   const library = (await (
     await page.request.get(`/api/teams/${teamId}/library`, { headers })
