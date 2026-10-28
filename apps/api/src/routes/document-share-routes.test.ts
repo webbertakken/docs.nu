@@ -8,13 +8,14 @@
 // The retraction of the "expires soon" warning at each site has its own suite
 // (expiry-retraction.test.ts); this one covers the routes' own behaviour.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { verifySharePassword } from '../auth/share-password-hash';
+import { hashSharePassword, verifySharePassword } from '../auth/share-password-hash';
 import type { Env } from '../types';
 
 const { db } = vi.hoisted(() => ({
   db: {
     createShareLink: vi.fn(),
     deleteShareLink: vi.fn(),
+    dropDocumentVisits: vi.fn(),
     extendShareLink: vi.fn(),
     generateShareCode: vi.fn(() => 'CODE1234'),
     getDocument: vi.fn(),
@@ -68,6 +69,7 @@ function ctxFor(
   path: string,
   opts: {
     body?: unknown;
+    rawBody?: string;
     owner?: string | null;
     sessionAccountId?: string | null;
     env?: Env;
@@ -77,6 +79,7 @@ function ctxFor(
   const dispatched: Promise<unknown>[] = [];
   const ctx = makeTestRouteContext(method, path, {
     body: opts.body,
+    rawBody: opts.rawBody,
     owner: opts.owner === undefined ? 'user_1' : opts.owner,
     sessionAccountId: opts.sessionAccountId,
     env: opts.env,
@@ -284,8 +287,8 @@ describe('POST /api/documents/:id/share — minting a link', () => {
     expect(db.createShareLink).not.toHaveBeenCalled();
   });
 
-  it('accepts each known expiry and falls back to never for anything else', async () => {
-    for (const expiry of ['week', 'month', 'sixMonths'] as const) {
+  it('accepts each known expiry, and never when none is given', async () => {
+    for (const expiry of ['week', 'month', 'sixMonths', 'never'] as const) {
       const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { expiry } });
       await handleDocumentShareRoutes(ctx);
       expect(db.createShareLink).toHaveBeenLastCalledWith(
@@ -297,18 +300,34 @@ describe('POST /api/documents/:id/share — minting a link', () => {
         null,
       );
     }
-    // An unknown token is not an error: it degrades to the pre-expiry
-    // behaviour, a link that works until revoked.
-    const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { expiry: 'fortnight' } });
+    const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { role: 'view' } });
     await handleDocumentShareRoutes(ctx);
     expect(db.createShareLink).toHaveBeenLastCalledWith(
       {},
       'd_1',
       'CODE1234',
-      'edit',
+      'view',
       'never',
       null,
     );
+  });
+
+  // A link that lasts for ever is more reach than was asked for: a wrong expiry is refused, like a wrong role.
+  it('400s an expiry it does not recognise instead of minting a permanent link', async () => {
+    for (const expiry of ['fortnight', 'weekly', 7, null, '']) {
+      const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { body: { expiry } });
+      const res = await handleDocumentShareRoutes(ctx);
+      expect(res!.status, JSON.stringify(expiry)).toBe(400);
+      expect(await res!.json()).toMatchObject({ message: 'invalid expiry' });
+    }
+    expect(db.createShareLink).not.toHaveBeenCalled();
+  });
+
+  // A body cut short is no body: read as {} it would mint the widest link, an edit link to every tab.
+  it('400s a body cut short of valid JSON, minting nothing', async () => {
+    const { ctx } = ctxFor('POST', '/api/documents/d_1/share', { rawBody: '{"role":"vi' });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(400);
+    expect(db.createShareLink).not.toHaveBeenCalled();
   });
 
   it('mints from a request with no readable body at all', async () => {
@@ -414,6 +433,15 @@ describe('PUT /api/documents/:id/share-password (docs/specs/013-workspace/share-
     expect(db.setDocumentSharePassword).toHaveBeenCalledWith({}, 'd_1', null);
   });
 
+  // A body cut short is no body: read as {}, it would remove the password and answer 200.
+  it('400s a body cut short of valid JSON, leaving the password as it is', async () => {
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      rawBody: '{"password":',
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(400);
+    expect(db.setDocumentSharePassword).not.toHaveBeenCalled();
+  });
+
   // docs/specs/013-workspace/share-password.md: visitors a code admitted before the password meet
   // the gate again; the room closes their sessions, off the response path.
   it('closes the share-code sessions when a password is set, and none when it is cleared', async () => {
@@ -438,6 +466,69 @@ describe('PUT /api/documents/:id/share-password (docs/specs/013-workspace/share-
     expect(cleared.broadcasts).toEqual([]);
   });
 
+  // A new password is at least SHARE_PASSWORD_MIN characters after trimming; an older, shorter one keeps working.
+  it('400s a new password under six characters, storing nothing', async () => {
+    for (const password of ['abc', '  abcde  ']) {
+      const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', { body: { password } });
+      const res = await handleDocumentShareRoutes(ctx);
+      expect(res!.status).toBe(400);
+      expect(await res!.json()).toMatchObject({ error: 'password_too_short' });
+    }
+    expect(db.setDocumentSharePassword).not.toHaveBeenCalled();
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: 'abcdef' },
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
+  });
+});
+
+// docs/specs/013-workspace/share-password.md "Existing viewers": a new or changed password holds for everyone who
+// came in through a link before it.
+describe('PUT /api/documents/:id/share-password: earlier link visitors', () => {
+  it('drops every link visit to the document when a password is set, and none when it is cleared', async () => {
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: 'hunter2' },
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
+    expect(db.dropDocumentVisits).toHaveBeenCalledWith({}, 'd_1');
+
+    db.dropDocumentVisits.mockClear();
+    const off = ctxFor('PUT', '/api/documents/d_1/share-password', { body: { password: null } });
+    await handleDocumentShareRoutes(off.ctx);
+    expect(db.dropDocumentVisits).not.toHaveBeenCalled();
+  });
+
+  it('drops the visits when the password changes', async () => {
+    db.getDocumentSharePassword.mockResolvedValue(await hashSharePassword('hunter2'));
+    const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: 'otters42' },
+    });
+    expect((await handleDocumentShareRoutes(ctx))!.status).toBe(200);
+    expect(db.setDocumentSharePassword).toHaveBeenCalled();
+    expect(db.dropDocumentVisits).toHaveBeenCalledWith({}, 'd_1');
+  });
+
+  // Nothing changed, so nobody is sent back to the gate: no new hash (which would void every grant), no visit
+  // dropped, no session closed.
+  it('sends no one away when the same password is saved again', async () => {
+    db.getDocumentSharePassword.mockResolvedValue(await hashSharePassword('hunter2'));
+    const room = roomEnv();
+    const { ctx, settled } = ctxFor('PUT', '/api/documents/d_1/share-password', {
+      body: { password: ' hunter2 ' },
+      env: room.env,
+      waitUntil: true,
+    });
+    const res = await handleDocumentShareRoutes(ctx);
+    expect(res!.status).toBe(200);
+    expect(await res!.json()).toEqual({ passwordSet: true });
+    await settled();
+    expect(db.setDocumentSharePassword).not.toHaveBeenCalled();
+    expect(db.dropDocumentVisits).not.toHaveBeenCalled();
+    expect(room.broadcasts).toEqual([]);
+  });
+});
+
+describe('PUT /api/documents/:id/share-password limits', () => {
   it('400s a password past the limit, storing nothing', async () => {
     const { ctx } = ctxFor('PUT', '/api/documents/d_1/share-password', {
       body: { password: 'x'.repeat(MAX_PASSWORD_LEN + 1) },

@@ -91,6 +91,20 @@ describe('GET /api/schema', () => {
 });
 
 describe('the catalogue routes', () => {
+  // decodeURIComponent throws on a malformed escape; a segment that does not decode names nothing.
+  it('answer a malformed escape as an unknown name, a 404 and never a 500', async () => {
+    for (const path of ['/api/templates/%', '/api/templates/%E0%A4%A']) {
+      const res = get(path);
+      expect(res.status, path).toBe(404);
+      expect(await res.json()).toMatchObject({ error: 'unknown_template' });
+    }
+    for (const path of ['/api/schema/%', '/api/schema/%E0%A4%A']) {
+      const res = get(path);
+      expect(res.status, path).toBe(404);
+      expect(await res.json()).toMatchObject({ error: 'unknown_kind' });
+    }
+  });
+
   it('answer GET only', () => {
     expect(get('/api/schema', 'POST').status).toBe(405);
     expect(logs).toEqual(['[catalogues] schema 405']);

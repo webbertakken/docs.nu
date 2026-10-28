@@ -237,6 +237,8 @@ the Collaborate Panel already applies (`elementDisplayLabel`, moved
 into `packages/document` so the panel and the index cannot disagree on
 what a row is called).
 
+**Comment times.** A thread's place in the Inbox is its latest comment's time, and that time is the writer's clock. A save (an autosave or an agent's changeset) carrying a comment timed later than the server's now plus `FUTURE_SLACK_MS` (five minutes, a device clock a little ahead) stores it at now when the comment is new, and at its stored time when it is the author's own, edited (`rewriteCommentAuthors`, `apps/api/src/comments.ts`). Without the cap, one comment from a clock running fast, or a bad value, would sit on top of everyone's Inbox for good.
+
 ### 2.2 Identity across sign-up: `owner_aliases`
 
 Comment `authorId`s and self-assigned `assignee.userId`s are written

@@ -4,6 +4,7 @@ import { elementFingerprint, type Element, type ElementOp, type Tab } from '@liv
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import type { Env } from '../types';
 import type { ChangesetRecord } from '../db/changesets';
+import { createShareLink } from '../db/share';
 import { makeTestRouteContext } from './test-route-context';
 import { handleDocuments } from './documents';
 import { testDocumentRoom } from '../test-document-room';
@@ -337,5 +338,39 @@ describe("another document's tab id", () => {
       body: { id: 't1', name: 'Board', elements: [box('a', 'Edited')] },
     });
     expect(again.status).toBeLessThan(300);
+  });
+});
+
+// docs/specs/013-workspace/tab-scoped-share-links.md "Structure": a link to one tab saves its content, and the tab
+// keeps its stored name and the Plan elements that pull cards onto it.
+describe('a tab-scoped save', () => {
+  it('lands the content, keeping the stored name and dropping a Plan card the save added', async () => {
+    const db = await documentWith([box('a')]);
+    await createShareLink(db.env, 'D', 'SCOPED01', 'edit', 'never', 't1');
+    const card = {
+      id: 'pc',
+      type: 'shape',
+      shape: 'plan-card',
+      x: 400,
+      y: 0,
+      width: 240,
+      height: 120,
+      planCard: { itemId: 'card01', size: 'compact' },
+    } as unknown as Element;
+    const res = await handleDocuments(
+      makeTestRouteContext('PUT', '/api/documents/D/tabs/t1', {
+        env: db.env,
+        owner: 'guest-1',
+        headers: { 'X-Share-Code': 'SCOPED01' },
+        body: { id: 't1', name: 'Mine now', elements: [box('a', 'edited'), card] },
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(db.sql.prepare("SELECT name FROM tabs WHERE id = 't1'").get()).toEqual({
+      name: 'Board',
+    });
+    expect(stored(db).map((e) => [e.id, (e as { label?: string }).label])).toEqual([
+      ['a', 'edited'],
+    ]);
   });
 });

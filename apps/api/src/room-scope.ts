@@ -56,6 +56,17 @@ export function opForScope(op: unknown, tabScope: string | null): unknown {
 
 // Whether a session scoped to `tabScope` may put this op into the room.
 // The role gate runs separately; this only confines the tab.
+// Whether a scoped session's op renames its tab: a `tab-meta` patch that sets `name` or clears it. A tab's name is
+// structure (docs/specs/013-workspace/tab-scoped-share-links.md "Structure").
+export function scopedRenames(op: unknown, tabScope: string | null): boolean {
+  if (tabScope === null) return false;
+  const o = op as { kind?: unknown; patch?: unknown; clear?: unknown } | null;
+  if (o?.kind !== 'tab-meta') return false;
+  const patch = o.patch;
+  if (typeof patch === 'object' && patch !== null && Object.hasOwn(patch, 'name')) return true;
+  return Array.isArray(o.clear) && o.clear.includes('name');
+}
+
 export function scopedSenderMayRelay(op: unknown, tabScope: string | null): boolean {
   if (tabScope === null) return true;
   const o = asOp(op);

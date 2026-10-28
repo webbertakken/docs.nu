@@ -27,7 +27,10 @@ function rateLimited(limiter: string, path: string): Response {
 }
 
 async function emailOf(request: Request): Promise<string | null> {
-  const { email } = await readOptionalBody(request.clone());
+  const body = await readOptionalBody(request.clone());
+  // An unreadable body names no address: the route answers it as better-auth does.
+  if (body instanceof Response) return null;
+  const { email } = body;
   return typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : null;
 }
 
