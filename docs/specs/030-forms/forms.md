@@ -684,7 +684,8 @@ with the ones there are. Question types go by their ids (`short`, `paragraph`, `
 showIf? }` (`showIf: null` is Always), `delete_section` (its questions join the section before), `set_form`
   `{ heading?, description?, cover?, theme? }` (the theme is the Form tab's, which the form's look follows), `settings` `{ closesAt?, limit?, confirmation?, closedMessage? }` (null
   clears one) and `responds_to` (as `add_form`'s). Each is checked as the builder checks it (limits, unique options,
-  a mapping that fits, a rule on an earlier choice), and a refusal writes nothing and names the change. A sheet
+  a mapping that fits, a rule on an earlier choice; a Multiple Choice's least and most picks count Other as one, as
+  the builder does, and 0 clears either), and a refusal writes nothing and names the change. A sheet
   form's sheet gains a header for each question it lacks one for, after its last header (bold, its width fitted), as a response would
   write it; it is read for this only when the form now asks for a header it did not. `read_form` names each
   question's sheet column (`column`) on a sheet form.

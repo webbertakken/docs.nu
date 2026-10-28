@@ -43,6 +43,8 @@ import { followerIdsOf, followTargetOf } from '../room-follows';
 import { opForScope } from '../room-scope';
 import { recheckAdmittedLink } from '../room-link-recheck';
 import { gateClientOp } from '../room-op-gate';
+import { getTab } from '../db/tabs';
+import { tabShowsEveryCard } from '@livedoc/items';
 import { RoomScopedStructure } from '../room-scoped-structure';
 import { answerInternal, type InternalRoom } from '../room-internal';
 import { rosterFrames, type RosterEntry } from '../room-roster';
@@ -402,6 +404,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       return new Response(null, { status: 101, webSocket: client });
     // Server-resolved facts (set by the api worker before forwarding the upgrade): room-session.ts.
     const v = verifiedSessionOf(request);
+    const tabShowsAll = await this.scopedTabShowsAll(v.documentId, v.tabScope);
     this.acceptSession(
       server,
       v.verifiedRole,
@@ -414,6 +417,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       v.workbenchPairing,
       v.adderKey,
       v.documentId,
+      tabShowsAll,
     );
     // A share session whose link changed while it was joining is told now (room-link-recheck.ts).
     this.state.waitUntil(this.recheckJoinedLink(server));
@@ -445,6 +449,22 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     this.closeSockets((each) => (each === ws ? [SHARE_LINK_CHANGED_CLOSE, op.kind] : null));
   }
 
+  // Whether the one tab a scoped session is confined to already shows every card (a board or plan view): only then
+  // may its ops carry one (room-scope.ts, docs/specs/026-plan/items.md "Who may do what"). Read once per scoped
+  // connection; a tab that can't be read counts as not.
+  private async scopedTabShowsAll(
+    documentId: string | null,
+    tabScope: string | null,
+  ): Promise<boolean> {
+    const env = this.content.env;
+    if (!env || !documentId || !tabScope) return false;
+    const tab = await getTab(env, documentId, tabScope).catch((error: unknown) => {
+      console.warn('[room-scope] tab unreadable', { documentId, tabScope, error: String(error) });
+      return null;
+    });
+    return tabShowsEveryCard(tab?.elements ?? []);
+  }
+
   // Turn an upgrade away when the room already holds ROOM_MAX_CONNECTIONS sockets: accepted only to be closed
   // with ROOM_FULL_CLOSE, never handed to the hibernation runtime, so it holds no session and receives nothing.
   turnAwayIfFull(server: WebSocket, documentId: string | null = null): boolean {
@@ -471,6 +491,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     workbenchPairing: string | null = null,
     adderKey: string | null = null,
     documentId: string | null = null,
+    tabShowsAll = false,
   ): void {
     ws.serializeAttachment(
       newSessionAttachment(
@@ -485,6 +506,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
           workbenchPairing,
           adderKey,
           documentId,
+          tabShowsAll,
         },
         crypto.randomUUID(),
       ),
@@ -785,6 +807,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       const gate = gateClientOp(msg.op, {
         role: sender.role,
         tabScope: session.tabScope ?? null,
+        tabShowsAll: session.tabShowsAll ?? false,
         key: sender.key,
       });
       if (gate.kind === 'drop') return;

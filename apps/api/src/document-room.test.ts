@@ -2135,6 +2135,7 @@ describe('DocumentRoom tab-scoped sessions', () => {
     p: ParticipantPresence,
     tabScope: string | null,
     shareCode: string | null = null,
+    tabShowsAll = false,
   ) {
     ws.attachment = {
       presenceId: p.id,
@@ -2142,6 +2143,7 @@ describe('DocumentRoom tab-scoped sessions', () => {
       presence: p,
       isOwner: false,
       tabScope,
+      tabShowsAll,
       shareCode,
     };
     (ws as unknown as { close: (code: number, reason: string) => void }).close = (code, reason) => {
@@ -2201,6 +2203,28 @@ describe('DocumentRoom tab-scoped sessions', () => {
       op: { kind: 'el', tabId: 't2', op: { kind: 'reorder', ids: [] } },
     });
     expect(ops(owner)).toEqual([{ kind: 'el', tabId: 't2', op: { kind: 'reorder', ids: [] } }]);
+  });
+
+  // docs/specs/026-plan/items.md "Who may do what": a board shows every card, so a scoped session never adds one.
+  it("relays a scoped session's board only when its tab already showed every card", () => {
+    const { room, state } = newRoom();
+    const owner = makeSocket();
+    const scoped = makeSocket();
+    const settled = makeSocket();
+    scopedSession(state, owner, presence('p-o', 'edit'), null);
+    scopedSession(state, scoped, presence('p-s', 'edit'), 't2');
+    scopedSession(state, settled, presence('p-t', 'edit'), 't2', null, true);
+    // A real element op carrying a board (moving one), judged by both gates: room-scope.ts refuses it from a session
+    // whose tab did not show every card; room-scoped-structure.ts relays an update it cannot judge (no stored tab here).
+    const board = {
+      kind: 'el',
+      tabId: 't2',
+      op: { kind: 'update', element: { id: 'b', type: 'shape', shape: 'plan-board', x: 10, y: 0 } },
+    };
+    sendFrame(room, scoped, { kind: 'op', op: board });
+    expect(ops(owner)).toEqual([]);
+    sendFrame(room, settled, { kind: 'op', op: board });
+    expect(ops(owner)).toEqual([board]);
   });
 
   it('filters the catch-up replay the same way', () => {

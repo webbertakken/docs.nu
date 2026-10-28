@@ -54,8 +54,6 @@ export function opForScope(op: unknown, tabScope: string | null): unknown {
   return typeof o.kind === 'string' && TAB_LESS_DELIVERED.has(o.kind) ? op : null;
 }
 
-// Whether a session scoped to `tabScope` may put this op into the room.
-// The role gate runs separately; this only confines the tab.
 // Whether a scoped session's op renames its tab: a `tab-meta` patch that sets `name` or clears it. A tab's name is
 // structure (docs/specs/013-workspace/tab-scoped-share-links.md "Structure").
 export function scopedRenames(op: unknown, tabScope: string | null): boolean {
@@ -67,13 +65,35 @@ export function scopedRenames(op: unknown, tabScope: string | null): boolean {
   return Array.isArray(o.clear) && o.clear.includes('name');
 }
 
-export function scopedSenderMayRelay(op: unknown, tabScope: string | null): boolean {
+// Whether a session scoped to `tabScope` may put this op into the room: only an op about its own tab, and, unless the
+// tab already showed every card when it joined (`tabShowsAll`), never one carrying a board or plan view, which would
+// widen what the link reaches (docs/specs/026-plan/items.md "Who may do what").
+// The role gate runs separately; this only confines the tab.
+export function scopedSenderMayRelay(
+  op: unknown,
+  tabScope: string | null,
+  tabShowsAll = false,
+): boolean {
   if (tabScope === null) return true;
   const o = asOp(op);
   if (!o || o.kind === 'document-meta') return false;
   const mine = onScope(o, tabScope);
-  if (mine !== undefined) return mine;
+  if (mine !== undefined) return mine && (tabShowsAll || !carriesEveryCardElement(op));
   return typeof o.kind === 'string' && TAB_LESS_SENDABLE.has(o.kind);
+}
+
+const EVERY_CARD_SHAPES = new Set(['plan-board', 'plan-view']);
+// An op nests its elements a few levels down at most (`tab.elements[]`, `ops[].element`); deeper is refused as one.
+const OP_SCAN_DEPTH = 8;
+
+// Whether an op holds, anywhere in its payload, an element that shows every card. Fails closed past OP_SCAN_DEPTH.
+function carriesEveryCardElement(value: unknown, depth = 0): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  if (depth > OP_SCAN_DEPTH) return true;
+  if (Array.isArray(value)) return value.some((v) => carriesEveryCardElement(v, depth + 1));
+  const shape = (value as { shape?: unknown }).shape;
+  if (typeof shape === 'string' && EVERY_CARD_SHAPES.has(shape)) return true;
+  return Object.values(value).some((v) => carriesEveryCardElement(v, depth + 1));
 }
 
 // document-meta carries every tab's name and folder. Other tabs keep their id

@@ -7,7 +7,7 @@
 // own batch, and the editor's offline Inbox read (§2.6) uses them in place of the table.
 
 import type { Element } from './index';
-import { normaliseBoardSetup } from '@livedoc/items';
+import { isDoneColumn, normaliseBoardSetup } from '@livedoc/items';
 
 // The status an All Cards board writes: it shows every card whatever its status, so the read can land a card
 // there when no column holds it. Never a real status (a status is trimmed text a person typed).
@@ -44,13 +44,12 @@ export function planBoardRowsFromElements(elements: readonly Element[]): PlanBoa
       });
       continue;
     }
-    const doneAt = setup.columns.findIndex((c) => c.id === setup.doneColumnId);
     setup.columns.forEach((c, i) =>
       rows.push({
         elementId: el.id,
         boardTitle,
         status: c.status,
-        done: doneAt >= 0 && i >= doneAt,
+        done: isDoneColumn(setup, c),
         boardOrder: order,
         position: i,
       }),

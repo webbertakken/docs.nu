@@ -46,6 +46,9 @@ export type SessionAttachment = {
   //   - `shareCode`: the share code that admitted it, from X-Verified-Share-Code,
   //     so revoking or rescoping that code can close exactly its sockets.
   tabScope?: string | null;
+  //   - `tabShowsAll`: the scoped tab already held a board or plan view when the session joined, as the room read
+  //     it then, so its ops may carry one (room-scope.ts); otherwise they may not add one.
+  tabShowsAll?: boolean;
   shareCode?: string | null;
   //   - `account`: a verified account holds this session, from X-Verified-Account
   //     (docs/specs/014-identity/profile-picture.md §6). Only such a session may put a picture on the
@@ -89,6 +92,7 @@ type VerifiedSession = {
   verifiedRole?: AccessLevel;
   isOwner: boolean;
   tabScope: string | null;
+  tabShowsAll?: boolean;
   shareCode: string | null;
   account: boolean;
   personTag: string | null;
@@ -137,6 +141,7 @@ export function newSessionAttachment(v: VerifiedSession, presenceId: string): Se
     presence: null,
     isOwner: v.isOwner,
     tabScope: v.tabScope,
+    tabShowsAll: v.tabShowsAll ?? false,
     shareCode: v.shareCode,
     account: v.account,
     personTag: v.personTag?.slice(0, MAX_PERSON_TAG_LEN) ?? null,

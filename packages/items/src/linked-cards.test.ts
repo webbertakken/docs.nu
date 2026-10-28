@@ -129,6 +129,11 @@ describe('collectingBoard', () => {
 });
 
 describe('status mapping', () => {
+  // No column counts as done, whatever its name (Counts as Done off on each).
+  const noDone: PlanBoardSetup = {
+    ...setup,
+    columns: setup.columns.map((c) => ({ ...c, done: false })),
+  };
   const withDoing: PlanBoardSetup = {
     ...setup,
     columns: [
@@ -143,7 +148,7 @@ describe('status mapping', () => {
     expect(recordStatusOf(withDoing, 'done')).toBe('done');
     expect(recordStatusOf(withDoing, 'wont-do')).toBe('wont-do');
     expect(recordStatusOf(withDoing, 'elsewhere')).toBeNull();
-    expect(recordStatusOf({ ...setup, doneColumnId: undefined }, 'new')).toBeNull();
+    expect(recordStatusOf(noDone, 'new')).toBeNull();
   });
   it('places each record status, keeping an open card in its open column', () => {
     expect(cardStatusFor(withDoing, 'open', undefined)).toBe('new');
@@ -153,7 +158,7 @@ describe('status mapping', () => {
     expect(cardStatusFor(withDoing, 'wont-do', 'new')).toBe('wont-do');
     const noAfter = { ...setup, columns: setup.columns.slice(0, 2) };
     expect(cardStatusFor(noAfter, 'wont-do', 'new')).toBe('done');
-    expect(cardStatusFor({ ...setup, doneColumnId: undefined }, 'done', 'new')).toBeUndefined();
+    expect(cardStatusFor(noDone, 'done', 'new')).toBeUndefined();
   });
 });
 
@@ -416,5 +421,15 @@ describe('healLinkedCards', () => {
     expect(
       heal([record({ status: 'wont-do', updatedAt: 200 })], [inDone], noAfter).patches,
     ).toEqual([]);
+  });
+
+  it('reads open in Done as agreeing on a board whose first column is Done, so the heal settles', () => {
+    const doneFirst = { ...setup, columns: setup.columns.slice(1) };
+    // The card an open action starts with on such a board sits in Done, the board's first column.
+    const made = heal([record()], [], doneFirst).creates[0]!;
+    expect(made.fields['status']).toBe('done');
+    const inDone = inSync(record(), { status: 'done' });
+    expect(heal([record()], [inDone], doneFirst).patches).toEqual([]);
+    expect(heal([record({ updatedAt: 200 })], [inDone], doneFirst).patches).toEqual([]);
   });
 });
