@@ -48,7 +48,7 @@ Only enough to anchor terms; the product survey is another angle's job.
 | Joined team member                | verified account id, `team_members.status = 'joined'`                                                                               | edit          | delete and move only (`mayDeleteDocument`); **not** sharing           |
 | Share-link holder                 | bearer code, optional password, optional expiry, optional tab scope                                                                 | link's role   | none                                                                  |
 | Embed visitor                     | same as share link, inside an iframe, no identity screen                                                                            | link's role   | none                                                                  |
-| API token, full                   | `lvd_` hash resolves to its account; flows through every gate as that account                                                       | owner's       | owner's (it passes `ownsDocument`), minus session-only administration |
+| API token, full                   | `livedoc_` hash resolves to its account; flows through every gate as that account                                                   | owner's       | owner's (it passes `ownsDocument`), minus session-only administration |
 | API token, read-only              | as above, refused on every `POST`/`PUT`/`DELETE` at one choke point ([index.ts](../../../apps/api/src/index.ts), `read_only_token`) | read          | none in practice (every ownership action is a write)                  |
 
 Sources: [Team shared documents](../../specs/013-workspace/team-shared-documents.md),

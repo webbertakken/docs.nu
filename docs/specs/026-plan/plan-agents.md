@@ -37,7 +37,7 @@ never told a change worked when it shows on no board.
   board takes its card type ([Plan board](plan-board.md#the-board-set-up)).
 - **`list_items`** answers the plan with the items: each board with its columns in order, each column with its
   name, status and the numbers of the live cards in it in board order (`#3 #7`; a board that takes only some card
-  types lists only theirs), then the items, each with its column's name beside its status (`Trash` for a trashed
+  types lists only theirs; a sorted board lists them sorted, and names its `sortBy`), then the items, each with its column's name beside its status (`Trash` for a trashed
   card, none for a status no board names), then the card types. Live cards no board column shows are listed under
   **Not on a board**. This is the text `board` view [Plan mode](plan-mode.md#agents) named as a later step. A filter
   by card type or column names them exactly as `change_items` does (`in-progress` reads In Progress; `Trash` the
@@ -53,14 +53,23 @@ Every write takes what a person would say, and stores the ids:
   aside (`statusKey`): "in progress", "In-Progress" and "IN PROGRESS" are one column. A status matches exactly.
 - **A card type** is its id or its name ("Bug", "bug").
 - **A custom field** is its id (`f-severity`) or its name ("Severity") on the item's type; a Choice takes one of
-  its options, by name, case aside.
+  its options, by name, case aside. A Number takes a number (text that reads as one, "5", is read as it) and a Date
+  a date such as 2026-10-14; anything else is `value_invalid`, naming what the field takes.
 - **A built-in field** is its id (`assignee`, `due`) or a name the interface gives it ("Due Date", "Assigned To",
   "Owner"). A name a type's own custom field has wins over a built-in's other name: on a Post type with a custom
   "Owner" field, "Owner" is that field, not the Assignee; elsewhere it is the Assignee. A built-in's id always means
   the built-in.
+- **A description** is Markdown: `#`, `##` and `###` headings, `**bold**`, `*italic*`, `~~struck~~`,
+  `[text](https://…)` links and `- ` bullets (shown as "• ", as a person's list is). It is stored as the
+  description's formatting (`descriptionRich`) with `description` its plain-text mirror, so it reads in the item
+  panel as a person's formatting does. Inline code loses its backticks (a description has no code style), and a
+  link that is not http(s) or mailto keeps its text only. Text with no Markdown is stored plain and drops any
+  formatting the card had, so a rewritten description never shows the old one; clearing Description clears its
+  formatting too.
 - **An assignee** is a person object `{ id, name, color }` or a name. A name matches a person already assigned on
   the document (case aside); otherwise it makes a named person (`n-` and a slug of the name, a Plan swatch chosen
-  from the name), so "Sam" is the same person on every card.
+  from the name; a hash of the name joins the slug when the slug cannot spell it, "Иван", or another person on the
+  document already has that id), so "Sam" is the same person on every card.
 - **Unknown names are refused, never stored**: a status no board names is `status_unknown`, a type the catalogue
   lacks is `type_unknown`, a custom field the type lacks is `field_unknown`, a Choice value not offered is
   `choice_unknown`. Each refusal lists what is there ("Columns: Backlog, In Progress, Review, Done"). A card that
@@ -80,7 +89,9 @@ Every write takes what a person would say, and stores the ids:
   only on a tab in Plan. Add a Board tab with add_tab and template "kanban" (or another board template).), read with
   the tab the board is placed beside, so it costs no extra request.
 - It is placed as the palette places one: a column named like a status the document's boards already use takes
-  that status, so its cards show on both boards; any other column gets a status of its own and starts empty.
+  that status, so its cards show on both boards; any other column gets a status of its own and starts empty. Each
+  column's status is made from its unique id, so two names that shorten to one id ("Waiting A" and "Waiting B" cut
+  to one slug, or two names in a script the slug drops) still make two columns.
 - It goes on the tab named, else the first tab that already has a board, else the first tab, to the right of
   everything the tab holds (tops aligned), as one changeset an agent can revert.
 - It brings its preset's card types, as placing it in the editor does
@@ -107,8 +118,17 @@ Every write takes what a person would say, and stores the ids:
   display places them, and custom fields follow the display alone. The answer names both.
 - `swimlanes` sets its rows as the board's menu does: none, assignee, type, priority, status (or "column"), or a field
   by name ("Severity"), any field a row can group by; anything else is refused naming those there are.
-  `doneColumn` names the column whose cards count as done (Completion, and the Done phase the charts read), or null
-  for none.
+  `sortBy` sets [Sort Cards](plan-board.md#the-board-set-up): up to two `{ field, direction }`, the field by name
+  ("Priority", "Due Date", a custom field such as "Value") or id, the direction `ascending` (lowest or earliest
+  first, a Choice in option order; the default) or `descending`; an empty list turns sorting off. A field the board
+  cannot sort by, the same field twice or more than two levels are refused naming the fields there are. The answer
+  names the sort. The CLI's `board set` takes it as `--sort "Priority descending, Due Date"` (`none` turns it off).
+  `doneColumns` names the columns whose cards count as done ([Done columns](plan-board.md#done-columns): Completion,
+  Points and the Done phase the charts read), whole: the named ones count, every other does not, and `[]` makes
+  none count. The older `doneColumn` still works as it did, the named column and every one after it counting as
+  done (null for none); giving both is refused. A column `columns` adds counts as done by its name.
+  `list_items` marks each column that counts as done (`done: true`), and the CLI's `board set` takes
+  `--done "Done, Won't Do"` (`none` for no done column).
 - A built-in field shows on a card only when both the board's `cardFields` and the card type's display have it; the
   tool descriptions say so.
 - Card types are named as everywhere; `"every type"` (the CLI's `all`) shows every type again, and an empty list

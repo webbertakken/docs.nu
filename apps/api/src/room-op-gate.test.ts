@@ -23,10 +23,12 @@ describe('gateClientOp', () => {
 
   it('relays presence from anyone, mutations from an editor only', () => {
     expect(gateClientOp({ kind: 'cursor' }, as('view'))).toEqual(relay(true));
-    expect(gateClientOp({ kind: 'tab', tabId: 't' }, as('edit'))).toEqual(relay(false));
-    expect(gateClientOp({ kind: 'tab', tabId: 't' }, as('view'))).toEqual(DROP);
+    expect(gateClientOp({ kind: 'tab', tabId: 't', tab: { id: 't' } }, as('edit'))).toEqual(
+      relay(false),
+    );
+    expect(gateClientOp({ kind: 'tab', tabId: 't', tab: { id: 't' } }, as('view'))).toEqual(DROP);
     // An unknown role reads as the lowest level.
-    expect(gateClientOp({ kind: 'tab', tabId: 't' }, as('admin'))).toEqual(DROP);
+    expect(gateClientOp({ kind: 'tab', tabId: 't', tab: { id: 't' } }, as('admin'))).toEqual(DROP);
   });
 
   it('keeps a viewer from taking part: answers, reactions, speech and focus', () => {
@@ -49,7 +51,9 @@ describe('gateClientOp', () => {
       relay(false, true),
     );
     expect(gateClientOp({ kind: 'vote', voter: 'you' }, as('participate'))).toEqual(DROP);
-    expect(gateClientOp({ kind: 'tab', tabId: 't' }, as('participate'))).toEqual(DROP);
+    expect(gateClientOp({ kind: 'tab', tabId: 't', tab: { id: 't' } }, as('participate'))).toEqual(
+      DROP,
+    );
   });
 
   it("shows only an editor's drag preview", () => {
@@ -59,8 +63,50 @@ describe('gateClientOp', () => {
 
   it('keeps a tab-scoped session to its own tab', () => {
     const scoped = as('edit', { tabScope: 't1' });
-    expect(gateClientOp({ kind: 'tab', tabId: 't1' }, scoped)).toEqual(relay(false));
+    expect(gateClientOp({ kind: 'tab', tabId: 't1', tab: { id: 't1' } }, scoped)).toEqual(
+      relay(false),
+    );
     expect(gateClientOp({ kind: 'tab', tabId: 't2' }, scoped)).toEqual(DROP);
     expect(gateClientOp({ kind: 'document-meta' }, scoped)).toEqual(DROP);
+  });
+});
+
+// docs/specs/013-workspace/tab-scoped-share-links.md "Realtime": a tab op's payload keeps to the tab it names.
+describe('gateClientOp: a tab op keeps to its tab', () => {
+  it('drops a whole-tab op whose payload names another tab, or none, from anyone', () => {
+    expect(gateClientOp({ kind: 'tab', tabId: 't1', tab: { id: 't2' } }, as('edit'))).toEqual(DROP);
+    expect(gateClientOp({ kind: 'tab', tabId: 't1', tab: null }, as('edit'))).toEqual(DROP);
+    expect(gateClientOp({ kind: 'tab', tabId: 't1', tab: { id: 't1' } }, as('edit'))).toEqual(
+      relay(false),
+    );
+  });
+
+  it('drops a tab-meta patch carrying the id, elements or articles, from anyone', () => {
+    for (const key of ['id', 'elements', 'articles'])
+      expect(
+        gateClientOp({ kind: 'tab-meta', tabId: 't1', patch: { [key]: 'x' } }, as('edit')),
+        key,
+      ).toEqual(DROP);
+    expect(gateClientOp({ kind: 'tab-meta', tabId: 't1', patch: null }, as('edit'))).toEqual(DROP);
+    expect(
+      gateClientOp({ kind: 'tab-meta', tabId: 't1', patch: { theme: 'mono' } }, as('edit')),
+    ).toEqual(relay(false));
+  });
+
+  // "Structure": a tab's name is structure, so a scoped session never renames its tab.
+  it("drops a scoped session's rename of its own tab, and lets an unscoped one through", () => {
+    const scoped = as('edit', { tabScope: 't1' });
+    expect(
+      gateClientOp({ kind: 'tab-meta', tabId: 't1', patch: { name: 'Mine' } }, scoped),
+    ).toEqual(DROP);
+    expect(
+      gateClientOp({ kind: 'tab-meta', tabId: 't1', patch: {}, clear: ['name'] }, scoped),
+    ).toEqual(DROP);
+    expect(
+      gateClientOp({ kind: 'tab-meta', tabId: 't1', patch: { theme: 'mono' } }, scoped),
+    ).toEqual(relay(false));
+    expect(
+      gateClientOp({ kind: 'tab-meta', tabId: 't1', patch: { name: 'Ours' } }, as('edit')),
+    ).toEqual(relay(false));
   });
 });

@@ -9,7 +9,7 @@ Specs read: [MCP server](../../specs/015-api/mcp-server.md), [Public API and API
 - **The server owns meaning.** Everything that decides what gets _stored_ (graph and Mermaid to elements, normalisation, layout choice, template materialisation, element ops, validation) runs in the **api worker**, behind REST. MCP and CLI stop computing writes and become adapters. This is the only placement that survives version skew: an installed CLI from March cannot store elements the way the October server expects, but it can always ask the server to.
 - **Packages own presentation.** Read views (outline, ids, graph, comments, diff) are **pure functions in a new `@livedoc/document-views` package**, served by the api as `?view=` text **and** bundled in the CLI for local files. Online, the CLI prefers the server's rendering; offline (synced files) it renders locally and says which format version it understood.
 - **Front-ends own transport.** One **operation catalogue** (`@livedoc/agent-operations`: zod input and output, fact-only descriptions, behaviour preset, handler against a typed api client) is registered by `apps/mcp` as tools and by `apps/cli` as commands. PNG rasterisation stays at the edge (resvg-wasm in both), because it is stateless and presentational.
-- **Auth reuses the token.** `LIVEDOC_TOKEN` for agents and CI; `livedoc auth login` runs the **existing OAuth 2.1 + PKCE server** in `apps/mcp/src/oauth.ts` with a loopback redirect (needs RFC 8252 port-agnostic loopback matching), with **device code** (RFC 8628) as the headless path. The result is an ordinary `lvd_` token.
+- **Auth reuses the token.** `LIVEDOC_TOKEN` for agents and CI; `livedoc auth login` runs the **existing OAuth 2.1 + PKCE server** in `apps/mcp/src/oauth.ts` with a loopback redirect (needs RFC 8252 port-agnostic loopback matching), with **device code** (RFC 8628) as the headless path. The result is an ordinary `livedoc_` token.
 - **Distribution**: an npm package `livedoc` (name free on npm today, as is `@livedoc/cli`), bundled to one ESM file plus the resvg wasm and the Inter font, `npx livedoc@latest` on Node >= 22. Bun-compiled single binaries on GitHub Releases and a Homebrew tap come second.
 - **The largest gap is not the CLI.** A REST tab write is last-writer-wins with no revision check and tells the realtime room nothing (`docs/specs/015-api/api.md`: "a write from any other caller reaches connected peers only when they next load the tab"). A chat agent editing while a person watches the canvas is exactly that case. The `ops` endpoint with `If-Match` and room relay (§9) is the most important API addition, for MCP as much as the CLI.
 
@@ -178,7 +178,7 @@ The OAuth server in `apps/mcp/src/oauth.ts` already implements RFC 8414 discover
 1. `GET {host}/api/capabilities` gives `oauthIssuer` (new field; hosted: `https://mcp.docs.nu`).
 2. Discovery at `{issuer}/.well-known/oauth-authorization-server`.
 3. Listen on `127.0.0.1:0`, register or reuse the public client, open the browser at `/oauth/authorize` with S256 challenge and `state`.
-4. The person approves (optionally read-only) on the consent page; the code returns to the loopback listener; `POST /oauth/token` yields the `lvd_` token and a truthful `expires_in`.
+4. The person approves (optionally read-only) on the consent page; the code returns to the loopback listener; `POST /oauth/token` yields the `livedoc_` token and a truthful `expires_in`.
 
 Two changes are needed in `oauth.ts`:
 

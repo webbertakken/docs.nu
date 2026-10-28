@@ -44,7 +44,7 @@ export async function handleTabPages(
   if (result.status === 200 && ctx.token)
     ctx.waitUntil?.(afterChangeset.telemetry(ctx.env, 'Applied', frontDoorOf(ctx.request)));
   // The agent shows as present on the tab it wrote, as after a changeset.
-  refreshAfterWrite(ctx, id, tabId, author, {
+  refreshAfterWrite(ctx, document, tabId, author, {
     status: result.status,
     body: result.status === 200 ? { changeset: true } : null,
   });

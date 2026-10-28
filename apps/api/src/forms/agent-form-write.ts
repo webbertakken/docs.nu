@@ -18,6 +18,7 @@ import { relayPages } from '../room-client';
 import type { DocumentEnv } from '../types';
 import { readStoredTab } from '../changesets/stored-tab';
 import { SUBMIT_ATTEMPTS } from '../changesets/submit';
+import { formLeavesTab, structureRefusal } from '../tab-structure';
 
 const FORM_LOCKED_MESSAGE =
   'This form is taking responses, so only its settings can change. Close it first: its link stays.';
@@ -34,6 +35,9 @@ export async function writeAgentForm(
   documentId: string,
   tabId: string,
   body: Record<string, unknown>,
+  // The one tab a tab-scoped grant reaches (docs/specs/013-workspace/tab-scoped-share-links.md "Structure"): its form
+  // sends responses only to that tab, and the tab keeps its name.
+  scope: string | null = null,
 ): Promise<AgentFormResult> {
   const form = readForm(body['form']);
   if (!form)
@@ -60,6 +64,8 @@ export async function writeAgentForm(
         { rev: stored.rev },
       );
     }
+    if (scope && formLeavesTab(stored.tab.form, form, scope))
+      return structureRefusal('form', where);
     const before = readForm(stored.tab.form);
     if (!before || changesBeyondSettings(before, form)) {
       const live = await getLiveFormLink(env, documentId, tabId);
@@ -70,7 +76,8 @@ export async function writeAgentForm(
         return refused(409, 'form_locked', FORM_LOCKED_MESSAGE);
       }
     }
-    const name = capStoredName(form.heading, null, 'tab');
+    // The tab takes the form's heading as its name, except through a link to one tab: a name is structure.
+    const name = scope ? stored.tab.name : capStoredName(form.heading, null, 'tab');
     // The form wears its tab's look: a theme given is the tab's.
     const next: Tab = {
       ...stored.tab,

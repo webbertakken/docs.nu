@@ -5,6 +5,7 @@
 // /embed/workbench/document/<id>. The Explorer itself keeps speaking its own /explorer hrefs; these functions
 // translate both ways, so nothing inside it learns where it runs.
 
+import { decodePathSegment } from '@livedoc/api-schema';
 import { explorerPathFor, selectedFromRoute } from '@/app/explorer/routes';
 import type { SelectedNode } from '@/app/explorer/views';
 import { WORKSPACE_FRAME_PAGE } from './workbench-frame-path';
@@ -49,8 +50,11 @@ export function explorerRouteOfFrame(
   if (path === WORKSPACE_FRAME_PAGE) return { pathname: '/explorer/home', search };
   if (!path.startsWith(`${WORKSPACE_FRAME_PAGE}/`)) return null;
   if (path.startsWith(FOLDER_ROOT)) {
+    const id = decodePathSegment(path.slice(FOLDER_ROOT.length));
+    // A folder segment that does not decode names no folder: Home, as an unknown path.
+    if (id === null) return { pathname: '/explorer/home', search };
     const folder = new URLSearchParams(search);
-    folder.set('id', decodeURIComponent(path.slice(FOLDER_ROOT.length)));
+    folder.set('id', id);
     return { pathname: '/explorer/folder', search: folder };
   }
   return { pathname: path.slice(FRAME_PREFIX.length), search };
@@ -58,7 +62,7 @@ export function explorerRouteOfFrame(
 
 export function workspacePlaceOf(pathname: string, search: URLSearchParams): WorkspacePlace {
   if (pathname.startsWith(DOCUMENT_ROOT)) {
-    const id = decodeURIComponent(pathname.slice(DOCUMENT_ROOT.length).replace(/\/+$/, ''));
+    const id = decodePathSegment(pathname.slice(DOCUMENT_ROOT.length).replace(/\/+$/, ''));
     if (!id || id.includes('/') || id === NOT_A_DOCUMENT) return HOME;
     return {
       kind: 'document',

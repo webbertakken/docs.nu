@@ -186,7 +186,11 @@ export type SharedDocumentResolution =
       // The grant for a password-protected document, kept instead of the password; null without one.
       shareGrant?: string | null;
     }
-  | { passwordRequired: true; invalid: boolean };
+  | ({ passwordRequired: true } & SharePasswordAsk);
+
+// Why the password gate shows (docs/specs/013-workspace/share-password.md "Editor flow"): `invalid` after a wrong
+// password, `rateLimited` after too many tries (the try was not checked, so it is not called wrong).
+export type SharePasswordAsk = { invalid: boolean; rateLimited: boolean };
 
 // Hybrid identity (docs/specs/014-identity/auth-and-guest-access.md, docs/specs/015-api/api.md). When a token provider has been
 // registered via `setTokenProvider` and resolves to a non-null

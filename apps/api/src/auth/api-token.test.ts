@@ -3,9 +3,9 @@ import { isApiTokenFormat } from '@livedoc/api-schema';
 import { generateApiToken, hashApiToken, apiTokenExpiry } from './api-token';
 
 describe('generateApiToken', () => {
-  it('mints an lvd_-prefixed token that passes the format check', () => {
+  it('mints a livedoc_-prefixed token that passes the format check', () => {
     const t = generateApiToken();
-    expect(t.startsWith('lvd_')).toBe(true);
+    expect(t.startsWith('livedoc_')).toBe(true);
     expect(isApiTokenFormat(t)).toBe(true);
   });
 
@@ -17,13 +17,13 @@ describe('generateApiToken', () => {
 
 describe('hashApiToken', () => {
   it('is deterministic and 64 hex chars', async () => {
-    const a = await hashApiToken('lvd_abc');
-    const b = await hashApiToken('lvd_abc');
+    const a = await hashApiToken('livedoc_abc');
+    const b = await hashApiToken('livedoc_abc');
     expect(a).toBe(b);
     expect(a).toMatch(/^[0-9a-f]{64}$/);
   });
   it('differs for different tokens', async () => {
-    expect(await hashApiToken('lvd_a')).not.toBe(await hashApiToken('lvd_b'));
+    expect(await hashApiToken('livedoc_a')).not.toBe(await hashApiToken('livedoc_b'));
   });
 });
 

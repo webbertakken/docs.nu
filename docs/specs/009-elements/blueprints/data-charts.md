@@ -119,6 +119,10 @@ chart beside it on any theme. The menu's data-row swatches read the same ladder 
   `fill-rule="evenodd"`; a 100 % datum is two half rings with the hole cut out; readouts at the ring's middle radius.
 - **Bar** (horizontal): baseline at 6 % of the area's width, bars to 94 %; side padding `min(20, area.h * 0.08)`;
   slot `innerH / n`, thickness `min(slot * 0.7, 48)`; animation origin the baseline's middle; readout at the bar's end.
+- **Below zero** (Column and Bar): `barMarks` runs the value range from `min(0, values)` to `max(0, values)` (equal:
+  widened by 1; with Show Axis, `axisScale(lo, hi)`'s round ends) and places the baseline at zero; a bar spans from
+  zero to its value either side. `floor` is the plot's far edge below zero (a column chart's foot, a bar chart's left
+  edge), where the column names sit; a negative value's readout sits past its end (under a column, left of a bar).
 - **Area**: Line's marks plus, per series, a closed path from the zero line through its points, filled in its colour
   at `AREA_FILL_OPACITY` (0.25), drawn under its line; overlapping, never stacked.
 - **Scatter**: points only (radius 4), no polyline. When every category passes `scatterX` (commas removed, a finite

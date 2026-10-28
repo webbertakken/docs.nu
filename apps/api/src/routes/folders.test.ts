@@ -77,6 +77,15 @@ describe('handleFolders auth', () => {
     expect(res.status).toBe(400);
   });
 
+  // An id is a key in paths: letters, digits, - and _ only, at most KEY_ID_MAX long.
+  it('400 on a create whose id is not letters, digits, - and _', async () => {
+    for (const id of ['f/1', 'f:1', 'f 1', 'x'.repeat(65), 7]) {
+      const res = await handleFolders(makeCtx('POST', '/api/folders', { body: { id, name: 'F' } }));
+      expect(res.status, String(id)).toBe(400);
+    }
+    expect(db.createFolder).not.toHaveBeenCalled();
+  });
+
   it('404 when the create parent belongs to another owner', async () => {
     db.getFolder.mockResolvedValue({ id: 'p1', ownerId: 'someone-else' });
     const res = await handleFolders(

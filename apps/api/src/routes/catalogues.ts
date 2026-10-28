@@ -2,7 +2,11 @@
 // template as an outline, icon search, and the element format. Pure functions over bundled data; no identity, GET
 // only, cached five minutes; each answer logs `[catalogues] <segment> <status>`.
 
-import type { IconSearchResponse, TemplateCatalogueResponse } from '@livedoc/api-schema';
+import {
+  decodePathSegment,
+  type IconSearchResponse,
+  type TemplateCatalogueResponse,
+} from '@livedoc/api-schema';
 import { renderView } from '@livedoc/document-views';
 import { addableKinds, elementFormatText, elementKindsText } from '@livedoc/edit-operations';
 import { ICON_QUERY_MAX, ICON_SEARCH_MAX_LIMIT, searchIcons } from '@livedoc/icons/search';
@@ -25,7 +29,8 @@ function templates(ctx: RouteContext): Response {
   if (kind === undefined)
     return json(templateCatalogue() satisfies TemplateCatalogueResponse, { headers: cached });
   if (ctx.segments.length > 3) return notFound();
-  const decoded = templateKindOf(decodeURIComponent(kind));
+  const name = decodePathSegment(kind);
+  const decoded = name === null ? null : templateKindOf(name);
   if (!decoded)
     return json(
       { error: 'unknown_template', kinds: templateCatalogue().templates.map((t) => t.kind) },
@@ -62,7 +67,8 @@ function schema(ctx: RouteContext): Response {
   const kind = ctx.segments[2];
   if (kind === undefined) return textPlain(elementKindsText(), { headers: cached });
   if (ctx.segments.length > 3) return notFound();
-  const text = elementFormatText(decodeURIComponent(kind));
+  const name = decodePathSegment(kind);
+  const text = name === null ? null : elementFormatText(name);
   if (text === null)
     return json({ error: 'unknown_kind', kinds: [...addableKinds(), 'arrow'] }, { status: 404 });
   return textPlain(text, { headers: cached });

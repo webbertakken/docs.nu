@@ -463,8 +463,8 @@ lowLabel?, highLabel?, goesTo? }`: `blankQuestion(type, id)`, then `applyQuestio
 `setting_not_for_type` naming the type's settings (`TYPE_SETTINGS`). Limits: `PROMPT_MAX` (`prompt_empty`, `too_long`),
 `HELP_MAX`, `PLACEHOLDER_MAX`, `SCALE_LABEL_MAX`; options 1..`OPTIONS_MAX`, each 1..`OPTION_MAX`, unique case aside
 (`option_empty`, `options_repeat`, `options_none`, `options_full`); scale `RATING_SCALE_MIN`..`RATING_SCALE_MAX`
-(`scale_out_of_range`); labels only on a numbered rating (`labels_need_numbers`); Multiple Choice picks 0..options
-(`picks_out_of_range`); `min_over_max`. `""` clears a text setting, `false` a switch.
+(`scale_out_of_range`); labels only on a numbered rating (`labels_need_numbers`); Multiple Choice picks 1..options, Other
+counting as one, and 0 clearing the bound as a stored form reads it (`picks_out_of_range`); `min_over_max`. `""` clears a text setting, `false` a switch.
 
 ### Engine flow
 

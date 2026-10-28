@@ -11,6 +11,7 @@
 // per-owner write rate limit in index.ts.
 
 import {
+  decodePathSegment,
   parsePlacementDefaultKey,
   type PlacementDefaultKey,
   type PlacementDefaultRejection,
@@ -40,13 +41,8 @@ function rejected(reason: PlacementDefaultRejection | 'folder_not_found'): Respo
 
 /** The key a path segment names, raw (`mode:draw`) or percent-encoded (`mode%3Adraw`). */
 function keyOf(segment: string): PlacementDefaultKey | null {
-  let decoded: string;
-  try {
-    decoded = decodeURIComponent(segment);
-  } catch {
-    return null;
-  }
-  return parsePlacementDefaultKey(decoded);
+  const decoded = decodePathSegment(segment);
+  return decoded === null ? null : parsePlacementDefaultKey(decoded);
 }
 
 /** The `folderId` of a PUT body, or null when the body is not `{ folderId: <non-empty string> }`. */

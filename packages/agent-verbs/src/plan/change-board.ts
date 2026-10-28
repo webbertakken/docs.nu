@@ -12,9 +12,13 @@ import { elementFingerprint } from '@livedoc/document';
 import {
   CARD_FIELD_LABELS,
   SWIMLANE_BY,
+  boardAddTypes,
+  boardSortNamed,
+  boardSortText,
   laneFieldsOf,
   type ItemTypeDef,
   normaliseBoardSetup,
+  isDoneColumn,
   planBoardWidthFor,
   reshapeBoard,
   resolveType,
@@ -27,7 +31,9 @@ import { apiRefusalOf } from './api-refusal';
 import { readPlanState } from './plan-state';
 import { tabPath } from '../verbs/shared';
 
-interface ChangeBoardInput extends Omit<BoardChange, 'types' | 'swimlanes'> {
+interface ChangeBoardInput extends Omit<BoardChange, 'types' | 'swimlanes' | 'sortBy'> {
+  // Sort Cards by field name or id; an empty list turns it off.
+  sortBy?: readonly { field: string; direction?: 'ascending' | 'descending' | undefined }[];
   // Its swimlanes, as the board's menu names them: none, assignee, type, priority, status (or "column"), or a field
   // by name ("Severity").
   swimlanes?: string;
@@ -47,10 +53,11 @@ type ChangeBoardResult =
       tabId: string;
       elementId: string;
       title: string;
-      columns: { name: string; status: string }[];
+      columns: { name: string; status: string; done?: true }[];
       takes: string[] | 'every type';
       cardSize: CardSize;
       cardFields: string[];
+      sortBy: string[];
       changesetId: string | null;
       rev: number | null;
     }
@@ -142,6 +149,13 @@ export async function changeBoard(
         code: 'board_unknown',
         message: 'That board changed since it was read: list_items again.',
       };
+    // Sort Cards names the fields the board's own card types offer.
+    let sortBy: BoardChange['sortBy'];
+    if (input.sortBy) {
+      const named = boardSortNamed(input.sortBy, boardAddTypes(setup, state.plan.types));
+      if (!named.ok) return named;
+      sortBy = named.sortBy;
+    }
     const reshaped = reshapeBoard(
       setup,
       {
@@ -150,7 +164,9 @@ export async function changeBoard(
         ...(input.cardSize ? { cardSize: input.cardSize } : {}),
         ...(swimlanes ? { swimlanes } : {}),
         ...(input.doneColumn !== undefined ? { doneColumn: input.doneColumn } : {}),
+        ...(input.doneColumns ? { doneColumns: input.doneColumns } : {}),
         ...(input.cardFields ? { cardFields: input.cardFields } : {}),
+        ...(sortBy ? { sortBy } : {}),
         ...(input.columns ? { columns: input.columns } : {}),
         ...(types !== undefined ? { types } : {}),
       },
@@ -180,13 +196,18 @@ export async function changeBoard(
       tabId,
       elementId,
       title: reshaped.setup.title,
-      columns: reshaped.setup.columns.map((c) => ({ name: c.name, status: c.status })),
+      columns: reshaped.setup.columns.map((c) => ({
+        name: c.name,
+        status: c.status,
+        ...(isDoneColumn(reshaped.setup, c) ? { done: true as const } : {}),
+      })),
       takes: reshaped.setup.addTypes ? reshaped.setup.addTypes.map(label) : 'every type',
       cardSize: reshaped.setup.cardSize ?? 'detailed',
       // A board's card fields are built-in fields only (normaliseBoardSetup keeps CARD_FIELDS alone).
       cardFields: reshaped.setup.cardFields.map(
         (f) => CARD_FIELD_LABELS[f as keyof typeof CARD_FIELD_LABELS],
       ),
+      sortBy: boardSortText(reshaped.setup.sortBy, state.plan.types),
       changesetId: answer.changeset?.id ?? null,
       rev: answer.changeset?.rev ?? null,
     };

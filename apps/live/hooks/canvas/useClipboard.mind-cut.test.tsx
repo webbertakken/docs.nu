@@ -53,15 +53,23 @@ afterEach(() => {
   cleanup();
 });
 
-function copied(opts?: { cut: boolean }): string[] {
+function copied(
+  opts?: { cut: boolean },
+  {
+    selected = 'a',
+    layerLockedIds,
+    elements = map,
+  }: { selected?: string; layerLockedIds?: Set<string>; elements?: Element[] } = {},
+): string[] {
   const { result } = renderHook(() =>
     useClipboard({
       isReadOnly: false,
       embedMode: false,
-      readSelection: () => ({ selectedId: 'a', multiSelectedIds: new Set() }),
+      readSelection: () => ({ selectedId: selected, multiSelectedIds: new Set() }),
       editingId: null,
       setEditingId: () => {},
-      activeTab: { id: 't', name: 'Board', elements: map },
+      activeTab: { id: 't', name: 'Board', elements },
+      ...(layerLockedIds ? { layerLockedIds } : {}),
       commit: () => {},
       setSelectedId: () => {},
       setMultiSelectedIds: () => {},
@@ -71,6 +79,8 @@ function copied(opts?: { cut: boolean }): string[] {
     }),
   );
   act(() => result.current.copySelection(opts));
+  // A copy with nothing to take writes nothing.
+  if (written === '') return [];
   return (JSON.parse(written) as { elements: Element[] }).elements.map((el) => el.id).sort();
 }
 
@@ -81,5 +91,18 @@ describe('copying a mind node', () => {
 
   it('a plain Copy copies only the selected node', () => {
     expect(copied()).toEqual(['a']);
+  });
+
+  it('a Cut copies only what its delete takes: a node on a locked layer stays, and its branch', () => {
+    // The delete takes root; a, on a locked layer, stays with everything under it, so none of that is copied to be
+    // pasted twice.
+    expect(copied({ cut: true }, { selected: 'root', layerLockedIds: new Set(['a']) })).toEqual([
+      'root',
+    ]);
+  });
+
+  it('a Cut of a locked node copies its branch but not the node, as its delete leaves the node', () => {
+    const locked = map.map((el) => (el.id === 'a' ? { ...el, locked: true } : el));
+    expect(copied({ cut: true }, { elements: locked })).toEqual(['a-a1', 'a1']);
   });
 });

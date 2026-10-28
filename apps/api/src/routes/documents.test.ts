@@ -518,13 +518,17 @@ describe('handleDocuments share-link expiry (docs/specs/013-workspace/share-link
     expect(db.createShareLink).toHaveBeenCalledWith({}, 'd1', 'CODE2345', 'edit', 'week', null);
   });
 
-  it('POST /documents/:id/share defaults unknown / missing expiry to never', async () => {
+  it('POST /documents/:id/share defaults a missing expiry to never, and refuses an unknown one', async () => {
     db.getDocument.mockResolvedValue(fakeDocument('owner-1'));
     db.createShareLink.mockResolvedValue({ ...link, expiry: 'never', expiresAt: null });
-    await handleDocuments(
+    await handleDocuments(makeCtx('POST', '/api/documents/d1/share', { body: { role: 'view' } }));
+    expect(db.createShareLink).toHaveBeenCalledWith({}, 'd1', 'CODE2345', 'view', 'never', null);
+    db.createShareLink.mockClear();
+    const res = await handleDocuments(
       makeCtx('POST', '/api/documents/d1/share', { body: { role: 'view', expiry: 'fortnight' } }),
     );
-    expect(db.createShareLink).toHaveBeenCalledWith({}, 'd1', 'CODE2345', 'view', 'never', null);
+    expect(res.status).toBe(400);
+    expect(db.createShareLink).not.toHaveBeenCalled();
   });
 
   it('extend re-arms an expiring link for the owner', async () => {

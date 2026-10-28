@@ -17,6 +17,7 @@ import {
 } from './item';
 import type { ItemMove } from './item';
 import { CUSTOM_FIELD_ID_PATTERN } from './type-catalogue';
+import { boardSortComparator, normaliseBoardSort, type BoardSortLevel } from './board-sort';
 import {
   ITEM_TYPES,
   LEGACY_PARENT_GROUPING,
@@ -33,6 +34,7 @@ import {
   PLAN_WIP_MAX,
 } from './limits';
 import { HEX_COLOUR, isObj } from './validate';
+import { isDoneColumn } from './done-columns';
 
 export interface PlanColumn {
   id: string;
@@ -42,6 +44,9 @@ export interface PlanColumn {
   color?: string;
   // How many slots wide it is (docs/specs/026-plan/plan-board.md "The board set-up"); absent is 1.
   width?: ColumnWidth;
+  // Whether its cards count as done (docs/specs/026-plan/plan-board.md "Done columns"). Absent: by its name, or on
+  // an older board by its `doneColumnId` (isDoneColumn).
+  done?: boolean;
 }
 
 export const COLUMN_WIDTHS = [1, 2, 3] as const;
@@ -103,10 +108,15 @@ export function cardFieldsAt(
 export interface PlanBoardSetup {
   title: string;
   columns: PlanColumn[];
+  // An older board's one done column, every column after it done too; now written for older editors only, as the
+  // first done column (docs/specs/026-plan/plan-board.md "Done columns").
   doneColumnId?: string;
   swimlaneBy: SwimlaneBy;
   // The field a 'field' board lanes by: a built-in of LANE_FIELD_BUILT_INS or a custom field id.
   swimlaneField?: string;
+  // Sort Cards (docs/specs/026-plan/plan-board.md "The board set-up"): up to two levels, rank breaking ties. Absent is
+  // rank order.
+  sortBy?: BoardSortLevel[];
   cardFields: CardField[];
   cardSize?: CardSize;
   // An Archive board (docs/specs/026-plan/items.md "Archive"): it shows only archived items.
@@ -130,11 +140,12 @@ export interface PlanBoardSetup {
 export const LINKED_RECORD_KINDS = ['actions'] as const;
 export type LinkedRecordKind = (typeof LINKED_RECORD_KINDS)[number];
 
-// The Due Soon widget's narrowing: due from `from` (absent: any earlier day) to `to`, not done.
+// The Due Soon widget's narrowing: due from `from` (absent: any earlier day) to `to`, not done (`finished`, the
+// board's finishedStatuses, left out).
 export interface QuickDueWindow {
   from?: string;
   to: string;
-  doneStatus?: string;
+  finished?: string[];
 }
 
 export interface QuickFilter {
@@ -314,6 +325,8 @@ export interface BoardProjection {
   unplaced: Item[];
   doneCount: number;
   total: number;
+  // Sort Cards orders its cards: a card is not reordered by hand in its own cell.
+  sorted?: boolean;
 }
 
 export const NO_LANE = '';
@@ -400,7 +413,7 @@ export function quickFilterMatches(quick: QuickFilter | undefined, item: Item): 
     const due = item.fields['due'];
     if (typeof due !== 'string' || due > quick.due.to) return false;
     if (quick.due.from && due < quick.due.from) return false;
-    if (quick.due.doneStatus && itemStatus(item) === quick.due.doneStatus) return false;
+    if (quick.due.finished?.includes(itemStatus(item) ?? '')) return false;
   }
   const text = quick.text?.trim().toLowerCase();
   if (text) {
@@ -658,12 +671,15 @@ export function projectBoard(
     else scoped.push(it);
   }
   scoped.sort(byRank);
+  // Sort Cards: stable, so rank still orders the cards each level ties.
+  const sorted = !!setup.sortBy?.length;
+  if (sorted) scoped.sort(boardSortComparator(setup.sortBy!, types));
   unplaced.sort((a, b) => a.key - b.key);
 
   const { by, lanes, laneOfItem } = boardLanes(setup, scoped, items, types, statusNames);
 
+  // Cards in every done column (docs/specs/026-plan/plan-board.md "Done columns").
   let doneCount = 0;
-  const doneStatus = setup.columns.find((c) => c.id === setup.doneColumnId)?.status;
   const columns: ProjectedColumn[] = setup.columns.map((column) => {
     const all =
       archiveBoard || allBoard
@@ -671,7 +687,7 @@ export function projectBoard(
           ? scoped
           : []
         : scoped.filter((it) => itemStatus(it) === column.status);
-    if (column.status === doneStatus) doneCount = all.length;
+    if (isDoneColumn(setup, column)) doneCount += all.length;
     const shown = all.filter((it) => quickFilterMatches(quick, it));
     return {
       column,
@@ -683,7 +699,15 @@ export function projectBoard(
       })),
     };
   });
-  return { columns, lanes, swimlanes: by !== 'none', unplaced, doneCount, total: scoped.length };
+  return {
+    columns,
+    lanes,
+    swimlanes: by !== 'none',
+    unplaced,
+    doneCount,
+    total: scoped.length,
+    ...(sorted ? { sorted } : {}),
+  };
 }
 
 // Face-down while the board hides writing and the viewer did not write it.
@@ -704,9 +728,12 @@ export function normaliseBoardSetup(input: unknown): PlanBoardSetup | null {
   const columns: PlanColumn[] = [];
   for (const c of input['columns'].slice(0, PLAN_COLUMNS_MAX)) {
     if (!isObj(c)) continue;
-    const { id, status, name, wipLimit, color } = c;
+    const { id, status: rawStatus, name, wipLimit, color } = c;
     if (typeof id !== 'string' || !id || id.length > 40 || seenIds.has(id)) continue;
-    if (typeof status !== 'string' || !status.trim() || status.length > ITEM_STATUS_MAX) continue;
+    if (typeof rawStatus !== 'string' || !rawStatus.trim() || rawStatus.length > ITEM_STATUS_MAX)
+      continue;
+    // Trimmed, as every card's status is (fields.ts), so a card moved into the column lands in it.
+    const status = rawStatus.trim();
     if (seenStatus.has(status)) continue;
     seenIds.add(id);
     seenStatus.add(status);
@@ -726,6 +753,8 @@ export function normaliseBoardSetup(input: unknown): PlanBoardSetup | null {
     if (typeof color === 'string' && HEX_COLOUR.test(color)) col.color = color;
     const width = (c as { width?: unknown }).width;
     if (width === 2 || width === 3) col.width = width;
+    const done = (c as { done?: unknown }).done;
+    if (typeof done === 'boolean') col.done = done;
     columns.push(col);
   }
   // No columns is a board waiting for its first (docs/specs/026-plan/plan-board.md "The board set-up").
@@ -754,6 +783,7 @@ export function normaliseBoardSetup(input: unknown): PlanBoardSetup | null {
   // every status) groups by status (docs/specs/026-plan/plan-board.md "Swimlanes"). Another board stored grouping by
   // status reads as no grouping.
   if (swimlaneBy === 'status' && input['allCards'] !== true) swimlaneBy = 'none';
+  const sortBy = normaliseBoardSort(input['sortBy']);
   const cardFields = Array.isArray(input['cardFields'])
     ? CARD_FIELDS.filter((f) => (input['cardFields'] as unknown[]).includes(f))
     : [...DEFAULT_CARD_FIELDS];
@@ -767,6 +797,7 @@ export function normaliseBoardSetup(input: unknown): PlanBoardSetup | null {
     ...(doneColumnId ? { doneColumnId } : {}),
     swimlaneBy,
     ...(swimlaneField ? { swimlaneField } : {}),
+    ...(sortBy ? { sortBy } : {}),
     cardFields,
     ...(readBoardWidgets(input['widgets']) ? { widgets: readBoardWidgets(input['widgets']) } : {}),
     ...(input['archive'] === true ? { archive: true } : {}),

@@ -1,4 +1,4 @@
-import { isFixedSizeElement } from '@livedoc/document';
+import { isFixedSizeElement, rotationOf } from '@livedoc/document';
 import {
   alignmentGuides,
   distributionSnap,
@@ -8,7 +8,6 @@ import {
   capturePlacement,
   laneSnapThreshold,
   snapToLane,
-  unionRects,
   type AlignmentGuide,
   type BoxedElement,
   type DistributionGuide,
@@ -366,8 +365,28 @@ export function resolveBoxedResize({
   // the primary's edges aren't load-bearing here: snapping one member's
   // edge would push the whole group around in ways the user didn't ask
   // for.
-  const unionStart = unionRects(startBounds.values());
-  if (!unionStart || !corner) return null;
+  // Each member as drawn, so a rotated member's turned corners count towards the union the
+  // handles stand on (the box deriveCanvasSelection draws).
+  // Runs every pointer frame, so the union is folded in place: no per-member boxes or corners.
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const el of elements) {
+    const start = isBoxed(el) ? startBounds.get(el.id) : undefined;
+    if (!start) continue;
+    const r = (rotationOf(el) * Math.PI) / 180;
+    const halfW = (Math.abs(start.width * Math.cos(r)) + Math.abs(start.height * Math.sin(r))) / 2;
+    const halfH = (Math.abs(start.width * Math.sin(r)) + Math.abs(start.height * Math.cos(r))) / 2;
+    const cx = start.x + start.width / 2;
+    const cy = start.y + start.height / 2;
+    minX = Math.min(minX, cx - halfW);
+    minY = Math.min(minY, cy - halfH);
+    maxX = Math.max(maxX, cx + halfW);
+    maxY = Math.max(maxY, cy + halfH);
+  }
+  if (minX === Infinity || !corner) return null;
+  const unionStart = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
   const anyAspectLocked = elements.some(
     (el) => isBoxed(el) && startBounds.has(el.id) && el.aspectLocked === true,
   );
@@ -381,7 +400,12 @@ export function resolveBoxedResize({
   const unionNext =
     dragAspectLocked || anyAspectLocked || shiftHeld
       ? constrainedBounds(unionStart, mode, dx, dy, unionMinScale(elements, startBounds))
-      : nextBounds(unionStart, mode, dx, dy, false);
+      : flooredUnion(
+          unionStart,
+          nextBounds(unionStart, mode, dx, dy, false),
+          corner,
+          unionAxisFloors(elements, startBounds),
+        );
   const boundsById = new Map<string, ShapeBounds>();
   for (const el of elements) {
     if (!isBoxed(el)) continue;
@@ -390,14 +414,49 @@ export function resolveBoxedResize({
     // Fixed-size kinds (docs/specs/009-elements/mode-button.md) ride along with the union's MOVE but keep
     // their own width / height, so scaling a selection can't quietly resize a
     // control that has no resize handles of its own.
-    if (isFixedSizeElement(el)) {
-      const moved = unionResizeMember(start, unionStart, unionNext, corner);
-      boundsById.set(el.id, { ...moved, width: start.width, height: start.height });
-      continue;
-    }
-    boundsById.set(el.id, unionResizeMember(start, unionStart, unionNext, corner));
+    boundsById.set(
+      el.id,
+      unionResizeMember(start, unionStart, unionNext, corner, {
+        rotation: rotationOf(el),
+        keepSize: isFixedSizeElement(el),
+      }),
+    );
   }
   return { boundsById, guides: null };
+}
+
+// The smallest scale on each axis an unconstrained multi-resize may reach: the largest of its resizable members'
+// own floors on that axis. Below it a member stops at its minimum size while the union keeps shrinking, so it would
+// stick out of the box. Fixed-size members keep their size whatever the union does, so they set no floor.
+function unionAxisFloors(
+  elements: Element[],
+  startBounds: ReadonlyMap<string, ShapeBounds>,
+): { sx: number; sy: number } {
+  const floorFor = (side: number) => (side >= MIN_SIZE ? MIN_SIZE / side : 1);
+  let sx = 0;
+  let sy = 0;
+  for (const el of elements) {
+    const start = startBounds.get(el.id);
+    if (!start || !isBoxed(el) || isFixedSizeElement(el)) continue;
+    sx = Math.max(sx, floorFor(start.width));
+    sy = Math.max(sy, floorFor(start.height));
+  }
+  return { sx, sy };
+}
+
+// The union no smaller than its floors, around the same anchor (the corner opposite the handle).
+function flooredUnion(
+  start: ShapeBounds,
+  next: ShapeBounds,
+  corner: 'nw' | 'ne' | 'sw' | 'se',
+  floors: { sx: number; sy: number },
+): ShapeBounds {
+  const width = Math.max(next.width, start.width * floors.sx);
+  const height = Math.max(next.height, start.height * floors.sy);
+  if (width === next.width && height === next.height) return next;
+  const x = corner === 'nw' || corner === 'sw' ? start.x + start.width - width : start.x;
+  const y = corner === 'nw' || corner === 'ne' ? start.y + start.height - height : start.y;
+  return { x, y, width, height };
 }
 
 // The smallest uniform scale a constrained multi-resize may reach: the

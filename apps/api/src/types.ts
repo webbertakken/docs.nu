@@ -68,6 +68,11 @@ export type Env = {
   // password / share-code guessing. Keyed on CF-Connecting-IP. Optional:
   // absent (self-host) → "allow".
   SHARE_RATE_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
+  // Share-password guesses (docs/specs/013-workspace/share-password.md "Guessing is limited"): per network, per document.
+  SHARE_GUESS_VISITOR_LIMITER?: {
+    limit: (input: { key: string }) => Promise<{ success: boolean }>;
+  };
+  SHARE_GUESS_ITEM_LIMITER?: { limit: (input: { key: string }) => Promise<{ success: boolean }> };
   // Per-IP throttle for GET /api/unfurl (docs/specs/009-elements/link-cards.md) — an unauthenticated
   // outbound page fetch, so bound abuse. Keyed on CF-Connecting-IP. Optional:
   // absent (self-host) → "allow".

@@ -210,3 +210,36 @@ describe('create_document themes', () => {
     expect(tabs).toEqual(['mocha', 'ocean']);
   });
 });
+
+// docs/specs/015-api/mcp-server.md "Values checked": create_document names the element and the rule it breaks, as
+// add_tab and update_document do, never only "every element needs id/type/x/y/width/height".
+describe('create_document refusals', () => {
+  const card = (id: string, tags: string[]) => ({
+    id,
+    type: 'shape',
+    shape: 'card',
+    x: 0,
+    y: 0,
+    width: 200,
+    height: 120,
+    tags,
+  });
+
+  it("names a card's seventh tag", async () => {
+    const { run, posted } = harness(undefined);
+    const out = (await run([
+      { name: 'Board', elements: [card('svc', ['a', 'b', 'c', 'd', 'e', 'f', 'g'])] },
+    ])) as unknown as { isError?: boolean; content: { text: string }[] };
+    expect(out.isError).toBe(true);
+    expect(out.content[0]!.text).toMatch(/Tab "Board": element "svc": "tags" must be/);
+    expect(posted).toHaveLength(0);
+  });
+
+  it('names an id given twice', async () => {
+    const { run } = harness(undefined);
+    const out = (await run([
+      { name: 'Board', elements: [card('svc', []), card('svc', [])] },
+    ])) as unknown as { content: { text: string }[] };
+    expect(out.content[0]!.text).toMatch(/element "svc": the id is used twice/);
+  });
+});

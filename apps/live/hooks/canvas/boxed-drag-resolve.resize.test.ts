@@ -126,6 +126,46 @@ describe('resolveBoxedResize, a multi-selection with Shift', () => {
     const out = resize(pair(), ['a', 'b'], 'resize-se', 250, 0, { shiftHeld: false }).boundsById;
     expect(out.get('a')).toEqual({ x: 0, y: 0, width: 200, height: 50 });
   });
+
+  it('never lets a member stick out of the box through a hard shrink without Shift', () => {
+    for (const mode of ['resize-se', 'resize-nw'] as const) {
+      const sign = mode === 'resize-se' ? -1 : 1;
+      const out = resize(pair(), ['a', 'b'], mode, sign * 1000, sign * 1000, {
+        shiftHeld: false,
+      }).boundsById;
+      const a = out.get('a')!;
+      const b = out.get('b')!;
+      // Still side by side, a member never over another, every one at or above its minimum.
+      expect(a.x + a.width, mode).toBeLessThanOrEqual(b.x + 1e-9);
+      expect(Math.min(a.width, a.height, b.width, b.height)).toBeGreaterThanOrEqual(20 - 1e-9);
+      // The corner opposite the handle stays put.
+      if (mode === 'resize-se') expect([a.x, a.y]).toEqual([0, 0]);
+      else expect(b.x + b.width).toBeCloseTo(250);
+    }
+  });
+});
+
+describe('resolveBoxedResize, a multi-selection with a rotated member', () => {
+  // `b` is turned a quarter: 100 wide and 50 tall in its own frame, so it reads 50 wide and 100
+  // tall, drawn over x 225..275, y -25..75.
+  const pair = () => [box('a', 0, 0, 100, 50), box('b', 200, 0, 100, 50, { rotation: 90 })];
+
+  it('stands the union on the member as drawn', () => {
+    // Free, the far corner tracks the pointer: the union (0, -25, 275 x 100) doubles in width.
+    const out = resize(pair(), ['a', 'b'], 'resize-se', 275, 0, { shiftHeld: false }).boundsById;
+    expect(out.get('a')).toEqual({ x: 0, y: 0, width: 200, height: 50 });
+  });
+
+  it('stretches a turned member along the axis the drag stretches on screen', () => {
+    const out = resize(pair(), ['a', 'b'], 'resize-se', 275, 0, { shiftHeld: false }).boundsById;
+    const b = out.get('b')!;
+    // Its own height reads horizontally, so a horizontal stretch doubles it; its width (vertical
+    // on screen) stays. It turns about its centre, which the union scale carries to (500, 25).
+    expect(b.width).toBeCloseTo(100);
+    expect(b.height).toBeCloseTo(100);
+    expect(b.x + b.width / 2).toBeCloseTo(500);
+    expect(b.y + b.height / 2).toBeCloseTo(25);
+  });
 });
 
 // A text box that fits or wraps hugs its text through a resize (docs/specs/023-draw-mode/
