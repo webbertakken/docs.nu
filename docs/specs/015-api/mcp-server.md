@@ -345,6 +345,14 @@ and an `iconId` that names no icon is refused with the icons like it and a
 pointer to `search_icons`. Each of these was once stored and drawn wrong in silence. The check passes every element
 of every template, so a tab read back as JSON writes again unchanged.
 
+Every refusal **names the element and the rule** it breaks, so a model can fix its own call: an element by its id,
+and one without an id by what it is to the call (`the added element` for an ops `add`, never its place in a
+one-element list such as "element 1"); an update by its target's id. A field's neighbours share its first word as
+written, so a camelCase `strokeColour` is offered `strokeColor`, `strokeWidth`. `create_document` names what is wrong
+with an element it cannot store (`element "svc": "tags" must be an array of at most 6 ...`, `element "svc": the id
+is used twice`) before the general "every element needs id/type/x/y/width/height" refusal, as `add_tab` and
+`update_document` do.
+
 ### 4.5 `list_templates`
 
 Browse the template library — the same hand-tuned catalogue the editor's
