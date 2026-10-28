@@ -47,6 +47,7 @@ export {
   summariseHistory,
   type HistoryChip,
   type HistoryDay,
+  type HistoryPersonKey,
   type HistoryRun,
   type HistorySummary,
 } from './history';

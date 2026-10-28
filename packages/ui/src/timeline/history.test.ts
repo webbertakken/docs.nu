@@ -13,6 +13,10 @@ import {
 } from './history';
 import type { TimelineEvent } from './types';
 
+// Who an event is by, as the host tells people apart: here the actor id, else the name it carries.
+const personKey = (e: TimelineEvent) =>
+  e.actorId ?? (typeof e.snapshot.authorName === 'string' ? e.snapshot.authorName : null);
+
 // Sunday 25 October 2026, mid-afternoon, local time.
 const NOW = new Date(2026, 9, 25, 15, 0).getTime();
 const at = (daysAgo: number, hour = 12) => new Date(2026, 9, 25 - daysAgo, hour).getTime();
@@ -63,7 +67,7 @@ describe('buildHistory', () => {
       // Same type and person as the last, but another day: a run never crosses a day.
       event({ id: 'e', occurredAt: at(1, 11) }),
     ];
-    const days = buildHistory(events, NOW);
+    const days = buildHistory(events, NOW, personKey);
     expect(days.map((d) => [d.label, d.count])).toEqual([
       ['Today', 4],
       ['Yesterday', 1],
@@ -76,19 +80,45 @@ describe('buildHistory', () => {
       event({ id: 'a', occurredAt: at(0, 14) }),
       event({ id: 'b', occurredAt: at(0, 13), eventType: 'comment_added' }),
     ];
-    expect(buildHistory(events, NOW)[0]!.runs).toHaveLength(2);
+    expect(buildHistory(events, NOW, personKey)[0]!.runs).toHaveLength(2);
   });
 
-  it('folds system events, which name nobody, like any other person', () => {
+  it('tells people apart by the host’s key, not the actor id alone', () => {
+    const events = [
+      event({
+        id: 'a',
+        actorId: null,
+        eventType: 'comment_added',
+        snapshot: { authorName: 'Ada' },
+      }),
+      event({
+        id: 'b',
+        actorId: null,
+        eventType: 'comment_added',
+        snapshot: { authorName: 'Grace' },
+      }),
+      event({
+        id: 'c',
+        actorId: null,
+        eventType: 'comment_added',
+        snapshot: { authorName: 'Grace' },
+      }),
+    ];
+    expect(buildHistory(events, NOW, personKey)[0]!.runs.map((r) => r.events.length)).toEqual([
+      1, 2,
+    ]);
+  });
+
+  it('folds events that name nobody as one person', () => {
     const events = [
       event({ id: 'a', actorId: null, eventType: 'share_link_expiring' }),
       event({ id: 'b', actorId: null, eventType: 'share_link_expiring' }),
     ];
-    expect(buildHistory(events, NOW)[0]!.runs[0]!.events).toHaveLength(2);
+    expect(buildHistory(events, NOW, personKey)[0]!.runs[0]!.events).toHaveLength(2);
   });
 
   it('has nothing to group for nothing loaded', () => {
-    expect(buildHistory([], NOW)).toEqual([]);
+    expect(buildHistory([], NOW, personKey)).toEqual([]);
   });
 
   it('works out 1,000 loaded events inside a frame', () => {
@@ -101,9 +131,9 @@ describe('buildHistory', () => {
       }),
     );
     const started = performance.now();
-    const days = buildHistory(events, NOW);
+    const days = buildHistory(events, NOW, personKey);
     historyCategories(events);
-    summariseHistory(events);
+    summariseHistory(events, personKey);
     const ms = performance.now() - started;
     expect(days.reduce((n, d) => n + d.count, 0)).toBe(1_000);
     expect(ms).toBeLessThan(16);
@@ -134,14 +164,18 @@ describe('the filter', () => {
 
 describe('the summary', () => {
   it('counts the events and the people who took part, newest first', () => {
-    const summary = summariseHistory([
-      event({ id: 'a', actorId: 'me' }),
-      event({ id: 'b', actorId: 'ada' }),
-      event({ id: 'c', actorId: 'me' }),
-      event({ id: 'd', actorId: null }),
-    ]);
-    expect(summary.count).toBe(4);
-    expect(summary.people.map((e) => e.actorId)).toEqual(['me', 'ada']);
+    const summary = summariseHistory(
+      [
+        event({ id: 'a', actorId: 'me' }),
+        event({ id: 'b', actorId: null, snapshot: { authorName: 'Ada' } }),
+        event({ id: 'c', actorId: 'me' }),
+        event({ id: 'd', actorId: null }),
+        event({ id: 'e', actorId: null, snapshot: { authorName: 'Ada' } }),
+      ],
+      personKey,
+    );
+    expect(summary.count).toBe(5);
+    expect(summary.people.map((e) => e.id)).toEqual(['a', 'b']);
   });
 
   it('says how many events, with a plus while older ones remain', () => {

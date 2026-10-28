@@ -60,8 +60,12 @@ describe('historyWords', () => {
     expect(historyWords(event(), card({ description: null }), ME).quote).toBeNull();
   });
 
-  it('is You for the reader and names nobody for a system event', () => {
+  it('is You for the reader and names nobody for an event that names nobody', () => {
     expect(historyWords(event({ actorId: ME }), card(), ME).who).toBe('You');
-    expect(historyWords(event({ actorId: null }), card(), ME).who).toBeNull();
+    expect(historyWords(event({ actorId: null, snapshot: {} }), card(), ME).who).toBeNull();
+  });
+
+  it('names a person whose id the document feed hid, by the event’s own name', () => {
+    expect(historyWords(event({ actorId: null }), card(), ME).who).toBe('Ada Lovelace');
   });
 });

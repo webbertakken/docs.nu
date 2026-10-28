@@ -4,7 +4,6 @@
 // stable colour, or the person glyph on the brand fill for the reader. Decorative: every entry
 // names its person in words beside it.
 
-import type { TimelineEvent } from '@livedoc/ui';
 import { IDENTITY_FILL, PictureDisc, identityVars, lucideGlyph } from '@livedoc/ui';
 import { lucideUser } from '@livedoc/icons/lucide';
 import { colorForKey, initialsOf } from '@/lib/identity';
@@ -12,15 +11,16 @@ import { colorForKey, initialsOf } from '@/lib/identity';
 const PersonGlyph = lucideGlyph(lucideUser, 12);
 
 export function HistoryPerson({
-  event,
   name,
+  colourKey,
   mine,
   size,
   ring = false,
 }: {
-  event: TimelineEvent;
   // "You", their name or "Someone" (eventPersonName).
   name: string;
+  // What tells them apart (eventPersonKey), so one person wears one colour throughout.
+  colourKey: string;
   // The reader: the brand fill and the person glyph rather than their own initials.
   mine: boolean;
   size: number;
@@ -36,7 +36,7 @@ export function HistoryPerson({
         pictureUrl={null}
         size={size}
         style={{
-          ...(mine ? null : identityVars(colorForKey(event.actorId ?? name))),
+          ...(mine ? null : identityVars(colorForKey(colourKey))),
           fontSize: Math.round(size * 0.42),
         }}
         className={`font-semibold text-white [&_svg]:h-[60%] [&_svg]:w-[60%] ${
