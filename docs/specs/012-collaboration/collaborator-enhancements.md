@@ -75,3 +75,73 @@ result for a click whose obvious meaning is "tell me about this person".
   its open flag and the clicked participant id live in `useEditorDialogs`.
 - Telemetry: `UI` / `Opened` / `Collaborators` on open. Following from the
   modal keeps the existing `Canvas` / `Used` / `FollowMe` event.
+
+## 2. Hide Participant Cursors
+
+### The problem
+
+In a busy session everyone's cursor and name pill move over the canvas at once. A vote can hide them for the whole
+room while it is open ([Session tools](session-tools.md#hide-participant-cursors-default-on)), but that is for
+everyone and only for the vote. One person who just wants to read or work without the movement had no way to turn
+them off for themselves.
+
+### The behaviour
+
+- **One switch, Hide Participant Cursors**, off by default. On, this screen stops drawing other people's cursor
+  arrows and name pills. Nothing else changes: avatars on the tabs, the Collaborators modal, Follow, selection discs
+  and locks, laser trails and agents' focus rings all stay, and everyone else still sees your cursor.
+- **Two places, one value.** The switch is in Settings under **Panels › Collaborate**, below Enable Collaborate
+  Panel, and the same switch sits at the foot of the Collaborators modal, one click away when a session gets busy.
+  Flipping either flips both.
+- **Remembered on this device**, in `localStorage` (`livedoc:v2:hide-cursors`, the literal `'true'` while on), never
+  in the synced `UserPreferences` ([User preferences](../007-editor/user-preferences.md)): like the Keyboard
+  Shortcuts switch, it suits a screen (a projector, a small laptop) rather than a person. Every tab of the browser
+  follows a flip at once (the `storage` event).
+- **A filter at render, nothing on the wire.** Peers' cursor positions still arrive; they are just not drawn.
+  Turning it off shows every cursor again at its latest position. A vote's room-wide hiding is separate and stops
+  the sending too; the two compose, and either one hides the cursors.
+- **Every role** (Editor, Participant, Viewer) has it: it only changes what this screen draws, and nobody else sees
+  any difference. A private document has no room and no cursors to hide, but the Settings row still shows, so the
+  choice is ready for the next shared one.
+
+### Implementation notes
+
+- `apps/live/hooks/collab/useHideCursors.ts` is the store, over `useLocalStorageValue`.
+- `apps/live/components/canvas/RemoteCursor.tsx` holds the cursor and `RemoteCursors`, the layer that draws the list
+  inside the canvas's panned and zoomed wrapper and draws nothing while the switch is on.
+- `apps/live/components/dialogs/HideCursorsSwitch.tsx` is the modal's row, and owns the label and hint the Settings
+  row shares.
+- Settings: a `hideCursors` row (its own kind, like `shortcuts`) in the Collaborate category.
+- Telemetry: `UI` / `Toggled` / `HideCursorsOn` / `HideCursorsOff`, sent before the write, from either place.
+
+## 3. Cursors Step Aside
+
+### The problem
+
+Another person's cursor and name pill can sit right over the thing you want to read or click. The cursor never took
+the click (it has always let pointer events through), but you could not see what you were aiming at until they
+moved.
+
+### The behaviour
+
+- **Over or near a cursor, it fades out.** When your pointer comes within 8 px (`CURSOR_NEAR_PX`) of another
+  person's arrow or name pill, that cursor fades away (a short opacity fade, none with reduced motion) and stays
+  faded while your pointer is there. Move away and it comes back at its latest position. Only the cursors near your
+  pointer fade; the rest stay.
+- **It works both ways round:** a cursor that moves under your still pointer steps aside too, and one that moves
+  away comes back. So does a canvas panned or zoomed under a still pointer.
+- **Never steals a click.** Cursors stay `pointer-events: none`, faded or not, so a click lands on whatever is
+  beneath.
+- **Mouse and pen only.** A touch screen has no hover, so nothing fades there; a touch clears anything a pen left
+  faded. Leaving the window or the page brings every cursor back.
+- **Every role** (Editor, Participant, Viewer) gets it: it changes only what this screen draws.
+
+### Implementation notes
+
+- `apps/live/lib/cursor-hover.ts` is the hit test: each cursor's box on screen from its canvas point, the zoom and
+  the canvas origin, its pill's width estimated from the name's length, so no layout is read per cursor.
+- `apps/live/hooks/canvas/useCursorsNearPointer.ts` keeps it off the hot path: one passive `pointermove` listener
+  while any cursor is drawn, at most one check per animation frame, one rect read per check (a zero-size anchor at
+  canvas (0, 0)). It renders only when the set of cursors near the pointer changes, never per pointer move.
+- The `RemoteCursors` layer fades the cursors the hook names; each `RemoteCursor` is memoised, so one cursor
+  stepping aside re-renders that cursor, not the room.
