@@ -231,7 +231,7 @@ export const AI_CLIENTS: readonly AiClient[] = [
       },
       {
         text: 'If it can’t, create an API token in LiveDoc’s **Settings**, under **Account**, **API Tokens**, and send it as a header:',
-        code: { lang: 'text', code: 'Authorization: Bearer lvd_…', label: 'Header' },
+        code: { lang: 'text', code: 'Authorization: Bearer livedoc_…', label: 'Header' },
       },
     ],
     note: 'Running your own LiveDoc? Use your own MCP host in place of mcp.docs.nu, still ending in /mcp.',

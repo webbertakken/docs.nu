@@ -132,7 +132,7 @@ async function routeApiRequest(
   // once here; the first credential present decides, and one that is present but wrong is refused, never read as
   // a guest. Token prefixes are checked first: they are cheap string tests, and a session token never carries one.
   const bearer = bearerTokenOf(request.headers.get('Authorization'));
-  // 1. API token (docs/specs/015-api/public-api-and-tokens.md): a `Bearer lvd_…` resolves to its owner account
+  // 1. API token (docs/specs/015-api/public-api-and-tokens.md): a `Bearer livedoc_…` resolves to its owner account
   // via the hashed-token lookup, so a token request flows through the same ownership and gate checks as a
   // signed-in one. A bearer that carries the prefix claims to be a token even when it is cut short or mistyped
   // (a copy-paste slip): unknown, revoked or expired, it is refused here (§3.3).

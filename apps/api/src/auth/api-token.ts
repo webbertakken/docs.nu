@@ -10,7 +10,7 @@ import { API_TOKEN_PREFIX, randomBase64Url, sha256Hex } from '@livedoc/api-schem
 const TOKEN_PREFIX = API_TOKEN_PREFIX;
 const TOKEN_RANDOM_BYTES = 32; // 256 bits
 
-// `lvd_<base64url(32 random bytes)>`. The prefix is greppable for leak
+// `livedoc_<base64url(32 random bytes)>`. The prefix is greppable for leak
 // scanning and disambiguates a token from a session token in the same
 // `Authorization: Bearer` header.
 export function generateApiToken(): string {

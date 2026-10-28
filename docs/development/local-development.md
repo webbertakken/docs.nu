@@ -138,7 +138,7 @@ above, sign in, and create a token in Settings › API Tokens. Then build the bu
 
 ```bash
 pnpm --filter @livedoc/cli build
-export LIVEDOC_HOST=http://localhost:8787 LIVEDOC_TOKEN=lvd_...
+export LIVEDOC_HOST=http://localhost:8787 LIVEDOC_TOKEN=livedoc_...
 apps/cli/dist/livedoc.mjs document ls
 ```
 

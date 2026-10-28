@@ -23,13 +23,13 @@ const ERROR_SCHEMA: JsonSchema = {
 };
 
 const SECURITY_SCHEMES: Record<string, JsonSchema> = {
-  // A LiveDoc session token OR an API token (`lvd_…`), both presented as
+  // A LiveDoc session token OR an API token (`livedoc_…`), both presented as
   // `Authorization: Bearer <credential>` (docs/specs/014-identity/auth-and-guest-access.md, docs/specs/015-api/public-api-and-tokens.md).
   Bearer: {
     type: 'http',
     scheme: 'bearer',
     description:
-      'A LiveDoc session token or an API token (`lvd_…`). API tokens are the credential for external callers; create one in the Explorer (see the API tokens help article).',
+      'A LiveDoc session token or an API token (`livedoc_…`). API tokens are the credential for external callers; create one in the Explorer (see the API tokens help article).',
   },
   // The guest path: a per-browser owner id (docs/specs/014-identity/auth-and-guest-access.md). First-party app use;
   // where sign-in is on, its `X-Owner-Sig` HMAC is required too.
@@ -234,7 +234,7 @@ export function buildOpenApiDocument(): OpenApiDocument {
       description:
         'The REST API behind LiveDoc. The same surface the web editor uses, callable ' +
         'programmatically. External callers authenticate with an API token ' +
-        '(`Authorization: Bearer lvd_…`); see the "API tokens" help article to create one. ' +
+        '(`Authorization: Bearer livedoc_…`); see the "API tokens" help article to create one. ' +
         'Endpoints an external token can use are marked `x-token-usable`. The realtime ' +
         'WebSocket protocol is documented in docs/specs/015-api/api.md, not here.',
       license: { name: 'MIT' },

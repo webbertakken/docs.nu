@@ -187,7 +187,7 @@ nothing. To run it:
 
 3. **Deploy after the api worker** (it reaches api over a service binding). The
    deploy workflow already orders `mcp` after `api`. Tokens minted via the MCP
-   are ordinary `lvd_` API tokens — they appear in the API Tokens category of
+   are ordinary `livedoc_` API tokens — they appear in the API Tokens category of
    Settings and are revocable there.
 
 4. **Only if you've turned telemetry on:** set the same `INTERNAL_EVENTS_KEY` on
