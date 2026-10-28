@@ -16,7 +16,7 @@ export const metadata = helpMetadata({
   categorySlug="developers"
 >
 
-`livedoc` is a command line for the livedoc API. It is built first for **coding agents** (an agent working in your repository, or one changing a diagram while you talk to it) and second for **scripts**: finding documents, reading a tab as text, changing it with edit operations, answering comments, and syncing documents to files.
+`livedoc` is a command line for the LiveDoc API. It is built first for **coding agents** (an agent working in your repository, or one changing a diagram while you talk to it) and second for **scripts**: finding documents, reading a tab as text, changing it with edit operations, answering comments, and syncing documents to files.
 
 It sits beside the [MCP server](/help/account-and-data/connect-ai-mcp/), not in place of it. Both call the same [API](/help/developers/api-overview/) with an [API token](/help/account-and-data/api-tokens/), and the API owns every change, so an older copy of the CLI never writes the old way.
 
@@ -116,7 +116,7 @@ livedoc tab lint "Auth flow"              # what is wrong with how it is drawn
 livedoc tab render "Auth flow" --png auth.png
 ```
 
-`document ls` covers your personal library and every team you have joined, newest first. Wherever a command takes a document, you can give its **name**, the start of its **id**, or a pasted **livedoc link**; a share link acts through that link. A name that matches more than one document is refused with the candidates, rather than guessed. `--tab` takes a tab name or the start of its id, and the first tab is used when you leave it out.
+`document ls` covers your personal library and every team you have joined, newest first. Wherever a command takes a document, you can give its **name**, the start of its **id**, or a pasted **LiveDoc link**; a share link acts through that link. A name that matches more than one document is refused with the candidates, rather than guessed. `--tab` takes a tab name or the start of its id, and the first tab is used when you leave it out.
 
 `tab view` reads a tab as text, the outline by default; `--view` picks `graph`, `layout`, `comments`, `show` (one element, with `--ref`) or `find` (with `--text`), and `--budget` fits it to about that many tokens. `tab render` writes a PNG or SVG preview and prints its path and size, never image bytes.
 

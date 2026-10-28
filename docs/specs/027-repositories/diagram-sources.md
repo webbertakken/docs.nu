@@ -4,7 +4,7 @@
 
 Most repositories already hold diagrams as text: Mermaid in READMEs, PlantUML beside the code, Graphviz written by
 generators such as code2flow. A **source** is one such diagram, a file or a fenced block in Markdown, **bound** to a
-livedoc tab through a [repository link](repository-link.md). Binding is the onboarding: every source comes into
+LiveDoc tab through a [repository link](repository-link.md). Binding is the onboarding: every source comes into
 LiveDoc (forward compatible), and LiveDoc writes back what the format can say (backward compatible, as far
 as the format goes).
 

@@ -179,8 +179,9 @@ describe('useTimelineFeed failure handling', () => {
 
     apiListTimeline.mockResolvedValue({ events: [event('a', 10)], nextCursor: '10:a' });
     act(() => result.current.retry());
-    await waitFor(() => expect(result.current.error).toBe(false));
-    expect(result.current.events.map((e) => e.id)).toEqual(['a']);
+    // Try again clears the failure as soon as it asks (the feed shows loading), so wait for the page itself.
+    await waitFor(() => expect(result.current.events.map((e) => e.id)).toEqual(['a']));
+    expect(result.current.error).toBe(false);
     expect(result.current.hasMore).toBe(true);
   });
 

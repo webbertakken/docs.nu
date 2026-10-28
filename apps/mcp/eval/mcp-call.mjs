@@ -6,7 +6,7 @@
 //   node mcp-call.mjs tools [<name> ...]      one line per tool, or the full description and schema of those named
 //   node mcp-call.mjs <tool> '<json args>'    call a tool and print its result
 //
-// Environment: LIVEDOC_TOKEN (an livedoc_ API token; else read from token.env beside this file), MCP_URL (default
+// Environment: LIVEDOC_TOKEN (a livedoc_ API token; else read from token.env beside this file), MCP_URL (default
 // http://127.0.0.1:8798/mcp), EVAL_LOG (a jsonl of every call; default runs/calls.jsonl) and EVAL_IMG_DIR (where
 // image results are saved; default runs/shots). Never commit a token: token.env and runs/ are gitignored.
 

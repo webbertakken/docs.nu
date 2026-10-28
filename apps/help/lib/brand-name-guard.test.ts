@@ -94,6 +94,29 @@ function splitWordmarks(): string[] {
     );
 }
 
+// The product written in lower case in a help article's prose (outside code and quoted names), where only the
+// command line is `livedoc`. The rebrand left "the livedoc API" and "a file livedoc did not write" that way.
+function lowerCaseProductName(): string[] {
+  const out = execFileSync(
+    'git',
+    ['grep', '--untracked', '-l', '-w', 'livedoc', '--', 'apps/help/app/*.mdx'],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+    },
+  );
+  const found: string[] = [];
+  for (const file of out.split('\n').filter(Boolean)) {
+    const prose = readFileSync(join(ROOT, file), 'utf8')
+      .split(/(```[\s\S]*?```|`[^`\n]*`|"livedoc")/g)
+      .filter((_, i) => i % 2 === 0)
+      .join(' ');
+    for (const m of prose.matchAll(/.{0,30}(?<![@\w/.:-])livedoc(?![\w:/.-]|_).{0,30}/g))
+      found.push(`${file}: ${m[0]}`);
+  }
+  return found;
+}
+
 describe('the brand name', () => {
   it('says livediagram only where it means the upstream project', () => {
     expect(leftoverMentions()).toEqual(UPSTREAM_MENTIONS);
@@ -101,5 +124,9 @@ describe('the brand name', () => {
 
   it('never sets the old name as a split wordmark', () => {
     expect(splitWordmarks()).toEqual([]);
+  });
+
+  it('writes the product as LiveDoc in help prose', () => {
+    expect(lowerCaseProductName()).toEqual([]);
   });
 });

@@ -318,7 +318,7 @@ pnpm --filter @livedoc/api exec wrangler secret put DRIVE_TOKEN_KEY   # openssl 
 
 If your site redirects one host to another (docs.nu sends `www` to the apex), register both as JavaScript origins with `/drive/connected` redirect URIs: the consent flow uses whichever host the app actually runs on.
 
-The mirror's root folder in each user's Drive is named **`livedoc (self-hosted)`** on your deployment (docs.nu's own is `livedoc`, its staging and local development `livedoc (staging)`), so a user of both never gets two folders of the same name. There is no setting: the name comes from the host, is given only when the folder is created, and users may rename or move it freely.
+The mirror's root folder in each user's Drive is named **`LiveDoc (self-hosted)`** on your deployment (docs.nu's own is `LiveDoc`, local development's `LiveDoc (development)`), so a user of both never gets two folders of the same name. There is no setting: the name comes from the host, is given only when the folder is created, and users may rename or move it freely.
 
 `DRIVE_TOKEN_KEY` seals the stored refresh tokens; changing it turns every connection into **Needs reconnecting**. Files a different deployment's Google project created are foreign to yours and import as copies. Your privacy policy must describe the Google user data you handle; docs.nu's is in the help centre under Policies.
 
