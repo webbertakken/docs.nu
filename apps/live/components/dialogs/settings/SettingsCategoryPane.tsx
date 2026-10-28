@@ -9,7 +9,8 @@ import type { SettingsCategoryId } from './settings-icons';
 import { SettingsChoiceRow } from './SettingsChoiceRow';
 import { SettingsToggleGroupRow } from './SettingsToggleGroupRow';
 import { SettingsRow } from './SettingsRow';
-import { SettingsDeleteAccountRow, SettingsIdentityRow } from './SettingsAccountRows';
+import { SettingsDeleteAccountRow } from './SettingsAccountRows';
+import { SettingsProfileCard } from './SettingsProfileCard';
 import {
   SettingsAccountNameRow,
   SettingsSessionsRow,
@@ -264,7 +265,7 @@ export function SettingsCategoryPane({
       case 'shortcutList':
         return <SettingsShortcutListRow row={row} />;
       case 'identity':
-        return <SettingsIdentityRow row={row} />;
+        return <SettingsProfileCard row={row} />;
       case 'deleteAccount':
         return <SettingsDeleteAccountRow row={row} />;
       case 'accountName':

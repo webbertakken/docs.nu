@@ -32,7 +32,7 @@ There is one candidate, so the **profile picture URL** is:
 
 The picture is fetched straight from Google, sized by Google's own option: the path's options after its last `=` are
 replaced with `s<px>-c` (square, centred), so a URL stored at one size draws crisp at any. Each disc offers a 96px and a
-192px source (`srcset` with `sizes` set to the disc's size), so a 44px disc is crisp at 2x and 3x and the smaller discs
+192px source (`srcset` with `sizes` set to the disc's size), so the profile card's 72px disc is crisp at 2x, a 44px disc at 2x and 3x, and the smaller discs
 reuse the 96px download.
 
 ## 3. What "automatically" means

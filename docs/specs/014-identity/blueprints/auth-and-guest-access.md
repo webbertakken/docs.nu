@@ -404,7 +404,8 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
   account" of chips: "LiveDoc Account" (brand tone, shield glyph) or "Guest · This Browser Only", "Joined <Month
   Year>" when known, "Colour: <name>" with its swatch (`presenceColourName`: the palette name, "Custom" off it).
   The colour is read from the participant record (`apiLoadSelf`); until it answers the chip and the cursor hold
-  the neutral swatch, so nothing moves when it lands. A guest's card adds a box headed "Sign in to make this
+  the neutral swatch ("Colour: …"), so nothing moves when it lands; with no record (a guest who never opened a
+  document) there is no colour to name, and no colour chip. A guest's card adds a box headed "Sign in to make this
   yours" with three lines ("Keep your documents and settings on every device.", "Choose the name and colour
   collaborators see on your cursor.", "Share with your team, and get an email when someone comments.") and
   **Sign In** (primary) and **Create Account** (secondary), both returning to Settings (`authHrefWithReturn`).

@@ -639,9 +639,9 @@ and the dialog stays as the one complete, browsable index of them.
   category it opens and never navigates the page.
 
   **Every signed-out message links to sign in.** Wherever a Settings row says
-  something needs an account (the guest identity card, Delete Account, the
+  something needs an account (the guest profile card, Delete Account, the
   email stand-in card, the API Tokens manager), the message ends with a
-  **Sign In** link to `/sign-in/` that returns to the current page. On a
+  **Sign In** link (the profile card's is a button beside **Create Account**) to `/sign-in/` that returns to the current page. On a
   deployment without sign-in (`useSignInAvailable` false) there is nowhere to sign
   in, so the link is absent. Preferences whose
   day-to-day home used to be a panel's own gear popover live here now, and

@@ -10,7 +10,7 @@ import {
 import { signIn, type Account } from './sign-in';
 
 // The account avatar end to end (docs/specs/014-identity/profile-picture.md), signed in for real: the
-// account's Google picture (better-auth's `user.image`) in the header trigger and the Settings identity card,
+// account's Google picture (better-auth's `user.image`) in the header trigger and the Settings profile card,
 // the initial without one, the initial again when it fails, and the avatar's box unmoved through every state.
 
 test.use({ colorScheme: 'dark' });
@@ -59,7 +59,7 @@ function holdPictures(page: Page) {
   };
 }
 
-test('draws the Google picture in the header and the identity card, without moving', async ({
+test('draws the Google picture in the header and the profile card, without moving', async ({
   page,
   context,
   baseURL,
@@ -91,7 +91,7 @@ test('draws the Google picture in the header and the identity card, without movi
   const card = page.getByRole('dialog').locator('[data-avatar-state]').first();
   await expect(card).toHaveAttribute('data-avatar-state', 'picture');
   // Polled: the dialog scales in, and the box is only true once it has settled.
-  await expect.poll(async () => await card.boundingBox()).toMatchObject({ width: 44, height: 44 });
+  await expect.poll(async () => await card.boundingBox()).toMatchObject({ width: 72, height: 72 });
   // One size for both surfaces: the card reuses the header's download.
   expect(new Set(pictures.urls).size).toBe(1);
 
@@ -172,7 +172,7 @@ test('frames the picture as its source does, crisp at 2x', async ({
   await page.getByRole('menuitem', { name: 'Account' }).click();
   const card = page.getByRole('dialog').locator('[data-avatar-state]').first();
   await expect(card).toHaveAttribute('data-avatar-state', 'picture');
-  await expect.poll(async () => await card.boundingBox()).toMatchObject({ width: 44, height: 44 });
+  await expect.poll(async () => await card.boundingBox()).toMatchObject({ width: 72, height: 72 });
 
   // At 2x the 44px disc needs 88 device pixels: the browser takes the 96px source, square as Google frames it.
   expect(requested.every((u) => /=s(96|192)-c$/.test(u))).toBe(true);
