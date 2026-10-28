@@ -286,7 +286,9 @@ a card refuses with "Preview can't add its card until Responses Go To names a bo
   ignoring case (a repeat is put back), edited as a list: Enter adds the next ("Option 3", selected), Backspace in an
   empty one removes it, Alt+Up and Alt+Down move it, pasting several lines adds one option a line. **Add “Other”**
   adds an Other option with its own text box to Single and Multiple Choice; typing in it picks it, and its text is
-  kept as the answer.
+  kept as the answer. An Other text that repeats one of the options is that option: on Multiple Choice it merges
+  with it first, and only then are the picks counted against the question's least and most, so ticking A and typing
+  A in Other is one pick.
 - A **required** question is marked with a red asterisk and its accessible name says "required". A required
   Checkbox must be ticked.
 - A **Number** answer is read as the respondent's locale writes it: the box offers a decimal keypad, which has a comma

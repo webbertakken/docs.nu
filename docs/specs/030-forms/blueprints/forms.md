@@ -134,7 +134,8 @@ field). An Other pick is sent as `OTHER_ANSWER` with its text under `other`.
 | above_max | not_an_email | not_a_link | not_a_date | not_an_option | too_few | too_many | out_of_scale | must_tick`.
 An empty answer (`''`, whitespace, `[]`, `false`, absent) is `{}`, or `required` / `must_tick` when required. A Link
 without a scheme is taken as `https://`; only `https://` with a dotted host passes. Multiple picks are kept in option
-order, an Other's text last. `checkResponse(form, body, questions?)` checks every question (or a section's); answers to
+order, an Other's text last; an Other repeating an option merges into it, and `too_few` / `too_many` count the merged
+picks. `checkResponse(form, body, questions?)` checks every question (or a section's); answers to
 unknown ids are dropped. `answerErrorMessage(q, error)` is the page's copy, shared by client and api.
 
 ## 5. Mapping (`mapping.ts`)
