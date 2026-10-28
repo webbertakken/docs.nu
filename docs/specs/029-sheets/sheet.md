@@ -877,7 +877,8 @@ not in Sheet Settings, not anywhere.
 - **Presence**: each other person's selection on the sheet is outlined in their colour, with their full name on a
   tag at its top right (hidden after 3 seconds still, shown again on hover). A cell someone is editing shows their
   outline thicker. It is sent as an ephemeral `sheet-presence` room op, never stored, and only while the person has
-  a selection on a sheet; a late joiner hears it as a Plan card hold is said again ([Plan mode](../026-plan/plan-mode.md#collaboration)).
+  a selection on a sheet. A selection is drawn only on the sheet and tab it names, so a person confined to one tab
+  never shows on a sheet of another; a late joiner hears it as a Plan card hold is said again ([Plan mode](../026-plan/plan-mode.md#collaboration)).
 - Two people typing in different cells never overwrite each other. Two saving the same cell: the later save
   wins. A cell being edited by you that someone else changes keeps your edit; saving it wins.
 - A row or column someone else inserts or deletes while you edit moves your edit with its cell; if your cell was
