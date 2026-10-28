@@ -16,9 +16,9 @@
 import { useLayoutEffect, useState, type RefObject } from 'react';
 import { fitStripTiles } from './toolbar-strip-tiles';
 import { editorViewportOf } from '@/lib/editor-viewport';
+import { measureTopLineClearance } from '@/lib/top-line-clearance';
 
 const PHONE_GUTTERS_PX = 24;
-const MENU_GAP_PX = 8;
 
 export function useStripTileLimit(
   cardRef: RefObject<HTMLElement | null>,
@@ -77,8 +77,8 @@ export function useStripTileLimit(
         if (leadingRef?.current)
           available = vw - PHONE_GUTTERS_PX / 2 - (card.getBoundingClientRect().left - view.left);
       } else {
-        const menu = document.querySelector<HTMLElement>('[data-toolbar-menu]');
-        const clear = menu ? menu.getBoundingClientRect().right - view.left + MENU_GAP_PX : 0;
+        // Clear of both side groups of the top line (lib/top-line-clearance).
+        const clear = measureTopLineClearance(view);
         available = vw - 2 * clear;
       }
       setMeasured(fitStripTiles({ available, chrome, pitch }));

@@ -19,7 +19,6 @@ export function SlidesClusterSegment(props: {
 }) {
   return (
     <ClusterPopoverSegment
-      divided
       label="Open Slides"
       hoverTitle="Open Slides"
       hoverDescription="Build a slide deck from your pages and present it."

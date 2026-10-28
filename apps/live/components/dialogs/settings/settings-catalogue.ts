@@ -15,6 +15,7 @@ import {
   autoRebindArrowsEnabled,
   showProfilePictureEnabled,
   panelEnabled,
+  buttonLabelsOn,
   type MapSize,
   type PanelSwitch,
   type UserPreferences,
@@ -952,20 +953,20 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         illustration: 'appearance',
       },
       {
-        // docs/specs/007-editor/user-preferences.md "Button Labels": the names beside the footer bar's
-        // buttons' icons; the bottom-right cluster is icons alone whatever it says. A phone never names
-        // them, so the row is inert there.
+        // docs/specs/007-editor/user-preferences.md "Button Labels": the names beside the actions group's
+        // Search, Settings and appearance icons, off by default; the tools group is icons alone whatever it
+        // says. A phone never names them, so the row is inert there.
         kind: 'toggle',
         key: 'dockButtonNames',
         keywords:
-          'button labels names text captions bottom bar footer search settings theme icons only',
+          'button labels names text captions actions toolbar search settings theme appearance icons only',
         section: 'Interface',
         label: 'Button Labels',
         description:
-          'Names the footer bar’s buttons (Search, Settings, the theme) beside their icons.',
+          'Names the Search, Settings and appearance buttons at the top right beside their icons.',
         desktopOnly:
           'Phones always show these buttons as icons. Your choice still applies on a larger screen.',
-        read: (p) => p.dockButtonNames !== false,
+        read: (p) => buttonLabelsOn(p),
         write: (p, v) => ({ ...p, dockButtonNames: v }),
         event: { category: 'UI', on: 'DockButtonNamesOn', off: 'DockButtonNamesOff' },
       },

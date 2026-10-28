@@ -31,8 +31,11 @@ export function ToolbarGroup({
 
 // The divider's hairline, drawn before a part that follows a part which drew something. By CSS, so a part whose
 // controls render nothing (`empty:hidden`) leaves no doubled or dangling divider behind.
-const AFTER_A_PART =
+export const AFTER_A_PART =
   '[[data-toolbar-part]:not(:empty)~&]:before:mx-0.5 [[data-toolbar-part]:not(:empty)~&]:before:h-6 [[data-toolbar-part]:not(:empty)~&]:before:w-px [[data-toolbar-part]:not(:empty)~&]:before:shrink-0 [[data-toolbar-part]:not(:empty)~&]:before:bg-slate-200 dark:[[data-toolbar-part]:not(:empty)~&]:before:bg-slate-700';
+
+/** A part's classes, for a part a component draws itself (the tools group's cluster strips). */
+export const TOOLBAR_PART = `flex items-center gap-0.5 empty:hidden ${AFTER_A_PART}`;
 
 // A run of controls inside a group; a divider parts it from the run before.
 export function ToolbarPart({
@@ -43,10 +46,7 @@ export function ToolbarPart({
   className?: string;
 }) {
   return (
-    <div
-      data-toolbar-part=""
-      className={`flex items-center gap-0.5 empty:hidden ${AFTER_A_PART} ${className}`.trim()}
-    >
+    <div data-toolbar-part="" className={`${TOOLBAR_PART} ${className}`.trim()}>
       {children}
     </div>
   );

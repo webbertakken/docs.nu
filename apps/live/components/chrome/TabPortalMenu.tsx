@@ -20,7 +20,7 @@ import {
   AddTabToDocumentDialog,
   AddTabToFolderDialog,
 } from '@/components/dialogs/TabOrganiseDialogs';
-import type { CanvasMenuActions, CanvasMenuTarget } from './TabBar';
+import type { CanvasMenuActions, CanvasMenuTarget } from './lines/tabs-chrome';
 import {
   DuplicateIcon,
   MenuTreeContext,

@@ -1,14 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-  type RefObject,
-} from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { tabHasDrawing } from '@livedoc/document';
 import { useEditorContext } from '@/app/document/[id]/EditorContext';
 import { useSelectTab } from '@/app/document/[id]/useSelectTab';
@@ -35,7 +28,8 @@ const SplitStaticPane = dynamic(() => import('./SplitStaticPane').then((m) => m.
 });
 
 // Side by side tabs (docs/specs/007-editor/split-view.md): two tabs of the document on screen, each
-// keeping its side, with one site header across the top and one tab bar across the bottom. The
+// keeping its side. The editor's two lines (docs/specs/007-editor/toolbar-layout.md "The two lines") are its chrome, so
+// they sit in the editor's pane, with the palette. The
 // editor (canvas, toolbars, panels) sits in the pane of the active tab; the other pane draws its tab
 // live. Clicking into the other pane, or resting the pointer there, moves the editor across, and
 // neither drawing moves. With no split this is a plain full-size box and changes nothing.
@@ -44,21 +38,10 @@ const SplitStaticPane = dynamic(() => import('./SplitStaticPane').then((m) => m.
 // its chrome lays out inside its pane. Its menus and dialogs render to the page body, in client
 // coordinates, so they land where they always do; pointer maths reads the canvas's own rect.
 export function SplitViewFrame({
-  header,
-  footer,
   children,
 }: {
-  // The site header and the tab bar under everything: inside the editor's column with no split,
-  // across both panes with one.
-  header: ReactNode;
-  footer: ReactNode;
-  // The editor's column, given what to put where the header and the footer go (themselves, or
-  // spacers of their height), and whether a split is showing (chrome that stands down for one).
-  children: (
-    headerInColumn: ReactNode,
-    footerInColumn: ReactNode,
-    splitShowing: boolean,
-  ) => ReactNode;
+  // The editor's column, given whether a split is showing (chrome that stands down for one).
+  children: (splitShowing: boolean) => ReactNode;
 }) {
   const ctx = useEditorContext();
   const {
@@ -108,14 +91,6 @@ export function SplitViewFrame({
     editorSide === 'left'
       ? { left: leftWidth, width: split.rightWidth }
       : { left: 0, width: leftWidth };
-
-  // The header's and the footer's heights, for the spacers that keep the editor's column laid out
-  // as before. Seeded with their usual sizes (3.5rem, the 48px tab bar) so the first frame of a
-  // split is already laid out.
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const footerRef = useRef<HTMLDivElement | null>(null);
-  const headerHeight = useObservedHeight(headerRef, showing, 56);
-  const footerHeight = useObservedHeight(footerRef, showing && footer !== null, 48);
 
   // The pane slides in once, when the split opens; moving the editor between panes is instant.
   const [arrived, setArrived] = useState(false);
@@ -209,29 +184,9 @@ export function SplitViewFrame({
     window.dispatchEvent(new Event('resize'));
   }, [showing, editorSide]);
 
-  const headerInColumn = showing ? (
-    <div aria-hidden className="shrink-0" style={{ height: headerHeight }} />
-  ) : (
-    header
-  );
-  const footerInColumn =
-    showing && footer !== null ? (
-      <div aria-hidden className="shrink-0" style={{ height: footerHeight }} />
-    ) : (
-      footer
-    );
-  // The panes stop above the footer, which spans them.
-  const paneBottom = showing && footer !== null ? footerHeight : 0;
-
   return (
     <SplitViewContext.Provider value={split}>
       <div className="relative h-dvh w-full overflow-hidden">
-        {showing ? (
-          // One header across both panes, above the editor's box.
-          <div ref={headerRef} className="absolute inset-x-0 top-0 z-[3]">
-            {header}
-          </div>
-        ) : null}
         <div
           // The box the editor's chrome sizes itself to (lib/editor-viewport): its pane, in a split.
           {...{ [EDITOR_VIEWPORT_ATTR]: showing ? 'pane' : 'window' }}
@@ -244,7 +199,7 @@ export function SplitViewFrame({
             ...(showing ? { transform: 'translateZ(0)', overflow: 'clip' } : null),
           }}
         >
-          {children(headerInColumn, footerInColumn, showing)}
+          {children(showing)}
         </div>
         {staticTab ? (
           <div
@@ -252,8 +207,8 @@ export function SplitViewFrame({
               leaving ? 'split-pane-leave' : arrived ? '' : 'split-pane-enter'
             }`}
             style={{
-              top: headerHeight,
-              bottom: paneBottom,
+              top: 0,
+              bottom: 0,
               left: staticBox.left,
               width: staticBox.width,
             }}
@@ -278,10 +233,7 @@ export function SplitViewFrame({
           </div>
         ) : null}
         {showing ? (
-          <div
-            className="absolute z-[2]"
-            style={{ top: headerHeight, bottom: paneBottom, left: leftWidth }}
-          >
+          <div className="absolute z-[2]" style={{ top: 0, bottom: 0, left: leftWidth }}>
             <SplitDivider
               rightWidth={split.rightWidth}
               viewportWidth={viewportWidth}
@@ -299,33 +251,8 @@ export function SplitViewFrame({
             />
           </div>
         ) : null}
-        {showing && footer !== null ? (
-          // The tab bar across both panes, under the editor's box like the header is over it.
-          <div ref={footerRef} className="absolute inset-x-0 bottom-0 z-[3]">
-            {footer}
-          </div>
-        ) : null}
       </div>
       <SplitDropZone split={split} tabs={tabs} loadedTabIds={loadedTabIds} />
     </SplitViewContext.Provider>
   );
-}
-
-// An element's height, kept current while `active` (and `fallback` until it is first measured).
-function useObservedHeight(
-  ref: RefObject<HTMLElement | null>,
-  active: boolean,
-  fallback: number,
-): number {
-  const [height, setHeight] = useState(fallback);
-  useLayoutEffect(() => {
-    const node = ref.current;
-    if (!active || !node) return;
-    const measure = () => setHeight(node.offsetHeight);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [ref, active]);
-  return height;
 }

@@ -278,14 +278,15 @@ describe('settings catalogue', () => {
     for (const row of rows) expect(row.desktopOnly).toMatch(/A mouse setting/);
   });
 
-  it('offers Button Labels in Appearance, on by default and desktop only', () => {
+  it('offers Button Labels in Appearance, off by default and desktop only', () => {
     const appearance = SETTINGS_CATEGORIES.find((c) => c.id === 'appearance')!;
     const row = appearance.rows.find((r) => r.key === 'dockButtonNames');
     if (row?.kind !== 'toggle') throw new Error('no Button Labels toggle');
     expect(row.label).toBe('Button Labels');
-    expect(row.read({})).toBe(true);
-    expect(row.read({ dockButtonNames: false })).toBe(false);
-    expect(row.write({}, false)).toEqual({ dockButtonNames: false });
+    // Off unless turned on, so the top line leaves the strip its room (docs/specs/007-editor/user-preferences.md).
+    expect(row.read({})).toBe(false);
+    expect(row.read({ dockButtonNames: true })).toBe(true);
+    expect(row.write({}, true)).toEqual({ dockButtonNames: true });
     expect(row.desktopOnly).toMatch(/Phones always show these buttons as icons/);
     expect(row.event).toMatchObject({ on: 'DockButtonNamesOn', off: 'DockButtonNamesOff' });
   });

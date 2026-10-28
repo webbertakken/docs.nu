@@ -139,7 +139,6 @@ export function SessionClusterStrip({
       ) : null}
       {showVote ? (
         <ClusterPopoverSegment
-          divided={showTimer}
           label={
             voteDotsLeft !== null
               ? `Open Vote (${voteDotsLeft} ${voteDotsLeft === 1 ? 'dot' : 'dots'} left)`
@@ -171,7 +170,6 @@ export function SessionClusterStrip({
       ) : null}
       {showPoll ? (
         <ClusterPopoverSegment
-          divided={showTimer || showVote}
           label={pollRunning ? 'Open Poll' : 'Start a Poll'}
           hoverTitle="Poll"
           hoverDescription={
@@ -250,7 +248,7 @@ function TimerClockSegment({
       aria-label={`${kind} ${clock}`}
       aria-expanded={open}
       style={open ? undefined : timerFillStyle(timer, now)}
-      className={`flex h-11 items-center gap-1.5 px-3 transition ${
+      className={`relative flex h-9 touch-target-y items-center gap-1.5 rounded-md px-3 transition ${
         open
           ? PRESSED
           : done

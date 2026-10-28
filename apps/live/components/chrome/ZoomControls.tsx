@@ -1,3 +1,4 @@
+import { TOOLBAR_PART, ToolbarDivider } from './ToolbarGroup';
 import { useCoarsePointer } from '@/hooks/ui/useCoarsePointer';
 import { IsometricOrbitButton } from '@/components/chrome/IsometricOrbitButton';
 import { ZoomMenu, type ZoomRange } from '@/components/chrome/ZoomMenu';
@@ -90,12 +91,14 @@ export function ZoomControls({
   return (
     <div
       data-zoom-controls
+      data-toolbar-part=""
       onPointerDown={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
-      className="pointer-events-auto flex animate-fade-in items-center gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-lg shadow-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-slate-950/40"
+      // A part of the tools group (docs/specs/007-editor/toolbar-layout.md "The bottom line").
+      className={`pointer-events-auto animate-fade-in ${TOOLBAR_PART}`}
     >
       {pinchOnly ? null : (
         <HoverCard title="Zoom out" description={why(copy.out)}>
@@ -127,9 +130,7 @@ export function ZoomControls({
           is Fit on desktop) is hidden, and hover popovers don't exist on
           touch, so a plain Fit button keeps the action reachable. */}
       <span className="contents sm:hidden">
-        {pinchOnly ? null : (
-          <div className="mx-0.5 h-6 w-px bg-slate-200 dark:bg-slate-700" aria-hidden />
-        )}
+        {pinchOnly ? null : <ToolbarDivider />}
         <HoverCard title="Fit to screen" description={why(copy.fit)}>
           <button
             type="button"
@@ -144,7 +145,7 @@ export function ZoomControls({
       </span>
       {onIsoOrbit && onIsoReset ? (
         <>
-          <div className="mx-0.5 h-6 w-px bg-slate-200 dark:bg-slate-700" aria-hidden />
+          <ToolbarDivider />
           <IsometricOrbitButton onOrbit={onIsoOrbit} onReset={onIsoReset} />
         </>
       ) : null}
@@ -155,7 +156,7 @@ export function ZoomControls({
         // the exit button lives here. zenEnterHere (palette-less sessions)
         // keeps the old enter button too.
         <>
-          <div className="mx-0.5 h-6 w-px bg-slate-200 dark:bg-slate-700" aria-hidden />
+          <ToolbarDivider />
           <HoverCard
             title={zenActive ? 'Exit zen mode' : 'Zen mode'}
             description={

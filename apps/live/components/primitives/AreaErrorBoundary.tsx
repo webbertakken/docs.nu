@@ -21,15 +21,15 @@ import { isChunkLoadError } from '@/lib/stale-chunks';
 //   - 'none' for transient overlays (dialogs, popovers, menus, search): the
 //     overlay simply disappears, and the owner's `onError` can close it so
 //     the next open mounts clean.
-//   - 'panel' for layout areas (canvas, header, tab bar, Explorer panes): a
+//   - 'panel' for layout areas (canvas, the editor's groups, Explorer panes): a
 //     small notice in the area's place with a Try Again that remounts it,
 //     so the rest of the page stays reachable instead of going blank.
 
 // Closed on purpose: the area is part of a public telemetry token.
 type ErrorArea =
   | 'Canvas'
-  | 'Header'
-  | 'TabBar'
+  | 'Actions'
+  | 'Document'
   | 'TabDialogs'
   | 'Collaborators'
   | 'Presentation'
@@ -47,8 +47,8 @@ type ErrorArea =
 // Human names for the notice, so it reads as a place, not a component.
 const AREA_LABEL: Record<ErrorArea, string> = {
   Canvas: 'the canvas',
-  Header: 'the header',
-  TabBar: 'the tab bar',
+  Actions: 'the actions toolbar',
+  Document: 'the document toolbar',
   TabDialogs: 'a tab dialog',
   Collaborators: 'the collaborators panel',
   Presentation: 'the presentation',

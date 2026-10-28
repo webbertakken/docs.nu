@@ -5,7 +5,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import type { SaveStatus } from '@/components/chrome/EditorHeader';
+import type { SaveStatus } from './save-status';
 
 vi.mock('@/lib/api-client', () => ({
   apiListDocuments: vi.fn(),

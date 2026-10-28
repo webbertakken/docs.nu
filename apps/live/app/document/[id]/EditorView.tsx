@@ -16,7 +16,6 @@ import { useRegionCycle } from '@/hooks/ui/useRegionCycle';
 import { useEffect, useMemo } from 'react';
 import { addToDocumentTargets } from '@/lib/add-to-document-targets';
 import { canvasSurface } from '@livedoc/document';
-import { getTheme } from '@/lib/themes';
 import { resolveViewBackdrop } from '@/lib/view-backdrop';
 import { CanvasPatternContext } from '@/components/canvas/canvas-pattern-context';
 import { readDrawPattern } from '@/lib/whiteboard-dock-prefs';
@@ -33,15 +32,16 @@ import { FormBoardContext } from '@/components/forms/form-board-context';
 import { useFormBoardValue } from '@/hooks/forms/useFormBoardValue';
 import { SheetsProviders } from '@/hooks/sheets/sheet-comments-context';
 import { PresentationHost } from '@/components/canvas/PresentationHost';
-import { EditorHeader } from '@/components/chrome/EditorHeader';
+import { ActionsGroup } from '@/components/chrome/lines/ActionsGroup';
+import { DocumentGroup } from '@/components/chrome/lines/DocumentGroup';
+import { EditorLinesContext } from '@/components/chrome/lines/editor-lines-context';
 import { EmbedChrome } from '@/components/chrome/EmbedChrome';
-import { WorkbenchOpenLink, WorkbenchReconnectLine } from '@/components/chrome/WorkbenchChrome';
+import { WorkbenchReconnectLine } from '@/components/chrome/WorkbenchChrome';
 import { appHrefOfPlace } from '@/lib/workbench/workspace-place';
 
 // The document in a full tab, by its link when the frame opened it by one.
 const workbenchDocumentHref = (documentId: string, shareCode: string | null) =>
   appHrefOfPlace({ kind: 'document', documentId, tabId: null, shareCode });
-import { TabBar } from '@/components/chrome/TabBar';
 import { LandscapeBarFold, LandscapeBarsHandle } from '@/components/chrome/LandscapeBars';
 import { useLandscapeBars } from '@/hooks/ui/useLandscapeBars';
 import { SplitViewFrame } from '@/components/split/SplitViewFrame';
@@ -73,13 +73,12 @@ import { RolePill, RoleStatusIcon } from '@/components/chrome/RoleIndicator';
 import { MinimalChromeProvider } from '@/components/providers/minimal-chrome';
 import { isMinimalChrome, isPowerUserMode } from '@/lib/power-user-mode';
 import { UiScaleProvider, useUiScalePreview } from '@/components/providers/ui-scale';
-import { ButtonLabelsProvider } from '@/hooks/ui/useButtonLabelsSetting';
 import { resolveUiScales } from '@/lib/ui-scale';
 import { useIsMobileViewport } from '@/hooks/ui/useIsMobileViewport';
 // Each major area fails on its own and reports which one it was (docs/specs/017-telemetry/telemetry.md).
 import { AreaErrorBoundary } from '@/components/primitives/AreaErrorBoundary';
 import { QuickStyleHost } from '@/components/canvas/QuickStyleHost';
-import { panelEnabled } from '@/lib/user-preferences';
+import { buttonLabelsOn, panelEnabled } from '@/lib/user-preferences';
 import { EditorStartPanels } from '@/components/start/EditorStartPanels';
 
 // Loaded when first drawn (docs/specs/016-platform/web-performance.md): search while it is open. Its code is
@@ -277,44 +276,55 @@ export function EditorView() {
       : undefined,
   );
 
-  // A phone held sideways folds the header and the tab bar (docs/specs/007-editor/live-app.md "A phone
-  // held sideways"); a rename asked for elsewhere shows them first, so its field can take the focus.
+  // A phone held sideways folds the actions and document groups (docs/specs/007-editor/live-app.md "A phone held
+  // sideways"); a rename asked for elsewhere shows them first, so its field can take the focus.
   const landscapeBars = useLandscapeBars([renameDocumentNonce, renameTabNonce]);
 
-  // The site header. Zen / focus mode (docs/specs/007-editor/zen-mode.md) hides it entirely so the
-  // canvas gets the full height; embeds (docs/specs/013-workspace/embeds.md) never show it. Side by
-  // side (docs/specs/007-editor/split-view.md) lays it across both panes.
-  const header =
+  // The two lines' page-built groups (docs/specs/007-editor/toolbar-layout.md "The two lines"), placed by the
+  // canvas chrome (EditorLinesContext). Zen / focus mode (docs/specs/007-editor/zen-mode.md) hides both; embeds
+  // (docs/specs/013-workspace/embeds.md) never show them.
+  const openShare = () => {
+    setShareDialogOpen(true);
+    track('UI', 'Opened', 'Share');
+  };
+  // The actions group, top right: the chrome trio, the document actions, the account. Through the welcome flow the
+  // account control alone, so the first-paint chrome stays minimal.
+  const actionsGroup =
     zenMode || !appChrome ? null : (
       <LandscapeBarFold shown={landscapeBars.shown}>
-        <AreaErrorBoundary area="Header" fallback="panel">
-          <EditorHeader
-            documentName={documentName}
-            hideTitle={anyWelcomeOpen}
-            showShare={canShareDocument && hydrated && !anyWelcomeOpen}
+        <AreaErrorBoundary area="Actions" fallback="panel">
+          <ActionsGroup
+            documentActions={!anyWelcomeOpen}
+            onOpenSearch={() => openSearchWithPrefetch(setSearchOpen, loadAllTabs)}
+            onOpenSettings={() => {
+              // Preferences are the person's, not the document's, so every role may open them (a Viewer opting out
+              // of telemetry for their own browser).
+              setSettingsOpen(true);
+              track('UI', 'Opened', 'Settings');
+            }}
+            powerUser={isPowerUserMode(userPreferences)}
+            // Settings > Appearance > Button Labels names Search, Settings and the appearance (never on a phone). Icons
+            // alone unless it is turned on, so the top line leaves the strip its room (mock-up F).
+            labelled={!minimalChrome && buttonLabelsOn(userPreferences)}
+            workbenchOpenHref={
+              workbench && documentId
+                ? workbenchDocumentHref(documentId, workbench.shareCode)
+                : undefined
+            }
+            // Only the owner or a team member shares (canShareDocument), once the document is up; a visitor sees
+            // Make a Copy in the same slot (a joined team member is no visitor: the team's documents are theirs).
+            showShare={canShareDocument && hydrated}
             shareable={documentShareable}
-            teamDocument={!!documentTeamId}
-            offline={isOffline}
-            // Visitors see "Make a copy" instead of "Share": same slot (a joined
-            // team member is no visitor: the team's documents are theirs to share),
-            // different action. Hidden during the welcome flow so the
-            // first-paint chrome stays minimal, and during hydration so
-            // we don't render the button before we know whether the user
-            // is the owner.
             onMakeCopy={
               !canShareDocument && hydrated && !anyWelcomeOpen && documentId
                 ? () => void makeCopy()
                 : undefined
             }
             copying={copying}
-            readOnly={isStructureReadOnly}
-            renameNonce={renameDocumentNonce}
-            // Minimal chrome moves the pill to an icon in the status bar.
-            rolePill={minimalChrome ? undefined : <RolePill {...role} />}
-            // docs/specs/012-collaboration/presentation-mode.md "The header's Present button": only
-            // while the deck has a slide to show, on a desktop, once the document is up. Every role.
+            // docs/specs/012-collaboration/presentation-mode.md "The header's Present button": only while the deck
+            // has a slide to show, on a desktop, once the document is up. Every role.
             present={
-              hydrated && !anyWelcomeOpen && !isMobileViewport && slideDeck.runnable.length > 0
+              hydrated && !isMobileViewport && slideDeck.runnable.length > 0
                 ? {
                     slideCount: slideDeck.runnable.length,
                     starting: slideDeck.startingDeck,
@@ -325,121 +335,111 @@ export function EditorView() {
                   }
                 : undefined
             }
-            brandAccent={getTheme(activeTab.theme).elementStroke ?? undefined}
             onOpenAccount={() => openSettingsOn('account')}
-            onOpenShare={() => {
-              setShareDialogOpen(true);
-              track('UI', 'Opened', 'Share');
-            }}
-            onRename={(next) => {
-              const prev = documentName.trim();
-              // docs/specs/006-document/name-length.md: capped here so the header rename can't outrun the
-              // limit the auto-namer and the Explorer renames both respect.
-              const nextTrim = truncateName(next);
-              nameDocument(nextTrim);
-              if (nextTrim && nextTrim !== prev) track('Document', 'Renamed');
-            }}
+            onOpenShare={openShare}
           />
         </AreaErrorBoundary>
       </LandscapeBarFold>
     );
 
-  // The tab bar, the editor's footer. Hidden through the welcome flow, in zen mode and in embeds.
-  // Side by side (docs/specs/007-editor/split-view.md) lays it across both panes, like the header.
-  const footer =
+  // The document group, bottom right: the document's name, the active tab, the tab stack, the contributors, Add
+  // tab. Hidden through the welcome flow, in zen mode and in embeds.
+  const documentGroup =
     anyWelcomeOpen || zenMode || embedMode ? null : (
       <LandscapeBarFold shown={landscapeBars.shown}>
-        <AreaErrorBoundary area="TabBar" fallback="panel">
-          <TabBar
-            powerUser={isPowerUserMode(userPreferences)}
-            workbenchLink={
-              workbench && documentId
-                ? (labelled) => (
-                    <WorkbenchOpenLink
-                      href={workbenchDocumentHref(documentId, workbench.shareCode)}
-                      labelled={labelled}
-                    />
-                  )
-                : undefined
-            }
-            roleIcon={
-              minimalChrome ? (
+        <AreaErrorBoundary area="Document" fallback="panel">
+          <DocumentGroup
+            name={{
+              documentName,
+              showShare: canShareDocument && hydrated,
+              shareable: documentShareable,
+              teamDocument: !!documentTeamId,
+              offline: isOffline,
+              onOpenShare: openShare,
+              readOnly: isStructureReadOnly,
+              renameNonce: renameDocumentNonce,
+              // Minimal chrome swaps the pill for its status icon.
+              rolePill: minimalChrome ? (
                 <RoleStatusIcon role={role.role} onToggle={role.onToggle} />
-              ) : undefined
-            }
-            tabs={tabs}
-            activeId={activeId}
-            // Clicking an avatar in a presence stack opens the Collaborators
-            // modal (docs/specs/012-collaboration/collaborator-enhancements.md), which is where Follow (docs/specs/012-collaboration/follow-me-viewport.md) lives.
-            followingId={followMe.followingId}
-            followerCount={followMe.followerCount}
-            onOpenCollaborators={openCollaborators}
-            onMoveTabToFolder={moveTabToFolder}
-            onRemoveTabFromFolder={removeTabFromFolder}
-            onRenameFolder={renameTabFolder}
-            activeTabHasContent={activeTab.elements.length > 0}
-            onSelect={selectTab}
-            onAdd={() => addTab()}
-            onRename={renameTab}
-            onDuplicate={duplicateTab}
-            onDelete={deleteTab}
-            onClearContent={() => void clearTabContent()}
-            onImportTab={() => setImportOpen(true)}
-            onExportTab={() => {
-              setExportScope('tab');
-              setExportOpen(true);
+              ) : (
+                <RolePill {...role} />
+              ),
+              onRename: (next) => {
+                const prev = documentName.trim();
+                // docs/specs/006-document/name-length.md: capped here so the rename can't outrun the limit the
+                // auto-namer and the Explorer renames both respect.
+                const nextTrim = truncateName(next);
+                nameDocument(nextTrim);
+                if (nextTrim && nextTrim !== prev) track('Document', 'Renamed');
+              },
             }}
-            otherDocuments={addToDocumentTargets({
-              documentId,
-              documentList,
-              isOffline,
-              workbench: workbench !== null,
-              isOwner,
-            })}
-            onCopyTabTo={linkActiveTabTo}
-            onToggleLockTab={toggleActiveTabLock}
-            onReorder={reorderTabs}
-            // A tab-scoped visitor edits their tab's content at most, never the
-            // tabs around it (docs/specs/013-workspace/tab-scoped-share-links.md).
-            readOnly={isStructureReadOnly}
-            isOutOfScope={isOutOfScope}
-            renameActiveNonce={renameTabNonce}
-            participantsByTab={participantsByTab}
-            selfId={selfParticipant.id}
-            selfRole={sessionRole}
-            onOpenSettings={() => {
-              // Preferences are user-scoped, not document-scoped, so
-              // view-role visitors can still flip them for their own
-              // browser (e.g. opt out of telemetry).
-              setSettingsOpen(true);
-              track('UI', 'Opened', 'Settings');
-            }}
-            onOpenSearch={() => openSearchWithPrefetch(setSearchOpen, loadAllTabs)}
-            // Canvas right-click (desktop) + long-press (touch) open the active
-            // tab's menu with the canvas sections folded in, rendered by the
-            // TabBar so it reuses every tab handler. Element / multi context
-            // menus stay on EditorContextMenu below.
-            canvasMenu={contextMenu?.mode === 'canvas' ? contextMenu : null}
-            onCloseCanvasMenu={closeContextMenu}
-            canvasActions={{
-              // Paste straight from the empty-canvas right-click (docs/specs/008-canvas/canvas-and-palette.md).
-              onPaste: () =>
-                pasteFromClipboard(
-                  undefined,
-                  contextMenu?.mode === 'canvas' ? (contextMenu.canvasPoint ?? null) : null,
-                ),
-              canPaste: hasClipboard,
+            tabs={{
+              tabs: tabs,
+              activeId: activeId,
+              // Clicking an avatar in a presence stack opens the Collaborators
+              // modal (docs/specs/012-collaboration/collaborator-enhancements.md), which is where Follow (docs/specs/012-collaboration/follow-me-viewport.md) lives.
+              followingId: followMe.followingId,
+              followerCount: followMe.followerCount,
+              onOpenCollaborators: openCollaborators,
+              onMoveTabToFolder: moveTabToFolder,
+              onRemoveTabFromFolder: removeTabFromFolder,
+              onRenameFolder: renameTabFolder,
+              activeTabHasContent: activeTab.elements.length > 0,
+              onSelect: selectTab,
+              onAdd: () => addTab(),
+              onRename: renameTab,
+              onDuplicate: duplicateTab,
+              onDelete: deleteTab,
+              onClearContent: () => void clearTabContent(),
+              onImportTab: () => setImportOpen(true),
+              onExportTab: () => {
+                setExportScope('tab');
+                setExportOpen(true);
+              },
+              otherDocuments: addToDocumentTargets({
+                documentId,
+                documentList,
+                isOffline,
+                workbench: workbench !== null,
+                isOwner,
+              }),
+              onCopyTabTo: linkActiveTabTo,
+              onToggleLockTab: toggleActiveTabLock,
+              onReorder: reorderTabs,
+              // A tab-scoped visitor edits their tab's content at most, never the
+              // tabs around it (docs/specs/013-workspace/tab-scoped-share-links.md).
+              readOnly: isStructureReadOnly,
+              isOutOfScope: isOutOfScope,
+              renameActiveNonce: renameTabNonce,
+              participantsByTab: participantsByTab,
+              selfId: selfParticipant.id,
+              selfRole: sessionRole,
+              // Canvas right-click (desktop) + long-press (touch) open the active
+              // tab's menu with the canvas sections folded in, drawn by the document
+              // group so it reuses every tab handler. Element / multi context
+              // menus stay on EditorContextMenu below.
+              canvasMenu: contextMenu?.mode === 'canvas' ? contextMenu : null,
+              onCloseCanvasMenu: closeContextMenu,
+              canvasActions: {
+                // Paste straight from the empty-canvas right-click (docs/specs/008-canvas/canvas-and-palette.md).
+                onPaste: () =>
+                  pasteFromClipboard(
+                    undefined,
+                    contextMenu?.mode === 'canvas' ? (contextMenu.canvasPoint ?? null) : null,
+                  ),
+                canPaste: hasClipboard,
+              },
             }}
           />
         </AreaErrorBoundary>
       </LandscapeBarFold>
     );
+  const lines = { actions: actionsGroup, document: documentGroup };
 
-  // The bars handle, at the canvas's top-right corner: only on a phone held sideways (CSS), and only
-  // where there are bars to fold (not in zen, an embed, the workbench frame, the welcome flow or a
-  // running presentation).
+  // The bars handle, at the canvas's top-right corner: only on a phone held sideways (CSS), and only where there are
+  // groups to fold (not in zen, an embed, the welcome flow or a running presentation).
   const landscapeBarsHandle =
-    header && footer && slideDeck.presentingAt === null ? (
+    actionsGroup && documentGroup && slideDeck.presentingAt === null ? (
       <LandscapeBarsHandle shown={landscapeBars.shown} onToggle={landscapeBars.toggle} />
     ) : null;
 
@@ -478,12 +478,12 @@ export function EditorView() {
                         powerUser={isPowerUserMode(userPreferences)}
                       >
                         <UiScaleProvider value={uiScales}>
-                          <ButtonLabelsProvider value={userPreferences?.dockButtonNames !== false}>
-                            <EditorModeProvider value={ctx.editorMode}>
-                              {/* Side by side tabs (docs/specs/007-editor/split-view.md): the editor, and another
+                          <EditorModeProvider value={ctx.editorMode}>
+                            {/* Side by side tabs (docs/specs/007-editor/split-view.md): the editor, and another
                       tab of the document live beside it when one has been dragged to the right. */}
-                              <SplitViewFrame header={header} footer={footer}>
-                                {(headerInColumn, footerInColumn, splitShowing) => (
+                            <EditorLinesContext.Provider value={lines}>
+                              <SplitViewFrame>
+                                {(splitShowing) => (
                                   <div
                                     // The open tab's editor mode, for the e2e helpers (e2e/fixtures.ts).
                                     data-editor-mode={ctx.editorMode.mode}
@@ -510,7 +510,6 @@ export function EditorView() {
                                         </button>
                                       </div>
                                     ) : null}
-                                    {headerInColumn}
                                     <AreaErrorBoundary area="TabDialogs">
                                       <EditorTabDialogs />
                                     </AreaErrorBoundary>
@@ -567,7 +566,6 @@ export function EditorView() {
                                         ended={workbench.ended}
                                       />
                                     ) : null}
-                                    {footerInColumn}
                                     {/* Quick style panel (docs/specs/008-canvas/quick-style-panel.md): the most-used style choices beside
               a selection. Stands down in zen / embeds / presenting and while an
               element menu is open, which is the complete home of every setting. */}
@@ -696,8 +694,8 @@ export function EditorView() {
                                   </div>
                                 )}
                               </SplitViewFrame>
-                            </EditorModeProvider>
-                          </ButtonLabelsProvider>
+                            </EditorLinesContext.Provider>
+                          </EditorModeProvider>
                         </UiScaleProvider>
                       </MinimalChromeProvider>
                     </CanvasFocusProvider>

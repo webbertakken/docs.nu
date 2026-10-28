@@ -22,6 +22,9 @@ import { OffscreenContentHint } from '@/components/canvas/OffscreenContentHint';
 import { ToolbarPalette } from '@/components/palette/ToolbarPalette';
 import { pickPaletteAddHandlers } from '@/components/palette/palette-add-handlers';
 import { BrandGroup } from '@/components/chrome/lines/BrandGroup';
+import { BottomLine } from '@/components/chrome/lines/BottomLine';
+import { useEditorLines } from '@/components/chrome/lines/editor-lines-context';
+import { ToolbarGroup } from '@/components/chrome/ToolbarGroup';
 import { getTheme } from '@/lib/themes';
 import { showsSlidesButton, SlidesClusterSegment } from '@/components/canvas/SlidesClusterSegment';
 import { PlanCardsClusterStrip } from '@/components/canvas/PlanCardsClusterStrip';
@@ -52,7 +55,6 @@ import {
   Fragment,
   useCallback,
   useMemo,
-  useState,
   type Dispatch,
   type RefObject,
   type SetStateAction,
@@ -64,19 +66,16 @@ import { useCanvasChromePanels } from './useCanvasChromePanels';
 import { usePaletteDragGuides } from '@/hooks/canvas/usePaletteDragGuides';
 import { PANEL_CORNERS, PANEL_IDS, cornerBottomInset, type PanelCorner } from '@/lib/panel-layout';
 import type { StampGhost } from '@/components/canvas/useStampGhost';
-import { atLeastInset } from '@livedoc/ui';
-import { STRIP_SELECTOR, useStripCrowdsCorners } from '@/hooks/ui/useStripCrowdsCorners';
 import { PHONE_TOOLBAR_ITEMS } from '@/components/chrome/phone-toolbar-items';
 import { PHONE_CLUSTER_BUTTON_WIDTH } from '@/components/chrome/phone-toolbar-items';
 import { useSnapHaptic } from '@/hooks/canvas/useSnapHaptic';
-import { WHITEBOARD_DOCK_SELECTOR } from '@/lib/whiteboard-dock-prefs';
 import { CollaborateClusterButton } from './CollaborateClusterButton';
 import { AvatarClusterButton } from './AvatarClusterButton';
 import { kindCounts } from '@/components/panels/collaborate/collaborate-model';
 import { panelEnabled } from '@/lib/user-preferences';
 import { loadWhiteboardDock } from '@/lib/editor-deferred-code';
 import { useUiScale } from '@/components/providers/ui-scale';
-import { toSurfacePx, uiScaleStyle } from '@/lib/ui-scale';
+import { uiScaleStyle } from '@/lib/ui-scale';
 import { useSnapGuides } from '@/hooks/canvas/useSnapGuideState';
 
 // Draw mode's dock shows only on a Draw tab, so its code loads on demand (lib/editor-deferred-code.ts
@@ -202,13 +201,11 @@ export type CanvasChromeProps = CanvasProps & ChromeExtras;
 // banner) renders underneath the strip where it can't be reached
 // (toolbarTopClearancePx, lib/canvas-chrome.ts).
 
+// Every corner's top or bottom is set inline, clear of the two lines (see the dock layer below).
 const DOCK_CORNER_CLASS: Record<PanelCorner, string> = {
-  'top-left': 'left-4 top-4 flex-col items-start',
-  'top-right': 'right-4 top-4 flex-col items-end',
-  'bottom-left': 'left-4 bottom-4 flex-col-reverse items-start',
-  // bottom-right omits `bottom-4`; its bottom is set inline to clear the
-  // fixed zoom controls (cornerBottomInset), so panels docked there sit
-  // above the zoom bar instead of overlapping it.
+  'top-left': 'left-4 flex-col items-start',
+  'top-right': 'right-4 flex-col items-end',
+  'bottom-left': 'left-4 flex-col-reverse items-start',
   'bottom-right': 'right-4 flex-col-reverse items-end',
 };
 
@@ -353,6 +350,8 @@ export function CanvasChrome(props: CanvasChromeProps) {
   const dockOnTop = dockShown && props.whiteboardDock?.position === 'top';
   // The brand group at the top left (docs/specs/007-editor/toolbar-layout.md "The top line"), on a phone too: Back,
   // the menu button (not in a workbench, nor held sideways) and the mode switch.
+  // The actions group and the document group, built by the editor page (EditorLinesContext).
+  const lines = useEditorLines();
   const brandGroup = (
     <BrandGroup
       explorer={
@@ -414,42 +413,16 @@ export function CanvasChrome(props: CanvasChromeProps) {
     panelsOn,
   });
 
-  // Measured against the real top-corner stacks (useStripCrowdsCorners). A
-  // stack only renders while it holds a panel, so which top corners are
-  // occupied is part of what re-measures. A phone's strip always spans the top.
-  const topCornersKey = (['top-left', 'top-right'] as const)
-    .map((c) => dock.cornerStacks[c].filter((id) => panelEls[id] != null).join('+'))
-    .join('|');
   // UI scale (docs/specs/007-editor/ui-scale.md): the strip, the panels and the
   // bottom-right cluster are drawn at it, so the clearances around them follow.
   const toolbarScale = useUiScale('toolbar');
   const panelScale = useUiScale('panels');
   const cornerScale = useUiScale('cornerButtons');
-  // Beside Pages mode's Contents sidebar when it is pinned right (useContentsChrome), never under it.
-  const clusterX =
-    clusterInset.x +
-    (contentsDocked && contentsSide === 'right' ? CONTENTS_SIDEBAR_WIDTH * panelScale : 0);
-  // The dock's code loads on demand, so it is drawn a moment after the chrome: the top corners
-  // measure against it from the commit it is first drawn in (its onDrawn), never before, when there
-  // is nothing on the page to measure. Once drawn its code is in, so a later mount is immediate.
-  const [dockDrawn, setDockDrawn] = useState(false);
-  const markDockDrawn = useCallback(() => setDockDrawn(true), []);
-  // The bar across the top that the top corners give way to: the strip, or a dock at the top.
-  const topBar = isMobile
-    ? null
-    : stripShown
-      ? STRIP_SELECTOR
-      : dockOnTop && dockDrawn
-        ? WHITEBOARD_DOCK_SELECTOR
-        : null;
-  const topBarCrowds = useStripCrowdsCorners(
-    cornerRefs,
-    topBar,
-    topCornersKey,
-    `${toolbarScale}/${panelScale}`,
-  );
-  const stripSpansTop = stripShown && (isMobile || topBarCrowds);
-  const dockSpansTop = dockOnTop && topBarCrowds;
+  // Beside Pages mode's Contents sidebar when it is pinned (useContentsChrome), never under it.
+  const contentsWidth = CONTENTS_SIDEBAR_WIDTH * panelScale;
+  // The centre toolbar (the strip, or Draw's dock at the top) on a row of its own under the top line: always on a
+  // phone (docs/specs/007-editor/toolbar-layout.md "When a line runs out of room").
+  const centreOwnRow = isMobile && (stripShown || dockOnTop);
   // Bucketing keys off the persisted placement ONLY (not which panel is
   // mid-drag): a dragged panel must stay in the same DOM parent for the
   // whole gesture — reparenting it would remount the component and drop
@@ -476,12 +449,17 @@ export function CanvasChrome(props: CanvasChromeProps) {
               cornerRefs.current[corner] = el;
             }}
             style={{
-              ...(corner === 'bottom-right'
-                ? { bottom: cornerBottomInset(corner, cornerScale) }
-                : // The Draw dock is the strip's twin (its height, its scale), so the same clearance.
-                  (stripSpansTop || dockSpansTop) && corner.startsWith('top')
-                  ? { top: toolbarTopClearancePx(toolbarScale) }
-                  : undefined),
+              // The top corners start below the top line's groups (docs/specs/007-editor/toolbar-layout.md "The two
+              // lines"), a row lower while the strip (or Draw's dock, its twin) takes a row of its own; the bottom
+              // corners start above the bottom line: the tools group (drawn at its UI scale) bottom left, the document
+              // group bottom right.
+              ...(corner.startsWith('bottom')
+                ? { bottom: cornerBottomInset(corner, corner === 'bottom-left' ? cornerScale : 1) }
+                : {
+                    top:
+                      toolbarTopClearancePx(toolbarScale) +
+                      (centreOwnRow ? toolbarTopClearancePx(toolbarScale) - 12 : 0),
+                  }),
               // Beside Pages mode's Contents sidebar, never under it.
               ...(contentsDocked && corner.endsWith(contentsSide)
                 ? { [contentsSide]: contentsSidebarClearancePx(panelScale) }
@@ -507,6 +485,8 @@ export function CanvasChrome(props: CanvasChromeProps) {
       {/* The brand group at the top left, first of the canvas's controls in the keyboard order
           (docs/specs/007-editor/toolbar-layout.md "The top line"). Zen hides it with the rest of the chrome. */}
       {zenMode ? null : brandGroup}
+      {/* The actions group at the top right (docs/specs/007-editor/toolbar-layout.md "The top line"). */}
+      {zenMode ? null : lines?.actions}
 
       {/* The empty-canvas hint is now a dismissible bottom banner
           (EmptyCanvasBanner), rendered by EditorView alongside the sign-in /
@@ -613,11 +593,7 @@ export function CanvasChrome(props: CanvasChromeProps) {
       {/* The whiteboard's dock (docs/specs/023-draw-mode/draw-mode.md): top or bottom centre, in place
           of the palette. */}
       {dockShown && props.whiteboardDock ? (
-        <WhiteboardDock
-          model={props.whiteboardDock}
-          ink={props.whiteboardInk ?? '#1c1917'}
-          onDrawn={markDockDrawn}
-        />
+        <WhiteboardDock model={props.whiteboardDock} ink={props.whiteboardInk ?? '#1c1917'} />
       ) : null}
 
       {/* Corner panels (docs/specs/007-editor/panel-docking.md). Distributed into per-corner stack
@@ -639,212 +615,214 @@ export function CanvasChrome(props: CanvasChromeProps) {
         </>
       )}
 
-      {/* Bottom-right cluster. Order, left to right: the Undo / Redo
-          strip, the Session strip (Timer, Vote, Poll), the mode's own strip (Slides, Plan), the
-          Collaborate button (only while the tab has a thread or an action), the Layers and
-          Theme & Canvas strip, then the Zoom controls. The buttons open their panels as popovers
-          above them (docs/specs/007-editor/live-app.md). */}
-      <div
-        // Presenting hides this cluster (docs/specs/012-collaboration/presentation-mode.md): zen keeps the zoom controls
-        // as its one way back out, and a deck has its own way out plus no
-        // zoom to offer.
-        data-zoom-cluster=""
-        data-region="controls"
-        // Drawn at the UI scale, still 16px from the corner, or clear of a landscape notch.
-        // Over a maximised or tab-filling board or Sheet it sits inside the element's frame, clear of its edge and its
-        // scrollbar: in by the cover's padding and up past the scrollbar (docs/specs/026-plan/plan-board.md "Maximised
-        // board").
-        style={
-          cornerScale === 1
-            ? {
-                right: atLeastInset(`${16 + clusterX}px`, 'right'),
-                ...(clusterInset.y ? { bottom: 16 + clusterInset.y } : {}),
-              }
-            : {
-                ...uiScaleStyle(cornerScale),
-                right: atLeastInset(`${toSurfacePx(16 + clusterX, cornerScale)}px`, 'right'),
-                bottom: toSurfacePx(16 + clusterInset.y, cornerScale),
-              }
-        }
-        // On a phone the cluster stays one row (docs/specs/012-collaboration/session-tools.md "The Session
-        // strip"): its buttons share the width there is, PHONE_CLUSTER_BUTTON_WIDTH, from 36px up to their
-        // usual 44px (always 44px tall to tap), so Undo, the Session strip, Layers and Theme and Fit fill the
-        // row on a 360px screen and up. It may still wrap, from the right, on a narrower one, so Undo is never
-        // pushed off the screen.
-        className={`pointer-events-none absolute bottom-4 right-4 z-[var(--z-panel)] flex items-center gap-2 phone:left-4 phone:flex-wrap phone:justify-end phone:gap-1.5 ${PHONE_CLUSTER_BUTTON_WIDTH} ${PHONE_TOOLBAR_ITEMS}`}
-      >
-        {welcomeOpen ? null : (
-          <>
-            {offscreenContent ? <OffscreenContentHint onBringBack={onFitToScreen} /> : null}
-            {/* Undo / Redo: see UndoRedoClusterStrip. A Participant undoes its own changes too
+      {/* The bottom line (docs/specs/007-editor/toolbar-layout.md "The bottom line"): the tools group at the left, the
+          document group at the right. The tools group, left to right: the Undo / Redo strip, the Session strip (Timer,
+          Vote, Poll), the mode's own strip (Slides, Plan), the Collaborate button (only while the tab has a thread or an
+          action), the Layers and Theme & Canvas strip, then the Zoom controls, each a part after a divider. The buttons
+          open their panels as popovers above them (docs/specs/007-editor/live-app.md). Presenting hides the line
+          (docs/specs/012-collaboration/presentation-mode.md): zen keeps the zoom controls as its one way back out. Over
+          a maximised or tab-filling board or Sheet the line sits inside the element's frame, clear of its edge and its
+          scrollbar (docs/specs/026-plan/plan-board.md "Maximised board"); beside Pages' pinned Contents, never under. */}
+      <BottomLine
+        inset={{
+          left: clusterInset.x + (contentsDocked && contentsSide === 'left' ? contentsWidth : 0),
+          right: clusterInset.x + (contentsDocked && contentsSide === 'right' ? contentsWidth : 0),
+          bottom: clusterInset.y,
+        }}
+        document={zenMode ? null : lines?.document}
+        tools={
+          <ToolbarGroup
+            label="Tools"
+            data-zoom-cluster=""
+            data-region="controls"
+            data-floating-panel=""
+            // Drawn at the UI scale (docs/specs/007-editor/ui-scale.md).
+            style={cornerScale === 1 ? undefined : uiScaleStyle(cornerScale)}
+            // On a phone the group stays one row (docs/specs/012-collaboration/session-tools.md "The Session strip"): its
+            // buttons share the width there is, PHONE_CLUSTER_BUTTON_WIDTH, from 36px up to their usual size (always 44px
+            // tall to tap). It may still wrap on a narrower one, so Undo is never pushed off the screen. With nothing in
+            // it (the welcome flow) it is not drawn.
+            className={`pointer-events-auto relative phone:flex-wrap [&:not(:has([data-toolbar-part]:not(:empty)))]:hidden ${PHONE_CLUSTER_BUTTON_WIDTH} ${PHONE_TOOLBAR_ITEMS}`}
+          >
+            {welcomeOpen ? null : (
+              <>
+                {offscreenContent ? <OffscreenContentHint onBringBack={onFitToScreen} /> : null}
+                {/* Undo / Redo: see UndoRedoClusterStrip. A Participant undoes its own changes too
                 (docs/specs/013-workspace/share-roles.md). */}
-            {!zenMode && (!readOnly || !!props.participantPalette) ? (
-              <UndoRedoClusterStrip
-                onUndo={onUndo}
-                onRedo={onRedo}
-                canUndo={canUndo}
-                canRedo={canRedo}
-              />
-            ) : null}
-            {/* The page navigator (docs/specs/007-editor/pages-mode.md "Getting around the pages"): right of Undo /
+                {!zenMode && (!readOnly || !!props.participantPalette) ? (
+                  <UndoRedoClusterStrip
+                    onUndo={onUndo}
+                    onRedo={onRedo}
+                    canUndo={canUndo}
+                    canRedo={canRedo}
+                  />
+                ) : null}
+                {/* The page navigator (docs/specs/007-editor/pages-mode.md "Getting around the pages"): right of Undo /
                 Redo, for every role, while the tab has two pages or more; not on a phone, whose row has no room
                 for it (a swipe moves between pages there). */}
-            {!zenMode && !isMobile && props.pagesMode && props.pagesMode.pages.length > 1 ? (
-              <PageNavigatorClusterStrip
-                pageIds={props.pagesMode.pages.map((p) => p.id)}
-                onGo={props.pagesMode.focusPage}
-              />
-            ) : null}
-            {/* Avatar (docs/specs/008-canvas/avatar-mode.md "The Avatar Panel"): beside Undo / Redo while the mode
+                {!zenMode && !isMobile && props.pagesMode && props.pagesMode.pages.length > 1 ? (
+                  <PageNavigatorClusterStrip
+                    pageIds={props.pagesMode.pages.map((p) => p.id)}
+                    onGo={props.pagesMode.focusPage}
+                  />
+                ) : null}
+                {/* Avatar (docs/specs/008-canvas/avatar-mode.md "The Avatar Panel"): beside Undo / Redo while the mode
                 is on, for every role, Zen included: it is the mode's one piece of chrome. */}
-            {props.canvasTool === 'avatar' ? (
-              <AvatarClusterButton
-                popoverOpen={activeDockPanel === 'avatar'}
-                onTogglePopover={(button) => handleDockButtonClick('avatar', button, true)}
-                canSpeak={!!props.onSendAvatarMessage}
-              />
-            ) : null}
-            {/* The Session strip (docs/specs/012-collaboration/session-tools.md "The Session strip"): left of
+                {props.canvasTool === 'avatar' ? (
+                  <AvatarClusterButton
+                    popoverOpen={activeDockPanel === 'avatar'}
+                    onTogglePopover={(button) => handleDockButtonClick('avatar', button, true)}
+                    canSpeak={!!props.onSendAvatarMessage}
+                  />
+                ) : null}
+                {/* The Session strip (docs/specs/012-collaboration/session-tools.md "The Session strip"): left of
                 Layers, or of the mode's own strip. Kept in Zen: a running session is the one piece of
                 chrome a facilitator still needs there. Workshop has all three, Plan its Timer and
                 Vote, Pages a running Vote or Poll only; Diagram and Draw keep their bottom bar to
                 their own tools. */}
-            {props.sessionTools && stripTools ? (
-              <div className="contents">
-                <SessionClusterStrip
-                  timer={props.sessionTools.timer}
-                  voteRunning={!!props.tabVote}
-                  voteDotsLeft={
-                    // A Participant votes too (docs/specs/013-workspace/share-roles.md), so it sees its dots left.
-                    props.tabVote?.active && (!readOnly || props.takePart)
-                      ? Math.max(
-                          0,
-                          props.tabVote.votesPerPerson -
-                            votesSpentBy(props.tabVote, participantKey(selfParticipant)),
-                        )
-                      : null
-                  }
-                  voteReviewing={!!props.voteReview}
-                  voteButtonRef={voteButtonRef}
-                  pollRunning={!!props.pollPanel}
-                  canStart={stripCanStart(stripTools, !!readOnly)}
-                  offersTimer={stripTools.timer}
-                  offersPoll={stripTools.poll}
-                  open={
-                    activeDockPanel === 'session-timer' ||
-                    activeDockPanel === 'session-vote' ||
-                    activeDockPanel === 'session-poll'
-                      ? activeDockPanel
-                      : null
-                  }
-                  onToggle={(segment, button) => handleDockButtonClick(segment, button, true)}
-                />
-              </div>
-            ) : null}
-            {/* Contents and Slides (docs/specs/007-editor/pages-mode.md "Contents", "Slides"): in Pages
+                {props.sessionTools && stripTools ? (
+                  <div className="contents">
+                    <SessionClusterStrip
+                      timer={props.sessionTools.timer}
+                      voteRunning={!!props.tabVote}
+                      voteDotsLeft={
+                        // A Participant votes too (docs/specs/013-workspace/share-roles.md), so it sees its dots left.
+                        props.tabVote?.active && (!readOnly || props.takePart)
+                          ? Math.max(
+                              0,
+                              props.tabVote.votesPerPerson -
+                                votesSpentBy(props.tabVote, participantKey(selfParticipant)),
+                            )
+                          : null
+                      }
+                      voteReviewing={!!props.voteReview}
+                      voteButtonRef={voteButtonRef}
+                      pollRunning={!!props.pollPanel}
+                      canStart={stripCanStart(stripTools, !!readOnly)}
+                      offersTimer={stripTools.timer}
+                      offersPoll={stripTools.poll}
+                      open={
+                        activeDockPanel === 'session-timer' ||
+                        activeDockPanel === 'session-vote' ||
+                        activeDockPanel === 'session-poll'
+                          ? activeDockPanel
+                          : null
+                      }
+                      onToggle={(segment, button) => handleDockButtonClick(segment, button, true)}
+                    />
+                  </div>
+                ) : null}
+                {/* Contents and Slides (docs/specs/007-editor/pages-mode.md "Contents", "Slides"): in Pages
                 mode, one strip where Layers would be. Contents for every role and on a phone too; Slides on a
                 desktop only, as the Slide Deck itself is, and an Editor's, since building and presenting a deck
                 runs the session (docs/specs/013-workspace/share-roles.md), once a page is a slide: before that
                 the deck has nothing to hold. */}
-            {!zenMode && props.pagesMode ? (
-              <PagesClusterStrip
-                contents={
-                  // Docked as the sidebar, Contents has no button (useContentsChrome).
-                  contentsDocked ? null : (
-                    <ContentsClusterSegment
-                      popoverOpen={activeDockPanel === 'contents'}
-                      onTogglePopover={(button) => handleDockButtonClick('contents', button, true)}
-                    />
-                  )
-                }
-                slides={
-                  !isMobile &&
-                  !readOnly &&
-                  showsSlidesButton(props.pagesMode.pages) &&
-                  props.slideDeck ? (
-                    <SlidesClusterSegment
-                      popoverOpen={activeDockPanel === 'slides'}
-                      onTogglePopover={(button) => handleDockButtonClick('slides', button, true)}
-                    />
-                  ) : null
-                }
-              />
-            ) : null}
-            {/* Find a Card and Card Types (docs/specs/026-plan/items.md "Finding a card", item-types.md): in Plan
+                {!zenMode && props.pagesMode ? (
+                  <PagesClusterStrip
+                    contents={
+                      // Docked as the sidebar, Contents has no button (useContentsChrome).
+                      contentsDocked ? null : (
+                        <ContentsClusterSegment
+                          popoverOpen={activeDockPanel === 'contents'}
+                          onTogglePopover={(button) =>
+                            handleDockButtonClick('contents', button, true)
+                          }
+                        />
+                      )
+                    }
+                    slides={
+                      !isMobile &&
+                      !readOnly &&
+                      showsSlidesButton(props.pagesMode.pages) &&
+                      props.slideDeck ? (
+                        <SlidesClusterSegment
+                          popoverOpen={activeDockPanel === 'slides'}
+                          onTogglePopover={(button) =>
+                            handleDockButtonClick('slides', button, true)
+                          }
+                        />
+                      ) : null
+                    }
+                  />
+                ) : null}
+                {/* Find a Card and Card Types (docs/specs/026-plan/items.md "Finding a card", item-types.md): in Plan
                 mode, one strip where Layers would be, while the tab has something that shows cards ("The Plan
                 strip"). */}
-            {!zenMode && props.editorMode === 'plan' && tabShowsCards ? (
-              <PlanCardsClusterStrip
-                finderOpen={activeDockPanel === 'plan-cards'}
-                onToggleFinder={(button) => handleDockButtonClick('plan-cards', button, true)}
-                typesOpen={activeDockPanel === 'card-types'}
-                onToggleTypes={(button) => handleDockButtonClick('card-types', button, true)}
-                typesButtonRef={cardTypesButtonRef}
-                // The Trash leads the strip, off a phone and for an editor (docs/specs/026-plan/items.md "Trash").
-                // A Participant adds cards too (docs/specs/013-workspace/share-roles.md); the Trash stays an Editor's.
-                newCard={
-                  !readOnly || !!props.participantPalette
-                    ? {
-                        open: activeDockPanel === 'plan-new-card',
-                        onToggle: (button) => handleDockButtonClick('plan-new-card', button, true),
-                      }
-                    : undefined
-                }
-                trash={
-                  !readOnly && !isMobile
-                    ? {
-                        open: activeDockPanel === 'plan-trash',
-                        onToggle: (button) => handleDockButtonClick('plan-trash', button, true),
-                      }
-                    : undefined
-                }
-              />
-            ) : null}
-            {/* Collaborate (docs/specs/012-collaboration/assigned-actions.md §5): before Layers, only while
+                {!zenMode && props.editorMode === 'plan' && tabShowsCards ? (
+                  <PlanCardsClusterStrip
+                    finderOpen={activeDockPanel === 'plan-cards'}
+                    onToggleFinder={(button) => handleDockButtonClick('plan-cards', button, true)}
+                    typesOpen={activeDockPanel === 'card-types'}
+                    onToggleTypes={(button) => handleDockButtonClick('card-types', button, true)}
+                    typesButtonRef={cardTypesButtonRef}
+                    // The Trash leads the strip, off a phone and for an editor (docs/specs/026-plan/items.md "Trash").
+                    // A Participant adds cards too (docs/specs/013-workspace/share-roles.md); the Trash stays an Editor's.
+                    newCard={
+                      !readOnly || !!props.participantPalette
+                        ? {
+                            open: activeDockPanel === 'plan-new-card',
+                            onToggle: (button) =>
+                              handleDockButtonClick('plan-new-card', button, true),
+                          }
+                        : undefined
+                    }
+                    trash={
+                      !readOnly && !isMobile
+                        ? {
+                            open: activeDockPanel === 'plan-trash',
+                            onToggle: (button) => handleDockButtonClick('plan-trash', button, true),
+                          }
+                        : undefined
+                    }
+                  />
+                ) : null}
+                {/* Collaborate (docs/specs/012-collaboration/assigned-actions.md §5): before Layers, only while
                 the tab has a comment thread or an action. A view-role visitor
                 gets it too: they read threads and answer them. */}
-            {!zenMode &&
-            panelsOn.collaborate &&
-            (commentRows.length > 0 || actionRows.length > 0) ? (
-              <CollaborateClusterButton
-                openCount={kindCounts('open', commentRows, actionRows).all}
-                popoverOpen={activeDockPanel === 'collaborate'}
-                onTogglePopover={(button) => handleDockButtonClick('collaborate', button, true)}
-              />
-            ) : null}
-            {/* Layers (docs/specs/006-document/layers.md) and the Theme & Canvas brush
+                {!zenMode &&
+                panelsOn.collaborate &&
+                (commentRows.length > 0 || actionRows.length > 0) ? (
+                  <CollaborateClusterButton
+                    openCount={kindCounts('open', commentRows, actionRows).all}
+                    popoverOpen={activeDockPanel === 'collaborate'}
+                    onTogglePopover={(button) => handleDockButtonClick('collaborate', button, true)}
+                  />
+                ) : null}
+                {/* Layers (docs/specs/006-document/layers.md) and the Theme & Canvas brush
                 (docs/specs/011-theme/canvas-and-theme-dialog.md, its one entry point; read-only sessions
                 pass no handler), one strip in every mode: see LayersThemeStrip. */}
-            {!zenMode ? (
-              <LayersThemeStrip
-                layers={
-                  !readOnly && panelsOn.layers
-                    ? {
-                        open: activeDockPanel === 'layers',
-                        onToggle: (button) => handleDockButtonClick('layers', button, true),
-                      }
-                    : undefined
-                }
-                onOpenTheme={onOpenCanvasTheme && !whiteboard ? onOpenCanvasTheme : undefined}
-              />
-            ) : null}
-            <ViewZoomControls
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onSetZoom={handleSetZoom}
-              onFitToScreen={onFitToScreen}
-              onIsoOrbit={canvasTool === 'isometric' ? onIsoOrbit : undefined}
-              onIsoReset={canvasTool === 'isometric' ? onIsoReset : undefined}
-              onToggleZen={onToggleZen}
-              zenActive={zenMode}
-              // View-only visitors have no palette (so no canvas-tool
-              // dropdown); the dock keeps the enter button for them.
-              zenEnterHere={readOnly}
-              pinchOnly={isMobile}
-            />
-          </>
-        )}
-      </div>
+                {!zenMode ? (
+                  <LayersThemeStrip
+                    layers={
+                      !readOnly && panelsOn.layers
+                        ? {
+                            open: activeDockPanel === 'layers',
+                            onToggle: (button) => handleDockButtonClick('layers', button, true),
+                          }
+                        : undefined
+                    }
+                    onOpenTheme={onOpenCanvasTheme && !whiteboard ? onOpenCanvasTheme : undefined}
+                  />
+                ) : null}
+                <ViewZoomControls
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onSetZoom={handleSetZoom}
+                  onFitToScreen={onFitToScreen}
+                  onIsoOrbit={canvasTool === 'isometric' ? onIsoOrbit : undefined}
+                  onIsoReset={canvasTool === 'isometric' ? onIsoReset : undefined}
+                  onToggleZen={onToggleZen}
+                  zenActive={zenMode}
+                  // View-only visitors have no palette (so no canvas-tool
+                  // dropdown); the dock keeps the enter button for them.
+                  zenEnterHere={readOnly}
+                  pinchOnly={isMobile}
+                />
+              </>
+            )}
+          </ToolbarGroup>
+        }
+      />
     </>
   );
 }

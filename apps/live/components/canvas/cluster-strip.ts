@@ -1,10 +1,13 @@
-// The bottom-corner clusters' look (Undo/Redo, Layers, Collaborate and the popover buttons): one
-// strip card and one resting control, so the clusters read as a single set.
+import { TOOLBAR_PART } from '@/components/chrome/ToolbarGroup';
+import { TOOLBAR_CONTROL_REST } from '@/components/chrome/toolbar-surface';
 
-/** The rounded strip a cluster's buttons sit in. */
-export const CLUSTER_STRIP =
-  'pointer-events-auto flex animate-fade-in items-stretch overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-slate-950/40';
+// The tools group's parts (docs/specs/007-editor/toolbar-layout.md "The bottom line"): Undo / Redo, the Session strip,
+// the mode's strip, Collaborate, Layers and Theme, Zoom. Each strip is a part of the one group, a divider before it,
+// its buttons the group's flat 36px controls, so the cluster reads as one toolbar. A strip marks itself
+// `data-toolbar-part` (the divider rule reads it).
 
-/** A cluster button at rest (not pressed, its popover closed). */
-export const CLUSTER_CONTROL_REST =
-  'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white';
+/** A strip's run of buttons inside the tools group. */
+export const CLUSTER_STRIP = `pointer-events-auto animate-fade-in ${TOOLBAR_PART}`;
+
+/** A cluster button at rest (not pressed, its popover closed): the group's hover fill. */
+export const CLUSTER_CONTROL_REST = TOOLBAR_CONTROL_REST;

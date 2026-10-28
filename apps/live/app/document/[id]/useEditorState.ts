@@ -15,7 +15,6 @@ import { useTabRevisions } from './useTabRevisions';
 import { useWorkbenchEnd } from './useWorkbenchEnd';
 import { useWorkbenchMessages } from './useWorkbenchMessages';
 import { usePlanTourLeftovers } from '@/hooks/plan/usePlanTourLeftovers';
-import { usePublishTabRename } from '@/hooks/editor/active-tab-name-store';
 import { openSearchWithPrefetch } from '@/lib/open-search';
 import { planHidesCursors } from '@/lib/plan-cursors';
 import { useTourSquare } from '@/hooks/editor/useTourSquare';
@@ -2675,8 +2674,6 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     retitleSheets: sheets.retitleSheets,
     sheetTitle: sheets.sheetTitle,
   });
-  // The menu box renames the open tab on a click on its name (active-tab-name-store).
-  usePublishTabRename(activeId, renameTab, !isStructureReadOnly);
   useAssignRef(newTabInRef, (mode: EditorMode) => addTab(mode));
 
   // Tab-folder membership (docs/specs/006-document/tab-folders.md), kept separate from the busy

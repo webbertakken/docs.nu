@@ -168,9 +168,9 @@ export type UserPreferences = {
   // Missing / undefined / true === on, the default. Flipped from the
   // panel's settings gear (desktop-only chrome, like the hover itself).
   layerHoverPreview?: boolean;
-  // Button Labels: whether the footer bar names its buttons (Search, Settings, the theme) beside their
-  // icons (docs/specs/007-editor/user-preferences.md). Missing === on; a phone never names them, and the
-  // bottom-right cluster is icons alone, whatever this says. Read through useButtonLabelsSetting.
+  // Button Labels: whether the actions group names Search, Settings and the appearance beside their icons
+  // (docs/specs/007-editor/user-preferences.md). Missing === off, so the top line leaves the strip its room; a phone
+  // never names them, and the tools group is icons alone, whatever this says. Read through buttonLabelsOn.
   dockButtonNames?: boolean;
   // Email notifications (docs/specs/014-identity/profile-and-email-notifications.md). Account-level settings flipped from the
   // Settings dialog; the api worker reads them server-side before
@@ -448,4 +448,11 @@ export type PanelSwitch =
   'layersPanelEnabled' | 'collaboratePanelEnabled' | 'quickStylePanelEnabled';
 export function panelEnabled(prefs: UserPreferences | undefined, key: PanelSwitch): boolean {
   return prefs?.[key] !== false;
+}
+
+/** Button Labels (`dockButtonNames`): on only when the person turned it on. */
+export function buttonLabelsOn(
+  prefs: Pick<UserPreferences, 'dockButtonNames'> | null | undefined,
+): boolean {
+  return prefs?.dockButtonNames === true;
 }

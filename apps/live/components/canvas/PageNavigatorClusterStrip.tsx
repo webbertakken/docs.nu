@@ -12,7 +12,7 @@ import { useCurrentPageId } from '@/lib/current-page-kind';
 const Prev = lucideGlyph(lucideChevronLeft, 18);
 const Next = lucideGlyph(lucideChevronRight, 18);
 
-const ARROW = `flex h-11 w-11 items-center justify-center transition disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent dark:disabled:text-slate-600 dark:disabled:hover:bg-transparent ${CLUSTER_CONTROL_REST}`;
+const ARROW = `relative flex h-9 w-9 touch-target items-center justify-center rounded-md transition disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent dark:disabled:text-slate-600 dark:disabled:hover:bg-transparent ${CLUSTER_CONTROL_REST}`;
 
 export function PageNavigatorClusterStrip({
   pageIds,
@@ -36,6 +36,7 @@ export function PageNavigatorClusterStrip({
       aria-label={`Page ${at + 1} of ${count}`}
       data-page-navigator=""
       data-dock-button=""
+      data-toolbar-part=""
       className={CLUSTER_STRIP}
     >
       <HoverCard title="Previous Page" description="Go to the page before this one.">
@@ -50,7 +51,7 @@ export function PageNavigatorClusterStrip({
           <Prev />
         </button>
       </HoverCard>
-      <span className="flex min-w-[4.5rem] items-center justify-center border-x border-slate-100 px-2 text-[13px] font-medium tabular-nums text-slate-600 dark:border-slate-800 dark:text-slate-300">
+      <span className="flex min-w-[4.5rem] items-center justify-center px-2 text-[13px] font-medium tabular-nums text-slate-600 dark:border-slate-800 dark:text-slate-300">
         {at + 1} of {count}
       </span>
       <HoverCard title="Next Page" description="Go to the page after this one.">

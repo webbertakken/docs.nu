@@ -20,6 +20,10 @@
 // (docs/specs/007-editor/ui-scale.md), so only its height scales.
 export const toolbarTopClearancePx = (scale: number) => 12 + 46 * scale + 10;
 
+// Where a centre toolbar on a row of its own under the top line starts (docs/specs/007-editor/toolbar-layout.md "When a
+// line runs out of room"): the line's 12px inset, its 46px group at the toolbar UI scale, the line's 8px gap.
+export const secondRowTopPx = (scale: number) => 12 + 46 * scale + 8;
+
 export type DockAnchor = { left: number; top: number; arrowOffset: number; bottom?: number };
 
 export function computeDockAnchor(

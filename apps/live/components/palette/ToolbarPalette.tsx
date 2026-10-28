@@ -25,6 +25,7 @@ import { SnapWidth } from '@/components/primitives/SnapWidth';
 import { PHONE_TOOLBAR_ITEMS } from '@/components/chrome/phone-toolbar-items';
 import { BAND_STRIP_FLUSH, BAND_TINT, TOOLBAR_CARD } from '@/components/chrome/toolbar-surface';
 import { ToolbarGroup } from '@/components/chrome/ToolbarGroup';
+import { secondRowTopPx } from '@/lib/canvas-chrome';
 import { PaletteTintProvider } from './palette-controls';
 import { PaletteGroupProvider } from './palette-group-state';
 import { PaletteDropdown, TOOLBAR_TRIGGER_TONE } from './PaletteDropdown';
@@ -444,12 +445,14 @@ export function ToolbarPalette(props: Props) {
       // centred; `top` is restated so the strip keeps its 12px from the top.
       // In a maximised element's header band the strip moves to the header's right end (CanvasCover's setStripEnd
       // sets the two properties on the canvas; centred otherwise, docs/specs/026-plan/plan-board.md).
+      // Crowded (it would run under a side group of the top line even with its fewest tiles), it takes a row of its own
+      // under the line, still centred (docs/specs/007-editor/toolbar-layout.md "When a line runs out of room"); a
+      // phone's strip always does.
       style={{
-        ...(scale === 1 ? {} : { ...uiScaleStyle(scale), top: toSurfacePx(12, scale) }),
-        alignItems: crowded ? 'flex-end' : 'var(--plan-strip-align, center)',
-        paddingRight: crowded
-          ? 'max(0.75rem, var(--plan-strip-end, 0px))'
-          : 'var(--plan-strip-end, 0px)',
+        ...(scale === 1 ? {} : uiScaleStyle(scale)),
+        top: toSurfacePx(crowded || phoneRow ? secondRowTopPx(scale) : 12, scale),
+        alignItems: crowded ? 'center' : 'var(--plan-strip-align, center)',
+        paddingRight: 'var(--plan-strip-end, 0px)',
       }}
       // While one of its popovers is open (a category's flyout, More, Search) the strip rises to the popover layer,
       // so what hangs from it sits over everything on the canvas, an element's toolbar and menus included.

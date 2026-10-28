@@ -47,9 +47,7 @@ export function LayersThemeStrip({
             onPointerDown={(e) => e.stopPropagation()}
             onClick={onOpenTheme}
             aria-label="Theme and canvas"
-            className={`flex h-11 w-11 items-center justify-center transition ${
-              layers ? 'border-l border-slate-100 dark:border-slate-800' : ''
-            } ${CLUSTER_CONTROL_REST}`}
+            className={`relative flex h-9 w-9 touch-target items-center justify-center rounded-md transition ${''} ${CLUSTER_CONTROL_REST}`}
           >
             <ThemeLookIcon />
           </button>

@@ -35,7 +35,7 @@ export function CollaborateClusterButton({
       onClick={(e) => onTogglePopover(e.currentTarget)}
       aria-label={label}
       aria-expanded={popoverOpen}
-      className={`relative flex h-11 w-11 items-center justify-center transition ${
+      className={`relative flex h-9 w-9 touch-target items-center justify-center rounded-md transition ${
         popoverOpen
           ? 'bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-100'
           : CLUSTER_CONTROL_REST
@@ -54,6 +54,7 @@ export function CollaborateClusterButton({
         e.preventDefault();
         e.stopPropagation();
       }}
+      data-toolbar-part=""
       className={CLUSTER_STRIP}
     >
       {/* No hover card while open: it would sit over the panel it names. Disabled, not unwrapped, so the button keeps its focus as the panel opens. */}

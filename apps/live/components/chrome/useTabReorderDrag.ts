@@ -35,7 +35,8 @@ export function useTabReorderDrag(
       // Pick the side from the pointer's position within the pill so the
       // insertion caret sits exactly where the tab will land.
       const rect = e.currentTarget.getBoundingClientRect();
-      const side = e.clientX < rect.left + rect.width / 2 ? 'before' : 'after';
+      // The tab list's rows run down: above a row's middle lands before it.
+      const side = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
       if (dropTarget?.id !== tabId || dropTarget.side !== side) setDropTarget({ id: tabId, side });
     },
     onDragLeave: () => {

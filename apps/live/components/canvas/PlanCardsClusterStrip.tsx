@@ -51,12 +51,10 @@ export function PlanCardsClusterStrip({
           <TrashSegment popoverOpen={trash.open} onTogglePopover={trash.onToggle} />
         ) : null}
         {newCard && showsNewCard ? (
-          <NewCardSegment divided={trashInStrip} open={newCard.open} onToggle={newCard.onToggle} />
+          <NewCardSegment open={newCard.open} onToggle={newCard.onToggle} />
         ) : null}
         {hasTypes ? (
           <ClusterPopoverSegment
-            // A divider when a button sits to its left (the Trash, or an editor's New Card).
-            divided={trashInStrip || showsNewCard}
             label="Find a Card"
             hoverTitle="Cards"
             hoverDescription="Every card in this document: search them, find the ones on no board, and open any of them."
@@ -66,7 +64,6 @@ export function PlanCardsClusterStrip({
           />
         ) : null}
         <ClusterPopoverSegment
-          divided={hasTypes || trashInStrip}
           label="Open Card Types"
           hoverTitle="Card Types"
           hoverDescription="The kinds of card this document's boards hold, and the fields each one has."

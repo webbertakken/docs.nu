@@ -6,17 +6,14 @@ import { PlusIcon } from '@livedoc/ui';
 import { ClusterPopoverSegment } from './ClusterPopoverButton';
 
 export function NewCardSegment({
-  divided,
   open,
   onToggle,
 }: {
-  divided: boolean;
   open: boolean;
   onToggle: (button: HTMLElement) => void;
 }) {
   return (
     <ClusterPopoverSegment
-      divided={divided}
       label="New Card"
       hoverTitle="New Card"
       hoverDescription="Make a card of any type here and now, then put it on a board when you are ready."
