@@ -2,7 +2,7 @@
 
 Every quarter, check that only what should reach production can, and that every way in is locked properly.
 Part of the [ISMS](../specs/033-information-security/isms.md); the result goes to the ISMS record store as
-`YYYY-MM-DD-access-review.md`.
+`access-reviews/YYYY-MM-DD-access-review.md`.
 
 ## Accounts
 
@@ -24,8 +24,9 @@ Part of the [ISMS](../specs/033-information-security/isms.md); the result goes t
 
 1. Confirm the `main` ruleset is active and still requires the checks listed in [Deployment](../specs/016-platform/deployment.md#ci).
 2. Search the GitHub security log for ruleset bypasses since the last review, and write each one down with its reason.
-3. Confirm secret scanning and push protection are on, and private vulnerability reporting is enabled.
-4. Confirm no high or critical CodeQL or Dependabot alert is older than 14 days.
+3. Confirm the admin bypass on the `main` ruleset is still limited to pull requests.
+4. Confirm secret scanning, push protection and Dependabot security updates are on, and private vulnerability reporting is enabled.
+5. Confirm no high or critical CodeQL or Dependabot alert is older than 14 days.
 
 ## Devices
 

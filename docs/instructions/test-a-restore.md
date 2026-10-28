@@ -2,7 +2,7 @@
 
 Every 6 months, prove that D1 and a document room can be brought back to an earlier minute.
 Part of the [ISMS](../specs/033-information-security/isms.md); the result goes to the ISMS record store as
-`YYYY-MM-DD-restore-test.md`.
+`restore-tests/YYYY-MM-DD-restore-test.md`.
 
 The test runs on a pull request preview, never on production: a preview has its own workers, D1 and R2
 ([Preview deployments](../specs/016-platform/preview-deployments.md)).

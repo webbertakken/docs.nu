@@ -2,7 +2,7 @@
 
 Every year, and before a new supplier processes anything, check that each supplier is fit to hold what it is given.
 Part of the [ISMS](../specs/033-information-security/isms.md); the result goes to the ISMS record store as
-`YYYY-MM-DD-supplier-review.md`.
+`supplier-reviews/YYYY-MM-DD-supplier-review.md`.
 
 ## Before adding a supplier
 

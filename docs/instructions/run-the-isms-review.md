@@ -2,7 +2,7 @@
 
 Once a year, check that the [ISMS](../specs/033-information-security/isms.md) still fits LiveDoc, works, and improves.
 This is the management review; with one operator it also stands in for the internal audit.
-The result goes to the ISMS record store as `YYYY-MM-DD-isms-review.md`.
+The result goes to the ISMS record store as `isms-reviews/YYYY-MM-DD-isms-review.md`.
 
 ## Inputs
 
