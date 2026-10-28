@@ -1,5 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { performance } from 'node:perf_hooks';
+import { cpuBudgetMs, cpuMsOfAsync } from '@livedoc/vitest-config/cpu-time';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Tab } from '@livedoc/document';
 import { getTab, upsertTab } from '../db/tabs';
@@ -50,13 +51,12 @@ beforeEach(() => {
   room.exec(`INSERT INTO document (id, saved_at, created_at) VALUES ('${D}', 1, 1)`);
 });
 
+// The fastest of RUNS, in CPU time: wall-clock time also counts waiting for a core while other suites run, which
+// failed a 30 ms read at 34 ms on CI. Budgets are cpuBudgetMs, widened on CI and under coverage
+// (packages/vitest-config/cpu-time.js).
 async function best(run: (i: number) => Promise<unknown>): Promise<number> {
   let fastest = Infinity;
-  for (let i = 0; i < RUNS; i++) {
-    const start = performance.now();
-    await run(i);
-    fastest = Math.min(fastest, performance.now() - start);
-  }
+  for (let i = 0; i < RUNS; i++) fastest = Math.min(fastest, await cpuMsOfAsync(() => run(i)));
   return fastest;
 }
 
@@ -88,8 +88,8 @@ describe('the room store budgets', () => {
     const tab = bigTab('big', 1_000_000);
     const save = await best(() => upsertTab(env, D, tab, 0));
     const read = await best(() => getTab(env, D, 'big'));
-    expect(save).toBeLessThan(60);
-    expect(read).toBeLessThan(30);
+    expect(save).toBeLessThan(cpuBudgetMs(60));
+    expect(read).toBeLessThan(cpuBudgetMs(30));
   });
 
   it('saves a tab placing 500 images under 15 ms', async () => {
@@ -104,7 +104,7 @@ describe('the room store budgets', () => {
     }));
     const tab = { id: 'gallery', name: 'Gallery', elements } as unknown as Tab;
     const save = await best(() => upsertTab(env, D, tab, 0));
-    expect(save).toBeLessThan(15);
+    expect(save).toBeLessThan(cpuBudgetMs(15));
     const placed = await env.DOCUMENT_DB.prepare('SELECT COUNT(*) AS n FROM image_refs').first<{
       n: number;
     }>();
@@ -147,6 +147,6 @@ describe('the room store budgets', () => {
       await upsertTab(env, D, { id: `t${i}`, name: `Tab ${i}`, elements: [box(i)] } as Tab, i);
     }
     const outline = await best(() => readDocumentOutline(env, D));
-    expect(outline).toBeLessThan(10);
+    expect(outline).toBeLessThan(cpuBudgetMs(10));
   });
 });
