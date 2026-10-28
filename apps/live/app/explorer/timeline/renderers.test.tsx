@@ -8,7 +8,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { TimelineEvent } from '@livedoc/ui';
-import { TIMELINE_RENDERERS } from './renderers';
+import { TIMELINE_RENDERERS, eventPersonName } from './renderers';
 import { OPEN_SETTINGS_EVENT } from '@/lib/open-settings';
 
 vi.mock('@/components/panels/DocumentThumbnail', () => ({
@@ -193,5 +193,29 @@ describe('team and account cards', () => {
       }),
     );
     expect(r.subject).toBe('3 images');
+  });
+});
+
+// Who did it, as a document's History names them (docs/specs/013-workspace/timeline.md §2.10):
+// from the event itself, with no other request.
+describe('eventPersonName', () => {
+  it('is You for the reader', () => {
+    expect(eventPersonName(event({ actorId: ME }), ME)).toBe('You');
+  });
+
+  it('reads the name the event carries, whichever kind of person it is', () => {
+    for (const key of ['authorName', 'memberName', 'actorName', 'visitorName']) {
+      expect(eventPersonName(event({ actorId: 'ada', snapshot: { [key]: 'Ada' } }), ME)).toBe(
+        'Ada',
+      );
+    }
+  });
+
+  it('is Someone for a person the event does not name', () => {
+    expect(eventPersonName(event({ actorId: 'ada', snapshot: {} }), ME)).toBe('Someone');
+  });
+
+  it('names nobody for a system event', () => {
+    expect(eventPersonName(event({ actorId: null }), ME)).toBeNull();
   });
 });

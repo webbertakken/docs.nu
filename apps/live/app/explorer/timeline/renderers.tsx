@@ -48,7 +48,19 @@ function isMine(event: TimelineEvent, ctx: TimelineRendererContext): boolean {
 
 function actorName(event: TimelineEvent, ctx: TimelineRendererContext): string {
   if (isMine(event, ctx)) return 'You';
-  return str(event.snapshot, 'authorName') ?? str(event.snapshot, 'memberName') ?? 'Someone';
+  return (
+    str(event.snapshot, 'authorName') ??
+    str(event.snapshot, 'memberName') ??
+    str(event.snapshot, 'actorName') ??
+    str(event.snapshot, 'visitorName') ??
+    'Someone'
+  );
+}
+
+/** Who did it, from the event alone: "You", the name it carries, "Someone", or null for a system
+ *  event, which names nobody (a document's History, docs/specs/013-workspace/timeline.md §2.10). */
+export function eventPersonName(event: TimelineEvent, viewerId: string | null): string | null {
+  return event.actorId ? actorName(event, { viewerId }) : null;
 }
 
 function byActor(event: TimelineEvent, ctx: TimelineRendererContext): string {
