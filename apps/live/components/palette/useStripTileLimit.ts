@@ -16,7 +16,7 @@
 import { useLayoutEffect, useState, type RefObject } from 'react';
 import { fitStripTiles } from './toolbar-strip-tiles';
 import { editorViewportOf } from '@/lib/editor-viewport';
-import { measureTopLine } from '@/lib/top-line-clearance';
+import { measureTopLine, topLineGroups } from '@/lib/top-line-clearance';
 
 const PHONE_GUTTERS_PX = 24;
 
@@ -66,10 +66,7 @@ export function useStripTileLimit(
         (parseFloat(railStyle.marginLeft) || 0) +
         (parseFloat(railStyle.marginRight) || 0);
       const chrome = cardWidth - railShare;
-      // A tile's pitch, as the rail lays them out: tiles a fixed divider follows are wider, so the mean of those drawn,
-      // never less than a bare tile and its gap. The bare tile alone underestimated a rail with dividers, which then
-      // ran one tile past the room between the top line's groups.
-      const pitch = Math.max(tileWidth + gap, (railShare + gap) / items.length);
+      const pitch = tileWidth + gap;
       // The room is the editor's: the window, or its pane in a side by side split
       // (docs/specs/007-editor/split-view.md), measured from the pane's own left edge.
       const view = editorViewportOf(card);
@@ -92,6 +89,9 @@ export function useStripTileLimit(
     // A pane resizes without the window (the split's divider): refit as it does.
     const pane = editorViewportOf(card).element;
     if (pane) observer.observe(pane);
+    // The room is between the top line's side groups, which change width on their own (Start Tour offered, the mode
+    // switch's name, an account signing in): refit as they do, or the strip kept a count fitted to the old room.
+    if (!isMobile) for (const group of topLineGroups()) observer.observe(group);
     window.addEventListener('resize', measure);
     return () => {
       observer.disconnect();
