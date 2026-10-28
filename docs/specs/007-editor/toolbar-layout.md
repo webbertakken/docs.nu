@@ -21,8 +21,9 @@ and one category's tiles:
  Explorer            (Undo/Redo, Layers, zoom: the bottom-right cluster)
 ```
 
-- **Top left, before the strip: the menu button**, in a card with the tab's name. No mode switch sits there: a
-  tab's mode is chosen on its start while it is empty ([The mode switch](editor-modes.md#the-mode-switch)).
+- **Top left, before the strip: the menu button and the editor mode switch**
+  ([The mode switch](editor-modes.md#the-mode-switch)), then the tab's name, in one card. The switch shows the
+  mode's icon and name; on a phone, its icon alone.
   On a phone that card sits at the far left of the strip's row, the strip beside it (below). In a workspace
   workbench frame, which has no Explorer button, the card holds **Back** instead
   ([Workbench embeds](../013-workspace/workbench-embeds.md#what-renders)).
@@ -402,7 +403,8 @@ button always was. It gets the same chrome as a desktop ([Live app](live-app.md)
 panels in their corners, Layers and Collaborate as popovers over
 their bottom-row buttons. What changes to fit the width:
 
-- **The menu button gets its own card, left of the strip.**
+- **The menu button gets its own card, left of the strip,** with the mode switch beside it as an icon and a
+  chevron, no name, and no tab name.
   The card sits at the left gutter and the strip follows it 8px to the right,
   left-aligned rather than centred, so the two read as separate toolbars on
   one row. There is no room for a corner card above a strip that needs the

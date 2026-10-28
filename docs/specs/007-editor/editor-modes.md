@@ -17,7 +17,7 @@ where it is and changes only how the next mark is made.
 | **Pages mode**    | Pages on the canvas, of four kinds: infographic pages to lay out, article pages to write, slide pages to present and logo pages to design a logo on ([Pages](pages-mode.md), [Logo pages](logo-pages.md)). |
 | **Plan mode**     | Boards of items: Plan boards, cards, the item panel ([Plan mode](../026-plan/plan-mode.md)).                                                                                                               |
 | **Workshop mode** | Running a session with a team: the Collaborate elements, stickers and the Session strip ([Workshop mode](../012-collaboration/workshop-mode.md)).                                                          |
-| **mode switch**   | The control leading an empty tab's start that changes the editor mode.                                                                                                                                     |
+| **mode switch**   | The control beside the menu button (and leading an empty tab's start) that changes the mode.                                                                                                               |
 
 - "Whiteboard" names the activity and Draw mode's look, never a tab kind and
   never a type of document.
@@ -40,22 +40,32 @@ where it is and changes only how the next mark is made.
 
 ## The mode switch
 
-- **A tab's mode is chosen while it is empty.** The switch leads every start panel's rail ([Template
-  starts](start-diagramming.md) "Changing mode"), so a tab begun in the wrong mode changes before anything is made.
-  Once a tab has content it keeps its mode: to work on that content another way, make a new tab in the other mode,
-  or show the tab live in a [Tab Window](../009-elements/tab-window.md) there.
-- **Nowhere else.** No switch sits beside the menu (hamburger) button, the tab menu holds no Mode section, and the
-  tab bar and the Explorer offer none. The top-chrome chip and the tab menu's Mode rows were retired on 2026-10-18:
-  changing a full tab's mode was a hangover from before new tabs opened in a chosen mode and tab windows existed,
-  and it confused more than it helped.
-- **A dropdown chip** (`ModeMenuChip`, placed by `StartModeSwitch`): a full-width row at the top of the rail,
-  showing the current mode's icon, its name and a chevron, on the faint tint the editor's menu-like controls use.
-  A press opens the **mode menu** below it, hanging from its left edge. Choosing a row switches and closes the menu;
-  Escape or a press outside closes it.
+- **Beside the menu (hamburger) button, on every tab.** The top chrome's switch (`EditorModeSwitch`) sits directly
+  to the right of the menu button, in the same card at the top left ([Toolbar layout](toolbar-layout.md)), before
+  the tab's name. A tab with content changes mode here: the palette and the tab pill's icon follow at once, and
+  every element stays exactly where it is.
+  - **On a phone** it shows the icon and the chevron only, no name, to save room in the strip's row; its accessible
+    name still says the mode. It sits in the menu card wherever that card is: at the left of the strip's row, or in
+    the corner where a Draw tab or a read-only visitor has no strip.
+  - It stays up in every mode, so it never moves when the mode changes.
+- **And on an empty tab's start.** The switch also leads every start panel's rail ([Template
+  starts](start-diagramming.md) "Changing mode"), named and full width (`StartModeSwitch`), so a tab begun in the
+  wrong mode changes before anything is made.
+- **The two always agree.** On an empty tab both show at once. Both read and write the one source of truth, the
+  tab's mode (`Tab.opensIn`, through the editor's one `EditorModeState`), so a switch in either place updates the
+  other, the palette and the tab pill's icon in the same render.
+- **Nowhere else.** The tab menu holds no Mode section, and the tab bar and the Explorer offer none.
+- **A dropdown chip** (`ModeMenuChip`): on the start's rail a full-width row; beside the menu button a compact
+  chip (`compact`). Both show the current mode's icon, its name (not on a phone beside the menu button) and a
+  chevron, on the faint tint the editor's menu-like controls use. A press opens the **mode menu** below it, hanging
+  from its left edge. Choosing a row switches and closes the menu; Escape or a press outside closes it.
   - **No hover card:** it would cover the menu the chip opens. The menu's preview does that job.
-  - Semantics: a menu button (`aria-haspopup="menu"`, `aria-expanded`) named
-    "Tab mode: Diagram", over a `menu` of `menuitemradio` rows; arrow keys
-    open it and move within it, wrapping, Home and End jump.
+  - Semantics: a menu button (`aria-haspopup="menu"`, `aria-expanded`) over a `menu` of `menuitemradio` rows;
+    arrow keys open it and move within it, wrapping, Home and End jump. The start's chip is named for the tab it
+    sets ("Tab mode: Diagram"), the top chrome's for the editor ("Editor mode: Diagram"), so the two never share a
+    name while both show.
+  - The top chrome's menu floats over the canvas (a portal), kept 8px inside the viewport, so it never sits under
+    the canvas's own overlays nor runs off a phone's right edge.
   - The same for everyone, power user mode or not, on a phone as on a computer.
 - **The mode menu** is two panes: a **list** of the modes and a **preview** of one.
   - **The list:** one row per mode in catalogue order, each its mark on a small tile in the
@@ -79,22 +89,28 @@ where it is and changes only how the next mark is made.
   - Workshop: "Run a live session: timers, votes, polls and reveals."
   - Pages: "Lay out slides, infographics, articles and logos on pages."
   - Plan: "Boards of cards moving through columns, with types and fields."
-- **One switch:** every start panel's rail carries the same chip and menu. The New Document wizard's mode cards are
-  a choice of what to make, not a switch.
+- **One switch, two places:** the chip beside the menu button and every start panel's rail open the same menu, by
+  the same rules. The New Document wizard's mode cards are a choice of what to make, not a switch.
 - **One mode chosen:** Diagram, Draw, Workshop, Pages or Plan.
   Exactly one is active.
 - **Switching is instant and lossless:** no dialog, no reload, and no element changes (the tab's
   mode is the one field it writes, with what the mode brings: "Where the mode lives"); the
   selection is kept, an in-progress gesture or text edit is finished first, and the canvas
   viewport does not move.
-- **Where it is offered:** on the start of a general, unlocked, empty tab, to anyone who can edit. A view-role
-  visitor, and everyone on a locked tab, sees no switch and sees the tab in its mode.
+- **Where it is offered:** on a general, unlocked tab, empty or not, to an Editor ([Share
+  roles](../013-workspace/share-roles.md): changing a tab's mode is reshaping it). A Board, Sheet or Dashboard tab
+  shows it too, offering a new tab in another mode ("Plan stands apart"). A Participant, a Viewer, and everyone on a
+  locked tab, sees no switch and sees the tab in its mode; Shift+D does nothing for them.
 - **Not on event-storming boards:** the tab kind keeps its own tools and
   notation, and shows no switch.
-- **Zero layout shift:** the switch fills its row, and nothing next to it moves when the mode changes.
-- **Shift+D** moves an **empty** tab to the next mode, wrapping round through all five, shown in the switch's
-  preview, `aria-keyshortcuts` and Settings › Keyboard; a switch by key is announced politely ("Draw mode"). On a tab
-  with content it does nothing, as the switch is not offered there. It obeys the character-key shortcuts setting.
+- **Width:** the start's switch fills its row; the top chrome's chip takes only the width its content needs, so a
+  short name (Draw) leaves no empty space. The tab name beside it moves a little on a switch, which is the person's
+  own choice.
+- **Shift+D** moves the tab to the next mode, wrapping round, shown in the switch's preview, `aria-keyshortcuts`
+  and Settings › Keyboard; a switch by key is announced politely ("Draw mode"). An empty tab steps through all five; a
+  tab with content steps through the modes on its side of Plan's line ("Plan stands apart"), so a Plan tab with
+  content has none to step to and the key does nothing. It works wherever the switch is offered, and obeys the
+  character-key shortcuts setting.
 - **Accessible:** reachable by keyboard, its state exposed to assistive
   technology, its text and focus ring at least WCAG 2.2 AA.
 
@@ -108,12 +124,13 @@ tab.") and **New <Mode> Tab** opens one after the others, with its mode's own st
 Workshop, Start Making Pages or Start Drawing (a pen in hand) ([Template starts](start-diagramming.md)), and
 Start Planning for Plan. A session that cannot add
 tabs (a tab-scoped link, docs/specs/013-workspace/tab-scoped-share-links.md) is offered no new tab: those rows show,
-inert (`aria-disabled`), and ask nothing. Since the switch shows only on an empty tab's start, the line holds in
-practice for a Board, Sheet or Dashboard tab, whose kind keeps it in Plan (`lockedReason`).
+inert (`aria-disabled`), and ask nothing. A Board, Sheet or Dashboard tab is always on Plan's side, whatever it
+holds: its kind keeps it in Plan (`lockedReason`).
 
 **Except on an empty tab.** A general tab with no elements has nothing either side's tools could not hold, so it
 crosses the line freely, into Plan and out of it, as one plain switch (`crossPlan` on `useEditorMode`): the start's
-switch lists every mode unlocked, and Shift+D steps through all five. The first element ends switching altogether. A Board, Sheet or Dashboard tab keeps its kind's lock (`lockedReason`). See
+switches list every mode unlocked, and Shift+D steps through all five. The first element puts the tab back on its side
+of the line: from then on it switches only among the modes there. A Board, Sheet or Dashboard tab keeps its kind's lock (`lockedReason`). See
 [Template starts](start-diagramming.md) "Changing mode".
 
 ## Where the mode lives
@@ -121,8 +138,8 @@ switch lists every mode unlocked, and Shift+D steps through all five. The first 
 - **The mode is the tab's, the same for everyone.** A general tab stores its editor mode
   (`Tab.opensIn`, `diagram` when absent; the field keeps its stored name). Everyone on the tab
   works in that mode at once: a view that differed from person to person would be inconsistent.
-- **Switching is a tab edit.** The start's switch, Shift+D on an empty tab and a start's template from another
-  mode, used by an editor on a general, unlocked tab, set the tab's mode: **one tab edit** (one undo step,
+- **Switching is a tab edit.** The switch beside the menu button, the start's switch, Shift+D and a start's
+  template from another mode, used by an editor on a general, unlocked tab, set the tab's mode: **one tab edit** (one undo step,
   synced to everyone). Everything the switch brings with it lands in the same edit: entering
   Pages puts a board that does not fit its first page onto a page made around it
   ([Pages](pages-mode.md) "Into pages"), and leaving Pages with **Turn Into
@@ -163,8 +180,8 @@ switch lists every mode unlocked, and Shift+D steps through all five. The first 
 - **A new document opens in Diagram** unless its maker chose otherwise: a new document's Mode step on `/new` picks
   its mode's blank, so the document opens in that mode ([New document route](new-document-route.md)). An import that
   sets its own mode wins.
-- **No Mode in the tab menu.** The tab menu offers no mode choice; it was retired with the top chrome's chip
-  (above).
+- **No Mode in the tab menu.** The tab menu offers no mode choice: the switch beside the menu button is the one
+  place a tab with content changes mode (above). The tab pill's icon follows a switch at once, as the palette does.
 - **The tab pill shows the tab's mode.** Each tab pill leads with the icon of its mode (the same
   glyph the mode switch uses), tinted with the tab's theme accent. An
   event-storming board is always Diagram, so it shows the Diagram icon. A Board, Sheet or Dashboard tab, always Plan,
@@ -458,7 +475,7 @@ something on it asks first:
 - **A tab with articles** asks Turn Articles Into Pages? (Convert, Keep as Articles, Cancel;
   [Article pages](article-pages.md#leaving-pages)).
 - **A tab with content but no articles** asks a lighter question: a small card hanging from the
-  mode switch that asked (a start's, `data-mode-switch`), pointing at it, below
+  mode switch that asked (the one beside the menu button, `data-mode-switch`), pointing at it, below
   it or above when there is no room below. A warning glyph in an amber disc, the title "Switch to
   <Mode>?" and one sentence: "<Mode> mode doesn't show pages. Changes you make there may not fit
   back onto your pages when you return to Pages." Its buttons are **Cancel** and **Switch** (the
@@ -473,7 +490,7 @@ something on it asks first:
 
 Every mode of the catalogue is offered to everyone: the mode switch and the template picker's
 mode filter always list all five, and a tab always opens in its stored mode. Shift+D, on an empty tab, steps through
-all five.
+all five; on a tab with content, through the modes on its side of Plan's line.
 
 Pages and Plan each had a switch in **Settings › Experimental** while they
 were new. Both graduated on 2026-10-06, and the **Experimental** category went
