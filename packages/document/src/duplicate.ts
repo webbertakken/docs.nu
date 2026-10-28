@@ -80,11 +80,16 @@ export function freshCopyFields(el: Element): {
 //
 // Returns the new elements plus a map of old → new ids so callers can wire
 // extra arrows (e.g. a connector from the original to the duplicate).
+//
+// `existing` is what an uncopied end may stay attached to: the ids already on the tab the copies land on. It
+// defaults to every id in `elements`, which is that tab for a duplicate; a paste passes the tab's own ids, because
+// the clipboard elements it merges in are not on the tab (docs/specs/008-canvas/arrow-to-arrow.md).
 export function duplicateElements(
   elements: Element[],
   ids: ReadonlySet<ElementId>,
   dx: number,
   dy: number,
+  existing?: ReadonlySet<ElementId>,
 ): { newElements: Element[]; idMap: Map<ElementId, ElementId> } {
   const idMap = new Map<ElementId, ElementId>();
   let newBoxed: BoxedElement[] = [];
@@ -102,7 +107,7 @@ export function duplicateElements(
   // A chart copied with its Sheet reads the Sheet's copy (docs/specs/029-sheets/sheet.md "Charts").
   newBoxed = relinkCopiedCharts(newBoxed, sheetIds);
 
-  const existingIds = new Set(elements.map((e) => e.id));
+  const existingIds = existing ?? new Set(elements.map((e) => e.id));
 
   // Decide which arrows copy, and mint their new ids into idMap BEFORE
   // building any copy: an on-arrow endpoint (docs/specs/008-canvas/arrow-to-arrow.md) can only follow
