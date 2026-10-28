@@ -15,10 +15,9 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { useMenuCardClearance } from './useMenuCardClearance';
+import { useDockLinePlacement } from './useDockLinePlacement';
 import { useCanvasSurface } from '@/components/canvas/CanvasSurfaceContext';
 import type { WhiteboardDockModel } from '@/hooks/canvas/useWhiteboard';
-import type { WhiteboardDockPosition } from '@/lib/whiteboard-dock-prefs';
 import { whiteboardShapeEntry } from '@/lib/whiteboard-shape-catalogue';
 import {
   pinFromMenu,
@@ -53,16 +52,14 @@ import { toSurfacePx, uiScaleStyle } from '@/lib/ui-scale';
 // How long the "seven pinned" hint stays up.
 const HINT_MS = 4000;
 
-// Where the wrapper sits. At the top it keeps clear of the Explorer menu card (top-left): beside it on a phone or a
-// tablet, centred with the same clearance on both sides from lg (D33), so a tablet in portrait still shows the whole
-// dock. The dock is one card that scrolls inside itself, with no bleed. The clearance is the card's measured right
-// edge plus 8 px (`--dock-clear`, useMenuCardClearance): the card holds the menu button, the editor mode switch and
-// on a computer the tab's name, so its width varies. Until measured, the old guesses hold: 7.5rem on a tablet,
-// 4.125rem on a phone. The 12 px margin on the right is kept.
-const WRAPPER_PLACEMENT: Record<WhiteboardDockPosition, string> = {
-  top: 'top-3 left-[var(--dock-clear,7.5rem)] max-w-[calc(100%-var(--dock-clear,7.5rem)-0.75rem)] phone:left-[var(--dock-clear,4.125rem)] phone:max-w-[calc(100%-var(--dock-clear,4.125rem)-0.75rem)] lg:left-1/2 lg:-translate-x-1/2 lg:max-w-[calc(100%-2*var(--dock-clear,7.5rem))]',
-  bottom:
-    'bottom-[4.25rem] left-1/2 -translate-x-1/2 max-w-[calc(100%-1.5rem)] min-[1760px]:bottom-4',
+// Where the wrapper sits (docs/specs/023-draw-mode/draw-mode.md "Where the dock sits"): on its line, centred between
+// the line's side groups with the same clearance on both sides (`--dock-clear`, useDockLinePlacement), or on a row of
+// its own just inside the line when it does not fit there, and always on a phone, 12px from the canvas's sides. The
+// dock is one card that scrolls inside itself, with no bleed. Its top or bottom is set inline (the line's 12px, or the
+// row past the line).
+const WRAPPER_PLACEMENT = {
+  onLine: 'left-1/2 -translate-x-1/2 max-w-[calc(100%-2*var(--dock-clear,7.5rem))]',
+  ownRow: 'left-1/2 -translate-x-1/2 max-w-[calc(100%-1.5rem)]',
 };
 
 type WhiteboardDockProps = {
@@ -82,10 +79,11 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
   // (docs/specs/007-editor/ui-scale.md).
   const scale = useUiScale('toolbar');
   const wrapper = useRef<HTMLDivElement>(null);
-  const clear = useMenuCardClearance(wrapper, scale, model.position === 'top');
   // A phone's dock: one pinned shape on the bar, the rest in the Shapes flyout, and no dragging
   // shapes on or off the bar (its drop targets would not match the pins it hides).
   const phone = useIsMobileViewport();
+  const placement = useDockLinePlacement(wrapper, model.position, phone);
+  const edge = placement?.edge ?? 12;
   const pins = phone
     ? splitPhonePins(model.pinnedShapes)
     : { onBar: model.pinnedShapes, inMenu: [] };
@@ -278,16 +276,15 @@ export function WhiteboardDock({ model, ink, onDrawn }: WhiteboardDockProps) {
         e.stopPropagation();
       }}
       style={{
-        ...(clear === null ? {} : ({ '--dock-clear': `${clear}px` } as CSSProperties)),
-        ...(scale === 1
+        ...(placement === null
           ? {}
-          : {
-              ...uiScaleStyle(scale),
-              // Restated so the dock keeps its 12px from the edge however it is zoomed.
-              ...(model.position === 'top' ? { top: toSurfacePx(12, scale) } : {}),
-            }),
+          : ({ '--dock-clear': `${toSurfacePx(placement.clear, scale)}px` } as CSSProperties)),
+        ...(scale === 1 ? {} : uiScaleStyle(scale)),
+        // Restated in the dock's own units, so it keeps its distance however it is zoomed.
+        [model.position]: toSurfacePx(edge, scale),
       }}
-      className={`pointer-events-none absolute z-[var(--z-toolbar)] w-max ${WRAPPER_PLACEMENT[model.position]}`}
+      data-dock-row={placement?.ownRow ? 'own' : 'line'}
+      className={`pointer-events-none absolute z-[var(--z-toolbar)] w-max ${placement?.ownRow ? WRAPPER_PLACEMENT.ownRow : WRAPPER_PLACEMENT.onLine}`}
     >
       <DockBody below={below} hint={hint} fly={fly} open={open} groups={groups} />
     </div>

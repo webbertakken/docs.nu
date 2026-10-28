@@ -2,6 +2,7 @@
 
 import { ActionsGroup } from './ActionsGroup';
 import { BrandGroup } from './BrandGroup';
+import { TopLine } from './TopLine';
 
 const noop = () => {};
 
@@ -10,14 +11,16 @@ const noop = () => {};
 // over the screen, in place of the header those screens had. Its parent is the positioned screen.
 export function StatusTopLine() {
   return (
-    <>
-      <BrandGroup explorer={null} />
-      <ActionsGroup
-        documentActions={false}
-        showShare={false}
-        shareable={false}
-        onOpenShare={noop}
-      />
-    </>
+    <TopLine
+      brand={<BrandGroup explorer={null} />}
+      actions={
+        <ActionsGroup
+          documentActions={false}
+          showShare={false}
+          shareable={false}
+          onOpenShare={noop}
+        />
+      }
+    />
   );
 }

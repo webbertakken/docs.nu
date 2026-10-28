@@ -79,13 +79,12 @@ export function useMovablePanelMeasure({
         );
         return;
       }
-      const tabbar = document.querySelector('[data-editor-tabbar]');
-      let bottomLimit = tabbar ? tabbar.getBoundingClientRect().top : window.innerHeight;
-      const zoom = document.querySelector('[data-zoom-controls]');
-      if (zoom) {
-        const z = zoom.getBoundingClientRect();
-        const overlapsX = panelRect.right > z.left && panelRect.left < z.right;
-        if (overlapsX) bottomLimit = Math.min(bottomLimit, z.top);
+      // Down to the bottom line's groups beneath it (docs/specs/007-editor/toolbar-layout.md "The bottom line").
+      let bottomLimit = window.innerHeight;
+      for (const group of document.querySelectorAll('[data-zoom-cluster], [data-document-group]')) {
+        const g = group.getBoundingClientRect();
+        const overlapsX = panelRect.right > g.left && panelRect.left < g.right;
+        if (overlapsX && g.height > 0) bottomLimit = Math.min(bottomLimit, g.top);
       }
       setBodyMaxH(Math.max(bottomLimit - panelRect.top - headerH - GAP, 80));
     };
@@ -93,7 +92,7 @@ export function useMovablePanelMeasure({
     window.addEventListener('resize', compute);
     // Re-measure on any layout shift of the panel itself — accordions
     // expanding/collapsing, the panel settling into its stacked position,
-    // or the zoom bar / tab bar mounting after first paint. Safe from a
+    // or the bottom line's groups mounting after first paint. Safe from a
     // feedback loop: bodyMaxH is derived from the panel's TOP and the
     // chrome below it, never from the body content, so once the layout
     // settles compute returns the same value and React bails on the set.

@@ -23,6 +23,7 @@ import { ToolbarPalette } from '@/components/palette/ToolbarPalette';
 import { pickPaletteAddHandlers } from '@/components/palette/palette-add-handlers';
 import { BrandGroup } from '@/components/chrome/lines/BrandGroup';
 import { BottomLine } from '@/components/chrome/lines/BottomLine';
+import { TopLine } from '@/components/chrome/lines/TopLine';
 import { useEditorLines } from '@/components/chrome/lines/editor-lines-context';
 import { ToolbarGroup } from '@/components/chrome/ToolbarGroup';
 import { getTheme } from '@/lib/themes';
@@ -482,11 +483,10 @@ export function CanvasChrome(props: CanvasChromeProps) {
 
   return (
     <>
-      {/* The brand group at the top left, first of the canvas's controls in the keyboard order
-          (docs/specs/007-editor/toolbar-layout.md "The top line"). Zen hides it with the rest of the chrome. */}
-      {zenMode ? null : brandGroup}
-      {/* The actions group at the top right (docs/specs/007-editor/toolbar-layout.md "The top line"). */}
-      {zenMode ? null : lines?.actions}
+      {/* The top line's side groups, the brand group first of the canvas's controls in the keyboard order and the
+          actions group after it (docs/specs/007-editor/toolbar-layout.md "The top line"). Zen hides them with the
+          rest of the chrome. */}
+      {zenMode ? null : <TopLine brand={brandGroup} actions={lines?.actions ?? null} />}
 
       {/* The empty-canvas hint is now a dismissible bottom banner
           (EmptyCanvasBanner), rendered by EditorView alongside the sign-in /

@@ -22,6 +22,9 @@ export type DocumentActionsProps = {
 // A shared document's Share, and a published form's Share Form: the brand fill, so the state reads at a glance.
 const SHARED = `bg-brand-700 text-white hover:bg-brand-800 hover:text-white dark:hover:text-white ${SOLID_BRAND_DARK_CONTROL}`;
 
+// A label: the name beside the icon, read out only on a phone, whose top line has no room for it.
+const LABEL = 'text-optical-centre phone:sr-only';
+
 // The document actions in the actions group (docs/specs/007-editor/toolbar-layout.md "The top line"): Make a Copy,
 // Present, then Share or Share Form, each the group's flat button with its name.
 export function DocumentActions({
@@ -44,7 +47,7 @@ export function DocumentActions({
             className={`${TOOLBAR_BUTTON} disabled:cursor-not-allowed disabled:opacity-50`}
           >
             <CopyIcon />
-            <span className="text-optical-centre">{copying ? 'Copying' : 'Copy'}</span>
+            <span className={LABEL}>{copying ? 'Copying' : 'Copy'}</span>
           </button>
         </HoverCard>
       ) : null}
@@ -63,7 +66,7 @@ export function DocumentActions({
             className={`${TOOLBAR_BUTTON} disabled:cursor-wait disabled:opacity-60`}
           >
             <PresentIcon />
-            <span className="text-optical-centre">{present.starting ? 'Starting' : 'Present'}</span>
+            <span className={LABEL}>{present.starting ? 'Starting' : 'Present'}</span>
           </button>
         </HoverCard>
       ) : null}
@@ -85,7 +88,7 @@ export function DocumentActions({
             className={`${TOOLBAR_BUTTON} ${formShare.published ? SHARED : ''}`}
           >
             <ShareIcon />
-            <span className="text-optical-centre">Share Form</span>
+            <span className={LABEL}>Share Form</span>
           </button>
         </HoverCard>
       ) : showShare ? (
@@ -102,7 +105,7 @@ export function DocumentActions({
           >
             <ShareIcon />
             {/* "Share" in both states: the fill, aria-pressed and the share-state icon by the name carry the state. */}
-            <span className="text-optical-centre">Share</span>
+            <span className={LABEL}>Share</span>
           </button>
         </HoverCard>
       ) : null}

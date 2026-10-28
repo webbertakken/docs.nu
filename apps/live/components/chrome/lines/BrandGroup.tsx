@@ -1,7 +1,7 @@
 'use client';
 
 import { useUiScale } from '@/components/providers/ui-scale';
-import { toSurfacePx, uiScaleStyle } from '@/lib/ui-scale';
+import { uiScaleStyle } from '@/lib/ui-scale';
 import { EditorModeSwitch } from '@/components/chrome/editor-mode/EditorModeSwitch';
 import { ToolbarExplorerButton } from '@/components/chrome/ToolbarExplorerButton';
 import { ToolbarGroup, ToolbarPart } from '@/components/chrome/ToolbarGroup';
@@ -31,7 +31,7 @@ export function BrandGroup({
   accent?: string;
   phone?: boolean;
 }) {
-  // Drawn at the UI scale (docs/specs/007-editor/ui-scale.md), still 12px from the corner.
+  // Drawn at the UI scale (docs/specs/007-editor/ui-scale.md); the top line (TopLine) places it.
   const scale = useUiScale('toolbar');
   const pageBack = useBackTarget();
   return (
@@ -41,12 +41,8 @@ export function BrandGroup({
       data-tour-id="dock-explorer"
       data-toolbar-menu=""
       data-region="header"
-      style={
-        scale === 1
-          ? undefined
-          : { ...uiScaleStyle(scale), top: toSurfacePx(12, scale), left: toSurfacePx(12, scale) }
-      }
-      className={`pointer-events-auto absolute left-3 top-3 z-[var(--z-toolbar)] ${BAND_TINT} ${BAND_BLEND} ${BAND_FLUSH} ${PHONE_TOOLBAR_ITEMS}`}
+      style={scale === 1 ? undefined : uiScaleStyle(scale)}
+      className={`pointer-events-auto relative shrink-0 ${BAND_TINT} ${BAND_BLEND} ${BAND_FLUSH} ${PHONE_TOOLBAR_ITEMS}`}
       onPointerDown={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
         e.preventDefault();

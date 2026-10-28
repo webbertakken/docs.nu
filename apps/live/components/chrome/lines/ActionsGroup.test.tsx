@@ -70,9 +70,9 @@ describe('ActionsGroup', () => {
     renderGroup();
     const group = screen.getByRole('toolbar', { name: 'Actions' });
     expect(group.hasAttribute('data-toolbar-actions')).toBe(true);
-    expect(group.className).toContain('right-3');
-    expect(group.className).toContain('top-3');
-    expect(group.getAttribute('data-region')).toBe('actions');
+    // The top line places it at the right (TopLine).
+    expect(group.className).toContain('ml-auto');
+    expect(group.getAttribute('data-region')).toBe('header');
   });
 
   it('offers Share to someone who may share, Make a Copy to a visitor, never both', () => {

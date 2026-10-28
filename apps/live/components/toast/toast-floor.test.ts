@@ -60,7 +60,7 @@ describe('toastFloor', () => {
   it('names the editor and Explorer bottom chrome', () => {
     for (const hook of [
       'data-toast-floor',
-      'data-editor-tabbar',
+      'data-document-group',
       'data-zoom-cluster',
       'data-whiteboard-dock',
     ]) {

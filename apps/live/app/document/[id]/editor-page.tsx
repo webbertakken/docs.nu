@@ -12,6 +12,7 @@ import {
 } from '@/components/providers/workbench-session-context';
 import { BrandGroup } from '@/components/chrome/lines/BrandGroup';
 import { StatusTopLine } from '@/components/chrome/lines/StatusTopLine';
+import { TopLine } from '@/components/chrome/lines/TopLine';
 import { track } from '@/lib/telemetry';
 import { requestDriveFlush } from '@/lib/drive/tab-election';
 import { LazyExplorer } from '@/components/panels/LazyExplorer';
@@ -307,7 +308,7 @@ function EmbedShell({
 }) {
   return (
     <main className="relative h-dvh bg-slate-50 dark:bg-slate-950">
-      {frame ? <BrandGroup explorer={null} /> : null}
+      {frame ? <TopLine brand={<BrandGroup explorer={null} />} actions={null} /> : null}
       {children}
     </main>
   );
