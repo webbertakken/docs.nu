@@ -14,18 +14,23 @@
 // activity card, one document's history — can fail the same way and
 // should say so the same way.
 
-export function TimelineErrorState({ onRetry }: { onRetry?: () => void }) {
+export function TimelineErrorState({
+  onRetry,
+  title = 'Couldn’t load your timeline',
+  description = 'Your history is safe. Check your connection and try again.',
+}: {
+  onRetry?: () => void;
+  // Whose feed failed, for a host that is not the reader's own feed (a document's History).
+  title?: string;
+  description?: string;
+}) {
   return (
     <div
       role="alert"
       className="rounded-xl border border-dashed border-slate-200 px-6 py-10 text-center dark:border-slate-700"
     >
-      <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-        Couldn&rsquo;t load your timeline
-      </p>
-      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Your history is safe. Check your connection and try again.
-      </p>
+      <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{title}</p>
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
       {onRetry && (
         <button
           type="button"

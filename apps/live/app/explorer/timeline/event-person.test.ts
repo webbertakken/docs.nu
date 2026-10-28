@@ -24,9 +24,7 @@ function event(over: Partial<TimelineEvent>): TimelineEvent {
 
 describe('eventPersonName', () => {
   it('is You for the reader', () => {
-    expect(eventPersonName(event({ actorId: ME, snapshot: { authorName: 'Me' } }), ME)).toBe(
-      'You',
-    );
+    expect(eventPersonName(event({ actorId: ME, snapshot: { authorName: 'Me' } }), ME)).toBe('You');
   });
 
   it('reads the name the event carries, whichever kind of person it is', () => {
