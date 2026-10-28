@@ -174,10 +174,10 @@ test('frames the picture as its source does, crisp at 2x', async ({
   await expect(card).toHaveAttribute('data-avatar-state', 'picture');
   await expect.poll(async () => await card.boundingBox()).toMatchObject({ width: 72, height: 72 });
 
-  // At 2x the 44px disc needs 88 device pixels: the browser takes the 96px source, square as Google frames it.
+  // At 2x the 72px disc needs 144 device pixels: the browser takes the 192px source, square as Google frames it.
   expect(requested.every((u) => /=s(96|192)-c$/.test(u))).toBe(true);
   const img = card.locator('img');
-  expect(await img.evaluate((el: HTMLImageElement) => el.currentSrc)).toMatch(/=s96-c$/);
+  expect(await img.evaluate((el: HTMLImageElement) => el.currentSrc)).toMatch(/=s192-c$/);
 
   // The rim sits in the outer fifth of the picture; 4 CSS px inside the disc's left edge, on its
   // horizontal centre line, is well inside it when the framing is right.
