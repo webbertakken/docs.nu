@@ -230,7 +230,7 @@ rename sends (tabs in order, with their folders), through `/mutation`; a failure
 
 ### Rooms for every server-stored document
 
-- `roomStubFor(env, documentId)` returns a stub for every document; the `shareable`/`teamId` gate goes. Its
+- `documentRoom(env, documentId)` (through `roomFetch`) reaches a room for every document; there is no `shareable`/`teamId` gate. Its
   callers (`fetchRoomLedger`, `relayElementDelta`, `broadcastDocumentTrashed`, `relayChangeset`,
   `readRoomSelections`) take the document id; `relayTabRename` is a rename's.
 - The editor opens its room when `hydrated && documentId && documentServerStored`, where

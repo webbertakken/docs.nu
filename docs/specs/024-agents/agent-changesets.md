@@ -215,7 +215,7 @@ erases anything:
 | ----------------------------- | ---------- | ------------------------------------------------------------------------ |
 | `CHANGESET_MAX_OPERATIONS`    | 500        | A full tab rebuild of a large diagram fits; a runaway loop does not      |
 | `CHANGESET_RELAY_MAX_BYTES`   | 192 KiB    | Under the room's 256 KiB frame cap with room for metadata                |
-| `CHANGESET_MERGE_WINDOW`      | 10 minutes | Covers a pre-spec bundle until the new-version prompt reloads it         |
+| `CHANGESET_MERGE_WINDOW_MS`   | 10 minutes | Covers a pre-spec bundle until the new-version prompt reloads it         |
 | `CHANGESET_RETENTION_DAYS`    | 30         | Matches the Trash: an agent's work can be undone as long as a delete can |
 | `CHANGESET_REVEAL_MS`         | 2000       | Long enough to notice, short enough not to clutter                       |
 | `CHANGESET_TOAST_COALESCE_MS` | 10000      | One toast per burst of work                                              |

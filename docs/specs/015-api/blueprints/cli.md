@@ -660,7 +660,7 @@ url.dll,FileProtocolHandler <url>` on Windows; the URL is one argument and never
   and the complete URL; polls `/oauth/token` every `interval` seconds, honouring `slow_down`, until the code's
   `expires_in` (`DEVICE_CODE_TTL_S` when absent) has passed: a poll that would land after it is not sent, and the
   login ends with the expired-code error, as for `expired_token`.
-- `--with-token` (`tokenFromStdin` in `commands/local.ts`): stdin must not be a terminal (exit 2 otherwise); reads to end, trims, `isApiTokenFormat`, else
+- `--with-token` (`tokenFromStdin` in `apps/cli/src/commands/local.ts`): stdin must not be a terminal (exit 2 otherwise); reads to end, trims, `isApiTokenFormat`, else
   exit 1.
 - All three end in `GET {apiBase}/tokens/current` with the new token, then `store.put(profile, credential)`, then
   the replaced token's revoke (Credentials).

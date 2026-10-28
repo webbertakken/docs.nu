@@ -16,7 +16,7 @@ the live editor (lazily loaded), the api worker (validation, renders, agents) an
 | input             | `CellInput`                                                                                |
 | value             | `Value` (`packages/sheets/src/formula/values.ts`)                                          |
 | format            | `CellFormat`                                                                               |
-| range             | `GridRange { r1, c1, r2, c2 }` (positions), `RefRange` (ids, stored)                       |
+| range             | `GridRange { r1, c1, r2, c2 }` (positions), `IdRange` (ids, stored)                        |
 | cell write        | `SheetWrite` of kind `cells`                                                               |
 | layout write      | `SheetWrite` of kind `layout`                                                              |
 | sheet rev         | `Sheet.rev`                                                                                |
@@ -238,7 +238,7 @@ The read's format `hint` is applied only when the cell's `nf` is unset or `auto`
 
 ### Tokens
 
-`tokenize` (`formula/tokens.ts`) yields `Token { k: TokenKind; v; start; end }`, `TokenKind` one of `num`, `str`
+`tokenize` (`packages/sheets/src/formula/tokens.ts`) yields `Token { k: TokenKind; v; start; end }`, `TokenKind` one of `num`, `str`
 (double quotes, `""` escape), `err` (`#N/A`, `#REF!`, ...), `ident` (a name, a function name, `TRUE`/`FALSE` or an
 A1 reference: the parser tells them apart; column-only `A:C` and row-only `2:4` are read by the parser), `sheet`
 (`Name!` or `'Quoted Name'!`, `''` escape; `v` is the title), `op` (`+ - * / ^ & = <> < > <= >= % :`), `lparen`,
@@ -294,15 +294,15 @@ closing bracket", ...). Unknown function names parse (they evaluate to `#NAME?`)
 
 ### Functions
 
-- `FnDef = { min: number; max: number /* MANY, Infinity */; impl; volatile?: true; lazy?: true }` (`formula/fn.ts`). `lazy` functions (`IF`, `IFS`, `SWITCH`, `IFERROR`, `IFNA`, `AND`, `OR`, `CHOOSE`) get
+- `FnDef = { min: number; max: number /* MANY, Infinity */; impl; volatile?: true; lazy?: true }` (`packages/sheets/src/formula/fn.ts`). `lazy` functions (`IF`, `IFS`, `SWITCH`, `IFERROR`, `IFNA`, `AND`, `OR`, `CHOOSE`) get
   thunks so unused branches are not evaluated.
 - The closed name list is exactly formulas.md's catalogue. `FUNCTION_DOCS[name] = { args: string[]; summary;
 example }` feeds autocomplete, the hint card and the help article; a test checks the docs, the registry and
   formulas.md list the same names.
 - A call whose argument count is outside `min..max` evaluates to `#N/A` with the reason "Wrong number of
   arguments to SUM. Expected at least 1", which the editor shows on hover.
-- Scalar functions applied to an array argument broadcast (lift) element-wise, producing an array, unless the
-  parameter is in `arrayArgs` (aggregates take ranges as they are).
+- Scalar functions (built with `lift`, `packages/sheets/src/formula/fn.ts`) applied to an array argument broadcast element-wise,
+  producing an array; aggregates take ranges as they are.
 - `REGEX*`: compiled with `new RegExp(pattern, 'u')`. A regex cannot be interrupted, so two estimates are checked
   first, either over its budget → `#VALUE!`: the plain pass (`text.length * pattern.length` > `REGEX_WORK_MAX`), and
   the backtracking (`regex-cost.ts`: `regexWork(regexShape(pattern), text.length)` > `REGEX_BACKTRACK_MAX`), which
@@ -316,11 +316,11 @@ example }` feeds autocomplete, the hint card and the help article; a test checks
 
 ### Workbook and recalculation
 
-- `new Workbook({ sheets, locale, now?, rand?, cards? })` (`engine/workbook.ts`) holds the sheets of one tab.
+- `new Workbook({ sheets, locale, now?, rand?, cards? })` (`packages/sheets/src/engine/workbook.ts`) holds the sheets of one tab.
   `value(sheetId, r, c)` reads a cell by position (its input, its formula's value, or what a spill puts there);
   `formulaResult`, `spillOwnerAt` and `extent` read the rest. `updateSheet(sheet, keys?)`, `removeSheet(id)`,
   `setCards(source)` and `tick()` (TODAY and NOW move on) are the changes.
-- **Dependency graph**: `Dependencies` (`engine/dependencies.ts`) records who reads what while a formula is worked
+- **Dependency graph**: `Dependencies` (`packages/sheets/src/engine/dependencies.ts`) records who reads what while a formula is worked
   out (`noteCell`, `noteRange`), so INDIRECT and OFFSET are tracked as they are read. Single cells go by id; ranges
   by position in a per-column index (sheet id, then column position, then entries), so the readers of one changed
   cell are found without scanning every formula.

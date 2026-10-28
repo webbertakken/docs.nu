@@ -89,7 +89,7 @@ closes the composer, tracks `Canvas · Used · AvatarMessage` or `AvatarMessageP
 
 ### Receiving
 
-`receivePeerSay(from, rawOp)` (the store, called by `useRoomConnection`): `parseAvatarSay(rawOp)` (null → drop);
+`receivePeerSay(from, op)` (the store, called by `useRoomConnection`): `parseAvatarSay(op)` (null → drop);
 `SeenIds.add(id)` false → drop; then a bubble with `bornAt = now`. The layer resolves its speaker and announces it
 (above). A sender who leaves keeps their bubbles until they fade. Leaving the document empties the store
 (`resetSpeechBubbles`).

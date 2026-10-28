@@ -184,9 +184,10 @@ Token prefixes are checked first because they are cheap string tests and a sessi
 `getAccountSession(env, token)`:
 
 1. Null when identity is off.
-2. `jwtVerify(token, localJwks, { issuer, audience, algorithms: ['EdDSA'], clockTolerance: SESSION_TOKEN_SKEW_S })`.
-3. `localJwks` is `createLocalJWKSet` over the public keys in `identity_jwks`, cached per isolate for
-   `JWKS_CACHE_MS`, re-read once on a `kid` it does not hold (a rotation). No HTTP self-fetch (better-auth issue
+2. `jwtVerify(token, jwks, { issuer, audience, algorithms: ['EdDSA'], clockTolerance: SESSION_TOKEN_SKEW_S })`.
+3. `jwks` is `createLocalJWKSet(await keysFor(env, kid, now))`: the public keys in `identity_jwks` (a key past its
+   expiry kept for `JWKS_GRACE_S`), cached per isolate for `JWKS_CACHE_MS`, re-read once on a `kid` it does not hold
+   (a rotation), logging `[auth] jwks_reloaded reason=kid_miss|ttl`. No HTTP self-fetch (better-auth issue
    #10888 is a self-fetch 500 on Workers).
 4. Returns `{ accountId: sub, email, emailVerified, authTime }`; null on any failure, logging
    `[auth] session_token_rejected reason=<jose code>`.
@@ -194,7 +195,7 @@ Token prefixes are checked first because they are cheap string tests and a sessi
 
 ### Freshness
 
-`isFresh(session) = now - authTime <= FRESH_SESSION_AGE_S`. Checked by `DELETE /api/account` (from the session
+A session is fresh while `now - authTime <= FRESH_SESSION_AGE_S`. Checked by `DELETE /api/account` (from the session
 token's `auth_time`) and, in `routes/auth.ts`, before `POST /api/auth/unlink-account` and `/link-social` (from
 `getSession`'s `session.createdAt`). Stale answers `403 SESSION_NOT_FRESH`; the browser runs the re-verify step and
 retries once.
