@@ -44,7 +44,7 @@ Resizing aspect-locks by default (the image's `naturalWidth:naturalHeight` ratio
 
 ## Storage
 
-- **R2 bucket:** `docs-nu-images`. Binding name `IMAGES` in `apps/api/wrangler.toml`. One bucket per environment (production `docs-nu-images` and staging `docs-nu-images-staging`, declared separately).
+- **R2 bucket:** `docs-nu-images`. Binding name `IMAGES` in `apps/api/wrangler.toml`. One bucket per environment: production's `docs-nu-images`, and each preview its own `docs-nu-pr-<n>-images` ([Preview deployments](../016-platform/preview-deployments.md)).
 - **D1 table:** `images`, created by `apps/api/migrations/0014_images.sql`:
   ```sql
   CREATE TABLE images (

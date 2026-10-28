@@ -747,8 +747,7 @@ In `packages/api-schema/src/changesets.ts` (CS35):
 | `CHANGESET_SEEN_HEADER`          | `X-Changeset-Seen` | Spec                                                 | fixed             |
 | `CLIENT_HEADER`                  | `X-Livedoc-Client` | CS25                                                 | fixed             |
 
-No new binding or environment variable; self-hosting needs only the migration. Staging needs no `[env.staging]`
-change.
+No new binding or environment variable; self-hosting needs only the migration.
 
 ## Defaults ledger
 

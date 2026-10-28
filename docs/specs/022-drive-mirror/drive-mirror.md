@@ -337,7 +337,7 @@ folder id):
 
 ## Copies made in Drive
 
-**Verified** against real Google (the staging client, scopes `drive.file` and
+**Verified** against real Google (a test client, scopes `drive.file` and
 `drive.install`): a copy the user makes in Drive's own UI ("Make a copy") is
 **invisible to LiveDoc**. It is not a file LiveDoc created, so
 `files.list` does not show it and it never reaches `changes.list`. Drive-UI
@@ -614,15 +614,14 @@ D1, owned by the api worker:
 
 ## Hosted deployment: one Google project per environment
 
-docs.nu runs **two Google Cloud projects**, one for production and one
-for staging, so each environment has its own OAuth client id, client secret,
-Picker key and Drive UI integration:
+A deployment with more than one environment gives each its **own Google Cloud project**, so each has its own OAuth
+client id, client secret, Picker key and Drive UI integration. docs.nu has one environment, production, and no Google
+project yet, so the mirror is off there; previews never carry one.
 
-- A project has exactly one Drive UI integration **Open URL**, so with one
-  project "Open with" could never be tried on staging once production claimed
-  it.
-- `drive.file` access is per project: a file one project created is foreign to
-  the other, so staging's test files never mix with real users' mirrors.
+- A project has exactly one Drive UI integration **Open URL**, so two environments sharing a project could never
+  both offer "Open with".
+- `drive.file` access is per project: a file one project created is foreign to the other, so one environment's test
+  files never mix with another's real mirrors.
 - Consent screens and test users stay apart.
 
 Within an environment the api worker and the live build always carry the
@@ -630,9 +629,8 @@ Within an environment the api worker and the live build always carry the
 profile, and every deploy proves it (the worker's live vars, and the built
 live app, checked against the entry). While an entry is empty the Drive mirror
 is off in that environment (no Drive entry, every route `503`). Each
-environment's Picker key is its own secret: `NEXT_PUBLIC_GOOGLE_API_KEY` for
-production, `NEXT_PUBLIC_GOOGLE_API_KEY_STAGING` for staging; the client secret
-and `DRIVE_TOKEN_KEY` were already per environment.
+environment's Picker key is its own secret (production's is `NEXT_PUBLIC_GOOGLE_API_KEY`); the client secret and
+`DRIVE_TOKEN_KEY` are per environment too.
 
 What an operator configures in each Google project (changed only by the operator). docs.nu has
 none configured yet, so the Drive mirror is off there:

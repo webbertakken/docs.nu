@@ -601,7 +601,7 @@ beyond D1's own; a connection is re-creatable by reconnecting. `DELETE /api/driv
 - `state` binds user, redirect URI and 10 minutes; a code minted for one user cannot be redeemed by another.
 - Access tokens reach the browser only for the caller's own grant, which is what the browser would hold anyway.
 - Writes ride the existing `WRITE_RATE_LIMITER`. `POST /drive/token` also has its own `DRIVE_TOKEN_RATE_LIMITER`
-  (10 per 60 s per account id, namespace `1007`, production and `[env.staging]`), checked before Google is
+  (10 per 60 s per account id, namespace `7007`), checked before Google is
   called; absent binding allows (self-host).
 - The browser never deletes a Drive file it did not create: tombstones name only files an item recorded.
 - `/drive/open` treats `state` as untrusted JSON; ids are validated before any request; an unknown file is an error.
@@ -880,28 +880,26 @@ docs.nu's per-environment Google identity lives in `apps/api/hosted-vars.json`, 
   "IMAGE_MAX_PER_OWNER": "100",
   "IMAGE_MAX_BYTES_PER_OWNER": "104857600",
   "environments": {
-    "production": { "GOOGLE_CLIENT_ID": "" },
-    "staging": { "GOOGLE_CLIENT_ID": "" }
+    "production": { "GOOGLE_CLIENT_ID": "" }
   }
 }
 ```
 
-- Top-level vars are shared by every environment and must be non-empty. `environments` holds exactly `production`
-  and `staging`, each declaring the same names, none of them also shared. An empty value means **unset in that
+- Top-level vars are shared by every environment and must be non-empty. `environments` holds `production` and any
+  other environment a deployment declares, each declaring the same names, none of them also shared. An empty value means **unset in that
   environment**: the operator fills the client ids; until then the Drive mirror is off there.
-- `hostedEnvironment(wranglerEnv)`: `''` is `production`, `staging` is `staging`, anything else throws.
+- `hostedEnvironment(wranglerEnv)`: `''` is `production`, any other name is that environment, which the profile must declare.
 - `resolveHostedVars(profile, environment)` → `{ vars, unset }`: shared vars plus the environment's non-empty ones,
   and the names it leaves unset. `flags`, `build-env` and both verifies read only this, so the api worker and the
   live build of one environment agree by construction.
-- CLI, from `apps/api`: `flags [--env staging]` (the `--var` pairs), `build-env [--env staging]`
-  (`NEXT_PUBLIC_TELEMETRY_ENABLED`, and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` only when set), `verify [--env staging]`
+- CLI, from `apps/api`: `flags [--env <name>]` (the `--var` pairs), `build-env [--env <name>]`
+  (`NEXT_PUBLIC_TELEMETRY_ENABLED`, and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` only when set), `verify [--env <name>]`
   (the serving version carries every resolved var with its value and none of the unset ones; the args reach
-  wrangler too), `verify-build <dir> [--env staging]` (the built live app contains the environment's client id when
+  wrangler too), `verify-build <dir> [--env <name>]` (the built live app contains the environment's client id when
   set, and never another environment's).
 - `deploy-reusable.yml` passes `${WRANGLER_ENV:+--env "$WRANGLER_ENV"}` (from `inputs.wrangler_env`) to all four,
   runs `verify-build ../live/out` after the build, and takes the Picker key from the `NEXT_PUBLIC_GOOGLE_API_KEY`
-  secret the caller hands over: `deploy.yml` passes `NEXT_PUBLIC_GOOGLE_API_KEY`, `deploy-staging.yml` passes
-  `NEXT_PUBLIC_GOOGLE_API_KEY_STAGING`.
+  secret the caller hands over: `deploy.yml` passes `NEXT_PUBLIC_GOOGLE_API_KEY`.
 
 ## Assets and external resources
 

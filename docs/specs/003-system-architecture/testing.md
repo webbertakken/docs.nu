@@ -179,8 +179,8 @@ format → typecheck; **Tests** runs **test** → **coverage thresholds**, each
 suite exactly once (a workspace with `test:coverage` runs only that), for every
 workspace but the editor; **Editor unit tests i/3** run the editor's suite
 (`apps/live`, most of the repository's tests) under coverage, a third of its
-files each (`vitest run --shard=i/3`); **Build** runs the build and the staging
-config check. No CI change is needed to start running
+files each (`vitest run --shard=i/3`); **Build** runs the build and the deploy
+config check (`pnpm deploy:check`). No CI change is needed to start running
 tests; adding a `test` script to a workspace is enough for Turborepo to pick
 it up.
 

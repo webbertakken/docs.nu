@@ -23,7 +23,7 @@ export type ToolResult = {
   isError?: boolean;
 };
 
-// The live app this MCP server belongs to: its own host on staging and on a self-host
+// The live app this MCP server belongs to: its own host on a preview or a self-host
 // (CONSENT_BASE_URL, as the consent and device pages use), docs.nu otherwise.
 export const appBase = (env: Pick<Env, 'CONSENT_BASE_URL'>) =>
   env.CONSENT_BASE_URL ?? 'https://docs.nu';

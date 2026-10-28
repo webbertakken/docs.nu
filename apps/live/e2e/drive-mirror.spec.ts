@@ -20,7 +20,7 @@ const FOLDER = `e2e-folder-${RUN}`;
 const PLAN = `e2e-plan-${RUN}`;
 const NOTES = `e2e-notes-${RUN}`;
 const apiBase = '/api';
-// The e2e runs on a loopback host, which names the root like staging
+// The e2e runs on a loopback host, which names the root for development
 // (docs/specs/022-drive-mirror/drive-mirror.md, "The root folder's name").
 const ROOT_NAME = 'LiveDoc (development)';
 const SHOTS = process.env.E2E_DRIVE_SHOTS ?? '/tmp/livedoc-drive-e2e';

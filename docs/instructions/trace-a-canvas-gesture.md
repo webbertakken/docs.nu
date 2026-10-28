@@ -19,7 +19,7 @@ browser. The budget it is held to is in [Canvas performance](../specs/008-canvas
 
 6. Launch headless Chromium at 1440 × 900 in dark mode, ignoring the local certificate.
 7. Route every non-GET `/api/**` request to a 204 and swallow every WebSocket
-   (`context.routeWebSocket`), so the board is never written; staging boards belong to people.
+   (`context.routeWebSocket`), so the board is never written; the boards there belong to people.
 8. Open the board, wait for network idle, dismiss any dialog, and press `v` for the Select tool.
 9. Set `Emulation.setCPUThrottlingRate` to 4.
 
