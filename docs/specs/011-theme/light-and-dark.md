@@ -79,6 +79,19 @@ does too, so the editor never asks anyone to switch mode to suit a tab.
   exports made from the editor, the palette's tile tint, the theme and look previews in Tab Style, and the quick
   style swatches. Server-made images (thumbnails, the MCP's inline renders) have no viewer and draw what is stored.
 
+## Colours an agent writes
+
+The editor's pickers store `#rrggbb`, but agents and imports write colours the way CSS does: `#fff`, `#fff8`,
+`#0ea5e980`, `red`, `SlateGray`. Every readability rule above reads all of them as the colour they name
+(`hexToRgb` in `packages/document/src/colors.ts`, over the one parser in `packages/document/src/css-colour.ts`): the
+shorthand `#rgb` and `#rgba` (the `#` required, as in CSS), `#rrggbb` and `#rrggbbaa` (the `#` optional),
+surrounding spaces ignored, and the 148 CSS named colours (any case, trimmed). An alpha digit is set aside when an ink
+is judged, and a translucent fill is not taken for the surface under a label (`colourIsOpaque`). `transparent`,
+`rgb()` strings and anything else stay unread, and an unread colour is drawn as written with its label left alone. A
+colour that is mixed (a tint, a shade, a table header band, a lifted accent) mixes as its `#rrggbb`. So a box an agent
+fills `#fff` gets the deep label a `#ffffff` box gets, and one filled `navy` gets white. The stored value is never
+rewritten. Named colours are a map read built once, since the parse runs for every label drawn.
+
 ## The match prompt is gone
 
 The prompt that offered to switch the editor's mode to suit a tab's theme ("This tab uses a light theme") is removed,
