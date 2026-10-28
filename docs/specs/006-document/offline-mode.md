@@ -520,8 +520,7 @@ Track adoption without content, reusing the closed vocabulary:
 ## Implementation map
 
 - `apps/live/lib/api-client.ts` + `lib/api/*` — the persistence-backend seam;
-  new `LocalBackend` (IndexedDB) beside the existing API calls; per-document
-  dispatch via a local index.
+  each call dispatches per document (`isOfflineId`) to `lib/offline/offline-store.ts` (IndexedDB).
 - New Document wizard (`TemplatePicker` / `template-picker-settings.tsx`,
   [Dedicated route for new-document creation](../007-editor/new-document-route.md)): the **Settings** step's Save location chooser ([Save Locations](save-locations.md), the
   This Browser tile) + data-loss warning + contextual help link.

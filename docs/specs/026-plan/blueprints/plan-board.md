@@ -183,7 +183,7 @@ the items too.
 
 - `normaliseBoardSort` keeps up to `BOARD_SORT_LEVELS_MAX` levels whose field is a built-in (`BOARD_SORT_BUILT_INS`:
   priority, estimate, start, due) or a custom field id, each once, `dir` `'asc'` or `'desc'`.
-- `sortCards(items, sortBy, types)` reads each card's key once per level (`sortKeyOf`: a number, or a date string; a
+- `sortCards(items, sortBy, types)` reads each card's key once per level (`levelReader` in `board-sort.ts`, through `boardSortComparator`: a number, or a date string; a
   Choice its option index; a field the card's type lacks, or of a kind it cannot sort by, is no value), then sorts
   stably, no value last at every level, so the rank order it is given breaks ties. `projectBoard` runs it after
   `byRank` when `sortBy` is set and returns `sorted: true`.

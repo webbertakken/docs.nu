@@ -64,7 +64,7 @@ Two methods ship first:
 An email code is only as good as its delivery, so sign-in email is not best-effort the way the lifecycle series is
 ([Transactional & lifecycle email](transactional-email.md)):
 
-- A code that could not be handed to the provider fails the request with `email_send_failed`, and the page says
+- A code that could not be handed to the provider fails the request (`502 EMAIL_SEND_FAILED`), and the page says
   "We couldn't send the code. Try again in a minute." rather than waiting for a code that will never come.
 - Sending goes through one email sender with two possible providers, Cloudflare Email Service (the
   `EMAIL` Workers binding) when bound, else Resend (`RESEND_API_KEY`). With neither configured, email codes are off and

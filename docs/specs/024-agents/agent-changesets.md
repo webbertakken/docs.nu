@@ -76,7 +76,7 @@ says what it has seen.
      changed it after, so the person's version stands. Taking the changeset's version keeps the save's live fields;
    - a **reorder** is re-applied only when the save still holds those elements in the order the changeset found.
      A save without the header (a bundle older than this spec) is treated as having seen nothing newer than
-     `CHANGESET_MERGE_WINDOW` ago.
+     `CHANGESET_MERGE_WINDOW_MS` (10 minutes) ago.
 
 Because the merge reads the stored changesets rather than the room's relay, a changeset survives a dropped relay, a sleeping room and an
 editor that was offline when it landed.
@@ -146,6 +146,9 @@ The room's answer is the source; when the room cannot be reached, nothing counts
 
 ## Strict sources
 
+Specified with [Diagram sources](../027-repositories/diagram-sources.md), not built yet: no changeset is checked for
+residue today.
+
 A changeset on a tab bound to a source in strict compatibility
 ([Diagram sources](../027-repositories/diagram-sources.md#strict)) is compiled, then checked against the bridge's
 capabilities before the write; a result holding residue is refused `422 not_expressible`, naming each element and
@@ -212,7 +215,7 @@ erases anything:
 | ----------------------------- | ---------- | ------------------------------------------------------------------------ |
 | `CHANGESET_MAX_OPERATIONS`    | 500        | A full tab rebuild of a large diagram fits; a runaway loop does not      |
 | `CHANGESET_RELAY_MAX_BYTES`   | 192 KiB    | Under the room's 256 KiB frame cap with room for metadata                |
-| `CHANGESET_MERGE_WINDOW`      | 10 minutes | Covers a pre-spec bundle until the new-version prompt reloads it         |
+| `CHANGESET_MERGE_WINDOW_MS`   | 10 minutes | Covers a pre-spec bundle until the new-version prompt reloads it         |
 | `CHANGESET_RETENTION_DAYS`    | 30         | Matches the Trash: an agent's work can be undone as long as a delete can |
 | `CHANGESET_REVEAL_MS`         | 2000       | Long enough to notice, short enough not to clutter                       |
 | `CHANGESET_TOAST_COALESCE_MS` | 10000      | One toast per burst of work                                              |

@@ -444,7 +444,7 @@ Missing key === undefined === default behaviour. Concretely:
   hover preview went with the Activity panel (removed 2026-10-03). A value
   still stored under either is ignored on read and dropped on the next
   write; Undo and Redo always show in the bottom-right cluster.
-  `pagesModeEnabled` (and its older name `infographicModeEnabled`) and
+  `illustrateModeEnabled` (Pages mode's switch, and `infographicModeEnabled` before it) and
   `planModeEnabled` went with the Settings › Experimental category (removed
   2026-10-06, [Editor modes](editor-modes.md#every-mode-always-offered)):
   every mode is always offered, and a stored `false` is dropped the same way.

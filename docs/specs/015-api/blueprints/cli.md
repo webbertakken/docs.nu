@@ -110,7 +110,7 @@ Scope, by file:
 | Pull file           | `PullFile`, `<slug>.livedoc.json`                                       | One document on disk, with each tab's revision                           |
 | Preview             | `tab render`, `graph render`                                            | A PNG or SVG file of a tab or a graph                                    |
 | Loopback login      | `loginWithBrowser`                                                      | OAuth with PKCE and a `127.0.0.1` redirect                               |
-| Device login        | `loginWithDevice`, `DeviceGrant`                                        | The RFC 8628 grant; the person approves at `/oauth/device`               |
+| Device login        | `loginWithDevice`                                                       | The RFC 8628 grant; the person approves at `/oauth/device`               |
 | User code           | `userCode`, `formatUserCode`, `normaliseUserCode`                       | The 8-letter code the person types                                       |
 | Built-in CLI client | `CLI_CLIENT_ID` `livedoc-cli`, `CLI_CLIENT_NAME` `LiveDoc CLI`          | The public client the server vouches for                                 |
 | Room stream         | `openRoomStream`                                                        | The CLI's listening socket for `wait` and `watch`                        |
@@ -544,7 +544,7 @@ More: livedoc <resource> --help, livedoc guide <topic>
   `More: livedoc <resource> <verb> --help`.
 - **Verb** (`livedoc <resource> <verb> --help`), within `HELP_VERB_MAX_TOKENS`: the description; `Usage:` built
   from `cli.positionals` and the flags; `Flags`, one line each with the zod `.describe()` text; `Examples`, the two
-  of `cli.examples`; `Prints: <cli.prints>`. Write flags share one description each, kept in `WRITE_FLAG_TEXT`.
+  of `cli.examples`; `Prints: <cli.prints>`. Write flags share one description each, kept in `writeFlags` (`packages/agent-verbs/src/write.ts`).
 - **Guide** (`livedoc guide`) lists the six topics one line each; `guide <topic>` prints the topic, within
   `GUIDE_TOPIC_MAX_TOKENS` (CLI49). The `edit` topic shows `element connect <doc> <a> <b>` and says why `->` is
   never typed unquoted. The `workbench` topic is the
@@ -662,7 +662,7 @@ url.dll,FileProtocolHandler <url>` on Windows; the URL is one argument and never
   and the complete URL; polls `/oauth/token` every `interval` seconds, honouring `slow_down`, until the code's
   `expires_in` (`DEVICE_CODE_TTL_S` when absent) has passed: a poll that would land after it is not sent, and the
   login ends with the expired-code error, as for `expired_token`.
-- `loginWithToken`: stdin must not be a terminal (exit 2 otherwise); reads to end, trims, `isApiTokenFormat`, else
+- `--with-token` (`tokenFromStdin` in `apps/cli/src/commands/local.ts`): stdin must not be a terminal (exit 2 otherwise); reads to end, trims, `isApiTokenFormat`, else
   exit 1.
 - All three end in `GET {apiBase}/tokens/current` with the new token, then `store.put(profile, credential)`, then
   the replaced token's revoke (Credentials).
@@ -751,7 +751,7 @@ type PullFile = DocumentEnvelope & { livedocSync: PullSync };
 
 ### Update check
 
-After a command exits 0, when `CI` is unset or empty, stderr is a terminal, `LIVEDOC_NO_UPDATE_CHECK` is not
+Not built yet (the spec's "Ahead: the update check"); every name in this section is planned. After a command exits 0, when `CI` is unset or empty, stderr is a terminal, `LIVEDOC_NO_UPDATE_CHECK` is not
 `1`, and `update.json`'s `checkedAt` is older than `UPDATE_CHECK_INTERVAL_MS`: `GET
 https://registry.npmjs.org/@livedoc/cli/latest` with `UPDATE_CHECK_TIMEOUT_MS`; `checkedAt` and `latest` are stored
 whatever the answer; a newer `version` prints the notice (CLI43).
@@ -845,8 +845,8 @@ minted token revoked`, or `[oauth] handover revoke failed` when the revoke itsel
   anti-phishing line still shows the redirect host the server read. `clientId` on the session lookup is not a
   secret and decides nothing but the telemetry type.
 - **The device grant.** User codes have 20⁸ (2.6 × 10¹⁰) values, live 10 minutes, are single use, and their lookup
-  is rate limited per IP (`DEVICE_LOOKUP_RATE_MAX`); `device_authorization` is limited like registration
-  (`DEVICE_AUTH_RATE_PER_HOUR`). Only the built-in client may start one. The page names the client from the server
+  is rate limited per IP (`LOOKUP_LIMIT` in `apps/mcp/src/oauth-device.ts`); `device_authorization` is limited like
+  registration (`START_LIMIT`). Only the built-in client may start one. The page names the client from the server
   and warns: "Only enter a code shown by a terminal you are using." The token travels from the page to the trusted
   `MCP_ORIGIN` only, as the consent page's does.
 - **Hosts.** A self-host profile reaches its own host only (I5); telemetry goes to that host's api; the update
@@ -857,7 +857,7 @@ minted token revoked`, or `[oauth] handover revoke failed` when the revoke itsel
 - **Supply chain.** Published by CI with provenance through npm trusted publishing (no npm token stored); the
   package's `files` allowlist is the bundle, the wasm, the font, the licences and the README; no install scripts;
   no native addon: the keychain is the platform's own tool.
-- **Roles.** The CLI enforces nothing the api does not; every refusal is the api's gate (`gateComment`,
+- **Roles.** The CLI enforces nothing the api does not; every refusal is the api's gate (`gateRead`,
   `gateParticipate`, `gateEdit`), mapped to exit 4.
 
 ## Performance and limits
@@ -1048,48 +1048,48 @@ WebSocket) with a fixed clock; none waits on a real timer or the network.
 
 ## Constants and configuration
 
-| Constant                           | Value                  | Provenance                                    | Safe range         |
-| ---------------------------------- | ---------------------- | --------------------------------------------- | ------------------ |
-| `HELP_TOP_MAX_TOKENS`              | 520                    | Spec                                          | 400 to 600         |
-| `HELP_RESOURCE_MAX_TOKENS`         | 250                    | Spec                                          | 150 to 300         |
-| `HELP_VERB_MAX_TOKENS`             | 400                    | Spec                                          | 300 to 500         |
-| `GUIDE_TOPIC_MAX_TOKENS`           | 1200                   | Research (agent-cli-ergonomics §4.2), CLI49   | 800 to 2000        |
-| `SKILL_FRONTMATTER_MAX_TOKENS`     | 80                     | Spec "about 60"; research §4.2, CLI49         | 60 to 100          |
-| `SKILL_BODY_MAX_TOKENS`            | 1500                   | Research §4.2, CLI49                          | 1000 to 2500       |
-| `SCHEMA_KIND_MAX_TOKENS`           | 300                    | Research §4.2, CLI73                          | 200 to 500         |
-| `TOKEN_EXPIRY_WARN_DAYS`           | 14                     | Spec                                          | 7 to 30            |
-| `LIST_DEFAULT_LIMIT`               | 20                     | `find_documents`' default, CLI19              | 10 to 50           |
-| `LIST_MAX_LIMIT`                   | 200                    | CLI19                                         | 50 to 500          |
-| `ICON_SEARCH_MAX_LIMIT`            | 50                     | `find_documents`' maximum, CLI74              | 20 to 100          |
-| `ICON_QUERY_MAX`                   | 60                     | The name cap, CLI74                           | 20 to 120          |
-| `REF_MIN_PREFIX` (documents, tabs) | 4                      | The views' ref rule, CLI20                    | fixed by views     |
-| `REQUEST_TIMEOUT_MS`               | 30000                  | CLI46                                         | 10000 to 120000    |
-| `CAPABILITIES_CACHE_TTL_MS`        | 3600000                | CLI8                                          | 600000 to 86400000 |
-| `HELD_RETRY_INTERVAL_MS`           | 2000                   | CLI25                                         | 500 to 10000       |
-| `WAIT_HELD_MAX_S`                  | 3600                   | `WAIT_MAX_TIMEOUT_S`, CLI25                   | 600 to 86400       |
-| `READ_COPY_REVS_PER_TAB`           | 3                      | CLI76                                         | 1 to 10            |
-| `READ_COPY_MAX_BYTES`              | 33554432               | About 16 of the largest tabs, CLI76           | 8 MiB to 256 MiB   |
-| `WAIT_DEFAULT_TIMEOUT_S`           | 600                    | CLI61                                         | 60 to 3600         |
-| `WAIT_MAX_TIMEOUT_S`               | 3600                   | CLI61                                         | 600 to 86400       |
-| `WAIT_SETTLE_MS`                   | 2000                   | One editor burst, CLI80                       | 500 to 10000       |
-| `ROOM_RECONNECT_MIN_MS`            | 1000                   | CLI32                                         | 500 to 5000        |
-| `ROOM_RECONNECT_MAX_MS`            | 30000                  | CLI32                                         | 10000 to 120000    |
-| `ROOM_FULL_SETTLE_MS`              | 1000                   | api.md "A room holds at most 100 connections" | 500 to 5000        |
-| `EXPORT_CONCURRENCY`               | 2                      | Token read limit 120 a minute, CLI29          | 1 to 4             |
-| `TELEMETRY_FLUSH_TIMEOUT_MS`       | 300                    | Research §9, CLI41                            | 100 to 1000        |
-| `UPDATE_CHECK_INTERVAL_MS`         | 86400000               | Spec "once a day at most"                     | fixed by spec      |
-| `UPDATE_CHECK_TIMEOUT_MS`          | 1500                   | CLI43                                         | 500 to 3000        |
-| `LOGIN_TIMEOUT_MS`                 | 600000                 | The authorize session's 10-minute TTL         | equal to it        |
-| `CLI_CLIENT_ID`                    | `livedoc-cli`          | MCP server §3                                 | fixed              |
-| `CLI_CLIENT_NAME`                  | `LiveDoc CLI`          | Spec (the token's name)                       | fixed              |
-| `DEVICE_CODE_TTL_S`                | 600                    | The authorize session's TTL, CLI36            | 300 to 1800        |
-| `DEVICE_POLL_INTERVAL_S`           | 5                      | RFC 8628 §3.2 default                         | 5 to 15            |
-| `DEVICE_SLOW_DOWN_S`               | 5                      | RFC 8628 §3.5                                 | fixed by RFC       |
-| `USER_CODE_LENGTH`                 | 8                      | RFC 8628 §6.1 example, CLI36                  | 8 to 10            |
-| `USER_CODE_ALPHABET`               | `BCDFGHJKLMNPQRSTVWXZ` | RFC 8628 §6.1                                 | fixed              |
-| `DEVICE_AUTH_RATE_PER_HOUR`        | 20                     | `/oauth/register`'s per-IP cap                | 5 to 100           |
-| `DEVICE_LOOKUP_RATE_MAX`           | 30 per 600 s per IP    | CLI36                                         | 10 to 100          |
-| `CLI_PACKAGE_MAX_BYTES`            | 8388608                | CLI54                                         | 4 MiB to 16 MiB    |
+| Constant                             | Value                  | Provenance                                    | Safe range         |
+| ------------------------------------ | ---------------------- | --------------------------------------------- | ------------------ |
+| `HELP_TOP_MAX_TOKENS`                | 520                    | Spec                                          | 400 to 600         |
+| `HELP_RESOURCE_MAX_TOKENS`           | 250                    | Spec                                          | 150 to 300         |
+| `HELP_VERB_MAX_TOKENS`               | 400                    | Spec                                          | 300 to 500         |
+| `GUIDE_TOPIC_MAX_TOKENS`             | 1200                   | Research (agent-cli-ergonomics §4.2), CLI49   | 800 to 2000        |
+| `SKILL_FRONTMATTER_MAX_TOKENS`       | 80                     | Spec "about 60"; research §4.2, CLI49         | 60 to 100          |
+| `SKILL_BODY_MAX_TOKENS`              | 1500                   | Research §4.2, CLI49                          | 1000 to 2500       |
+| `SCHEMA_KIND_MAX_TOKENS`             | 300                    | Research §4.2, CLI73                          | 200 to 500         |
+| `TOKEN_EXPIRY_WARN_DAYS`             | 14                     | Spec                                          | 7 to 30            |
+| `LIST_DEFAULT_LIMIT`                 | 20                     | `find_documents`' default, CLI19              | 10 to 50           |
+| `LIST_MAX_LIMIT`                     | 200                    | CLI19                                         | 50 to 500          |
+| `ICON_SEARCH_MAX_LIMIT`              | 50                     | `find_documents`' maximum, CLI74              | 20 to 100          |
+| `ICON_QUERY_MAX`                     | 60                     | The name cap, CLI74                           | 20 to 120          |
+| `REF_MIN_PREFIX` (documents, tabs)   | 4                      | The views' ref rule, CLI20                    | fixed by views     |
+| `REQUEST_TIMEOUT_MS`                 | 30000                  | CLI46                                         | 10000 to 120000    |
+| `CAPABILITIES_CACHE_TTL_MS`          | 3600000                | CLI8                                          | 600000 to 86400000 |
+| `HELD_RETRY_INTERVAL_MS`             | 2000                   | CLI25                                         | 500 to 10000       |
+| `WAIT_HELD_MAX_S`                    | 3600                   | `WAIT_MAX_TIMEOUT_S`, CLI25                   | 600 to 86400       |
+| `READ_COPY_REVS_PER_TAB`             | 3                      | CLI76                                         | 1 to 10            |
+| `READ_COPY_MAX_BYTES`                | 33554432               | About 16 of the largest tabs, CLI76           | 8 MiB to 256 MiB   |
+| `WAIT_DEFAULT_TIMEOUT_S`             | 600                    | CLI61                                         | 60 to 3600         |
+| `WAIT_MAX_TIMEOUT_S`                 | 3600                   | CLI61                                         | 600 to 86400       |
+| `WAIT_SETTLE_MS`                     | 2000                   | One editor burst, CLI80                       | 500 to 10000       |
+| `ROOM_RECONNECT_MIN_MS`              | 1000                   | CLI32                                         | 500 to 5000        |
+| `ROOM_RECONNECT_MAX_MS`              | 30000                  | CLI32                                         | 10000 to 120000    |
+| `ROOM_FULL_SETTLE_MS`                | 1000                   | api.md "A room holds at most 100 connections" | 500 to 5000        |
+| `EXPORT_CONCURRENCY`                 | 2                      | Token read limit 120 a minute, CLI29          | 1 to 4             |
+| `TELEMETRY_FLUSH_TIMEOUT_MS`         | 300                    | Research §9, CLI41                            | 100 to 1000        |
+| `UPDATE_CHECK_INTERVAL_MS` (planned) | 86400000               | Spec "once a day at most"                     | fixed by spec      |
+| `UPDATE_CHECK_TIMEOUT_MS` (planned)  | 1500                   | CLI43                                         | 500 to 3000        |
+| `LOGIN_TIMEOUT_MS`                   | 600000                 | The authorize session's 10-minute TTL         | equal to it        |
+| `CLI_CLIENT_ID`                      | `livedoc-cli`          | MCP server §3                                 | fixed              |
+| `CLI_CLIENT_NAME`                    | `LiveDoc CLI`          | Spec (the token's name)                       | fixed              |
+| `DEVICE_CODE_TTL_S`                  | 600                    | The authorize session's TTL, CLI36            | 300 to 1800        |
+| `DEVICE_POLL_INTERVAL_S`             | 5                      | RFC 8628 §3.2 default                         | 5 to 15            |
+| `DEVICE_SLOW_DOWN_S`                 | 5                      | RFC 8628 §3.5                                 | fixed by RFC       |
+| `USER_CODE_LENGTH`                   | 8                      | RFC 8628 §6.1 example, CLI36                  | 8 to 10            |
+| `USER_CODE_ALPHABET`                 | `BCDFGHJKLMNPQRSTVWXZ` | RFC 8628 §6.1                                 | fixed              |
+| `START_LIMIT` (oauth-device)         | 20 per 3600 s per IP   | `/oauth/register`'s per-IP cap                | 5 to 100           |
+| `LOOKUP_LIMIT` (oauth-device)        | 30 per 600 s per IP    | CLI36                                         | 10 to 100          |
+| `CLI_PACKAGE_MAX_BYTES`              | 8388608                | CLI54                                         | 4 MiB to 16 MiB    |
 
 Environment the CLI reads: `LIVEDOC_TOKEN`, `LIVEDOC_HOST`, `LIVEDOC_PROFILE`, `LIVEDOC_TELEMETRY`,
 `DO_NOT_TRACK`, `LIVEDOC_NO_UPDATE_CHECK`, `LIVEDOC_DEBUG`, `CI`, `XDG_CONFIG_HOME`, `XDG_CACHE_HOME`.

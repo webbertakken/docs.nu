@@ -61,7 +61,7 @@ apps/live/components/palette/palette-plan-view-tiles.tsx PLAN_VIEW_TILES, spread
   `floor(((height - 62) / weeks - 20) / 16)` entries, the last line kept for "+N more" when more are due.
 - Calendar moves: `canMove = plan.planInput && plan.canEditCards`. `useCalendarDrag` starts on an entry's
   pointerdown (button 0), listens on window, and counts a drag past `CALENDAR_DRAG_SLOP_PX` (3 px, Euclidean);
-  `calendarDayAt(gridBox, x, y, firstDay, weeks)` reads the day under the pointer from the grid's on-screen box
+  `calendarDayAt(rect, clientX, clientY, firstDay, weeks)` reads the day under the pointer from the grid's on-screen box
   (zoom included), and the ghost's place is scaled back by `offsetWidth / box.width`. Pointer-up commits when the
   day differs; Escape (capture-phase, stopped) and pointercancel drop; a moved press calls `swallowNextClick()`.
   `calendarMove(item, field, toDay)` gives `{ set, days }` or null (no date, same day, not a whole day); the

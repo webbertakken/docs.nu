@@ -24,14 +24,6 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
   overlay, not read-only, not embedded, tab not locked), seen or not. `start` does nothing while this tour or
   another (`useActiveTour()`) is active. The tour never starts on its own.
 - **Rerun:** `WORKSHOP_TOUR_RELAUNCH_EVENT` starts it when it is on offer; elsewhere it is ignored.
-- **Retired: the offer.** Until 28 October 2026 the host armed itself on entering Workshop, offered after
-  `OFFER_DELAY_MS` (800) when not seen, with a `welcome` card (`WorkshopTourArt`, **No** / **Yes**). The art, the
-  delay and the card are gone.
-- **Retired: the welcome tour's chain.** Until October 2026 `TourHost` offered the welcome tour first in
-  Workshop (`owedByWorkshop`), carried this tour's offer on its closing card (`outroChoice`, "Show me
-  Workshop", `WORKSHOP_TOUR_START_EVENT`) and wrote `workshopTourSeen` with `tourSeen`. All of it is gone:
-  `TourStage` / `TourPopover` lost `outroChoice`, `lib/workshop-tour.ts` lost the start event, and
-  `workshopTourSteps` lost `withWelcome`.
 - **One tour at a time:** each of `TourHost` (the Diagram tour), `PlanTourHost`, `WorkshopTourHost` treats any other
   active tour as blocking and publishes itself with `setActiveTour` while active.
 - **Steps:** `collaborate` (`band-collaborate` with `alsoHighlight`
@@ -99,11 +91,11 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
 
 ## Constants and configuration
 
-None. (`OFFER_DELAY_MS`, 800, went with the offer on 28 October 2026.)
+None.
 
 ## Assets and external resources
 
-- No art of its own (`WorkshopTourArt` went with the welcome card). Help card glyph
+- No art of its own. Help card glyph
   `workshop-tour` in `apps/help/lib/featureIcons.tsx`, hue `#ea580c` in `featureColours.ts`.
 
 ## Defaults ledger

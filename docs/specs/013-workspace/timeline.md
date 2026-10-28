@@ -279,8 +279,9 @@ cards take the cells after it.
   entries arrive newest-first.
 - Related event types alias onto one bucket so an add and a remove on
   the same day read as one moment: `team_member_joined` +
-  `team_member_left` → "Members Changed"; `share_link_created` +
-  `share_link_expired` → "Sharing Changed".
+  `team_member_left` + `team_member_removed` → "Members Changed"; `share_link_created` +
+  `share_link_expiring` → "Sharing Changed"; `document_moved` + `team_document_added` → "Documents Filed"
+  (`BUCKET_ALIASES`, `packages/ui/src/timeline/stacking.ts`).
 - **Never stacked**: `comment_added` on a thread you are in,
   `team_invite_received`, and any event whose description carries
   content that only makes sense individually. A collapsed comment hides
@@ -1009,14 +1010,14 @@ CREATE TABLE timeline_scope_state (
   scope_type       TEXT NOT NULL,
   scope_id         TEXT NOT NULL,
   backfilled_at    INTEGER,               -- NULL until the one-shot backfill has run
-  last_refreshed_at INTEGER,
+  last_seen_at     INTEGER,
   PRIMARY KEY (scope_type, scope_id)
 );
 ```
 
 One row per scope. `backfilled_at` gates the one-shot seeding in §5;
-`last_refreshed_at` backs the "Last refreshed …" line and the
-stale-read threshold.
+`last_seen_at` (named `last_refreshed_at` until migration `0043_timeline_last_seen.sql`) is the scope's
+watermark: the unread count counts what came after it, and a refresh stamps it.
 
 ### 3.4 What the scope model bought
 
@@ -1513,7 +1514,7 @@ Response:
     }
   ],
   "nextCursor": "1754380800000:abc",
-  "lastRefreshedAt": 1754384400000
+  "lastSeenAt": 1754384400000
 }
 ```
 
@@ -1532,8 +1533,8 @@ own id; everyone else is named by the snapshot's display name.
 
 ### 6.2 `POST /api/timeline/refresh`
 
-Stamps `last_refreshed_at`, runs the backfill if it hasn't run, and
-returns `{ lastRefreshedAt }`. Throttled to one call per scope per 5
+Stamps `last_seen_at`, runs the backfill if it hasn't run, and
+returns `{ lastSeenAt }`. Throttled to one call per scope per 5
 seconds server-side to absorb spam-clicks on the Refresh button.
 
 ### 6.2a `DELETE /api/timeline/events/:id`
@@ -1694,7 +1695,7 @@ Adding an Explorer section touches the same files every section does:
 `apps/live/app/explorer/<section>/page.tsx` (the route stub),
 the sidebar group that holds its row, if it has one (`app/explorer/sidebar/`, [Explorer structure](explorer-structure.md)),
 `components/primitives/explorer-icons.tsx`, `view-titles.ts` and `useExplorerPane.ts` (pane content, title, crumbs),
-`ExplorerPane.tsx` (dispatch; neither Home nor the feed is a `BROWSE_KIND`),
+`ExplorerPane.tsx` (dispatch; neither Home nor the feed is in `BROWSE_KINDS`),
 `ExplorerEmptyState.tsx`, and `routes.test.ts`'s `STATIC_NODES`.
 
 The feed's pane is lazy-loaded like `ProfilePane` / `TeamPane`, so the
