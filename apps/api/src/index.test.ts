@@ -241,7 +241,7 @@ describe('read-only API token enforcement (docs/specs/015-api/mcp-server.md §4.
   });
 });
 
-// An `livedoc_` bearer is a claim to be a token; one that resolves to no live row (unknown, revoked or expired) is
+// A `livedoc_` bearer is a claim to be a token; one that resolves to no live row (unknown, revoked or expired) is
 // refused at the front door with 401 `invalid_token`, never treated as a guest or as nobody
 // (docs/specs/015-api/public-api-and-tokens.md §3.3).
 describe('worker refusal of an unknown API token', () => {
@@ -249,7 +249,7 @@ describe('worker refusal of an unknown API token', () => {
   const TOKEN = `livedoc_${'x'.repeat(43)}`;
   beforeEach(() => resolveApiTokenMock.mockResolvedValue(null));
 
-  it('401s an livedoc_ bearer that resolves to no live token, on owner-scoped and token routes alike', async () => {
+  it('401s a livedoc_ bearer that resolves to no live token, on owner-scoped and token routes alike', async () => {
     for (const path of ['/api/documents', '/api/tokens/current', '/api/teams']) {
       const res = await worker.fetch(
         get(path, { Authorization: `Bearer ${TOKEN}` }),

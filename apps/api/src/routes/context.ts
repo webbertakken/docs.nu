@@ -46,7 +46,7 @@ export type RouteContext = {
   // fallback and no API token or workbench session administers.
   sessionAccountId: string | null;
   // The server-verified account id from any credential: a session
-  // token, an `livedoc_` API token (whose owner is always an account,
+  // token, a `livedoc_` API token (whose owner is always an account,
   // docs/specs/015-api/public-api-and-tokens.md §3.3), or a workbench session's owner. This is the identity for team-membership
   // CONTENT access — gateRead/gateEdit and the teams-surface reads — so a
   // token reaches the same documents the app does (docs/specs/015-api/public-api-and-tokens.md §3.4). Account

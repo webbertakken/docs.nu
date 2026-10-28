@@ -6,7 +6,7 @@
 // signed-in (the canvas never is — docs/specs/014-identity/auth-and-guest-access.md).
 //
 // Two verified credentials reach the READ surface (docs/specs/015-api/public-api-and-tokens.md §3.4): a
-// session token, or an `livedoc_` API token (its owner is always a
+// session token, or a `livedoc_` API token (its owner is always a
 // account) — so an external integration can list the caller's
 // teams and read their shared libraries like the app does. Every
 // MUTATION (create, invites, roles, join/accept/leave, invite links,

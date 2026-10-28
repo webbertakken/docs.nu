@@ -143,7 +143,7 @@ an agent through the CLI is designing their own diagram.
 
 In order of precedence:
 
-1. **`LIVEDOC_TOKEN`**, an `livedoc_` token from the environment: agents, CI, sandboxes. There is no `--token` flag;
+1. **`LIVEDOC_TOKEN`**, a `livedoc_` token from the environment: agents, CI, sandboxes. There is no `--token` flag;
    it would land in shell history and transcripts.
 2. **The stored credential** of the active profile, from `auth login`.
 
