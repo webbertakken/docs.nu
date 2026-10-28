@@ -55,14 +55,14 @@ import { closeStartForBlank } from '@/components/start/close-start-for-blank';
 import { handTemplatePick } from '@/lib/placement-defaults/template-pick-handoff';
 import { isBlankTemplate } from '@livedoc/templates';
 import { NEW_DOCUMENT_THEME_ID, newDocumentContent } from '@/lib/new-document-content';
+import { loadEditorPage } from '@/lib/editor-page-loader';
 import { trackNewDocumentCreated, writeNewDocument } from '@/lib/new-document/write-new-document';
 
 // In-place handoff (docs/specs/007-editor/new-document-route.md): once a document is created, this page
 // renders the editor itself under the rewritten /document/<id> URL instead of paying for a second page
-// load. `loadEditor` is also called on mount to fetch the chunk ahead; if it still isn't in at
-// handoff, the opening screen holds at its "opening" stage.
-const loadEditor = () => import('@/app/document/[id]/editor-page');
-const EditorPage = dynamic(loadEditor, {
+// load. `loadEditorPage` (lib/editor-page-loader.ts) is also called on mount to fetch the chunk ahead; if it
+// still isn't in at handoff, the opening screen holds at its "opening" stage.
+const EditorPage = dynamic(loadEditorPage, {
   ssr: false,
   loading: () => <OpeningScreen />,
 });
@@ -189,7 +189,7 @@ export default function NewDocumentPage() {
     document.title = 'New Document | LiveDoc';
     // Fetch the editor's chunk while identity + the create run. Fire-and-forget: a failure here
     // just leaves `dynamic` to retry the import at handoff.
-    loadEditor().catch(() => {});
+    loadEditorPage().catch(() => {});
   }, []);
 
   // Back/forward-cache restore: creating navigates away with
