@@ -31,11 +31,12 @@ import { handleTokens } from './tokens';
 const makeCtx = (
   method: string,
   path: string,
-  opts: { sessionAccountId?: string | null; body?: unknown } = {},
+  opts: { sessionAccountId?: string | null; body?: unknown; rawBody?: string } = {},
 ): RouteContext => {
   const sessionAccountId = opts.sessionAccountId === undefined ? 'user_1' : opts.sessionAccountId;
   return makeTestRouteContext(method, path, {
     body: opts.body,
+    rawBody: opts.rawBody,
     sessionAccountId,
     owner: sessionAccountId,
   });
@@ -102,6 +103,13 @@ describe('handleTokens — list / create / revoke', () => {
     expect(out.id).toBe('tok_1');
     // The route mints for the CALLER, under the name they gave.
     expect(db.mintApiToken).toHaveBeenCalledWith({}, { ownerId: 'user_1', name: 'CI' });
+  });
+
+  // A body cut short is no body (docs/specs/015-api/api.md "Request bodies"): nothing is minted.
+  it('400s a body cut short of valid JSON, minting nothing', async () => {
+    const res = await handleTokens(makeCtx('POST', '/api/tokens', { rawBody: '{"name":"C' }));
+    expect(res.status).toBe(400);
+    expect(db.mintApiToken).not.toHaveBeenCalled();
   });
 
   it('409s when the mint refuses at the per-account cap', async () => {
