@@ -4,6 +4,8 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { errorNameToken, errorTypeToken } from '@livedoc/api-schema';
 import { Button } from '@livedoc/ui';
 import { track } from '@/lib/telemetry';
+import { recordClientError } from '@/lib/bug-report/recent-errors';
+import { ReportBugScreenButton } from '@/components/bug-report/ReportBugButton';
 import { browserNavigationDeps, recoverInBrowser } from '@/lib/stale-build-navigation';
 import { isChunkLoadError } from '@/lib/stale-chunks';
 
@@ -84,6 +86,11 @@ export class AreaErrorBoundary extends Component<Props, { failed: boolean }> {
 
   override componentDidCatch(error: unknown, info: ErrorInfo) {
     console.error(`${this.props.area} failed to render.`, error, info.componentStack);
+    // A bug report carries it (docs/specs/016-platform/bug-reports.md "Context").
+    recordClientError(
+      'render',
+      `${this.props.area}: ${error instanceof Error ? error.message : String(error)}`,
+    );
     try {
       track('Error', 'Client', errorTypeToken('Render', this.props.area, errorNameToken(error)));
     } catch {
@@ -116,6 +123,7 @@ export class AreaErrorBoundary extends Component<Props, { failed: boolean }> {
         <Button variant="secondary" size="xs" onClick={this.retry}>
           Try Again
         </Button>
+        <ReportBugScreenButton size="xs" />
       </div>
     );
   }

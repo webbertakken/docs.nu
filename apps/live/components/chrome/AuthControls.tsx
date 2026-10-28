@@ -3,7 +3,7 @@
 // Header sign-in / sign-out pill. Shows:
 //
 //   - signed out → "Sign in" link to /live/sign-in/
-//   - signed in  → account avatar (profile picture or initial) + dropdown with "Profile" + "Sign out"
+//   - signed in  → account avatar (profile picture or initial) + dropdown with "Account", "Report a Bug" + "Sign out"
 //
 // Mounted in EditorHeader (and any future header chrome that wants auth controls). Reads the session from the
 // auth bridge's context (components/providers/AuthBridge.tsx), so it works anywhere under it.
@@ -26,6 +26,7 @@ import {
 import { useSignInAvailable } from '@/lib/auth-config';
 import { track } from '@/lib/telemetry';
 import { useAuthHrefs } from '@/components/chrome/auth-shared';
+import { useOpenBugReport } from '@/components/bug-report/BugReportProvider';
 import { accountInitial } from '@/lib/account-avatar';
 import {
   HEADER_ACTION_BTN,
@@ -61,6 +62,7 @@ function AuthControlsEnabled({ onOpenAccount }: AuthControlsProps) {
   const nameId = useId();
   // Return here after sign-in (must run before the early returns below).
   const { signInHref } = useAuthHrefs();
+  const openBugReport = useOpenBugReport();
 
   // Click-outside closes the menu. Listener installs only while
   // the menu is open so an inert button doesn't pay for it.
@@ -160,6 +162,22 @@ function AuthControlsEnabled({ onOpenAccount }: AuthControlsProps) {
               Account
             </Link>
           )}
+          {/* Report a Bug (docs/specs/004-interface-design/report-a-bug-entries.md): focus goes back to this
+              menu's button, as the item is gone by then. */}
+          <button
+            type="button"
+            role="menuitem"
+            tabIndex={-1}
+            data-bug-report-entry=""
+            aria-haspopup="dialog"
+            onClick={() => {
+              closeMenu();
+              openBugReport({ trigger });
+            }}
+            className="block w-full rounded px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            Report a Bug
+          </button>
           <button
             type="button"
             role="menuitem"

@@ -5,7 +5,7 @@
 // anything else, or a second failure inside the loop guard's window, shows this calm page in the
 // app's own look instead of the framework's.
 import { useEffect } from 'react';
-import { Button } from '@livedoc/ui';
+import { Button, REPORT_A_BUG_PATH } from '@livedoc/ui';
 import { browserNavigationDeps, recoverInBrowser } from '@/lib/stale-build-navigation';
 import './globals.css';
 
@@ -27,6 +27,14 @@ export default function GlobalError({
           <h1 className="text-lg font-semibold">This page couldn&apos;t load</h1>
           <p className="text-sm text-slate-600 dark:text-slate-300">Reload to try again.</p>
           <Button onClick={() => window.location.reload()}>Reload</Button>
+          {/* The root failed, so no form is mounted: the form's own page (docs/specs/016-platform/bug-reports.md). */}
+          <a
+            href={REPORT_A_BUG_PATH}
+            data-bug-report-entry=""
+            className="text-sm text-brand-700 underline underline-offset-2 hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
+          >
+            Report a Bug
+          </a>
         </main>
       </body>
     </html>

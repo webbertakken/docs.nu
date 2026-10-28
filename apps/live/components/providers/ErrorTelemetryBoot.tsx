@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { installClientErrorTracking } from '@livedoc/telemetry-client';
 import { setApiErrorReporter, setApiWarningReporter } from '@/lib/api-client';
 import { track } from '@/lib/telemetry';
+import { installRecentErrorCapture, recordClientError } from '@/lib/bug-report/recent-errors';
 
 // Error telemetry boot (docs/specs/017-telemetry/telemetry.md 'Error' category): mounts once from the
 // root layout and wires the two editor-side error sources into track():
@@ -25,7 +26,12 @@ import { track } from '@/lib/telemetry';
 export function ErrorTelemetryBoot() {
   useEffect(() => {
     installClientErrorTracking(track);
-    setApiErrorReporter((type) => track('Error', 'Api', type));
+    // The newest client errors, for a bug report's context (docs/specs/016-platform/bug-reports.md "Context").
+    installRecentErrorCapture(window);
+    setApiErrorReporter((type) => {
+      track('Error', 'Api', type);
+      recordClientError('api', type);
+    });
     setApiWarningReporter((type) => track('Error', 'Warning', type));
   }, []);
   return null;

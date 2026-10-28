@@ -20,6 +20,8 @@ export const LIVE_ROUTE_SEGMENTS: ReadonlySet<string> = new Set([
   'join',
   'new',
   'oauth',
+  // Report a Bug's own page and a filed screenshot's (docs/specs/016-platform/bug-reports.md).
+  'report-a-bug',
   'sign-in',
   // The workbench pairing page, /workbench/pair (docs/specs/013-workspace/workbench-embeds.md "Pairing").
   'workbench',

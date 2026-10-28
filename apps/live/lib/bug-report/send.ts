@@ -10,7 +10,7 @@ export type BugReportSendResult =
   | { kind: 'failed'; reason: 'rate_limited' | 'too_large' | 'failed' };
 
 type Deps = {
-  fetcher: typeof fetch;
+  fetcher: (input: string, init?: RequestInit) => Promise<Response>;
   // The request's identity headers (a session token, else the guest id); a throw sends the report without one.
   identity: () => Promise<Record<string, string>>;
 };

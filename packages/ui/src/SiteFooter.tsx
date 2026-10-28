@@ -4,7 +4,7 @@ import { Brand } from './Brand';
 import { CONTRIBUTORS } from './contributors';
 import { Glyph } from './icons/Glyph';
 import { lucideGlyph } from './icons/lucide-glyph';
-import { REPO_URL } from './site';
+import { REPO_URL, REPORT_A_BUG_PATH } from './site';
 
 // NEXT_PUBLIC_BUILD_YEAR (docs/specs/016-platform/nextjs.md "One configuration"); empty outside a Next build.
 const buildYear = () => process.env.NEXT_PUBLIC_BUILD_YEAR ?? '';
@@ -63,7 +63,12 @@ const COLUMNS: { title: string; links: (FooterLink | typeof GITHUB)[] }[] = [
   },
   {
     title: 'Connect',
-    links: [{ href: '/help/contact/', label: 'Contact' }, GITHUB],
+    links: [
+      { href: '/help/contact/', label: 'Contact' },
+      // Report a Bug (docs/specs/004-interface-design/report-a-bug-entries.md): the editor app's form page.
+      { href: REPORT_A_BUG_PATH, label: 'Report a Bug' },
+      GITHUB,
+    ],
   },
 ];
 
