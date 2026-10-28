@@ -98,9 +98,43 @@ async function setHideRule(page: Page, css: string | null) {
   );
 }
 
+// The chrome's text is the system UI stack (-apple-system, ..., Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif),
+// so which face draws it depends on what the machine has installed: the CI image (Playwright's Ubuntu) has none of
+// the named faces and draws Liberation Sans, a developer's Linux has Roboto, and the cap band moves with the face. The
+// audit pins every named face of the stack to Liberation Sans (installed with Playwright's browsers on Linux), so a
+// run here measures what CI measures. On CI it changes nothing.
+const PINNED_UI_FACE_ID = 'optical-audit-ui-face';
+const UI_STACK_FACES = [
+  'BlinkMacSystemFont',
+  'Segoe UI',
+  'Roboto',
+  'Helvetica Neue',
+  'Noto Sans',
+  'Arial',
+];
+const PINNED_UI_FACE_CSS = UI_STACK_FACES.flatMap((family) => [
+  `@font-face { font-family: "${family}"; src: local("Liberation Sans"), local("LiberationSans-Regular"); font-weight: 100 549; }`,
+  `@font-face { font-family: "${family}"; src: local("Liberation Sans Bold"), local("LiberationSans-Bold"); font-weight: 550 900; }`,
+]).join('\n');
+
+export async function pinUiFace(page: Page): Promise<void> {
+  await page.evaluate(
+    ([id, css]) => {
+      if (document.getElementById(id)) return;
+      const s = document.createElement('style');
+      s.id = id;
+      s.textContent = css;
+      document.head.appendChild(s);
+    },
+    [PINNED_UI_FACE_ID, PINNED_UI_FACE_CSS] as const,
+  );
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+}
+
 export async function auditOptical(page: Page): Promise<OpticalReport> {
   // The audit tags the DOM; tagging a tree React is still hydrating reads as a hydration mismatch.
   await page.waitForLoadState('networkidle');
+  await pinUiFace(page);
   // Text is measured by its glyphs: before the web font has swapped in, a fallback font's cap band sits a pixel or
   // so off, which failed "the Explorer" and "the New Document wizard" now and then on CI and never locally.
   await page.evaluate(() => document.fonts.ready.then(() => undefined));

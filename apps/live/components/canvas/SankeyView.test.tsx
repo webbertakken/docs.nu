@@ -24,10 +24,12 @@ describe('SankeyView', () => {
     // The hover targets come last: seven bands, then eight nodes.
     const hits = container.querySelectorAll('[stroke="transparent"]');
     fireEvent.pointerEnter(hits[0]!);
+    fireEvent.pointerMove(hits[0]!);
     expect(container.textContent).toContain('Salary → Budget: 3,200 · 100% of Salary');
     fireEvent.pointerLeave(hits[0]!);
     const nodeHits = container.querySelectorAll('rect[fill="transparent"]');
     fireEvent.pointerEnter(nodeHits[1]!);
+    fireEvent.pointerMove(nodeHits[1]!);
     expect(container.textContent).toContain('Budget: In 4,000 · Out 4,000');
   });
 
@@ -87,6 +89,7 @@ describe('SankeyView tour lift', () => {
     expect(container.textContent).toContain('Budget: In 4,000 · Out 4,000');
     const hits = container.querySelectorAll('[stroke="transparent"]');
     fireEvent.pointerEnter(hits[0]!);
+    fireEvent.pointerMove(hits[0]!);
     expect(container.textContent).toContain('Budget: In 4,000');
     expect(container.textContent).not.toContain('Salary → Budget:');
     // The step over, the pointer's hover reads again.

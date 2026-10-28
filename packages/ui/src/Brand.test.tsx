@@ -142,6 +142,8 @@ describe('the hover fan', () => {
       act(() => frames.splice(0).forEach((cb) => cb(performance.now() + ms)));
 
     fireEvent.pointerEnter(container.querySelector('a')!, { pointerType: 'mouse' });
+
+    fireEvent.pointerMove(container.querySelector('a')!, { pointerType: 'mouse' });
     step(1000);
     expect(page()).not.toBe(rest);
 
@@ -172,6 +174,7 @@ describe('the wordmark', () => {
     const wordmark = container.querySelector<HTMLElement>('[data-logotype]')!;
     const before = wordmark.outerHTML;
     fireEvent.pointerEnter(container.querySelector('a')!, { pointerType: 'mouse' });
+    fireEvent.pointerMove(container.querySelector('a')!, { pointerType: 'mouse' });
     expect(wordmark.querySelector('[aria-hidden="true"]')).toBeNull();
     expect(wordmark.outerHTML).toBe(before);
   });

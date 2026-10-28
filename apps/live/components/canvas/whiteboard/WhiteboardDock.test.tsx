@@ -278,6 +278,7 @@ describe('WhiteboardDock settings', () => {
     renderDock();
     const cog = screen.getByRole('button', { name: 'Settings' });
     fireEvent.pointerEnter(cog, { pointerType: 'mouse' });
+    fireEvent.pointerMove(cog, { pointerType: 'mouse' });
     expect(screen.queryByRole('group', { name: 'Settings' })).toBeNull();
     fireEvent.click(cog);
     expect(screen.getByRole('group', { name: 'Settings' })).toBeTruthy();

@@ -163,6 +163,12 @@ describe('BackgroundSection', () => {
         pointerType: 'mouse',
       },
     );
+    fireEvent.pointerMove(
+      within(screen.getByRole('group', { name: 'Dark' })).getByRole('button', { name: 'Red' }),
+      {
+        pointerType: 'mouse',
+      },
+    );
     expect(onPreview).toHaveBeenLastCalledWith({
       fill: { kind: 'solid', color: penColourHex('red', 'light') },
     });
@@ -194,6 +200,14 @@ describe('BackgroundSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Gradient from colour' }));
     const popover = screen.getByRole('dialog', { name: 'Gradient from colour' });
     fireEvent.pointerEnter(
+      within(within(popover).getByRole('group', { name: 'Light' })).getByRole('button', {
+        name: 'Green',
+      }),
+      {
+        pointerType: 'mouse',
+      },
+    );
+    fireEvent.pointerMove(
       within(within(popover).getByRole('group', { name: 'Light' })).getByRole('button', {
         name: 'Green',
       }),
@@ -255,6 +269,7 @@ describe('the Animated category', () => {
     const onBackground = slide();
     fireEvent.click(radio('Animated'));
     fireEvent.pointerEnter(radio('Starfield'));
+    fireEvent.pointerMove(radio('Starfield'));
     expect(onPreview).toHaveBeenLastCalledWith({
       fill: expect.objectContaining({ kind: 'gradient', motion: 'starfield' }),
     });

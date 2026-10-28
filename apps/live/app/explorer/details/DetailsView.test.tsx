@@ -238,6 +238,7 @@ describe('DetailsView preview', () => {
     render(<DetailsView {...view([doc('Roadmap')])} />);
     const sizeCell = within(screen.getAllByRole('row')[1]!).getAllByRole('cell')[4]!;
     fireEvent.pointerEnter(sizeCell, { pointerType: 'mouse' });
+    fireEvent.pointerMove(sizeCell, { pointerType: 'mouse' });
     expect(previewHint()).toBeNull();
     act(() => {
       vi.advanceTimersByTime(600);

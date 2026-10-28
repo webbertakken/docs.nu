@@ -13,6 +13,7 @@ const webber: Participant = { id: 'me', name: 'Webber', color: '#3b82f6', status
 function hoverText(participant: Participant): string {
   const view = render(<ParticipantAvatar participant={participant} withHoverCard />);
   fireEvent.pointerEnter(screen.getByRole('img'), { pointerType: 'mouse' });
+  fireEvent.pointerMove(screen.getByRole('img'), { pointerType: 'mouse' });
   const text = document.body.textContent ?? '';
   view.unmount();
   return text;

@@ -55,6 +55,7 @@ describe('PageBackgroundButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Background' }));
     const dots = screen.getByRole('radio', { name: 'Dots' });
     fireEvent.pointerEnter(dots);
+    fireEvent.pointerMove(dots);
     expect(onPreview).toHaveBeenLastCalledWith({ pattern: 'dots' });
     fireEvent.click(dots);
     expect(onBackground).toHaveBeenCalledWith({ pattern: 'dots' });

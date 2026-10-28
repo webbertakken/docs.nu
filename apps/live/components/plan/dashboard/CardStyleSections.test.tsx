@@ -84,6 +84,7 @@ describe('a Utility’s Style row', () => {
     const solid = shapeColorPresets(getTheme(undefined)).find((p) => p.id === 'solid')!;
     const tile = screen.getByRole('button', { name: /Solid/ });
     fireEvent.pointerEnter(tile, { pointerType: 'mouse' });
+    fireEvent.pointerMove(tile, { pointerType: 'mouse' });
     expect(frame(view)?.style.backgroundColor).not.toBe('');
     fireEvent.pointerLeave(tile, { pointerType: 'mouse' });
     expect(changeDashboard).not.toHaveBeenCalled();

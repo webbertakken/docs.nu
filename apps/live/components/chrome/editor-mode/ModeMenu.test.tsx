@@ -40,6 +40,8 @@ describe('ModeMenu preview', () => {
     for (const tool of MODE_TOOLS.diagram) expect(preview().textContent).toContain(tool);
 
     fireEvent.pointerEnter(row('Workshop'));
+
+    fireEvent.pointerMove(row('Workshop'));
     expect(preview().dataset.modePreview).toBe('workshop');
     expect(preview().textContent).toContain(editorModeDescription('workshop'));
   });
@@ -54,6 +56,7 @@ describe('ModeMenu preview', () => {
     open('diagram');
     expect(preview().getAttribute('aria-hidden')).toBe('true');
     fireEvent.pointerEnter(row('Workshop'));
+    fireEvent.pointerMove(row('Workshop'));
     expect(preview().querySelector('button')).toBeNull();
     expect(preview().textContent).not.toContain('Switch to');
     // The menu's items are its rows alone.
@@ -72,6 +75,7 @@ describe('ModeMenu preview', () => {
   it('switches from a clicked row, and closes', () => {
     const { onChange } = open('diagram');
     fireEvent.pointerEnter(row('Draw'));
+    fireEvent.pointerMove(row('Draw'));
     fireEvent.click(row('Draw'));
     expect(onChange).toHaveBeenCalledWith('draw');
     expect(screen.queryByRole('menu')).toBeNull();

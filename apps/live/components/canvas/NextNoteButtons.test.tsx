@@ -223,6 +223,7 @@ describe('NextNoteButtons', () => {
     const c = draw([event], { selectedId: 'e' });
     const after = screen.getByRole('button', { name: /after/i });
     fireEvent.pointerEnter(after);
+    fireEvent.pointerMove(after);
     const ghost = c.container.querySelector<HTMLElement>('[data-testid="next-note-ghost"]')!;
     expect(ghost).not.toBeNull();
     expect(ghost.textContent).toContain('Policy');
@@ -247,6 +248,7 @@ describe('NextNoteButtons', () => {
     const onAdd = vi.fn();
     draw([event, command], { selectedId: 'e', onAdd });
     fireEvent.pointerEnter(screen.getByRole('button', { name: /before/i }));
+    fireEvent.pointerMove(screen.getByRole('button', { name: /before/i }));
     expect(onAdd).not.toHaveBeenCalled();
   });
 });

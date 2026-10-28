@@ -105,6 +105,9 @@ describe('the article accent', () => {
     fireEvent.pointerEnter(accent.getByRole('button', { name: 'Violet' }), {
       pointerType: 'mouse',
     });
+    fireEvent.pointerMove(accent.getByRole('button', { name: 'Violet' }), {
+      pointerType: 'mouse',
+    });
     expect(onPreview).toHaveBeenLastCalledWith({ accent: penColourHex('violet', 'light') });
     fireEvent.click(accent.getByRole('button', { name: 'Violet' }));
     expect(onChange).toHaveBeenLastCalledWith({

@@ -58,6 +58,7 @@ describe('LayoutGallery', () => {
     render(<LayoutGallery page={slide!} onApply={onApply} onPreview={onPreview} />);
     const tile = document.querySelector('[data-layout-tile="slide-split-image-right"]')!;
     fireEvent.pointerEnter(tile);
+    fireEvent.pointerMove(tile);
     expect(onPreview).toHaveBeenLastCalledWith('slide-split-image-right');
     fireEvent.click(tile);
     expect(onApply).toHaveBeenCalledWith('slide-split-image-right');

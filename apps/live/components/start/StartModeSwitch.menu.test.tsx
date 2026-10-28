@@ -108,6 +108,7 @@ describe('StartModeSwitch chip', () => {
     const preview = () => document.querySelector('[data-mode-preview]')!;
     expect(preview().textContent).not.toContain('⇧D');
     fireEvent.pointerEnter(screen.getByRole('menuitemradio', { name: /^Draw/ }));
+    fireEvent.pointerMove(screen.getByRole('menuitemradio', { name: /^Draw/ }));
     expect(preview().textContent).toContain('⇧D');
   });
 

@@ -143,6 +143,7 @@ describe('ImageSearchPane for a page background', () => {
     const tile = screen.getByRole('button', { name: /Picture a/ });
     expect(tile.closest('ul')!.className).toContain('grid-cols-3');
     fireEvent.pointerEnter(tile);
+    fireEvent.pointerMove(tile);
     expect(onPreview).toHaveBeenLastCalledWith(result('a'));
     fireEvent.pointerLeave(tile.closest('ul')!);
     expect(onPreview).toHaveBeenLastCalledWith(null);

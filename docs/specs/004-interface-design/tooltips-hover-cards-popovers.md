@@ -98,6 +98,10 @@ name.
 
 These meet WCAG 2.2 AA, including 1.4.13 Content on Hover or Focus.
 
+- **Only a moving pointer opens it.** A hint opens for a pointer that moved onto its control, never for a control
+  the layout moved under a resting pointer (a dialog closing, a group sliding in): the browser reports an enter then,
+  but nobody pointed at it. The pointer's first move over the control starts the hint's delay. Keyboard focus opens
+  it as before.
 - **Dismissible.** Escape closes an open hint without moving the pointer or focus. The keypress is not
   consumed: a menu or dialog listening for Escape closes on the same press. A dismissed hint stays
   closed until the pointer leaves and returns, or focus leaves and returns.

@@ -244,6 +244,7 @@ describe('the fan', () => {
     const first = fanTitles();
     const card = screen.getAllByRole('link').find((a) => a.textContent?.includes(first[2]!))!;
     fireEvent.pointerEnter(card.closest('div')!.parentElement!);
+    fireEvent.pointerMove(card.closest('div')!.parentElement!);
     act(() => {
       vi.advanceTimersByTime(HERO_FAN_SWAP_MS * 3);
     });

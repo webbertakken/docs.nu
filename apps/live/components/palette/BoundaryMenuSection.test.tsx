@@ -49,6 +49,7 @@ describe('BoundaryMenuSection', () => {
     const { ops, lastMap } = show(boundary());
     const inset = screen.getByRole('button', { name: 'Inset Style' });
     fireEvent.pointerEnter(inset, { pointerType: 'mouse' });
+    fireEvent.pointerMove(inset, { pointerType: 'mouse' });
     expect(ops.preview).toHaveBeenCalled();
     fireEvent.click(inset);
     expect(ops.commit).toHaveBeenCalledWith(expect.any(Function), 'BoundaryStyle');
