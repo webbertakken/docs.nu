@@ -6,7 +6,9 @@
     "production": {
       "APP_BASE_URL": "https://docs.nu",
       "GOOGLE_CLIENT_ID": "",
-      "GOOGLE_AUTH_CLIENT_ID": "1721797323-k75cj54la8o9g7iqdp8pj7bf3d46q6ua.apps.googleusercontent.com"
+      "GOOGLE_AUTH_CLIENT_ID": "1721797323-k75cj54la8o9g7iqdp8pj7bf3d46q6ua.apps.googleusercontent.com",
+      "BUG_REPORT_DOCUMENT_ID": "e4d9a4ed-d739-48ad-a97b-c8a8419ccac7",
+      "BUG_REPORT_TAB_ID": "de860fd5-5878-4379-ba2a-e9d738371b4f"
     }
   }
 }
