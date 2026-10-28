@@ -13,13 +13,15 @@ import router, { type Env } from './index';
 
 function mockFetcher() {
   const urls: string[] = [];
+  const requests: Request[] = [];
   const fetcher = {
     fetch: (req: Request) => {
       urls.push(req.url);
+      requests.push(req);
       return Promise.resolve(new Response('ok'));
     },
   } as unknown as Fetcher;
-  return { fetcher, urls };
+  return { fetcher, urls, requests };
 }
 
 function makeEnv() {
@@ -46,6 +48,18 @@ describe('production dispatch (service bindings)', () => {
     const { env, api } = makeEnv();
     await dispatch('/api/documents/abc', env);
     expect(api.urls).toEqual(['https://docs.nu/api/documents/abc']);
+  });
+
+  // docs/specs/015-api/api.md "Rate limiting": the api's per-IP limits key on the visitor, never on the router in
+  // front of it, so every app's visitors never share one bucket.
+  it("hands each worker the visitor's own address", async () => {
+    const { env, api, telemetry } = makeEnv();
+    const from = (path: string) =>
+      new Request(`https://docs.nu${path}`, { headers: { 'CF-Connecting-IP': '2001:db8::7' } });
+    await router.fetch(from('/api/share/abc'), env);
+    await router.fetch(from('/telemetry/x'), env);
+    expect(api.requests[0]!.headers.get('CF-Connecting-IP')).toBe('2001:db8::7');
+    expect(telemetry.requests[0]!.headers.get('CF-Connecting-IP')).toBe('2001:db8::7');
   });
 
   it('strips /live off the asset-prefix requests for the live worker', async () => {

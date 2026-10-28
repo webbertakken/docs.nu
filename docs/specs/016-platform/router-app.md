@@ -48,7 +48,7 @@ Two properties keep it safe. It sits **after** the live-route check, so `/explor
 
 ## Implementation
 
-In production the Worker has five **service bindings**, one to each downstream app (MARKETING / LIVE / API / TELEMETRY / HELP). A shared `forward()` helper resolves each target as _binding if present, else local-dev origin_ (see Local development below) and strips the prefix for the basePath/assetPrefix paths (live assets + telemetry + help) when forwarding to a binding:
+In production the Worker has five **service bindings**, one to each downstream app (MARKETING / LIVE / API / TELEMETRY / HELP). A shared `forward()` helper resolves each target as _binding if present, else local-dev origin_ (see Local development below) and strips the prefix for the basePath/assetPrefix paths (live assets + telemetry + help) when forwarding to a binding. It forwards the visitor's request with its headers, `CF-Connecting-IP` among them, so the api's per-IP limits key on the visitor and never on the router ([Rate limiting](../015-api/api.md#rate-limiting)):
 
 ```ts
 // sketch, real source: apps/router/src/index.ts
