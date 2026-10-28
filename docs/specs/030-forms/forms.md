@@ -286,7 +286,9 @@ a card refuses with "Preview can't add its card until Responses Go To names a bo
   ignoring case (a repeat is put back), edited as a list: Enter adds the next ("Option 3", selected), Backspace in an
   empty one removes it, Alt+Up and Alt+Down move it, pasting several lines adds one option a line. **Add “Other”**
   adds an Other option with its own text box to Single and Multiple Choice; typing in it picks it, and its text is
-  kept as the answer.
+  kept as the answer. An Other text that repeats one of the options is that option: on Multiple Choice it merges
+  with it first, and only then are the picks counted against the question's least and most, so ticking A and typing
+  A in Other is one pick.
 - A **required** question is marked with a red asterisk and its accessible name says "required". A required
   Checkbox must be ticked.
 - A **Number** answer is read as the respondent's locale writes it: the box offers a decimal keypad, which has a comma
@@ -684,9 +686,11 @@ with the ones there are. Question types go by their ids (`short`, `paragraph`, `
 showIf? }` (`showIf: null` is Always), `delete_section` (its questions join the section before), `set_form`
   `{ heading?, description?, cover?, theme? }` (the theme is the Form tab's, which the form's look follows), `settings` `{ closesAt?, limit?, confirmation?, closedMessage? }` (null
   clears one) and `responds_to` (as `add_form`'s). Each is checked as the builder checks it (limits, unique options,
-  a mapping that fits, a rule on an earlier choice), and a refusal writes nothing and names the change. A sheet
-  form's sheet gains a header for each question it lacks one for, after its last header (bold, its width fitted), as a response would
-  write it; it is read for this only when the form now asks for a header it did not. `read_form` names each
+  a mapping that fits: never a Rating field on a shorter scale than the question's, out of 5 when it names none,
+  nor a field the card type hides; a rule on an earlier choice; a Multiple Choice's least and most picks count Other as
+  one, as the builder does, and 0 clears either), and a refusal writes nothing and names the change. A sheet
+  form's sheet gains a header for each question it lacks one for, after its last header (bold, its width fitted, written as text so a
+  question worded `2024`, `TRUE` or `=Score` stays that text), as a response would write it; it is read for this only when the form now asks for a header it did not. `read_form` names each
   question's sheet column (`column`) on a sheet form.
 - **`share_form`** (write): `publish` (makes the form link; on a closed form, opens it again), `close`, or
   `delete_link`. A form with problems is refused with every problem, as Share Form lists them. The answer is the
@@ -705,7 +709,8 @@ showIf? }` (`showIf: null` is Always), `delete_section` (its questions join the 
   sheet), the response number or none, the card's title, and the card's id when it made the card itself.
 - **A live form is locked for agents too**: while it takes responses, `change_form` refuses every change but
   `settings`, saying to close it with `share_form` first (its link stays); the api refuses a changeset that changes
-  anything else about it (`form_locked`), whoever sends it.
+  anything else about it (`form_locked`), whoever sends it. A form switched on but past its Close On or at its
+  Response Limit takes no responses, so it is not locked, unless the change would have it take them again.
 - **Share roles**: reading needs read access to the tab; the link's code only ever reaches an Editor; building and
   publishing are an Editor's, as the api gates them (a Participant's or Viewer's token is refused).
 - **How it is written**: a new Form tab is a changeset whose `replace` names its `form` (the form whole, read by the

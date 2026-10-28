@@ -470,6 +470,10 @@ describe('POST /api/teams (create)', () => {
       { id: 't1', name: 123 },
       { id: 't1', name: 'Crew', organisation: [] },
       { id: 'x'.repeat(65), name: 'Crew' },
+      // An id is a key in paths and scopes: letters, digits, - and _ only.
+      { id: 't/1', name: 'Crew' },
+      { id: 't:1', name: 'Crew' },
+      { id: 't 1', name: 'Crew' },
     ]) {
       const res = await handleTeams(makeCtx('POST', '/api/teams', { body }));
       expect(res.status).toBe(400);

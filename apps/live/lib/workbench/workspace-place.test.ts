@@ -73,6 +73,17 @@ describe('workspacePlaceOf', () => {
   });
 });
 
+describe('a malformed escape in the frame address', () => {
+  // decodeURIComponent throws on these; a segment that does not decode names nothing, so the frame opens Home.
+  it('reads a document or folder segment that does not decode as Home, never a crash', () => {
+    const home: WorkspacePlace = { kind: 'explorer', node: { kind: 'home' } };
+    for (const bad of ['%', '%E0%A4%A']) {
+      expect(place(`/embed/workbench/document/${bad}`)).toEqual(home);
+      expect(place(`/embed/workbench/explorer/folder/${bad}`)).toEqual(home);
+    }
+  });
+});
+
 describe('explorerRouteOfFrame', () => {
   it('hands the Explorer the app route a frame path stands for, its query kept', () => {
     const route = (path: string) => {

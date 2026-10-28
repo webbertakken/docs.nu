@@ -152,7 +152,7 @@ describe('sharePasswordStatus', () => {
 describe('the verified cache', () => {
   const limiter = (success = true) => {
     const limit = vi.fn(async () => ({ success }));
-    return { env: { SHARE_RATE_LIMITER: { limit } } as unknown as Env, limit };
+    return { env: { SHARE_GUESS_VISITOR_LIMITER: { limit } } as unknown as Env, limit };
   };
 
   it('answers a repeat correct password without another derivation or budget', async () => {
@@ -206,32 +206,57 @@ describe('the verified cache', () => {
   });
 });
 
+// docs/specs/013-workspace/share-password.md "Guessing is limited": each try the cache cannot answer counts against
+// the caller's network and against the document, whatever the network.
 describe('the guess budget', () => {
-  it('spends one unit per check under the caller network', async () => {
-    getSharePasswordMock.mockResolvedValue(await hashSharePassword('hunter2', FAST));
-    const limit = vi.fn(async () => ({ success: true }));
-    const env = { SHARE_RATE_LIMITER: { limit } } as unknown as Env;
-    await sharePasswordStatus(env, 'd1', attempt('wrong', '2001:0db8:0000:0001::/64'));
-    expect(limit).toHaveBeenCalledWith({ key: 'share-pw:2001:0db8:0000:0001::/64' });
-  });
-
-  // Over the limit the answer is the same whether the guess was right or not,
-  // so a caller who has spent the budget learns nothing more.
-  it('answers invalid without checking once the budget is spent, even for the right password', async () => {
-    getSharePasswordMock.mockResolvedValue(await hashSharePassword('hunter2', FAST));
+  const limiters = (visitor = true, document = true) => {
+    const byVisitor = vi.fn(async () => ({ success: visitor }));
+    const byDocument = vi.fn(async () => ({ success: document }));
     const env = {
-      SHARE_RATE_LIMITER: { limit: vi.fn(async () => ({ success: false })) },
+      SHARE_GUESS_VISITOR_LIMITER: { limit: byVisitor },
+      SHARE_GUESS_ITEM_LIMITER: { limit: byDocument },
     } as unknown as Env;
-    expect(await sharePasswordStatus(env, 'd1', attempt('hunter2'))).toBe('invalid');
-    expect(await sharePasswordStatus(env, 'd1', attempt('wrong'))).toBe('invalid');
+    return { env, byVisitor, byDocument };
+  };
+
+  it('spends one unit per check under the caller network, and one under the document', async () => {
+    getSharePasswordMock.mockResolvedValue(await hashSharePassword('hunter2', FAST));
+    const { env, byVisitor, byDocument } = limiters();
+    await sharePasswordStatus(env, 'd1', attempt('wrong', '2001:0db8:0000:0001::/64'));
+    expect(byVisitor).toHaveBeenCalledWith({ key: 'share-pw:2001:0db8:0000:0001::/64' });
+    expect(byDocument).toHaveBeenCalledWith({ key: 'share-pw-doc:d1' });
   });
 
-  it('does not spend budget on a document with no password, or a missing one', async () => {
-    const limit = vi.fn(async () => ({ success: true }));
-    const env = { SHARE_RATE_LIMITER: { limit } } as unknown as Env;
-    await sharePasswordStatus(env, 'd1', attempt('anything'));
+  // Refused before the check, so the answer is the same whether the guess was right or not.
+  it('answers rate_limited without checking once either budget is spent, even for the right password', async () => {
     getSharePasswordMock.mockResolvedValue(await hashSharePassword('hunter2', FAST));
+    for (const [visitor, document] of [
+      [false, true],
+      [true, false],
+    ] as const) {
+      const { env } = limiters(visitor, document);
+      expect(await sharePasswordStatus(env, 'd1', attempt('hunter2'))).toBe('rate_limited');
+      expect(await sharePasswordStatus(env, 'd1', attempt('wrong'))).toBe('rate_limited');
+      expect(await sharePasswordOk(env, 'd1', attempt('hunter2'))).toBe(false);
+    }
+  });
+
+  it('does not spend budget on a document with no password, a missing one, or a grant', async () => {
+    const { env, byVisitor, byDocument } = limiters();
+    await sharePasswordStatus(env, 'd1', attempt('anything'));
+    const stored = await hashSharePassword('hunter2', FAST);
+    getSharePasswordMock.mockResolvedValue(stored);
     await sharePasswordStatus(env, 'd1', null);
-    expect(limit).not.toHaveBeenCalled();
+    expect(await sharePasswordStatus(env, 'd1', attempt(await shareGrantFor('d1', stored)))).toBe(
+      'ok',
+    );
+    expect(byVisitor).not.toHaveBeenCalled();
+    expect(byDocument).not.toHaveBeenCalled();
+  });
+
+  it('checks as usual where the limiters are not bound (self-host)', async () => {
+    getSharePasswordMock.mockResolvedValue(await hashSharePassword('hunter2', FAST));
+    expect(await sharePasswordStatus(ENV, 'd1', attempt('hunter2'))).toBe('ok');
+    expect(await sharePasswordStatus(ENV, 'd1', attempt('wrong'))).toBe('invalid');
   });
 });

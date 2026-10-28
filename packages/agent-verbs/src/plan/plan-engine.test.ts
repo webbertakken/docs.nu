@@ -47,7 +47,8 @@ const BOARD = (types: string[] | null = null) => ({
   types,
   columns: [
     { status: 'todo~x', name: 'To Do', wipLimit: 2 },
-    { status: 'done~x', name: 'Done' },
+    // The plan route's outline marks a done column (planOutline).
+    { status: 'done~x', name: 'Done', done: true as const },
   ],
 });
 const STATUSES = [
@@ -154,7 +155,8 @@ describe('planListing', () => {
       takes: 'every type',
       columns: [
         { name: 'To Do', wipLimit: 2, cards: ['#2', '#1'] },
-        { name: 'Done', cards: ['#3'] },
+        // Done counts as done by its name (docs/specs/026-plan/plan-board.md "Done columns").
+        { name: 'Done', done: true, cards: ['#3'] },
       ],
     });
     expect(listing.notOnBoard).toEqual(['#4']);
@@ -164,6 +166,26 @@ describe('planListing', () => {
       { id: 'f-sev', name: 'Severity', kind: 'choice', options: ['S1', 'S2'] },
     ]);
     expect(listing.hint).toBeUndefined();
+  });
+
+  it('lists a sorted board’s cards in its sort, naming it', async () => {
+    const sorted = { ...BOARD(), sortBy: [{ field: 'f-sev', dir: 'desc' as const }] };
+    const cards = [
+      item(1, 'aaa111', { title: 'Low', status: 'todo~x', 'f-sev': 'S1' }, 'bug', 'a'),
+      item(2, 'bbb222', { title: 'High', status: 'todo~x', 'f-sev': 'S2' }, 'bug', 'b'),
+    ];
+    const { api: a } = api(
+      { [`/documents/${D}/items`]: { items: cards, rev: 1 } },
+      { boards: [sorted], statuses: STATUSES, types: [...ITEM_TYPES, BUG] },
+    );
+    const listing = planListing(await readPlanState(a, D));
+    expect(listing.boards[0]).toMatchObject({
+      sortBy: ['Severity (Reverse Option Order)'],
+      columns: [
+        { name: 'To Do', cards: ['#2', '#1'] },
+        { name: 'Done', cards: [] },
+      ],
+    });
   });
 
   it('shows no card on a board that takes no type', async () => {
@@ -723,10 +745,48 @@ describe('changeBoard', () => {
       swimlaneField: 'f-sev',
       cardSize: 'compact',
     });
+    expect(r.columns).toEqual([
+      { name: 'Ready', status: 'todo~x' },
+      { name: 'Done', status: 'done~x', done: true },
+    ]);
+    const picked = await changeBoard(a, D, { board: 'Sprint', doneColumns: ['To Do'] }, 'mcp');
+    expect(picked.ok && picked.columns).toEqual([
+      { name: 'To Do', status: 'todo~x', done: true },
+      { name: 'Done', status: 'done~x' },
+    ]);
     expect(await changeBoard(a, D, { board: 'Sprint', swimlanes: 'Mood' }, 'mcp')).toMatchObject({
       ok: false,
       code: 'board_invalid',
     });
+  });
+
+  it('sorts its cards by fields by name, an empty list turning it off', async () => {
+    const { api: a, seen } = api();
+    const r = await changeBoard(
+      a,
+      D,
+      {
+        board: 'Sprint',
+        sortBy: [{ field: 'Priority', direction: 'descending' }, { field: 'severity' }],
+      },
+      'mcp',
+    );
+    if (!r.ok) throw new Error(r.message);
+    expect(r.sortBy).toEqual(['Priority (Highest First)', 'Severity (In Option Order)']);
+    const setup = (
+      seen[0]!.body as { operations: { fields: { planBoard: Record<string, unknown> } }[] }
+    ).operations[0]!.fields.planBoard;
+    expect(setup['sortBy']).toEqual([
+      { field: 'priority', dir: 'desc' },
+      { field: 'f-sev', dir: 'asc' },
+    ]);
+    expect(await changeBoard(a, D, { board: 'Sprint', sortBy: [] }, 'mcp')).toMatchObject({
+      ok: true,
+      sortBy: [],
+    });
+    expect(
+      await changeBoard(a, D, { board: 'Sprint', sortBy: [{ field: 'Title' }] }, 'mcp'),
+    ).toMatchObject({ ok: false, code: 'board_invalid' });
   });
 
   it('refuses an unknown or ambiguous board, type or column list', async () => {
@@ -971,5 +1031,82 @@ describe('every branch of the engine', () => {
     await expect(
       changeCardTypes(trashDown, D, [{ op: 'delete', type: 'Bug' }]),
     ).rejects.toBeInstanceOf(ApiError);
+  });
+});
+
+describe('a description written as Markdown', () => {
+  const RICH = [{ text: 'Old', bold: true }];
+  const formatted = () => [
+    item(1, 'aaa111', { title: 'B', status: 'todo~x', description: 'Old', descriptionRich: RICH }),
+  ];
+  const posted = (seen: { method: string; body: unknown }[]) =>
+    seen.filter((c) => c.method === 'POST').map((c) => c.body);
+
+  it('stores its plain text and its formatting, and reads back as the description', async () => {
+    const { api: a, seen } = api();
+    const r = await applyItemChanges(
+      a,
+      D,
+      [
+        { op: 'add', title: 'New', status: 'To Do', fields: { description: '## Why\n**Soon**' } },
+        { op: 'set', item: '#1', fields: { description: 'See [docs](https://x.dev)' } },
+      ],
+      await readPlanState(a, D),
+    );
+    const [add, set] = posted(seen);
+    expect(add).toMatchObject({
+      fields: {
+        description: 'Why\nSoon',
+        descriptionRich: [
+          { text: 'Why\n', heading: 2 },
+          { text: 'Soon', bold: true },
+        ],
+      },
+    });
+    expect(set).toMatchObject({
+      set: {
+        description: 'See docs',
+        descriptionRich: [{ text: 'See ' }, { text: 'docs', link: 'https://x.dev' }],
+      },
+    });
+    expect(r.applied[1]).toContain('set description = "See docs"');
+    expect(r.applied[1]).not.toContain('descriptionRich');
+  });
+
+  it('drops the formatting a card had when the new text has none, and only then', async () => {
+    const { api: a, seen } = api({ [`/documents/${D}/items`]: { items: formatted(), rev: 1 } });
+    const r = await applyItemChanges(
+      a,
+      D,
+      [{ op: 'set', item: '#1', fields: { description: 'Plain now' } }],
+      await readPlanState(a, D),
+    );
+    expect(posted(seen)[0]).toEqual({
+      set: { description: 'Plain now' },
+      clear: ['descriptionRich'],
+    });
+    expect(r.applied[0]).not.toContain('cleared');
+
+    const { api: b, seen: seenB } = api();
+    await applyItemChanges(
+      b,
+      D,
+      [{ op: 'set', item: '#1', fields: { description: 'Plain now' } }],
+      await readPlanState(b, D),
+    );
+    expect(posted(seenB)[0]).toEqual({ set: { description: 'Plain now' } });
+  });
+
+  it('clears the formatting with the description', async () => {
+    const { api: a, seen } = api({ [`/documents/${D}/items`]: { items: formatted(), rev: 1 } });
+    const r = await applyItemChanges(
+      a,
+      D,
+      [{ op: 'set', item: '#1', clear: ['Description'] }],
+      await readPlanState(a, D),
+    );
+    expect(posted(seen)[0]).toEqual({ clear: ['description', 'descriptionRich'] });
+    expect(r.applied[0]).toContain('cleared description');
+    expect(r.applied[0]).not.toContain('descriptionRich');
   });
 });

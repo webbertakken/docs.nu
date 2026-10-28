@@ -20,6 +20,10 @@ const { api, track } = vi.hoisted(() => ({
 }));
 vi.mock('@/lib/api-client', () => api);
 vi.mock('@/lib/telemetry', () => ({ track }));
+const { toastError } = vi.hoisted(() => ({ toastError: vi.fn() }));
+vi.mock('@/hooks/ui/useToast', () => ({
+  useToast: () => ({ error: toastError, success: vi.fn(), info: vi.fn() }),
+}));
 
 const { useShareLinks } = await import('./useShareLinks');
 
@@ -58,6 +62,7 @@ function setup(links: ShareLink[] = [], setSharePasswordSet = vi.fn()) {
 beforeEach(() => {
   for (const fn of Object.values(api)) fn.mockReset();
   track.mockReset();
+  toastError.mockReset();
 });
 
 describe('useShareLinks scope', () => {
@@ -119,5 +124,20 @@ describe('useShareLinks share password', () => {
     expect(api.apiSetSharePassword).toHaveBeenCalledWith('me', 'd1', null);
     expect(setSharePasswordSet).toHaveBeenCalledWith(false);
     expect(track).toHaveBeenCalledWith('Document', 'Shared', 'PasswordCleared');
+  });
+
+  // The api refuses a new password under six characters; the owner is told why, not "try again".
+  it('words a too-short refusal, leaving the state as it was', async () => {
+    api.apiSetSharePassword.mockRejectedValue(
+      Object.assign(new Error('set share password failed: 400'), {
+        status: 400,
+        code: 'password_too_short',
+      }),
+    );
+    const setSharePasswordSet = vi.fn();
+    const { result } = setup([], setSharePasswordSet);
+    expect(await result.current.setDocumentSharePassword('abc')).toBeUndefined();
+    expect(setSharePasswordSet).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith('A share password needs at least 6 characters.');
   });
 });

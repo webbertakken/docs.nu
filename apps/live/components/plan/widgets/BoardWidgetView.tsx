@@ -19,6 +19,9 @@ import {
   type ItemTypeDef,
   type PlanBoardSetup,
   type QuickFilter,
+  doneColumnsOf,
+  finishedStatuses,
+  setColumnDone,
   type QuickDueWindow,
 } from '@livedoc/items';
 import { PRIORITY_COLOURS, accentOn, type PlanPalette } from '../plan-palette';
@@ -147,15 +150,15 @@ export function BoardWidgetView({ kind, ctx }: { kind: BoardWidgetKind; ctx: Wid
       );
     }
     case 'progress': {
-      if (setup.doneColumnId === undefined) {
-        // Pressing it makes the last column the done one, the column work usually ends in.
+      if (doneColumnsOf(setup).length === 0) {
+        // Pressing it makes the last column count as done, the column work usually ends in.
         const last = setup.columns[setup.columns.length - 1];
         return ctx.canEdit && last ? (
           <button
             type="button"
             className={`${WIDGET_PILL} cursor-pointer transition hover:bg-black/5 dark:hover:bg-white/10`}
             style={{ ...pill, borderStyle: 'dashed' }}
-            onClick={() => ctx.onSetup({ ...setup, doneColumnId: last.id }, 'DoneColumn')}
+            onClick={() => ctx.onSetup(setColumnDone(setup, last.id, true), 'DoneColumn')}
           >
             <Lead kind="progress" color={palette.muted} />
             Set Done Column
@@ -454,9 +457,9 @@ export function BoardWidgetView({ kind, ctx }: { kind: BoardWidgetKind; ctx: Wid
       const today = todayNumber(ctx.now);
       // Each count narrows the board to exactly the cards it counts, not done: overdue (due by
       // yesterday), or due from today to a week out.
-      const doneStatus = setup.columns.find((c) => c.id === setup.doneColumnId)?.status;
+      const finished = finishedStatuses(setup);
       const tag = (n: number, color: string, label: string, window: QuickDueWindow) => {
-        const value = doneStatus ? { ...window, doneStatus } : window;
+        const value = finished.length > 0 ? { ...window, finished } : window;
         const on = JSON.stringify(ctx.quick.due) === JSON.stringify(value);
         return (
           <button

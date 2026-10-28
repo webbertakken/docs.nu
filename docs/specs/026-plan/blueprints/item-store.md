@@ -104,7 +104,7 @@ Returns `{ ok: true, fields }` or `{ ok: false, error: ItemRejection, field }`. 
 | --------- | ------------------------------------------------------------------ |
 | text      | string, trimmed, 1..`ITEM_TITLE_MAX` (title); empty title rejected |
 | long text | string ≤ `ITEM_DESCRIPTION_MAX`                                    |
-| status    | string ≤ 40                                                        |
+| status    | string ≤ 40, trimmed, not empty                                    |
 | person    | `{ id ≤ 64, name ≤ 80, color #rrggbb }`                            |
 | priority  | one of `PRIORITIES`                                                |
 | labels    | ≤ `ITEM_LABELS_MAX` strings ≤ 32, de-duplicated                    |
@@ -143,7 +143,7 @@ never end in `0`, so a key between always exists. Ties (equal ranks after concur
 
 - `PlanBoardSetup = { title; columns: PlanColumn[]; doneColumnId?; swimlaneBy: SwimlaneBy;
 cardFields: CardField[]; hideWriting: boolean }` (a stored `voting` is read past: a vote is the tab's session vote).
-- `PlanColumn = { id; status; name; wipLimit?; color? }`; `SwimlaneBy = 'none' | 'assignee' | 'type' | 'priority' | 'status' | 'field'` (a stored
+- `PlanColumn = { id; status; name; wipLimit?; color?; width?; done? }` (`done`: counts as done, plan-board.md "Done columns"); `SwimlaneBy = 'none' | 'assignee' | 'type' | 'priority' | 'status' | 'field'` (a stored
   `'parent'` reads as `'field'` with `swimlaneField: 'parent'`).
 - No scope: a `scope` an older board stored is read past. Types are the one filter: the types `boardAddTypes(setup, types)`
   resolves (every type when `addTypes` is absent or names none still in the catalogue) drops an item of a type the board does not show, before columns, lanes,
@@ -151,7 +151,7 @@ cardFields: CardField[]; hideWriting: boolean }` (a stored `voting` is read past
   drop target refuses such a card (`accepts`) and such a palette type (`acceptsType`), refusal "This board shows
   <types> cards".
 - Output: `{ columns: { column, count, overLimit, lanes: { laneKey, items[] }[] }[], lanes: LaneHead[],
-unplaced: Item[], doneCount, total }`. Items sorted by `compareRank`, then `key`. Lanes ordered: assignee by
+unplaced: Item[], doneCount, total }` (`doneCount`: cards in every done column, `isDoneColumn`). Items sorted by `compareRank`, then `key`. Lanes ordered: assignee by
   name, type by catalogue order, priority by `PRIORITIES`, a Card field (Parent among them) by the linked card's key,
   any other field by `fieldLaneOrder`; the empty group last.
 - `quick = { text?: string; mine?: string }` narrows (title/key/labels substring; `mine` = assignee id).
@@ -436,6 +436,9 @@ replays the write with the keys the first write was given. Votes push nothing.
 ## Security and trust
 
 - Every write passes the document gate; tab-scoped links are confined by `itemIdsShownOnTab`.
+- A tab-scoped link never widens its reach: a tab save adding the tab's first board or plan view (`tabShowsEveryCard`) is
+  403 `tab_scope_widen` (`tab-put-route.ts`), and the room drops such an op unless the tab showed every card when the
+  session joined (`scopedSenderMayRelay`, `tabShowsAll` on the session; `room-scope.test.ts`, `tab-put-route.test.ts`).
 - Items never change from a client socket; `items` is a system op.
 - Field values are validated and bounded; text is drawn as text, never HTML.
 - Vote budget is a facilitation aid enforced in the editor only (stated, not a trust boundary).

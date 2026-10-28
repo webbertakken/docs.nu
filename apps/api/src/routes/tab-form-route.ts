@@ -12,6 +12,7 @@ import {
   missingDocument,
   readBody,
   requireOwner,
+  tabScopeOf,
   type DocumentRouteContext,
 } from './context';
 
@@ -27,12 +28,12 @@ export async function handleTabForm(
   if (!(await gateEdit(ctx, id, document.ownerId, document.teamId, tabId))) return forbidden();
   const body = await readBody(ctx);
   if (body instanceof Response) return body;
-  const result = await writeAgentForm(ctx.env, id, tabId, body);
+  const result = await writeAgentForm(ctx.env, id, tabId, body, await tabScopeOf(ctx, document));
   // An agent's write counts as one applied change, by its front door, as a changeset does.
   if (result.status === 200 && ctx.token)
     ctx.waitUntil?.(afterChangeset.telemetry(ctx.env, 'Applied', frontDoorOf(ctx.request)));
   // The agent shows as present on the tab it wrote, as after a changeset.
-  refreshAfterWrite(ctx, id, tabId, await authorOf(ctx, owner), {
+  refreshAfterWrite(ctx, document, tabId, await authorOf(ctx, owner), {
     status: result.status,
     body: result.status === 200 ? { changeset: true } : null,
   });

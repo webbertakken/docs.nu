@@ -261,7 +261,9 @@ export function useTabActions(deps: TabActionsDeps) {
     // peer's selection of the original render (and lock, docs/specs/007-editor/live-app.md) on
     // the copy too, since remote selections resolve by element id. A Dashboard's slots follow the new ids.
     const reminted = remintTabElements({ ...src, elements: src.elements.map((el) => ({ ...el })) });
-    const name = `${src.name} copy`;
+    // Capped like every name the editor makes (docs/specs/006-document/name-length.md): a full-length name's copy
+    // runs past it.
+    const name = truncateName(`${src.name} copy`);
     // A Board or Visualisation tab and its board or chart share one name (docs/specs/026-plan/plan-tabs.md "Names"):
     // the copy's are titled as the copy is, so neither takes the original's name back later.
     const copy: Tab = {

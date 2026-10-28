@@ -24,6 +24,8 @@ import {
   type ItemTypeDef,
   type PlanStatusName,
   type PlanBoardOutline,
+  boardSortText,
+  sortCards,
 } from '@livedoc/items';
 import type { PlanState } from './plan-state';
 
@@ -35,6 +37,8 @@ interface ListedColumn {
   name: string;
   status: string;
   wipLimit?: number;
+  // Its cards count as done (docs/specs/026-plan/plan-board.md "Done columns").
+  done?: true;
   cards: string[];
 }
 
@@ -44,6 +48,8 @@ interface ListedBoard {
   tabId: string;
   kind: PlanBoardOutline['kind'];
   takes: string[] | 'every type';
+  // Sort Cards, as "Priority (Highest First)": its columns list their cards in that order.
+  sortBy?: string[];
   columns: ListedColumn[];
 }
 
@@ -219,12 +225,17 @@ export function planListing(state: PlanState, filter: ResolvedListingFilter = {}
       takes: b.types
         ? b.types.map((id) => plan.types.find((t) => t.id === id)?.label ?? id)
         : 'every type',
+      ...(b.sortBy ? { sortBy: boardSortText(b.sortBy, plan.types) } : {}),
       columns: b.columns.map((c) => {
         const cards = filed
-          ? live.filter(
-              (i) =>
-                itemStatus(i) === c.status &&
-                boardShowsType({ addTypes: b.types ?? undefined }, i.type, plan.types),
+          ? sortCards(
+              live.filter(
+                (i) =>
+                  itemStatus(i) === c.status &&
+                  boardShowsType({ addTypes: b.types ?? undefined }, i.type, plan.types),
+              ),
+              b.sortBy,
+              plan.types,
             )
           : [];
         for (const i of cards) onABoard.add(i.id);
@@ -232,6 +243,7 @@ export function planListing(state: PlanState, filter: ResolvedListingFilter = {}
           name: c.name,
           status: c.status,
           ...(c.wipLimit ? { wipLimit: c.wipLimit } : {}),
+          ...(c.done ? { done: true as const } : {}),
           cards: cards.map(ref),
         };
       }),

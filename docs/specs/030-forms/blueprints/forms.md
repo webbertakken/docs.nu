@@ -134,7 +134,8 @@ field). An Other pick is sent as `OTHER_ANSWER` with its text under `other`.
 | above_max | not_an_email | not_a_link | not_a_date | not_an_option | too_few | too_many | out_of_scale | must_tick`.
 An empty answer (`''`, whitespace, `[]`, `false`, absent) is `{}`, or `required` / `must_tick` when required. A Link
 without a scheme is taken as `https://`; only `https://` with a dotted host passes. Multiple picks are kept in option
-order, an Other's text last. `checkResponse(form, body, questions?)` checks every question (or a section's); answers to
+order, an Other's text last; an Other repeating an option merges into it, and `too_few` / `too_many` count the merged
+picks. `checkResponse(form, body, questions?)` checks every question (or a section's); answers to
 unknown ids are dropped. `answerErrorMessage(q, error)` is the page's copy, shared by client and api.
 
 ## 5. Mapping (`mapping.ts`)
@@ -431,7 +432,8 @@ opensIn: 'plan', elements: [], defaultTextSize: 'sm', form, theme? }`. On an exi
   "change it with change_form" (changesets write and relay elements, and a form is none).
 - **Existing form** (`writeAgentForm`): body `{ form, rev? }` (`invalid_body` otherwise); the stored tab read; 404
   `not_found`, 400 `not_a_form_tab`, 409 `tab_locked`; `rev` given and not the stored one → 409 `form_changed` with
-  `rev`; `changesBeyondSettings` and a live link `open === 1` → 409 `form_locked`; written with `upsertTabAtRev`
+  `rev`; `changesBeyondSettings` and a live link `open === 1`, with the form before or after taking responses (not
+  `closedBySettings` at the link's count and now) → 409 `form_locked`; written with `upsertTabAtRev`
   (`name` the heading, capped as a tab name), a lost race retried `SUBMIT_ATTEMPTS` times; relayed as
   `tab-meta { name, form }`. Gated `gateEdit` (a Participant or Viewer 403); a token's write counts as Applied.
   Logs `[forms] agent.written`, `agent.locked`, `agent.changed-since`, `agent.stale-retry`.
@@ -443,16 +445,16 @@ opensIn: 'plan', elements: [], defaultTextSize: 'sm', form, theme? }`. On an exi
 
 ### Names and refusals (`form-names.ts`)
 
-| Reference      | Matches, in order                                                                                                                                | Refusal (code, message lists what there is)                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Form tab       | tab id; tab name (case aside); none given: the document's first Form tab                                                                         | `form_tab_unknown`; `form_tab_none` with add_form; `not_a_form_tab`                                                                                   |
-| question       | id; prompt (case aside, trimmed); two prompts alike → `question_ambiguous`                                                                       | `question_unknown`                                                                                                                                    |
-| section        | id; title (case aside); a whole number 1..n (its place)                                                                                          | `section_unknown`                                                                                                                                     |
-| board          | a Board tab's live board: tab or element id; tab name; board title                                                                               | `board_unknown`                                                                                                                                       |
-| card type      | the document's (`resolveType`); else the ready-made type of that name, brought in; else a new type of that name                                  | none                                                                                                                                                  |
-| column         | the board's column name (case aside) or status                                                                                                   | `column_unknown`                                                                                                                                      |
-| sheet          | its id; its Responses Go To name (`sheetRefsOf`: the tab's name, "Name 2" for a second)                                                          | `sheet_unknown`                                                                                                                                       |
-| `goesTo` field | the card type's custom field by name (case aside); else a new field (`newFieldFor`; a choice with Other a text field, `MAPPABLE_KINDS[type][1]`) | `field_does_not_fit` with the kinds that fit; `title_not_allowed`; `fields_full` at `ITEM_TYPE_CUSTOM_MAX`; `goes_to_on_sheet`; `goes_to_needs_board` |
+| Reference      | Matches, in order                                                                                                                                | Refusal (code, message lists what there is)                                                                                                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Form tab       | tab id; tab name (case aside); none given: the document's first Form tab                                                                         | `form_tab_unknown`; `form_tab_none` with add_form; `not_a_form_tab`                                                                                                                                                                              |
+| question       | id; prompt (case aside, trimmed); two prompts alike → `question_ambiguous`                                                                       | `question_unknown`                                                                                                                                                                                                                               |
+| section        | id; title (case aside); a whole number 1..n (its place)                                                                                          | `section_unknown`                                                                                                                                                                                                                                |
+| board          | a Board tab's live board: tab or element id; tab name; board title                                                                               | `board_unknown`                                                                                                                                                                                                                                  |
+| card type      | the document's (`resolveType`); else the ready-made type of that name, brought in; else a new type of that name                                  | none                                                                                                                                                                                                                                             |
+| column         | the board's column name (case aside) or status                                                                                                   | `column_unknown`                                                                                                                                                                                                                                 |
+| sheet          | its id; its Responses Go To name (`sheetRefsOf`: the tab's name, "Name 2" for a second)                                                          | `sheet_unknown`                                                                                                                                                                                                                                  |
+| `goesTo` field | the card type's custom field by name (case aside); else a new field (`newFieldFor`; a choice with Other a text field, `MAPPABLE_KINDS[type][1]`) | `field_does_not_fit` with the kinds that fit, for a Rating field on a shorter scale than the question's, and for a field the type hides; `title_not_allowed`; `fields_full` at `ITEM_TYPE_CUSTOM_MAX`; `goes_to_on_sheet`; `goes_to_needs_board` |
 
 ### Question input (`form-question.ts`)
 
@@ -461,8 +463,8 @@ lowLabel?, highLabel?, goesTo? }`: `blankQuestion(type, id)`, then `applyQuestio
 `setting_not_for_type` naming the type's settings (`TYPE_SETTINGS`). Limits: `PROMPT_MAX` (`prompt_empty`, `too_long`),
 `HELP_MAX`, `PLACEHOLDER_MAX`, `SCALE_LABEL_MAX`; options 1..`OPTIONS_MAX`, each 1..`OPTION_MAX`, unique case aside
 (`option_empty`, `options_repeat`, `options_none`, `options_full`); scale `RATING_SCALE_MIN`..`RATING_SCALE_MAX`
-(`scale_out_of_range`); labels only on a numbered rating (`labels_need_numbers`); Multiple Choice picks 0..options
-(`picks_out_of_range`); `min_over_max`. `""` clears a text setting, `false` a switch.
+(`scale_out_of_range`); labels only on a numbered rating (`labels_need_numbers`); Multiple Choice picks 1..options, Other
+counting as one, and 0 clearing the bound as a stored form reads it (`picks_out_of_range`); `min_over_max`. `""` clears a text setting, `false` a switch.
 
 ### Engine flow
 
@@ -513,7 +515,7 @@ showIfBroken?, questions: [{ id, type, typeName, prompt, …settings, goesTo?, g
 - **Sheet columns** (`syncSheetHeaders`): a new responses sheet is given every header, then `freeze` 1 and `rename`
   its tab's name; an existing sheet form's sheet, when the form asks for a header it did not (`sheetHeaders` of the
   form as read against the form as changed) or its sheet changed, is read (`A1:ZZ1`) and given the headers it lacks
-  after its last one (bold, `resize` fit), never over one. A failed sync is said in `made`, never fatal. Read answers carry each
+  after its last one (each written `'<header>` so a `set` keeps it text, bold, `resize` fit), never over one. A failed sync is said in `made`, never fatal. Read answers carry each
   question's `column` on a sheet form.
 - **Placing a question**: `before` a question (its index), else `after` one (its index + 1), else the end of
   `section` (`placeQuestion`); `move_question` needs one of them.

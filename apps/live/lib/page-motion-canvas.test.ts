@@ -109,6 +109,12 @@ describe('rgba', () => {
   });
 
   it('leaves a colour it cannot read as it is', () => {
-    expect(rgba('red', 0.5)).toBe('red');
+    expect(rgba('nope', 0.5)).toBe('nope');
+  });
+
+  // docs/specs/011-theme/light-and-dark.md "Colours an agent writes": a named colour is read.
+  it('reads a named or shorthand colour', () => {
+    expect(rgba('red', 0.5)).toBe('rgba(255, 0, 0, 0.5)');
+    expect(rgba('#fff', 1)).toBe('rgba(255, 255, 255, 1)');
   });
 });

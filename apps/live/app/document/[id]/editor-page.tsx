@@ -237,6 +237,7 @@ export default function LivePage({ surface = 'app' }: { surface?: EditorSurface 
       <StatusShell title="Password required" showHeader={!embedMode}>
         <SharePasswordGate
           invalid={sharePasswordGate.invalid}
+          rateLimited={sharePasswordGate.rateLimited}
           ownerName={documentOwnerName}
           onSubmit={(pw) => {
             setSharePasswordGate(null);
