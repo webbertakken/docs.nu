@@ -9,11 +9,14 @@ import { chmod, copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/pr
 import { dirname, join, relative, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import { EMBEDDED_WORKS } from '../../../packages/licences/src/embedded-works.ts';
 
 const app = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = resolve(app, '../..');
-const dist = join(app, 'dist');
+// `--out <dir>` writes the package elsewhere (the build test's temporary directory); dist by default.
+const { values: args } = parseArgs({ options: { out: { type: 'string' } } });
+const dist = resolve(args.out ?? join(app, 'dist'));
 const outfile = join(dist, 'livedoc.mjs');
 
 const result = await build({
