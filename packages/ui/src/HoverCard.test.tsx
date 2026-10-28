@@ -63,3 +63,39 @@ describe('HoverCard', () => {
     expect((container.firstElementChild as HTMLElement).className).toBe('inline-flex');
   });
 });
+
+describe('for assistive technology', () => {
+  it('describes its control by the description, kept beside any description it had', () => {
+    render(
+      <HoverCard title="Details view" description="A sortable table.">
+        <button type="button" aria-describedby="own">
+          Details
+        </button>
+      </HoverCard>,
+    );
+    const button = screen.getByRole('button', { name: 'Details' });
+    const ids = button.getAttribute('aria-describedby')!.split(' ');
+    expect(ids[0]).toBe('own');
+    expect(document.getElementById(ids[1]!)?.textContent).toBe('A sortable table.');
+  });
+
+  it('describes through its wrapper when the child is not one element', () => {
+    const { container } = render(
+      <HoverCard title="Count" description="Cards in this column.">
+        3 cards
+      </HoverCard>,
+    );
+    const wrapper = container.firstElementChild!;
+    const id = wrapper.getAttribute('aria-describedby')!;
+    expect(document.getElementById(id)?.textContent).toBe('Cards in this column.');
+  });
+
+  it('adds nothing when there is no description', () => {
+    render(
+      <HoverCard title="Details view">
+        <button type="button">Details</button>
+      </HoverCard>,
+    );
+    expect(screen.getByRole('button').hasAttribute('aria-describedby')).toBe(false);
+  });
+});

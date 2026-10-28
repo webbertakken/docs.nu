@@ -1,5 +1,6 @@
 'use client';
 
+import { SwitchRow } from '@livedoc/ui';
 // A logo page's Mirror (docs/specs/007-editor/logo-pages.md "Mirror"): the button beside its cog,
 // pressed while Mirror While Drawing is on for the page, opening a popover: the switch at the top,
 // then the axis (Vertical, Horizontal, Both, Radial), Radial's copies, and Merge Into One. This
@@ -7,7 +8,6 @@
 import type { ReactNode } from 'react';
 import { MIRROR_AXES, RADIAL_COPIES } from '@livedoc/document';
 import { SegmentedRadio } from '@/components/primitives/SegmentedRadio';
-import { SwitchRow } from '@/components/primitives/SwitchRow';
 import type { LogoToolsView } from '@/hooks/editor/useLogoTools';
 import { MirrorAxisGlyph } from './logo-glyphs';
 import { TitlePopoverButton } from './TitlePopoverButton';

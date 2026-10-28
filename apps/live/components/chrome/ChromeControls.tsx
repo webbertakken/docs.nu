@@ -1,10 +1,11 @@
 import { AppearanceToggle } from '@/components/chrome/AppearanceToggle';
 import { CHROME_BTN, CHROME_BTN_LABELLED, ChromeLabel } from '@/components/chrome/chrome-button';
 import { SettingsIcon, GithubIcon, SearchGlyph } from '@/components/chrome/tab-bar-icons';
+import { TourOfferButton } from '@/components/tour/TourOfferButton';
 import { REPO_URL, HoverCard } from '@livedoc/ui';
 
 // The right-hand control cluster shared by the editor's bottom tab bar and
-// the Explorer's bottom bar (docs/specs/007-editor/live-app.md): search, the open-source GitHub
+// the Explorer's bottom bar (docs/specs/007-editor/live-app.md): the Start Tour button, search, the open-source GitHub
 // link, settings, and the dark-mode toggle. Each callback-driven control
 // renders only when its handler is supplied; dark-mode is always shown, and
 // GitHub unless the host opts out. Keyboard shortcuts live in Settings' Keyboard category. Rendered as a fragment
@@ -39,6 +40,10 @@ export function ChromeControls({
   const BTN = labelled ? `${CHROME_BTN} ${CHROME_BTN_LABELLED}` : CHROME_BTN;
   return (
     <>
+      {/* The Start Tour button, first in the cluster and immediately left of Search: the one way into a tour,
+          drawn only while one is on offer (docs/specs/007-editor/editor-tour.md "Where it appears"). Leading the
+          cluster, it comes and goes without moving the controls beside it. */}
+      <TourOfferButton labelled={labelled} />
       {onOpenSearch ? (
         <HoverCard title="Search" description="Find documents, folders, tabs and elements.">
           <button type="button" onClick={onOpenSearch} aria-label="Search" className={BTN}>

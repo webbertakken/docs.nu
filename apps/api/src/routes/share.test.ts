@@ -65,6 +65,7 @@ vi.mock('../thumbnail', () => ({
 // Import AFTER the mock so the share.ts module picks up the stubbed
 // db helpers. passwordGate is module-private to share.ts, exported
 // only for this suite (see the comment on the export).
+import { SHARE_GUESS_RETRY_AFTER_S } from '../auth/share-access';
 import { handleShare, handleShareImage, passwordGate } from './share';
 import { getDocument, getParticipant, getShareLink, recordSharedAccess } from '../db';
 import { notifyDocumentJoin } from '../email/notifications';
@@ -173,6 +174,19 @@ describe('passwordGate (docs/specs/013-workspace/share-password.md status-code m
     expect(result).not.toBeNull();
     expect(result!.status).toBe(403);
     expect(await result!.json()).toEqual({ error: 'password_invalid' });
+  });
+
+  // Over the guess budget the try is refused before the check, and told when to come back.
+  it('returns 429 password_rate_limited with Retry-After once the guess budget is spent', async () => {
+    getSharePasswordMock.mockResolvedValue('hunter2');
+    const env = {
+      ...FAKE_ENV,
+      SHARE_GUESS_VISITOR_LIMITER: { limit: async () => ({ success: false }) },
+    } as typeof FAKE_ENV;
+    const result = await passwordGate(env, 'diag-9', { value: 'hunter2', rateKey: 'net-1' });
+    expect(result!.status).toBe(429);
+    expect(result!.headers.get('Retry-After')).toBe(String(SHARE_GUESS_RETRY_AFTER_S));
+    expect(await result!.json()).toEqual({ error: 'password_rate_limited' });
   });
 
   it('returns null when the visitor supplied the exact matching password (allowed through)', async () => {

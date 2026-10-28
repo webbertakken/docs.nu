@@ -35,7 +35,9 @@ Migration `0095_team_invite_decline_and_reminders.sql` on `team_members`:
 - Backfill: every row `status = 'invited'` at migration time gets `clock_started_at` = the migration's now (`strftime('%s','now') * 1000`); its reminder stamps stay null.
 - `status` stays TEXT with no CHECK; `memberStatus` maps unknown / NULL to `'joined'` (the 0021 rule).
 - Hashes are never cleared while the row lives; deleting the row (Admin remove, re-invite replacement, team delete) is the only revocation.
-- Account deletion: `detachUserFromTeams` deletes every row keyed to the user, rejected ones included.
+- Account deletion: `detachUserFromTeams` deletes every row keyed to the user, rejected ones included, and the
+  `declined` rows keyed by the account's address alone (`user_id` NULL, matched in any case); an `invited` row to the
+  address stays (`apps/api/src/db/team-account-close.test.ts`).
 
 ## Interfaces and contracts
 

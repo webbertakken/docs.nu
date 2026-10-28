@@ -43,6 +43,19 @@ export function createFailureCopy(error: unknown): CreateFailure {
   };
 }
 
+export type CreateAttempt<T> = { ok: true; value: T } | { ok: false; failure: CreateFailure };
+
+// Runs every step of a create as one attempt: settling identity, loading a template's seeds and the write itself.
+// Any of them failing answers with the card, so /new never stays on its creating screen with no way on
+// (docs/specs/007-editor/new-document-route.md "Every step of the create can fail to that card").
+export async function attemptCreate<T>(create: () => Promise<T>): Promise<CreateAttempt<T>> {
+  try {
+    return { ok: true, value: await create() };
+  } catch (error) {
+    return { ok: false, failure: createFailureCopy(error) };
+  }
+}
+
 // The ids a create writes under. Minted once per attempt and kept for its Retry: a create that
 // reached the server but whose answer was lost would, retried under fresh ids, make a second
 // document. Retried under the same ids, the api takes it as the re-commit of an id the caller

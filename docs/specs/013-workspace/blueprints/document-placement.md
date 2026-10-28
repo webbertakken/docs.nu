@@ -142,6 +142,7 @@ No new request on the happy path (one fewer: the follow-up PUT is gone); no layo
 | Rejection tokens                                                | `packages/api-schema/src/placement.test.ts`                           |
 | Body carries placement                                          | `apps/live/lib/api-client.test.ts`                                    |
 | Card copy and action                                            | `apps/live/app/new/create-failure.test.ts`                            |
+| Identity and seed failures reach the card (`attemptCreate`)     | `apps/live/app/new/create-failure.test.ts`                            |
 | Choose-again URL                                                | `apps/live/lib/new-document-params.test.ts`                           |
 | Team duplicate is one create                                    | `apps/live/lib/duplicate-document.test.ts`                            |
 | Sync refile                                                     | `apps/live/lib/offline/offline-convert.test.ts`                       |

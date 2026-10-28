@@ -1,12 +1,5 @@
 import type { Browser, Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  test,
-  guestSigFor,
-  mintSignedGuest,
-  ownerHeaders,
-} from './fixtures';
+import { expect, test, guestSigFor, mintSignedGuest, ownerHeaders } from './fixtures';
 
 // Two people dragging ONE element at the same moment (docs/specs/012-collaboration/realtime-conflict-resolution.md
 // "Same-element edits converge"): the room orders the two moves, and both screens end on the later one. Each used
@@ -95,7 +88,6 @@ test('two peers dragging the same element at once end on the same position', asy
   await peerPage.getByRole('button', { name: /^join$/i }).click();
   await peerPage.locator(CANVAS).waitFor();
   for (const p of [ownerPage, peerPage]) {
-    await dismissQuickTour(p);
     await p.keyboard.press('v');
   }
 

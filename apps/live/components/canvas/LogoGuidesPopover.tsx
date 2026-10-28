@@ -1,12 +1,12 @@
 'use client';
 
+import { SwitchRow } from '@livedoc/ui';
 // A logo page's Guides (docs/specs/007-editor/logo-pages.md "Beside the cog"): the button beside
 // its cog, pressed while the page shows its guides, opening a popover: Show Guides for this page at
 // the top, then which guides show and how strongly (the person's synced preferences, also in
 // Settings).
 import type { ReactNode } from 'react';
 import { SegmentedRadio } from '@/components/primitives/SegmentedRadio';
-import { SwitchRow } from '@/components/primitives/SwitchRow';
 import { LOGO_GUIDE_PARTS, LOGO_GUIDE_STRENGTHS } from '@/lib/logo-guide-prefs';
 import type { LogoToolsView } from '@/hooks/editor/useLogoTools';
 import { TitlePopoverButton } from './TitlePopoverButton';

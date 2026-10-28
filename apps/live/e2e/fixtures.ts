@@ -7,7 +7,6 @@ import {
 } from '@playwright/test';
 import type { StoredDocument, StoredTab } from './stored';
 import { DEBUG_STORAGE_KEY } from '../lib/debug-log';
-import { TOUR_PENDING_KEY } from '../lib/tour-pending';
 
 // Shared fixture (docs/specs/003-system-architecture/e2e-smoke.md): every smoke test fails on an uncaught
 // exception or unhandled rejection surfaced to the page — the class the
@@ -60,66 +59,9 @@ export async function enableDebugLogs(context: BrowserContext): Promise<void> {
   );
 }
 
-// The Draw, Avatar, Forms, Pages and element tours (docs/specs/023-draw-mode/draw-tour.md, docs/specs/008-canvas/avatar-tour.md,
-// docs/specs/030-forms/forms.md, docs/specs/007-editor/pages-tour.md) offer themselves 800 ms into their modes and their overlays would take the presses of every spec there; they have
-// their own unit tests. Marked seen for every page of the context.
-async function markModeToursSeen(context: BrowserContext): Promise<void> {
-  await context.addInitScript(() => {
-    const key = 'livedoc:user-preferences:v1';
-    try {
-      const prefs = JSON.parse(localStorage.getItem(key) ?? '{}') as Record<string, unknown>;
-      // The Pages tour offers each page kind once (lib/tour-tracks.ts): every kind answered.
-      if (
-        prefs.drawTourSeen !== true ||
-        prefs.avatarTourSeen !== true ||
-        prefs.formTourSeen !== true ||
-        !Array.isArray(prefs.pagesTourKinds) ||
-        !Array.isArray(prefs.elementTourKinds)
-      )
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            ...prefs,
-            drawTourSeen: true,
-            avatarTourSeen: true,
-            formTourSeen: true,
-            pagesTourSeen: true,
-            pagesTourKinds: ['slide', 'infographic', 'article', 'logo'],
-            // Element tours (docs/specs/007-editor/element-tours.md): the offer beside a Sankey's toolbar.
-            elementTourKinds: [
-              'sankey',
-              'layer-stack',
-              'pyramid',
-              'funnel',
-              'cycle',
-              'hub',
-              'onion',
-              'chevrons',
-              'mind-node',
-              'flowchart',
-              'org-chart',
-              'sequence',
-              'chart',
-              'stack',
-              'entity',
-              'tab-window',
-              'lane',
-              'boundary',
-              'diagram-key',
-              'portal',
-            ],
-          }),
-        );
-    } catch {
-      // No storage: nothing to mark.
-    }
-  });
-}
-
 export const test = base.extend<{ pageErrors: string[] }>({
   context: async ({ context }, use) => {
     await enableDebugLogs(context);
-    await markModeToursSeen(context);
     await use(context);
   },
   pageErrors: async ({ page }, use) => {
@@ -258,59 +200,19 @@ export async function startEventStormingRow(page: Page): Promise<void> {
   await notes.nth(2).waitFor();
 }
 
-// Dismiss the Diagram tour's offer (docs/specs/007-editor/editor-tour.md) when this page is owed one.
-// It lands a BEAT AFTER the canvas does, and its modal overlay swallows pointer events, so a test that
-// merely checks whether it is showing YET races it and then finds its drags going nowhere, silently.
-// The offer comes only while /new's handoff flag is in sessionStorage (lib/tour-pending.ts): without
-// the flag (a reload after declining it, a document opened by URL) nothing is owed, and this returns
-// at once instead of waiting out a timeout. With it, wait until the offer shows, or until the flag
-// clears without one (the tour already seen). The offer is the Diagram tour's, so a tab in another mode
-// keeps it owed without showing it (the editor marks which mode the tab is in).
-export async function dismissQuickTour(page: Page): Promise<void> {
-  const decline = page.getByRole('button', { name: /^no$/i }).first();
-  const owed = () => page.evaluate((key) => sessionStorage.getItem(key) === '1', TOUR_PENDING_KEY);
-  const elsewhere = () =>
-    page.evaluate(() => {
-      const mode = document.querySelector('[data-editor-mode]')?.getAttribute('data-editor-mode');
-      return mode !== undefined && mode !== null && mode !== 'diagram';
-    });
-  await expect
-    .poll(async () => (await decline.isVisible()) || !(await owed()) || (await elsewhere()), {
-      message: 'the owed tour offer never showed',
-    })
-    .toBe(true);
-  if (!(await decline.isVisible())) return;
-  await decline.click();
-  await decline.waitFor({ state: 'detached' });
-}
-
 // A blank canvas straight away: /new?blank=1, the wizard bypass Start Blank
 // links to (docs/specs/007-editor/new-document-route.md).
 export async function openStartBlank(page: Page): Promise<void> {
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
 }
 
 // A blank tab in Workshop mode straight away: /new?template=blank-session creates it with no wizard
 // (docs/specs/012-collaboration/workshop-mode.md "Templates"). Where the session kit lives: the
 // Collaborate and Stickers categories and the Session strip.
 export async function openBlankSession(page: Page): Promise<void> {
-  // The Workshop tour offers itself 800 ms into Workshop (WorkshopTourHost OFFER_DELAY_MS) and its
-  // overlay would take these specs' presses; it has its own unit tests.
-  await page.addInitScript(() => {
-    const key = 'livedoc:user-preferences:v1';
-    try {
-      const prefs = JSON.parse(localStorage.getItem(key) ?? '{}') as Record<string, unknown>;
-      if (prefs.workshopTourSeen !== true)
-        localStorage.setItem(key, JSON.stringify({ ...prefs, workshopTourSeen: true }));
-    } catch {
-      // No storage: nothing to mark.
-    }
-  });
   await page.goto('/new?template=blank-session');
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
 }
 
 // A blank Diagram document through the wizard: Diagram on the Mode step, Create, then the start screen's × (a blank
@@ -358,7 +260,6 @@ export async function seedTab(page: Page, elements: Seed): Promise<void> {
   );
   await page.reload();
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
   // The seeded elements pop in (a short scale animation) after the canvas mounts: a test that
   // measures or drags one before it settles works from a box that is still changing.
   const first = elements.find((el) => typeof el.id === 'string');

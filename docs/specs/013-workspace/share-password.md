@@ -39,15 +39,22 @@ identity, share-code path) and [11-api](../015-api/api.md) (share links).
   memory for 10 minutes, at most 1,000 entries per isolate. The stored value is
   part of the key, so changing or removing the password invalidates it at once.
 - **Guessing is limited on every door.** Each derivation (a check the cache could
-  not answer) first spends one unit of the `SHARE_RATE_LIMITER` binding under the
-  key `share-pw:<network>`, where the network is the caller's IPv4 address or
-  IPv6 /64 (`clientRateKey`). Over the limit, the attempt is treated as wrong
-  without being checked, so the answer never reveals whether a guess was right.
-  This covers every share-code door (the resolve, `canReadDocument` /
-  `canEditDocument`, images, the room's `p`), not just the resolve. A correct
-  visitor is answered from the cache after their first check in an isolate, so
-  they spend almost nothing. The resolve read (`GET /api/share/:code`) keeps its
-  own per-network request throttle on the same binding.
+  not answer) is first counted twice, at Cloudflare's edge so the counts hold across
+  isolates: against the caller's network on `SHARE_GUESS_VISITOR_LIMITER` (10 a
+  minute, key `share-pw:<network>`, the caller's IPv4 address or IPv6 /64,
+  `clientRateKey`), and against the document from any network on
+  `SHARE_GUESS_ITEM_LIMITER` (30 a minute, key `share-pw-doc:<documentId>`), so a
+  guesser can't spread tries across addresses either. Over either, the attempt is
+  refused without being checked (`rate_limited`), so the answer never reveals
+  whether a guess was right. This covers every share-code door (the resolve,
+  `canReadDocument` / `canEditDocument`, images, the room's `p`), not just the
+  resolve. The resolve answers it `429 { error: 'password_rate_limited' }` with
+  `Retry-After: 60` (`SHARE_GUESS_RETRY_AFTER_S`); every other door refuses it as it
+  refuses a wrong password. A grant, a missing password and a document without one
+  spend nothing, and a correct visitor is answered from the cache after their first
+  check in an isolate, so a visitor already in spends almost nothing. The resolve
+  read (`GET /api/share/:code`) keeps its own per-network request throttle on
+  `SHARE_RATE_LIMITER`. With the bindings absent (self-host), every check runs.
 - It is **never** returned anywhere: not in the document DTO, and not to the
   owner either.
 - The **owner always bypasses** the password (identified by `ownerId` / the
@@ -60,14 +67,17 @@ identity, share-code path) and [11-api](../015-api/api.md) (share links).
   whether a password is in force.
 - `PUT /api/documents/:id/share-password` (owner, or a joined team member on a team document). Body
   `{ password: string | null }`. A null / empty / whitespace-only value clears
-  the password; anything else is trimmed, then hashed and stored. The visitor's
+  the password; anything else is trimmed, then hashed and stored. A new password shorter than
+  `SHARE_PASSWORD_MIN` (6, `@livedoc/api-schema`) after trimming is refused, `400 { error: 'password_too_short' }`,
+  storing nothing; a shorter password saved before the rule keeps working, since the gate never asks its length. The visitor's
   gate trims what is typed too, so a password saved with a stray leading or
   trailing space is still the one a visitor can enter. Returns
   `{ passwordSet: boolean }`.
 - `GET /api/share/:code` (viewer resolve): if the document has a password, return
   **401 `{ error: 'password_required' }`** when the request carries no
   `X-Share-Password`, **403 `{ error: 'password_invalid' }`** when it carries
-  the wrong one, and only record the visit + return the document on a match.
+  the wrong one, **429 `{ error: 'password_rate_limited' }`** with `Retry-After: 60` when the guess budget is
+  spent, and only record the visit + return the document on a match.
 - Every other share-code-authorised route is gated through
   `canReadDocument` / `canEditDocument` (`src/auth/document-access.ts`). Both gain a
   `sharePassword` argument: after the link + role check, if the document has a
@@ -144,7 +154,9 @@ full-screen card with a lock, a single password input, and an error line) rather
 than the canvas. On submit it calls `setSessionSharePassword(pw)` and re-runs
 the bootstrap (a retry counter in the bootstrap effect's deps); the retried
 `apiLoadShared` now carries the password and either hydrates the editor or
-re-shows the gate with `invalid`. Once past the gate the password is on every
+re-shows the gate with `invalid`, or, after a `429 password_rate_limited`, with
+`rateLimited`: the try was not checked, so instead of "That password didn't match" the gate says **Too many
+tries. Wait a minute, then try again.** (`role="alert"`). Once past the gate the password is on every
 HTTP call (via `apiHeaders`) and the WS (`connectRoom`), so reads, writes,
 images, and realtime all stay authorised.
 
@@ -152,9 +164,12 @@ Existing viewers when the owner sets or changes a password: the room closes ever
 session a share code admitted (close code 4005, "access changed"), whether it
 joined with the code itself or with a ticket a share-code visitor minted. Their
 editor reloads, the reload meets the gate, and they are prompted for the new
-password. The owner and team members are untouched: their sessions were not
-admitted by a code. Clearing the password closes nobody, since it only widens
-access. The close is best-effort and off the response path: the password is
+password. Their visits go too (`dropDocumentVisits`, every `shared_with` row of the document): the document
+leaves their Shared With Me list, their Inbox and every other leg that reads a visit, until they enter the
+password, which records the visit again. The owner and team members are untouched: their sessions were not
+admitted by a code. Clearing the password closes and drops nothing, since it only widens access, and saving the
+same password again (checked against the stored hash) writes nothing and sends no one away: a new hash would void
+every grant for no change. The close is best-effort and off the response path: the password is
 already stored, and every later API call and room join is gated on it either way.
 
 The editor also defers two ancillary fetches behind the gate so a visitor on the
@@ -174,7 +189,10 @@ beneath the passes (see [Live app → Share dialog](../007-editor/live-app.md#sh
 it applies to all links), hinting that everyone opening a pass must enter it,
 embeds included ([Read-only embeds (`/embed`)](embeds.md)). Switched on with no
 password yet, it reveals a `type="text"` input (the owner sees what they type)
-with **Save** (Enter also saves). Once a password is saved the field is replaced
+with **Save** (Enter also saves). A new password needs `SHARE_PASSWORD_MIN` (6) characters after trimming:
+until the field holds them, **Save** and Enter wait and a hint under the field reads **At least 6 characters.**
+(named by the field's `aria-describedby`). The api's own refusal is worded too: "A share password needs at least
+6 characters." Once a password is saved the field is replaced
 by a **Password Set** line with **Replace** and **Remove**: the server keeps only
 a hash, so the saved password cannot be shown again. **Replace** brings back the
 empty field with **Save** and **Cancel**. Switching it off with a password saved

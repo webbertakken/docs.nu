@@ -20,6 +20,11 @@ describe('a link’s address', () => {
     expect(safeLinkUrl('not a url')).toBeNull();
     expect(safeLinkUrl('')).toBeNull();
   });
+
+  it('reads a host with a port as a bare host, not a scheme', () => {
+    expect(safeLinkUrl('example.com:8080/x')).toBe('https://example.com:8080/x');
+    expect(safeLinkUrl('localhost:3000')).toBe('https://localhost:3000/');
+  });
 });
 
 describe('reading a stored card', () => {

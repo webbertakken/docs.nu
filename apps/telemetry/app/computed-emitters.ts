@@ -47,6 +47,21 @@ function tokensAfter(source: string, marker: string, close: string): string[] {
 }
 
 // The Drive mirror's inbound change types and Open with outcomes.
+// The Timeline's filter categories (packages/ui/src/timeline/eventCategory.ts), sent by a chip.
+const TIMELINE_CATEGORIES = [
+  'comments',
+  'new',
+  'edits',
+  'renames',
+  'deletions',
+  'sharing',
+  'actions',
+  'teams',
+  'filing',
+  'account',
+  'other',
+];
+
 const DRIVE_INBOUND_TYPES = tokensAfter(
   read('live/lib/drive/plan-inbound.ts'),
   'export type InboundType',
@@ -57,6 +72,11 @@ const DRIVE_OPEN_WITH_TYPES = tokensAfter(
   'export function openWithTelemetryType',
   '{',
 );
+
+// The Inbox's filter tokens and row kinds (docs/specs/013-workspace/inbox.md §6), from its model.
+const INBOX_MODEL = read('live/components/panels/inbox/inbox-entries.ts');
+const INBOX_FILTER_TYPES = tokensAfter(INBOX_MODEL, 'export const INBOX_FILTER_TELEMETRY', '};');
+const INBOX_ROW_KINDS = tokensAfter(INBOX_MODEL, 'export type InboxEntryKind', ';');
 
 // The api's email templates: `export type EmailKind = 'Welcome' | ...;`.
 const EMAIL_KINDS = tokensAfter(read('api/src/email/templates.ts'), 'export type EmailKind', ';');
@@ -457,20 +477,10 @@ export const COMPUTED_EMITTERS: Record<string, ComputedValues> = {
     values: TEMPLATES,
     open: TEMPLATE_WHY,
   },
-  'apps/live/app/explorer/useTimelineFeed.ts Timeline·Selected': {
-    values: [
-      'comments',
-      'new',
-      'edits',
-      'renames',
-      'deletions',
-      'sharing',
-      'actions',
-      'teams',
-      'filing',
-      'account',
-      'other',
-    ],
+  'apps/live/app/explorer/useTimelineFeed.ts Timeline·Selected': { values: TIMELINE_CATEGORIES },
+  // A document's History chips (docs/specs/013-workspace/timeline.md §2.10): the same categories.
+  'apps/live/components/panels/DocumentHistoryDialog.tsx Timeline·Selected': {
+    values: TIMELINE_CATEGORIES,
   },
   // Which Trash (docs/specs/013-workspace/trash.md): lib/trash-groups.ts's
   // telemetryType, the one closed set every site sends.
@@ -599,6 +609,12 @@ export const COMPUTED_EMITTERS: Record<string, ComputedValues> = {
   'apps/live/components/palette/PaletteCategoryBrowser.tsx UI·Opened': {
     values: ['IconGroup', 'TechGroup', 'StickerGroup'],
   },
+  'apps/live/components/panels/inbox/InboxPane.tsx Activity·Changed': {
+    values: INBOX_FILTER_TYPES,
+  },
+  'apps/live/components/panels/inbox/InboxReader.tsx Activity·Selected': {
+    values: INBOX_ROW_KINDS,
+  },
   'apps/live/components/panels/SearchPanel.tsx UI·Opened': { values: SLUGS, open: SLUG_WHY },
   'apps/live/components/panels/SearchPanel.tsx Search·Selected': {
     values: ['Document', 'Shared', 'Folder', 'Team', 'Tab', 'Element', 'Palette', 'Command'],
@@ -653,9 +669,6 @@ export const COMPUTED_EMITTERS: Record<string, ComputedValues> = {
     values: ELEMENT_TOUR_TOKENS.flatMap((t) => [`${t}Completed`, `${t}Skipped`]),
   },
   'apps/live/components/tour/ElementTourHost.tsx UI·Opened': {
-    values: ELEMENT_TOUR_TOKENS.map((t) => `${t}Offer`),
-  },
-  'apps/live/components/tour/ElementTourHost.tsx UI·Closed': {
     values: ELEMENT_TOUR_TOKENS.map((t) => `${t}Offer`),
   },
   'apps/live/components/tour/AvatarTourHost.tsx UI·View': { values: AVATAR_TOUR_STEP_SOURCE },

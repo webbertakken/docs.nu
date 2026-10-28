@@ -1,6 +1,6 @@
 import { MAX_TAB_ID_LEN } from './document-room-rules';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DOCUMENT_FORMAT } from '@livedoc/api-schema';
+import { DOCUMENT_FORMAT, ROOM_FULL_CLOSE, ROOM_MAX_CONNECTIONS } from '@livedoc/api-schema';
 import type { ParticipantPresence, RoomIncoming } from '@livedoc/api-schema';
 import {
   MUTATION_OP_KINDS,
@@ -1710,6 +1710,22 @@ describe('DocumentRoom freeing a selection lock (docs/specs/007-editor/live-app.
     expect(released(holder)).toHaveLength(1);
   });
 
+  // docs/specs/013-workspace/tab-scoped-share-links.md "Realtime": a link to one tab frees a hold on that tab only.
+  it('lets a tab-scoped session free only a hold by someone working on its own tab', () => {
+    const { room, state } = newRoom();
+    const scoped = makeSocket();
+    const near = makeSocket();
+    const far = makeSocket();
+    seedSession(state, scoped, { ...presence('scoped', 'edit'), tabId: 't1' });
+    scoped.attachment = { ...(scoped.attachment as object), tabScope: 't1' };
+    seedSession(state, near, { ...presence('near', 'edit'), tabId: 't1' });
+    seedSession(state, far, { ...presence('far', 'edit'), tabId: 't2' });
+    sendFrame(room, scoped, unlock('far'));
+    expect(released(far)).toEqual([]);
+    sendFrame(room, scoped, unlock('near'));
+    expect(released(near)).toHaveLength(1);
+  });
+
   it('ignores an unlock aimed at yourself', () => {
     const { room, host } = room3();
     sendFrame(room, host, unlock('host'));
@@ -2119,6 +2135,7 @@ describe('DocumentRoom tab-scoped sessions', () => {
     p: ParticipantPresence,
     tabScope: string | null,
     shareCode: string | null = null,
+    tabShowsAll = false,
   ) {
     ws.attachment = {
       presenceId: p.id,
@@ -2126,6 +2143,7 @@ describe('DocumentRoom tab-scoped sessions', () => {
       presence: p,
       isOwner: false,
       tabScope,
+      tabShowsAll,
       shareCode,
     };
     (ws as unknown as { close: (code: number, reason: string) => void }).close = (code, reason) => {
@@ -2180,8 +2198,33 @@ describe('DocumentRoom tab-scoped sessions', () => {
     sendFrame(room, scoped, { kind: 'op', op: { kind: 'el', tabId: 't1', op: {} } });
     sendFrame(room, scoped, { kind: 'op', op: { kind: 'document-meta', name: 'x', tabs: [] } });
     expect(ops(owner)).toEqual([]);
-    sendFrame(room, scoped, { kind: 'op', op: { kind: 'el', tabId: 't2', op: {} } });
-    expect(ops(owner)).toEqual([{ kind: 'el', tabId: 't2', op: {} }]);
+    sendFrame(room, scoped, {
+      kind: 'op',
+      op: { kind: 'el', tabId: 't2', op: { kind: 'reorder', ids: [] } },
+    });
+    expect(ops(owner)).toEqual([{ kind: 'el', tabId: 't2', op: { kind: 'reorder', ids: [] } }]);
+  });
+
+  // docs/specs/026-plan/items.md "Who may do what": a board shows every card, so a scoped session never adds one.
+  it("relays a scoped session's board only when its tab already showed every card", () => {
+    const { room, state } = newRoom();
+    const owner = makeSocket();
+    const scoped = makeSocket();
+    const settled = makeSocket();
+    scopedSession(state, owner, presence('p-o', 'edit'), null);
+    scopedSession(state, scoped, presence('p-s', 'edit'), 't2');
+    scopedSession(state, settled, presence('p-t', 'edit'), 't2', null, true);
+    // A real element op carrying a board (moving one), judged by both gates: room-scope.ts refuses it from a session
+    // whose tab did not show every card; room-scoped-structure.ts relays an update it cannot judge (no stored tab here).
+    const board = {
+      kind: 'el',
+      tabId: 't2',
+      op: { kind: 'update', element: { id: 'b', type: 'shape', shape: 'plan-board', x: 10, y: 0 } },
+    };
+    sendFrame(room, scoped, { kind: 'op', op: board });
+    expect(ops(owner)).toEqual([]);
+    sendFrame(room, settled, { kind: 'op', op: board });
+    expect(ops(owner)).toEqual([board]);
   });
 
   it('filters the catch-up replay the same way', () => {
@@ -2450,7 +2493,7 @@ describe('DocumentRoom and agent changesets', () => {
     room: DocumentRoom,
     id: string,
     personTag: string | null = null,
-    role: 'edit' | 'view' = 'edit',
+    role: 'edit' | 'participate' | 'view' = 'edit',
   ) {
     const ws = makeSocket();
     room.acceptSession(asWs(ws), role, false, null, null, personTag !== null, personTag);
@@ -2511,22 +2554,39 @@ describe('DocumentRoom and agent changesets', () => {
     expect(peer.sent).toEqual([]);
   });
 
-  it("answers every selection on the tab, any role, marking the agent owner's own", async () => {
+  it("answers the selections that hold on the tab, a Participant's and an Editor's, marking the agent owner's own", async () => {
     const { room } = newRoom();
     const owner = join(room, 'o', 'tag-owner');
+    const participant = join(room, 'p', null, 'participate');
     const viewer = join(room, 'v', null, 'view');
     join(room, 'idle');
     sendFrame(room, owner, {
       kind: 'op',
       op: { kind: 'select', elementId: 'a', tabId: 't1', elementIds: ['a', 'b'] },
     });
+    sendFrame(room, participant, {
+      kind: 'op',
+      op: { kind: 'select', elementId: 'd', tabId: 't1' },
+    });
     sendFrame(room, viewer, { kind: 'op', op: { kind: 'select', elementId: 'c', tabId: 't1' } });
     await Promise.resolve();
+    // A Viewer's selection holds nothing against an agent ("Held elements").
     expect((await selections(room, 'tab=t1&person=tag-owner')).selections).toEqual([
       { elementIds: ['a', 'b'], name: 'Name o', color: '#abc', mine: true },
-      { elementIds: ['c'], name: 'Name v', color: '#abc', mine: false },
+      { elementIds: ['d'], name: 'Name p', color: '#abc', mine: false },
     ]);
     expect((await selections(room, 'tab=t2&person=tag-owner')).selections).toEqual([]);
+  });
+
+  it("still answers the agent owner's own selection from a Viewer's seat", async () => {
+    const { room } = newRoom();
+    const owner = join(room, 'o', 'tag-owner', 'view');
+    sendFrame(room, owner, { kind: 'op', op: { kind: 'select', elementId: 'a', tabId: 't1' } });
+    await Promise.resolve();
+    expect((await selections(room, 'tab=t1&person=tag-owner')).selections).toEqual([
+      { elementIds: ['a'], name: 'Name o', color: '#abc', mine: true },
+    ]);
+    expect((await selections(room, 'tab=t1&person=someone-else')).selections).toEqual([]);
   });
 
   it('forgets a selection when it clears or its socket closes', async () => {
@@ -2693,6 +2753,32 @@ describe('DocumentRoom agent presence (docs/specs/024-agents/agent-presence.md)'
 
 // docs/specs/012-collaboration/realtime-conflict-resolution.md "Keepalive": the runtime answers the client's ping
 // itself, so a keepalive never wakes the room.
+// docs/specs/015-api/api.md "A room holds at most 100 connections".
+describe('DocumentRoom capacity', () => {
+  const upgrade = () => {
+    const server = { accept: vi.fn(), close: vi.fn() };
+    return { server, ws: server as unknown as WebSocket };
+  };
+
+  it('admits up to ROOM_MAX_CONNECTIONS and turns the next one away with ROOM_FULL_CLOSE, logging it', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { room, state } = newRoom();
+    for (let i = 0; i < ROOM_MAX_CONNECTIONS - 1; i++) seedSession(state, makeSocket(), null);
+    const last = upgrade();
+    expect(room.turnAwayIfFull(last.ws)).toBe(false);
+    expect(last.server.close).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    seedSession(state, makeSocket(), null);
+    const over = upgrade();
+    expect(room.turnAwayIfFull(over.ws)).toBe(true);
+    expect(over.server.accept).toHaveBeenCalled();
+    expect(over.server.close).toHaveBeenCalledWith(ROOM_FULL_CLOSE, 'room-full');
+    expect(warn).toHaveBeenCalledWith('[room] full', expect.objectContaining({ connections: 100 }));
+    // Never admitted: the room still holds exactly the cap.
+    expect(state.getWebSockets()).toHaveLength(ROOM_MAX_CONNECTIONS);
+  });
+});
+
 describe('DocumentRoom keepalive', () => {
   afterEach(() => vi.unstubAllGlobals());
 

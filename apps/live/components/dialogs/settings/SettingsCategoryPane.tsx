@@ -19,6 +19,7 @@ import {
   SettingsSignInMethodsRow,
 } from './SettingsAccountManageRows';
 import { SettingsShortcutsRow } from './SettingsShortcutsRow';
+import { SettingsHideCursorsRow } from './SettingsHideCursorsRow';
 import { SettingsShortcutListRow } from './SettingsShortcutListRow';
 import { SettingsSliderRow } from './SettingsSliderRow';
 import { SettingsNoteRow } from './SettingsNoteRow';
@@ -264,6 +265,8 @@ export function SettingsCategoryPane({
         return <SettingsNoteRow row={row} />;
       case 'shortcuts':
         return <SettingsShortcutsRow row={row} />;
+      case 'hideCursors':
+        return <SettingsHideCursorsRow row={row} />;
       case 'shortcutList':
         return <SettingsShortcutListRow row={row} />;
       case 'identity':

@@ -5,6 +5,8 @@
 // pair (that follows the APP's mode) does not. Shared by the editor
 // (apps/live lib/element-tint.ts) and the headless render.
 
+import { parseCssColour } from './css-colour';
+
 /** `rgba()` for a hex; `color-mix` for anything else (a named / rgb() /
  *  oklch() colour this can't parse), which a browser without it drops,
  *  leaving the surface untinted rather than wrong. */
@@ -26,7 +28,7 @@ export function colorWash(color: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/** `color-mix(in srgb, a share, b)` for two six-digit hexes, as a hex; `a` when either won't parse. SVG exports can't
+/** `color-mix(in srgb, a share, b)` for two colours the one parser reads (any hex form, a CSS name), as a hex; `a` when either won't parse. SVG exports can't
  *  rely on CSS color-mix. A leaf, so the leaf modules that ramp colours (concept graphics) can use it at load. */
 export function mixHex(a: string, b: string, share: number): string {
   const x = rgbOf(a);
@@ -39,7 +41,8 @@ export function mixHex(a: string, b: string, share: number): string {
   return `#${m(x[0], y[0])}${m(x[1], y[1])}${m(x[2], y[2])}`;
 }
 
-function rgbOf(hex: string): [number, number, number] | null {
-  const m = /^#?([a-fA-F\d]{2})([a-fA-F\d]{2})([a-fA-F\d]{2})$/.exec(hex);
-  return m ? [parseInt(m[1]!, 16), parseInt(m[2]!, 16), parseInt(m[3]!, 16)] : null;
+// Any colour the one parser reads (css-colour.ts, itself a leaf): a shorthand or named colour mixes as its hex.
+function rgbOf(colour: string): [number, number, number] | null {
+  const c = parseCssColour(colour);
+  return c ? [c.r, c.g, c.b] : null;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiListDocumentsWithTeamRecent } from '@/lib/api-client';
 import { useAfterDriveChange } from '@/hooks/persistence/useAfterDriveChange';
 import { relativeSince, useRelativeNow } from '@/lib/relative-time';
@@ -16,21 +16,9 @@ type RecentItem = { id: string; name: string; savedAt: number | null; teamName: 
 // for returning users, hidden entirely for someone with no documents yet
 // (and on narrow viewports where the wizard already fills the width). Each
 // row opens that document directly.
-export function RecentDocumentsCard({
-  ownerId,
-  onCount,
-}: {
-  ownerId: string | null;
-  // Reports how many documents the owner has, once known. The page uses it
-  // to gate the interactive tour's welcome offer (docs/specs/007-editor/editor-tour.md, zero-document
-  // users only); this card already holds the only document-list fetch on
-  // /new, so it shares the answer rather than the page fetching twice.
-  onCount?: (n: number) => void;
-}) {
+export function RecentDocumentsCard({ ownerId }: { ownerId: string | null }) {
   const [recent, setRecent] = useState<RecentItem[] | null>(null);
   const now = useRelativeNow();
-  // Reported to the newest callback; a fresh one never refetches.
-  const reportCount = useEffectEvent((n: number) => onCount?.(n));
 
   // Bumped when a change made in Google Drive lands, to re-read the list
   // (docs/specs/022-drive-mirror/drive-mirror.md, "Other views follow").
@@ -43,8 +31,6 @@ export function RecentDocumentsCard({
     void apiListDocumentsWithTeamRecent(ownerId)
       .then(({ documents, teamRecent }) => {
         if (cancelled) return;
-        // A team member with nothing of their own is not new: their team's documents count.
-        reportCount(documents.length + teamRecent.length);
         const item = (d: DocumentSummary, teamName: string | null): RecentItem => ({
           id: d.id,
           name: d.name,
@@ -60,9 +46,7 @@ export function RecentDocumentsCard({
         setRecent(top);
       })
       .catch(() => {
-        // Best-effort: a returning user just doesn't get the shortcut. Report
-        // zero so a fresh visitor on a flaky network still gets the tour card.
-        if (!cancelled) reportCount(0);
+        // Best-effort: a returning user just doesn't get the shortcut.
       });
     return () => {
       cancelled = true;

@@ -398,6 +398,12 @@ everything beats five that technically fit. The trigger keeps its
 Filter label and dot; its accessible name says "View and filter
 timeline", because on that width it is both.
 
+**The popover takes focus when it opens.** It is portalled to the end of
+the page, so Tab from the Filter button would never reach it: opening
+moves focus into it, and closing with focus still inside hands focus back
+to the Filter button. Focus someone moved elsewhere (a click away) stays
+where they put it.
+
 **The header also carries New Document**, at the row's right edge where
 every other Explorer section puts its create action. A feed is a record
 of what happened rather than a container you add to, so this page
@@ -466,7 +472,11 @@ the mode buttons in §2.2.
   header in both modes — doing nothing at all in one of them.
 
 - **Show More** appends the next page when the read returns a cursor.
-  Page size 50, capped server-side at 200.
+  Page size 50, capped server-side at 200. **A next page that fails**
+  keeps the cursor (the history is never claimed to end there), says
+  "Couldn't load older events." above the button, and the button reads
+  **Try Again**, reading the page once per press; nothing reads it on its
+  own. The editor's Explorer panel says the same over its Show Earlier.
 
 **The Filter dot means "this feed is narrowed", whichever control did
 it** — a reader wondering why the page looks short needs one signal, not
@@ -503,7 +513,8 @@ popover is clipped no matter its z-index.
   copy is "No loaded events match these filters" ("Show More to look further back, or remove a filter.") instead, and Show
   more (§2.3) stays under it: claiming nothing matches while older
   pages are unread is the same lie in a smaller voice.
-- **Failed**: "Couldn't load your timeline", with a Try again action.
+- **Failed**: "Couldn't load your timeline", with a Try again action. Pressing it shows the loading state at
+  once, on the page and in the editor's Explorer panel, never the old failure until the new read answers.
   **A read that failed must never render as an empty feed.** The first
   version of this surface mapped every failure — offline, an expired
   session token, a worker 500 — onto an empty page, so a reader who
@@ -728,10 +739,9 @@ returning `{ title?, menu? }`; the card places `menu` in its title row
 and stops the card's own click from firing under it, and renders
 `title` in place of the subject when given (the inline rename input).
 The live app's `useTimelineCardSlots` implements it against the Explorer
-context. `ScopedTimeline` (a team's activity, a document's history) passes
-nothing and gets plain cards: those surfaces sit outside the Explorer
-context that supplies the handlers, and on a document's own history page
-every card is the same document.
+context. `ScopedTimeline` (a team's activity) passes nothing and gets
+plain cards: it sits outside the Explorer context that supplies the
+handlers. A document's History (§2.10) has no cards to put a menu on.
 
 **A folder card carries the Explorer's folder menu**, by the same
 argument and the same mechanism: `FolderActionsMenu`, the one the
@@ -824,6 +834,88 @@ which takes that one card off the reader's feed.
 `DELETE /api/timeline/events/:id` and `POST /api/timeline/events/dismiss`
 (§6.2a). Telemetry: `Timeline` / `Removed` / `Entry` for a card, `Stack`
 for a run (§10).
+
+### 2.10 A document's History
+
+One document's own story is **History** on its menu, from an Explorer row, a
+Home card or a Timeline card (§3.4). It is a dialog rather than a page,
+because "what happened to this?" is asked while looking at the row. It does
+not reuse the feed's cards: one document's events read best as a rail, the
+way a changelog does, where the feed's cards and calendar answer "what
+happened everywhere". It lives in
+`apps/live/components/panels/DocumentHistoryDialog.tsx` and its parts in
+`components/panels/document-history/`; the pure rules (days, runs, chips,
+summary) in `packages/ui/src/timeline/history.ts`.
+
+- **Whose history.** The header shows the document itself: its thumbnail
+  (the Explorer's `DocumentThumbnail`, the undrawn sketch when nothing is
+  drawn), its name as the dialog's heading, and its owner as the Explorer's
+  Owner column words it ("You", the team, or the sharer's name). There is
+  no kind word: LiveDoc is one product and a document has no kind
+  ([Domain language](../003-system-architecture/domain-language.md)).
+- **At a glance.** A strip under the header: when it was made, when it last
+  changed (relative, "2 hours ago"), how many people the loaded events name
+  (their initials avatars, up to three, and the count) and how many events are
+  loaded ("50+ events" while older ones remain). Made is the document's
+  `createdAt`, else a loaded Document Created event; with neither it is left
+  out rather than guessed. The strip is shown once events have loaded.
+- **Filter.** One chip per kind of event present in what is loaded, the
+  feed's own categories and labels (Comments, New documents, Edits,
+  Sharing, Organisation, ...) in their fixed order, each with its count, and
+  **All** first; shown only when two or more kinds are present. One chip at
+  a time, each a toggle button (`aria-pressed`). With nothing matching, the
+  list says so and offers **Show all**.
+- **The rail.** Events newest first on a vertical rail, one ordered list per
+  local day under a sticky day heading with the day's count: **Today**,
+  **Yesterday**, the weekday within the last week, then the date ("Tue, 5
+  Aug", with its year when not this year's). Each heading and time is a
+  `<time datetime>`. The same-day create rule (§2.1a) applies, as it does on
+  the feed.
+- **An event.** Its type's glyph (the feed's own, §2) in a disc on the rail,
+  in its tone, always beside the reason line in words ("Comment Added"), so
+  colour is never the only signal. Then who did it: "You" on the brand
+  fill, or an initials avatar in the person's stable colour (`colorForKey`
+  on their name) and their name; an event that names nobody (an expiry
+  warning, an edit by someone else) shows no person. Then the detail the renderer gives ("To Launches", "Copy of Q3"), without
+  a "by ..." the avatar line already says, and a comment's or action's words
+  quoted beneath. Names come from the event itself (its author, member,
+  actor or visitor name); no other request is made for names.
+- **Whose is whose.** A document's feed names only the reader by id: every
+  other actor goes out as null (§6.1), because an owner id is a credential
+  and a document's history is readable by anyone holding a share code. So
+  History tells people apart by the reader's id or, for everyone else, the
+  name the event carries; a person is never keyed on an id the reader was
+  not given.
+- **Runs.** Consecutive events of one type by one person (as told apart
+  above, an unnamed person counting as one) on one day fold into
+  one entry ("Document Edited, 3 times", with the first and last times);
+  **Show all 3** (`aria-expanded`) deals the run out beneath it, each with
+  its detail and time.
+- **Paging.** The feed's one paged read (`GET /api/timeline` with the
+  document scope, pages of 50, `useTimelineFeed`). **Show older events**
+  under the rail reads the next page and says how many are shown (polite
+  live region); it is gone at the end, where "The beginning of its history"
+  closes a history longer than one page.
+- **States.** Loading: a rail-shaped skeleton (`aria-busy`). Nothing yet: the
+  shared empty state, "Nothing has happened yet". A failed first read says
+  "Couldn't load its history" with **Try again**, never "nothing has
+  happened" (§2.4); a failed later page keeps what is shown, says "Couldn't
+  load older events" and the button reads **Try again**.
+- **Not here.** No card menus, no Remove from Timeline, no unread markers and
+  no calendar: those act on a reader's feed, and this is the document's
+  record.
+- **Fit.** A centred panel 36 rem wide on a desktop, its body scrolling under
+  the fixed header, summary and chips; edge to edge and full height on a
+  phone. Light and dark. Hover transitions are `duration-micro`; a run dealt
+  out fades in, not under reduced motion. Escape closes and focus returns to
+  the row the menu was opened from.
+- **Speed.** The days, runs, chips and summary are worked out once per loaded
+  page and filter (memoised); 1,000 loaded events group well inside a frame
+  (a test keeps a 16 ms budget).
+- **Roles.** History reads the document's own scope, whose gate is the
+  document's (§3.4): whoever may open the document may read its history,
+  Editor, Participant or Viewer alike. It changes nothing, so no role gates
+  anything inside it.
 
 ## 3. Data model
 
@@ -932,7 +1024,7 @@ The join table and the free-text `scope_type` were the forward plan, and
 two of the three have since shipped:
 
 - **A per-document timeline** (`scope_type = 'document'`) — every document
-  keeps its own history, surfaced from the row menu as **History**. It
+  keeps its own history, surfaced from the row menu as **History** (§2.10). It
   carries _document-level_ events (rename, share toggle, theme change),
   never element diffs. Its read gate defers to
   the document's OWN gate rather than re-deriving one, which is what lets
@@ -1316,7 +1408,8 @@ share link"_, under the **sharing** filter, for a document they had never
 shared a link for — once per teammate per day, so a twelve-person library
 could put eleven false cards a day on one document. Duplicating a
 team-library document reported _"copied by a visitor"_, which is simply
-untrue. Both now require a share code to have been presented. The
+untrue. Both now require the reader's grant to have come through a share link (`DocumentGrant.shareCode`), not
+merely a share header: a teammate following a share link is still a teammate. The
 teammate's own `document_duplicated` event is unaffected: they really did
 copy it.
 
@@ -1431,6 +1524,12 @@ is `403`. This is the only gate the endpoint needs in v1, and it is
 worth stating plainly because the scope parameter looks like it invites
 more.
 
+**A document scope names only the reader.** Its rows go out with every
+other actor's `actorId` as `null`: an owner id is a credential (a guest's
+`X-Owner-Id` is their whole workspace) and a document's feed is readable by
+anyone holding a share code. The client only compares `actorId` with its
+own id; everyone else is named by the snapshot's display name.
+
 ### 6.2 `POST /api/timeline/refresh`
 
 Stamps `last_refreshed_at`, runs the backfill if it hasn't run, and
@@ -1510,6 +1609,7 @@ stacking.ts              bucket + alias rules (pure)
 sameDayCreate.ts         hide the edit that shares a day with the create (pure, §2.1a)
 eventTone.ts             event type -> tone, and the tone colour vars
 monthCells.ts            month-grid arithmetic (pure)
+history.ts               a document's History: day labels, runs, chips, summary (pure, §2.10)
 sourceTypeMeta.ts        chip label + fallback glyph per source type
 types.ts                 TimelineEvent, renderer contracts
 ```
@@ -1523,8 +1623,9 @@ route. The one thing a renderer can't supply, the ⋯ menu, comes in
 through the separate `cardSlots` hook (§2.8), because it needs the
 Explorer's loaded lists and handlers rather than the event alone.
 
-This split is what lets a per-document timeline (§3.4) adopt the same
-components without inheriting Explorer-specific copy.
+This split is what lets a team's activity (§3.4) adopt the same
+components, and a document's History (§2.10) the same renderers, without
+inheriting Explorer-specific copy.
 
 **Colour.** Each tone gets a CSS variable pair
 (`--ld-timeline-<tone>` and `--ld-timeline-<tone>-soft`) defined in the
@@ -1631,8 +1732,10 @@ New category `Timeline` in the closed enum in
   the page load started on it, `Nav` when reached from elsewhere (the
   sidebar's Timeline row, or Home's See Timeline link).
 - `Timeline`/`Changed` with `type` `List` | `Calendar` — mode switch.
-- `Timeline`/`Selected` with `type` the source type — a filter chip
-  toggled.
+- `Timeline`/`Selected` with `type` the category id — a filter chip
+  toggled, on the feed's filter or a document's History (§2.10).
+- `Timeline`/`Opened` with `type` `Run` — a folded run in a document's
+  History dealt out (§2.10).
 - `Timeline`/`Opened` with `type` `Stack` — a stacked run expanded.
   Tells us whether stacking thresholds are right.
 - `Timeline`/`Loaded` with `type` `More` — Show More.

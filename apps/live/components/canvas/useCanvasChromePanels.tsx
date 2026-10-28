@@ -210,7 +210,24 @@ export function useCanvasChromePanels({
     onMenuExport: explorerMenuActions?.onExport,
     onMenuSearch: explorerMenuActions?.onSearch,
     onMenuSettings: explorerMenuActions?.onOpenSettings,
+    onToggleActionDone,
   });
+  // The Inbox section's Mark Done (docs/specs/013-workspace/inbox.md §1.5, §5): the canvas's own, for an action on
+  // the tab open here, offered only where the session may mark one done.
+  const activeTabId = props.activeTabId;
+  const canMarkDone = !!onToggleActionDone;
+  const inboxDone = useMemo(
+    () =>
+      canMarkDone && currentDocumentId && activeTabId
+        ? {
+            documentId: currentDocumentId,
+            tabId: activeTabId,
+            markDone: (elementId: string, actionId: string) =>
+              explorerHandlers.onToggleActionDone?.(elementId, true, actionId),
+          }
+        : null,
+    [canMarkDone, currentDocumentId, activeTabId, explorerHandlers],
+  );
   // The ⋯ menu's rows, stable like the rest; a row stays absent while its
   // handler is, since the stable wrapper alone would always look present.
   const hasShare = !!explorerMenuActions?.onShare;
@@ -341,6 +358,7 @@ export function useCanvasChromePanels({
         onRenameCurrent={explorerHandlers.onRenameCurrent}
         onDeleteDocument={explorerHandlers.onDeleteDocument}
         onLibraryChanged={explorerHandlers.onLibraryChanged}
+        inboxDone={inboxDone}
         onDuplicateDocument={explorerHandlers.onDuplicateDocument}
         onCreateFolder={explorerHandlers.onCreateFolder}
         onRenameFolder={explorerHandlers.onRenameFolder}

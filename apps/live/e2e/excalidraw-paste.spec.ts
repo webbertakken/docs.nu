@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { excalidrawBuilder, excalidrawText } from '../lib/excalidraw-fixtures';
-import { dismissQuickTour, expect, expectNoPageErrors, startBlankDocument, test } from './fixtures';
+import { expect, expectNoPageErrors, startBlankDocument, test } from './fixtures';
 
 // Paste from Excalidraw (docs/specs/020-import-export/excalidraw-import-export.md "Paste"): a copy
 // made in Excalidraw, pasted with Ctrl+V, lands as native content, selected, in one undo step.
@@ -84,7 +84,6 @@ const countElements = (page: Page) =>
 async function pasteSample(page: Page, path: string) {
   await page.goto(path);
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
   const sample = sampleCopy();
   await page.evaluate((text) => navigator.clipboard.writeText(text), sample.text);
   await page.mouse.move(700, 450);
@@ -142,7 +141,6 @@ test.describe('ordinary text', () => {
   test('is not mistaken for an Excalidraw copy', async ({ page, pageErrors }) => {
     await page.goto('/new?template=whiteboard');
     await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-    await dismissQuickTour(page);
     await page.evaluate(() => navigator.clipboard.writeText('{"type":"excalidrawish"}'));
     await page.mouse.move(700, 450);
     await page.keyboard.press('ControlOrMeta+v');
@@ -158,7 +156,6 @@ test.describe('dropping an Excalidraw file', () => {
   test('lands its scene where it is released', async ({ page, pageErrors }) => {
     await page.goto('/new?template=whiteboard');
     await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-    await dismissQuickTour(page);
     const sample = sampleCopy();
     const drop = await page.evaluateHandle((text) => {
       const data = new DataTransfer();
@@ -175,7 +172,6 @@ test.describe('dropping an Excalidraw file', () => {
   test('refuses another file and says so', async ({ page, pageErrors }) => {
     await page.goto('/new?template=whiteboard');
     await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-    await dismissQuickTour(page);
     const drop = await page.evaluateHandle(() => {
       const data = new DataTransfer();
       data.items.add(new File(['hello'], 'notes.txt', { type: 'text/plain' }));
@@ -194,7 +190,6 @@ test.describe('importing Excalidraw files from the Explorer', () => {
 
   test('each file becomes its own document, named after the file', async ({ page, pageErrors }) => {
     await startBlankDocument(page);
-    await dismissQuickTour(page);
     await page.goto('/explorer/recent');
     const button = page
       .getByRole('toolbar', { name: 'Import from' })

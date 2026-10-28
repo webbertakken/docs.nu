@@ -1,4 +1,4 @@
-// The steps of the Draw tour (docs/specs/023-draw-mode/draw-tour.md "The steps"): a welcome card, the dock's Drawing
+// The steps of the Draw tour (docs/specs/023-draw-mode/draw-tour.md "The steps"): the dock's Drawing
 // tools, the Quick Style panel, the dock's Shapes and Settings, then the outro. It places nothing; the one thing it
 // changes, a marker picked up to show Quick Style, it puts back down.
 
@@ -18,12 +18,6 @@ export type DrawTourApi = Record<string, never>;
 export type DrawTourStep = TourStepOf<DrawTourApi>;
 
 export const DRAW_TOUR_STEPS: DrawTourStep[] = [
-  {
-    id: 'welcome',
-    card: 'welcome',
-    title: 'Getting started with Draw?',
-    body: 'A quick look at the pens, shapes and tools?',
-  },
   {
     id: 'drawing-tools',
     title: 'Pens and Tools',

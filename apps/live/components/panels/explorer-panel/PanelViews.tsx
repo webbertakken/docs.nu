@@ -6,7 +6,8 @@
 // starts only while its section is mounted, so opening the editor costs nothing more.
 import { useState } from 'react';
 import { dateKey, pickRenderer, timeLabel } from '@livedoc/ui';
-import { ActivityPane } from '@/components/panels/ActivityPane';
+import { InboxPane } from '@/components/panels/inbox/InboxPane';
+import type { InboxDone } from '@/components/panels/inbox/inbox-verbs';
 import { GalleryPane } from '@/components/panels/GalleryPane';
 import { ThemesPane } from '@/components/panels/ThemesPane';
 import { ShapeLibrariesPane } from '@/components/panels/ShapeLibrariesPane';
@@ -255,8 +256,10 @@ export function HomeSection({
   );
 }
 
-export function InboxSection({ ownerId }: { ownerId: string }) {
-  return <ActivityPane compact feed={useActivityFeed(ownerId)} />;
+// The Inbox, compact and always narrow; `done` is the editor's Mark Done for the tab it has open
+// (docs/specs/013-workspace/inbox.md §5).
+export function InboxSection({ ownerId, done }: { ownerId: string; done?: InboxDone | null }) {
+  return <InboxPane compact feed={useActivityFeed(ownerId)} ownerId={ownerId} done={done} />;
 }
 
 // The Timeline as a list for the pane: each event one row under its day, the newest first. Its card menus and the
@@ -292,6 +295,11 @@ export function TimelineSection({ ownerId }: { ownerId: string }) {
           </PaneList>
         </PaneSection>
       ))}
+      {feed.hasMore && feed.loadMoreFailed && !feed.loadingMore ? (
+        <p role="status" className="text-center text-xs text-slate-600 dark:text-slate-300">
+          Couldn’t load older events.
+        </p>
+      ) : null}
       {feed.hasMore ? (
         <button
           type="button"
@@ -299,7 +307,7 @@ export function TimelineSection({ ownerId }: { ownerId: string }) {
           disabled={feed.loadingMore}
           className="mx-auto cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
         >
-          {feed.loadingMore ? 'Loading…' : 'Show Earlier'}
+          {feed.loadingMore ? 'Loading…' : feed.loadMoreFailed ? 'Try Again' : 'Show Earlier'}
         </button>
       ) : null}
     </div>

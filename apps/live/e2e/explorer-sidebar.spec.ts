@@ -212,7 +212,6 @@ test.describe('editor Explorer panel', () => {
     const owner = await mintSignedGuest(page.request);
     const origin = new URL(baseURL!).origin;
     await darkVisitor(page, owner);
-    await page.addInitScript(() => localStorage.setItem('livedoc:v2:tour-seen', '1'));
     const id = crypto.randomUUID();
     const make = async (docId: string, name: string) => {
       const res = await page.request.post(`${apiBase}/documents`, {

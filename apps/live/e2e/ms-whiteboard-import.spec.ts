@@ -1,7 +1,7 @@
 // The Microsoft Whiteboard import end to end (docs/specs/020-import-export/whiteboard-import.md
 // "Importing"), on a synthesised export: list, import, report, one document per board.
 import type { Page } from '@playwright/test';
-import { test, expect, dismissQuickTour, expectNoPageErrors, startBlankDocument } from './fixtures';
+import { test, expect, expectNoPageErrors, startBlankDocument } from './fixtures';
 import { syntheticExportZip } from './ms-whiteboard-board';
 
 // The Explorer page header's "Import from" toolbar opens the import.
@@ -18,7 +18,6 @@ test('Microsoft Whiteboard boards open as their own documents with a report', as
   pageErrors,
 }) => {
   await startBlankDocument(page);
-  await dismissQuickTour(page);
   await openMsWhiteboardImport(page);
   const chooser = page.waitForEvent('filechooser');
   await page.getByRole('button', { name: 'Choose a .zip' }).click();

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ToastActionSpec } from '@/hooks/ui/useToast';
 import type { DocumentListItem, Folder } from '@/lib/api-client';
 import type { TeamDocumentRow } from '@/hooks/persistence/useTeamLibrariesSweep';
 
@@ -21,6 +22,13 @@ const { useExplorerMoves } = await import('./useExplorerMoves');
 const doc = (id: string) => ({ id, name: id, folderId: null }) as DocumentListItem;
 const teamDoc = (id: string, teamId: string) =>
   ({ id, folderId: null, team: { id: teamId } }) as TeamDocumentRow;
+const namedTeamDoc = (id: string, teamId: string) =>
+  ({
+    id,
+    name: `Doc ${id}`,
+    folderId: null,
+    team: { id: teamId, name: 'Design' },
+  }) as TeamDocumentRow;
 
 function setup() {
   let list = [doc('a'), doc('b')];
@@ -29,7 +37,12 @@ function setup() {
       list = typeof next === 'function' ? next(list) : next;
     },
   );
-  const toast = { error: vi.fn() };
+  const toast = {
+    error: vi.fn(),
+    success: vi.fn(),
+    action: vi.fn<(spec: ToastActionSpec) => void>(),
+    dismissAction: vi.fn(),
+  };
   const refreshFolders = vi.fn(() => Promise.resolve());
   const refreshTeamLibraries = vi.fn();
   const refreshPersonal = vi.fn(() => Promise.resolve());
@@ -40,8 +53,17 @@ function setup() {
       setDocuments,
       folders: [] as Folder[],
       teams: [],
-      teamFolders: [],
-      teamDocuments: [teamDoc('t1', 'team-1')],
+      teamFolders: [
+        {
+          id: 'tf1',
+          name: 'Specs',
+          parentId: null,
+          path: 'Specs',
+          teamId: 'team-1',
+          teamName: 'Design',
+        },
+      ],
+      teamDocuments: [teamDoc('t1', 'team-1'), namedTeamDoc('t2', 'team-1')],
       descendantSet: () => new Set<string>(),
       refreshFolders,
       refreshTeamLibraries,
@@ -112,6 +134,28 @@ describe('moving a team document within its team', () => {
     await vi.waitFor(() => expect(refreshTeamLibraries).toHaveBeenCalled());
     expect(track).toHaveBeenCalledWith('Team', 'Moved', 'Document');
     expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  // docs/specs/004-interface-design/toasts.md "Naming what it acted on".
+  it('says where it went with an Undo that moves it back', async () => {
+    vi.mocked(apiSetDocumentFolder).mockResolvedValue(undefined);
+    const { moves, toast } = setup();
+    moves.moveDocumentTo('t2', { teamId: 'team-1', folderId: 'tf1' });
+    await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
+    const offer = toast.action.mock.calls[0]![0];
+    expect(offer.message).toBe('“Doc t2” moved to “Specs”');
+    offer.actions[0]!.onSelect();
+    expect(vi.mocked(apiSetDocumentFolder)).toHaveBeenLastCalledWith(
+      'owner-1',
+      't2',
+      null,
+      'team-1',
+    );
+    await vi.waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('“Doc t2” moved back to “Design”'),
+    );
+    expect(toast.action).toHaveBeenCalledOnce();
+    expect(track).toHaveBeenCalledWith('Team', 'Moved', 'Undo');
   });
 
   it('says so, and logs it, when the move fails', async () => {

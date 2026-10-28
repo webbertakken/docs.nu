@@ -80,17 +80,26 @@ export function useExplorerLens({
   const [openingSearch, setOpeningSearch] = useState(false);
   // The address bar follows the field at most every LENS_URL_WRITE_MS (a trailing write), and at once on blur:
   // a write per keystroke made held Backspace exceed Safari's 100 history writes in 10 s, which throws.
-  const urlWrite = useRef<{ timer: number | null; href: string | null }>({
+  // A waiting write remembers the page it was typed on: the field outlives a view change, and typing then going
+  // Back (a mouse button, a swipe) must never write the filter onto the page gone back to.
+  const urlWrite = useRef<{ timer: number | null; href: string | null; page: string | null }>({
     timer: null,
     href: null,
+    page: null,
   });
   const flushUrl = useCallback(() => {
     const pending = urlWrite.current;
     if (pending.timer !== null) window.clearTimeout(pending.timer);
     pending.timer = null;
-    if (pending.href === null) return;
-    window.history.replaceState(window.history.state, '', pending.href);
+    const { href, page } = pending;
     pending.href = null;
+    pending.page = null;
+    if (href === null) return;
+    if (window.location.pathname !== page) {
+      debugLog('[explorer-lens] url write dropped: the page moved on');
+      return;
+    }
+    window.history.replaceState(window.history.state, '', href);
   }, []);
   // Leaving the view drops a write still waiting: it would land on the next page's address.
   useEffect(
@@ -99,6 +108,7 @@ export function useExplorerLens({
       if (pending.timer !== null) window.clearTimeout(pending.timer);
       pending.timer = null;
       pending.href = null;
+      pending.page = null;
     },
     [],
   );
@@ -154,6 +164,7 @@ export function useExplorerLens({
       setSync((s) => ({ ...s, pending: [...s.pending, written] }));
       const url = new URL(window.location.href);
       urlWrite.current.href = lensHref(`${url.pathname}${url.search}`, written) + url.hash;
+      urlWrite.current.page = url.pathname;
       if (nextCaret === null) flushUrl();
       else if (urlWrite.current.timer === null)
         urlWrite.current.timer = window.setTimeout(flushUrl, LENS_URL_WRITE_MS);

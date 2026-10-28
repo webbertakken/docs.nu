@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test';
 import {
-  dismissQuickTour,
   expect,
   expectNoPageErrors,
   openContextMenuFromKeyboard,
@@ -24,7 +23,6 @@ async function openEditor(page: Page) {
   // Straight to a blank canvas: the /new?blank=1 bypass (Start Blank).
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
 }
 
 async function openSettings(page: Page) {

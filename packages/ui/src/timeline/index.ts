@@ -37,6 +37,20 @@ export {
   useTimelineGrouping,
   type TimelineDayGroup,
 } from './useTimelineGrouping';
+export {
+  buildHistory,
+  eventCountLabel,
+  filterHistory,
+  historyCategories,
+  historyCreatedAt,
+  historyDayLabel,
+  summariseHistory,
+  type HistoryChip,
+  type HistoryDay,
+  type HistoryPersonKey,
+  type HistoryRun,
+  type HistorySummary,
+} from './history';
 export { buildMonthCells, formatMonth, monthKeyOf, shiftMonth, type MonthCell } from './monthCells';
 export { sourceTypeIconPath } from './sourceTypeMeta';
 export type {

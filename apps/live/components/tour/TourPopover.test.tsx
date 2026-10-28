@@ -10,8 +10,8 @@ const props = {
   stepNumber: 0,
   stepCount: 5,
   stepId: 'palette',
-  title: 'Getting started with Diagrams?',
-  body: 'Want a quick tour?',
+  title: 'The Palette',
+  body: 'Add whatever you need.',
   targetRect: null,
   palette: planPalette('light'),
   onNext: () => undefined,
@@ -86,5 +86,45 @@ describe('TourPopover keys', () => {
     expect(on.onNext).toHaveBeenCalledTimes(1);
     expect(menuArrow).not.toHaveBeenCalled();
     menu.remove();
+  });
+});
+
+// docs/specs/007-editor/editor-tour.md "The last card": the last card is the step card, never a banner.
+describe('TourPopover last card', () => {
+  afterEach(cleanup);
+  const outro = { eyebrow: 'Draw tour', helpHref: '/help/draw/', finish: 'Start' };
+
+  it('swaps the count and Next for its eyebrow, the help link and the finish button', () => {
+    const onNext = vi.fn();
+    const onSkip = vi.fn();
+    render(
+      <TourPopover
+        {...props}
+        stepNumber={4}
+        title="You're ready to draw"
+        outro={outro}
+        onNext={onNext}
+        onSkip={onSkip}
+      />,
+    );
+    expect(screen.getByRole('dialog', { name: "Tour: You're ready to draw" })).toBeTruthy();
+    expect(screen.getByText('Draw tour')).toBeTruthy();
+    expect(screen.queryByText('4 of 5')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Skip tour' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Next' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Learn More' }).getAttribute('href')).toBe(
+      '/help/draw/',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+    expect(onNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('finishes on Escape, as its finish button does', () => {
+    const onNext = vi.fn();
+    const onSkip = vi.fn();
+    render(<TourPopover {...props} outro={outro} onNext={onNext} onSkip={onSkip} />);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onNext).toHaveBeenCalledTimes(1);
+    expect(onSkip).not.toHaveBeenCalled();
   });
 });

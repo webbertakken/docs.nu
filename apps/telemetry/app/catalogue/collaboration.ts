@@ -686,6 +686,14 @@ export const TIMELINE_STACKS_EXPANDED = chart(
   { types: ['Stack'] },
 );
 
+export const TIMELINE_HISTORY_RUNS = chart(
+  'Timeline',
+  'Opened',
+  'History Runs Expanded',
+  "A folded run of one kind of change in a document's History dealt out to show each one.",
+  { types: ['Run'] },
+);
+
 export const TIMELINE_ENTRIES_REMOVED = chart(
   'Timeline',
   'Removed',
@@ -706,6 +714,27 @@ export const ACTIVITY_THREADS = chart(
   'Selected',
   'Inbox Items Opened',
   "An action, a Plan card or a comment thread opened from the Explorer's Inbox.",
+);
+
+export const ACTIVITY_FILTERS = chart(
+  'Activity',
+  'Changed',
+  'Inbox Filters Changed',
+  "A filter chosen over the Explorer's Inbox: All, My Actions, Assigned by Me, Comments or Form Responses.",
+);
+
+export const ACTIVITY_REPLIES = chart(
+  'Activity',
+  'Added',
+  'Inbox Replies',
+  "A comment thread answered from the Explorer's Inbox reading pane.",
+);
+
+export const ACTIVITY_RESOLVED = chart(
+  'Activity',
+  'Resolved',
+  'Inbox Items Resolved',
+  "A thread resolved from the Explorer's Inbox, or an action marked done from the editor's panel.",
 );
 
 // Explorer Home (docs/specs/013-workspace/explorer-home.md): arrivals by type, documents opened
@@ -767,9 +796,13 @@ export const TIMELINE_AND_ACTIVITY: MetricStack = {
     TIMELINE_VISITS,
     TIMELINE_MENUS,
     TIMELINE_STACKS_EXPANDED,
+    TIMELINE_HISTORY_RUNS,
     TIMELINE_ENTRIES_REMOVED,
     ACTIVITY_OPENED,
     ACTIVITY_THREADS,
+    ACTIVITY_FILTERS,
+    ACTIVITY_REPLIES,
+    ACTIVITY_RESOLVED,
     TIMELINE_LOADS,
     TIMELINE_VIEW_SWITCHED,
     TIMELINE_FILTERED,

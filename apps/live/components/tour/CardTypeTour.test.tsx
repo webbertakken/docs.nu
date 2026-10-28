@@ -74,6 +74,6 @@ describe('Show Me', () => {
       undefined,
     ]);
     expect(CARD_TYPE_TOUR_STEPS.at(-1)?.card).toBe('outro');
-    expect(CARD_TYPE_TOUR_STEPS.some((s) => s.card === 'welcome')).toBe(false);
+    expect(CARD_TYPE_TOUR_STEPS.filter((s) => s.card)).toHaveLength(1);
   });
 });

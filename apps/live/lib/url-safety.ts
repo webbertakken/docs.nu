@@ -6,6 +6,8 @@
 // vbscript:, file:, etc. — enforced both at store time (normaliseUrl) and at
 // follow time (isSafeFollowUrl) as defence-in-depth for older / bypassing data.
 
+import { withUrlScheme } from '@livedoc/forms';
+
 const SAFE_SCHEMES = new Set(['http:', 'https:', 'mailto:']);
 
 // Normalise a user-entered address for storage. Prepends `https://` to a bare
@@ -15,7 +17,7 @@ const SAFE_SCHEMES = new Set(['http:', 'https:', 'mailto:']);
 export function normaliseUrl(raw: string): string | null {
   const t = raw.trim();
   if (!t) return null;
-  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : `https://${t}`;
+  const withScheme = withUrlScheme(t);
   let u: URL;
   try {
     u = new URL(withScheme);

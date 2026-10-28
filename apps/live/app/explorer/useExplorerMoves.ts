@@ -14,6 +14,9 @@ import { DOCUMENT_FAILURE, FOLDER_FAILURE } from '@/lib/write-failure-copy';
 import { toastName } from '@/lib/toast-name';
 import { OFFLINE_OWNER_ID } from '@/lib/offline/offline-store';
 import { track } from '@/lib/telemetry';
+import { documentMovedBackMessage, type MoveDestination } from '@/lib/document-toast-copy';
+import { offerMoveUndo } from '@/lib/document-move-undo';
+import type { useToast } from '@/hooks/ui/useToast';
 import type { TeamDocumentRow, TeamFolderRow } from '@/hooks/persistence/useTeamLibrariesSweep';
 
 // The unified move-picker slice (docs/specs/013-workspace/team-shared-documents.md), lifted out of
@@ -49,7 +52,7 @@ export function useExplorerMoves({
   refreshTeamLibraries: () => void;
   refreshPersonal: (ownerId: string) => Promise<void>;
   moveDocumentToFolder: (id: string, folderId: string | null) => void;
-  toast: { error: (message: string) => void };
+  toast: Pick<ReturnType<typeof useToast>, 'error' | 'success' | 'action' | 'dismissAction'>;
 }) {
   // Move picker target. The picker uses moveAnchorRef for placement.
   // `kind` discriminates whether we're moving a document or a folder
@@ -119,14 +122,37 @@ export function useExplorerMoves({
   // Re-folder a team-library document WITHIN its team (folderId null =
   // the team's root), then re-sweep so Recent's rows repaint.
   // Same call the team page's own move uses (docs/specs/013-workspace/team-shared-documents.md).
-  const moveTeamDocumentToFolder = (id: string, teamId: string, folderId: string | null) => {
+  // Once it landed, the toast names the document and where it went, with an Undo that moves it back
+  // (docs/specs/004-interface-design/toasts.md "Naming what it acted on").
+  const moveTeamDocumentToFolder = (
+    id: string,
+    teamId: string,
+    folderId: string | null,
+    undo = false,
+  ) => {
     if (!ownerId) return;
+    const row = teamDocuments.find((d) => d.id === id);
+    const from = row?.folderId ?? null;
+    const dest: MoveDestination = folderId
+      ? { folder: teamFolders.find((f) => f.id === folderId)?.name ?? '' }
+      : { team: row?.team.name ?? '' };
     // .then BEFORE .catch, deliberately: chained the other way round the
     // success handler also runs after a swallowed rejection, which is harmless
     // for a refresh but would keep counting moves that never happened.
     void apiSetDocumentFolder(ownerId, id, folderId, teamId)
       .then(() => {
         refreshTeamLibraries();
+        if (undo) {
+          toast.success(documentMovedBackMessage(row?.name, dest));
+          track('Team', 'Moved', 'Undo');
+          return;
+        }
+        offerMoveUndo(toast, {
+          id,
+          name: row?.name,
+          dest,
+          moveBack: () => moveTeamDocumentToFolder(id, teamId, from, true),
+        });
         track('Team', 'Moved', 'Document');
       })
       .catch((err: unknown) => {

@@ -1,11 +1,5 @@
 import type { Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  startTemplateDocument,
-  test,
-} from './fixtures';
+import { expect, expectNoPageErrors, startTemplateDocument, test } from './fixtures';
 import { openPhotoBoard } from './fixtures/photo-board';
 import { wallPhotoPng, type WallNote } from './fixtures/wall-photo';
 
@@ -283,7 +277,6 @@ test('the photo import needs no model key', async ({ page, pageErrors }) => {
   );
   await startTemplateDocument(page, 'Technical', /^Event storming/i);
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
   await expect(page.getByRole('button', { name: /add from photo/i })).toBeVisible();
   expectNoPageErrors(pageErrors);
 });

@@ -19,8 +19,11 @@ export type TourApi = {
 };
 
 // A Diagram tour step: the shared step shape (tour-step.ts) over this tour's api, plus the words a touch
-// screen reads where the desktop's would name a hover or a click it does not have.
-export type TourStep = TourStepOf<TourApi> & { touchBody?: string };
+// screen reads where the desktop's would name a hover or a click it does not have, and whether an event-storming
+// board skips it (docs/specs/021-event-storming/event-storming.md): the board hides the palette's header band, so its
+// two dropdowns aren't there to point at. Without it the step anchors to a display:none trigger, a ring measuring 0x0
+// in the top-left corner and a menu opened off-screen.
+export type TourStep = TourStepOf<TourApi> & { touchBody?: string; boardSkip?: boolean };
 
 // The steps this surface actually has chrome for. Filtering up front (not
 // letting a missing target time out mid-tour) keeps the "N of M" count
@@ -62,12 +65,6 @@ const closeTabStyle = () => document.querySelector<HTMLElement>(TAB_STYLE)?.pare
 let tabStyleLeft = false;
 
 export const TOUR_STEPS: TourStep[] = [
-  {
-    id: 'welcome',
-    card: 'welcome',
-    title: 'Getting started with Diagrams?',
-    body: 'A quick look at the editor? It takes about a minute.',
-  },
   {
     id: 'palette',
     title: 'The Palette',

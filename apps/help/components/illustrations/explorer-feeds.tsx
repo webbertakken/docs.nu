@@ -1,7 +1,7 @@
 // Explorer feed illustrations (docs/specs/018-help/help-app.md): Home (Jump Back In and What
 // happened), the Timeline feed and its stacking, the Inbox, Recent, Shared With Me,
 // and the Spaces group of the sidebar with its teams. Drawn from the real labels in apps/live
-// (sidebar-structure.ts, home-copy.ts, ActivityPane.tsx, views.tsx, the @livedoc/ui timeline).
+// (sidebar-structure.ts, home-copy.ts, inbox-entries.ts, views.tsx, the @livedoc/ui timeline).
 // Composed from the shared primitives plus the Explorer parts, so the house style holds.
 
 import type { ReactNode } from 'react';
@@ -269,114 +269,134 @@ function BigGlyph({ kind, tone }: { kind: 'team' | 'folder' | 'pencil'; tone: To
   );
 }
 
-/** The row of the Inbox: kind glyph, title (and hint), the document chip and where, the person. */
-function InboxRow({
+/** One Inbox row, three lines: who and when; what; why, then the document's chip. The chosen row has a brand edge. */
+function InboxListRow({
   y,
-  kind,
-  title,
-  hint,
-  chip,
-  where,
   who,
-  colour,
+  bold = false,
   time,
+  title,
+  why,
+  chip,
+  colour,
+  chosen = false,
 }: {
   y: number;
-  kind: 'action' | 'comment' | 'card';
-  title: string;
-  hint?: string;
-  chip: string;
-  where: string;
   who: string;
-  colour: 'brand' | 'emerald' | 'violet' | 'amber';
+  bold?: boolean;
   time: string;
+  title: string;
+  why: string;
+  chip: string;
+  colour: 'brand' | 'emerald' | 'violet' | 'amber' | 'slate';
+  chosen?: boolean;
 }) {
-  const chipW = chip.length * 5.6 + 12;
+  const chipX = 52 + why.length * 5.4 + 8;
   return (
     <g>
-      <rect
-        x={32}
-        y={y}
-        width={356}
-        height={34}
-        rx={6}
-        className="fill-white stroke-slate-200"
-        strokeWidth={1}
-      />
-      <g
-        transform={`translate(46 ${y + 12})`}
-        className="stroke-slate-400"
-        strokeWidth={1.5}
-        fill="none"
-        strokeLinejoin="round"
-      >
-        {kind === 'action' && (
-          <g>
-            <rect x={-5} y={-6} width={10} height={12} rx={1.5} />
-            <path d="M-2 -6 V-8 H2 V-6 M-2.5 0 L-0.5 2 L2.5 -1.5" />
-          </g>
-        )}
-        {kind === 'comment' && <path d="M-6 -5 H6 V3 H-1 L-4 6 V3 H-6 Z" />}
-        {kind === 'card' && <rect x={-5} y={-5} width={10} height={10} rx={2} />}
-      </g>
-      <Label x={60} y={y + 11} size={10.5} weight={600} tone="strong">
-        {title}
-      </Label>
-      {hint && (
+      {chosen && (
         <g>
           <rect
-            x={60 + title.length * 5.9 + 6}
-            y={y + 4}
-            width={hint.length * 6.2 + 10}
-            height={14}
-            rx={7}
-            className="fill-amber-50 stroke-amber-400"
-            strokeWidth={1}
+            x={17}
+            y={y}
+            width={207}
+            height={46}
+            className="fill-brand-50 dark:fill-(--help-art-slate-800)"
           />
-          <Label
-            x={60 + title.length * 5.9 + 11}
-            y={y + 11}
-            size={10}
-            weight={600}
-            className="fill-amber-600 dark:fill-amber-300"
-          >
-            {hint}
-          </Label>
+          <rect x={17} y={y} width={2.5} height={46} className="fill-brand-600" />
         </g>
       )}
-      <rect x={60} y={y + 19} width={chipW} height={12} rx={6} className="fill-slate-100" />
-      <Label x={66} y={y + 25.5} size={10} weight={600} tone="body">
-        {chip}
+      <Avatar cx={36} cy={y + 13} r={8} initial={who.charAt(0)} colour={colour} />
+      <Label x={52} y={y + 11} size={10} weight={bold ? 700 : 400} tone={bold ? 'strong' : 'body'}>
+        {who}
       </Label>
-      <Label x={60 + chipW + 6} y={y + 25.5} size={10} tone="muted">
-        {where}
-      </Label>
-      <Avatar cx={372} cy={y + 13} r={8} initial={who} colour={colour} />
-      <Label x={358} y={y + 13} size={10} tone="muted" anchor="end">
+      <Label x={214} y={y + 11} size={9} tone="muted" anchor="end">
         {time}
+      </Label>
+      <Label x={52} y={y + 24} size={10.5} tone="strong">
+        {title}
+      </Label>
+      <Label x={52} y={y + 37} size={9} weight={600} tone="muted">
+        {why}
+      </Label>
+      <rect
+        x={chipX}
+        y={y + 31}
+        width={chip.length * 5 + 10}
+        height={12}
+        rx={6}
+        className="fill-slate-100"
+      />
+      <Label x={chipX + 5} y={y + 37.5} size={9} tone="body">
+        {chip}
       </Label>
     </g>
   );
 }
 
-/** A section heading of the Inbox with its count. */
-function InboxSectionTitle({ y, title, count }: { y: number; title: string; count: number }) {
-  const w = title.length * 7;
+/** A filter chip over the Inbox's list, with its count; the chosen one is filled. */
+function InboxChip({
+  x,
+  label,
+  count,
+  on = false,
+}: {
+  x: number;
+  label: string;
+  count: number;
+  on?: boolean;
+}) {
+  const w = (label.length + String(count).length) * 5.2 + 16;
   return (
     <g>
-      <Label x={34} y={y} size={10} weight={700} tone="muted">
-        {title}
-      </Label>
       <rect
-        x={34 + w + 4}
-        y={y - 7}
-        width={16}
-        height={14}
-        rx={7}
-        className="fill-slate-200 dark:fill-(--help-art-slate-800)"
+        x={x}
+        y={50}
+        width={w}
+        height={16}
+        rx={8}
+        className={on ? 'fill-slate-900 dark:fill-slate-100' : 'fill-slate-100'}
       />
-      <Label x={34 + w + 12} y={y} anchor="middle" size={10} weight={700} tone="muted">
-        {count}
+      <Label
+        x={x + 8}
+        y={58.5}
+        size={9}
+        weight={600}
+        className={on ? 'fill-white dark:fill-slate-900' : undefined}
+        tone={on ? undefined : 'body'}
+      >
+        {`${label} ${count}`}
+      </Label>
+    </g>
+  );
+}
+
+/** A verb in the reading pane, with its key. */
+function InboxVerb({
+  x,
+  label,
+  keyName,
+  primary = false,
+}: {
+  x: number;
+  label: string;
+  keyName: string;
+  primary?: boolean;
+}) {
+  const w = (label.length + keyName.length) * 5.6 + 22;
+  return (
+    <g>
+      <rect
+        x={x}
+        y={112}
+        width={w}
+        height={20}
+        rx={6}
+        className={primary ? 'fill-brand-700' : 'fill-white stroke-slate-300'}
+        strokeWidth={1}
+      />
+      <Label x={x + 9} y={122.5} size={10} weight={600} tone={primary ? 'onAccent' : 'body'}>
+        {`${label}  ${keyName}`}
       </Label>
     </g>
   );
@@ -575,59 +595,87 @@ export function TimelineStack() {
   );
 }
 
-/** The Inbox: Assigned to You, You Assigned, then Open Comment Threads, each with a count. */
-export function InboxSections() {
+/** The Inbox: the filter bar over one list, newest first under its dividers, and the chosen row in the reading pane
+ *  with its verbs and keys. */
+export function InboxListAndPane() {
   return (
-    <Scene w={420} h={274} bg="plain">
-      <Pane h={250} />
-      <Label x={32} y={30} size={12} weight={700} tone="strong">
+    <Scene w={560} h={274} bg="plain">
+      <Pane w={528} h={250} />
+      <Label x={32} y={34} size={12} weight={700} tone="strong">
         Inbox
       </Label>
-      <line x1={16} y1={42} x2={404} y2={42} className="stroke-slate-200" strokeWidth={1.5} />
-      <InboxSectionTitle y={56} title="ASSIGNED TO YOU" count={2} />
-      <InboxRow
-        y={64}
-        kind="action"
-        title="Confirm the retry budget"
-        chip="Payments"
-        where="Checkout · Flow"
-        who="Y"
-        colour="brand"
-        time="2h"
-      />
-      <InboxRow
-        y={102}
-        kind="card"
-        title="#12 Add the audit table"
-        chip="Ledger"
-        where="Sprint board · Plan"
-        who="Y"
-        colour="brand"
-        time="1d"
-      />
-      <InboxSectionTitle y={152} title="YOU ASSIGNED" count={1} />
-      <InboxRow
-        y={160}
-        kind="action"
-        title="Draft the rollout note"
-        chip="Payments"
-        where="Release · Plan"
-        who="S"
-        colour="emerald"
-        time="3d"
-      />
-      <InboxSectionTitle y={208} title="OPEN COMMENT THREADS" count={1} />
-      <InboxRow
-        y={216}
-        kind="comment"
+      <InboxChip x={30} label="All" count={4} on />
+      <InboxChip x={76} label="My Actions" count={2} />
+      <InboxChip x={160} label="Comments" count={1} />
+      <line x1={224} y1={42} x2={224} y2={262} className="stroke-slate-200" strokeWidth={1.5} />
+      <Label x={30} y={84} size={8.5} weight={700} tone="muted">
+        TODAY
+      </Label>
+      <InboxListRow
+        y={90}
+        who="Priya"
+        bold
+        time="5 min ago"
         title="Checkout"
-        hint="Mentioned You"
+        why="@ Mentioned You"
         chip="Payments"
-        where="Checkout · Flow"
-        who="P"
         colour="violet"
-        time="5m"
+        chosen
       />
+      <InboxListRow
+        y={138}
+        who="Sam"
+        bold
+        time="2 hours ago"
+        title="Confirm the retry budget"
+        why="To Do"
+        chip="Payments"
+        colour="emerald"
+      />
+      <Label x={30} y={198} size={8.5} weight={700} tone="muted">
+        EARLIER THIS WEEK
+      </Label>
+      <InboxListRow
+        y={204}
+        who="Jo"
+        time="3 days ago"
+        title="Draft the rollout note"
+        why="Waiting on Jo"
+        chip="Release"
+        colour="amber"
+      />
+      <Label x={244} y={60} size={9} tone="muted">
+        Payments › Flow
+      </Label>
+      <Label x={244} y={82} size={15} weight={700} tone="strong">
+        Checkout
+      </Label>
+      <Label x={244} y={100} size={10} tone="body">
+        Priya mentioned you · 5 min ago
+      </Label>
+      <InboxVerb x={244} label="Reply" keyName="r" primary />
+      <InboxVerb x={310} label="Resolve" keyName="e" />
+      <InboxVerb x={388} label="Open" keyName="↵" />
+      <line x1={244} y1={146} x2={528} y2={146} className="stroke-slate-200" strokeWidth={1} />
+      <Avatar cx={254} cy={164} r={8} initial="P" colour="violet" />
+      <Label x={268} y={161} size={9.5} weight={700} tone="strong">
+        Priya · 5 min ago
+      </Label>
+      <Label x={268} y={175} size={10} tone="body">
+        Can we keep three retries here?
+      </Label>
+      <rect
+        x={244}
+        y={196}
+        width={284}
+        height={44}
+        rx={6}
+        className="fill-white stroke-slate-300"
+        strokeWidth={1}
+      />
+      <Label x={254} y={212} size={10} tone="muted">
+        Reply to Priya…
+      </Label>
     </Scene>
   );
 }

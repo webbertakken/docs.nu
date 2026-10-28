@@ -11,8 +11,8 @@ import type { TourEngine } from './useTourEngine';
 // card glide to it together. The glide is the only time either animates its position: a target that moves while its
 // step is up (a scroll, a zoom) is followed exactly.
 export function useTourGlide<Api>(engine: TourEngine<Api>) {
-  const landed =
-    engine.active && engine.landed && engine.step && !engine.step.card ? engine.step : null;
+  // The last card lands like any step, centred: the card glides to the middle of the screen with its words.
+  const landed = engine.active && engine.landed && engine.step ? engine.step : null;
   const [shown, setShown] = useState<{ step: TourStepOf<Api>; stepIndex: number } | null>(null);
   const [gliding, setGliding] = useState(false);
   // Adjusted during render: the landing and the words change in the same frame.
@@ -22,8 +22,6 @@ export function useTourGlide<Api>(engine: TourEngine<Api>) {
     setGliding(shown !== null);
   }
   if (!engine.active && shown) setShown(null);
-  // A bookend card (the outro) takes over: the next step after it starts afresh.
-  if (engine.active && engine.step?.card && shown) setShown(null);
   useEffect(() => {
     if (!gliding) return;
     const t = setTimeout(() => setGliding(false), TOUR_GLIDE_MS + 40);

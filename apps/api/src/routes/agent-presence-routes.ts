@@ -20,9 +20,9 @@ import { logRefusal } from './refusal-log';
 import {
   deniedOnTab,
   gateEdit,
+  gateGrant,
   gateRead,
   missingDocument,
-  shareCodeOf,
   type DocumentRouteContext,
 } from './context';
 
@@ -107,6 +107,10 @@ async function presenceRoute(ctx: DocumentRouteContext): Promise<Response | null
   if (focus instanceof Response) return focus;
   // The entry's name and colour are the owner's (I2); its level the one the gates resolve for the token (PR27).
   const participant = await getParticipant(env, owner);
+  // The link the grant came through, never the share header on its own: an owner or team member sending one keeps an
+  // entry no link revoke should close, and the entry a link admitted closes with that link (docs/specs/024-agents/
+  // agent-presence.md "Presence").
+  const grant = await gateGrant(ctx, documentId, doc.ownerId, doc.teamId);
   const role: ShareRole =
     !token.readOnly && (await gateEdit(ctx, documentId, doc.ownerId, doc.teamId, tabId))
       ? 'edit'
@@ -118,7 +122,7 @@ async function presenceRoute(ctx: DocumentRouteContext): Promise<Response | null
       tokenId: token.id,
       tabId,
       personTag: await personTagFor(documentId, owner),
-      shareCode: shareCodeOf(request),
+      shareCode: grant?.shareCode ?? null,
       name: participant?.name ?? 'Anonymous',
       color: participant?.color ?? '#94a3b8',
       role,

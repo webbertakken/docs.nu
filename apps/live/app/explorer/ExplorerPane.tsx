@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useCallback, useMemo } from 'react';
 import { useExplorer } from './ExplorerContext';
-import { useDocumentEntryFor } from './useDocumentEntryFor';
+import { useDocumentEntryFor, useExplorerDocumentsById } from './useDocumentEntryFor';
 import type { HelpArticleKey } from '@/lib/help-articles';
 import { ListView, PaneHeader, SharedList, SkeletonRows, type PaneDocument } from './views';
 import { CardView } from './CardView';
@@ -106,8 +106,8 @@ const HomePane = dynamic(
 const TagsPane = dynamic(() => import('./tags/TagsPane').then((m) => m.TagsPane), {
   ssr: false,
 });
-const ActivityPane = dynamic(
-  () => import('@/components/panels/ActivityPane').then((m) => m.ActivityPane),
+const InboxPane = dynamic(
+  () => import('@/components/panels/inbox/InboxPane').then((m) => m.InboxPane),
   { ssr: false },
 );
 
@@ -220,6 +220,8 @@ export function ExplorerPane() {
   // Home's Jump Back In cards carry each document's Explorer menu (docs/specs/013-workspace/explorer-home.md).
   const showHistory = useCallback((id: string, name: string) => setHistoryFor({ id, name }), []);
   const homeDocumentMenus = useDocumentEntryFor({ onShowHistory: showHistory });
+  // The history dialog's header and summary read the document's row (whose it is, when made).
+  const documentsById = useExplorerDocumentsById();
 
   // Which of New document, New folder and Import from this section offers (pane-header-actions.ts).
   const offers = paneHeaderActions(selected.kind);
@@ -346,7 +348,9 @@ export function ExplorerPane() {
       ) : selected.kind === 'inbox' ? (
         // Like the Timeline, ahead of the document-list `loading` gate: the
         // section reads its own feed (docs/specs/013-workspace/inbox.md §5).
-        <ActivityPane feed={activity} />
+        ownerId ? (
+          <InboxPane feed={activity} ownerId={ownerId} />
+        ) : null
       ) : loading ? (
         <SkeletonRows />
       ) : selected.kind === 'invites' ? (
@@ -441,6 +445,7 @@ export function ExplorerPane() {
           ownerId={ownerId}
           documentId={historyFor?.id ?? null}
           documentName={historyFor?.name ?? null}
+          document={historyFor ? documentsById.get(historyFor.id) : undefined}
         />
       ) : null}
     </TitleHighlightProvider>

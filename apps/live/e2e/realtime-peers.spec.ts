@@ -1,13 +1,5 @@
 import type { Browser, Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  test,
-  guestSigFor,
-  mintSignedGuest,
-  ownerHeaders,
-  paletteTile,
-} from './fixtures';
+import { expect, test, guestSigFor, mintSignedGuest, ownerHeaders, paletteTile } from './fixtures';
 
 // Two people on one shared document (docs/specs/012-collaboration/realtime-conflict-resolution.md): each sees
 // the other online, an edit reaches the other side live, the autosave keeps everyone's edits (a peer's is
@@ -31,11 +23,6 @@ async function openAs(
         if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
         localStorage.setItem('livedoc:v2:name-confirmed', '1');
       }
-      // The Workshop tour offers itself over the board (fixtures openBlankSession); its overlay would take the presses.
-      localStorage.setItem(
-        'livedoc:user-preferences:v1',
-        JSON.stringify({ workshopTourSeen: true }),
-      );
     },
     { o: owner, sig: owner ? guestSigFor(owner) : null },
   );
@@ -96,8 +83,6 @@ test('two peers see each other, edit live, and every edit is kept', async ({
   const peerPage = await openAs(browser, baseURL!, `/document/shared?s=${code}`, null);
   await peerPage.getByRole('button', { name: /^join$/i }).click();
   await peerPage.locator(CANVAS).waitFor();
-  await dismissQuickTour(ownerPage);
-  await dismissQuickTour(peerPage);
 
   // Presence: the owner sees two people online, the peer among them.
   const online = ownerPage.locator('[role="img"][aria-label$="(Online)"]');

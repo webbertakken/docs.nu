@@ -833,6 +833,7 @@ export * from './arrow-behind';
 export * from './element-grid';
 // Tab + document name length cap (docs/specs/006-document/name-length.md).
 export * from './names';
+export * from './graphemes';
 export * from './geometry-snapping';
 export * from './arrow-snapping';
 export * from './geometry-guides';

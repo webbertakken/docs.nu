@@ -150,6 +150,10 @@ export function placeHint(input: {
 - An empty `label` renders the child alone, with no wrapper handlers.
 - `role="tooltip"` on both surfaces, each with a `useId` id. The trigger is not given `aria-describedby`: a tooltip
   repeats the accessible name, so describing by it would announce the name twice (D30).
+- A `HoverCard` with a `description` renders a `hidden` span (its own `useId` id) holding the description, so the
+  words exist while the card is closed. A single element child is cloned with that id appended to any
+  `aria-describedby` it already carries; any other child (text, a fragment, several nodes) is described through the
+  wrapper instead. No description adds no attribute and no span.
 
 Placement (moved unchanged from the old `Tooltip`): try top, bottom, right, left in that order and take the first whose
 box fits inside the viewport less `margin`; if none fits, top. Top and bottom centre on the trigger and clamp
@@ -242,6 +246,7 @@ surface.
 | Mouse focus opens nothing                   | `useHint.test.tsx`                                                 |
 | Warm-up                                     | `hint-registry.test.ts`; `Tooltip.test.tsx` second trigger         |
 | Hover card opens at once                    | `HoverCard.test.tsx`; e2e zoom control                             |
+| Hover card describes its control            | `HoverCard.test.tsx`, for assistive technology                     |
 | Escape dismisses and passes through         | `useHint.test.tsx`; e2e                                            |
 | Hoverable, grace                            | `useHint.test.tsx`                                                 |
 | Press closes and cancels                    | `useHint.test.tsx`, including a control that stops bubbling        |

@@ -84,6 +84,13 @@ export async function dropVisitsThroughLinks(
     .run();
 }
 
+// Every link visit to a document ends (docs/specs/013-workspace/share-password.md "Existing viewers"): a new or changed
+// share password holds for everyone a link admitted before it, so the document leaves their Shared With Me list,
+// their Inbox and every leg that reads shared_with until they enter the password, which records the visit again.
+export async function dropDocumentVisits(env: Env, documentId: string): Promise<void> {
+  await env.DB.prepare('DELETE FROM shared_with WHERE document_id = ?').bind(documentId).run();
+}
+
 // List documents shared with this owner, newest interaction first.
 // Joins through `diagrams` for the name + owner-side savedAt; also
 // surfaces a still-live `shareCode` for each row so the client can

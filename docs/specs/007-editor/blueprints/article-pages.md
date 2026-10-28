@@ -32,7 +32,7 @@ design decision. The page model, the row, page kinds and page actions are
 | Article edits (row)      | `PageUnit`, `pageUnits`, `articlePages`, `withArticleFlow`, `withArticleAdded`, `withArticleRemoved`, `withUnitMoved`, `withArticleDuplicated`, `withArticlePageCount`, `packages/document/src/article-pages.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Margin note              | `AnnotationElement.articleNote?: 'comment' \| 'action'` (`element-types.ts`); `ArticleNoteKind`, `ArticleNotePlace`, `packages/document/src/article-notes.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Note edits               | `articleNoteCorner`, `newArticleNote`, `withNotesSettled`, `withNoteMarksRemoved`, `articleNoteIds`, `withNoteMarkersRemoved`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Note marker face         | `ArticleNoteFace` (`components/canvas/article/ArticleNoteFace.tsx`), routed by `ElementFaceRouter`; chip variant in `element-variant.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Note marker face         | `ArticleNoteFace` (`components/canvas/article/ArticleNoteFace.tsx`, `data-note-face` = `comment` / `comment-resolved` / `action-open` / `action-done` / `action-wont-do`), routed by `ElementFaceRouter`; chip variant in `element-variant.ts`; look and name `noteLook`, `noteAriaLabel`, `NOTE_INK` (`lib/article/article-note-look.ts`)                                                                                                                                                                                                                                                                                                                                                 |
 | Turn Into Pages          | `articleBlocksAsRuns`, `articleAsPages`, `withArticlesAsPages`, `packages/document/src/article-to-page.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Block ops                | `ArticleOp` (`put`, `remove`, `style`), `diffArticleFlow(before, after)`, `applyArticleOps(flow, ops)`, `parseArticleOps(v)`; ids `isArticleId`, `packages/document/src/article-flow-ops.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | Room op                  | `RoomOp` `{ kind: 'article'; tabId; flow; ops; created?; agent? }` / `{ …; removed: true }` (mutation), `packages/api-schema/src/room-messages.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -144,7 +144,8 @@ style? }`. Saved with the tab (D1 row, `MAX_TAB_BYTES` has the last word), carri
   - Runs: non-string or empty text dropped; flags kept only when `true`; `sup` and `sub` together
     keep `sup`; `href` kept only through `isSafeArticleHref`; `color` / `hl` only as hex; `note`
     only as an id (`isArticleId`), `nk` only `'action'`. Neighbours of one format merge; text and
-    link addresses together capped at `MAX_ARTICLE_BLOCK_TEXT` over at most `MAX_ARTICLE_RUNS` runs.
+    link addresses together capped at `MAX_ARTICLE_BLOCK_TEXT` over at most `MAX_ARTICLE_RUNS` runs; the
+    cut never falls inside a surrogate pair, so an emoji is kept whole or left out.
   - `level` floored and capped to `ARTICLE_LIST_MAX_LEVEL`; `checked` only on a to-do; zone
     `width` / `height` rounded and clamped to `ARTICLE_ZONE_MIN..MAX`; `at` kept only with an id
     page and finite `x`, `y`; code text sliced to the cap.
@@ -435,6 +436,14 @@ pagesNeeded)` (adds pages like the last; removes trailing pages with no elements
   to it plus `ARTICLE_NOTE_GAP`; moved only past 0.5 px.
 - Plain click on `[data-note-id]` with a collapsed DOM selection opens it (`article-note-action`
   class says which).
+- Look (`noteLook(element)`): a comment is `comment-resolved` when its thread is resolved, else
+  `comment` with the open count (`activeCommentCount`); an action is `action-done` /
+  `action-wont-do` by its `status`, else `action-open` (no action yet included). The chip: a
+  comment `border-radius: 50%`, an action 8 px; fill and 1.5 px rim from `NOTE_INK`; hover
+  `shadow-md`. The text: `.article-note` indigo-400 at 22% with a 2 px solid indigo-500 at 70%
+  underline, `.article-note-action` emerald-400 at 22% with a 2 px dashed emerald-500 at 70%.
+- Presenting: `html[data-presenting] [data-article-note]` is `visibility: hidden` and
+  `html[data-presenting] .article-flow .article-note` loses its background and underline.
 
 ### Style
 
@@ -647,6 +656,11 @@ failure is a silent no-op with a debug log).
 - To-do boxes: ⌘Enter ticks the to-do at the caret, as a press on the box does.
 - Style tab: looks, accents and segmented fields are radiogroups; toggles `role="switch"` with
   `aria-checked`.
+- A margin note's marker: the element wrapper's `aria-label` is `noteAriaLabel` (spec "Its
+  name"), not the kind label; its face SVG is `aria-hidden`. Contrast as the spec's table; the
+  chip's colours are fixed (`NOTE_INK`), never themed. Touch reach: under `@media (pointer:
+coarse)` a `::before` on `[data-article-note]` extends 6 px left and right and 3 px up and down
+  (44 x 38 at 100%).
 - Decorative parts are `aria-hidden`: page numbers, drop carets, ghosts, peer carets.
 - Contrast: the accent is passed through `legibleOn` against the page; ink is slate-800 on light
   and slate-200 on dark (AA on paper and on Midnight).
@@ -718,6 +732,7 @@ ended`, `articles turned into pages`. Page-level edits log `[page] …` (Pages
 | A page held by its article's lock: Delete disabled with the reason                                                                                                                                                 | `apps/live/components/canvas/PagePanel.locks.test.tsx` "a page held by its article lock"                                             |
 | Toolbar Colour: each picker titled on screen (Text Colour, Highlight), Default and Accent before the strong colours, No highlight before the soft ones; the Style tab's Accent leads with Theme, previews on hover | `apps/live/components/canvas/article/article-colours.test.tsx`                                                                       |
 | A margin note's marker carries no badge strip                                                                                                                                                                      | `apps/live/components/canvas/useElementIndicators.test.ts` "gives an annotation no note indicator, and a margin note nothing at all" |
+| A comment and an action differ in glyph, outline and name; resolved and done show                                                                                                                                  | `apps/live/components/canvas/article/ArticleNoteFace.test.tsx`, `apps/live/lib/article/article-note-look.test.ts`                    |
 | Present from any mode: an article page with its writing, read only                                                                                                                                                 | `apps/live/lib/presented-pages.test.ts` "outside Pages, presents an article page with its writing, read only"                        |
 | Agents read and write an article as Markdown                                                                                                                                                                       | `packages/document/src/article-markdown-io.test.ts`; `packages/edit-operations/src/pages/article-write.test.ts`                      |
 | `article` is a mutation op (never relayed from a view-role session)                                                                                                                                                | `apps/api/src/document-room.test.ts` "lets no document-mutating op kind into the presence set" (generic, every mutation kind)        |
@@ -758,4 +773,4 @@ ended`, `articles turned into pages`. Page-level edits log `[page] …` (Pages
 
 ## Defaults ledger
 
-See [DEFAULTS.md](DEFAULTS.md), rows D33 to D54 and D60.
+See [DEFAULTS.md](DEFAULTS.md), rows D33 to D54, D60 and D90.

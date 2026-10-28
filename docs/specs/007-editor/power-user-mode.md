@@ -30,10 +30,12 @@ Switching the mode **on** writes these values, once:
 | AI suggested prompts | `aiSuggestedPrompts` | off   |
 | Minimal chrome       | `minimalChrome`      | on    |
 
-The Plan and Pages tours offer each of their tracks once (`planTourTracks`, `pagesTourKinds`), and the
-[element tours](element-tours.md) each toured kind opted in to (`elementTourOffers`, answered in `elementTourKinds`);
-their seen flag counts every track only while the mode is on, so switching it off gives back every track not yet
-answered. Element tours are off until opted in to, so for someone who never opted in the mode changes nothing there.
+The Plan and Pages tours record each of their tracks once taken (`planTourTracks`, `pagesTourKinds`); their seen
+flag counts every track as taken only while the mode is on, so switching it off gives back every Settings row not
+yet taken. Marking a tour seen only changes its Settings row (and which Plan track the bottom bar's Start Tour
+button names): every mode tour stays on the button ([Diagram tour](editor-tour.md) "Where it appears"). An
+[element tour](element-tours.md) is on the button only for a kind opted in to (`elementTourOffers`), which the mode
+never changes, so for someone who never opted in it changes nothing there.
 
 Panel opacity is not part of the preset. Motion is not part of the mode: every transition is snappy for everyone
 ([Motion](../004-interface-design/motion.md)).
@@ -83,7 +85,7 @@ the interface, and leaves the controls:
 - **Selection kind chip.** The caption above the selection toolbar ("Selected Arrow", "Selected Square", "Selected
   Elements (3)") is hidden.
 - **Palette tile captions.** Palette tiles show their icon only.
-- **Status bar text.** The bottom bar's Search, Settings and appearance controls show their icons only.
+- **Status bar text.** The bottom bar's Search, Start Tour, Settings and appearance controls show their icons only.
 - **The "Tabs" label** before the tab pills is hidden.
 - **Panel titles and help buttons.** Panels (Explorer, Map, Layers, ...) hide their
   header title and their `?` help button. A panel with a `⋯` menu gains a **Help** row there, opening the same

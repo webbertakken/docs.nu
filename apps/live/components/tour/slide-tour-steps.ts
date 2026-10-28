@@ -16,13 +16,6 @@ import {
 } from './page-tour-dom';
 import { opensFrom } from './tour-open';
 
-export const SLIDE_WELCOME: PageTourStep = {
-  id: 'welcome',
-  card: 'welcome',
-  title: 'Getting started with Slides?',
-  body: 'A quick look at slide layouts, backgrounds and presenting? Try anything as we go.',
-};
-
 export function slideTourSteps(): PageTourStep[] {
   return [
     {
