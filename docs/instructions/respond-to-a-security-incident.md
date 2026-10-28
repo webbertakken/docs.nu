@@ -5,7 +5,7 @@ Part of the [ISMS](../specs/033-information-security/isms.md); records go to the
 
 ## Triage
 
-1. Open a record named `YYYY-MM-DD-incident-<slug>.md` in the ISMS record store, and note the time the event was seen.
+1. Open a record named `incidents/YYYY-MM-DD-incident-<slug>.md` in the ISMS record store, and note the time the event was seen.
 2. Write down where it came from: a vulnerability advisory, a CodeQL or Dependabot alert, a log line, a supplier notice, a user.
 3. Decide whether it is an **incident**: confidentiality, integrity or availability of an [asset](../specs/033-information-security/assets.md) is harmed or about to be.
 4. If it is not, write why in the record, close it, and stop here.
@@ -33,7 +33,8 @@ Part of the [ISMS](../specs/033-information-security/isms.md); records go to the
 
 ## Notify
 
-1. If personal data was breached and harm to people is likely, notify the supervisory authority **within 72 hours** of becoming aware.
+1. If personal data was breached and harm to people is likely, notify the Dutch Data Protection Authority
+   (Autoriteit Persoonsgegevens) **within 72 hours** of becoming aware, through its data breach notification form.
 2. If the risk to people is high, tell the affected people directly, plainly, by email.
 3. If the incident came from a vulnerability report, keep the reporter informed in the advisory and publish it once fixed.
 4. If a supplier caused or shares the incident, report it to them.

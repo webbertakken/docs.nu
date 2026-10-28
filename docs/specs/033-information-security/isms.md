@@ -68,7 +68,8 @@ Each objective is measurable and checked at the yearly management review.
 - **Records** are the evidence that the ISMS runs: incident logs, access reviews, restore tests, supplier reviews,
   management reviews and internal audits.
 - Records can name people, accounts and weaknesses, so they never go into this public repository.
-- Records live in the private **ISMS record store**, one dated Markdown file per record, kept for at least 3 years.
+- Records live in the private **ISMS record store**, the repository `webbertakken/livedoc-isms-records`.
+- Each record is one dated Markdown file in the folder for its kind, kept for at least 3 years.
 
 ## Cadence
 
