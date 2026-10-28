@@ -7,7 +7,7 @@ Derived from [Toasts](../toasts.md). Implementation detail only; the spec decide
 | File                                          | Holds                                                                                                                   |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `apps/live/hooks/ui/useToast.tsx`             | `ToastProvider`, `useToast`, the `ToastApi` (`info`, `success`, `warning`, `error`, `offer`, `action`, `dismissAction`) |
-| `apps/live/components/toast/toast-queue.ts`   | Pure queue writes: `pushToast`, `upsertActionToast`, `retireToast`, `TOAST_LIMIT`, durations                            |
+| `apps/live/components/toast/toast-queue.ts`   | Pure queue writes: `pushToast`, `upsertActionToast`, `retireToasts`, `TOAST_LIMIT`, durations                           |
 | `apps/live/components/toast/ToastStack.tsx`   | The always-mounted `Notifications` region, its placement and the floor                                                  |
 | `apps/live/components/toast/ToastCard.tsx`    | One toast: icon, message, actions, close; `TOAST_SURFACE` for the look shared by other notices                          |
 | `apps/live/components/toast/useToastTimer.ts` | The pausable timeout                                                                                                    |
