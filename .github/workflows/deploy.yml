@@ -28,10 +28,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # CI on `main` runs once per commit and never cancels an older run, so two
-  # quick merges can finish out of order. Only the commit still at the tip of
-  # `main` deploys; an older one stands down, and the newer commit's own CI
-  # run deploys it. A pull request's CI never deploys production.
+  # CI on `main` runs once per commit and never cancels an older run, so with several
+  # sessions merging, a commit's CI often finishes after the next merge. The newest green
+  # commit deploys even when `main` has moved on; one that is the same as, or older than,
+  # what production runs stands down, so production never goes back
+  # (scripts/deploy-gate.mjs, docs/specs/016-platform/deployment.md). A pull request's CI
+  # never deploys production.
   latest:
     name: Latest on main
     if: >-
@@ -42,28 +44,23 @@ jobs:
       github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     outputs:
-      current: ${{ steps.tip.outputs.current }}
+      current: ${{ steps.gate.outputs.current }}
     steps:
-      - id: tip
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/deploy-gate.mjs
+          sparse-checkout-cone-mode: false
+      - id: gate
         env:
           GH_TOKEN: ${{ github.token }}
           PASSED: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          set -euo pipefail
-          tip=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
-          if [ "$tip" = "$PASSED" ]; then
-            echo "deploy: $PASSED is the tip of main; deploying"
-            echo current=true >> "$GITHUB_OUTPUT"
-          else
-            echo "deploy: $PASSED passed CI but main is at $tip; its own CI run deploys it"
-            echo current=false >> "$GITHUB_OUTPUT"
-          fi
+        run: node scripts/deploy-gate.mjs
 
   deploy:
     name: Production
     needs: latest
     # A dispatch deploys on demand (the gate above is skipped then); a CI run
-    # deploys only the commit the gate found at the tip of `main`.
+    # deploys only a commit the gate found newer than production.
     if: >-
       always() &&
       (github.event_name == 'workflow_dispatch' ||
