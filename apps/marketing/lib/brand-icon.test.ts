@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { inflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { brandLogoSvg, brandMarkSvg } from '@livedoc/ui';
 
@@ -13,6 +14,22 @@ const APPS = ['marketing', 'live', 'help', 'telemetry'] as const;
 const REPO = new URL('../../../', import.meta.url);
 const read = (path: string) => readFileSync(fileURLToPath(new URL(path, REPO)), 'utf8').trim();
 const REGENERATE = 'stale: run `pnpm icons:brand`';
+
+// The alpha of an RGBA PNG's top-left pixel (255 for a PNG without alpha). The first pixel of the first row is
+// stored unfiltered under every PNG filter, so it reads straight from the inflated image data.
+function cornerAlpha(path: string): number {
+  const png = readFileSync(fileURLToPath(new URL(path, REPO)));
+  const colourType = png[25];
+  if (colourType !== 6) return 255;
+  const idat: Buffer[] = [];
+  for (let at = 8; at < png.length;) {
+    const length = png.readUInt32BE(at);
+    if (png.toString('ascii', at + 4, at + 8) === 'IDAT')
+      idat.push(png.subarray(at + 8, at + 8 + length));
+    at += 12 + length;
+  }
+  return inflateSync(Buffer.concat(idat))[4]!;
+}
 
 describe('brand icon', () => {
   it('ships the compact, scheme-following mark as every app/icon.svg', () => {
@@ -33,7 +50,7 @@ describe('brand icon', () => {
   });
 
   // The app that serves its own icon under a basePath (help) pairs the SVG with a PNG fallback through Next's icon
-  // file convention (both app/icon.svg and app/icon.png), the 256px white tile the other three name in BRAND_ICONS
+  // file convention (both app/icon.svg and app/icon.png), the 256px transparent mark the other three name in BRAND_ICONS
   // (docs/specs/016-platform/nextjs.md "Features used and declined").
   it('gives help the PNG fallback, the same tile marketing serves', () => {
     const tile = readFileSync(
@@ -97,6 +114,15 @@ describe('brand media', () => {
       expect(pngSize(`marketing/media/logo/livedoc-logo-${scheme}.png`).width, REGENERATE).toBe(
         1200,
       );
+  });
+
+  // The install dialog and the launcher show the `any` icons as they are, so they carry no tile of their own.
+  it.each([
+    'apps/marketing/public/livedoc-icon-192.png',
+    'apps/marketing/public/livedoc-icon-256.png',
+    'apps/marketing/public/livedoc-icon-512.png',
+  ])('%s is transparent around the mark', (path) => {
+    expect(cornerAlpha(path), REGENERATE).toBe(0);
   });
 
   // Browsers and tools ask for /favicon.ico by name; it holds 16, 32 and 48px images.

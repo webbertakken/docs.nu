@@ -43,22 +43,24 @@ or a raster is missing or the wrong size.
 | File                                                                  | Size              | Drawing        | Background  |
 | --------------------------------------------------------------------- | ----------------- | -------------- | ----------- |
 | `apps/{marketing,live,help,telemetry}/app/icon.svg`                   | scalable          | compact, auto  | transparent |
-| `apps/help/app/icon.png`                                              | 256               | full, light    | white       |
+| `apps/help/app/icon.png`                                              | 256               | full, light    | transparent |
 | `apps/marketing/public/favicon.ico`                                   | 16, 32, 48 inside | compact, light | transparent |
-| `apps/marketing/public/livedoc-icon-256.png` (`BRAND_ICONS` fallback) | 256               | full, light    | white       |
+| `apps/marketing/public/livedoc-icon-256.png` (`BRAND_ICONS` fallback) | 256               | full, light    | transparent |
 
-### Android (web app manifest, `apps/marketing/app/manifest.ts`)
+### Install (web app manifest, `apps/marketing/app/manifest.ts`)
 
 | File                                               | Size | Purpose      | Drawing                  | Background        |
 | -------------------------------------------------- | ---- | ------------ | ------------------------ | ----------------- |
-| `apps/marketing/public/livedoc-icon-192.png`       | 192  | `any`        | full, light, 73% of tile | white             |
-| `apps/marketing/public/livedoc-icon-512.png`       | 512  | `any`        | full, light, 73% of tile | white             |
+| `apps/marketing/public/livedoc-icon-192.png`       | 192  | `any`        | full, light, whole box   | transparent       |
+| `apps/marketing/public/livedoc-icon-512.png`       | 512  | `any`        | full, light, whole box   | transparent       |
 | `apps/marketing/public/livedoc-maskable-192.png`   | 192  | `maskable`   | full, light, 56% of tile | white, full bleed |
 | `apps/marketing/public/livedoc-maskable-512.png`   | 512  | `maskable`   | full, light, 56% of tile | white, full bleed |
 | `apps/marketing/public/livedoc-monochrome-512.png` | 512  | `monochrome` | compact, mono white, 56% | transparent       |
 
 56% keeps every corner of the stack inside the maskable safe zone, the centre circle of 80% of the tile's width.
-The manifest also lists `/icon.svg` as `any`.
+The manifest also lists `/icon.svg` as `any`. The `any` PNGs are transparent because install dialogs and desktop
+launchers show them as they are; the mark's own view box leaves its margin. `brand-icon.test.ts` checks their corners
+are clear.
 
 ### iOS
 
@@ -109,4 +111,4 @@ permanent.
 - `packages/ui/src/Brand.test.tsx`: the React mark draws the same sheets, the accent tints it, mono applies the
   opacities, reduced motion never starts the fan.
 - `apps/marketing/lib/brand-icon.test.ts`: every committed SVG equals the module's output; every raster exists at its
-  size; the manifest lists every Android icon with its purpose; `favicon.ico` holds 16, 32 and 48.
+  size; the manifest lists every install icon with its purpose; `favicon.ico` holds 16, 32 and 48.

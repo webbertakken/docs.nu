@@ -1,7 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
-import { performance } from 'node:perf_hooks';
-import { cpuBudgetMs, cpuMsOfAsync } from '@livedoc/vitest-config/cpu-time';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { cpuBudgetMs, cpuMsOfAsync } from '@livedoc/vitest-config/cpu-time';
 import type { Tab } from '@livedoc/document';
 import { getTab, upsertTab } from '../db/tabs';
 import { nodeDocumentSql, nodeTransaction } from '../test-document-sql';
@@ -12,8 +11,10 @@ import { migrateDocumentSchema } from './document-schema';
 import { drainShares, receiveShares } from './tab-shares';
 
 // The room store's budgets (docs/specs/006-document/blueprints/document-storage.md "Performance and limits"),
-// node:sqlite standing in for the room's SQLite. Each case keeps the best of a few runs, so one slow tick of a busy
-// machine does not fail it; the budgets have headroom over the measured numbers either way.
+// node:sqlite standing in for the room's SQLite. Each case keeps the best of a few runs, in CPU time
+// (docs/specs/003-system-architecture/testing.md "Speed budgets are CPU time"), so neither a busy machine's wait for a
+// core nor one slow tick fails it. cpuBudgetMs keeps each written budget locally and gives it headroom on CI and under
+// coverage, where the instrumentation slows the same work.
 
 const D = 'doc-1';
 const RUNS = 5;
@@ -56,7 +57,9 @@ beforeEach(() => {
 // (packages/vitest-config/cpu-time.js).
 async function best(run: (i: number) => Promise<unknown>): Promise<number> {
   let fastest = Infinity;
-  for (let i = 0; i < RUNS; i++) fastest = Math.min(fastest, await cpuMsOfAsync(() => run(i)));
+  for (let i = 0; i < RUNS; i++) {
+    fastest = Math.min(fastest, await cpuMsOfAsync(() => run(i)));
+  }
   return fastest;
 }
 
@@ -126,13 +129,14 @@ describe('the room store budgets', () => {
         .run();
     }
     await upsertTab(env, D, { ...tab, name: 'Shared, renamed' }, 0);
-    const start = performance.now();
-    const result = await drainShares(env, D, (to, messages) =>
-      receiveShares(holders.get(to)!, to, D, messages),
-    );
-    const took = performance.now() - start;
+    let result: Awaited<ReturnType<typeof drainShares>> | undefined;
+    const took = await cpuMsOfAsync(async () => {
+      result = await drainShares(env, D, (to, messages) =>
+        receiveShares(holders.get(to)!, to, D, messages),
+      );
+    });
     expect(result).toMatchObject({ sent: 20, failed: 0 });
-    expect(took).toBeLessThan(2_000);
+    expect(took).toBeLessThan(cpuBudgetMs(2_000));
     const taken = await holders
       .get('holder-19')!
       .DOCUMENT_DB.prepare('SELECT name FROM tabs')

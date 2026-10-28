@@ -24,11 +24,11 @@ site header's and the editor header's `<Brand assemble>`), only while `<html>` l
 | Grid cells (`full`)       | scale 0.3, transparent                 | 260ms    | 420ms + 60ms each | `cubic-bezier(.2,.8,.2,1)`     |
 | Text lines                | scaleX 0 from the left                 | 380ms    | 560ms + 70ms each | `cubic-bezier(.2,.8,.2,1)`     |
 | The fold                  | folded up (flipped about its diagonal) | 360ms    | 760ms             | `cubic-bezier(.4,0,.2,1)`      |
-| `Live`, then `Doc`        | 14px left, transparent                 | 500ms    | 520ms, 610ms      | `cubic-bezier(.2,.8,.2,1)`     |
 
 Every part fills `backwards`, so the static HTML paints the first frame. `BRAND_ASSEMBLE_MS` (1700) after hydration,
 `useBrandAssembled` sets `data-brand-assembled` on `<html>`; a header mounted later (a client navigation) is drawn
-whole. Under `prefers-reduced-motion: reduce` the logo instead fades in over 250ms.
+whole. Under `prefers-reduced-motion: reduce` the mark (`[data-mark-art]`) instead fades in over 250ms. No rule names
+`[data-logotype]`: the wordmark never animates.
 
 ## Fan (`packages/ui/src/useBrandFan.ts`)
 

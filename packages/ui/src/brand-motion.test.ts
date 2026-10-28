@@ -19,9 +19,14 @@ describe('brand-motion.css', () => {
     for (const a of animations.filter((a) => a.trim() !== 'none')) expect(a).toContain('backwards');
   });
 
-  it('only fades the logo in under reduced motion', () => {
+  it('only fades the mark in under reduced motion', () => {
     const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
     expect(reduced).toContain('ldm-fade-in');
     expect(reduced).toContain('animation: none');
+    expect(reduced).toMatch(/\[data-assemble\] \[data-mark-art\] \{\s*animation: ldm-fade-in/);
+  });
+
+  it('never moves the wordmark: only the mark assembles', () => {
+    expect(css).not.toContain('data-logotype');
   });
 });

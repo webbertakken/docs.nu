@@ -3,8 +3,8 @@
 // docs/specs/004-interface-design/blueprints/brand-media.md:
 //   - apps/*/app/icon.svg: the compact mark, light/dark by prefers-color-scheme
 //   - apps/marketing/public/favicon.ico: 16, 32 and 48px, for browsers and tools that ask for it by name
-//   - apps/marketing/public/: the Android icons (white tiles, maskable tiles, the monochrome silhouette)
-//   - apps/help/app/icon.png: the 256px tile, its favicon's PNG fallback
+//   - apps/marketing/public/: the install icons (transparent marks, maskable tiles, the monochrome silhouette)
+//   - apps/help/app/icon.png: the 256px transparent mark, its favicon's PNG fallback
 //   - apps/marketing/public/email/livedoc-mark-64.png: the transparent 64px mark the api's emails show beside the
 //     wordmark (2x their 28px slot); its path never changes
 //   - marketing/media/logo/: the full mark (light, dark, mono black and white) and the lockup (SVG and PNG)
@@ -117,10 +117,11 @@ for (const size of [16, 32, 64, 128, 256, 512]) {
 for (const size of [256, 512, 1024])
   await tile(size, `marketing/media/icons/livedoc-icon-${size}.png`);
 
-// Android (apps/marketing/app/manifest.ts): white tiles for `any`, full-bleed white tiles with the stack inside the
-// safe zone for `maskable`, and a white silhouette for `monochrome` (themed launchers keep only its alpha).
+// The manifest (apps/marketing/app/manifest.ts): transparent marks for `any`, which install dialogs and launchers
+// show as they are; full-bleed white tiles with the stack inside the safe zone for `maskable`; and a white
+// silhouette for `monochrome` (themed launchers keep only its alpha).
 for (const size of [192, 256, 512])
-  await tile(size, `apps/marketing/public/livedoc-icon-${size}.png`);
+  await shoot({ svg: markFor(size), size, path: `apps/marketing/public/livedoc-icon-${size}.png` });
 for (const size of [192, 512]) {
   const markSize = Math.round(size * MASKABLE_FILL);
   await shoot({

@@ -59,7 +59,7 @@ the tile shows through them.
 `Live` is the accent: `brand-600` in light mode, `sky-400` in dark, or the theme accent in the editor. `Doc` is the
 surrounding ink (`slate-900`, `slate-100` in dark). The name is written `LiveDoc`, never with the domain. The wordmark
 is a logotype, which WCAG 1.4.3 exempts from contrast minimums, and the contrast audits skip it by its
-`data-logotype` mark. The plain-text wordmark in email follows the same split: `Live` in brand blue, `Doc` in ink.
+`data-logotype` mark. The wordmark never animates: it stands still while the mark beside it moves. The plain-text wordmark in email follows the same split: `Live` in brand blue, `Doc` in ink.
 
 ## Size and motion
 
@@ -72,7 +72,8 @@ with a small gap between them:
 | `md` | Site and editor headers   | 28px | 18px     | 10px |
 | `lg` | The site footer           | 40px | 24px     | 12px |
 
-The mark moves in four ways, each once and each kept to the logo in the site and editor headers unless named:
+The mark moves in four ways, each once and each kept to the logo in the site and editor headers unless named; the
+wordmark holds still through all of them:
 
 **Assemble, as a page loads.** On a full load or a refresh, the header logo builds itself from nothing, before any
 script runs:
@@ -80,7 +81,6 @@ script runs:
 - The three sheets drop into place back to front, each from a little above, with a soft overshoot.
 - The back sheet's grid cells pop in (`full` only), the page's text lines draw from left to right, and the page's
   corner folds down.
-- The wordmark's `Live` and `Doc` slide in from the left.
 - It takes about 1.7 seconds and plays once per load: moving between pages in the app does not replay it.
 
 **Fan, on pointing.** Pointing at the logo, or reaching it by keyboard, fans the stack open:
@@ -88,8 +88,6 @@ script runs:
 - The sheets spread apart along the stack's direction, each one more step from the page in front of it, over 700ms,
   easing out, and hold open for as long as the pointer stays.
 - On leaving, the stack closes over 450ms, easing out.
-- The wordmark's letters gleam once, left to right, over 900ms each time the pointer arrives (white over light-mode
-  ink, sky-300 over dark mode's near-white). Leaving early lets it finish.
 - Touch has no hover, so a tap never starts it.
 
 **Press, on clicking.** Pressing the logo (pointer down, or Enter or Space held) draws the sheets a little closer
@@ -101,8 +99,8 @@ on its own, larger, and its page cycles through the kinds of document LiveDoc ma
 a sheet, a board and a form, each for a moment, the page lifting slightly as it changes. It runs while it is on
 screen and pauses when scrolled away.
 
-Reduced motion holds every one of them still: the assembly and the press become a short fade, the fan and the gleam
-do not run, and every kind swaps its content with a plain crossfade at a slower pace.
+Reduced motion holds every one of them still: the assembly and the press become a short fade of the mark, the fan
+does not run, and every kind swaps its content with a plain crossfade at a slower pace.
 
 Its pace is listed in [Motion](./motion.md) beside the other hover stories.
 
@@ -112,7 +110,8 @@ Every surface that shows LiveDoc outside a page gets the mark in the size and fo
 
 - **Web:** an SVG favicon that follows the browser's scheme, a PNG fallback, and `/favicon.ico` for browsers and
   tools that ask for it by name.
-- **Android:** the web app manifest's icons at 192 and 512px, on a white tile for `any`, inside the 80% safe zone on a white tile for `maskable` (so a circle or squircle mask never clips a sheet), and a single-colour `monochrome`
+- **Install:** the web app manifest's icons at 192 and 512px, the mark on a transparent ground for `any` (what the
+  browser's install dialog and desktop launchers show, so no white square frames it), inside the 80% safe zone on a white tile for `maskable` (so a circle or squircle mask never clips a sheet), and a single-colour `monochrome`
   silhouette for themed launchers.
 - **iOS:** an opaque 180px home-screen tile (iOS paints transparency black), with the home-screen title `LiveDoc`.
 - **Social:** the share cards (the site's, each feature page's and each help article's) carry the full mark.

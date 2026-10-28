@@ -10,7 +10,7 @@ describe('web app manifest', () => {
     expect(manifest()).toMatchObject({ name: 'LiveDoc', short_name: 'LiveDoc' });
   });
 
-  it('lists the SVG and the 192 and 512px white tiles for any launcher', () => {
+  it('lists the SVG and the 192 and 512px transparent marks for any launcher', () => {
     expect(by('any')).toEqual(['/icon.svg', '/livedoc-icon-192.png', '/livedoc-icon-512.png']);
   });
 
