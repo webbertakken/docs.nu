@@ -205,7 +205,7 @@ export function OneTabShare() {
 }
 
 /** A live document embedded in another page: the canvas with the embed's only chrome (the
- *  Open in LiveDoc badge, the tab switcher and the zoom dock along the bottom left),
+ *  Open in LiveDoc badge and the tab switcher bottom-left, the zoom dock bottom-right),
  *  beside the iframe snippet the Share dialog copies. */
 export function EmbeddedDocument() {
   return (
@@ -244,7 +244,7 @@ export function EmbeddedDocument() {
       <Label x={182} y={165} size={10} weight={600} tone="body">
         Overview
       </Label>
-      {/* Beside them: the zoom dock. */}
+      {/* Bottom-right: the zoom dock. */}
       <rect x={244} y={150} width={28} height={26} rx={7} className="fill-slate-100" />
       <Label x={258} y={164} anchor="middle" size={12} weight={700} tone="body">
         +
