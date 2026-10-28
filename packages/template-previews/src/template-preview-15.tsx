@@ -270,8 +270,14 @@ export function templatePreviewGroup15(kind: TemplateKind): ReactElement | null 
   const w6 = (72 - 1.6 * 5) / 6 + 1.6;
   switch (kind) {
     case 'blank-board':
-      // An empty board filling its tab: three columns waiting for their first cards.
-      return board({ columns: [{ cards: [] }, { cards: [] }, { cards: [] }] });
+      // An empty board filling its tab: three columns; the story moves its first card along.
+      return board({
+        columns: [
+          { cards: [{ stripe: TASK, moveTo: { dx: step, dy: 0, at: 900 } }] },
+          { cards: [] },
+          { cards: [] },
+        ],
+      });
     case 'blank-plan':
       // An empty Plan tab: the Start Planning picker, a tile per board; the story picks the first.
       return boardPicker();
