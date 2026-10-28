@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BRAND_APPLE_WEB_APP, BRAND_ICONS } from './site';
+import { BRAND_APPLE_WEB_APP, BRAND_ICONS, CONTACT_FORM_URL } from './site';
 
 // docs/specs/004-interface-design/brand-mark.md "Icons and media".
 describe('brand icons and home-screen metadata', () => {
@@ -19,5 +19,12 @@ describe('brand icons and home-screen metadata', () => {
       ],
       apple: '/apple-icon',
     });
+  });
+});
+
+// docs/specs/018-help/help-pages.md "The contact form": a LiveDoc form on docs.nu, never another product's.
+describe('the contact form', () => {
+  it('is a published LiveDoc form on docs.nu', () => {
+    expect(CONTACT_FORM_URL).toMatch(/^https:\/\/docs\.nu\/form\/[A-Za-z0-9]{22}$/);
   });
 });
