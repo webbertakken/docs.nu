@@ -66,7 +66,7 @@ function readWrite(raw: unknown): SheetWriteRequest | null {
 // rewrites stored and relayed as a write of its own. Linear in the tab's formula references; the tab's sheets are read
 // side by side.
 async function shrinkReaders(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   head: SheetHead,
   changes: Extract<SheetWrite, { kind: 'layout' }>['changes'],
