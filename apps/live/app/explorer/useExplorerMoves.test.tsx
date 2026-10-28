@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ToastActionSpec } from '@/hooks/ui/useToast';
 import type { DocumentListItem, Folder } from '@/lib/api-client';
 import type { TeamDocumentRow } from '@/hooks/persistence/useTeamLibrariesSweep';
 
@@ -36,7 +37,12 @@ function setup() {
       list = typeof next === 'function' ? next(list) : next;
     },
   );
-  const toast = { error: vi.fn(), success: vi.fn(), action: vi.fn(), dismissAction: vi.fn() };
+  const toast = {
+    error: vi.fn(),
+    success: vi.fn(),
+    action: vi.fn<(spec: ToastActionSpec) => void>(),
+    dismissAction: vi.fn(),
+  };
   const refreshFolders = vi.fn(() => Promise.resolve());
   const refreshTeamLibraries = vi.fn();
   const refreshPersonal = vi.fn(() => Promise.resolve());
@@ -138,7 +144,7 @@ describe('moving a team document within its team', () => {
     await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
     const offer = toast.action.mock.calls[0]![0];
     expect(offer.message).toBe('“Doc t2” moved to “Specs”');
-    offer.actions[0].onSelect();
+    offer.actions[0]!.onSelect();
     expect(vi.mocked(apiSetDocumentFolder)).toHaveBeenLastCalledWith(
       'owner-1',
       't2',

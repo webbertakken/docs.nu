@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ToastActionSpec } from '@/hooks/ui/useToast';
 import { useTeamLibrary } from './useTeamLibrary';
 
 const apiGetTeamLibrary = vi.fn<typeof import('@/lib/api-client').apiGetTeamLibrary>();
@@ -27,7 +28,7 @@ const toast = vi.hoisted(() => ({
   error: vi.fn(),
   success: vi.fn(),
   info: vi.fn(),
-  action: vi.fn(),
+  action: vi.fn<(spec: ToastActionSpec) => void>(),
   dismissAction: vi.fn(),
 }));
 vi.mock('@/hooks/ui/useToast', () => ({ useToast: () => toast }));
@@ -157,7 +158,7 @@ describe('useTeamLibrary when the server refuses', () => {
     expect(toast.action).toHaveBeenCalledOnce();
     const offer = toast.action.mock.calls[0]![0];
     expect(offer.message).toBe('“D” moved to “F”');
-    offer.actions[0].onSelect();
+    offer.actions[0]!.onSelect();
     expect(toast.dismissAction).toHaveBeenCalledWith(offer.key);
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith('“D” moved back to the team library'),

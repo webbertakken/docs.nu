@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ToastActionSpec } from '@/hooks/ui/useToast';
 import type { DocumentListItem } from '@/lib/api-client';
 
 vi.mock('@/lib/api-client', () => ({
@@ -32,7 +33,12 @@ function setup() {
       list = typeof next === 'function' ? next(list) : next;
     },
   );
-  const toast = { success: vi.fn(), error: vi.fn(), action: vi.fn(), dismissAction: vi.fn() };
+  const toast = {
+    success: vi.fn(),
+    error: vi.fn(),
+    action: vi.fn<(spec: ToastActionSpec) => void>(),
+    dismissAction: vi.fn(),
+  };
   const { result } = renderHook(() =>
     useDocumentListActions({
       ownerId: 'owner-1',
@@ -116,8 +122,8 @@ describe('moveDocumentToFolder', () => {
     await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
     const offer = toast.action.mock.calls[0]![0];
     expect(offer.message).toBe('“Doc b” moved to “Plans”');
-    expect(offer.actions.map((a: { label: string }) => a.label)).toEqual(['Undo']);
-    expect(offer.actions[0].ariaLabel).toBe('Undo: move “Doc b” back');
+    expect(offer.actions.map((a) => a.label)).toEqual(['Undo']);
+    expect(offer.actions[0]!.ariaLabel).toBe('Undo: move “Doc b” back');
     expect(track).toHaveBeenCalledWith('Document', 'Moved');
   });
 
@@ -136,7 +142,7 @@ describe('moveDocumentToFolder', () => {
     actions.moveDocumentToFolder('b', 'f1');
     await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
     const offer = toast.action.mock.calls[0]![0];
-    offer.actions[0].onSelect();
+    offer.actions[0]!.onSelect();
     expect(toast.dismissAction).toHaveBeenCalledWith(offer.key);
     expect(folderOf('b')).toBeNull();
     expect(vi.mocked(apiSetDocumentFolder)).toHaveBeenLastCalledWith('owner-1', 'b', null);
@@ -174,8 +180,8 @@ describe('a refused change', () => {
   it('keeps a newer name when an older rename is refused', async () => {
     const slow = deferred();
     vi.mocked(apiSaveDocumentMeta)
-      .mockReturnValueOnce(slow.promise as never)
-      .mockResolvedValueOnce(undefined as never);
+      .mockReturnValueOnce(slow.promise)
+      .mockResolvedValueOnce(undefined);
     const { actions, toast, nameOf } = setup();
     actions.renameDocument('b', 'Second');
     actions.renameDocument('b', 'Third');
@@ -199,7 +205,7 @@ describe('a refused change', () => {
   it('keeps a newer folder when an older move is refused', async () => {
     const slow = deferred();
     vi.mocked(apiSetDocumentFolder)
-      .mockReturnValueOnce(slow.promise as never)
+      .mockReturnValueOnce(slow.promise)
       .mockResolvedValueOnce(undefined);
     const { actions, toast, folderOf } = setup();
     actions.moveDocumentToFolder('b', 'f1');
