@@ -715,3 +715,4 @@ export * from './mcp-origin';
 // Forms (docs/specs/030-forms/forms.md).
 export * from './forms';
 export { decodePathSegment } from './path-segment';
+export { KEY_ID_MAX, isKeyId } from './key-id';

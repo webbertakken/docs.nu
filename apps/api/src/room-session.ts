@@ -1,6 +1,6 @@
 // One session's state in the room (docs/specs/015-api/api.md, Realtime model): what the room pins on each
 // socket's serialized attachment at the upgrade, read from the headers only the api worker can set.
-import { isAccessLevel, type AccessLevel } from '@livedoc/api-schema';
+import { isAccessLevel, KEY_ID_MAX, type AccessLevel } from '@livedoc/api-schema';
 import { ADDER_KEY_LENGTH } from '@livedoc/document';
 import type { ParticipantPresence } from './types';
 
@@ -79,8 +79,8 @@ export type SessionAttachment = {
 const MAX_PERSON_TAG_LEN = 64;
 // A workbench pairing id is a UUID.
 const MAX_PAIRING_ID_LEN = 36;
-// A document id is a UUID; the clamp keeps a forged header from bloating the attachment.
-const MAX_DOCUMENT_ID_LEN = 64;
+// A document id is a key id (isKeyId, at most KEY_ID_MAX); the clamp keeps a forged header from bloating the attachment.
+const MAX_DOCUMENT_ID_LEN = KEY_ID_MAX;
 // A network tag is a 32-hex digest; the clamp keeps a forged header from bloating the attachment.
 const MAX_NETWORK_TAG_LEN = 32;
 

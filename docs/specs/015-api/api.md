@@ -229,6 +229,10 @@ A route whose body is required reads it with `readBody`: `400 invalid json` when
 
 A path segment the api decodes (a template kind, an element kind, a placement default key) that carries a malformed percent-escape (`%`, `%E0%A4%A`) names nothing: it answers as an unknown name does, `404`, never a `500` from the decoder (`decodePathSegment`, `@livedoc/api-schema`).
 
+### Ids
+
+A document, folder or team is created under an id its caller mints (`POST /api/documents`, `/api/folders`, `/api/teams`). The api keys the record by it and builds paths, room names and scopes from it, so it must be a **key id**: letters, digits, `-` and `_`, 1 to `KEY_ID_MAX` (64) characters (`isKeyId`, `@livedoc/api-schema`). Every id the app mints fits (UUIDs, short ids); anything else, a slash, a colon or a space included, is `400 invalid id`, before anything is written. Tag and shape-library ids already hold to the same set; a custom theme keeps its `custom:` prefix.
+
 ### Document dates
 
 A document's dates are its `createdAt` (shown as created) and `savedAt` (last
