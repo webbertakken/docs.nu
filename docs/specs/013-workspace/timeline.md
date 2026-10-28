@@ -398,6 +398,12 @@ everything beats five that technically fit. The trigger keeps its
 Filter label and dot; its accessible name says "View and filter
 timeline", because on that width it is both.
 
+**The popover takes focus when it opens.** It is portalled to the end of
+the page, so Tab from the Filter button would never reach it: opening
+moves focus into it, and closing with focus still inside hands focus back
+to the Filter button. Focus someone moved elsewhere (a click away) stays
+where they put it.
+
 **The header also carries New Document**, at the row's right edge where
 every other Explorer section puts its create action. A feed is a record
 of what happened rather than a container you add to, so this page
