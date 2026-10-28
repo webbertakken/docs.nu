@@ -843,8 +843,8 @@ summary) in `packages/ui/src/timeline/history.ts`.
   no kind word: LiveDoc is one product and a document has no kind
   ([Domain language](../003-system-architecture/domain-language.md)).
 - **At a glance.** A strip under the header: when it was made, when it last
-  changed (relative, "2 hours ago"), how many people took part (their
-  initials avatars, up to three, and the count) and how many events are
+  changed (relative, "2 hours ago"), how many people the loaded events name
+  (their initials avatars, up to three, and the count) and how many events are
   loaded ("50+ events" while older ones remain). Made is the document's
   `createdAt`, else a loaded Document Created event; with neither it is left
   out rather than guessed. The strip is shown once events have loaded.
@@ -862,15 +862,21 @@ summary) in `packages/ui/src/timeline/history.ts`.
   the feed.
 - **An event.** Its type's glyph (the feed's own, §2) in a disc on the rail,
   in its tone, always beside the reason line in words ("Comment Added"), so
-  colour is never the only signal. Then who did it: an initials avatar in
-  the person's stable colour (`colorForKey` on their id) and their name, or
-  "You" on the brand fill; a system event (an expiry warning) names nobody.
-  Then the detail the renderer gives ("To Launches", "Copy of Q3"), without
+  colour is never the only signal. Then who did it: "You" on the brand
+  fill, or an initials avatar in the person's stable colour (`colorForKey`
+  on their name) and their name; an event that names nobody (an expiry
+  warning, an edit by someone else) shows no person. Then the detail the renderer gives ("To Launches", "Copy of Q3"), without
   a "by ..." the avatar line already says, and a comment's or action's words
   quoted beneath. Names come from the event itself (its author, member,
-  actor or visitor name); a person the event does not name is "Someone". No
-  other request is made for names.
-- **Runs.** Consecutive events of one type by one person on one day fold into
+  actor or visitor name); no other request is made for names.
+- **Whose is whose.** A document's feed names only the reader by id: every
+  other actor goes out as null (§6.1), because an owner id is a credential
+  and a document's history is readable by anyone holding a share code. So
+  History tells people apart by the reader's id or, for everyone else, the
+  name the event carries; a person is never keyed on an id the reader was
+  not given.
+- **Runs.** Consecutive events of one type by one person (as told apart
+  above, an unnamed person counting as one) on one day fold into
   one entry ("Document Edited, 3 times", with the first and last times);
   **Show all 3** (`aria-expanded`) deals the run out beneath it, each with
   its detail and time.
@@ -1505,6 +1511,12 @@ caller, the signed guest participant id otherwise. Any other scope
 is `403`. This is the only gate the endpoint needs in v1, and it is
 worth stating plainly because the scope parameter looks like it invites
 more.
+
+**A document scope names only the reader.** Its rows go out with every
+other actor's `actorId` as `null`: an owner id is a credential (a guest's
+`X-Owner-Id` is their whole workspace) and a document's feed is readable by
+anyone holding a share code. The client only compares `actorId` with its
+own id; everyone else is named by the snapshot's display name.
 
 ### 6.2 `POST /api/timeline/refresh`
 
