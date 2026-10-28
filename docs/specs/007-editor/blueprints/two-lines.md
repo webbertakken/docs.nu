@@ -249,7 +249,8 @@ alone ([gate a feature by share role](../../../instructions/gate-a-feature-by-sh
 | Contributors up to 3 then +N; one list from either opener    | `apps/live/components/chrome/lines/DocumentGroup.test.tsx`                            |
 | Tab list rows, folders, filter above 5, switch, drop, scope  | `apps/live/components/chrome/lines/TabList.test.tsx`                                  |
 | Tab list keyboard, F2 rename, Escape                         | `apps/live/components/chrome/lines/TabList.test.tsx`                                  |
-| Strip clearance from both side groups                        | `apps/live/lib/top-line-clearance.test.ts`                                            |
+| The centre toolbar rule: centred, off centre, no fit         | `apps/live/lib/line-centre.test.ts`                                                   |
+| The strip on the line, off centre, its own row               | `apps/live/components/palette/useStripPlacement.test.tsx`                             |
 | The name gives way first                                     | `apps/live/components/chrome/lines/line-room.test.ts`                                 |
 | Draw's dock on its line, or its own row                      | `apps/live/components/canvas/whiteboard/dock-line-placement.test.ts`                  |
 | The top corners follow a centre toolbar on its own row       | `apps/live/hooks/ui/centre-row-store.test.tsx`                                        |
