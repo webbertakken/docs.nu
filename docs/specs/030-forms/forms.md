@@ -684,9 +684,10 @@ with the ones there are. Question types go by their ids (`short`, `paragraph`, `
 showIf? }` (`showIf: null` is Always), `delete_section` (its questions join the section before), `set_form`
   `{ heading?, description?, cover?, theme? }` (the theme is the Form tab's, which the form's look follows), `settings` `{ closesAt?, limit?, confirmation?, closedMessage? }` (null
   clears one) and `responds_to` (as `add_form`'s). Each is checked as the builder checks it (limits, unique options,
-  a mapping that fits, a rule on an earlier choice), and a refusal writes nothing and names the change. A sheet
-  form's sheet gains a header for each question it lacks one for, after its last header (bold, its width fitted), as a response would
-  write it; it is read for this only when the form now asks for a header it did not. `read_form` names each
+  a mapping that fits: never a Rating field on a shorter scale than the question's, out of 5 when it names none,
+  nor a field the card type hides; a rule on an earlier choice), and a refusal writes nothing and names the change. A sheet
+  form's sheet gains a header for each question it lacks one for, after its last header (bold, its width fitted, written as text so a
+  question worded `2024`, `TRUE` or `=Score` stays that text), as a response would write it; it is read for this only when the form now asks for a header it did not. `read_form` names each
   question's sheet column (`column`) on a sheet form.
 - **`share_form`** (write): `publish` (makes the form link; on a closed form, opens it again), `close`, or
   `delete_link`. A form with problems is refused with every problem, as Share Form lists them. The answer is the
@@ -705,7 +706,8 @@ showIf? }` (`showIf: null` is Always), `delete_section` (its questions join the 
   sheet), the response number or none, the card's title, and the card's id when it made the card itself.
 - **A live form is locked for agents too**: while it takes responses, `change_form` refuses every change but
   `settings`, saying to close it with `share_form` first (its link stays); the api refuses a changeset that changes
-  anything else about it (`form_locked`), whoever sends it.
+  anything else about it (`form_locked`), whoever sends it. A form switched on but past its Close On or at its
+  Response Limit takes no responses, so it is not locked, unless the change would have it take them again.
 - **Share roles**: reading needs read access to the tab; the link's code only ever reaches an Editor; building and
   publishing are an Editor's, as the api gates them (a Participant's or Viewer's token is refused).
 - **How it is written**: a new Form tab is a changeset whose `replace` names its `form` (the form whole, read by the
