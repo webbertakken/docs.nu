@@ -36,6 +36,8 @@ import { documentLoadOrigin, noteDocumentLoadEnded, startEditorTiming } from '@/
 import { errorNameToken, errorTypeToken } from '@livedoc/api-schema';
 import type { WorkbenchDocumentSession } from '@/components/providers/workbench-session-context';
 import { loadWorkbenchDocument } from './workbench-bootstrap';
+import { openPendingDocument } from './seed-pending-document';
+import { pendingDocument, type PendingDocument } from '@/lib/new-document/pending-documents';
 
 type SetState<T> = Dispatch<SetStateAction<T>>;
 
@@ -143,7 +145,8 @@ export function useIdentityBootstrap(opts: {
   // `early`: a document in This Browser opening before auth has settled (docs/specs/006-document/offline-mode.md
   // "Instant open"). It has no owner on the server to wait for, so it loads under the placeholder
   // participant and settleEarlyIdentity resolves who is reading once auth answers.
-  const bootstrap = useEffectEvent((early = false) => {
+  // `pending`: a document made in this browser whose create has not landed (pending-documents.ts), opened from memory.
+  const bootstrap = useEffectEvent((early = false, pending: PendingDocument | null = null) => {
     if (hydrated) return;
     // Wait for the session read to determine the auth state before bootstrapping.
     // Otherwise a signed-in user lands here with `accountId === null`
@@ -217,6 +220,35 @@ export function useIdentityBootstrap(opts: {
       setLoadedExistingDocument,
       setLoadedTabIds,
     });
+    // A document the Explorer has just made (docs/specs/013-workspace/new-document-menu.md "Opening at once"): it opens
+    // from memory, with nothing to fetch (seed-pending-document.ts).
+    if (pending) {
+      openPendingDocument(pending, {
+        resetTabs,
+        lastSavedTabsRef,
+        lastSavedNameRef,
+        loadedTabIdsRef,
+        selfParticipant,
+        setSelfParticipant,
+        setActiveId,
+        setDocumentName,
+        setDocumentItemTypes,
+        setDocumentOwnerId,
+        setDocumentTeamId,
+        setDocumentShareable,
+        setDocumentShareCode,
+        setLoadedExistingDocument,
+        setLoadedTabIds,
+        setDocumentServerStored,
+        setIsOwner,
+        setSessionRole,
+        setDocumentId,
+        setNameConfirmed,
+        setHydrated,
+        setLoadingDocument,
+      });
+      return;
+    }
     // The seed writes refs too (the saved tabs, the loaded ids): a superseded run never starts one.
     const seedFetchedDocument: typeof seedOnce = async (...args) => {
       if (live()) await seedOnce(...args);
@@ -649,7 +681,20 @@ export function useIdentityBootstrap(opts: {
       opts.refreshSharedList(self.id);
     })().catch((err: unknown) => console.warn('[load] resolving the reader failed', err));
   });
+  // A document the Explorer has just made opens from memory at once, before anything else is asked.
+  const tryPendingOpen = useEffectEvent((): boolean => {
+    if (hydrated || embed || workbench) return false;
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('s')) return false;
+    const pending = pendingDocument(documentIdFromPath(url.pathname).id);
+    if (!pending) return false;
+    earlyOpen.current = true;
+    debugLog('[load] open from memory of a document just made');
+    bootstrap(true, pending);
+    return true;
+  });
   useLayoutEffect(() => {
+    if (tryPendingOpen()) return;
     void tryEarlyOpen();
   }, []);
   useLayoutEffect(() => {

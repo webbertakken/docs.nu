@@ -205,6 +205,7 @@ import {
 import { useSyncInPlace } from './useSyncInPlace';
 import { useTakeOfflineInPlace } from './useTakeOfflineInPlace';
 import { useAutosave } from './useAutosave';
+import { useAttachPendingEditor, usePendingCreate } from './usePendingCreate';
 import { useDocumentTrashed } from './useDocumentTrashed';
 import { useDriveFollow } from './useDriveFollow';
 import { createRemoteOpJournal, type RemoteOpJournal } from './save-baseline';
@@ -947,8 +948,17 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   // the last-saved mirror refs above are seeded by the hydration effect.
   // The last revision known per tab, for the workbench's selection reference.
   const tabRevisions = useTabRevisions(realtime.changesetSeen.seen);
+  // A document the Explorer has just made: saves wait for its create (usePendingCreate).
+  const pendingCreate = usePendingCreate({
+    documentId,
+    selfId: selfParticipant.id,
+    setDocumentServerStored: realtime.setDocumentServerStored,
+    setDocumentTeamId,
+    refreshDocumentList,
+  });
   const { hasUnsavedChanges } = useAutosave({
     hydrated,
+    held: pendingCreate.held,
     documentId,
     // A Participant saves too, its own way (participant below).
     isReadOnly: autosaveReadOnly({
@@ -976,6 +986,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     changesetSeen: realtime.changesetSeen.seen,
     noteTabRevision: tabRevisions.noteSaved,
   });
+  useAttachPendingEditor(documentId, hasUnsavedChanges);
   // Sync Document from the Share dialog, with no reload (docs/specs/006-document/offline-mode.md "Syncing
   // in place").
   const syncToCloud = useSyncInPlace({
@@ -3926,6 +3937,7 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   useAssignRef(sheetsCommitRef, commit);
   useAssignRef(sheetsPlaceRef, (at, make, opts) => addBoxedAt(at.x, at.y, make, opts));
   return {
+    pendingCreate,
     planTabs,
     forms,
     surface,

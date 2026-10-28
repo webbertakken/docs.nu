@@ -72,8 +72,9 @@ function afterNextPaint(callback: () => void): void {
 export type TimingHandle = {
   /** End the timing now. Only the first end or cancel counts. */
   end: () => void;
-  /** End the timing once the next frame has painted, for a wait that ends on screen. */
-  endAfterPaint: () => void;
+  /** End the timing once the next frame has painted, for a wait that ends on screen; `measured` hears the
+   *  duration, sent or not (a log line). */
+  endAfterPaint: (measured?: (ms: number) => void) => void;
   /** Drop the timing: it failed, or was not the moment being measured after all. */
   cancel: () => void;
 };
@@ -96,16 +97,18 @@ export function startTiming(
   // hidden, so a page already hidden would otherwise pass once it is visible again.
   const hiddenAtStart = document.visibilityState === 'hidden';
   let settled = false;
-  const end = () => {
+  const end = (measured?: (ms: number) => void) => {
     if (settled) return;
     settled = true;
+    const ms = now() - start;
+    measured?.(ms);
     if (hiddenAtStart || wasHiddenSince(start)) return;
-    reportTiming(track, metric, now() - start);
+    reportTiming(track, metric, ms);
   };
   return {
-    end,
-    endAfterPaint: () => {
-      if (!settled) afterNextPaint(end);
+    end: () => end(),
+    endAfterPaint: (measured) => {
+      if (!settled) afterNextPaint(() => end(measured));
     },
     cancel: () => {
       settled = true;

@@ -84,6 +84,9 @@ product. Every timing is also skipped when it ends in failure; failures are alre
 - **`RoomReconnect`**: a live room that dropped by itself (not closed by the editor, not a trashed
   document or a changed share), from the drop to the first roster frame on the new socket, back-off waits
   included: the outage a person felt. Once per drop. A reconnect that never lands records nothing.
+- **`NewDocumentOpen`**: a document made from the Explorer's New Document menu
+  ([New Document menu](../013-workspace/new-document-menu.md#opening-at-once)), from the click to the first frame
+  painted with the new document open and editable. Its own metric, never a `DocumentLoad`: nothing is fetched.
 
 ### Every app: Core Web Vitals
 

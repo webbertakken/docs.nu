@@ -105,6 +105,8 @@ export function retryPendingDocument(id: string, opts: { withoutPlacement: boole
   const entry = entries.get(id);
   if (!entry || entry.doc.create.status !== 'failed') return;
   debugLog(`[new-document] retry placement=${opts.withoutPlacement ? 'none' : 'same'}`);
+  // Saved to My Documents: no longer filed in a team.
+  if (opts.withoutPlacement) entry.doc = { ...entry.doc, teamId: null };
   setCreate(id, { status: 'creating' });
   runWrite(id, opts.withoutPlacement ? {} : entry.place);
 }

@@ -80,7 +80,7 @@ describe('pending documents', () => {
 
   it('keeps holding after a failure, with its copy, and releases on a retry that lands', async () => {
     const { write, calls } = controlledWrite();
-    addPendingDocument(input(), write, { teamId: 'team-1' });
+    addPendingDocument(input({ teamId: 'team-1' }), write, { teamId: 'team-1' });
     let released = false;
     void whenDocumentCreated(ID)!.then(() => (released = true));
     calls[0]!.reject(new ApiError('create document', 403, 'team_forbidden'));
@@ -93,6 +93,7 @@ describe('pending documents', () => {
     retryPendingDocument(ID, { withoutPlacement: true });
     expect(pendingDocument(ID)?.create).toEqual({ status: 'creating' });
     expect(calls[1]!.place).toEqual({});
+    expect(pendingDocument(ID)?.teamId).toBeNull();
     calls[1]!.resolve();
     await flush();
     expect(released).toBe(true);
