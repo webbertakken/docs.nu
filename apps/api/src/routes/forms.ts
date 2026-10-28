@@ -11,13 +11,15 @@ import { formLook } from '@livedoc/document';
 import { FORM_CODE_PATTERN, closedMessageOf, closedReason, publicForm } from '@livedoc/forms';
 import { typesOf } from '@livedoc/items';
 import { clientIp, clientNetwork } from '../client-ip';
-import { addFormReport, countSuspendedFormLinks, suspendFormLink } from '../db';
+import { addFormReport, countSuspendedFormLinks, getFormLink, suspendFormLink } from '../db';
 import { notifyFormSuspended } from '../email/notifications';
 import { responsesProblem } from '../forms/form-tab';
 import { reportServerEvent } from '../server-telemetry';
 import { openFormLink, respond } from '../forms/respond';
 import { json, methodNotAllowed, notFound } from '../responses';
-import { readOptionalBody, type RouteContext } from './context';
+import { readOptionalBody, type DocumentRouteContext, type RouteContext } from './context';
+import { askRoom, documentRoom } from '../document-room/document-client';
+import { identityOf } from '../document-room/document-route';
 
 const REASON_TYPES: Record<FormReportReason, string> = {
   spam: 'Spam',
@@ -32,7 +34,7 @@ const BROWSER_ID = /^[A-Za-z0-9-]{8,64}$/;
 
 const formNotFound = () => json({ error: 'form_not_found' }, { status: 404 });
 
-async function read(ctx: RouteContext, code: string): Promise<Response> {
+async function read(ctx: DocumentRouteContext, code: string): Promise<Response> {
   const opened = await openFormLink(ctx, code);
   if (!opened) return formNotFound();
   const { link, doc, form, tab } = opened;
@@ -57,7 +59,7 @@ async function read(ctx: RouteContext, code: string): Promise<Response> {
   return json(body, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-async function fileReport(ctx: RouteContext, code: string): Promise<Response> {
+async function fileReport(ctx: DocumentRouteContext, code: string): Promise<Response> {
   const opened = await openFormLink(ctx, code);
   if (!opened) return formNotFound();
   const body = await readOptionalBody(ctx.request);
@@ -106,23 +108,41 @@ async function fileReport(ctx: RouteContext, code: string): Promise<Response> {
   return json({ ok: true }, { status: 201 });
 }
 
+type FormDoor = 'read' | 'respond' | 'report';
+
+// Which door a request knocks on, or the answer for one that is no door.
+function formDoor(segments: readonly string[], method: string): FormDoor | Response {
+  if (segments.length === 3) return method === 'GET' ? 'read' : methodNotAllowed();
+  if (segments.length === 4 && segments[3] === 'responses')
+    return method === 'POST' ? 'respond' : methodNotAllowed();
+  if (segments.length === 4 && segments[3] === 'reports')
+    return method === 'POST' ? 'report' : methodNotAllowed();
+  return notFound();
+}
+
+// A public form's doors in the worker: the link names its document, whose room answers (respondToForm), as the form
+// is that document's tab. An unknown code, or a code that cannot be one, is answered here as any missing form is.
 export async function handleForms(ctx: RouteContext): Promise<Response> {
-  const { segments, request } = ctx;
+  const { segments, request, env } = ctx;
   const code = segments[2] ?? '';
   if (!code) return notFound();
-  // A code that cannot be one is answered as any missing form is.
-  const known = FORM_CODE_PATTERN.test(code);
-  if (segments.length === 3) {
-    if (request.method !== 'GET') return methodNotAllowed();
-    return known ? read(ctx, code) : formNotFound();
-  }
-  if (segments.length === 4 && segments[3] === 'responses') {
-    if (request.method !== 'POST') return methodNotAllowed();
-    return known ? respond(ctx, code) : formNotFound();
-  }
-  if (segments.length === 4 && segments[3] === 'reports') {
-    if (request.method !== 'POST') return methodNotAllowed();
-    return known ? fileReport(ctx, code) : formNotFound();
-  }
-  return notFound();
+  const door = formDoor(segments, request.method);
+  if (door instanceof Response) return door;
+  const link = FORM_CODE_PATTERN.test(code) ? await getFormLink(env, code) : null;
+  if (!link) return formNotFound();
+  return askRoom(request, () =>
+    documentRoom(env, link.document_id).respondToForm(request, identityOf(ctx)),
+  );
+}
+
+// The doors themselves, inside the form's document's room.
+export async function answerFormRequest(ctx: DocumentRouteContext): Promise<Response> {
+  const { segments, request } = ctx;
+  const code = segments[2] ?? '';
+  const door = formDoor(segments, request.method);
+  if (door instanceof Response) return door;
+  if (!FORM_CODE_PATTERN.test(code)) return formNotFound();
+  if (door === 'read') return read(ctx, code);
+  if (door === 'respond') return respond(ctx, code);
+  return fileReport(ctx, code);
 }

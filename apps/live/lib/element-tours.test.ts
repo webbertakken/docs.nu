@@ -3,11 +3,14 @@
 import { describe, expect, it } from 'vitest';
 import { createShape, type Element } from '@livedoc/document';
 import {
+  answerEveryElementTour,
   canTourElement,
+  ELEMENT_TOUR_KINDS,
   elementTourKindOf,
   elementTourSeen,
   markElementTourSeen,
   offerElementTourAgain,
+  offerEveryElementTour,
 } from './element-tours';
 
 const sankey = createShape('sankey', 0, 0) as Element;
@@ -26,11 +29,21 @@ describe('element tours', () => {
     expect(canTourElement({ level: 'edit' }, { ...sankey, locked: true }, 'sankey')).toBe(false);
   });
 
+  it('offers no kind until the person opts in', () => {
+    expect(elementTourSeen({}, 'sankey')).toBe(true);
+    expect(elementTourSeen(null, 'sankey')).toBe(true);
+    expect(elementTourSeen({ elementTourOffers: ['sankey'] }, 'sankey')).toBe(false);
+    expect(elementTourSeen({ elementTourOffers: ['sankey'] }, 'flowchart')).toBe(true);
+  });
+
   it('remembers an answer, and counts every kind seen for a power user only', () => {
-    expect(elementTourSeen({}, 'sankey')).toBe(false);
-    expect(elementTourSeen(markElementTourSeen({}, 'sankey'), 'sankey')).toBe(true);
-    expect(elementTourSeen({ elementToursSeen: true }, 'sankey')).toBe(false);
-    expect(elementTourSeen({ elementToursSeen: true, powerUserMode: true }, 'sankey')).toBe(true);
+    const optedIn = { elementTourOffers: ['sankey' as const] };
+    expect(elementTourSeen(optedIn, 'sankey')).toBe(false);
+    expect(elementTourSeen(markElementTourSeen(optedIn, 'sankey'), 'sankey')).toBe(true);
+    expect(elementTourSeen({ ...optedIn, elementToursSeen: true }, 'sankey')).toBe(false);
+    expect(
+      elementTourSeen({ ...optedIn, elementToursSeen: true, powerUserMode: true }, 'sankey'),
+    ).toBe(true);
   });
 
   it('marks an answer once', () => {
@@ -38,15 +51,54 @@ describe('element tours', () => {
     expect(markElementTourSeen(once, 'sankey')).toEqual({ elementTourKinds: ['sankey'] });
   });
 
+  it('opts a kind in when its switch is turned on, and no other', () => {
+    const on = offerElementTourAgain({}, 'flowchart');
+    expect(on).toEqual({
+      elementToursSeen: false,
+      elementTourOffers: ['flowchart'],
+      elementTourKinds: [],
+    });
+    expect(elementTourSeen(on, 'flowchart')).toBe(false);
+    expect(elementTourSeen(on, 'sankey')).toBe(true);
+  });
+
   it('offers a kind again, even to a power user', () => {
     const power = {
       powerUserMode: true,
       elementToursSeen: true,
+      elementTourOffers: ['sankey' as const],
       elementTourKinds: ['sankey' as const],
     };
     const again = offerElementTourAgain(power, 'sankey');
     expect(elementTourSeen(again, 'sankey')).toBe(false);
     expect(again.elementToursSeen).toBe(false);
+  });
+
+  it('keeps a power user’s other opted-in kinds answered when one is offered again', () => {
+    const power = {
+      powerUserMode: true,
+      elementToursSeen: true,
+      elementTourOffers: ['sankey' as const, 'chart' as const],
+    };
+    const again = offerElementTourAgain(power, 'sankey');
+    expect(elementTourSeen(again, 'chart')).toBe(true);
+    expect(again.elementTourKinds).toEqual(['chart']);
+  });
+
+  it('opts every kind in at once, forgetting every answer', () => {
+    const all = offerEveryElementTour({ elementTourKinds: ['sankey'], elementToursSeen: true });
+    expect(all.elementTourOffers).toEqual([...ELEMENT_TOUR_KINDS]);
+    expect(all.elementTourKinds).toBeUndefined();
+    expect(all.elementToursSeen).toBe(false);
+    expect(ELEMENT_TOUR_KINDS.every((k) => !elementTourSeen(all, k))).toBe(true);
+  });
+
+  it('answers every kind at once, keeping who opted in', () => {
+    const none = answerEveryElementTour({ elementTourOffers: ['sankey'] });
+    expect(none.elementTourOffers).toEqual(['sankey']);
+    expect(none.elementTourKinds).toEqual([...ELEMENT_TOUR_KINDS]);
+    expect(none.elementToursSeen).toBe(true);
+    expect(elementTourSeen(none, 'sankey')).toBe(true);
   });
 });
 

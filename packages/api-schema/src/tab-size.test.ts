@@ -1,21 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import {
-  D1_MAX_ROW_BYTES,
-  D1_ROW_HEADROOM_BYTES,
+  SQLITE_ROW_MAX_BYTES,
+  SQLITE_ROW_HEADROOM_BYTES,
   MAX_TAB_BYTES,
   tabDataBytes,
   tabTooLarge,
 } from './tab-size';
 
-// docs/specs/015-api/api.md "Tab size": a tab's data fits one D1 row.
+// docs/specs/015-api/api.md "Tab size": a tab's data fits one row of its room's SQLite.
 describe('the tab size cap', () => {
   it('is D1’s row cap less the headroom for the row’s other columns', () => {
-    expect(D1_MAX_ROW_BYTES).toBe(2_000_000);
-    expect(MAX_TAB_BYTES).toBe(D1_MAX_ROW_BYTES - D1_ROW_HEADROOM_BYTES);
+    expect(SQLITE_ROW_MAX_BYTES).toBe(2_000_000);
+    expect(MAX_TAB_BYTES).toBe(SQLITE_ROW_MAX_BYTES - SQLITE_ROW_HEADROOM_BYTES);
     expect(MAX_TAB_BYTES).toBe(1_991_808);
     // The other columns at their largest: a UUID id, a 60-character name of 4-byte characters,
     // an integer timestamp, a record header of a few bytes a column.
-    expect(36 + 60 * 4 + 8 + 64).toBeLessThan(D1_ROW_HEADROOM_BYTES);
+    expect(36 + 60 * 4 + 8 + 64).toBeLessThan(SQLITE_ROW_HEADROOM_BYTES);
   });
 
   it('measures the stored data: UTF-8 JSON without the id and name', () => {

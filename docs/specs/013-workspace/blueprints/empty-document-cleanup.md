@@ -11,7 +11,8 @@ Scope, by file:
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `packages/api-schema/src/trash.ts`                                        | `TrashReason`, `TrashedDocument.reason`, `EMPTY_DOCUMENT_STALE_DAYS` / `_MS`                                 |
 | `apps/api/migrations/0056_document_trash_reason.sql`                      | `documents.trash_reason`                                                                                     |
-| `apps/api/src/db/empty-document-sweep.ts`                                 | `trashEmptyDocuments`: the set-based move, capped                                                            |
+| `apps/api/src/db/empty-document-sweep.ts`                                 | `trashEmptyDocuments`: the set-based move over `documents.content_summary`, capped                           |
+| `apps/api/src/document-room/content-summary.ts`                           | `contentSummaryOf`: the room's `hasContent` test, pushed in the content summary                              |
 | `apps/api/src/db/trash.ts`                                                | `listTrash` reads the reason; `restoreDocument` clears it and restarts stale                                 |
 | `apps/api/src/index.ts`                                                   | The 03:00 cron calls the sweep beside the purge                                                              |
 | `apps/api/src/openapi/schemas.generated.ts`                               | Regenerated: `TrashedDocument.reason`                                                                        |
@@ -25,7 +26,8 @@ Scope, by file:
 
 | Term             | Identifier                                              | Meaning                                               |
 | ---------------- | ------------------------------------------------------- | ----------------------------------------------------- |
-| Empty            | SQL predicate in `empty-document-sweep.ts`              | No tab linked to the document holds an element        |
+| Empty            | `json_extract(content_summary, '$.hasContent') = 0`     | No tab of the document holds content, as last pushed  |
+| Unknown          | `content_summary IS NULL`                               | No summary pushed yet; never empty                    |
 | Stale            | `saved_at <= now - EMPTY_DOCUMENT_STALE_MS`             | Not saved for 30 days (so also created 30+ days ago)  |
 | Clean-up / sweep | `trashEmptyDocuments`, log `empty sweep`                | The daily move of empty, stale documents to the Trash |
 | Trash reason     | `documents.trash_reason`, `TrashReason`, `reason`       | Why a document is in the Trash: `deleted` or `empty`  |
@@ -51,7 +53,11 @@ Invariants:
   `purgeExpiredTrash` cannot purge a document in the run that moved it: the purge needs
   `trashed_at <= now - TRASH_RETENTION_MS`.
 - **C2** Selection and move are one `UPDATE ... WHERE id IN (SELECT ... LIMIT ?)`: the empty and stale
-  predicate is evaluated inside the write, so a save committed before the statement keeps the document.
+  predicate is evaluated inside the write, so a save the room has pushed before the statement keeps the document.
+- **C7** The content test runs in the room, over its own tabs, as `ContentSummary.hasContent`
+  (`HAS_CONTENT` in `document-room/content-summary.ts`); the sweep reads only D1, never a room or a tab body.
+- **C8** A document whose summary has not landed (`content_summary IS NULL`, not yet in its room) is unknown and
+  never moved.
 - **C3** Only live rows are selected (`trashed_at IS NULL`); a document already in the Trash keeps its
   first time and reason.
 - **C4** A tab row whose `data` is not valid JSON counts as content (D143): the sweep fails safe.
@@ -71,8 +77,8 @@ export type TrashReason = (typeof TRASH_REASONS)[number];
 export type TrashedDocument = { ...; reason: TrashReason };
 
 // apps/api/src/db/empty-document-sweep.ts
-export const EMPTY_SWEEP_BATCH = 500;
-export const EMPTY_SWEEP_MAX_BATCHES = 4;
+const EMPTY_SWEEP_BATCH = 500;
+const EMPTY_SWEEP_MAX_BATCHES = 4;
 export function trashEmptyDocuments(env: Env, now: number,
   opts?: { batch?: number; maxBatches?: number }): Promise<number>; // rows moved
 
@@ -87,18 +93,23 @@ UPDATE documents SET trashed_at = ?1, trash_reason = 'empty'
  WHERE id IN (
    SELECT d.id FROM documents d
     WHERE d.trashed_at IS NULL AND d.saved_at <= ?2
-      AND NOT EXISTS (
-        SELECT 1 FROM document_tabs dt JOIN tabs t ON t.id = dt.tab_id
-         WHERE dt.document_id = d.id
-           AND CASE
-                 WHEN NOT json_valid(t.data) THEN 1
-                 WHEN COALESCE(json_array_length(t.data, '$.elements'), 0) > 0 THEN 1
-                 WHEN EXISTS (SELECT 1 FROM json_each(t.data, '$.articles')) THEN 1
-                 WHEN json_type(t.data, '$.form') = 'object' THEN 1
-                 ELSE 0
-               END = 1)
+      AND d.content_summary IS NOT NULL
+      AND json_extract(d.content_summary, '$.hasContent') = 0
     ORDER BY d.saved_at ASC, d.id ASC
     LIMIT ?3)
+```
+
+The room's test, per tab of the document, over the room's `document_tabs` and `tabs`; `hasContent` is true when
+any tab answers 1:
+
+```sql
+CASE
+  WHEN NOT json_valid(t.data) THEN 1
+  WHEN COALESCE(json_array_length(t.data, '$.elements'), 0) > 0 THEN 1
+  WHEN EXISTS (SELECT 1 FROM json_each(t.data, '$.articles')) THEN 1
+  WHEN json_type(t.data, '$.form') = 'object' THEN 1
+  ELSE 0
+END
 ```
 
 `GET /api/trash` rows: `reason` is `'empty'` when `trash_reason = 'empty'`, else `'deleted'`. MCP
@@ -118,10 +129,14 @@ person, which NULL means (D141). No index: nothing filters on it. The sweep scan
 cost every autosave a write to save a once-a-day scan (Performance). Account deletion and purges remove the row with the rest; guest-to-account
 migration moves `owner_id` only. Restore clears the column, so a live row's value is always NULL.
 
+`documents.content_summary` (the [document storage blueprint](../../006-document/blueprints/document-storage.md)'s)
+is what the sweep reads: written at create, and by the room's outbox on every change of a tab or its stats. Restore's
+`saved_at = now` holds against the push, which writes `saved_at = MAX(saved_at, ?)`.
+
 ## Errors and edge cases
 
-- **X1** A document with no tabs: empty (the `NOT EXISTS` holds).
-- **X2** A tab shared with another document that has elements: neither document is empty.
+- **X1** A document with no tabs: empty (no tab answers 1, so `hasContent` is false).
+- **X2** A tab shared with another document that has elements: neither document is empty (each holder's room holds its own copy of the tab).
 - **X3** A tab whose `data` lacks `elements`: `json_array_length` is NULL, coalesced to 0: empty.
 - **X4** Invalid JSON in a tab: content (C4).
 - **X5** A tab with an article and no elements: content (C6); an empty `articles` object is not.
@@ -129,7 +144,10 @@ migration moves `owner_id` only. Restore clears the column, so a live row's valu
   is not. The checks are one `CASE`, evaluated in order and stopped at the first match (an `OR` chain SQLite may
   evaluate whole), so a body that is not JSON never reaches `json_type` and a tab with elements is parsed at
   most twice: 8.9 ms CPU over 5,000 tabs of 6.7 KiB, against 8.7 ms for the earlier three-check `OR`.
-- **X5** Saved between the cron's start and the statement: kept (C2).
+- **X5** Saved between the cron's start and the statement: kept once the room's drain has pushed it (C2).
+- **X5c** Given content in the minute before the statement, not yet pushed: judged on the last pushed summary and
+  `saved_at`, so it can move; it stays restorable for 30 days, and its editor's next save answers 410 (X6).
+- **X5d** Not yet in its room (`content_summary IS NULL`): kept, however old (C8).
 - **X6** An editor open on the document when it is moved: its next save answers 410 `document_trashed` and
   the editor shows the deleted card (Trash I5); restorable from there.
 - **X7** The first run on a deployment with a backlog: at most `EMPTY_SWEEP_BATCH x EMPTY_SWEEP_MAX_BATCHES`
@@ -149,11 +167,10 @@ migration moves `owner_id` only. Restore clears the column, so a live row's valu
 
 ## Performance and limits
 
-Measured on production, 2026-09-29: 601 documents, 707 tabs (3.4 MB of tab JSON, largest 727 KB); the
-candidate query found 109 documents in 9.6 ms reading 1,472 rows. Per run: at most 4 statements, each
-scanning live documents plus a probe of their tabs (the `EXISTS` stops at the first tab with an element).
-At 100x today's size (~60k documents) a statement reads on the order of 150k rows, well inside D1's per-query
-limits; the cap bounds the writes at 2,000 per run, the same order as the Trash purge.
+Per run: at most 4 statements, each scanning live documents and reading one `json_extract` of each row's summary;
+no tab is read. At ~60k documents a statement reads on the order of 60k rows, well inside D1's per-query limits;
+the cap bounds the writes at 2,000 per run, the same order as the Trash purge. The content test's cost moves into
+each room, once per drain over that document's own tabs (the `CASE` stops at the first match).
 
 ## Observability
 
@@ -183,16 +200,18 @@ limits; the cap bounds the writes at 2,000 per run, the same order as the Trash 
 
 ## Testing
 
-| Rule                                                         | Test                                           |
-| ------------------------------------------------------------ | ---------------------------------------------- |
-| Empty / not empty (X1 to X4), stale boundary, live only, cap | `apps/api/src/db/empty-document-sweep.test.ts` |
-| Reason on the list; restore clears it and restarts stale     | `apps/api/src/db/empty-document-sweep.test.ts` |
-| Cron: moves, logs, never purges what it moved (C1)           | `apps/api/src/scheduled-trash.test.ts`         |
-| MCP `list_trash` carries `reason`                            | `apps/mcp/src/tools.test.ts`                   |
-| Local rows are `deleted`                                     | `apps/live/lib/offline/offline-trash.test.ts`  |
-| Row lead and card lead copy                                  | `apps/live/lib/trash-groups.test.ts`           |
-| OpenAPI parity                                               | `apps/api/src/openapi/*.test.ts`               |
-| Help registry keywords                                       | `apps/help` registry tests                     |
+| Rule                                                       | Test                                                                                                |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Empty / not empty (X1 to X5b) through the push, stale, cap | `apps/api/src/db/empty-document-sweep.test.ts`                                                      |
+| The room builds `hasContent` (C7, X1)                      | `apps/api/src/document-room/content-summary.test.ts`                                                |
+| An unknown summary is never moved (C8, X5d)                | `apps/api/src/scheduled-trash.test.ts` "keeps a document whose room has not pushed its summary yet" |
+| Reason on the list; restore clears it and restarts stale   | `apps/api/src/db/empty-document-sweep.test.ts`                                                      |
+| Cron: moves, logs, never purges what it moved (C1)         | `apps/api/src/scheduled-trash.test.ts`                                                              |
+| MCP `list_trash` carries `reason`                          | `apps/mcp/src/tools.test.ts`                                                                        |
+| Local rows are `deleted`                                   | `apps/live/lib/offline/offline-trash.test.ts`                                                       |
+| Row lead and card lead copy                                | `apps/live/lib/trash-groups.test.ts`                                                                |
+| OpenAPI parity                                             | `apps/api/src/openapi/*.test.ts`                                                                    |
+| Help registry keywords                                     | `apps/help` registry tests                                                                          |
 
 ## Constants and configuration
 

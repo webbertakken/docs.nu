@@ -1,0 +1,48 @@
+import { ArticleLayout } from '@/components/ArticleLayout';
+import { getSubArticles } from '@/lib/articles';
+import { helpMetadata } from '@/lib/seo';
+import { PopularGrid } from '@/components/illustrations/palette-categories';
+
+export const metadata = helpMetadata({
+  title: 'Popular',
+  description:
+    'In Diagram mode the palette opens on Popular: the twelve tiles most reached for, on the strip, so your everyday shapes and tools are one click away.',
+  path: '/help/palette/popular/',
+});
+
+<ArticleLayout
+  title="Popular"
+  description="Diagram mode's landing category: the twelve tiles most reached for, on the strip."
+  categoryTitle="Palette"
+  categorySlug="palette"
+  subArticles={getSubArticles("popular")}
+>
+
+**Popular** is the category Diagram mode's palette opens on. Its twelve tiles sit right on the [palette strip](/help/palette/toolbar-layout/), picked from across the palette, so the shapes and tools you use most are one click away. Each tile behaves exactly like the same tile in its home category: click it and then click the canvas to drop it, or drag on the canvas to draw it at a size, or drag the tile straight onto the canvas. Tiles preview the tab's theme the same way.
+
+<Figure caption="Popular in Diagram mode: twelve tiles, the same for everyone.">
+  <PopularGrid />
+</Figure>
+
+## What's in it
+
+Square, Circle, Diamond, Text, Arrow, Frame, Mind Node, Flowchart, Sankey, Table, **AWS** (opens the AWS marks) and Entity.
+
+The list is fixed and the same for everyone: using a tile never reorders it, and it can't be edited. Everything else is one pick away in the **category picker** just before the tiles, or a search away with the strip's **Search**.
+
+## Other modes
+
+[Workshop](/help/canvas/workshop-mode/) and [Pages](/help/canvas/pages-mode/) show their categories along the strip by name instead, each opening a panel of its elements, so they have no Popular. [Plan mode](/help/canvas/plan-mode/)'s palette opens on **Cards** (or **Boards**, until the tab has a board), an [Event Storming board](/help/canvas/event-storming-boards/) opens on its own notation, and [Draw mode](/help/canvas/draw-mode/) shows its own pens.
+
+## Every time you open a document
+
+The palette strip opens on Popular each time a document loads, rather than on the last category you used, and shows its twelve tiles (fewer on a narrow window, with the rest behind **More**).
+
+<Tip>
+  Several Popular tiles have a single-key shortcut, so you can skip the palette altogether: **R**
+  for a square, **O** a circle, **D** a diamond, **T** text, **A** an arrow and **F** a frame. Hold
+  **⌘** (Ctrl on Windows) to see each tile's shortcut on the palette. See [Keyboard
+  Shortcuts](/help/tips-and-tricks/keyboard-shortcuts/).
+</Tip>
+
+</ArticleLayout>

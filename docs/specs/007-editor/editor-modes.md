@@ -295,9 +295,10 @@ holds.
   and Components' collapsed groups); it
   renders whatever tiles the layout hands it. A category with no body of its
   own, such as Popular, is a tile grid.
-- **Every surface reads the layout:** the Toolbar strip, its category bar and flyouts (Diagram, Workshop,
-  Pages: [The category bar](toolbar-layout.md#the-category-bar), which shows the layout without Popular, with
-  one-word names, Write and Draw apart, and Workshop's session tools as Session) and its More popover (Plan).
+- **Every surface reads the layout:** the Toolbar strip, its category bar and flyouts (Workshop, Pages:
+  [The category bar](toolbar-layout.md#the-category-bar), which shows the layout without Popular, with one-word
+  names, Write and Draw apart, and Workshop's session tools as Session), and its category picker, tiles and More
+  popover (Diagram, Plan).
 - Draw mode shows its own tools in place of the palette, so it borrows
   Diagram's layout.
 
@@ -311,7 +312,7 @@ page: its **Components** ends with the **Stack**, and its **Data** with the **Ti
 **Components** leaves out **Entity**; Diagram's
 **Media** leaves out the **Embed** group (YouTube, Vimeo, Loom, Figma, Google
 Docs, Website), keeping Image and Avatar; it offers Build's tiles as two categories, **Diagrams** (Mind node, Org
-chart, Flowchart, Sequence, Table and the **Entity**, Popular's alone until the category bar had no Popular) and
+chart, Flowchart, Sequence, Table and the **Entity**, also on Diagram's Popular) and
 **Layout** (Lane, Frame, Stack, **Boundary**, Timeline, then Diagram key and the **Card**, **Badge** and **Step
 Number** from Components: [The card](../009-elements/card.md), [The badge](../009-elements/badge.md),
 [The step number](../009-elements/step-number.md), [The boundary](../009-elements/boundary.md)), so what is built

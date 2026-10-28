@@ -306,13 +306,12 @@ Share dialog gate, Share Form's, and the move prompt after signing in).
   filing it elsewhere. On `folder_not_found` or `folder_scope_mismatch` the sync creates the
   document again at the root of My Documents and logs `[offline-sync] placement refused reason=<code>, filed at root`;
   any other failure fails the sync and keeps the local copy.
-- **A forked tab comes back as its own tab.** The create never writes into a tab
-  another document holds: a seeded tab whose id is already taken outside this
-  document is created under a fresh id, and the document's tab / element links and
-  deck slides follow it. So a tab that forked on Take Offline returns as a new
-  tab beside the original rather than overwriting it; joining them again is an
-  explicit "Add to Document". A retried create (the tab already in this document)
-  keeps its ids.
+- **A synced-back tab keeps its id.** Each document's tabs live in its own room
+  ([Document storage](document-storage.md)), so a create can never write into a tab
+  another document holds. A tab that forked on Take Offline returns under its own
+  id, beside any other document's tab of the same id and independent of it; its
+  links and deck slides need no change. Joining them again is an explicit "Add to
+  Document". A retried create keeps its ids too.
 - **What went up is what is removed.** The upload takes seconds and the document
   stays editable meanwhile (here or in another tab). The local copy is removed only if
   it still matches what was uploaded (its save time, card store revision and each

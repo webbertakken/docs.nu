@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { sqliteD1 } from '../test-sqlite-d1';
 import { assertSelect, inlineId, planOf, verifyOf, type Query } from './content-move-plan';
 
+// A content_moves record, as a room writes it (content-move.ts), in the test's column order.
+const MOVE_ROW = `INSERT OR REPLACE INTO content_moves (document_id, status, d1_tabs, room_tabs, d1_hash, room_hash, tried_at)
+  VALUES (?, ?, ?, ?, ?, ?, 1)`;
+
 function d1() {
   const { sql } = sqliteD1();
   sql.exec(`
@@ -37,9 +41,7 @@ describe('the operator tool', () => {
   it('passes only when every document moved with matching hashes', async () => {
     const { sql, query } = d1();
     const plan = await planOf(query);
-    sql.exec(`CREATE TABLE IF NOT EXISTS content_moves (document_id TEXT PRIMARY KEY, status TEXT NOT NULL,
-      d1_tabs INTEGER, room_tabs INTEGER, d1_hash TEXT, room_hash TEXT)`);
-    const insert = sql.prepare('INSERT OR REPLACE INTO content_moves VALUES (?, ?, ?, ?, ?, ?)');
+    const insert = sql.prepare(MOVE_ROW);
     for (const p of plan) insert.run(p.id, 'moved', p.tabs, p.tabs, p.hash, p.hash);
     expect((await verifyOf(query, plan)).pass).toBe(true);
 
@@ -55,11 +57,9 @@ describe('the operator tool', () => {
   it('fails a document whose D1 content changed since the plan', async () => {
     const { sql, query } = d1();
     const plan = await planOf(query);
-    sql.exec(`CREATE TABLE IF NOT EXISTS content_moves (document_id TEXT PRIMARY KEY, status TEXT NOT NULL,
-      d1_tabs INTEGER, room_tabs INTEGER, d1_hash TEXT, room_hash TEXT)`);
     sql.exec("UPDATE tabs SET name = 'Changed'");
     const now = await planOf(query);
-    const insert = sql.prepare('INSERT INTO content_moves VALUES (?, ?, ?, ?, ?, ?)');
+    const insert = sql.prepare(MOVE_ROW);
     for (const p of now) insert.run(p.id, 'moved', p.tabs, p.tabs, p.hash, p.hash);
     const result = await verifyOf(query, plan);
     expect(result.rows.find((r) => r.id === 'a')!.problem).toBe('changed since the plan');
@@ -70,13 +70,40 @@ describe('a document purged since the plan', () => {
   it('passes as gone', async () => {
     const { sql, query } = d1();
     const plan = await planOf(query);
-    sql.exec(`CREATE TABLE IF NOT EXISTS content_moves (document_id TEXT PRIMARY KEY, status TEXT NOT NULL,
-      d1_tabs INTEGER, room_tabs INTEGER, d1_hash TEXT, room_hash TEXT)`);
     sql.exec("DELETE FROM documents WHERE id = 'b'");
-    const insert = sql.prepare('INSERT INTO content_moves VALUES (?, ?, ?, ?, ?, ?)');
+    const insert = sql.prepare(MOVE_ROW);
     insert.run('a', 'moved', 1, 1, plan[0]!.hash, plan[0]!.hash);
     const result = await verifyOf(query, plan);
     expect(result.pass).toBe(true);
     expect(result.rows.find((r) => r.id === 'b')!.status).toBe('gone');
+  });
+});
+
+describe('a document created in its room', () => {
+  it('passes when its room records it born and moved', async () => {
+    const { sql, query } = d1();
+    const plan = await planOf(query);
+    for (const p of plan) sql.prepare(MOVE_ROW).run(p.id, 'moved', p.tabs, p.tabs, p.hash, p.hash);
+    sql.exec(
+      "INSERT INTO documents (id, owner_id, name, saved_at, created_at) VALUES ('new', 'o', 'New', 1, 1)",
+    );
+    sql.exec(
+      "INSERT INTO content_moves (document_id, status, born, tried_at) VALUES ('new', 'moved', 1, 1)",
+    );
+    const result = await verifyOf(query, plan);
+    expect(result.rows.find((r) => r.id === 'new')!.problem).toBeNull();
+    expect(result.pass).toBe(true);
+  });
+
+  it('fails one born but not recorded moved', async () => {
+    const { sql, query } = d1();
+    sql.exec(
+      "INSERT INTO documents (id, owner_id, name, saved_at, created_at) VALUES ('new', 'o', 'New', 1, 1)",
+    );
+    sql.exec(
+      "INSERT INTO content_moves (document_id, status, born, tried_at) VALUES ('new', 'failed', 1, 1)",
+    );
+    const result = await verifyOf(query, []);
+    expect(result.rows.find((r) => r.id === 'new')!.problem).toBe('status failed');
   });
 });

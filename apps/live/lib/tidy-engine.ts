@@ -1,7 +1,6 @@
-// The tidiers, loaded on demand (docs/specs/008-canvas/blueprints/tidy-up.md "Performance and limits").
-// The Tidy Up layouts, their router and the verdicts are only needed once someone opens Tidy Up or runs a
-// tidier from the command palette, so they stay out of the editor's first load: the popover loads them as
-// it opens (before it judges anything), and a palette command loads them at the press.
+// The tidiers, loaded on demand (docs/specs/008-canvas/blueprints/layout-cleanup.md "Performance and limits").
+// The layouts, their router and the verdicts are only needed once someone runs a tidier from the command
+// palette, so they stay out of the editor's first load: the first press loads them.
 
 import type { cleanupElements } from './tab-cleanup';
 import type { assessCleanup, verdictNotice } from './tidy-verdict';
@@ -27,9 +26,6 @@ export function loadTidyEngine(): Promise<TidyEngine> {
   );
   return pending;
 }
-
-/** The tidiers if they have loaded, else null. */
-export const tidyEngine = (): TidyEngine | null => engine;
 
 /** Run `go` with the tidiers: now if they have loaded, once they have otherwise. */
 export function withTidyEngine(go: (engine: TidyEngine) => void): void {

@@ -61,7 +61,7 @@ test.describe('Role pill', () => {
     await openEditor(page);
     const pill = header(page).getByRole('button', { name: 'Editing. Owned by you' });
     await expect(pill).toBeVisible();
-    await expect(page.locator('[data-category-bar-button][aria-label="Shapes"]')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Palette category' })).toBeVisible();
 
     await pill.hover();
     await expect(page.locator(TOOLTIP)).toHaveText('Owned by you', { timeout: 2_000 });
@@ -76,7 +76,7 @@ test.describe('Role pill', () => {
     const viewing = header(page).getByRole('button', { name: 'Viewing. Owned by you' });
     await expect(viewing).toBeVisible();
     // Read-only: the palette's categories are gone.
-    await expect(page.locator('[data-category-bar-button]')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Palette category' })).toHaveCount(0);
 
     await viewing.click();
     await expect(pill).toBeVisible();

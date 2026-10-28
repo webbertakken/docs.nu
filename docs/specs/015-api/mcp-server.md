@@ -459,7 +459,7 @@ Edge labels are capped the same way (overflow is dropped, an arrow has no note).
 
 **Boxes fit their labels.** Each node is sized from its label (estimated text
 width and line count, within a sane range) and **keeps that size** through the
-layout: the peer sizing that Tidy Up applies (every box of a tier as big as its
+layout: the peer sizing that the editor's Auto Layout applies (every box of a tier as big as its
 longest label) is skipped for graph input, where it let one long label inflate
 every box ("CTO" drawn as wide as "Platform and site reliability"). An
 unlabelled circle is a small solid dot ([Mermaid](../020-import-export/mermaid.md)
@@ -500,7 +500,7 @@ unlabelled circle is a small solid dot ([Mermaid](../020-import-export/mermaid.m
   one, just off the line on either side, where it touches no box, border, heading or line (a wide label on a drop
   beside a neighbour's drop), before it is ever laid over another line. Each label keeps off the labels placed
   before it (two "publish" labels off one bus stood over each other).
-  The gap between two ranks fits the widest label crossing it, as Tidy Up's does (its width left to right, its line
+  The gap between two ranks fits the widest label crossing it, as the editor's Auto Layout's does (its width left to right, its line
   height either side of the jog top to bottom), so a caption is never longer than its edge; between a group and a
   node outside it too.
 - **Side steps sit level with their decision.** A decision (diamond) with two or more exits keeps its main exit on

@@ -168,10 +168,14 @@ export function canonicalContent(rows: MovableRows): CanonicalContent {
   return out as CanonicalContent;
 }
 
+/** The canonical content as the one JSON text its hash is taken over: equal texts are equal content. */
+export function canonicalJson(content: CanonicalContent): string {
+  return JSON.stringify(MOVABLE_TABLES.map(({ table }) => content[table] ?? null));
+}
+
 /** SHA-256 over the canonical content's JSON, lower-case hex; the same in Workers and in Node. */
 export async function contentHashOf(content: CanonicalContent): Promise<string> {
-  const ordered = MOVABLE_TABLES.map(({ table }) => content[table] ?? null);
-  const bytes = new TextEncoder().encode(JSON.stringify(ordered));
+  const bytes = new TextEncoder().encode(canonicalJson(content));
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }

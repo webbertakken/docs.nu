@@ -25,8 +25,9 @@ const item = (id: string, key: number, rev = 1): Item => ({
   updatedBy: PERSON,
 });
 
+// The content's last save, in the document's room (pushed to the listing by its outbox).
 const savedAt = (db: ReturnType<typeof sqliteD1>) =>
-  (db.sql.prepare("SELECT saved_at FROM documents WHERE id = 'd1'").get() as { saved_at: number })
+  (db.sql.prepare("SELECT saved_at FROM document WHERE id = 'd1'").get() as { saved_at: number })
     .saved_at;
 
 beforeEach(() => {
@@ -85,7 +86,7 @@ describe('sheet writes', () => {
       updated_by: JSON.stringify(PERSON),
     });
     const write = (fromRev: number, nonce: string, now: number) =>
-      db.env.DB.batch([
+      db.env.DOCUMENT_DB.batch([
         headWriteStatement(db.env, 'd1', 's1', fromRev, nonce, now, PERSON, {}),
         documentSavedStatement(db.env, 'd1', 's1', nonce, now),
       ]);

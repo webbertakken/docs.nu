@@ -168,9 +168,9 @@ export type UserPreferences = {
   // Missing / undefined / true === on, the default. Flipped from the
   // panel's settings gear (desktop-only chrome, like the hover itself).
   layerHoverPreview?: boolean;
-  // Whether the bottom-right cluster names its buttons beside their icons on a wide desktop
-  // (docs/specs/007-editor/live-app.md "Named on a wide desktop"). Missing === on; a phone never
-  // names them, whatever this says. Read through useDockNames.
+  // Button Labels: whether the footer bar names its buttons (Search, Settings, the theme) beside their
+  // icons (docs/specs/007-editor/user-preferences.md). Missing === on; a phone never names them, and the
+  // bottom-right cluster is icons alone, whatever this says. Read through useButtonLabelsSetting.
   dockButtonNames?: boolean;
   // Email notifications (docs/specs/014-identity/profile-and-email-notifications.md). Account-level settings flipped from the
   // Settings dialog; the api worker reads them server-side before
@@ -232,6 +232,9 @@ export type UserPreferences = {
   // (Play or Cancel), so each offers itself once ever. Surfaced in Settings as Tours › Show Me, one switch
   // per kind (inverted). Read through lib/element-tours.
   elementTourKinds?: ElementTourKind[];
+  // The toured kinds whose element tour this person asked to be offered (Settings › Tours › Show Me); none by
+  // default, so no Show Me sits beside the selection toolbar until they opt in (lib/element-tours.ts).
+  elementTourOffers?: ElementTourKind[];
   // Counts every element tour as answered while Power user mode is on (lib/tour-tracks.ts); written by its preset.
   elementToursSeen?: boolean;
   // Documents this user has hidden from the Explorer's Recent list

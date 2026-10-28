@@ -1,4 +1,4 @@
-// A bucket grid over the boxes Tidy Up's router must keep clear of (auto-layout-route.ts), so a
+// A bucket grid over the boxes the tidy profile's router must keep clear of (auto-layout-route.ts), so a
 // leg is tested against the boxes near it rather than every box on the tab. Each box sits in every
 // cell its padded bounds touch; a query returns each box at most once, in no particular order.
 

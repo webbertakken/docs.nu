@@ -165,7 +165,6 @@ import { useElementLinks } from '@/hooks/canvas/useElementLinks';
 import { useElementSelectionActions } from '@/hooks/canvas/useElementSelectionActions';
 import { useElementStyle } from '@/hooks/canvas/useElementStyle';
 import { useStylePreview } from '@/hooks/canvas/useStylePreview';
-import { useCleanupPreview } from '@/hooks/canvas/useCleanupPreview';
 import { useShapeDrawing } from '@/hooks/canvas/useShapeDrawing';
 import { useShareLinks } from '@/hooks/persistence/useShareLinks';
 import { useTabActions } from '@/hooks/persistence/useTabActions';
@@ -3492,16 +3491,6 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     onCommitted: styleMemory.recordEdit,
   });
 
-  // The same idea one level up (docs/specs/008-canvas/layout-cleanup.md "Hover to see it first"):
-  // hovering a Tidy Up tile lays the whole tab out behind the popover, and it only sticks on press.
-  const { previewCleanup, endCleanupPreview, assessCleanupKind } = useCleanupPreview({
-    editsBlocked: structureBlocked,
-    activeId,
-    tabsRef,
-    tickTabs,
-    previewingRef,
-  });
-
   // Element link picker state + the link read/write/follow handlers.
   // See useElementLinks.
   const {
@@ -4074,9 +4063,6 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     applyImageToElement,
     autoAlignTab,
     autoLayoutTab,
-    previewCleanup,
-    endCleanupPreview,
-    assessCleanupKind,
     // The facilitator baton (docs/specs/012-collaboration/facilitator.md): who is running this session.
     facilitator,
     setTabFinish,

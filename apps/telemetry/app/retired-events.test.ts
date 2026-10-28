@@ -59,6 +59,13 @@ describe('isRetiredEvent', () => {
     expect(isRetiredEvent('UI', 'Opened', 'SettingsAi')).toBe(false);
   });
 
+  it("retires the Tidy Up button's opening, not the tidiers it ran", () => {
+    expect(isRetiredEvent('UI', 'Opened', 'TidyUp')).toBe(true);
+    expect(isRetiredEvent('Tab', 'Aligned', 'Smart')).toBe(false);
+    expect(isRetiredEvent('Tab', 'Aligned', 'PageTidyUp')).toBe(false);
+    expect(isRetiredEvent('UI', 'Opened', 'Layers')).toBe(false);
+  });
+
   it('keeps everything that still exists', () => {
     expect(isRetiredEvent('Document', 'Undone', null)).toBe(false);
     expect(isRetiredEvent('Help', 'View', 'undo')).toBe(false);

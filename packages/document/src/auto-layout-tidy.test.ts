@@ -11,7 +11,7 @@ import { arrowPathPolyline } from './arrow-path';
 import { endpointPosition } from './geometry';
 import type { Anchor, ArrowElement, BoxedElement, Element, ShapeElement, ShapeKind } from './index';
 
-// docs/specs/008-canvas/layout-cleanup.md "Tidy Up keeps a flowchart a flowchart" and "What moves together".
+// docs/specs/008-canvas/layout-cleanup.md "The tidy profile keeps a flowchart a flowchart" and "What moves together".
 
 function box(
   id: string,
@@ -102,7 +102,7 @@ function crossesBox(points: { x: number; y: number }[], b: BoxedElement): boolea
   return false;
 }
 
-describe('Tidy Up on a flowchart', () => {
+describe('the tidy profile on a flowchart', () => {
   for (const style of [{}, { style: 'flow' as const, direction: 'TB' as const }]) {
     const label = 'direction' in style ? 'Flowchart Down' : 'Smart';
     it(`${label} keeps the spine in one straight column, sizes as drawn`, () => {

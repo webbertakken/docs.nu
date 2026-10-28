@@ -30,11 +30,11 @@ function liveDoc(sql: DatabaseSync, id: string, ownerId = 'owner', teamId: strin
   });
 }
 
-function tabIn(sql: DatabaseSync, tabId: string, ...documentIds: string[]) {
+// A tab `holder` holds, which its room lists as shared with `others` (document-room/tab-shares.ts).
+function tabIn(sql: DatabaseSync, tabId: string, holder: string, ...others: string[]) {
   row(sql, 'tabs', { id: tabId, name: tabId, data: '{"elements":[]}', updated_at: T0 });
-  documentIds.forEach((d, i) =>
-    row(sql, 'document_tabs', { document_id: d, tab_id: tabId, order_index: i, added_at: T0 }),
-  );
+  row(sql, 'document_tabs', { document_id: holder, tab_id: tabId, order_index: 0, added_at: T0 });
+  for (const other of others) row(sql, 'tab_shares', { tab_id: tabId, document_id: other });
 }
 
 function get(db: SqliteD1, opts: Parameters<typeof makeTestRouteContext>[2] = {}) {

@@ -168,7 +168,7 @@
 - [x] Constants and configuration
 - [x] Defaults ledger
 
-## tidy-up
+## layout-cleanup
 
 - [x] Domain and naming
 - [x] Behaviour and state
@@ -177,9 +177,6 @@
 - [x] Errors and edge cases
 - [x] Security and trust
 - [x] Performance and limits
-- [x] Presentation and UX
-- [x] Accessibility
-- [x] Web Experience
 - [x] Observability
 - [x] Testing
 - [x] Constants and configuration

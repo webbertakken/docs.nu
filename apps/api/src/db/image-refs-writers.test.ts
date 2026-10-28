@@ -7,7 +7,7 @@ import { handleDocuments } from '../routes/documents';
 import { handleDocumentSubresources } from '../routes/document-subresource-routes';
 import { deleteAccount } from './account';
 import { copyDocument, deleteDocument } from './documents';
-import { deleteTabRow, linkTabToDocument, seedTabs, swapTabData, upsertTab } from './tabs';
+import { deleteTabRow, seedTabs, swapTabData, upsertTab } from './tabs';
 import { tabStatsOfData } from './tab-stats';
 
 // Every writer of `tabs.data` keeps `image_refs` in step with the body
@@ -167,36 +167,25 @@ describe('deleteTabRow', () => {
     await deleteTabRow(db.env, 'A', 't1');
     expect(allRefs(db.sql)).toEqual([]);
   });
-
-  it('keeps them while another document still links the tab', async () => {
-    const db = withDocument();
-    liveDoc(db.sql, 'B');
-    await upsertTab(db.env, 'A', tabWith('t1', 'img-1'), 0);
-    await linkTabToDocument(db.env, 'B', 't1');
-    await deleteTabRow(db.env, 'A', 't1');
-    expect(refs(db.sql, 't1')).toEqual(['img-1']);
-  });
 });
 
-describe('documentRemovalStatements (document delete, Take Offline, account deletion)', () => {
-  it("prunes the dropped tabs' references and keeps a shared tab's", async () => {
+describe('removing documents (document delete, Take Offline, account deletion)', () => {
+  it("drops the removed document's references with its room, keeping another document's", async () => {
     const db = withDocument();
     liveDoc(db.sql, 'B');
     await upsertTab(db.env, 'A', tabWith('own', 'img-1'), 0);
-    await upsertTab(db.env, 'A', tabWith('shared', 'img-2'), 1);
-    await linkTabToDocument(db.env, 'B', 'shared');
+    await upsertTab(db.env, 'B', tabWith('theirs', 'img-2'), 0);
     await deleteDocument(db.env, 'A');
-    expect(allRefs(db.sql)).toEqual(['shared:img-2']);
+    expect(allRefs(db.sql)).toEqual(['theirs:img-2']);
   });
 
-  it('prunes on account deletion, keeping a tab shared into another owner', async () => {
+  it("drops a leaver's references on account deletion, keeping another owner's", async () => {
     const db = withDocument('leaver');
     liveDoc(db.sql, 'B', 'stayer');
     await upsertTab(db.env, 'A', tabWith('own', 'img-1'), 0);
-    await upsertTab(db.env, 'A', tabWith('shared', 'img-2'), 1);
-    await linkTabToDocument(db.env, 'B', 'shared');
+    await upsertTab(db.env, 'B', tabWith('theirs', 'img-2'), 0);
     await deleteAccount(db.env, 'leaver');
-    expect(allRefs(db.sql)).toEqual(['shared:img-2']);
+    expect(allRefs(db.sql)).toEqual(['theirs:img-2']);
   });
 });
 

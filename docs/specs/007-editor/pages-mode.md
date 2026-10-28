@@ -644,15 +644,13 @@ and logo pages keep their background in the panel only. Opening it is tracked as
 An infographic or slide page's title bar holds a **Tidy** button, its icon alone (never named,
 on a desktop or a phone), right after Background and left of the lock and the cog, shown only
 while a press would change something (a page already tidy, or empty, shows none), the cog's
-size with a tooltip ("Tidy: align and space what is on this page"), its glyph the diagram Tidy
-Up's broom. A logo page's Tidy (for drawn lines) sits in the same place, after Mirror and
-Guides, its icon alone too. It is Diagram mode's Tidy Up ([Layout cleanup](../008-canvas/layout-cleanup.md#the-tidy-up-button))
+size with a tooltip ("Tidy: align and space what is on this page"), its glyph a broom. A logo page's Tidy (for drawn lines) sits in the same place, after Mirror and
+Guides, its icon alone too. It is Diagram mode's Auto Layout ([Layout cleanup](../008-canvas/layout-cleanup.md))
 for a page: where the diagram one lays shapes out from their arrows, a page has no graph, so this
 one keeps the author's layout and straightens it.
 
 - **Runs at once.** One tidier, so no popover: a press tidies the page, one edit, one undo. On a
-  desktop pointer, hovering the button shows the tidied page in place (nothing written), as the
-  diagram Tidy Up's tiles do; leaving the button puts it back. A page already tidy says so in a
+  desktop pointer, hovering the button shows the tidied page in place (nothing written); leaving the button puts it back. A page already tidy says so in a
   toast ("This page is already tidy.") and writes nothing.
 - **What it tidies**: the elements on the page (centre on the page, as everywhere else), as
   **blocks**: an element with others wholly inside it (a card and its text, a background and

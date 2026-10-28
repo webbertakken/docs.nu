@@ -57,7 +57,7 @@ import {
 } from './item-route-kit';
 import { patches } from './item-patches-route';
 import { tally } from './item-tally-route';
-import { readBody, type RouteContext } from './context';
+import { readBody, type DocumentRouteContext } from './context';
 
 // `owner` is the caller: a restored comment thread keeps author ids on their own comments only.
 function readCreate(raw: unknown, owner: string): ItemCreate | ItemRejection {
@@ -70,7 +70,7 @@ function readCreate(raw: unknown, owner: string): ItemCreate | ItemRejection {
 }
 
 // GET /items: the store, or the items a tab-scoped caller's tab shows.
-async function list(ctx: RouteContext, documentId: string): Promise<Response> {
+async function list(ctx: DocumentRouteContext, documentId: string): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'read');
   if (caller instanceof Response) return caller;
   const [items, rev] = await Promise.all([
@@ -89,7 +89,7 @@ async function list(ctx: RouteContext, documentId: string): Promise<Response> {
 // no per-card sort.
 // `by` names who made them when that is not the caller: a form's response (docs/specs/030-forms/forms.md).
 export async function createMany(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   caller: Pick<ItemCaller, 'documentId' | 'owner'>,
   creates: ItemCreate[],
   opts?: { by: ItemPerson },
@@ -145,7 +145,7 @@ export async function createMany(
   return itemBusy();
 }
 
-async function create(ctx: RouteContext, documentId: string): Promise<Response> {
+async function create(ctx: DocumentRouteContext, documentId: string): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'participate');
   if (caller instanceof Response) return caller;
   const body = await readBody(ctx);
@@ -167,7 +167,7 @@ async function create(ctx: RouteContext, documentId: string): Promise<Response> 
   return json(answer, { status: 201 });
 }
 
-async function bulk(ctx: RouteContext, documentId: string): Promise<Response> {
+async function bulk(ctx: DocumentRouteContext, documentId: string): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'edit');
   if (caller instanceof Response) return caller;
   // Bulk writes (an offline document's items, on sync) are whole-document writes.
@@ -194,7 +194,7 @@ async function bulk(ctx: RouteContext, documentId: string): Promise<Response> {
 // so anything it reads (a move's neighbours) is read afresh on every attempt. A change may answer with a Response
 // instead (a refusal, or nothing to write).
 export async function writeItem(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   caller: ItemCaller,
   itemId: string,
   change: (item: Item, by: ItemPerson) => Item | Response | Promise<Item | Response>,
@@ -225,7 +225,11 @@ export async function writeItem(
   return itemBusy();
 }
 
-async function patch(ctx: RouteContext, documentId: string, itemId: string): Promise<Response> {
+async function patch(
+  ctx: DocumentRouteContext,
+  documentId: string,
+  itemId: string,
+): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'participate');
   if (caller instanceof Response) return caller;
   const body = await readBody(ctx);
@@ -241,7 +245,11 @@ async function patch(ctx: RouteContext, documentId: string, itemId: string): Pro
   );
 }
 
-async function move(ctx: RouteContext, documentId: string, itemId: string): Promise<Response> {
+async function move(
+  ctx: DocumentRouteContext,
+  documentId: string,
+  itemId: string,
+): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'participate');
   if (caller instanceof Response) return caller;
   const body = await readBody(ctx);
@@ -259,7 +267,11 @@ async function move(ctx: RouteContext, documentId: string, itemId: string): Prom
   );
 }
 
-async function remove(ctx: RouteContext, documentId: string, itemId: string): Promise<Response> {
+async function remove(
+  ctx: DocumentRouteContext,
+  documentId: string,
+  itemId: string,
+): Promise<Response> {
   const caller = await itemCaller(ctx, documentId, 'edit');
   if (caller instanceof Response) return caller;
   if (caller.scope && !caller.scope.has(itemId)) return itemNotFound();
@@ -273,7 +285,7 @@ async function remove(ctx: RouteContext, documentId: string, itemId: string): Pr
 }
 
 // The item routes, or null for a path that is not theirs.
-export async function handleItemRoutes(ctx: RouteContext): Promise<Response | null> {
+export async function handleItemRoutes(ctx: DocumentRouteContext): Promise<Response | null> {
   const { segments, request } = ctx;
   if (segments[3] !== 'items') return null;
   const documentId = segments[2]!;
@@ -324,7 +336,7 @@ export function readSeedItems(raw: unknown, owner: string): ItemCreate[] | Respo
 // Writes a new document's seed items, in batches of the bulk cap. No room is open yet, so
 // nothing is relayed.
 export async function seedItems(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   owner: string,
   creates: ItemCreate[],

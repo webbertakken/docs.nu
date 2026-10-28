@@ -51,9 +51,11 @@ describe('tourStepsFor', () => {
   it('reads tap and long-press words on a touch screen, click and right-click words otherwise', () => {
     const body = (touch: boolean, id: string) =>
       tourStepsFor({ mobile: true, esBoard: false, touch }).find((s) => s.id === id)!.body;
-    expect(body(false, 'categories')).toMatch(/Click to add/);
+    expect(body(false, 'categories')).toBe(
+      'Pick a category to see its elements on the strip. Click one to add it, or drag it onto the canvas.',
+    );
     expect(body(true, 'categories')).toBe(
-      'Tap a category to see what is in it. Tap to add, or drag onto the canvas.',
+      'Pick a category to see its elements on the strip. Tap one to add it, or drag it onto the canvas.',
     );
     expect(body(false, 'context-menu')).toMatch(/^Right-click/);
     expect(body(true, 'context-menu')).toMatch(/^Long-press anything/);

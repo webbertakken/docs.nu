@@ -7,7 +7,7 @@
 //   - the title, the caption and the key of shapes live beside it (graph-header.ts).
 //   - placeElbowLabels, the last pass: each elbow's label on a run of its own (graph-look-labels.ts).
 //
-// Graph input only (graph-input.ts `layoutGraph`); the editor's Mermaid import and Tidy Up never run them.
+// Graph input only (graph-input.ts `layoutGraph`); the editor's Mermaid import and tidy profile never run them.
 
 import { anchorPrimarySide } from './anchors';
 import { isContainerKind } from './containment';

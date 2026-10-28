@@ -1,5 +1,5 @@
-// Ranking for the editor's Tidy Up flow layout (docs/specs/008-canvas/layout-cleanup.md "Tidy Up
-// keeps a flowchart a flowchart"). Three steps the graph-input layout does not take, because an
+// Ranking for the editor's tidy-profile flow layout (docs/specs/008-canvas/layout-cleanup.md "The
+// tidy profile keeps a flowchart a flowchart"). Three steps the graph-input layout does not take, because an
 // author's drawing carries intent a generated graph does not:
 //
 //   1. Loops are broken the way the drawing reads. A depth-first walk from the sources, children

@@ -1,20 +1,18 @@
 // The Inbox's Form Responses (docs/specs/030-forms/forms.md "Hearing about responses", docs/specs/013-workspace/
 // inbox.md): each live form, in a document the reader owns or reaches through a team, with responses the reader has
-// not seen. Unseen is counted by response number (form_reads), so the read touches no card.
+// not seen. Unseen is counted by response number (form_reads), so the read touches no card; the form's tab name,
+// heading and board are what the document's room pushed onto its links with the tab (document-outbox.ts).
 import type { ActivityFormResponses } from '@livedoc/api-schema';
 import { VISIBLE_DOCUMENTS_CTES } from './document-visibility';
 
 // From the reader's documents to their form links (the link's document index), then each link's read row.
 export const FORM_RESPONSES_SQL = `WITH ${VISIBLE_DOCUMENTS_CTES}
   SELECT l.code, v.id AS document_id, v.name AS document_name, v.team_id AS document_team_id, v.via,
-         l.tab_id, t.name AS tab_name,
-         json_extract(t.data, '$.form.heading') AS heading,
-         COALESCE(json_extract(t.data, '$.form.sheet.tabId'), json_extract(t.data, '$.form.destination.tabId')) AS board_tab_id,
+         l.tab_id, l.tab_name, l.heading, l.board_tab_id,
          l.responses - COALESCE(r.seen_number, 0) AS unseen,
          COALESCE(l.last_response_at, l.created_at) AS latest_at
     FROM visible v
     CROSS JOIN form_links l ON l.document_id = v.id
-    JOIN tabs t ON t.id = l.tab_id
     LEFT JOIN form_reads r ON r.code = l.code AND r.owner_id = ?1
    WHERE v.via <> 'shared'
      AND l.suspended_at IS NULL

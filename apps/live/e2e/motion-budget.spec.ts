@@ -100,10 +100,8 @@ async function tourTheChrome(page: Page): Promise<void> {
   await page.waitForTimeout(400);
 
   await toggle(page, 'Selection mode');
-  // A category's flyout on the category bar (docs/specs/007-editor/toolbar-layout.md "The category bar").
-  await openAndClose(page, () =>
-    page.locator('[data-category-bar-button][aria-label="Layout"]').click(),
-  );
+  // The category picker (docs/specs/007-editor/toolbar-layout.md).
+  await toggle(page, 'Palette category');
   await toggle(page, 'Fit to screen');
   // The Explorer popover, and the Document menu on its Current Document card.
   const explorer = page.getByRole('button', { name: 'Explorer', exact: true });

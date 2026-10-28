@@ -31,8 +31,9 @@ Switching the mode **on** writes these values, once:
 | Minimal chrome       | `minimalChrome`      | on    |
 
 The Plan and Pages tours offer each of their tracks once (`planTourTracks`, `pagesTourKinds`), and the
-[element tours](element-tours.md) each toured kind (`elementTourKinds`); their seen
-flag counts every track only while the mode is on, so switching it off gives back every track not yet answered.
+[element tours](element-tours.md) each toured kind opted in to (`elementTourOffers`, answered in `elementTourKinds`);
+their seen flag counts every track only while the mode is on, so switching it off gives back every track not yet
+answered. Element tours are off until opted in to, so for someone who never opted in the mode changes nothing there.
 
 Panel opacity is not part of the preset. Motion is not part of the mode: every transition is snappy for everyone
 ([Motion](../004-interface-design/motion.md)).

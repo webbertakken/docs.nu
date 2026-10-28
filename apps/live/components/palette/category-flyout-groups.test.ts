@@ -29,8 +29,8 @@ const tile = (id: string, dividerAfter = false): PaletteTileDef => ({
 });
 
 describe('the category bar', () => {
-  it('is Diagram’s, Workshop’s and Pages’s strip, not Plan’s or Draw’s', () => {
-    expect([...CATEGORY_BAR_MODES].sort()).toEqual(['diagram', 'pages', 'workshop']);
+  it('is Workshop’s and Pages’s strip, not Diagram’s, Plan’s or Draw’s', () => {
+    expect([...CATEGORY_BAR_MODES].sort()).toEqual(['pages', 'workshop']);
   });
 
   it('names every category in one word', () => {

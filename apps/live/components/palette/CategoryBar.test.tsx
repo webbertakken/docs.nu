@@ -28,7 +28,7 @@ afterEach(() => {
   cleanup();
 });
 
-function show(mode: EditorMode = 'diagram', { minimal = false }: { minimal?: boolean } = {}) {
+function show(mode: EditorMode = 'workshop', { minimal = false }: { minimal?: boolean } = {}) {
   const h = Object.fromEntries(
     PALETTE_ADD_HANDLER_KEYS.map((k) => [k, vi.fn()]),
   ) as unknown as PaletteAddHandlers;
@@ -71,12 +71,12 @@ describe('hover intent', () => {
   });
 
   it('moves an open flyout to the next category at once, and ignores a touch', () => {
-    show();
+    show('pages');
     fireEvent.pointerEnter(button('Shapes'), mouse);
     wait(HOVER_OPEN_MS);
     fireEvent.pointerEnter(button('Concepts'), mouse);
     expect(heading()).toBe('Concepts');
-    fireEvent.pointerEnter(button('Layout'), { pointerType: 'touch' });
+    fireEvent.pointerEnter(button('Components'), { pointerType: 'touch' });
     expect(heading()).toBe('Concepts');
   });
 
@@ -190,14 +190,14 @@ describe('hover intent', () => {
 
 describe('minimal chrome (docs/specs/007-editor/power-user-mode.md)', () => {
   it('shows a picture tile’s icon alone, keeping its name, and a card its name', () => {
-    show('diagram', { minimal: true });
+    show('pages', { minimal: true });
     fireEvent.click(button('Shapes'), { detail: 1 });
     const square = within(flyout()!).getByRole('button', { name: 'Add Square' });
     expect(square.textContent).not.toContain('Square');
-    fireEvent.click(button('Diagrams'), { detail: 1 });
-    expect(
-      within(flyout()!).getAllByRole('button', { name: /Mind Node/ })[0]!.textContent,
-    ).toContain('Mind Node');
+    fireEvent.click(button('Concepts'), { detail: 1 });
+    expect(within(flyout()!).getAllByRole('button', { name: /Sankey/ })[0]!.textContent).toContain(
+      'Sankey',
+    );
   });
 });
 
@@ -210,9 +210,9 @@ describe('the keyboard', () => {
     fireEvent.keyDown(button('Write'), { key: 'ArrowLeft' });
     fireEvent.keyDown(button('Shapes'), { key: 'ArrowLeft' });
     // Wraps round to the last.
-    expect(document.activeElement).toBe(button('Media'));
-    fireEvent.keyDown(button('Media'), { key: 'ArrowDown' });
-    expect(heading()).toBe('Media');
+    expect(document.activeElement).toBe(button('Data'));
+    fireEvent.keyDown(button('Data'), { key: 'ArrowDown' });
+    expect(heading()).toBe('Data');
     expect(document.activeElement?.hasAttribute('data-flyout-item')).toBe(true);
   });
 

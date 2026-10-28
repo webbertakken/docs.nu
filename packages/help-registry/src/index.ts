@@ -174,7 +174,7 @@ export const categories: Category[] = [
     title: 'Palette',
     description:
       'Your launchpad for everything on the canvas: every element and palette setting explained.',
-    articleCount: 36,
+    articleCount: 37,
     kind: 'feature',
     groups: ['Everyday Elements', 'Diagram Kits', 'Workshop Kits', 'Palette Settings'],
   },
@@ -1446,6 +1446,15 @@ export const articles: Article[] = [
     group: 'Palette Settings',
   },
   {
+    slug: 'popular',
+    title: 'Popular',
+    description: "The twelve tiles Diagram mode's palette opens on, right on the strip.",
+    keywords: 'popular common default quick tiles landing everyday shapes strip diagram first',
+    category: 'Palette',
+    categorySlug: 'palette',
+    group: 'Everyday Elements',
+  },
+  {
     slug: 'toolbar-layout',
     title: 'Toolbar Layout',
     description: 'The palette strip across the top of the canvas, its More and its Search.',
@@ -1829,7 +1838,7 @@ export const articles: Article[] = [
   {
     slug: 'add-to-document',
     title: 'Add a Tab to Another Document',
-    description: 'Add the active tab to another document you own; both share the same live tab.',
+    description: 'Add the active tab to another document you own; edits in either reach the other.',
     keywords: 'reuse share tab sync across documents diagrams move copy live',
     category: 'Tabs',
     categorySlug: 'tabs',
@@ -3040,9 +3049,9 @@ export const articles: Article[] = [
   {
     slug: 'auto-layout',
     title: 'Auto Layout',
-    description: 'Tidy Up the arrow graph as a flowchart, tree, or mindmap.',
+    description: 'Lay out the arrow graph as a flowchart, tree, or mindmap.',
     keywords:
-      'arrange flowchart tree mindmap tidy up automatic graph preview hover try before greyed out disabled already tidy lanes swimlane route arrows',
+      'arrange flowchart tree mindmap tidy up automatic graph command palette already tidy lanes swimlane route arrows',
     category: 'Tools',
     categorySlug: 'tools/layout-cleanup',
     parentSlug: 'layout-cleanup',

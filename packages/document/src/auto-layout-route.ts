@@ -1,4 +1,4 @@
-// Square arrow routes for the editor's Tidy Up (docs/specs/008-canvas/layout-cleanup.md "Arrows
+// Square arrow routes for the editor's tidy profile (docs/specs/008-canvas/layout-cleanup.md "Arrows
 // route square, around the boxes"). Laid out, a straight arrow between two boxes that are not in
 // line runs diagonally across whatever sits between, and a loop's way back runs straight through
 // the column it returns along. A flowchart is read along square lines instead, so each arrow is

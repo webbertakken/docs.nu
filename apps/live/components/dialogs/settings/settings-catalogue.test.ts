@@ -327,29 +327,30 @@ describe('settings catalogue', () => {
       'pagesTourSeen-infographic': ['pagesTourSeen', 'pagesTourKinds'],
       'pagesTourSeen-article': ['pagesTourSeen', 'pagesTourKinds'],
       'pagesTourSeen-logo': ['pagesTourSeen', 'pagesTourKinds'],
-      elementToursSeen: ['elementToursSeen', 'elementTourKinds'],
+      // Turned on from nothing, it opts every kind in; there is no answer to forget.
+      elementToursSeen: ['elementToursSeen', 'elementTourOffers'],
       // One element's tour writes the answered list alone (lib/element-tours.ts).
-      'elementTour-sankey': ['elementTourKinds'],
-      'elementTour-layer-stack': ['elementTourKinds'],
-      'elementTour-pyramid': ['elementTourKinds'],
-      'elementTour-funnel': ['elementTourKinds'],
-      'elementTour-cycle': ['elementTourKinds'],
-      'elementTour-hub': ['elementTourKinds'],
-      'elementTour-onion': ['elementTourKinds'],
-      'elementTour-timeline': ['elementTourKinds'],
-      'elementTour-chevrons': ['elementTourKinds'],
-      'elementTour-mind-node': ['elementTourKinds'],
-      'elementTour-flowchart': ['elementTourKinds'],
-      'elementTour-org-chart': ['elementTourKinds'],
-      'elementTour-sequence': ['elementTourKinds'],
-      'elementTour-chart': ['elementTourKinds'],
-      'elementTour-stack': ['elementTourKinds'],
-      'elementTour-entity': ['elementTourKinds'],
-      'elementTour-tab-window': ['elementTourKinds'],
-      'elementTour-lane': ['elementTourKinds'],
-      'elementTour-boundary': ['elementTourKinds'],
-      'elementTour-diagram-key': ['elementTourKinds'],
-      'elementTour-portal': ['elementTourKinds'],
+      'elementTour-sankey': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-layer-stack': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-pyramid': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-funnel': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-cycle': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-hub': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-onion': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-timeline': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-chevrons': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-mind-node': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-flowchart': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-org-chart': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-sequence': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-chart': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-stack': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-entity': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-tab-window': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-lane': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-boundary': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-diagram-key': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
+      'elementTour-portal': ['elementToursSeen', 'elementTourKinds', 'elementTourOffers'],
     };
     // Power user mode is a PRESET by design (docs/specs/007-editor/power-user-mode.md): it moves
     // exactly the preset's settings, pinned by its own test below.
@@ -416,6 +417,19 @@ describe('settings catalogue', () => {
         expect(bare[0], `${row.label} -> "${word}"`).toBe(bare[0]!.toUpperCase());
       });
     }
+  });
+
+  // docs/specs/007-editor/element-tours.md "Settings": each element's switch is an opt-in route of its own.
+  it('offers each element tour switch while Show Me on Every Element reads off', () => {
+    const ctx = { emailEnabled: true, signedIn: true, preferences: {} };
+    const tours = visibleCategories(false, ctx).find((c) => c.id === 'tours')!;
+    const keys = tours.rows.map((r) => r.key);
+    expect(keys).toContain('elementToursSeen');
+    expect(keys).toContain('elementTour-flowchart');
+    // An enable switch still gates its rows: the Layers panel off leaves its rows out.
+    const panels = visibleCategories(false, { ...ctx, preferences: { layersPanelEnabled: false } });
+    const layers = panels.find((c) => c.id === 'layers');
+    expect(layers?.rows.filter((r) => r.parent).length ?? 0).toBe(0);
   });
 
   it('hides the AI category until the worker advertises the capability', () => {

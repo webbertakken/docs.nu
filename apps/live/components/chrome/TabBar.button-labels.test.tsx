@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-// Settings > Appearance > Button Labels (docs/specs/007-editor/live-app.md "Named on a wide
-// desktop"): the footer bar names Search and Settings beside their icons unless it is off.
+// Settings > Appearance > Button Labels (docs/specs/007-editor/user-preferences.md): the footer bar names
+// Search and Settings beside their icons unless it is off.
 
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { DockNamesProvider } from '@/hooks/ui/useDockNames';
+import { ButtonLabelsProvider } from '@/hooks/ui/useButtonLabelsSetting';
 import { TabBar } from './TabBar';
 import { tabBarProps as props } from './TabBar.test-props';
 
@@ -21,9 +21,9 @@ describe('TabBar Button Labels', () => {
 
   it('shows the footer buttons as icons alone with Button Labels off', () => {
     render(
-      <DockNamesProvider value={false}>
+      <ButtonLabelsProvider value={false}>
         <TabBar {...props({ onOpenSearch: () => {} })} />
-      </DockNamesProvider>,
+      </ButtonLabelsProvider>,
     );
     expect(searchText()).toBe('');
   });
