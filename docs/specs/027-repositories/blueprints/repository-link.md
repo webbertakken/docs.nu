@@ -937,25 +937,25 @@ absent.
 
 ## Constants and configuration
 
-| Constant                  | Value          | Provenance                                   | Safe range      |
-| ------------------------- | -------------- | -------------------------------------------- | --------------- |
-| `LINK_FILE_NAME`          | `livedoc.toml` | Spec                                         | fixed           |
-| `MIRROR_DEFAULT_LEVEL`    | `index`        | Spec                                         | fixed by spec   |
-| `MIRROR_DEFAULT_DIR`      | `diagrams`     | Spec                                         | fixed by spec   |
-| `INDEX_FILE_NAME`         | `INDEX.md`     | Spec                                         | fixed           |
-| `LINK_ID_HEX`             | 16             | As read-copy keys (CLI76), RL8               | 16 to 64        |
-| `LINK_ID_MAX`             | 128            | RL3                                          | 64 to 256       |
-| `SYNC_LOCK_WAIT_MS`       | 30000          | Spec                                         | 10000 to 120000 |
-| `SYNC_LOCK_POLL_MS`       | 250            | RL18                                         | 100 to 1000     |
-| `SYNC_LOCAL_SETTLE_MS`    | 1500           | Spec                                         | 500 to 5000     |
-| `WAIT_SETTLE_MS` (reused) | 2000           | Spec ("the `wait --for change` rule"), CLI80 | as CLI80        |
-| `SYNC_WATCH_COVERAGE_MS`  | 60000          | RL21                                         | 15000 to 600000 |
-| `SYNC_CONCURRENCY`        | 2              | As `EXPORT_CONCURRENCY` (CLI29)              | 1 to 4          |
-| `PICKER_PAGE`             | 20             | `LIST_DEFAULT_LIMIT` (CLI19), RL38           | 10 to 50        |
-| `SYNC_REPORTS_KEPT`       | 20             | Spec                                         | 5 to 100        |
-| `SYNC_BASES_KEPT`         | 5              | Spec; used by the second slice               | 3 to 20         |
-| `SYNC_MERGE_ATTEMPTS`     | 3              | Spec; second slice                           | 1 to 5          |
-| `SYNC_HOOK_BUDGET_MS`     | 5000           | Spec; second slice                           | 2000 to 15000   |
+| Constant                        | Value          | Provenance                                   | Safe range      |
+| ------------------------------- | -------------- | -------------------------------------------- | --------------- |
+| `LINK_FILE_NAME`                | `livedoc.toml` | Spec                                         | fixed           |
+| `MIRROR_DEFAULT_LEVEL`          | `index`        | Spec                                         | fixed by spec   |
+| `MIRROR_DEFAULT_DIR`            | `diagrams`     | Spec                                         | fixed by spec   |
+| `INDEX_FILE_NAME`               | `INDEX.md`     | Spec                                         | fixed           |
+| `LINK_ID_HEX`                   | 16             | As read-copy keys (CLI76), RL8               | 16 to 64        |
+| `LINK_ID_MAX`                   | 128            | RL3                                          | 64 to 256       |
+| `SYNC_LOCK_WAIT_MS`             | 30000          | Spec                                         | 10000 to 120000 |
+| `SYNC_LOCK_POLL_MS`             | 250            | RL18                                         | 100 to 1000     |
+| `SYNC_LOCAL_SETTLE_MS`          | 1500           | Spec                                         | 500 to 5000     |
+| `WAIT_SETTLE_MS` (reused)       | 2000           | Spec ("the `wait --for change` rule"), CLI80 | as CLI80        |
+| `SYNC_WATCH_COVERAGE_MS`        | 60000          | RL21                                         | 15000 to 600000 |
+| `SYNC_CONCURRENCY`              | 2              | As `EXPORT_CONCURRENCY` (CLI29)              | 1 to 4          |
+| `PICKER_PAGE`                   | 20             | `LIST_DEFAULT_LIMIT` (CLI19), RL38           | 10 to 50        |
+| `SYNC_REPORTS_KEPT`             | 20             | Spec                                         | 5 to 100        |
+| `SYNC_BASES_KEPT` (planned)     | 5              | Spec; used by the second slice               | 3 to 20         |
+| `SYNC_MERGE_ATTEMPTS` (planned) | 3              | Spec; second slice                           | 1 to 5          |
+| `SYNC_HOOK_BUDGET_MS` (planned) | 5000           | Spec; second slice                           | 2000 to 15000   |
 
 Environment: none new. `LIVEDOC_DEBUG`, `XDG_CACHE_HOME` and the profile variables as the CLI reads them.
 

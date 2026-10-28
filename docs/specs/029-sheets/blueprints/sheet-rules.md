@@ -14,7 +14,7 @@ Derived from [Data validation](../data-validation.md), [Conditional formatting](
 | Display              | `show`: absent (Chip), `arrow`, `plain`                                         |
 | Reject / Warn        | `warn` absent (Reject) / `warn: true`                                           |
 | Help Text            | `help`                                                                          |
-| invalid value        | `ruleInvalid(...)` true                                                         |
+| invalid value        | `valueInvalid(...)` true                                                        |
 | format rule          | `FormatRule`, `layout.formatRules` (list order)                                 |
 | Single Colour        | `is: 'when'`, with `op` (a `ConditionOp` or `formula`), `a`, `b`, `fx`, `style` |
 | Colour Scale         | `is: 'scale'`, with `min`, `mid`, `max` (`ScalePoint`)                          |
@@ -61,7 +61,7 @@ export type FormatRule = IdRange & {
 // CellFormat gains: nc?: string (with nf 'custom'); NumberFormatKind gains 'custom'.
 ```
 
-- Rule ids: `newAxisId` form (6 base-36 characters), made by the client; unique per list.
+- Rule ids: the axis id form (`makeAxisIds`, 6 base-36 characters), made by the client; unique per list.
 - Text operands are stored as typed; Number and Date operands as numbers (the editor reads a typed date with the
   person's locale, an agent's with `en-GB`).
 
@@ -104,10 +104,11 @@ export type FormatRule = IdRange & {
 ## Engine (`packages/sheets/src/rules/`)
 
 - `rule-index.ts`: `ruleIndex<T extends IdRange>(layout, list)` buckets each rule by its column positions (a
-  `Map<colPos, { rule, r1, r2 }[]>`), cached per `(layout, list)` in a `WeakMap`; `ruleAtPos(index, r, c)` scans the
-  column's bucket (validation: the one rule; format: every rule in list order).
+  `Map<colPos, { rule, r1, r2 }[]>`), cached per `(layout, list)` in a `WeakMap`; `firstRuleAt(index, r, c)` (validation: the
+  one rule) and `rulesAt(index, r, c)` (format: every rule in list order) scan the column's bucket.
 - `validation.ts`: `validationRuleAt(layout, r, c)`, `inputAllowed(rule, input, ctx)` (`ctx`: `locale`, `options?` for a
-  range rule), `valueAllowed(rule, value, shown, ctx)` (for drawing: a formula's value, an existing value),
+  range rule), `valueInvalid(rule, value, shown, ctx)` (for drawing: a formula's value, an existing value), both through
+  `scalarAllowed(rule, v, ctx, shown?)`,
   `ruleLine(rule, ctx)` (the spec's lines, a date in the locale, options "and N more" after 5), `optionFor(rule, text)`
   (an option matching case aside, for saving the option's own spelling), `rangeOptions(wb, sheetId, rule)` (the src
   range's distinct shown values, empty aside, up to 500), `isEmail`, `isUrl`, and `checkboxValue(input)` (`true` /
