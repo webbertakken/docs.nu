@@ -29,38 +29,10 @@ import { EVENT_ICONS } from './icons';
 import { requestOpenSettings } from '@/lib/open-settings';
 import { explorerPathFor } from '../routes';
 import { assignAppLocation } from '@/lib/app-location';
-
-function str(snapshot: Record<string, unknown>, key: string): string | null {
-  const value = snapshot[key];
-  return typeof value === 'string' && value.length > 0 ? value : null;
-}
+import { actorName, isMine, snapshotString as str } from './event-person';
 
 function icon(event: TimelineEvent) {
   return EVENT_ICONS[event.eventType] ?? <SourceTypeIcon sourceType={event.sourceType} />;
-}
-
-// "you" vs a name. The stored row is viewer-agnostic — one row serves a
-// whole team — so the pronoun is decided here, against whoever is
-// reading.
-function isMine(event: TimelineEvent, ctx: TimelineRendererContext): boolean {
-  return Boolean(event.actorId && ctx.viewerId && event.actorId === ctx.viewerId);
-}
-
-function actorName(event: TimelineEvent, ctx: TimelineRendererContext): string {
-  if (isMine(event, ctx)) return 'You';
-  return (
-    str(event.snapshot, 'authorName') ??
-    str(event.snapshot, 'memberName') ??
-    str(event.snapshot, 'actorName') ??
-    str(event.snapshot, 'visitorName') ??
-    'Someone'
-  );
-}
-
-/** Who did it, from the event alone: "You", the name it carries, "Someone", or null for a system
- *  event, which names nobody (a document's History, docs/specs/013-workspace/timeline.md §2.10). */
-export function eventPersonName(event: TimelineEvent, viewerId: string | null): string | null {
-  return event.actorId ? actorName(event, { viewerId }) : null;
 }
 
 function byActor(event: TimelineEvent, ctx: TimelineRendererContext): string {
