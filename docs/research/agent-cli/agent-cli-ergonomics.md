@@ -440,7 +440,7 @@ This aligns with gh's 4 for auth. The codes stay few enough to state in the top 
 
 ### 4.13 Non-interactive guarantees
 
-- Auth by `LIVEDOC_TOKEN` (an `lvd_…` token) with no other setup. `auth login` (browser or device flow)
+- Auth by `LIVEDOC_TOKEN` (an `livedoc_…` token) with no other setup. `auth login` (browser or device flow)
   is for humans and writes the same token to the config file. `auth status` prints the account, the token
   name, whether it is read-only, and when it expires.
 - No pager, no spinner, no update notice, no ANSI and no emoji on stderr when piped (unlike wrangler, §2.5).
@@ -513,7 +513,7 @@ Start
   livedoc tab add "Auth flow" --mermaid - build a tab from Mermaid on stdin
   livedoc guide build                     building a diagram from scratch
 
-Env: LIVEDOC_TOKEN (lvd_...), LIVEDOC_API. Never prompts when piped.
+Env: LIVEDOC_TOKEN (livedoc_...), LIVEDOC_API. Never prompts when piped.
 More: livedoc <resource> --help, livedoc <resource> <verb> --help
 ```
 

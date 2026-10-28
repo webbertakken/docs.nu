@@ -30,6 +30,16 @@ import type { ParticipantDTO } from './types';
 // author id stays empty (the saver's copy has none: it is stripped from every
 // room op) until the author's own save claims it; see below.
 //
+// A comment's time is the writer's clock, and the Inbox orders threads by their latest comment's: one from a clock
+// running fast (or a bad value, 1e15) would sit on top of everyone's Inbox for good. A time later than now plus
+// FUTURE_SLACK_MS is taken as now on a new comment, and as the stored time on an author's own
+// (docs/specs/013-workspace/inbox.md "Comment times"). Five minutes is a device clock a little ahead; safe range 1 to
+// 60 minutes.
+export const FUTURE_SLACK_MS = 5 * 60 * 1000;
+
+const beyondNow = (at: unknown, now: number): boolean =>
+  typeof at === 'number' && at > now + FUTURE_SLACK_MS;
+
 // Pure helper, exported so the api worker's PUT-tab handler and
 // the colocated tests both consume the same implementation.
 export function rewriteCommentAuthors(
@@ -37,6 +47,7 @@ export function rewriteCommentAuthors(
   prevElements: Element[],
   writer: ParticipantDTO,
   roomAuthors: ReadonlyMap<string, { authorName: string; authorColor: string }> = new Map(),
+  now: number = Date.now(),
 ): Element[] {
   // Index existing comments by id so the lookup per new comment is
   // O(1). A comment id collision across two different elements is
@@ -96,6 +107,7 @@ export function rewriteCommentAuthors(
           return {
             ...body,
             ...(own ? {} : { text: prior.text, createdAt: prior.createdAt }),
+            ...(own && beyondNow(body.createdAt, now) ? { createdAt: prior.createdAt } : {}),
             authorName: prior.authorName,
             authorColor: prior.authorColor,
             authorId: claimed ? writer.id : prior.authorId,
@@ -107,7 +119,8 @@ export function rewriteCommentAuthors(
         // their own: credited as the room saw it posted.
         // A new comment's mentions arrive from a client: cleaned, never trusted.
         // A token id a client sends on a new comment is dropped: only the comment routes stamp one.
-        const { mentions: raw, tokenId: _sentToken, ...fresh } = c;
+        const { mentions: raw, tokenId: _sentToken, ...sent } = c;
+        const fresh = beyondNow(sent.createdAt, now) ? { ...sent, createdAt: now } : sent;
         const mentions = sanitizeMentions(raw);
         const withMentions = mentions ? { mentions } : {};
         const posted = roomAuthors.get(c.id);

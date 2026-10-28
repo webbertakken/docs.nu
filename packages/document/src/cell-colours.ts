@@ -4,7 +4,7 @@
 // of its hue on the dark surface, and on a light Sheet a near-black tint is drawn as a pale one, so a sheet set up in
 // one theme reads in the other. Then the ink (the cell's own text colour, else the Sheet's) is lifted or deepened until
 // it meets WCAG AA on what is behind it. Pure; the editor's cells and the cell editor read it.
-import { contrastRatio, hexToRgb, MIN_TEXT_CONTRAST } from './colors';
+import { contrastRatio, hexToRgb, MIN_TEXT_CONTRAST, normaliseHex } from './colors';
 import { mixHex } from './svg-render-face-kit';
 
 // A fill this close to white (its contrast with white below this) is pale: a tint drawn for a light canvas.
@@ -35,23 +35,28 @@ function chroma(hex: string): number {
 
 // The fill a stored fill is drawn with on `surface`.
 export function cellFill(bg: string, surface: CellSurface): string {
-  if (!hexToRgb(bg) || !hexToRgb(surface.fill)) return bg;
-  if (surface.dark && contrastRatio(bg, '#ffffff') < PALE_CONTRAST)
-    return mixHex(bg, surface.fill, PALE_ON_DARK_SHARE);
+  // A shorthand or named fill as `#rrggbb`, which the mixes below read.
+  const fill = normaliseHex(bg);
+  const paper = normaliseHex(surface.fill);
+  if (!fill || !paper) return bg;
+  if (surface.dark && contrastRatio(fill, '#ffffff') < PALE_CONTRAST)
+    return mixHex(fill, paper, PALE_ON_DARK_SHARE);
   if (
     !surface.dark &&
-    contrastRatio(bg, '#000000') < DARK_TINT_CONTRAST &&
-    chroma(bg) < DARK_TINT_CHROMA
+    contrastRatio(fill, '#000000') < DARK_TINT_CONTRAST &&
+    chroma(fill) < DARK_TINT_CHROMA
   )
-    return mixHex(bg, '#ffffff', DARK_ON_LIGHT_SHARE);
+    return mixHex(fill, '#ffffff', DARK_ON_LIGHT_SHARE);
   return bg;
 }
 
 // `ink` moved toward white (on a dark `behind`) or black (on a light one) until it reads at AA, keeping its hue as
 // long as it can; the input when it already reads or cannot be parsed.
-export function readableInk(ink: string, behind: string): string {
-  if (!hexToRgb(ink) || !hexToRgb(behind)) return ink;
-  if (contrastRatio(ink, behind) >= MIN_TEXT_CONTRAST) return ink;
+export function readableInk(written: string, behind: string): string {
+  // A shorthand or named colour as `#rrggbb`, which the mix below reads.
+  const ink = normaliseHex(written);
+  if (!ink || !normaliseHex(behind)) return written;
+  if (contrastRatio(ink, behind) >= MIN_TEXT_CONTRAST) return written;
   const toward =
     contrastRatio(behind, '#000000') > contrastRatio(behind, '#ffffff') ? '#000000' : '#ffffff';
   for (let t = INK_STEP; t < 1; t += INK_STEP) {

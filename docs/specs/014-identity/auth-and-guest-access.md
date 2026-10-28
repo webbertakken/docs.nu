@@ -15,17 +15,17 @@ across devices, teams, tokens, collaborating under one name).
 
 ## Who is who
 
-| Term                  | What it is                                                                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **guest**             | A visitor without an account. Works fully, keyed to one browser.                                                                               |
-| **guest id**          | The guest's owner id: a UUID the server mints, with an HMAC **guest signature** only the browser it was minted for holds.                      |
-| **account**           | A person who signed in. One row in LiveDoc's own identity tables, however many sign-in methods it has.                                         |
-| **account id**        | The account's owner id: `acct_` and 24 base62 characters, never a UUID, so the two shapes never meet.                                          |
-| **sign-in method**    | A way to prove who you are: Google, an email code (and later others). Several can belong to one account.                                       |
-| **session**           | A signed-in browser. A cookie on `/api/auth/*`, and the short-lived **session token** the browser sends to the rest of the api.                |
-| **API token**         | An `lvd_` secret for scripts, the CLI and MCP clients, owned by an account ([Public API and API tokens](../015-api/public-api-and-tokens.md)). |
-| **workbench session** | An `lvw_` credential for one framed editor, minted from a token ([Workbench embeds](../013-workspace/workbench-embeds.md)).                    |
-| **owner id**          | Whichever of guest id or account id owns a row. Every owner-keyed column holds one ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).   |
+| Term                  | What it is                                                                                                                                         |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **guest**             | A visitor without an account. Works fully, keyed to one browser.                                                                                   |
+| **guest id**          | The guest's owner id: a UUID the server mints, with an HMAC **guest signature** only the browser it was minted for holds.                          |
+| **account**           | A person who signed in. One row in LiveDoc's own identity tables, however many sign-in methods it has.                                             |
+| **account id**        | The account's owner id: `acct_` and 24 base62 characters, never a UUID, so the two shapes never meet.                                              |
+| **sign-in method**    | A way to prove who you are: Google, an email code (and later others). Several can belong to one account.                                           |
+| **session**           | A signed-in browser. A cookie on `/api/auth/*`, and the short-lived **session token** the browser sends to the rest of the api.                    |
+| **API token**         | An `livedoc_` secret for scripts, the CLI and MCP clients, owned by an account ([Public API and API tokens](../015-api/public-api-and-tokens.md)). |
+| **workbench session** | An `lvw_` credential for one framed editor, minted from a token ([Workbench embeds](../013-workspace/workbench-embeds.md)).                        |
+| **owner id**          | Whichever of guest id or account id owns a row. Every owner-keyed column holds one ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).       |
 
 ## Deployment modes
 
@@ -90,7 +90,7 @@ An email code is only as good as its delivery, so sign-in email is not best-effo
 One resolution at the top of every api request, in this order; the first credential present decides, and a
 credential that is present but wrong is refused, never read as a guest:
 
-1. **API token** (`Bearer lvd_…`): its owner account. Refused `401 invalid_token` when unknown, revoked or expired.
+1. **API token** (`Bearer livedoc_…`): its owner account. Refused `401 invalid_token` when unknown, revoked or expired.
 2. **Workbench session** (`Bearer lvw_…`): its owner, confined to its document or workspace.
 3. **Session token** (any other `Bearer`): the account, when it verifies. A token that fails verification (expired,
    wrong key, wrong issuer) falls through to the guest header, as a failed token always has, because the guest path must
@@ -300,9 +300,9 @@ be deleted again. The goodbye email goes to the address the account had.
 - **Teams** stay LiveDoc's own ([Teams](../013-workspace/teams.md)), not better-auth's organisations. A pending email invite becomes a membership when its address equals the
   account's email **and** that email is verified; the address is read from the verified session token, never a
   header.
-- **API tokens** are unchanged: `lvd_` secrets, hashed, six months, per-account cap, owned by an account id, minted
+- **API tokens** are unchanged: `livedoc_` secrets, hashed, six months, per-account cap, owned by an account id, minted
   only from a session ([Public API and API tokens](../015-api/public-api-and-tokens.md)).
-- **The MCP server** keeps its own OAuth 2.1 server and its `lvd_` tokens ([MCP server](../015-api/mcp-server.md)
+- **The MCP server** keeps its own OAuth 2.1 server and its `livedoc_` tokens ([MCP server](../015-api/mcp-server.md)
   §3); its consent page in `apps/live` trusts the LiveDoc session.
 - **The CLI** keeps `livedoc auth login` on the MCP worker's OAuth server, which already offers loopback PKCE and the
   device grant (`--device`); better-auth's device plugin would add a second OAuth server for the same job. Its device page in `apps/live`

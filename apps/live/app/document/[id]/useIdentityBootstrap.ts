@@ -17,6 +17,7 @@ import {
   setSessionSharePassword,
   writeCachedShareGrant,
   type ShareLink,
+  type SharePasswordAsk,
   type SharedWithItem,
   type ShareRole,
 } from '@/lib/api-client';
@@ -111,7 +112,7 @@ export function useIdentityBootstrap(opts: {
     setSharedDocuments: SetState<SharedWithItem[]>;
     setShareLinks: SetState<ShareLink[]>;
     setSharePasswordSet: SetState<boolean>;
-    setSharePasswordGate: SetState<{ invalid: boolean } | null>;
+    setSharePasswordGate: SetState<SharePasswordAsk | null>;
     setIdentityPromptOpen: SetState<boolean>;
   };
 }) {
@@ -450,7 +451,10 @@ export function useIdentityBootstrap(opts: {
             writeCachedShareGrant(shareCodeParam, null);
             setSessionSharePassword(null);
           }
-          setSharePasswordGate({ invalid: resolution.invalid });
+          setSharePasswordGate({
+            invalid: resolution.invalid,
+            rateLimited: resolution.rateLimited,
+          });
           setLoadingDocument(false);
           setNameConfirmed(hasConfirmedName());
           return;

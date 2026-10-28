@@ -1,6 +1,6 @@
 // /api/oauth/exchange — the single api change for the MCP OAuth flow
 // (docs/specs/015-api/mcp-server.md §3.4). The apps/live consent page (signed-in) calls this when a
-// user approves an MCP client. It mints an ordinary lvd_ API token (docs/specs/015-api/public-api-and-tokens.md)
+// user approves an MCP client. It mints an ordinary livedoc_ API token (docs/specs/015-api/public-api-and-tokens.md)
 // owned by that account, named for the connecting client, and returns the
 // secret ONCE. The MCP worker binds it to the PKCE flow in its own KV; the
 // token then shows up in the Explorer "API tokens" page and is revocable like
@@ -22,10 +22,9 @@ export async function handleOauthExchange(ctx: RouteContext): Promise<Response> 
   }
   const owner = sessionAccountId;
 
-  const body = (await readOptionalBody(request)) as {
-    clientName?: string;
-    readOnly?: boolean;
-  };
+  const read = await readOptionalBody(request);
+  if (read instanceof Response) return read;
+  const body = read as { clientName?: string; readOnly?: boolean };
   const raw = typeof body.clientName === 'string' ? body.clientName.trim() : '';
   if (raw.length > MAX_NAME_LEN) return badRequest('client name too long');
   // Default name keeps the token identifiable in the user's token list even if

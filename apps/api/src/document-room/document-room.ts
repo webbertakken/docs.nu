@@ -43,6 +43,7 @@ import { followerIdsOf, followTargetOf } from '../room-follows';
 import { opForScope } from '../room-scope';
 import { recheckAdmittedLink } from '../room-link-recheck';
 import { gateClientOp } from '../room-op-gate';
+import { RoomScopedStructure } from '../room-scoped-structure';
 import { answerInternal, type InternalRoom } from '../room-internal';
 import { rosterFrames, type RosterEntry } from '../room-roster';
 import { sessionMatchesAccessClose, type AccessCloseMatch } from '../room-access';
@@ -207,6 +208,8 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   private participantWrites: RoomParticipantWrites;
   // The document's content in this room's SQLite (room-content.ts).
   private readonly content: RoomContent;
+  // A tab-scoped session's structure check (docs/specs/013-workspace/tab-scoped-share-links.md "Structure").
+  private readonly scopedStructure = new RoomScopedStructure(() => this.content.tabStore());
 
   // The worker env is optional so unit tests can build a room from a fake state alone; without it the telemetry
   // emit (Document·Used·Multiplayer) is skipped.
@@ -798,13 +801,22 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         );
         return;
       }
+      // A tab-scoped session keeps its tab's structure (room-scoped-structure.ts), judged against the stored tab.
+      const admitted = session.tabScope
+        ? this.scopedStructure.admit(msg.op, {
+            documentId: session.documentId ?? null,
+            tabId: session.tabScope,
+          })
+        : { op: msg.op };
+      if (!admitted) return;
+      const clientOp = admitted.op;
       if (gate.participantAnswers) {
         this.participantWrites.scheduleAnswers(
           session.documentId ?? null,
-          (msg.op as { tabId?: unknown }).tabId,
+          (clientOp as { tabId?: unknown }).tabId,
         );
       }
-      const opKind = (msg.op as { kind?: unknown } | null | undefined)?.kind;
+      const opKind = (clientOp as { kind?: unknown } | null | undefined)?.kind;
       const isPresenceOp = gate.presence;
       // Running the session belongs to whoever holds the baton (docs/specs/012-collaboration/facilitator.md).
       // Only these two ops can be enforced here: a poll start / end is its own
@@ -828,10 +840,10 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       // "Held elements"). The DO's output gate holds
       // what follows until the write lands.
       if (opKind === 'select') {
-        void this.selections.note(sender.id, selectionFromOp(msg.op)).catch(() => {});
+        void this.selections.note(sender.id, selectionFromOp(clientOp)).catch(() => {});
       }
       if (opKind === 'tab-focus') {
-        const { tabId, besideTabId } = msg.op as { tabId?: unknown; besideTabId?: unknown };
+        const { tabId, besideTabId } = clientOp as { tabId?: unknown; besideTabId?: unknown };
         if (typeof tabId === 'string') {
           sender.tabId = tabId.slice(0, MAX_TAB_ID_LEN);
           // The other pane of a side by side split (docs/specs/007-editor/split-view.md "Presence"),
@@ -845,7 +857,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
       }
       // A follow is the room's to keep, never relayed: it tells the people followed, on their own sockets.
       if (opKind === 'follow') {
-        this.noteFollow(ws, session, sender, msg.op);
+        this.noteFollow(ws, session, sender, clientOp);
         return;
       }
       // Presence ops relay unordered (ephemeral, no catch-up). Mutation
@@ -863,26 +875,26 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         // Chained, so answers apply in the order they arrived even though each one is hashed first: a quick change
         // of mind must not lose to the answer it replaced.
         if (opKind === 'poll-answer') {
-          const op = msg.op;
+          const op = clientOp;
           this.pollAnswers = this.pollAnswers
             .then(() => this.relayPollAnswer(ws, op))
             .catch(() => {});
           return;
         }
         if (opKind === 'avatar-push') {
-          const targetId = (msg.op as { targetId?: unknown }).targetId;
+          const targetId = (clientOp as { targetId?: unknown }).targetId;
           if (typeof targetId === 'string') {
-            this.sendToPresence(targetId, { kind: 'op', from: sender.id, op: msg.op }, ws);
+            this.sendToPresence(targetId, { kind: 'op', from: sender.id, op: clientOp }, ws);
           }
           return;
         }
-        this.broadcast({ kind: 'op', from: sender.id, op: msg.op }, ws);
+        this.broadcast({ kind: 'op', from: sender.id, op: clientOp }, ws);
       } else {
         // No comment author id leaves the room, whatever a client sent: it is
         // the author's owner id, a guest's credential. And a posted comment
         // carries the name of the session that sent it, the one on its
         // cursor, not whatever the frame claimed (docs/specs/012-collaboration/collab-race-hardening.md).
-        const op = stampCommentAuthor(opForTheWire(msg.op), sender);
+        const op = stampCommentAuthor(opForTheWire(clientOp), sender);
         const seq = this.sequenceMutation(sender.id, op, ws);
         // The relay skips the sender, so tell it the seq its op took: its own
         // ops are already applied, and a reconnect must not replay them. The

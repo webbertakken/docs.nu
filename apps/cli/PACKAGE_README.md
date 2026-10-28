@@ -19,7 +19,7 @@ livedoc --help
 Create an API token in LiveDoc (Settings › API Tokens), then either set it for a command:
 
 ```bash
-export LIVEDOC_TOKEN=lvd_...
+export LIVEDOC_TOKEN=livedoc_...
 ```
 
 or store it for this machine:

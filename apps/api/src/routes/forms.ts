@@ -63,6 +63,7 @@ async function fileReport(ctx: DocumentRouteContext, code: string): Promise<Resp
   const opened = await openFormLink(ctx, code);
   if (!opened) return formNotFound();
   const body = await readOptionalBody(ctx.request);
+  if (body instanceof Response) return body;
   const reason = body['reason'];
   const browser = body['browser'];
   if (

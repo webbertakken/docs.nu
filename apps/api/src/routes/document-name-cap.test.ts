@@ -77,6 +77,24 @@ describe('POST /api/documents name cap', () => {
   });
 });
 
+describe('POST /api/documents id', () => {
+  // A document id is a key in paths, rooms and scopes: letters, digits, - and _ only, at most KEY_ID_MAX long.
+  it('refuses an id that is not letters, digits, - and _', async () => {
+    const db = sqliteD1();
+    for (const id of ['a/b', 'a:b', 'a b', 'x'.repeat(65), 42]) {
+      const res = await call(db, 'POST', '/api/documents', { id, name: 'Doc' });
+      expect(res.status, String(id)).toBe(400);
+      expect(await res.json()).toEqual({ error: 'bad_request', message: 'invalid id' });
+    }
+  });
+
+  it('takes a UUID', async () => {
+    const db = sqliteD1();
+    const id = '00000000-0000-4000-8000-000000000001';
+    expect((await call(db, 'POST', '/api/documents', { id, name: 'Doc' })).status).toBe(201);
+  });
+});
+
 describe('PUT /api/documents/:id name cap', () => {
   it('shortens a rename', async () => {
     const db = sqliteD1();

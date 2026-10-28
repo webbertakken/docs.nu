@@ -77,7 +77,7 @@ describe('SettingsTokensRow', () => {
 
   it('creates a token and shows its secret once', async () => {
     api.apiListTokens.mockResolvedValue([]);
-    api.apiCreateToken.mockResolvedValue({ token: 'lvd_secret', id: 'tok1' });
+    api.apiCreateToken.mockResolvedValue({ token: 'livedoc_secret', id: 'tok1' });
     render(<SettingsTokensRow row={ROW} />);
     // A chip fills the name; the field stays editable.
     fireEvent.click(await screen.findByRole('button', { name: 'CI Bot' }));
@@ -85,10 +85,10 @@ describe('SettingsTokensRow', () => {
     api.apiListTokens.mockResolvedValue([TOKEN]);
     fireEvent.click(screen.getByRole('button', { name: 'Create Token' }));
     const reveal = await screen.findByRole('status', { name: 'New token created' });
-    expect(reveal.textContent).toContain('lvd_secret');
+    expect(reveal.textContent).toContain('livedoc_secret');
     expect(api.apiCreateToken).toHaveBeenCalledWith('user_1', 'CI Bot');
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(screen.queryByText(/lvd_secret/)).toBeNull();
+    expect(screen.queryByText(/livedoc_secret/)).toBeNull();
     // Now there is one: the list, the meter and New take over.
     expect(await screen.findByText('CI bot')).toBeTruthy();
     expect(screen.getByRole('meter').getAttribute('aria-valuetext')).toBe('1 of 10');

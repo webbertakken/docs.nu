@@ -98,8 +98,12 @@ account_id_not_a_guest_credential`, unconditionally ([§4.1](#41-an-account-id-i
 ### 3.1 Token format
 
 - An opaque secret with a visible prefix for greppability + leak-scanning:
-  `lvd_<base64url(32 random bytes)>`. The prefix also disambiguates it from a
+  `livedoc_<base64url(32 random bytes)>`. The prefix names the product, so a token
+  found in a log or a pasted config says whose it is; it also disambiguates it from a
   session token in the same `Authorization: Bearer` header.
+- `API_TOKEN_PREFIX` (`@livedoc/api-schema`) is the one place the prefix is written; the api,
+  the CLI and the Settings dialog read it. Tokens minted before it, `lvd_…`, are not
+  accepted: when the prefix changed, the one live `lvd_` token was Webber's own.
 - Shown **once** at creation; never retrievable again.
 - Stored **hashed** (SHA-256), never in plaintext. Auth hashes the presented
   token and looks the hash up by its UNIQUE-indexed column — an indexed
@@ -143,14 +147,14 @@ A token authenticates as its own identity path, resolved once in `fetch`
 alongside the session token and the guest header ([API app](api.md#auth) has the
 full order, workbench sessions included):
 
-1. `Authorization: Bearer lvd_…` → hash → look up a non-revoked,
+1. `Authorization: Bearer livedoc_…` → hash → look up a non-revoked,
    non-expired row → the request's owner id is the row's `owner_id`; stamp
    `last_used_at`. The column means "the last request this token made, to
    within a minute": a request writes it only when the stored value is older
    than `LAST_USED_STAMP_WINDOW_MS` (60 s, `apps/api/src/db/api-tokens.ts`),
    checked again in the UPDATE's WHERE, so a burst of MCP tool calls (3 to 6
    api requests each) costs one write a minute rather than one per request.
-   Its only reader, the Settings token card, works at day grain. (A token and a session token can't both be the bearer.) An `lvd_`
+   Its only reader, the Settings token card, works at day grain. (A token and a session token can't both be the bearer.) An `livedoc_`
    bearer with no such row (unknown, revoked or expired), or one too short to be a token at all (cut short or
    mistyped when pasted), is refused there and then with `401 invalid_token` and `WWW-Authenticate: Bearer
 error="invalid_token"`, on every route: it never falls through to the guest
@@ -249,7 +253,7 @@ out top to bottom:
   **Create Token**. Enter submits, Escape cancels.
 - **Reveal.** After a create, the composer becomes an emerald-edged "Token
   Created" card that follows the theme (light in light mode): a "Shown once"
-  label and the secret in a monospace field with its `lvd_` prefix picked out.
+  label and the secret in a monospace field with its `livedoc_` prefix picked out.
   The field copies the way the Share dialog's pass link does: an icon-only copy button inside the field's right edge, with
   a tooltip, that turns into a check once the clipboard write resolves.
   **Done** drops the secret for good; it becomes the primary action once the

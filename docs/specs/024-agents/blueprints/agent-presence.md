@@ -394,7 +394,10 @@ setAt, expiresAt }`.
 - `PUT` / `DELETE /presence` on the room are reachable only through the stub, like `/broadcast`.
 - Every presence write counts against the token's write rate limit (`token:<id>`); a room holds at most
   `AGENT_PRESENCE_ROOM_MAX` entries.
-- An entry admitted by a share code dies with that code.
+- An entry admitted by a share code dies with that code. The entry's `shareCode`, on a set and on the refresh after
+  a changeset, revert, pages or form write (`refreshAfterWrite`), is the link the caller's grant came through
+  (`DocumentGrant.shareCode`), never the `X-Share-Code` header on its own: an owner or a joined team member who sends
+  one too keeps an entry no link revoke closes.
 
 ## Performance and limits
 

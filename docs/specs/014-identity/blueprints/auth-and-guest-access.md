@@ -159,7 +159,7 @@ sightings, migration 0047) are dropped; nothing else is named `identity_*` today
 
 ```text
 bearer = bearerTokenOf(Authorization)
-if bearer starts lvd_      → resolveApiToken           (refused 401 invalid_token when it does not resolve)
+if bearer starts livedoc_      → resolveApiToken           (refused 401 invalid_token when it does not resolve)
 elif bearer starts lvw_    → resolveWorkbenchSession   (refused 401 invalid_session)
 elif bearer                → getAccountSession(env, bearer)   (null → guest fall-through, logged)
 X-Owner-Id                 → guest, after the shape and signature gates
@@ -280,7 +280,7 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 - The session token's claims: `iss`, `aud`, `sub` (account id), `iat`, `exp`, `email`, `email_verified`,
   `auth_time`. Nothing else is read.
 - OpenAPI (`apps/api/src/openapi/manifest.ts`): the bearer scheme reads "A LiveDoc session token or an API token
-  (`lvd_…`)"; `clerk` and `guest-or-clerk` auth kinds become `session` and `guest-or-session`. better-auth's own routes
+  (`livedoc_…`)"; `clerk` and `guest-or-clerk` auth kinds become `session` and `guest-or-session`. better-auth's own routes
   are not in LiveDoc's OpenAPI document (they are documented by better-auth).
 
 ## Data and persistence
