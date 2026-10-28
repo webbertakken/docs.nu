@@ -16,6 +16,8 @@ static export.
 - **`<surface>.tsx`**: an editor surface several areas show, drawn once and
   imported wherever it recurs. `settings-dialog.tsx` holds the Settings frame,
   its Editor and Panels panes, and the `Switch` every settings-style row uses.
+  `editor-lines.tsx` holds the editor's two lines: the brand group, the actions group, the tools group, the
+  document group, the tab list and a short Palette strip, for every scene that shows the editor's chrome.
   Name every file after its subject (an area or a surface), never after the
   batch of work that produced it.
 - **`../Figure.tsx`** — frames a scene in an "editor viewport" card with a
