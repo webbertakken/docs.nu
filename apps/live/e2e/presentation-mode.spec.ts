@@ -1,5 +1,4 @@
 import {
-  dismissQuickTour,
   expect,
   expectNoPageErrors,
   guestSigFor,
@@ -64,7 +63,6 @@ test('a deck presents slide by slide and leaves the view as it was', async ({
   );
   await page.goto(`/document/${id}`);
   await page.locator(CANVAS).waitFor();
-  await dismissQuickTour(page);
 
   // The canvas camera, as its transform.
   const camera = () =>

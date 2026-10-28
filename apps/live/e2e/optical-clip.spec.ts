@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect, test, dismissQuickTour, expectNoPageErrors } from './fixtures';
+import { expect, test, expectNoPageErrors } from './fixtures';
 
 // A trimmed label that also clips (`text-optical-line` + `truncate`) must keep its ink
 // (docs/specs/004-interface-design/blueprints/optical-alignment.md, "Truncated label"): the trim puts
@@ -54,7 +54,6 @@ test('Settings category labels keep their descenders', async ({ page, pageErrors
   // Straight to a blank canvas: the /new?blank=1 bypass (Start Blank).
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
 
   await page.getByRole('button', { name: 'Application settings' }).click();
   const rail = dialog(page).getByRole('navigation', { name: 'Settings categories' });

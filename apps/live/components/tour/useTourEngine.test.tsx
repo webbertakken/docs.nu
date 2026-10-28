@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TourStepOf } from './tour-step';
 import { useTourEngine, type TourOutcome } from './useTourEngine';
 
-// The shared step runner (docs/specs/026-plan/blueprints/plan-tour.md "Engine").
+// The shared step runner (docs/specs/007-editor/editor-tour.md "Mechanics").
 
 const found = vi.hoisted(() => ({ selectors: new Set<string>() }));
 vi.mock('./tour-dom', () => ({
@@ -48,7 +48,6 @@ afterEach(() => {
 });
 
 const STEPS: TourStepOf<Api>[] = [
-  { id: 'welcome', card: 'welcome', title: 'W', body: '' },
   {
     id: 'one',
     title: 'One',
@@ -73,13 +72,11 @@ describe('useTourEngine', () => {
     found.selectors.add('[data-tour-id="two"]');
     const t = run(STEPS);
     expect(t.hook.result.current.countableSteps).toBe(2);
+    // Started from the bottom bar's button: straight onto the first step, no welcome card.
     act(() => t.hook.result.current.start());
-    await flush();
-    expect(t.hook.result.current.step?.id).toBe('welcome');
-    expect(t.views).toEqual([]);
-    act(() => t.hook.result.current.next());
     expect(t.onStart).toHaveBeenCalledTimes(1);
     await flush();
+    expect(t.hook.result.current.step?.id).toBe('one');
     expect(t.api.log).toEqual(['prepare one']);
     expect(t.hook.result.current.targetRect).not.toBeNull();
     act(() => t.hook.result.current.next());
@@ -100,9 +97,6 @@ describe('useTourEngine', () => {
     const t = run(steps);
     act(() => t.hook.result.current.start());
     await flush();
-    expect(reveal).not.toHaveBeenCalled();
-    act(() => t.hook.result.current.next());
-    await flush();
     expect(reveal).toHaveBeenLastCalledWith(expect.any(HTMLElement), undefined);
     act(() => t.hook.result.current.next());
     await flush();
@@ -117,11 +111,13 @@ describe('useTourEngine', () => {
     found.selectors.add('[data-tour-id="two"]');
     const t = run(STEPS);
     act(() => t.hook.result.current.start());
-    for (let i = 0; i < 3; i++) {
+    await flush();
+    for (let i = 0; i < 2; i++) {
       act(() => t.hook.result.current.next());
       await flush();
     }
     expect(t.hook.result.current.step?.id).toBe('outro');
+    expect(t.views).toEqual(['one', 'two', 'outro']);
     expect(t.api.log).toContain('prepare outro');
     expect(t.hook.result.current.targetRect).toBeNull();
     act(() => t.hook.result.current.next());
@@ -134,7 +130,6 @@ describe('useTourEngine', () => {
     found.selectors.add('[data-tour-id="two"]');
     const t = run(STEPS);
     act(() => t.hook.result.current.start());
-    act(() => t.hook.result.current.next());
     await act(async () => {
       await vi.advanceTimersByTimeAsync(10);
     });
@@ -143,17 +138,21 @@ describe('useTourEngine', () => {
     vi.useRealTimers();
   });
 
-  it('declines from the welcome card and skips from a step', async () => {
+  it('skips from any step, its first included, and can be started again', async () => {
     found.selectors.add('#one');
+    found.selectors.add('[data-tour-id="two"]');
     const t = run(STEPS);
     act(() => t.hook.result.current.start());
+    await flush();
     act(() => t.hook.result.current.skip());
-    expect(t.outcomes).toEqual(['declined']);
+    expect(t.outcomes).toEqual(['skipped']);
     act(() => t.hook.result.current.start());
+    await flush();
     act(() => t.hook.result.current.next());
     await flush();
     act(() => t.hook.result.current.skip());
-    expect(t.outcomes).toEqual(['declined', 'skipped']);
+    expect(t.outcomes).toEqual(['skipped', 'skipped']);
+    expect(t.onStart).toHaveBeenCalledTimes(2);
   });
 
   it('stops without an outcome', () => {
@@ -169,7 +168,6 @@ describe('useTourEngine', () => {
     found.selectors.add('#one');
     const t = run(STEPS);
     act(() => t.hook.result.current.start());
-    act(() => t.hook.result.current.next());
     await act(async () => {
       await vi.advanceTimersByTimeAsync(10);
     });
@@ -190,10 +188,9 @@ describe('useTourEngine', () => {
     vi.useRealTimers();
   });
 
-  it('skips a missing target backwards when going back, never onto the welcome card', async () => {
+  it('skips a missing target backwards when going back, never past the first step', async () => {
     vi.useFakeTimers();
     const steps: TourStepOf<Api>[] = [
-      STEPS[0]!,
       { id: 'a', title: 'A', body: '', selector: () => '#a' },
       { id: 'b', title: 'B', body: '', selector: () => '#b' },
       { id: 'c', title: 'C', body: '', selector: () => '#c' },
@@ -204,7 +201,8 @@ describe('useTourEngine', () => {
     const t = run(steps);
     const settle = () => act(async () => void (await vi.advanceTimersByTimeAsync(10)));
     act(() => t.hook.result.current.start());
-    for (let i = 0; i < 3; i++) {
+    await settle();
+    for (let i = 0; i < 2; i++) {
       act(() => t.hook.result.current.next());
       await settle();
     }
@@ -215,7 +213,7 @@ describe('useTourEngine', () => {
     await settle();
     await settle();
     expect(t.hook.result.current.step?.id).toBe('a');
-    // a is gone too: Back from c lands on c again, not on the welcome card.
+    // a is gone too: Back from c finds nothing before it to land on, and comes forward to c again.
     found.selectors.delete('#a');
     act(() => t.hook.result.current.next());
     await settle();
@@ -232,7 +230,6 @@ describe('useTourEngine', () => {
     found.selectors.add('#one');
     const t = run(STEPS);
     act(() => t.hook.result.current.start());
-    act(() => t.hook.result.current.next());
     await act(async () => void (await vi.advanceTimersByTimeAsync(10)));
     expect(t.hook.result.current.targetRect).not.toBeNull();
     found.selectors.delete('#one');

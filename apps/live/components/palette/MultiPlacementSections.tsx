@@ -1,3 +1,4 @@
+import { Switch } from '@livedoc/ui';
 import { CombineOpGlyph, CombineTiles } from '@/components/canvas/CombineMenu';
 import { MirrorCopyGlyph } from '@/components/canvas/logo-glyphs';
 import {
@@ -8,7 +9,6 @@ import {
   type ShapeElement,
 } from '@livedoc/document';
 import { ContextMenuDivider } from '@/components/palette/ContextMenu';
-import { ToggleSwitch } from '@/components/palette/palette-controls';
 import { onMouseHover } from '@/components/primitives/hover-preview';
 import { SizeButton } from '@/components/palette/palette-controls';
 import {
@@ -128,11 +128,7 @@ export function MultiPlacementSections({
                 </span>
                 Lock Aspect Ratio
               </span>
-              <ToggleSwitch
-                presentational
-                checked={!!boxedSel[0]!.aspectLocked}
-                label="Lock Aspect Ratio"
-              />
+              <Switch presentational size="sm" checked={!!boxedSel[0]!.aspectLocked} />
             </button>
           </>
         ) : null}

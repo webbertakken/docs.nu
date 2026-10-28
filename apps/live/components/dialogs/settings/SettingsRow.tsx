@@ -1,6 +1,6 @@
 'use client';
 
-import { ToggleSwitch } from '@/components/palette/palette-controls';
+import { Switch } from '@livedoc/ui';
 import { SettingsRowShell } from './SettingsRowShell';
 import type { SettingsRowSpec } from './settings-catalogue';
 
@@ -35,25 +35,18 @@ export function SettingsRow({
       onIllustrationToggle={disabled ? undefined : onChange}
       notice={notice}
       control={
-        // The one control: role=switch, named by the label and described by the description. Its
-        // ::after stretches over the whole cell, so a click anywhere on the row flips it, while the
-        // help link and the illustration sit above that layer and keep their own clicks.
-        // `presentational` only stops the ToggleSwitch being a <button>; it still exposes
-        // role="switch", so the aria-hidden wrapper keeps a screen reader to one switch.
-        <button
-          type="button"
-          role="switch"
-          aria-checked={checked}
-          aria-labelledby={`${row.key}-label`}
-          aria-describedby={`${row.key}-description`}
+        // The one control: the shared Switch at its compact size, named by the label and described by the
+        // description. `coversRow` stretches it over the whole cell, so a click anywhere on the row flips it, while
+        // the help link and the illustration sit above that layer and keep their own clicks.
+        <Switch
+          size="sm"
+          coversRow
+          checked={checked}
+          labelledBy={`${row.key}-label`}
+          describedBy={`${row.key}-description`}
           disabled={disabled}
-          onClick={() => onChange(!checked)}
-          className="shrink-0 cursor-pointer rounded-full outline-none after:absolute after:inset-0 after:content-[''] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed dark:focus-visible:ring-offset-slate-800"
-        >
-          <span aria-hidden className="flex">
-            <ToggleSwitch presentational checked={checked} label={row.label} />
-          </span>
-        </button>
+          onChange={onChange}
+        />
       }
     />
   );

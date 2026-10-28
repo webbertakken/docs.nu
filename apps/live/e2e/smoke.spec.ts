@@ -1,7 +1,6 @@
 import {
   test,
   expect,
-  dismissQuickTour,
   expectNoPageErrors,
   openBlankSession,
   startBlankDocument,
@@ -54,9 +53,6 @@ test('create a blank document, add a shape, and it survives a reload', async ({
   await startBlankDocument(page);
   // The wizard created a real document and routed to it.
   await expect(page).toHaveURL(/\/document\/[0-9a-f-]{36}/);
-  // The tour offer opens 800 ms after the editor is ready and its backdrop takes every click
-  // (TourHost): answer it first, or a slow runner's canvas click lands on the backdrop.
-  await dismissQuickTour(page);
 
   // The palette is open by default on desktop; its shape tiles are
   // aria-labelled ("Add Square"). Arm the Square, then drop it on the
@@ -134,7 +130,6 @@ test('an event-storming board stays a board across a reload', async ({ page, pag
 test('a note dropped between two notes stays between them', async ({ page, pageErrors }) => {
   await startEventStormingRow(page);
   const canvas = page.locator('[data-canvas-a11y-root]');
-  await dismissQuickTour(page);
 
   // The seeded timeline: three orange domain events, left to right.
   const notes = canvas.getByRole('img', { name: /^Sticky note/ });
@@ -217,7 +212,6 @@ test('a note dropped between two notes stays between them', async ({ page, pageE
 test('a note already on the board inserts between two others', async ({ page, pageErrors }) => {
   await startEventStormingRow(page);
   const canvas = page.locator('[data-canvas-a11y-root]');
-  await dismissQuickTour(page);
 
   const notes = canvas.getByRole('img', { name: /^Sticky note/ });
   await expect(notes).toHaveCount(3);

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { dismissQuickTour, expect, expectNoPageErrors, test, paletteTile } from './fixtures';
+import { expect, expectNoPageErrors, test, paletteTile } from './fixtures';
 
 // Power user mode and Minimal chrome (docs/specs/007-editor/power-user-mode.md), and the role pill
 // (docs/specs/007-editor/live-app.md#role-pill), in a real browser, dark mode.
@@ -17,7 +17,6 @@ async function openEditor(page: Page) {
   // Straight to a blank canvas: the /new?blank=1 bypass (Start Blank).
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
 }
 
 async function openSettings(page: Page) {

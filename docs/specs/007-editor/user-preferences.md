@@ -251,44 +251,45 @@ type UserPreferences = {
   // sent" email (sent to the team's admins). Defaults to true (notify).
   notifyInviteResponse?: boolean;
 
-  // The Diagram tour's seen-guard (docs/specs/007-editor/editor-tour.md; named for the welcome tour it
-  // was until October 2026, so earlier answers still hold). True once the
-  // tour's welcome offer has been answered (taken, skipped, or declined),
-  // so the offer never re-appears for this user on any device. Surfaced
-  // in Settings as Tours › "Diagram Tour" (inverted); turning it on and closing
-  // Settings replays the tour. Missing / undefined === not seen.
+  // The Diagram tour's taken record (docs/specs/007-editor/editor-tour.md; named for the welcome tour it
+  // was until October 2026). True once a run has ended (completed or skipped; until 28 October 2026
+  // also declined, when it hid the offer). It no longer hides the bottom bar's Start Tour button: it only
+  // feeds Settings' Tours › "Diagram Tour" row (inverted); turning it on and closing
+  // Settings reruns the tour when it is on offer. Missing / undefined === not seen.
   tourSeen?: boolean;
-  // The Plan tour's seen-guard (docs/specs/026-plan/plan-tour.md): true counts both tracks as seen while Power user
+  // The Plan tour's seen record (docs/specs/026-plan/plan-tour.md): true counts both tracks as taken while Power user
   // mode is on (lib/tour-tracks.ts); set with every track by Power user mode.
   planTourSeen?: boolean;
-  // The Plan tour tracks (Boards, Sheets, Dashboards) whose offer has been answered (taken, skipped or declined), so each offers
-  // itself once ever. Settings' Boards Tour and Sheets Tour rows each add or remove their own track.
+  // The Plan tour tracks (Boards, Sheets, Dashboards) taken (a run completed or skipped). It picks which track the
+  // bottom bar's Start Tour button names; Settings' Boards Tour, Sheets Tour and Dashboards Tour rows each add or
+  // remove their own track.
   planTourTracks?: PlanTourTrack[];
-  // The Workshop tour's seen-guard (docs/specs/012-collaboration/workshop-tour.md), as `planTourSeen`.
+  // The Workshop tour's taken record (docs/specs/012-collaboration/workshop-tour.md), as `planTourSeen`.
   // Surfaced in Settings as Tours › "Workshop Tour" (inverted). Missing / undefined === not seen.
   workshopTourSeen?: boolean;
-  // The Draw tour's seen-guard (docs/specs/023-draw-mode/draw-tour.md), as `workshopTourSeen`.
+  // The Draw tour's taken record (docs/specs/023-draw-mode/draw-tour.md), as `workshopTourSeen`.
   // Surfaced in Settings as Tours › "Draw Tour" (inverted). Missing / undefined === not seen.
   drawTourSeen?: boolean;
-  // The Forms tour's seen-guard (docs/specs/030-forms/forms.md "The Forms tour"), as `drawTourSeen`; Show Me Around
-  // in the form's cog panel reruns it. Missing / undefined === not seen.
+  // The Forms tour's record (docs/specs/030-forms/forms.md "The Forms tour"), written when a run ends; it feeds the
+  // Settings row only. Show Me Around in the form's cog panel reruns it. Missing / undefined === not seen.
   formTourSeen?: boolean;
-  // The Avatar tour's seen-guard (docs/specs/008-canvas/avatar-tour.md), as `drawTourSeen`.
+  // The Avatar tour's taken record (docs/specs/008-canvas/avatar-tour.md), as `drawTourSeen`.
   // Surfaced in Settings as Tours › "Avatar Tour" (inverted). Missing / undefined === not seen.
   avatarTourSeen?: boolean;
-  // The Pages tour's seen-guard (docs/specs/007-editor/pages-tour.md), as `planTourSeen`: true counts every
-  // page kind's track as seen while Power user mode is on. Set with every kind by Power user mode.
+  // The Pages tour's seen record (docs/specs/007-editor/pages-tour.md), as `planTourSeen`: true counts every
+  // page kind's track as taken while Power user mode is on. Set with every kind by Power user mode.
   pagesTourSeen?: boolean;
-  // The page kinds whose Pages tour track has been offered and answered (taken, skipped or declined), so each
-  // kind offers its own once ever. Settings' row per kind (Slides Tour, ...) adds or removes its own kind.
+  // The page kinds whose Pages tour track has been taken (completed or skipped; declined too, until 28 October
+  // 2026). Feeds Settings' row per kind (Slides Tour, ...), which adds or removes its own kind.
   pagesTourKinds?: PageKind[];
-  // Element tours (docs/specs/007-editor/element-tours.md): the toured element kinds whose offer has been answered
-  // (Play or Cancel). Surfaced in Settings as Tours › Show Me, one switch per kind (inverted).
+  // Element tours (docs/specs/007-editor/element-tours.md): the opted-in element kinds whose Settings switch was
+  // turned off since (until 28 October 2026 also Play or Cancel on the offer). Surfaced in Settings as Tours › Show
+  // Me, one switch per kind (inverted); taking a tour adds nothing here.
   elementTourKinds?: ElementTourKind[];
   // The toured kinds whose element tour this person opted in to (a Settings switch turned on); none by default,
-  // so no element tour is offered until they opt in.
+  // so the Start Tour button names no element tour until they opt in. On means on the button, taken or not.
   elementTourOffers?: ElementTourKind[];
-  // Counts every element tour as answered while Power user mode is on; written by its preset.
+  // Counts every element tour as answered (off the button) while Power user mode is on; written by its preset.
   elementToursSeen?: boolean;
   // The presenter settings (docs/specs/012-collaboration/presentation-mode.md "Presenter settings"), as one object,
   // read through lib/presentation-config. Surfaced in Settings as Editor › Presenting. Missing === what this
@@ -732,13 +733,11 @@ and the dialog stays as the one complete, browsable index of them.
   switches as one row of chips, see **Toggle groups** below), `appearance` (the one row
   backed by the device-local store, not `UserPreferences`), and `tokens` (the
   API token manager).
-  A toggle row's control is one `role="switch"` button, named by the label
-  (`aria-labelledby`) and described by the description; its `::after`
-  stretches over the whole cell so a click anywhere on the row flips it, while
-  the help link and the illustration sit above that layer and keep their own
-  clicks. The `ToggleSwitch` inside is wrapped `aria-hidden`, because
-  `presentational` still exposes `role="switch"` and would otherwise offer a
-  screen reader two nested switches of the same name.
+  A toggle row's control is the shared `Switch` at size `sm`, one `role="switch"`
+  button named by the label (`aria-labelledby`) and described by the description;
+  `coversRow` stretches it over the whole cell so a click anywhere on the row flips
+  it, while the help link and the illustration sit above that layer and keep their
+  own clicks. A toggle group's chips are `SwitchChip`s.
 
   Settings whose effect is **visual** carry a small **before/after
   illustration** drawn from the real editor, which **rings the state
@@ -774,47 +773,53 @@ and the dialog stays as the one complete, browsable index of them.
   **Tours** is a category of its own: one switch per guided tour, **Diagram
   Tour**, **Plan Tours** (over **Boards Tour**, **Sheets Tour** and **Dashboards Tour**), **Workshop Tour**,
   **Draw Tour**, **Forms Tour**, **Avatar Tour** and **Pages Tours** (over **Slides Tour**, **Infographic Tour**,
-  **Article Tour** and **Logo Tour**), each with a line saying where it offers itself and a **Learn more**
-  to its article, under one **Offer Again** section note: each tour offers
-  itself once; switch one back on and close Settings to take it again, straight
-  away if you are in its mode, otherwise the next time you are. (The tours used
+  **Article Tour** and **Logo Tour**), each with a line saying where it is on offer and a **Learn more**
+  to its article, under one **Offer Again** section note: switch one back on
+  and close Settings to take it again, straight away if it is on offer where you
+  are, otherwise from the bottom bar's Start Tour button when you get there. (Until
+  28 October 2026 each tour offered itself once, and the switch decided whether
+  it would offer itself again; now every tour is on the Start Tour button whenever
+  it could run, taken or not, and the switch is a record of whether it was taken,
+  [Diagram tour](editor-tour.md) "Where it appears".) (The tours used
   to be an Onboarding Tutorials grid of five switches inside
   Accessibility, where nobody looked for them: a tour is not an accessibility
-  setting.) Every switch is inverted: on means "offer me this tour", the
+  setting.) Every mode tour's switch is inverted: on means "not taken yet", the
   preference records "already seen", and its telemetry tokens still describe the
   PREFERENCE (switching on is `...SeenOff`), so each dashboard series keeps its
   meaning.
 
   **Diagram Tour** (the [Diagram tour](editor-tour.md), labelled **Welcome** until October 2026) is inverted
-  against the stored `tourSeen`. Because `tourSeen !== true` is necessary but NOT sufficient for the offer
-  (TourHost also needs the per-tab pending flag, which only `/new` sets), closing the dialog with the switch
-  on **marks that flag**, so its promise is true for a reader who had simply never taken the tour. Turning it
-  on from off additionally relaunches in place on a Diagram tab; on a tab in another mode the offer waits
-  for a Diagram tab. The Plan tour is a
+  against the stored `tourSeen`. Turning it on from off and closing the dialog relaunches the tour in place
+  on a Diagram tab where it is on offer (`livedoc:tour-relaunch`); on a tab in another mode it does
+  nothing, and the button offers it on a Diagram tab. (Until 28 October 2026 closing with the switch on also
+  marked the per-tab pending flag the offer needed; the flag is gone.) The Plan tour is a
   tour of several tracks (`apps/live/lib/tour-tracks.ts`): **Plan Tours** is one switch over all of them
-  (`tourTracksSwitch`, key `planTourSeen`: on while any track is owed, off answers every track, on forgets every
-  answer), and each track has its own row nested beneath it (`parent: 'planTourSeen'`), named for itself: **Boards
-  Tour**, **Sheets Tour** and **Dashboards Tour** (`tourTrackSwitch`, keys `planTourSeen-boards`,
-  `planTourSeen-sheets`, `planTourSeen-dashboards`). A track's row is on while its track is owed; off adds its track
-  to `planTourTracks`, on removes it alone, and both clear the single `planTourSeen`, folding it into the list first
-  so one track back on leaves the others answered. It needs no handoff flag (the Plan tour offers itself in Plan once
+  (`tourTracksSwitch`, key `planTourSeen`: on while any track is untaken, off marks every track taken, on forgets
+  every record), and each track has its own row nested beneath it (`parent: 'planTourSeen'`), named for itself:
+  **Boards Tour**, **Sheets Tour** and **Dashboards Tour** (`tourTrackSwitch`, keys `planTourSeen-boards`,
+  `planTourSeen-sheets`, `planTourSeen-dashboards`). A track's row is on while its track is untaken; off adds its
+  track to `planTourTracks`, on removes it alone, and both clear the single `planTourSeen`, folding it into the list
+  first so one track back on leaves the others taken. It needs no handoff flag (the Plan tour is on the button once
   a board or Sheet is open, the Dashboards tour on a dashboard), so closing the dialog only reruns it, when a track
-  became owed while it was open ([Plan tour](../026-plan/plan-tour.md)). **Workshop Tour** works the same way against
+  became untaken while it was open and the tour is on offer ([Plan tour](../026-plan/plan-tour.md)). **Workshop
+  Tour** works the same way against
   `workshopTourSeen` ([Workshop tour](../012-collaboration/workshop-tour.md)), **Draw Tour** against
   `drawTourSeen` ([Draw tour](../023-draw-mode/draw-tour.md)), **Forms Tour** against `formTourSeen` ([Forms](../030-forms/forms.md) "The Forms tour"), **Avatar Tour** against `avatarTourSeen`
   ([Avatar tour](../008-canvas/avatar-tour.md)), and the Pages tour is built as the Plan tour's
   rows are ([Pages tour](pages-tour.md)): **Pages Tours** over one row per page kind (**Slides Tour**,
-  **Infographic Tour**, **Article Tour**, **Logo Tour**); `pagesTourKinds` lists the kinds answered. Power user
-  mode's readout lists each tour's switch over all its tracks (**Plan Tours**, **Pages Tours**).
-  A multi-track tour's old single flag (`planTourSeen`, `pagesTourSeen`) counts every track only while Power
-  user mode is on, so an answer given before the tour split offers each track once more.
+  **Infographic Tour**, **Article Tour**, **Logo Tour**); `pagesTourKinds` lists the kinds taken. Closing the dialog
+  with one turned on from off reruns it when it is on offer where you are. Power user mode's readout lists each
+  tour's switch over all its tracks (**Plan Tours**, **Pages Tours**). A multi-track tour's old single flag
+  (`planTourSeen`, `pagesTourSeen`) counts every track only while Power user mode is on.
 
   Below the mode tours, **Show Me** (element tours, named Show Me in the interface) is its own section, a closed
   accordion naming how many are on ([Element tours](element-tours.md#settings)): **Show Me on Every Element**, built
   against `elementToursSeen`, `elementTourKinds` and `elementTourOffers`, with one switch per toured kind nested
   under it, named for the element (**Sankey Diagram**). Every one reads off until the person opts in: on opts the
-  kind in and forgets its answer, off answers it. Element tours need no relaunch: the offer shows the next time such
-  an element is selected. A category may mark any section
+  kind in and forgets its answer, putting its tour on the Start Tour button whenever such an element is selected,
+  taken or not; off answers it and takes it off the button. Taking a tour never turns its switch off. Element tours
+  need no relaunch: the button offers an opted-in kind's tour the moment such an element is selected. A category
+  may mark any section
   closed this way (`collapsedSections`); Settings opened on one of its rows opens it.
 
   **Toggle groups.** Several related switches that share one description are
@@ -828,7 +833,7 @@ and the dialog stays as the one complete, browsable index of them.
   **Button Labels** (Appearance › Interface, `dockButtonNames`, on by default)
   names the footer bar's buttons beside their icons: Search, Settings and the
   theme. The bottom-right cluster is icons alone whatever it says
-  ([Live app](live-app.md)). Off, the footer's buttons are icons alone, each
+  ([Live app](live-app.md)). Off, the bottom bar's buttons are icons alone, each
   still named in its hover card. A phone always shows
   icons alone, so the row is desktop only there.
 

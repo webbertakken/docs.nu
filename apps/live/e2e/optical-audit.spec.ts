@@ -9,14 +9,7 @@ import {
   seedOpenedDocument,
   shareLink,
 } from './audit-screens';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  test,
-  untilHydrated,
-  mintSignedGuest,
-} from './fixtures';
+import { expect, expectNoPageErrors, test, untilHydrated, mintSignedGuest } from './fixtures';
 import { auditOptical, OPTICAL_TOLERANCE_PX } from './optical';
 
 // Optical alignment audit (docs/specs/004-interface-design/optical-alignment.md): on each screen, every glyph
@@ -43,14 +36,13 @@ async function expectCentred(page: Page, screen: string): Promise<void> {
     .toEqual([]);
 }
 
-// A seeded document open in the editor, its quick tour dismissed; returns the seeded Spinner shape.
+// A seeded document open in the editor; returns the seeded Spinner shape.
 async function openSeededEditor(page: Page, baseURL: string): Promise<Locator> {
   const owner = await mintSignedGuest(page.request);
   const id = await seedDocument(page, owner, new URL(baseURL).origin);
   await darkVisitor(page, owner);
   await page.goto(`/document/${id}`);
   await page.locator(CANVAS).waitFor();
-  await dismissQuickTour(page);
   const spinner = page.getByRole('img', { name: /Spinner/ }).first();
   await expect(spinner).toBeVisible();
   return spinner;

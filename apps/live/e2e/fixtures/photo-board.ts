@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { dismissQuickTour, startEventStormingRow } from '../fixtures';
+import { startEventStormingRow } from '../fixtures';
 
 // The boundary model's weights, a hashed static asset of the app.
 export const BOUNDARY_WEIGHTS = /\/weights\.[^/]*\.bin$/;
@@ -38,6 +38,5 @@ export async function openPhotoBoard(
   await page.route('**/cdn.jsdelivr.net/**', (r) => r.abort());
   await startEventStormingRow(page);
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
   await page.waitForTimeout(500);
 }

@@ -3,18 +3,19 @@
 **Show Me** is a guided tour of one surface, run there and then on the surface itself, when the person presses
 the **Show Me** button. It is the on-demand cousin of the mode tours (the [Diagram tour](editor-tour.md), the
 [Plan tour](../026-plan/plan-tour.md) and the [Workshop tour](../012-collaboration/workshop-tour.md)), which
-offer themselves once; Show Me never offers itself. It exists for surfaces where people make something real in
-several steps whose ideas are not visible at a glance, and where a tour that offered itself would come at the
-wrong moment. An [element tour](element-tours.md) sits between the two: once opted in to in Settings, it offers
-itself, quietly, from a small toolbar beside a selected element.
+start from the bottom bar's Start Tour button; Show Me starts from its own button on the surface. It exists for
+surfaces where people make something real in several steps whose ideas are not visible at a glance. An
+[element tour](element-tours.md) is on the bottom bar's button too, while its element is selected, once its kind is
+opted in to in Settings. (Until 28 October 2026 the mode tours offered themselves once, and element tours from a
+small toolbar beside the selection.)
 
 ## Domain language
 
-| Term                | Means                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| **Show Me**         | This pattern, and the button that starts it. In the interface: **Show Me**                 |
-| **Show Me surface** | A surface that carries a Show Me button (the list below)                                   |
-| **mode tour**       | One of the tours that offer themselves once, in a mode (Diagram, Plan, Workshop); not this |
+| Term                | Means                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Show Me**         | This pattern, and the button that starts it. In the interface: **Show Me**                            |
+| **Show Me surface** | A surface that carries a Show Me button (the list below)                                              |
+| **mode tour**       | One of the tours on the bottom bar's Start Tour button, in a mode (Diagram, Plan, Workshop); not this |
 
 ## Where it lives
 

@@ -278,8 +278,8 @@ deleted or migrated), but its indicators are not drawn, so nothing invites addin
 
 ## The Plan tour
 
-- The first time a person works in Plan with a board or Sheet open, a guided tour offers itself on that board or
-  Sheet, changing nothing on it: [Plan tour](plan-tour.md).
+- While a person works in Plan with a board or Sheet open, the bottom bar's **Start Boards Tour** or **Start Sheets
+  Tour** button runs a guided tour on that board or Sheet: [Plan tour](plan-tour.md). It never offers itself.
 
 ## Help
 

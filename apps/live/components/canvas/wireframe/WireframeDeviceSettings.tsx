@@ -1,5 +1,6 @@
 'use client';
 
+import { SwitchRow } from '@livedoc/ui';
 // A wireframe page's device settings (docs/specs/007-editor/wireframe-pages.md "Choosing the
 // device"): the page's device (fixed once made), then Orientation while it turns, the Frame look, and
 // System Bars while it has them. The Device popover's body and the page panel's Device tab.
@@ -14,7 +15,6 @@ import {
   type WireframeFrameTheme,
 } from '@livedoc/document';
 import { SegmentedRadio } from '@/components/primitives/SegmentedRadio';
-import { SwitchRow } from '@/components/primitives/SwitchRow';
 import { DeviceMiniature } from './DeviceMiniature';
 
 const ORIENTATIONS: readonly { id: PageOrientation; label: string }[] = [

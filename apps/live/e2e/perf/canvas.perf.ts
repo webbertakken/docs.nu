@@ -1,14 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import type { Browser, CDPSession, Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  guestSigFor,
-  mintSignedGuest,
-  ownerHeaders,
-  test,
-} from '../fixtures';
+import { expect, guestSigFor, mintSignedGuest, ownerHeaders, test } from '../fixtures';
 import {
   REFERENCE_BENCH_MS,
   TARGET_SLOWDOWN,
@@ -125,7 +118,6 @@ async function openBoard(browser: Browser, owner: string, id: string, throttle: 
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 60_000 });
   await page.locator('[data-element-id="ref-0"]').first().waitFor({ timeout: 60_000 });
   const ms = await settledOpenMs(page);
-  await dismissQuickTour(page);
   await page.keyboard.press('Escape');
   await page.keyboard.press('v');
   await page.waitForTimeout(2000);

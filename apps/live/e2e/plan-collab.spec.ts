@@ -1,13 +1,6 @@
 import type { Browser, Page } from '@playwright/test';
 import { defaultCatalogue, presetSetup } from '@livedoc/items';
-import {
-  dismissQuickTour,
-  expect,
-  guestSigFor,
-  mintSignedGuest,
-  ownerHeaders,
-  test,
-} from './fixtures';
+import { expect, guestSigFor, mintSignedGuest, ownerHeaders, test } from './fixtures';
 
 // Two people set up one Plan board at once (docs/specs/012-collaboration/collab-race-hardening.md, phase 6).
 // Column cogs edit the board without selecting it, so the selection lock never heads off a collision; each
@@ -30,10 +23,6 @@ async function openAs(
         if (sig) localStorage.setItem('livedoc:v2:self-sig', sig);
         localStorage.setItem('livedoc:v2:name-confirmed', '1');
       }
-      localStorage.setItem(
-        'livedoc:user-preferences:v1',
-        JSON.stringify({ planTourSeen: true, planTourTracks: ['boards', 'sheets'] }),
-      );
     },
     { o: owner, sig: owner ? guestSigFor(owner) : null },
   );
@@ -113,8 +102,6 @@ test('two people renaming different columns of one board both keep their rename'
   const b = await openAs(browser, baseURL!, `/document/shared?s=${code}`, null);
   await b.getByRole('button', { name: /^join$/i }).click();
   await b.locator(CANVAS).waitFor();
-  await dismissQuickTour(a);
-  await dismissQuickTour(b);
   await expect.poll(() => heads(b)).toContain('Review');
 
   // Both rename at once, each a different column.
@@ -194,7 +181,6 @@ test('someone who joins after a card was opened sees it held', async ({
   // A adds a card and opens it: the card is held before B arrives.
   const a = await openAs(browser, baseURL!, `/document/${id}`, owner);
   await a.locator(CANVAS).waitFor();
-  await dismissQuickTour(a);
   const boardA = a.locator('[data-plan-board]').first();
   await boardA
     .getByRole('button', { name: /add card/i })
@@ -209,7 +195,6 @@ test('someone who joins after a card was opened sees it held', async ({
   const b = await openAs(browser, baseURL!, `/document/shared?s=${code}`, null);
   await b.getByRole('button', { name: /^join$/i }).click();
   await b.locator(CANVAS).waitFor();
-  await dismissQuickTour(b);
   const cardB = b.locator('[data-plan-board] [data-plan-card]').filter({ hasText: 'New task' });
   await expect(cardB.locator('[data-presence-tag]')).toBeVisible({ timeout: 10_000 });
 
