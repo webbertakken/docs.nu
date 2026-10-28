@@ -147,6 +147,17 @@ export default defineConfig({
             name: 'account',
             use: { ...devices['Desktop Chrome'], colorScheme: 'dark' as const },
             testMatch: /account\/.*\.spec\.ts/,
+            testIgnore: /account\/.*-budget\.spec\.ts/,
+          },
+          // A budget times the app, not the runner (docs/specs/003-system-architecture/e2e-smoke.md "Timing
+          // budgets"): it runs once every other signed-in spec has finished, one test at a time, so no other browser
+          // shares the CPU while it measures. The budget and its assertions are the spec's own.
+          {
+            name: 'account-budget',
+            use: { ...devices['Desktop Chrome'], colorScheme: 'dark' as const },
+            testMatch: /account\/.*-budget\.spec\.ts/,
+            dependencies: ['account'],
+            fullyParallel: false,
           },
         ]
       : []),
