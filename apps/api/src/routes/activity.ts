@@ -2,9 +2,8 @@
 //
 // GET /api/activity -> { actions: ActivityAction[], threads: ActivityThread[] }
 //
-// Read-only: every row is a link into the editor, where completing,
-// reassigning and resolving already exist behind their edit gates. So
-// there is no other verb here in v1.
+// Read-only: the Inbox's Reply and Resolve go through the comment routes every client uses
+// (docs/specs/013-workspace/inbox.md §1.5), never a route of the Inbox's own.
 //
 // Hybrid identity like the rest of the api (docs/specs/014-identity/auth-and-guest-access.md): the account id
 // when signed in, X-Owner-Id otherwise. Guests get their own page (their
