@@ -86,6 +86,7 @@ import { resolveWorkbenchSession } from './auth/workbench-session';
 import { workbenchRefusal } from './auth/workbench-confinement';
 import { sweepWorkbench } from './db/workbench';
 import { withServerRelease } from './server-release-header';
+import { backgroundWaitUntil } from './background';
 import type { Env } from './types';
 
 export { DocumentRoom, LegacyDocumentRoom };
@@ -379,7 +380,8 @@ async function routeApiRequest(
     resolveOwner,
     token: tokenAuth ? { id: tokenAuth.tokenId, readOnly: tokenAuth.readOnly } : null,
     workbench,
-    waitUntil: (promise) => executionCtx?.waitUntil(promise),
+    // Every handler's background work logs its failure here (docs/specs/015-api/api.md "Background work").
+    waitUntil: backgroundWaitUntil(executionCtx, apiRouteLabel(request.method, url.pathname)),
   };
   try {
     switch (segments[1]) {
@@ -468,8 +470,8 @@ async function routeApiRequest(
     // category): the worker owns the D1 binding, so a server-side
     // exception counts even when no client survives to report it.
     // Same TELEMETRY_ENABLED gate as the ingest; off the response's
-    // critical path (waitUntil), and its own failure is swallowed —
-    // the 500 must still go out. The type names the endpoint by its
+    // critical path (waitUntil), and its own failure is logged, never
+    // thrown: the 500 must still go out. The type names the endpoint by its
     // route words only (`Internal.Put.Documents.Tabs`), never an id.
     if (env.TELEMETRY_ENABLED === 'true') {
       const type = errorTypeToken('Internal', apiRouteLabel(request.method, url.pathname));
@@ -477,7 +479,7 @@ async function routeApiRequest(
         env,
         [{ category: 'Error', action: 'Api', type }],
         Date.now(),
-      ).catch(() => {});
+      ).catch((err: unknown) => console.error('[telemetry] crash report failed', err));
       executionCtx?.waitUntil?.(report);
     }
     return json({ error: 'internal_error' }, { status: 500 });
@@ -504,7 +506,8 @@ const worker = {
   //                 (docs/specs/013-workspace/empty-document-cleanup.md).
   // All are no-ops when nothing is over the floor; all use
   // `ctx.waitUntil` so they run concurrently and the worker can
-  // exit as soon as the schedule callback returns.
+  // exit as soon as the schedule callback returns. Each step carries its own catch and log line,
+  // so one failed step never skips another (docs/specs/015-api/api.md "Background work").
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     if (event.cron === '0 3 * * *') {
       const now = Date.now();
@@ -551,7 +554,11 @@ const worker = {
       );
       // docs/specs/014-identity/transactional-email.md: send any due onboarding emails (welcome catch-up + week 1 / 2).
       // No-op when RESEND_API_KEY is unset.
-      ctx.waitUntil(runLifecycleSweep(env));
+      ctx.waitUntil(
+        runLifecycleSweep(env).catch((err: unknown) =>
+          console.error('lifecycle sweep failed', err),
+        ),
+      );
       // docs/specs/013-workspace/teams.md "Reminders and expiry": expire invites nobody answered in 28 days
       // (always), then send the 1 / 7 / 21-day reminders (email only). Logs its own outcome.
       ctx.waitUntil(
@@ -560,7 +567,11 @@ const worker = {
           .catch((err) => console.error('[team-invites] sweep failed', err)),
       );
       // docs/specs/014-identity/transactional-email.md (#3): warn owners whose API token is within a week of expiry.
-      ctx.waitUntil(runTokenExpirySweep(env));
+      ctx.waitUntil(
+        runTokenExpirySweep(env).catch((err: unknown) =>
+          console.error('token expiry sweep failed', err),
+        ),
+      );
       // docs/specs/013-workspace/timeline.md §4.5: the same window, on the Timeline. Separate from
       // the email sweep above because that one no-ops without a Resend
       // key, and a self-host with no email provider still needs to know

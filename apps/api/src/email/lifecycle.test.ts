@@ -157,3 +157,23 @@ describe('runLifecycleSweep', () => {
     expect(vi.mocked(recordSendFailure).mock.calls.map((c) => c[1])).toEqual(['u7', 'u6', 'u8']);
   });
 });
+
+// docs/specs/015-api/api.md "Background work": each stage is a step of its own.
+describe('runLifecycleSweep isolates each stage', () => {
+  it('logs a failed stage and still runs the ones after it', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(dueForStage).mockRejectedValueOnce(new Error('D1 down')).mockResolvedValue([]);
+    vi.mocked(dueForActivation).mockResolvedValue([]);
+    vi.mocked(dueForWinback).mockResolvedValue([]);
+    await expect(runLifecycleSweep(env)).resolves.toBeUndefined();
+    expect(vi.mocked(dueForStage).mock.calls.map((c) => c[1])).toEqual([
+      'welcome',
+      'week1',
+      'week2',
+    ]);
+    expect(dueForActivation).toHaveBeenCalledOnce();
+    expect(dueForWinback).toHaveBeenCalledOnce();
+    expect(error).toHaveBeenCalledWith('[lifecycle] stage failed stage=welcome', expect.any(Error));
+    error.mockRestore();
+  });
+});

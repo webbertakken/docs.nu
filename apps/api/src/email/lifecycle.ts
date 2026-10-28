@@ -67,14 +67,24 @@ export async function runLifecycleSweep(env: Env): Promise<void> {
   // Welcome is the immediate first touch and isn't gated on a preference (the
   // user can't have toggled before it fires). Every LATER tip/check-in respects
   // notifyTips, so the "Tips and check-ins" toggle genuinely turns them all off.
-  await sweepStage(env, 'welcome', now, false);
+  await stage('welcome', () => sweepStage(env, 'welcome', now, false));
   // Activation nudge (docs/specs/014-identity/transactional-email.md #4): zero-document signups ~3 days in. Runs before
   // week 1 so an empty account hears this first; dueForActivation excludes rows
   // that already reached week 1.
-  await sweepActivation(env, now - ACTIVATION_DELAY_MS);
-  await sweepStage(env, 'week1', now - WEEK_MS, true);
-  await sweepStage(env, 'week2', now - 2 * WEEK_MS, true);
-  await sweepWinback(env, now - WINBACK_QUIET_MS);
+  await stage('activation', () => sweepActivation(env, now - ACTIVATION_DELAY_MS));
+  await stage('week1', () => sweepStage(env, 'week1', now - WEEK_MS, true));
+  await stage('week2', () => sweepStage(env, 'week2', now - 2 * WEEK_MS, true));
+  await stage('winback', () => sweepWinback(env, now - WINBACK_QUIET_MS));
+}
+
+// One stage of the sweep (docs/specs/015-api/api.md "Background work"): a failure is logged and the sweep goes
+// on, so one broken stage never starves the ones after it.
+async function stage(name: string, run: () => Promise<void>): Promise<void> {
+  try {
+    await run();
+  } catch (err) {
+    console.error(`[lifecycle] stage failed stage=${name}`, err);
+  }
 }
 
 // Whether the owner has opted out of tips / check-ins (docs/specs/014-identity/transactional-email.md). Shared by the
