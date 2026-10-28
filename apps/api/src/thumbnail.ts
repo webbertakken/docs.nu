@@ -48,7 +48,7 @@ import {
   servableImageIds,
 } from './db';
 import { imageRefIds } from './image-refs/extract';
-import type { DocumentDTO, Env } from './types';
+import type { DocumentDTO, DocumentEnv } from './types';
 
 // Content type for the cached SVG snapshot. Local to this module — the
 // HTTP responses set their own header (responses.ts); this only stamps
@@ -87,7 +87,7 @@ export type ThumbnailOptions = { defer?: (write: Promise<unknown>) => void };
 // when there's nothing to show: no R2 binding (self-host without
 // storage), no tab, or an empty / unparseable first tab.
 export async function getDocumentThumbnailSvg(
-  env: Env,
+  env: DocumentEnv,
   liveDoc: ThumbnailSubject,
   opts: ThumbnailOptions = {},
 ): Promise<string | null> {
@@ -144,7 +144,7 @@ export async function getDocumentThumbnailSvg(
 // a persistent cache. Returns null (caller 404s) when there's no object
 // store, the tab isn't in the document, or the tab is empty / unparseable.
 export async function getDocumentTabImageSvg(
-  env: Env,
+  env: DocumentEnv,
   liveDoc: ThumbnailSubject,
   tabId: string,
 ): Promise<string | null> {
@@ -159,7 +159,7 @@ export async function getDocumentTabImageSvg(
 // CLI's pull --svg and tab render, and any script. Unlike a snapshot it draws an empty tab too, and with no image
 // store its images keep their placeholders. Null when the tab is not in the document or its body does not parse.
 export async function renderTabSvg(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tabId: string,
 ): Promise<string | null> {
@@ -184,7 +184,7 @@ export async function renderTabSvg(
 // from the parse a render does anyway, so the lists know an old empty document after one ask. Best effort:
 // a failed stamp leaves the count unknown, which only means the row asks again.
 function stampUnknownCount(
-  env: Env,
+  env: DocumentEnv,
   body: StoredTabBody,
   count: number,
   opts: ThumbnailOptions,
@@ -205,7 +205,7 @@ function stampUnknownCount(
 // absent, unparseable, or has nothing to draw (an empty canvas has no
 // meaningful thumbnail; the row shows its icon instead).
 async function renderTabBodyToSvg(
-  env: Env,
+  env: DocumentEnv,
   liveDoc: ThumbnailSubject,
   body: StoredTabBody | null,
   opts: ThumbnailOptions = {},
@@ -310,7 +310,7 @@ async function renderTabBodyToSvg(
 // re-auth, and the same rule decides which: only an image the document may serve
 // (docs/specs/009-elements/images.md, "Placement grants") is read, one query for the tab.
 async function loadEmbeddedImages(
-  env: Env,
+  env: DocumentEnv,
   documentId: string,
   tab: Tab,
 ): Promise<Map<string, string>> {

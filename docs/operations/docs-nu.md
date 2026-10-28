@@ -20,6 +20,13 @@ docs.nu is LiveDoc's, and a guard keeps it so: `apps/help/lib/brand-name-guard.t
 - Documents are `.livedoc` files, `application/vnd.livedoc+json`; browser storage keys start `livedoc:`.
 - The MCP registry listing (`server.json`, `io.github.webbertakken/livedoc`) is published by hand from **Actions > Publish MCP server to registry**, once `mcp.docs.nu` serves. Restore the workflow's push trigger then.
 
+## Contact form
+
+The contact form ([help pages](../specs/018-help/help-pages.md#the-contact-form)) is a LiveDoc form in a document owned
+by Webber's docs.nu account, built and published with the CLI (`livedoc form add`, `livedoc form share … publish`).
+Its responses are cards on that document's board, and its owner is emailed for each one. Publishing again makes a new
+link, so a republished form means a new `CONTACT_FORM_URL`.
+
 ## Deploy
 
 From a clean checkout of the commit to ship:
@@ -33,6 +40,88 @@ The script mirrors `deploy-reusable.yml`: it builds with the hosted profile's bu
 The first deploy of a brand-new worker can fail with `This Worker does not exist on your account. [code: 10007]`: wrangler reads the worker's workers.dev state a moment after creating it, before Cloudflare shows it. Run the script again after a minute or two; a worker that exists never hits this.
 
 The token needs, on the account: Workers Scripts, D1, Workers R2 Storage and Workers KV Storage edit, plus Account Settings read. On the `docs.nu` zone: DNS and Workers Routes edit, for the custom domains.
+
+## Moving content into rooms
+
+The release that moves every document's content from D1 into its room ([Moving content into rooms](../specs/006-document/document-storage-move.md)) is Webber's to deploy. Each step below names who runs it; every command that writes is his.
+
+### Before the deploy
+
+1. From `apps/api`, take the plan (read-only: the tool runs only `SELECT`s, through wrangler) and keep its output and file:
+
+   ```sh
+   node --import ../../scripts/ts-source-hooks.mjs scripts/content-move.ts plan --remote --out content-move-plan.json
+   ```
+
+   It prints each document's id, tab count, content bytes and content hash.
+
+### What the deploy does
+
+`scripts/deploy-docs-nu.sh` applies D1 migrations `0105` to `0111` before the api deploys (the content summary column, the Inbox and image indexes keyed by document, `inbox_cards`, `document_images`, `room_purges`, the form link columns and `content_moves`); `0106` rebuilds `collab_actions` and `collab_threads` empty, and each room's first drain after its move refills them. Then:
+
+- The every-minute cron moves up to 25 documents a run, 6 at once, never-tried first; a document whose move failed or mismatched is tried again an hour later. So N documents take about N / 25 minutes.
+- A document opened before its turn moves on that request; while its move fails it answers 503 `content_moving` and the next request tries again. Documents created after the deploy are born moved.
+- A move reads D1 and writes only the room and its `content_moves` record; D1's content tables stay as they were.
+- Watch it with `pnpm exec wrangler tail docs-nu-api` (from `apps/api`): `[content-move] moved`, `failed` and `mismatch` lines, and `[content-move] sweep` per run. Progress, read-only:
+
+  ```sh
+  pnpm exec wrangler d1 execute DB --remote --command "SELECT COALESCE(m.status, 'unmoved') AS status, COUNT(*) AS n FROM documents d LEFT JOIN content_moves m ON m.document_id = d.id GROUP BY 1"
+  ```
+
+### After the deploy
+
+Once every document reads `moved`, verify against the plan (read-only):
+
+```sh
+node --import ../../scripts/ts-source-hooks.mjs scripts/content-move.ts verify --remote --plan content-move-plan.json
+```
+
+It passes (exit 0) when every document is moved, every hash matches the plan and both sides of every record agree; it exits 1 and lists every document that does not. The release that drops D1's content tables waits for this to pass on docs.nu.
+
+### Rollback
+
+- Before the deploy: nothing has moved; nothing to undo.
+- After it: the previous `docs-nu-api` version can be restored (`pnpm exec wrangler rollback` from `apps/api`, or the dashboard's Deployments). It reads D1's content tables, which the move never wrote, so every document shows its content as it was when it moved. Edits made in rooms since are not in D1 and are lost unless copied back first. Documents created since live only in their rooms and read as empty.
+- Before restoring it, put the Inbox index back in the shape the previous version writes, or its tab saves with a comment or an action fail. Migration `0106` rebuilt it; this restores the old tables empty and lets the previous version seed them again on each owner's next read:
+
+  ```sql
+  DROP TABLE collab_actions;
+  DROP TABLE collab_threads;
+  CREATE TABLE collab_actions (tab_id TEXT NOT NULL, element_id TEXT NOT NULL, action_id TEXT NOT NULL,
+    element_label TEXT NOT NULL, name TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL,
+    assignee_user_id TEXT, assignee_member_id TEXT, assignee_name TEXT, assigner_id TEXT NOT NULL,
+    assigner_name TEXT, team_id TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
+    PRIMARY KEY (tab_id, element_id, action_id), FOREIGN KEY (tab_id) REFERENCES tabs (id) ON DELETE CASCADE);
+  CREATE INDEX collab_actions_assignee_idx ON collab_actions (assignee_user_id, status);
+  CREATE INDEX collab_actions_assigner_idx ON collab_actions (assigner_id, status);
+  CREATE INDEX collab_actions_member_idx ON collab_actions (assignee_member_id);
+  CREATE TABLE collab_threads (tab_id TEXT NOT NULL, element_id TEXT NOT NULL, element_label TEXT NOT NULL,
+    resolved INTEGER NOT NULL, comment_count INTEGER NOT NULL, participant_ids TEXT NOT NULL,
+    latest_text TEXT NOT NULL, latest_author_name TEXT NOT NULL, latest_author_color TEXT NOT NULL,
+    first_at INTEGER NOT NULL, latest_at INTEGER NOT NULL, mentioned_ids TEXT NOT NULL DEFAULT '[]',
+    PRIMARY KEY (tab_id, element_id), FOREIGN KEY (tab_id) REFERENCES tabs (id) ON DELETE CASCADE);
+  CREATE INDEX collab_threads_open_idx ON collab_threads (resolved, latest_at);
+  DELETE FROM collab_index_state;
+  ```
+
+  The other new migrations only add tables and columns the previous version never reads, and its daily cron ignores the every-minute one.
+
+- The class change's release (the room becoming a SQLite Durable Object) cannot be rolled back: Cloudflare refuses a rollback across a Durable Object migration. A fault there is fixed forward.
+
+### Exporting D1
+
+`wrangler d1 export` refuses a database with a virtual table, and `content_search_fts` (content search's index, migration `0104`) is one. To export, drop it and its triggers, export, then recreate them exactly as `apps/api/migrations/0104_content_search.sql` does and rebuild the index from `content_search`:
+
+```sql
+DROP TRIGGER content_search_ai;
+DROP TRIGGER content_search_ad;
+DROP TRIGGER content_search_au;
+DROP TABLE content_search_fts;
+-- export, then recreate the table and the three triggers from 0104, and:
+INSERT INTO content_search_fts (content_search_fts) VALUES ('rebuild');
+```
+
+Content search finds nothing between the drop and the rebuild. D1 Time Travel restores the database to any minute of the last 30 days without an export.
 
 ## npm
 

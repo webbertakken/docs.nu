@@ -20,6 +20,7 @@ vi.mock('./db', async (orig) => ({
 }));
 
 import { DocumentRoom } from './document-room/document-room';
+import { roomSqlStorage } from './test-document-room';
 import { ANSWERS_FLUSH_MS } from './room-participant';
 
 const ME = 'a'.repeat(32);
@@ -53,7 +54,9 @@ function newRoom() {
     acceptWebSocket: () => {},
     // Every socket through one WebSocket object each, since the room compares them by identity.
     getWebSockets: () => sockets.map(wsOf),
+    id: { equals: () => true },
     storage: {
+      ...roomSqlStorage(),
       get: (k: string) => Promise.resolve(kv.get(k)),
       put: (k: string, v: unknown) => Promise.resolve(void kv.set(k, v)),
       delete: (k: string) => Promise.resolve(kv.delete(k)),

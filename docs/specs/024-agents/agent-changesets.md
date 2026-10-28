@@ -218,6 +218,12 @@ erases anything:
 A changeset's element ops, inverse and result lines are stored beside its record, one row each in the room, so only the tab
 cap bounds a changeset.
 
+A changeset lives in its document's room with the document's other content. Deleting an account purges the rooms of its own
+documents and their changesets with them; the changesets the person wrote on other people's documents stay in those
+rooms, credited by the name and colour they had, and go with that room's retention within
+`CHANGESET_RETENTION_DAYS`. Signing up does not move a guest's changesets: they keep the guest author id
+([API app](../015-api/api.md#owner-keyed-data)).
+
 Changesets count against the token's write rate limit ([Public API and API tokens](../015-api/public-api-and-tokens.md) §3.5).
 
 ## Observability and telemetry

@@ -35,8 +35,6 @@ const ALLOWED_TOKENS = [
   // The upstream project: its repository, and the spec about it.
   'livediagram-app/livediagram.app',
   'livediagram-upstream',
-  // livediagram's contact form, linked until docs.nu has its own channel.
-  'www.livediagram.app/form/',
 ];
 
 /**

@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { DOCUMENT_ID_HEADER } from '../room-client';
+import { DOCUMENT_ID_HEADER } from './document-client';
 import { json } from '../responses';
 import { takeLegacyState } from './legacy-handover';
 import {
@@ -47,6 +47,15 @@ import type { FacilitatorState } from '../facilitator';
 import { RoomFacilitator } from '../room-facilitator';
 
 import { writeQaAction, type QaWriteRequest } from '../qa-board-write';
+import { RoomContent, RoomIdMismatchError, RoomNotReadyError } from './room-content';
+import type { MoveOutcome } from './content-move';
+import type { DocumentRoomRpc } from './document-rpc';
+import type { Item } from '@livedoc/items';
+import type { ContentSummary } from '../db/content-summary';
+import type { DocumentCopy, DocumentOutline } from './document-content';
+import type { CreateOutcome, DocumentSeed } from './document-create';
+import type { RouteIdentity } from './document-route';
+import type { ShareAnswer, ShareMessage, SharedTabCopy } from './tab-shares';
 import {
   newSessionAttachment,
   readSessionAttachment,
@@ -193,6 +202,8 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   private readonly internal: InternalRoom;
   // A Participant's content and answers (docs/specs/013-workspace/share-roles.md), see room-participant.ts.
   private participantWrites: RoomParticipantWrites;
+  // The document's content in this room's SQLite (room-content.ts).
+  private readonly content: RoomContent;
 
   // The worker env is optional so unit tests can build a room from a fake state alone; without it the telemetry
   // emit (Document·Used·Multiplayer) is skipped.
@@ -200,8 +211,12 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     super(state, env);
     this.state = state;
     this.ledger = new RoomLedgerStore(state.storage);
+    this.content = new RoomContent(state, env, this, {
+      armAlarm: () => this.armAlarm(),
+      prepare: (documentId) => this.prepareForRpc(documentId),
+    });
     this.participantWrites = new RoomParticipantWrites({
-      env,
+      env: this.content.env,
       enqueue: (step) => this.queueTabWrite(step),
       sequence: (from, op, except) => this.sequenceMutation(from, op, except),
       sendTo: (ws, payload) => this.sendTo(ws, payload),
@@ -273,21 +288,54 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
 
   // The key-value room this document had before keeps its order state, ledger, poll, baton, selections and agent
   // presence; the first request after the class change takes them over before it is answered
-  // (docs/specs/006-document/document-storage-move.md "Handing over room state"). Null to carry on, or the
-  // answer when the handover failed.
-  private async ensureHandedOver(request: Request): Promise<Response | null> {
-    if (this.handedOver) return null;
-    const legacyRooms = this.env?.LEGACY_DOCUMENT_ROOM;
-    if (!legacyRooms) {
-      this.handedOver = true;
-      return null;
-    }
+  // (docs/specs/006-document/document-storage-move.md "Handing over room state"). A fetch names its document in
+  // X-Document-Id; an RPC names it as its first argument (RoomContent.rpc runs this first). Both bind the room to
+  // that id before anything is taken; then the move gate (RoomContent.ensureMoved) holds the request until the room
+  // holds its content. Null to carry on, or the answer when the room cannot serve this document yet.
+  private async ensureReady(request: Request): Promise<Response | null> {
     const documentId = request.headers.get(DOCUMENT_ID_HEADER);
+    if (documentId) {
+      try {
+        this.content.bind(documentId);
+      } catch (error) {
+        if (error instanceof RoomIdMismatchError) {
+          return json({ error: 'room_id_mismatch' }, { status: 409 });
+        }
+        throw error;
+      }
+    }
     if (!documentId) {
-      if (!this.missingIdLogged)
+      if (this.env?.LEGACY_DOCUMENT_ROOM && !this.missingIdLogged)
         console.warn('[legacy-handover] no document id', new URL(request.url).pathname);
       this.missingIdLogged = true;
       return null;
+    }
+    if (!this.handedOver && (await this.handOver(documentId))) {
+      return new RoomNotReadyError(documentId, 'handover').response();
+    }
+    try {
+      await this.content.ensureMoved(documentId, false);
+    } catch (error) {
+      if (error instanceof RoomNotReadyError) return error.response();
+      throw error;
+    }
+    return null;
+  }
+
+  // RoomContent's gate before every RPC, after it bound the room to `documentId`.
+  private async prepareForRpc(documentId: string): Promise<void> {
+    if (this.handedOver) return;
+    const failed = await this.handOver(documentId);
+    if (failed) throw new RoomNotReadyError(documentId, 'handover');
+  }
+
+  // Take the legacy room's state once; true when it failed (logged), so the caller refuses and the next request
+  // tries again.
+  private async handOver(documentId: string): Promise<boolean> {
+    const legacyRooms = this.env?.LEGACY_DOCUMENT_ROOM;
+    if (!legacyRooms) {
+      this.handedOver = true;
+      return false;
     }
     const legacy = legacyRooms.get(legacyRooms.idFromName(documentId));
     let outcome: { taken: number | null } | { error: unknown } = { taken: null };
@@ -307,7 +355,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     if ('error' in result) {
       const name = result.error instanceof Error ? result.error.message : String(result.error);
       console.error(`[legacy-handover] failed id=${documentId} error=${name}`);
-      return json({ error: 'room_unavailable' }, { status: 503, headers: { 'Retry-After': '5' } });
+      return true;
     }
     if (result.taken !== null) {
       console.log(`[legacy-handover] took id=${documentId} keys=${result.taken}`);
@@ -317,7 +365,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         }),
       );
     }
-    return null;
+    return false;
   }
 
   // Record the seq we just handed out. Not awaited: the DO output gate holds
@@ -328,8 +376,8 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   }
 
   override async fetch(request: Request): Promise<Response> {
-    const handover = await this.ensureHandedOver(request);
-    if (handover) return handover;
+    const notReady = await this.ensureReady(request);
+    if (notReady) return notReady;
     const url = new URL(request.url);
     const internal = await answerInternal(this.internal, request, url);
     if (internal) return internal;
@@ -562,15 +610,18 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     console.info('[room-access] closed', { match: close.match, closed });
   }
 
-  // The document is gone for good: end every session, then drop everything stored here, which includes the
-  // collaboration ledger's comment, idea and answer text, the order state, the poll, the baton and the alarm.
-  // The ledger's queued writes land first, so none of them can re-create a key after the wipe.
+  // The document is gone for good: tell the other holders of its shared tabs it left, end every session, then drop
+  // everything stored here, which includes the content, the collaboration ledger's comment, idea and answer text,
+  // the order state, the poll, the baton and the alarm. The ledger's queued writes land first, so none of them can
+  // re-create a key after the wipe.
   private async purge(): Promise<void> {
+    await this.content.leaveShares();
     this.closeSockets(() => [DOCUMENT_TRASHED_CLOSE, 'document-purged']);
     this.opLog = [];
     await this.ledger.settled();
     await this.state.storage.deleteAlarm();
     await this.state.storage.deleteAll();
+    this.content.forget();
     console.info('[room] purged');
   }
 
@@ -615,7 +666,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
   // /broadcast's is. The broadcast happens INSIDE the queued step, so peers
   // receive board states in rev order.
   async handleQaWrite(request: Request): Promise<Response> {
-    const env = this.env;
+    const env = this.content.env;
     if (!env) return new Response('no env', { status: 503 });
     let req: QaWriteRequest;
     try {
@@ -961,12 +1012,14 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     return null;
   }
 
-  // The room's one alarm, at the earliest of the facilitator grace deadline and every agent presence expiry, or
-  // none when there is neither (agent-presence I5, PR29).
+  // The room's one alarm, at the earliest of the facilitator grace deadline, every agent presence expiry and the
+  // outbox's drain, or none when there is none of them (agent-presence I5, PR29; document-storage "The outbox").
   private armAlarm(): void {
-    const deadlines = [this.baton.deadline(), this.agents.nextExpiry() ?? undefined].filter(
-      (d): d is number => d !== undefined,
-    );
+    const deadlines = [
+      this.baton.deadline(),
+      this.agents.nextExpiry() ?? undefined,
+      this.content.deadline() ?? undefined,
+    ].filter((d): d is number => d !== undefined);
     if (deadlines.length === 0) void this.state.storage.deleteAlarm();
     else void this.state.storage.setAlarm(Math.min(...deadlines));
   }
@@ -977,6 +1030,7 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
     for (const r of expired) agentPresenceLog('expired', r);
     if (expired.length > 0) this.broadcastPresence();
     this.baton.alarm();
+    await this.content.alarm(Date.now());
     this.armAlarm();
   }
 
@@ -1092,5 +1146,113 @@ export class DocumentRoom extends DurableObject<Env | undefined> {
         this.opRates.delete(ws);
       }
     }
+  }
+
+  // ---------- RPC: what the worker asks of this document (document-client.ts, document-rpc.ts) ----------
+
+  async route(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
+    return this.answer(documentId, (rpc) => rpc.route(documentId, request, identity));
+  }
+
+  async create(documentId: string, seed: DocumentSeed): Promise<CreateOutcome> {
+    // A new document is born moved (M4); a re-commit of one D1 already holds moves first.
+    return (await this.content.rpc(documentId, !seed.recommit)).create(documentId, seed);
+  }
+
+  async outline(documentId: string): Promise<DocumentOutline> {
+    return (await this.content.rpc(documentId)).outline(documentId);
+  }
+
+  async hasTab(documentId: string, tabId: string): Promise<boolean> {
+    return (await this.content.rpc(documentId)).hasTab(documentId, tabId);
+  }
+
+  async placesImage(
+    documentId: string,
+    imageId: string,
+    onlyTabId: string | null,
+  ): Promise<boolean> {
+    return (await this.content.rpc(documentId)).placesImage(documentId, imageId, onlyTabId);
+  }
+
+  async image(documentId: string, request: Request, identity: RouteIdentity): Promise<Response> {
+    return this.answer(documentId, (rpc) => rpc.image(documentId, request, identity));
+  }
+
+  async exportCopy(
+    documentId: string,
+    onlyTabId: string | null,
+    redactAuthorsFor: string | null,
+  ): Promise<DocumentCopy | null> {
+    return (await this.content.rpc(documentId)).exportCopy(documentId, onlyTabId, redactAuthorsFor);
+  }
+
+  async importCopy(documentId: string, copy: DocumentCopy): Promise<ContentSummary> {
+    return (await this.content.rpc(documentId, true)).importCopy(documentId, copy);
+  }
+
+  async item(documentId: string, itemId: string): Promise<Item | null> {
+    return (await this.content.rpc(documentId)).item(documentId, itemId);
+  }
+
+  async respondToForm(
+    documentId: string,
+    request: Request,
+    identity: RouteIdentity,
+  ): Promise<Response> {
+    return this.answer(documentId, (rpc) => rpc.respondToForm(documentId, request, identity));
+  }
+
+  // A tab shared between documents (tab-shares.ts): a joining document's copy, the join recorded, and what another
+  // holder sends. A room that holds no document answers every message `gone`.
+  async sharedTabCopy(documentId: string, tabId: string): Promise<SharedTabCopy | null> {
+    return (await this.content.rpc(documentId)).sharedTabCopy(documentId, tabId);
+  }
+
+  async shareJoined(
+    documentId: string,
+    tabId: string,
+    member: string,
+    seenUpdatedAt: number,
+  ): Promise<boolean> {
+    return (await this.content.rpc(documentId)).shareJoined(
+      documentId,
+      tabId,
+      member,
+      seenUpdatedAt,
+    );
+  }
+
+  async receiveShares(
+    documentId: string,
+    from: string,
+    messages: ShareMessage[],
+  ): Promise<ShareAnswer[]> {
+    return (await this.content.rpc(documentId)).receiveShares(documentId, from, messages);
+  }
+
+  // The sweep's move (docs/specs/006-document/blueprints/document-storage-move.md "The sweep"): the room's move
+  // outcome, moving now when it has not; null when D1 has no row for the document (G1).
+  async move(documentId: string): Promise<MoveOutcome | null> {
+    this.content.bind(documentId);
+    if (!this.handedOver && (await this.handOver(documentId))) {
+      throw new RoomNotReadyError(documentId, 'handover');
+    }
+    return this.content.move(documentId);
+  }
+
+  // An RPC answering a Response: a room not ready yet answers its named 503 rather than throwing.
+  private async answer(
+    documentId: string,
+    call: (rpc: DocumentRoomRpc) => Promise<Response>,
+  ): Promise<Response> {
+    let rpc: DocumentRoomRpc;
+    try {
+      rpc = await this.content.rpc(documentId);
+    } catch (error) {
+      if (error instanceof RoomNotReadyError) return error.response();
+      throw error;
+    }
+    return call(rpc);
   }
 }

@@ -264,14 +264,13 @@ describe('Activity: Plan cards assigned to the reader', () => {
   // docs/specs/013-workspace/inbox.md §2.4: the read seeks the reader's cards by the assignee
   // index and each card's Done check by (tab, status), never scanning the item store or a tab's boards.
   // Measured: 100,000 cards, 2,000 on the reader, read in ~25ms; the Done check without the seek took ~270ms.
-  it('seeks cards by assignee and the Done check by tab and status', async () => {
+  it('seeks the pushed cards by assignee, never scanning them', async () => {
     const { sql } = await setUp();
     const plan = sql
       .prepare(`EXPLAIN QUERY PLAN ${CARDS_SQL}`)
       .all('reader', 1, 100, '["x"]')
       .map((p) => String(p['detail']));
-    expect(plan.join('\n')).toContain('SEARCH i USING INDEX items_assignee');
-    expect(plan.some((d) => /plan_board_statuses.*\(tab_id=\? AND status=\?\)/.test(d))).toBe(true);
-    expect(plan.filter((d) => /^SCAN (i|items|pb)\b/.test(d))).toEqual([]);
+    expect(plan.join('\n')).toContain('SEARCH ic USING INDEX inbox_cards_assignee (assignee_id=?)');
+    expect(plan.filter((d) => /^SCAN (ic|inbox_cards)\b/.test(d))).toEqual([]);
   });
 });

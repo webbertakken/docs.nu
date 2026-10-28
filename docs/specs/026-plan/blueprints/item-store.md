@@ -10,7 +10,7 @@ store, the room op, and the editor's item slice.
 | item       | `Item` (`packages/items/src/item.ts`)                        |
 | item type  | `ItemTypeDef`, catalogue `ITEM_TYPES`, id `ItemTypeId`       |
 | field      | a key of `Item.fields` (`ItemFields`); kinds `ItemFieldKind` |
-| item store | D1 table `items`; editor slice `usePlanItems`                |
+| item store | room table `items`; editor slice `usePlanItems`              |
 | item key   | `Item.key` (number), drawn `#${key}`                         |
 | rank       | `Item.rank` (string), made by `rankBetween`                  |
 | status     | `fields.status` (string)                                     |
@@ -197,37 +197,57 @@ typeLabel? })` keeps live cards of any type id (no catalogue filter), narrowed t
   `cardMatches(item, query, typeLabel?)` also matches the type's name. `CardFinderPanel` holds the pressed types in
   component state and counts from the type-narrowed list.
 
-## Data and persistence: D1
+## Data and persistence: the room
 
-Migration `apps/api/migrations/0071_items.sql`:
+A document's items live in its room ([Document storage](../../006-document/blueprints/document-storage.md)), in the
+room schema (`apps/api/src/document-room/document-schema.ts`, `DOCUMENT_SCHEMA_STEPS`). The item store's counters sit
+on the room's one `document` row. Every module below takes `DocumentEnv` and reads and writes `env.DOCUMENT_DB`, the
+room's SQLite; D1 holds no item. D1's `items` (migration 0071) and its `documents.items_rev` and
+`documents.items_next_key` columns are content the move reads and then drops
+([Moving content into rooms](../../006-document/blueprints/document-storage-move.md)).
 
 ```sql
-CREATE TABLE items (
-  document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-  id TEXT NOT NULL,
-  type TEXT NOT NULL,
-  item_key INTEGER NOT NULL,
-  rank TEXT NOT NULL,
-  fields TEXT NOT NULL,            -- JSON object
-  rev INTEGER NOT NULL,
-  created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
-  created_by TEXT NOT NULL, updated_by TEXT NOT NULL,   -- JSON ItemPerson
+CREATE TABLE IF NOT EXISTS document (
+  ...
+  items_rev      INTEGER NOT NULL DEFAULT 0,
+  items_next_key INTEGER NOT NULL DEFAULT 1,
+  saved_at       INTEGER NOT NULL,
+  ...
+);
+CREATE TABLE IF NOT EXISTS items (
+  document_id TEXT    NOT NULL REFERENCES document (id) ON DELETE CASCADE,
+  id          TEXT    NOT NULL,
+  type        TEXT    NOT NULL,
+  item_key    INTEGER NOT NULL,
+  rank        TEXT    NOT NULL,
+  fields      TEXT    NOT NULL,   -- JSON object
+  rev         INTEGER NOT NULL,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL,
+  created_by  TEXT    NOT NULL,   -- JSON ItemPerson
+  updated_by  TEXT    NOT NULL,   -- JSON ItemPerson
   PRIMARY KEY (document_id, id)
 );
-CREATE UNIQUE INDEX items_document_key ON items(document_id, item_key);
-ALTER TABLE documents ADD COLUMN items_rev INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE documents ADD COLUMN items_next_key INTEGER NOT NULL DEFAULT 1;
+CREATE UNIQUE INDEX IF NOT EXISTS items_document_key ON items (document_id, item_key);
+CREATE INDEX IF NOT EXISTS items_assignee ON items (json_extract(fields, '$.assignee.id'));
+CREATE INDEX IF NOT EXISTS items_open_threads ON items (document_id)
+  WHERE json_extract(fields, '$.comments.resolved') = 0;
 ```
 
 - Field classification: `fields` is user content (never logged); `created_by`/`updated_by` display identity;
   the rest structural.
-- Cascade removes items on hard delete (`documentRemovalStatements` needs no new statement).
-- `copyDocument` copies items verbatim to the new document id and copies `items_rev`/`items_next_key`.
-- Writes: one D1 `batch` per write: `UPDATE documents SET items_rev = items_rev + 1 [, items_next_key = ...]
-WHERE id = ? RETURNING items_rev, items_next_key`, then the row write guarded by `rev = ?` (update) or
+- Purging a document deletes its room's storage, items included; nothing in D1 holds an item. What D1 hears of
+  items is the Inbox's projection (`inbox_cards` and the card threads), pushed by the room's outbox: triggers on
+  `items` key `cards` and `items` (the document storage blueprint, "The outbox"; the Inbox's read is
+  `document-room/inbox-cards.ts`).
+- A document's copy carries its items through the room's `exportCopy` (all of them, or a tab-scoped copy's shown
+  items) and `importDocumentCopy`, verbatim under the new document id, with `items_rev` and `items_next_key`
+  (`document-content.ts`).
+- Writes: one room `batch` per write: `UPDATE document SET items_rev = items_rev + 1 [, items_next_key = ...],
+saved_at = MAX(saved_at, ?) WHERE id = ? RETURNING items_rev`, then the row write guarded by `rev = ?` (update) or
   `INSERT` (create). A lost `rev` race retries up to `ITEM_WRITE_RETRIES` from a fresh read, then `409 item_busy`.
-- `apps/api/src/db/items.ts`: `getItemStoreHead`, `listItems`, `readItem`, `readItems`, `insertItems`,
-  `updateItemAtRev`, `updateItemsAtRev`, `deleteItemRow`, `copyItemsStatements`; `itemFromRow`: row ↔ `Item`.
+- `apps/api/src/db/items.ts`: `getItemStoreHead`, `getItemsRev`, `listItems`, `readItem`, `readItems`,
+  `insertItems`, `updateItemAtRev`, `updateItemsAtRev`, `deleteItemRow`; `itemFromRow`: row ↔ `Item`.
 
 ## Interfaces and contracts: REST
 
@@ -260,7 +280,7 @@ Comment writes (below, "Comments") add four more under `/items/:itemId/comments`
   must exist (`404 item_not_found`, and in a tab-scoped grant be in scope), each patch is validated as a single
   one is, and every resulting item is checked (`status_excluded` unless `undo`, the field bounds) before anything
   is written, so one refusal refuses the whole request, naming the item (`{ error, field?, id }`). The updates go
-  in one D1 batch, each guarded by the rev read, with one `items_rev` raise; an item a concurrent write moved on
+  in one room batch, each guarded by the rev read, with one `items_rev` raise; an item a concurrent write moved on
   is read again and retried (`ITEM_WRITE_RETRIES`), the rest kept. One room op relays every changed item. Logs
   `[items] patched` with the count. Every attempt checks all its items before writing its batch; a retry that then
   fails (an item refused as read again, or `item_busy` after the retries) answers its refusal with the items that
@@ -432,9 +452,9 @@ replays the write with the keys the first write was given. Votes push nothing.
 ## Performance and limits
 
 - Worst case 2,000 items × 16 KB = 32 MB is refused by the GET's practical size: `ITEMS_MAX` × typical 0.5 KB
-  = 1 MB; the GET streams one JSON array. The per-item cap bounds the row; D1's 1 MB row limit is never reached.
+  = 1 MB; the GET streams one JSON array. The per-item cap bounds the row; the room's 2 MB row limit is never reached.
 - Projection is O(n log n) per board render, memoised on `(setup, items map identity)`.
-- Changing many cards at once (`patches`) is one request per `ITEM_BULK_MAX` cards and one D1 batch, never a
+- Changing many cards at once (`patches`) is one request per `ITEM_BULK_MAX` cards and one room batch, never a
   request per card; a type with 2,000 cards is 10 requests.
 - A bulk create or a seed of n cards is one store read and one insert batch per `ITEM_BULK_MAX` cards, and ranks
   them in O(n log n): measured 2,000 creates at 5.3 ms CPU against 73 ms with a sort per create

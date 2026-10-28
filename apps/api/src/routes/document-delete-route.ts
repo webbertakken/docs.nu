@@ -15,9 +15,12 @@ import { markTimelineEventsDeletedBySource } from '../db/timeline';
 import { documentTrashed, forbidden, noContent, notFound } from '../responses';
 import { broadcastDocumentTrashed } from '../room-client';
 import { recordDocumentOffline } from '../timeline';
-import { mayDeleteDocument, requireOwner, type RouteContext } from './context';
+import { mayDeleteDocument, requireOwner, type DocumentRouteContext } from './context';
 
-export async function handleDocumentDelete(ctx: RouteContext, id: string): Promise<Response> {
+export async function handleDocumentDelete(
+  ctx: DocumentRouteContext,
+  id: string,
+): Promise<Response> {
   const { env, request, url } = ctx;
   // Owner or joined teammate, never a share-link visitor (mayDeleteDocument).
   // Resolve the caller first (400 with no auth), then 404 on a missing
@@ -68,7 +71,7 @@ export async function handleDocumentDelete(ctx: RouteContext, id: string): Promi
 // it and a plain delete answers the deleted state. A stranger (or a
 // share-link visitor, who may never delete) gets the 404 of a missing id.
 async function deleteFromTrash(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   id: string,
   permanent: boolean,
 ): Promise<Response> {

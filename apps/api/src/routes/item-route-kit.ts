@@ -24,7 +24,7 @@ import {
   gateRead,
   missingDocument,
   requireOwner,
-  type RouteContext,
+  type DocumentRouteContext,
 } from './context';
 
 type Level = 'read' | 'participate' | 'edit';
@@ -69,7 +69,10 @@ export function retiresItem(before: Item, next: Item): boolean {
   return isTrashed(before) !== isTrashed(next) || isArchived(before) !== isArchived(next);
 }
 
-export async function isItemEditor(ctx: RouteContext, caller: ItemCaller): Promise<boolean> {
+export async function isItemEditor(
+  ctx: DocumentRouteContext,
+  caller: ItemCaller,
+): Promise<boolean> {
   if (caller.editor !== undefined) return caller.editor;
   const doc = caller.doc;
   const tabId = ctx.url.searchParams.get('tabId') ?? undefined;
@@ -99,7 +102,7 @@ export const itemBusy = () => {
 
 // The caller and their reach: the whole document, or (a tab-scoped grant) the items one tab shows.
 export async function itemCaller(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   level: Level,
 ): Promise<ItemCaller | Response> {
@@ -130,7 +133,7 @@ export async function itemCaller(
   };
 }
 
-export async function writer(ctx: RouteContext, owner: string): Promise<ItemPerson> {
+export async function writer(ctx: DocumentRouteContext, owner: string): Promise<ItemPerson> {
   const p = await getParticipant(ctx.env, owner);
   return {
     id: await itemPersonId(owner),
@@ -140,7 +143,7 @@ export async function writer(ctx: RouteContext, owner: string): Promise<ItemPers
 }
 
 export function relay(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   upserts: Item[],
   removed: string[],

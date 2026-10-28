@@ -5,7 +5,7 @@ import type { AnswerValue, FormSheetDestination } from '@livedoc/forms';
 import { responseRowWrite, type FormDefinition } from '@livedoc/forms';
 import { cellKey, type SheetPerson } from '@livedoc/sheets';
 import { documentLinksTab, readCells, readSheetHead, usedSheetRows } from '../db';
-import type { RouteContext } from '../routes/context';
+import type { DocumentRouteContext } from '../routes/context';
 import { storeSheetWrite } from '../routes/sheet-write-route';
 import { sheetOnItsTab } from './form-tab';
 
@@ -13,7 +13,7 @@ type SheetRowOutcome = 'written' | 'missing' | 'full' | 'busy';
 
 // Whether the sheet a form sends its responses to is still there, on its tab in the document (form-tab.ts).
 export async function sheetThere(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   sheet: FormSheetDestination,
 ): Promise<boolean> {
@@ -21,7 +21,7 @@ export async function sheetThere(
 }
 
 export async function writeResponseRow(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   input: {
     documentId: string;
     sheet: FormSheetDestination;

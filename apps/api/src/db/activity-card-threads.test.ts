@@ -205,13 +205,15 @@ describe('Activity: Plan card comment threads', () => {
 
   // docs/specs/013-workspace/inbox.md §2.5: the scope comes first, so the item store is only ever read
   // per visible document (its primary key), never scanned whole.
-  it('reads items per visible document, never scanning the store', async () => {
+  it('reads card threads per visible document, never scanning them', async () => {
     const { sql } = await setUp();
     const plan = sql
       .prepare(`EXPLAIN QUERY PLAN ${CARD_THREADS_SQL}`)
       .all('reader', 1, 100)
       .map((p) => String(p['detail']));
-    expect(plan.filter((d) => /^SCAN (i|items)\b/.test(d))).toEqual([]);
-    expect(plan.join('\n')).toContain('USING INDEX items_open_threads');
+    expect(plan.filter((d) => /^SCAN (ct|ic|collab_threads|inbox_cards)\b/.test(d))).toEqual([]);
+    expect(plan.join('\n')).toContain(
+      'SEARCH ct USING INDEX sqlite_autoindex_collab_threads_1 (document_id=? AND tab_id=?)',
+    );
   });
 });

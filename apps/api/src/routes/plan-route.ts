@@ -7,7 +7,7 @@ import type { PlanResponse } from '@livedoc/api-schema';
 import { planOutline, type PlanTabInput } from '@livedoc/items';
 import { getTab, tabBodiesWithBoards, tabOutlines } from '../db';
 import { json, methodNotAllowed } from '../responses';
-import type { RouteContext } from './context';
+import type { DocumentRouteContext } from './context';
 import { itemCaller } from './item-route-kit';
 
 // Tabs read per query: the document overview's batch (document-views-route.ts).
@@ -19,7 +19,7 @@ const asInput = (tab: { id: string; name: string; elements: unknown }): PlanTabI
   elements: Array.isArray(tab.elements) ? (tab.elements as unknown[]) : [],
 });
 
-async function planTabs(ctx: RouteContext, documentId: string, tabId: string | null) {
+async function planTabs(ctx: DocumentRouteContext, documentId: string, tabId: string | null) {
   if (tabId !== null) {
     const tab = await getTab(ctx.env, documentId, tabId);
     return tab ? [asInput(tab)] : [];
@@ -32,7 +32,7 @@ async function planTabs(ctx: RouteContext, documentId: string, tabId: string | n
   }
 }
 
-export async function handlePlanRoute(ctx: RouteContext): Promise<Response | null> {
+export async function handlePlanRoute(ctx: DocumentRouteContext): Promise<Response | null> {
   const { segments, request } = ctx;
   if (segments.length !== 4 || segments[3] !== 'plan') return null;
   if (request.method !== 'GET') return methodNotAllowed();

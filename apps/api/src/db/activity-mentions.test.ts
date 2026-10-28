@@ -220,6 +220,8 @@ describe('an Action panel list past the cap', () => {
       data: string;
     };
     expect(JSON.parse(stored.data)).toHaveProperty(['elements', 0, 'actions', 'length'], 50);
+    // The index is what the room pushes from the stored tab.
+    await db.flush();
     const rows = db.sql.prepare('SELECT COUNT(*) AS n FROM collab_actions').get() as { n: number };
     expect(rows.n).toBe(50);
   });

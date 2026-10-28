@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { fakeD1 } from '../test-d1';
-import { copyDocument, remapTabDataLinks } from './documents';
+import { describe, expect, it, vi } from 'vitest';
+import { sqliteD1 } from '../test-sqlite-d1';
+import { remapTabDataLinks } from '../document-room/document-content';
+import { copyDocument } from './documents';
+import { upsertTab } from './tabs';
 
 // copyDocument re-points a copied tab's internal links at the copy's own tabs.
 describe('remapTabDataLinks', () => {
@@ -46,21 +48,71 @@ describe('remapTabDataLinks', () => {
 });
 
 // docs/specs/013-workspace/tab-scoped-share-links.md: a tab-scoped visitor's copy holds their tab only.
-describe('copyDocument tab filter', () => {
-  const source = { id: 'd1', owner_id: 'o', name: 'Doc', shareable: 0, saved_at: 1, created_at: 1 };
-  const answer = ({ sql }: { sql: string }) =>
-    sql.includes('FROM document_tabs dt') ? { all: [] } : { first: source, all: [] };
-  it('copies every tab by default and one tab when asked', async () => {
-    const all = fakeD1(answer);
-    await copyDocument(all.env, 'd1', 'd2', 'me', 'Copy');
-    expect(all.one('SELECT t.id, t.name, dt.order_index, t.data').sql).not.toContain(
-      'dt.tab_id = ?',
+// The copy moves content from the source's room into the copy's (docs/specs/006-document/blueprints/document-storage.md
+// "Routing", Copy): every tab under a fresh id, or a tab-scoped visitor's one tab.
+describe('copyDocument', () => {
+  async function source() {
+    const db = sqliteD1();
+    db.sql.exec(`INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at)
+      VALUES ('d1', 'o', 'Doc', 0, 1, 1)`);
+    await upsertTab(db.env, 'd1', { id: 't1', name: 'One', elements: [] }, 0);
+    await upsertTab(
+      db.env,
+      'd1',
+      {
+        id: 't2',
+        name: 'Two',
+        elements: [{ id: 'a', type: 'shape', link: { kind: 'tab', tabId: 't1' } }],
+      } as never,
+      1,
     );
+    return db;
+  }
+  const tabsOf = (db: ReturnType<typeof sqliteD1>, id: string) =>
+    db.sql
+      .prepare(
+        'SELECT t.id, t.name, t.data FROM document_tabs dt JOIN tabs t ON t.id = dt.tab_id WHERE dt.document_id = ? ORDER BY dt.order_index',
+      )
+      .all(id) as { id: string; name: string; data: string }[];
 
-    const one = fakeD1(answer);
-    await copyDocument(one.env, 'd1', 'd2', 'me', 'Copy', 't2');
-    const query = one.one('SELECT t.id, t.name, dt.order_index, t.data');
-    expect(query.sql).toContain('dt.tab_id = ?');
-    expect(query.bindings).toEqual(['d1', 't2']);
+  it('copies every tab under a fresh id, its links re-pointed, with the first summary', async () => {
+    const db = await source();
+    const copy = await copyDocument(db.env, 'd1', 'd2', 'me', 'Copy');
+    expect(copy?.tabs.map((t) => t.name)).toEqual(['One', 'Two']);
+    const [one, two] = tabsOf(db, 'd2');
+    expect(one!.id).not.toBe('t1');
+    const linked = JSON.parse(two!.data) as { elements: { link: { tabId: string } }[] };
+    expect(linked.elements[0]!.link.tabId).toBe(one!.id);
+    const row = db.sql.prepare("SELECT content_summary FROM documents WHERE id = 'd2'").get() as {
+      content_summary: string;
+    };
+    expect(JSON.parse(row.content_summary)).toMatchObject({ v: 1, tabs: 2 });
+  });
+
+  it("copies a tab-scoped visitor's one tab", async () => {
+    const db = await source();
+    const copy = await copyDocument(db.env, 'd1', 'd2', 'me', 'Copy', 't2');
+    expect(copy?.tabs.map((t) => t.name)).toEqual(['Two']);
+    expect(await copyDocument(db.env, 'd1', 'd3', 'me', 'Copy', 'nope')).toBeNull();
+  });
+
+  it('takes the new row back when the import fails, leaving the source whole', async () => {
+    const db = await source();
+    const ns = db.env.DOCUMENT_ROOM;
+    const get = ns.get.bind(ns);
+    vi.spyOn(ns, 'get').mockImplementation((id) => {
+      const room = get(id);
+      if (String(id) !== 'd2') return room;
+      return new Proxy(room, {
+        get: (target, prop): unknown =>
+          prop === 'importCopy'
+            ? () => Promise.reject(new Error('room down'))
+            : Reflect.get(target, prop),
+      });
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await expect(copyDocument(db.env, 'd1', 'd2', 'me', 'Copy')).rejects.toThrow('room down');
+    expect(db.sql.prepare("SELECT id FROM documents WHERE id = 'd2'").get()).toBeUndefined();
+    expect(tabsOf(db, 'd1')).toHaveLength(2);
   });
 });

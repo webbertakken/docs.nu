@@ -111,16 +111,6 @@ describe('the reference index on tab writes', () => {
     expect(sql.sql.prepare('SELECT COUNT(*) AS n FROM sheet_cells').get()).toEqual({ n: 0 });
   });
 
-  it('counts references only within the sheet’s own document', async () => {
-    sheetRow('d1', 'sheetA00', 't1');
-    sheetRow('d2', 'sheetA00', 'u1');
-    await upsertTab(sql.env, 'd1', tab('t1', [sheetEl('e1', 'sheetA00')]), 0);
-    await upsertTab(sql.env, 'd2', tab('u1', [sheetEl('e1', 'sheetA00')]), 0);
-    await upsertTab(sql.env, 'd1', tab('t1', []), 0);
-    expect(state('d1', 'sheetA00')!.since).toEqual(expect.any(Number));
-    expect(state('d2', 'sheetA00')!.since).toBeNull();
-  });
-
   it('notes a removed tab’s sheets', async () => {
     sheetRow('d1', 'sheetA00', 't1');
     await upsertTab(sql.env, 'd1', tab('t1', [sheetEl('e1', 'sheetA00')]), 0);

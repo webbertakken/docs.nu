@@ -13,14 +13,7 @@ import { tabShowsEveryCard } from '@livedoc/items';
 import { isValidTab, migrateIncomingTab, preferNewerQaAll, type Tab } from '@livedoc/document';
 import { mergeChangesetsIntoSave } from '../changesets/merge-on-save';
 import { hasNewComments, rewriteCommentAuthors } from '../comments';
-import {
-  changesetMergePages,
-  getParticipant,
-  getTab,
-  isTabRevStale,
-  upsertTabAtRev,
-  tabBelongsElsewhere,
-} from '../db';
+import { changesetMergePages, getParticipant, getTab, isTabRevStale, upsertTabAtRev } from '../db';
 import { emailEnabled } from '../email/client';
 import { notifyNewComment } from '../email/notifications';
 import { MAX_TAB_BYTES, bodyExceedsCap, storeTab } from '../limits';
@@ -29,7 +22,7 @@ import { badRequest, conflict, forbidden, json, payloadTooLarge } from '../respo
 import { applyRoomLedger, fetchRoomLedger } from '../room-client';
 import { recordTabSave } from '../timeline';
 import type { TabSaveDocument } from '../db/tab-save-document';
-import { readBody, type RouteContext } from './context';
+import { readBody, type DocumentRouteContext } from './context';
 
 // Fields of the stored record, not of the tab body; a client echoing them back never stores them
 // (CS32).
@@ -37,7 +30,7 @@ const RECORD_FIELDS = ['rev', 'documentId', 'orderIndex', 'updatedAt'] as const;
 
 // A token never does a whole-tab save (CS45): answered before anything is read.
 export function refuseTokenTabPut(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   documentId: string,
   tabId: string,
 ): Response | null {
@@ -54,7 +47,7 @@ export function refuseTokenTabPut(
 
 // The caller has passed the edit gate for this tab.
 export async function handleTabPut(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   existing: TabSaveDocument,
   tabId: string,
   owner: string,
@@ -91,13 +84,6 @@ export async function handleTabPut(
       mergeUnseenChangesets(ctx, incoming, seen),
       fetchRoomLedger(env, id, tabId, request.headers.get('X-Room-Cursor')),
     ]);
-    // A new tab id must be new: an id that already names another document's tab is refused, never overwritten
-    // (docs/specs/006-document/per-tab-storage.md). Checked only when this document has no such tab, so the
-    // common autosave pays nothing.
-    if (!existingTab && (await tabBelongsElsewhere(env, tabId, id))) {
-      console.warn("[tabs] refused a save onto another document's tab", { documentId: id, tabId });
-      return conflict('tab_id_taken');
-    }
     const ledger = applyRoomLedger(merge.tab, fetchedLedger);
     const commentAuthors = ledger.commentAuthors;
     // A copy: each attempt starts again from the save as sent.
@@ -208,7 +194,7 @@ type MergeOutcome = { tab: Tab; records: number; merged: number; superseded: num
 // Every recorded changeset of this tab after the revision the editor has seen, or, from an editor
 // too old to say (no header), those of the last CHANGESET_MERGE_WINDOW_MS, page by page.
 async function mergeUnseenChangesets(
-  ctx: RouteContext,
+  ctx: DocumentRouteContext,
   save: Tab,
   seen: number | null,
 ): Promise<MergeOutcome> {

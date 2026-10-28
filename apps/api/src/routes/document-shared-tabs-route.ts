@@ -3,12 +3,20 @@
 // notice"): how many of the document's tabs are also in other documents, and how
 // many documents, so the user hears that those tabs stay before they act.
 
-import { getDocument, sharedTabsSummary } from '../db';
+import { getDocument } from '../db';
+import { sharedTabsSummary } from '../document-room/tab-shares';
 import { forbidden, json } from '../responses';
-import { mayDeleteDocument, missingDocument, requireOwner, type RouteContext } from './context';
+import {
+  mayDeleteDocument,
+  missingDocument,
+  requireOwner,
+  type DocumentRouteContext,
+} from './context';
 
 // Returns null when the request isn't this route.
-export async function handleDocumentSharedTabs(ctx: RouteContext): Promise<Response | null> {
+export async function handleDocumentSharedTabs(
+  ctx: DocumentRouteContext,
+): Promise<Response | null> {
   const { request, env, segments } = ctx;
   if (segments.length !== 4 || segments[3] !== 'shared-tabs' || request.method !== 'GET') {
     return null;

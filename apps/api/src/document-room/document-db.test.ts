@@ -5,13 +5,16 @@ import { DocumentDb } from './document-db';
 
 function setup() {
   const raw = new DatabaseSync(':memory:');
+  let made = false;
   const ensureSchema = vi.fn(() => {
     raw.exec('CREATE TABLE IF NOT EXISTS t (id TEXT PRIMARY KEY, n INTEGER NOT NULL)');
+    made = true;
   });
   const onWrite = vi.fn();
   const db = new DocumentDb(nodeDocumentSql(raw), {
     transaction: nodeTransaction(raw),
     ensureSchema,
+    hasSchema: () => made,
     onWrite,
   });
   return { raw, db, ensureSchema, onWrite };
@@ -57,10 +60,20 @@ describe('DocumentDb', () => {
     expect(await db.prepare('SELECT count(*) AS c FROM t').first('c')).toBe(0);
   });
 
-  it('makes the schema before the first statement and tells the room about writes', async () => {
+  it('answers a read of a room with no schema as empty, making nothing (R1)', async () => {
+    const { db, raw, ensureSchema } = setup();
+    expect(await db.prepare('SELECT id FROM t').all()).toMatchObject({ results: [] });
+    expect(await db.prepare('SELECT id FROM t').first()).toBeNull();
+    const [read] = await db.batch([db.prepare('SELECT id FROM t')]);
+    expect(read?.results).toEqual([]);
+    expect(ensureSchema).not.toHaveBeenCalled();
+    expect(raw.prepare("SELECT name FROM sqlite_master WHERE name = 't'").all()).toEqual([]);
+  });
+
+  it('makes the schema before the first write and tells the room about writes', async () => {
     const { db, ensureSchema, onWrite } = setup();
     await db.prepare('SELECT 1').first();
-    expect(ensureSchema).toHaveBeenCalled();
+    expect(ensureSchema).not.toHaveBeenCalled();
     expect(onWrite).not.toHaveBeenCalled();
     await db.prepare('INSERT INTO t (id, n) VALUES (?, ?)').bind('a', 1).run();
     expect(onWrite).toHaveBeenCalledTimes(1);
