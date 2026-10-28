@@ -198,8 +198,8 @@ describe('useTimelineFeed failure handling', () => {
 
     apiListTimeline.mockResolvedValueOnce({ events: [event('b', 5)], nextCursor: undefined });
     act(() => result.current.loadMore());
-    await waitFor(() => expect(result.current.loadMoreFailed).toBe(false));
-    expect(result.current.events.map((e) => e.id)).toEqual(['a', 'b']);
+    await waitFor(() => expect(result.current.events.map((e) => e.id)).toEqual(['a', 'b']));
+    expect(result.current.loadMoreFailed).toBe(false);
   });
 });
 
