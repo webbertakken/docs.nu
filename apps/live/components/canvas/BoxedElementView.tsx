@@ -465,6 +465,8 @@ function BoxedElementViewImpl({
       // be open, so the board eases shut as well as open.
       data-insert-shift={insertShiftAnimates ? '' : undefined}
       data-stack-glide={stackGlide ? '' : undefined}
+      // A margin note's kind, for its touch reach and for hiding it while presenting (article-pages.css).
+      data-article-note={articleNote}
       // Screen-reader name (docs/specs/004-interface-design/canvas-accessibility.md): same naming the change log uses,
       // so 'Square "Login"' reads consistently across both surfaces. A face with controls of its own is a named group,
       // so its buttons stay reachable.
