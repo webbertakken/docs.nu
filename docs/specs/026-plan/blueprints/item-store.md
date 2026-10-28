@@ -350,8 +350,8 @@ action)` tracks `Comment · Added|Deleted|Resolved|Unresolved · Item`, applies 
   `itemId`, so the email opens the card).
 - **Activity**: `readActivity` adds `cardThreads` from `CARD_THREADS_SQL` (`db/plan-card-threads.ts`), the card
   placement shared with `CARDS_SQL` (`itemPlacementCtes` in `db/plan-board-index.ts`). `useActivityFeed` merges them
-  into `threads` as `{ kind: 'card' }` rows ordered by latest comment; `ActivityPane` draws them with
-  `ActivityCardThreadRow`, linking `cardDeepLinkHref`.
+  into `threads` as `{ kind: 'card' }` rows ordered by latest comment; `InboxPane` lists them as `CardThread`
+  rows (`inbox-entries.ts`), opening `cardDeepLinkHref`.
   `receive` runs `keepOwnCommentAuthors` before `mergeItemChanges`. `PlanContext.commentItem` and `ownerId`;
   `PlanSheetsHost` hands `ItemPanel` `comments: { canComment: canVote, selfId: ownerId, onComment }`;
   `ItemFieldEditor` draws `ItemComments` for `comments`, from the shared `comment-thread-parts.tsx`

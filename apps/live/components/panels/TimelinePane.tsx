@@ -75,6 +75,7 @@ function TimelineFeedView({
       onRetry={feed.retry}
       hasMore={feed.hasMore}
       loadingMore={feed.loadingMore}
+      loadMoreFailed={feed.loadMoreFailed}
       onLoadMore={feed.loadMore}
       lastSeenAt={feed.lastSeenAt}
       focusEventId={feed.focusEventId}

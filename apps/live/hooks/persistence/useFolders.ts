@@ -12,6 +12,7 @@ import { track } from '@/lib/telemetry';
 import { useAfterDriveChange } from '@/hooks/persistence/useAfterDriveChange';
 import { useToast } from '@/hooks/ui/useToast';
 import { FOLDER_FAILURE } from '@/lib/write-failure-copy';
+import { createOptimisticField } from '@/lib/optimistic-layers';
 
 // Folder state + the three mutation handlers (create / rename /
 // delete). Three pages used to inline this triplet by hand:
@@ -67,6 +68,8 @@ export function useFolders(
   const toast = useToast();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(autoLoad);
+  // Renames still waiting on the api, so a refusal takes back only its own (folders.md "Refused changes").
+  const [names] = useState(() => createOptimisticField<string>());
 
   // Settles `loading` from the response callbacks, never synchronously, so
   // the auto-load effect below only starts the request.
@@ -139,21 +142,24 @@ export function useFolders(
       // user blur / Enter on a text input.
       const prev = folders.find((f) => f.id === id);
       const prevName = prev?.name.trim() ?? '';
+      const write = names.begin(id, prev?.name ?? '', trimmed);
       setFolders((fs) => fs.map((f) => (f.id === id ? { ...f, name: trimmed } : f)));
       void apiUpdateFolder(ownerId, id, { name: trimmed })
         .then(() => {
+          names.accept(id, write);
           if (prevName !== trimmed) track('Folder', 'Renamed');
         })
         .catch((err: unknown) => {
-          // Roll the optimistic rename back to the stored name so the tree doesn't drift from the server on a
-          // failed write, and say so: a name that silently snapped back reads as the edit not taking.
+          // Take this rename back so the tree doesn't drift from the server on a failed write, and say so: a name
+          // that silently snapped back reads as the edit not taking. A newer rename still showing stays.
           console.warn('[folders] rename failed', { folder: id, message: (err as Error).message });
-          if (prev)
-            setFolders((fs) => fs.map((f) => (f.id === id ? { ...f, name: prev.name } : f)));
+          const shown = names.refuse(id, write);
+          if (prev && shown !== undefined)
+            setFolders((fs) => fs.map((f) => (f.id === id ? { ...f, name: shown } : f)));
           toast.error(FOLDER_FAILURE.rename(prev?.name));
         });
     },
-    [folders, ownerId, toast],
+    [folders, ownerId, toast, names],
   );
 
   const deleteFolder = useCallback(

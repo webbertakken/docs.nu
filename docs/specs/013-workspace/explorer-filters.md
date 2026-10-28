@@ -250,7 +250,9 @@ Keyboard:
 - The lens lives in the view's URL as `?q=<string>`, whitespace collapsed, removed when empty. Every change replaces
   the current history entry (no entry per keystroke). While typing, the address bar follows the field at most every
   250 ms (`LENS_URL_WRITE_MS`, a trailing write) and at once when the field loses focus: a write per keystroke ran a
-  held key past Safari's limit of 100 history writes in 10 seconds, which throws. The rows narrow a beat behind the
+  held key past Safari's limit of 100 history writes in 10 seconds, which throws. A write still waiting belongs to the
+  page it was typed on: typing then going Back (a mouse button, a swipe) drops it, so the filter never lands on the
+  page gone back to. The rows narrow a beat behind the
   field (a deferred value), so typing never waits on a long list.
 - Moving between aggregate views **carries** the lens. Entering a scoped view, or a view with no lens, starts with an
   empty lens; each view's URL keeps its own. Back and Forward restore the lens of the entry they land on.

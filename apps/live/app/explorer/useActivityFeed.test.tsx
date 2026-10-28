@@ -17,7 +17,7 @@ vi.mock('@/lib/local-identity', () => ({ getGuestSelfId: () => 'guest-1' }));
 
 const NO_LOCAL = { actions: [], threads: [], cards: [], cardThreads: [] };
 
-import { useActivityFeed } from './useActivityFeed';
+import { activityRowKey, useActivityFeed } from './useActivityFeed';
 
 const place = {
   documentId: 'd1',
@@ -57,6 +57,7 @@ const thread: ActivityThread = {
   youCommented: true,
   onYourDocument: false,
   mentionsYou: false,
+  canComment: true,
 };
 
 function card(id: string, updatedAt: number): ActivityCard {
@@ -230,5 +231,27 @@ describe('useActivityFeed', () => {
     await act(async () => answerFirst({ actions: [], threads: [thread], cards: [] }));
     expect(result.current.assignedToMe.map((a) => a.id)).toEqual(['b1']);
     expect(result.current.threads).toEqual([]);
+  });
+});
+
+// docs/specs/013-workspace/inbox.md §1.5: a row whose work is done from the Inbox leaves at once, the badge's list
+// with it, and a read made before the index caught up does not bring it back.
+describe('dismiss', () => {
+  it('drops a done row now and keeps it out of later reads', async () => {
+    const mine = action('mine', { assignedToMe: true, createdByMe: false });
+    apiListActivity.mockResolvedValue({ actions: [mine], threads: [thread], cards: [] });
+    const { result } = renderHook(() => useActivityFeed('me'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => result.current.dismiss(activityRowKey.thread(thread)));
+    act(() => result.current.dismiss(activityRowKey.action(mine)));
+    expect(result.current.threads).toEqual([]);
+    expect(result.current.assignedToMe).toEqual([]);
+
+    act(() => result.current.retry());
+    await waitFor(() => expect(apiListActivity).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.threads).toEqual([]);
+    expect(result.current.assignedToMe).toEqual([]);
   });
 });

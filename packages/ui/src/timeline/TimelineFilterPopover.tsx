@@ -85,6 +85,21 @@ export function TimelineFilterPopover({
   // popover straight back open.
   useClickOutside(ref, onClose);
   useEscape(onClose);
+  // Portalled to the end of the page, the panel is out of the Tab order after its Filter button: it takes focus as it
+  // opens, and hands it back to whatever held it (the button) when it closes with focus still inside or lost to the
+  // page. Focus someone moved elsewhere (a click away) stays where they put it.
+  useEffect(() => {
+    const panel = ref.current;
+    if (!panel) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    panel.focus({ preventScroll: true });
+    return () => {
+      const now = document.activeElement;
+      const lost = now === null || now === document.body;
+      if ((lost || panel.contains(now)) && previous?.isConnected)
+        previous.focus({ preventScroll: true });
+    };
+  }, []);
   useEffect(() => {
     window.addEventListener('scroll', onClose, true);
     window.addEventListener('resize', onClose);
@@ -101,8 +116,9 @@ export function TimelineFilterPopover({
       ref={ref}
       role="dialog"
       aria-label="Timeline filters"
+      tabIndex={-1}
       style={{ position: 'fixed', left: position.left, top: position.top, width: WIDTH }}
-      className="z-[var(--z-popover)] rounded-xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+      className="z-[var(--z-popover)] rounded-xl border border-slate-200 bg-white p-3 shadow-lg outline-none dark:border-slate-700 dark:bg-slate-900"
     >
       {/* View mode, on a phone only — the header row's own switch is
           hidden below `sm:` and this is where it goes (docs/specs/013-workspace/timeline.md §2.3).

@@ -4,11 +4,12 @@
 `/explorer/inbox`, that lists across every document the reader can
 open: the **open actions assigned to them**, the **open actions they
 assigned** to other people, and the **unresolved comment threads they
-are in**. Each row opens the document on the right tab with the element
-selected and its action / comment popover already open.
+are in**, and the **forms with responses they have not seen**, as a list and a reading pane. Each row opens the
+document on the right tab with the element selected and its action / comment popover already open; a thread can be
+answered and resolved from the pane itself.
 
 The Inbox was once called **Activity**, and its data layer keeps that name: it reads the
-activity index through `GET /api/activity` (§3), `useActivityFeed` and `ActivityPane`. The old
+activity index through `GET /api/activity` (§3) and `useActivityFeed`; the view is `InboxPane`. The old
 address, `/explorer/activity`, replaces itself with `/explorer/inbox`
 ([Folders: Explorer routes](folders.md#explorer-routes)).
 
@@ -38,10 +39,10 @@ outstanding for me right now.**
 
 - Not a replacement for the Collaborate Panel ([Assigned actions](../012-collaboration/assigned-actions.md) §5), which stays
   the in-editor, tab-scoped surface with its Open / Resolved sides.
-- No completing, reassigning, resolving, or replying from the page in
-  v1. Every row is a link into the editor, where those controls already
-  exist with their edit-access gates. A future version can add
-  "Mark done" to a row; the index carries what it needs.
+- No reassigning, editing or reopening from the page, and no verbs on a Plan card, a card thread, a form or a row
+  in This Browser: those stay in the editor. The page's own verbs are Reply and Resolve on an element's thread, and
+  Mark Done in the editor's panel (§1.5).
+- No read state: the Inbox never marks a row Seen, Later or Done of its own; a row leaves when its work is done.
 - Done actions and resolved threads are not listed. The page is an
   inbox of what is outstanding, not a history; the Timeline and the
   Collaborate Panel's Resolved side already cover the past.
@@ -54,56 +55,135 @@ the reader**. The badge always shows, **0** included, so an empty Inbox reads as
 shows nothing only while the Inbox is loading or failed to load, so it never claims a false 0. The
 count only covers work waiting on the reader, not work they handed out.
 
-The pane is a single page of three sections, each a card-list of rows
-(the same container the List view uses), each with a heading and a
-count, and each hidden entirely when empty:
+The Inbox is a **list and a reading pane**: one list of every row, newest first, and beside it the row the reader
+has chosen, with what can be done about it. The same component draws it on the page and in the editor's Explorer
+panel ([Explorer structure](explorer-structure.md) "The pane").
 
-1. **Assigned to You** — open actions whose assignee is the reader,
-   and open Plan cards ([Items](../026-plan/items.md)) whose Assignee is the reader (§2.4), in
-   one list. A self-assignment ([Assigned actions](../012-collaboration/assigned-actions.md): the Myself row, the guest to-do case)
-   lands here and only here.
-2. **You Assigned** — open actions the reader assigned to _somebody
-   else_. Self-assignments are excluded so one action never appears
-   twice.
-3. **Form Responses** — forms with responses the reader has not seen, in documents they own or reach through a
-   team ([Forms](../030-forms/forms.md#hearing-about-responses)): "3 new responses to **Bug Report**", opening the
-   board they land on. Listed between Assigned to You and You Assigned; the Inbox badge does not count them.
-4. **Open Comment Threads** — unresolved threads the reader is in.
-   "In" means one of two things, and the row says which:
-   - the reader wrote at least one comment in the thread, or
-   - the thread is on a document the reader **owns** (owners are
-     already treated as included: [Transactional & lifecycle email (Resend)](../014-identity/transactional-email.md) emails them every new
-     comment). The row carries a quiet **Your document** hint.
+### 1.1 What a row is
 
-   A Plan card's comment thread lists here too (§2.5), by the same rules, newest comment first among the
-   element threads. Its row is a card row (its type's glyph, **#key title**, **board title · tab name** or
-   **Not on a board**) whose detail is the latest comment and whose avatar is its latest author, with the same
-   **Mentioned You** / **Your document** hints; it opens the card (the `#item=` link, §1).
+Four kinds of row, each told apart by **why it is here**:
 
-Rows share one anatomy with the Collaborate Panel's ([Assigned actions](../012-collaboration/assigned-actions.md) §5) so a
-user recognises them: kind glyph far left (the action clipboard, the
-comment bubble); name + one-line detail in the middle; person avatar
-over a relative time far right. The detail line is where the row is
-_from_: **element label · tab name**, with a **document chip** naming the
-document (a team document's chip also names the team). An action row's
-title is the action name, its avatar the assignee (brand-tinted when
-that is the reader, labelled "You"); a **You Assigned** row shows the
-assignee's avatar with "Assigned to <name>" on hover. A thread row's
-title is the element label, its detail the latest comment's text, its
-avatar the latest author's colour, with the comment count on hover.
-A card row's glyph is its card type's (the built-in type's glyph, else a
-generic square); its title is **#key title**; its detail is the card's
-type ("Card" for a type a document added); its "where" is **board title ·
-tab name**, or **Not on a board**; its avatar is the reader ("You",
-brand-tinted) with "Assigned to you" on hover.
+- **My Actions**: open actions whose assignee is the reader, and open Plan cards ([Items](../026-plan/items.md))
+  whose Assignee is the reader (§2.4). A self-assignment ([Assigned actions](../012-collaboration/assigned-actions.md):
+  the Myself row, the guest to-do case) lands here and only here.
+- **Assigned by Me**: open actions the reader assigned to _somebody else_. Self-assignments are excluded so one
+  action never appears twice.
+- **Comments**: unresolved threads the reader is in. "In" means the reader wrote at least one comment in the thread,
+  is @-mentioned in it ([Comment mentions](../012-collaboration/comment-mentions.md)), or the thread is on a document
+  the reader **owns** (owners already hear about every new comment by email,
+  [Transactional & lifecycle email (Resend)](../014-identity/transactional-email.md)). A Plan card's thread lists
+  here too (§2.5), by the same rules.
+- **Form Responses**: forms with responses the reader has not seen, in documents they own or reach through a team
+  ([Forms](../030-forms/forms.md#hearing-about-responses)). The Inbox badge does not count them.
 
-Ordering within a section is **newest activity first**: an action's
-`updatedAt` (a reassignment or edit bumps it), a card's `updatedAt`
-(any write to the item bumps it), a thread's latest
-comment. The page is capped at 100 rows per kind; the cap is a
-ceiling on a page nobody scrolls that far down, not a paging design.
+### 1.2 The list
 
-**Row click opens the element.** The link is the document's normal URL
+Every row **newest first** (an action's `updatedAt`, which a reassignment or edit bumps; a card's `updatedAt`, which
+any write to the item bumps; a thread's latest comment; a form's latest response), under three date dividers:
+**Today** (since local midnight), **Earlier This Week** (the six days before) and **Older**. A divider shows only
+over rows it holds. The read is capped at 100 rows per kind (§3); the cap is a ceiling on a list nobody scrolls that
+far down, not a paging design.
+
+Each row is three lines:
+
+1. **Who is behind it**, and its age, as the Explorer says it ("12 min ago", "3 hours ago", "yesterday"): who assigned it to the reader (My Actions),
+   who it waits on (Assigned by Me), who wrote last (Comments); a Plan card reads **Plan card** and a form
+   **Form Responses**, where no one person stands behind the row. The name is semibold when the row asks something
+   of the reader: theirs to do, a mention, a thread on their document, new responses.
+2. **What it is**: the action's name; the card's **#key title**; the element a thread is on (its label, a table's
+   first cell, or "Untitled"); the form's heading.
+3. **Why it is here**, as an icon and words: **To Do**, **Waiting on Bo** (the assignee's first name, else "a
+   teammate"), **Mentioned You** (a mention wins), **On Your Document** (until the reader comments),
+   **You Commented**, or **6 New Responses**; then a **document chip** naming the document (a team document's chip
+   leads with the team glyph), and the [This Browser pill](../006-document/offline-mode.md#this-browser-pill) for a
+   row in this browser.
+
+The chosen row has a brand edge on its left and a tinted ground. The rows are an ARIA **listbox** (`role="listbox"`,
+each row an `option` with `aria-selected`), labelled "Inbox, <filter>"; focus stays on the list while the choice
+moves (`aria-activedescendant`). Each row's accessible name is one sentence: what, why, who, where.
+
+### 1.3 The filter bar
+
+Over the list: **All**, **My Actions**, **Assigned by Me**, **Comments** and **Form Responses**, each with its count.
+Each chip is a toggle button (`aria-pressed`) in a group labelled "Inbox filters". A filter holding nothing shows
+"Nothing in <filter>" with **Show All**. The choice is kept per viewer on this device, beside the Explorer's other
+view choices: `livedoc:explorer-inbox-filter:<viewer id>`; an unreadable value reads as All. Changing it clears the
+choice of row and says "<filter>: <n> rows" in the Inbox's polite live region.
+
+### 1.4 The reading pane
+
+A region labelled by its title:
+
+- **Where it is**: the document › the tab › the element (a card's board, when it is on one).
+- **The title**, a heading (the row's second line).
+- **Who and why**, in one sentence: "Priya mentioned you · 25 min ago", "Bo assigned this to you · 2 days ago",
+  "Waiting on Sam · 3 hours ago", "6 new responses · 1 hour ago".
+- **The verbs** with their keys (§1.5).
+- **The body**: an element thread's comments, read when the choice has rested 200 ms (each author's name, colour,
+  age and words, oldest first; the row's latest comment while it reads or when the read fails); a card thread's
+  latest comment; an action's description; a card's type and board; a form's count.
+- **A reply field** where Reply is offered: "Reply to Priya…", **Send** (Cmd/Ctrl+Enter), the field cleared and
+  the reply shown under the thread once it is posted.
+
+Side by side, the pane always shows a row: the chosen one, else the first.
+
+### 1.5 The verbs
+
+**Open** (↵) is always there: a link to the row's place in the editor (below), `Activity·Selected` by the row's
+kind. The rest are offered only where the page can carry them out, row by row:
+
+- **Reply** (r) and **Resolve** (e) on an **element's thread** whose document lets the reader comment
+  (`canComment`, §3): through the comment routes ([Agent presence](../024-agents/agent-presence.md) "Comments"):
+  a reply by `POST /api/documents/:id/tabs/:tabId/comments`, a resolve by
+  `…/comments/:commentId/resolve`, naming the thread by its first comment (read from
+  `GET /api/documents/:id/comments`). `Activity·Added·Reply` and `Activity·Resolved·Thread`.
+- **Mark Done** (e) on an **action**, only in the editor's Explorer panel and only for an action on the tab the
+  editor has open, through the canvas's own Mark Done, offered when the editor offers it (an action's status has no
+  route of its own). `Activity·Resolved·Action`.
+- Nothing more on a **This Browser** row (no page here reaches the browser's store but the editor), on a **Plan
+  card** or its thread (done is its board's column; a card thread is answered on the card), or on a **form**.
+
+A row whose work is done here (a thread resolved, an action marked done) **leaves the list at once**, and stays gone
+for the rest of the visit even if a read made before the index caught up lists it again. A verb that fails keeps the
+row and says so under the verbs ("Couldn't send your reply. Try again, or open the document to reply there.",
+"Couldn't resolve the thread.", "Couldn't mark it done."), the draft kept. The Inbox keeps **no read state**: no
+Seen, Later or Done of its own.
+
+Who may do what, by how the reader reaches the row's document ([Share roles](share-roles.md)):
+
+| Verb      | Editor (own, team, edit link)          | Participant (participate link) | Viewer (view link) |
+| --------- | -------------------------------------- | ------------------------------ | ------------------ |
+| Open      | Yes                                    | Yes                            | Yes                |
+| Reply     | Yes                                    | Yes                            | No                 |
+| Resolve   | Yes                                    | Yes                            | No                 |
+| Mark Done | Yes, in the editor's panel, on its tab | No (the editor's gate)         | No                 |
+
+The server's comment routes hold the same gate, so a reader whose link changed since the read is refused there and
+the pane says the verb failed. A shared document behind a share password refuses the page's verbs (the page carries
+no password); the pane says so the same way, and Open leads to the password prompt.
+
+### 1.6 Keys
+
+On the list: **j** / **↓** and **k** / **↑** move the choice, **Home** and **End** jump, **↵** opens the row in the
+editor (side by side) or opens the pane (where the pane stands in for the list). Anywhere in the Inbox but a field:
+**r** replies (focuses the reply field), **e** resolves or marks done, **Esc** returns from the pane to the list.
+Each verb button shows its key (`aria-keyshortcuts`, the key drawn as a `kbd`), except on a touch screen. Alt, Ctrl
+and Cmd chords are never the Inbox's.
+
+### 1.7 Narrow
+
+Under 768 px, and always in the editor's panel, the list stands alone; choosing a row (a tap, or ↵) opens the pane
+**in its place** (on a phone, over the whole page) with **Back to Inbox**. Opening it adds **one** entry to the
+browser's history, keeping the page's history state as it was, so the browser's Back (Android's, an iPhone's swipe)
+returns to the list, as Back to Inbox and Esc do. If the open row leaves the list while its entry stands (its work
+done, or gone from a re-read), the pane steps back off its own entry, so the next Back leaves the Inbox instead of
+doing nothing; and opening a row while that entry is still on top (a step back on its way) replaces it rather than
+stacking another. The filter bar becomes a strip of chips that scrolls sideways within itself, so the page never
+does. Chips, rows, verbs and Back to Inbox are at least 44 px tall.
+
+### 1.8 Opening a row
+
+**Open lands on the element.** The link is the document's normal URL
 (the share-code form for a document shared with the reader, [Read-only embeds (`/embed`)](embeds.md))
 with a fragment the editor reads on load:
 
@@ -133,25 +213,28 @@ navigation from the Explorer, Next commits the new URL after that
 render, so the hash would still be the Explorer's. An element the tab no longer holds
 (deleted since the page loaded) degrades to opening the tab.
 
+A card thread's row opens the card, as a card's does. A form's row opens the board its responses land on, else its Form
+tab.
+
 States:
 
-- **Loading**: the Explorer's skeleton rows.
-- **Empty** (nothing open in any section): one `EmptyState` — "Nothing
+- **Loading**: skeleton rows in the list's shape.
+- **Empty** (nothing under any filter): one `EmptyState` — "Nothing
   waiting on you", with a line explaining what lands here (actions and
   Plan cards assigned to you, actions you assigned, threads you're in) and a link to
   the assigned-actions help article. No New Document CTA: a new document
   does not put anything on this page.
-- **Failed**: "Couldn't load your activity" with **Try again**. Distinct
+- **Failed**: "Couldn't load your Inbox" with **Try again**. Distinct
   from empty for the same reason the Timeline keeps them apart
   ([Timeline](timeline.md) §2.4): "we couldn't ask" and "there is nothing" are
   different answers.
 
 **rows in This Browser.** A row from a document saved only in this browser ([Offline Mode](../006-document/offline-mode.md))
-carries the [This Browser pill](../006-document/offline-mode.md#this-browser-pill) in its "where" line, after the document
-chip, as a label (the row is already a link): the same amber words and glyph, and on hover "Lives only in this browser.
+carries the [This Browser pill](../006-document/offline-mode.md#this-browser-pill) in its third line, after the document
+chip, as a label (the row is already an option): the same amber words and glyph, and on hover "Lives only in this browser.
 Clearing this browser's site data deletes it." Nobody reads such a row as saved on LiveDoc or visible to anyone
-else. Its rows are found in the browser (§2.6) and listed among the server's, in the same sections and the same
-order; the badge counts them.
+else. Its rows are found in the browser (§2.6) and listed among the server's, in the same list and the same
+order; the badge counts them. Its only verb is Open (§1.5).
 
 Coming back to a tab that has been open a while re-reads the list
 (`useReturnToTab`, as the Timeline does), merging in place.
@@ -386,8 +469,8 @@ GET /api/activity   -> { actions: ActivityAction[], threads: ActivityThread[], c
 ```
 
 Hybrid identity (session token or `X-Owner-Id`); guests get their own
-page, keyed to their participant id. Read-only: nothing on the page is
-mutated from the page in v1, so there is no other verb.
+page, keyed to their participant id. The read is read-only; the pane's verbs (§1.5) go through the comment routes
+every other client uses, never a route of the Inbox's own.
 
 Wire types in `@livedoc/api-schema` (`activity.ts`), registered in
 the OpenAPI manifest + schema roots ([API documentation (OpenAPI)](../015-api/api-documentation.md)):
@@ -425,6 +508,10 @@ type ActivityThread = ActivityPlace & {
   youCommented: boolean;
   onYourDocument: boolean;
   mentionsYou: boolean; // an entry of mentioned_ids ∈ me ∪ my team_members rows
+  // The reader may comment on the document: they own it, it is in a team they joined, or the link they reach it
+  // through is a participate or edit link (docs/specs/013-workspace/share-roles.md). The pane offers Reply and
+  // Resolve only where it is true; the comment routes still gate every call.
+  canComment: boolean;
 };
 // An open Plan card assigned to the reader (§2.4). Not an ActivityPlace:
 // a card is not an element, and it may have no board to land on.
@@ -481,6 +568,10 @@ That order is the security boundary: a name can never leak a row from
 a document the reader has lost access to, and it is what keeps the
 `json_each` participant scan bounded to one person's library.
 
+A thread's `canComment` comes from the same set: true on a document the reader owns or reaches through a joined
+team (both are an Editor's), and on a shared one when the live link they reach it through is a `participate` or
+`edit` link; false through a `view` link. It is a hint for the pane, never a grant: the comment routes decide.
+
 A tab linked into two visible documents would list twice; the read
 dedupes on (tab, element) for a thread and (tab, element, action) for an
 action, preferring the document the reader owns,
@@ -495,20 +586,30 @@ The section checklist from [Timeline](timeline.md) §8.3: `views.tsx` gains
 gets the Overview row (with `InboxIcon` in
 `components/primitives/explorer-icons.tsx`),
 `useExplorerPane` names it, `ExplorerPane` dispatches to the
-lazy-loaded `ActivityPane` (not a `BROWSE_KIND`; no New Document / New
+lazy-loaded `InboxPane` (not a `BROWSE_KIND`; no New Document / New
 Folder header actions; Help links the new article), and
 `routes.test.ts`'s `STATIC_NODES` lists it. The sidebar badge and the
 pane read the same fetch (`useActivityFeed`, held in Explorer state
 like favourites), so opening the section never issues a second request
 and the badge cannot disagree with the list.
 
+The editor's Explorer panel draws the same `InboxPane`, compact and always narrow (§1.7), from its own
+`useActivityFeed`. The editor hands it the open document, the open tab and the canvas's Mark Done (`onToggleActionDone`,
+present only when the session may mark an action done), so the pane offers Mark Done on an action of that tab (§1.5).
+
 ## 6. Telemetry
 
 A new `Activity` category in `TELEMETRY_CATEGORIES` ([Telemetry + public transparency dashboard](../017-telemetry/telemetry.md)):
 
 - `Activity` / `Opened` when the section renders (once per visit);
-- `Activity` / `Selected` with type `Action` | `Thread` | `Card` on a row click;
-- `Activity` / `Loaded` / `Retry` when a failed read is retried.
+- `Activity` / `Selected` with type `Action` | `Card` | `Thread` | `CardThread` | `FormResponses` when Open (or ↵)
+  takes a row to the editor;
+- `Activity` / `Loaded` / `Retry` when a failed read is retried;
+- `Activity` / `Changed` with type `All` | `MyActions` | `AssignedByMe` | `Comments` | `FormResponses` when the filter
+  bar changes;
+- `Activity` / `Added` / `Reply` when a reply is posted from the pane;
+- `Activity` / `Resolved` with type `Thread` (a thread resolved from the pane) or `Action` (an action marked done from
+  the editor's panel).
 
 The category keeps the data layer's name. Picking the sidebar row is `UI` / `Selected` / `Sidebar.Inbox`
 ([Explorer structure](explorer-structure.md#telemetry)).
@@ -536,6 +637,18 @@ Never an action name, comment text, document name, or any identity.
   a document the reader cannot open.
 - `useActivityFeed.test.tsx`: sections split from one read, error vs
   empty, retry, rows in This Browser merged in order and counted.
+- `activity-can-comment.test.ts` (db, against real SQLite): `canComment` on an owned, a team and a shared document,
+  through a view, a participate and an edit link.
+- `inbox-entries.test.ts`: one list newest first, the four filters and their counts, the date dividers, each row's
+  who, what and why.
+- `inbox-verbs.test.ts`: which verbs each row is offered (an element thread by `canComment`, an action only on the
+  editor's open tab, nothing on This Browser, a card, a card thread or a form), and the comment calls they make.
+- `useInboxFilter.test.tsx`: the choice kept per viewer, an unreadable value read as All.
+- `useInboxPaneHistory.test.tsx`: one history entry per opening, Back closing the pane, a vanished row stepping back
+  off its entry, and an opening over a standing entry replacing it.
+- `InboxPane.test.tsx`: the listbox and its keys, the filter bar, the pane and its verbs, a done row leaving at once,
+  the narrow layout's Back to Inbox, and the telemetry.
+- `comments.test.ts` (live api client): the thread list read and its failure.
 - `offline-activity.test.ts`: the browser read of documents in This Browser (§2.6): assigned to and by the reader, the
   guest id, threads, open and finished cards, linked cards, trashed documents, placement, the cap.
 - `collab-index-rows.test.ts` and `plan-board-rows.test.ts` live in `packages/document` with the functions.

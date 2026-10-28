@@ -183,6 +183,33 @@ describe('useTimelineFeed failure handling', () => {
     expect(result.current.events.map((e) => e.id)).toEqual(['a']);
     expect(result.current.hasMore).toBe(true);
   });
+
+  it('keeps the next page reachable and says it failed when it does', async () => {
+    apiListTimeline.mockResolvedValueOnce({ events: [event('a', 10)], nextCursor: '10:a' });
+    const { result } = renderHook(() => useTimelineFeed('me', true));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    apiListTimeline.mockResolvedValueOnce(null);
+    act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.loadMoreFailed).toBe(true));
+    expect(result.current.hasMore).toBe(true);
+
+    apiListTimeline.mockResolvedValueOnce({ events: [event('b', 5)] });
+    act(() => result.current.loadMore());
+    expect(result.current.loadMoreFailed).toBe(false);
+    await waitFor(() => expect(result.current.events.map((e) => e.id)).toEqual(['a', 'b']));
+  });
+
+  it('shows the feed loading the moment Try again asks again, not the old failure', async () => {
+    apiListTimeline.mockResolvedValueOnce(null);
+    const { result } = renderHook(() => useTimelineFeed('me', true));
+    await waitFor(() => expect(result.current.error).toBe(true));
+
+    apiListTimeline.mockReturnValue(new Promise(() => {}));
+    act(() => result.current.retry());
+    expect(result.current.loading).toBe(true);
+    expect(result.current.error).toBe(false);
+  });
 });
 
 // Returning to a tab that has been open since yesterday (docs/specs/013-workspace/timeline.md §2.4a).

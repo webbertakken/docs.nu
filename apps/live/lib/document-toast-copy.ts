@@ -15,6 +15,10 @@ const where = (dest: MoveDestination): string => {
 export const documentMovedMessage = (name: string | null | undefined, dest: MoveDestination) =>
   `${toastName(name) ?? 'Document'} moved to ${where(dest)}`;
 
+/** What an Undo of a move says once the document is back where it was. */
+export const documentMovedBackMessage = (name: string | null | undefined, dest: MoveDestination) =>
+  `${toastName(name) ?? 'Document'} moved back to ${where(dest)}`;
+
 export const documentDuplicatedMessage = (name: string | null | undefined) =>
   `${toastName(name) ?? 'Document'} duplicated`;
 

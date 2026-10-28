@@ -19,6 +19,8 @@ import { useLatest } from '@/hooks/ui/useLatest';
 import { useToast } from '@/hooks/ui/useToast';
 import { logMoveFailure } from '@/lib/move-failure';
 import { DOCUMENT_FAILURE, FOLDER_FAILURE } from '@/lib/write-failure-copy';
+import { documentMovedBackMessage, type MoveDestination } from '@/lib/document-toast-copy';
+import { offerMoveUndo } from '@/lib/document-move-undo';
 import { indexFolders, folderBreadcrumb, groupDocumentsByFolder } from '@/lib/folder-tree';
 
 // One team's shared library (docs/specs/013-workspace/team-shared-documents.md): the folder tree + documents the
@@ -168,21 +170,41 @@ export function useTeamLibrary(
   );
 
   // Re-folder a document WITHIN the team (folderId null = the team's
-  // root).
+  // root). Once it landed, the toast names the document and where it went, with an Undo that moves it back
+  // (docs/specs/004-interface-design/toasts.md "Naming what it acted on"); the Undo says "moved back" without another.
   const moveDocument = useCallback(
     async (documentId: string, folderId: string | null) => {
       if (!ownerId) return;
-      try {
-        await apiSetDocumentFolder(ownerId, documentId, folderId, teamId);
-        track('Team', 'Moved', 'Document');
-      } catch (err) {
-        logMoveFailure('team-document', ` document=${documentId}`, err);
-        toast.error(DOCUMENT_FAILURE.move(liveDocs.find((d) => d.id === documentId)?.name));
-      }
-      await refresh();
-      onChange.current?.();
+      const move = async (to: string | null, from: string | null, undo: boolean) => {
+        const name = liveDocs.find((d) => d.id === documentId)?.name;
+        const dest: MoveDestination = to
+          ? { folder: folders.find((f) => f.id === to)?.name ?? '' }
+          : { team: '' };
+        try {
+          await apiSetDocumentFolder(ownerId, documentId, to, teamId);
+          if (undo) {
+            toast.success(documentMovedBackMessage(name, dest));
+            track('Team', 'Moved', 'Undo');
+          } else {
+            offerMoveUndo(toast, {
+              id: documentId,
+              name,
+              dest,
+              moveBack: () => void move(from, to, true),
+            });
+            track('Team', 'Moved', 'Document');
+          }
+        } catch (err) {
+          logMoveFailure('team-document', ` document=${documentId}`, err);
+          toast.error(DOCUMENT_FAILURE.move(name));
+        }
+        await refresh();
+        onChange.current?.();
+      };
+      const from = liveDocs.find((d) => d.id === documentId)?.folderId ?? null;
+      await move(folderId, from, false);
     },
-    [ownerId, teamId, liveDocs, refresh, onChange, toast],
+    [ownerId, teamId, liveDocs, folders, refresh, onChange, toast],
   );
 
   // Delete a team document, to the team's Trash. Any joined member may delete it

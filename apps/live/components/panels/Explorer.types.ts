@@ -2,6 +2,7 @@ import type { DocumentListItem, Folder, SharedWithItem } from '@/lib/api-client'
 import type { MovablePanelDockProps } from '@/components/primitives/MovablePanel';
 import type { MovablePanelPopoverProps } from '@/components/primitives/MovablePanel.types';
 import type { TeamDocumentRow, TeamFolderRow } from '@/hooks/persistence/useTeamLibrariesSweep';
+import type { InboxDone } from './inbox/inbox-verbs';
 
 // Folder mutations inside a team library, for the panel's team tree.
 // Create returns the new folder so the tree can open its parent and
@@ -84,6 +85,8 @@ export type ExplorerProps = {
   onMoveDocumentToFolder?: (documentId: string, folderId: string | null) => void;
   // The panel's Trash restored or deleted a document: the host refetches its lists.
   onLibraryChanged?: () => void;
+  // The editor's Mark Done for the tab it has open, for the Inbox section (docs/specs/013-workspace/inbox.md §5).
+  inboxDone?: InboxDone | null;
   // Scope-aware move (docs/specs/013-workspace/team-shared-documents.md): routes a pick that involves a team on
   // either side (re-folder within a team, personal -> team, team ->
   // personal). When wired, the move picker offers every space.

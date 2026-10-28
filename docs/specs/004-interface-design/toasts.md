@@ -42,6 +42,12 @@ scrolled away, can tell which one it was: "“Roadmap” deleted", "“Roadmap�
   again.", "moved to the team library". The surface never shows empty quotes.
 - **Where it went is named too**: the folder, or My Documents. A team is named when the surface knows it, else "the
   team library".
+- **A move offers Undo.** Moving a document to a folder, from Change Folder or a drop, in a person's own library or
+  within a team's, says "“Roadmap” moved to “Plans”" with **Undo** (`offerMoveUndo`,
+  `apps/live/lib/document-move-undo.ts`), which closes the toast and moves it back, then says "“Roadmap” moved back
+  to My Documents" without another Undo. A move into or out of a team offers none: crossing spaces changes who owns
+  the document ([Team shared documents](../013-workspace/team-shared-documents.md)), so taking it back is a second
+  change of owner the reader may not be allowed, and it is one menu away.
 - The wording lives in one place per family, so every surface says the same: `apps/live/lib/document-toast-copy.ts`
   (delete, restore, move, duplicate) and `apps/live/lib/write-failure-copy.ts` (a failed folder or document write).
 

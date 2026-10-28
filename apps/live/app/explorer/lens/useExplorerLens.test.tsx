@@ -59,4 +59,19 @@ describe('useExplorerLens address bar', () => {
     });
     expect(replace).not.toHaveBeenCalled();
   });
+
+  // docs/specs/013-workspace/explorer-filters.md: typing then going Back (a mouse button, a swipe) never writes the
+  // filter onto the page gone back to.
+  it('drops a waiting write once the page has moved on', () => {
+    const { result } = hook();
+    act(() => result.current.setField('late', 4));
+    window.history.pushState(null, '', '/explorer/recent');
+    const replace = vi.spyOn(window.history, 'replaceState');
+    act(() => {
+      vi.advanceTimersByTime(LENS_URL_WRITE_MS);
+    });
+    expect(replace).not.toHaveBeenCalled();
+    expect(window.location.pathname).toBe('/explorer/recent');
+    expect(window.location.search).toBe('');
+  });
 });

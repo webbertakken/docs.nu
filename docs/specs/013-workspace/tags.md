@@ -89,6 +89,8 @@ At `/explorer/tags`, the **Tags** row in the sidebar's More group.
   add some."
 - **No tags at all**: the Explorer's illustrated empty state, "Group related documents with tags", "Make a tag here, or
   choose Tags in any document's menu. Your tags are yours alone: nobody else sees them.", and **New Tag**.
+- **Loading** shows skeleton rows. **A failed read** says so, with **Try again**; pressing it shows the skeleton rows
+  again at once, never the old failure, until the new read answers.
 
 ### One tag's page
 

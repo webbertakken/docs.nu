@@ -1,7 +1,7 @@
 'use client';
 
 // The Inbox's data (docs/specs/013-workspace/inbox.md §1, §5): one read, split into the
-// three sections the pane shows, plus the count the sidebar badge draws. Assigned to You holds actions and
+// sections the Inbox lists, plus the count the sidebar badge draws. My Actions holds actions and
 // Plan cards (§2.4) in one list. The read is the server's and, beside it, this browser's documents in This Browser
 // (§2.6), whose rows are marked `local` so they show the This Browser pill.
 //
@@ -28,13 +28,23 @@ import { track } from '@/lib/telemetry';
 /** A row, marked `local` when it comes from a document saved only in this browser (§2.6). */
 export type Located<T> = T & { local?: true };
 
-/** One Assigned to You row: an action or a Plan card, told apart by `kind`. */
+/** One My Actions row: an action or a Plan card, told apart by `kind`. */
 export type AssignedRow =
   Located<{ kind: 'action' } & ActivityAction> | Located<{ kind: 'card' } & ActivityCard>;
 
-/** One Open Comment Threads row: an element's thread or a Plan card's (§2.5), told apart by `kind`. */
+/** One Comments row: an element's thread or a Plan card's (§2.5), told apart by `kind`. */
 export type ThreadRow =
   Located<{ kind: 'thread' } & ActivityThread> | Located<{ kind: 'card' } & ActivityCardThread>;
+
+/** Each row's key in the Inbox (docs/specs/013-workspace/inbox.md §1.2): unique per row and stable across reads, so
+ *  the choice survives a re-read and a row done here stays gone (`dismiss`). */
+export const activityRowKey = {
+  action: (a: ActivityAction) => `a:${a.documentId}:${a.tabId}:${a.elementId}:${a.id}`,
+  card: (c: ActivityCard) => `c:${c.documentId}:${c.id}`,
+  thread: (t: ActivityThread) => `t:${t.documentId}:${t.tabId}:${t.elementId}`,
+  cardThread: (t: ActivityCardThread) => `ct:${t.documentId}:${t.id}`,
+  form: (f: ActivityFormResponses) => `f:${f.documentId}:${f.tabId}`,
+} as const;
 
 const NO_LOCAL: OfflineActivity = { actions: [], threads: [], cards: [], cardThreads: [] };
 
@@ -71,6 +81,9 @@ export type ActivityFeed = {
   /** The last read FAILED — not the same as nothing outstanding. */
   error: boolean;
   retry: () => void;
+  /** A row whose work was done from the Inbox (§1.5), by its `activityRowKey`: gone from every list now, and from
+   *  every later read while the feed lives, even one made before the index caught up. */
+  dismiss: (key: string) => void;
 };
 
 export function useActivityFeed(ownerId: string | null): ActivityFeed {
@@ -81,6 +94,7 @@ export function useActivityFeed(ownerId: string | null): ActivityFeed {
   const [formResponses, setFormResponses] = useState<ActivityFormResponses[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(() => new Set());
   // Guards a late response from a previous owner id (a guest signing in
   // mid-session re-runs this with a different id).
   const requestId = useRef(0);
@@ -128,6 +142,7 @@ export function useActivityFeed(ownerId: string | null): ActivityFeed {
   const [loadingFor, setLoadingFor] = useState(ownerId);
   if (ownerId !== loadingFor) {
     setLoadingFor(ownerId);
+    setDismissed(new Set());
     if (ownerId) setLoading(true);
   }
 
@@ -144,32 +159,58 @@ export function useActivityFeed(ownerId: string | null): ActivityFeed {
     void load('replace');
   }, [load]);
 
-  // The split (docs/specs/013-workspace/inbox.md §1): a self-assignment is "assigned to you" and
+  const dismiss = useCallback((key: string) => {
+    setDismissed((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+  }, []);
+  const kept = useCallback(
+    <T>(rows: T[], keyOf: (row: T) => string) =>
+      dismissed.size === 0 ? rows : rows.filter((r) => !dismissed.has(keyOf(r))),
+    [dismissed],
+  );
+  const openActions = useMemo(() => kept(actions, activityRowKey.action), [kept, actions]);
+
+  // The split (docs/specs/013-workspace/inbox.md §1.1): a self-assignment is "My Actions" and
   // only that, so one action never lists twice.
   const assignedToMe = useMemo(
     () =>
       [
-        ...actions.filter((a) => a.assignedToMe).map((a) => ({ kind: 'action' as const, ...a })),
-        ...cards.map((c) => ({ kind: 'card' as const, ...c })),
+        ...openActions
+          .filter((a) => a.assignedToMe)
+          .map((a) => ({ kind: 'action' as const, ...a })),
+        ...kept(cards, activityRowKey.card).map((c) => ({ kind: 'card' as const, ...c })),
       ].sort((a, b) => b.updatedAt - a.updatedAt),
-    [actions, cards],
+    [openActions, cards, kept],
   );
   const youAssigned = useMemo(
     () =>
-      actions
+      openActions
         .filter((a) => a.createdByMe && !a.assignedToMe)
         .sort((a, b) => b.updatedAt - a.updatedAt),
-    [actions],
+    [openActions],
   );
 
   const threadRows = useMemo(
     () =>
       [
-        ...threads.map((t) => ({ kind: 'thread' as const, ...t })),
-        ...cardThreads.map((t) => ({ kind: 'card' as const, ...t })),
+        ...kept(threads, activityRowKey.thread).map((t) => ({ kind: 'thread' as const, ...t })),
+        ...kept(cardThreads, activityRowKey.cardThread).map((t) => ({
+          kind: 'card' as const,
+          ...t,
+        })),
       ].sort((a, b) => b.latest.at - a.latest.at),
-    [threads, cardThreads],
+    [threads, cardThreads, kept],
   );
 
-  return { assignedToMe, youAssigned, threads: threadRows, formResponses, loading, error, retry };
+  const openForms = useMemo(() => kept(formResponses, activityRowKey.form), [kept, formResponses]);
+
+  return {
+    assignedToMe,
+    youAssigned,
+    threads: threadRows,
+    formResponses: openForms,
+    loading,
+    error,
+    retry,
+    dismiss,
+  };
 }

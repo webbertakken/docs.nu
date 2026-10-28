@@ -434,6 +434,9 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
   "ActivityThread": {
     "additionalProperties": false,
     "properties": {
+      "canComment": {
+        "type": "boolean"
+      },
       "commentCount": {
         "type": "number"
       },
@@ -513,6 +516,7 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       }
     },
     "required": [
+      "canComment",
       "commentCount",
       "documentId",
       "documentName",

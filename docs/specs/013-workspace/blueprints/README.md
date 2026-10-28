@@ -20,3 +20,4 @@ Follow the references below only as needed; never upfront.
 - ./DEFAULTS.md - when a workspace blueprint applies a default the spec leaves open
 - ./COMPLETENESS.md - when checking which completeness categories a workspace blueprint covers
 - ./empty-document-cleanup.md - when implementing or changing the daily move of empty documents to the Trash: the sweep over the content summary, the trash reason, the restore restart
+- ./inbox.md - when implementing or changing the Inbox's list and reading pane: entries, filters, verbs, keys, the narrow pane's history entry, `canComment`

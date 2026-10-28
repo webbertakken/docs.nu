@@ -83,6 +83,7 @@ function ExplorerImpl({
   favouriteIds,
   onToggleFavourite,
   onLibraryChanged,
+  inboxDone = null,
 }: ExplorerProps) {
   const toast = useToast();
   const minimalChrome = useMinimalChrome();
@@ -416,6 +417,7 @@ function ExplorerImpl({
                 onNewFolder={newFolder}
                 inFolder={paneFolderId !== null}
                 onLibraryChanged={onLibraryChanged ?? NOOP}
+                inboxDone={inboxDone}
                 tree={
                   isTreeSection(section) ? (
                     <PanelExplorerTree

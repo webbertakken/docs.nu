@@ -15,7 +15,9 @@ the registry from selection/document verbs to the whole app surface.
   Works in zen mode and read-only views, like the existing binding.
 - **The Explorer page binds both too** (`useSearchShortcut`), opening the same panel as its
   Search button. As in the editor, the chords stand down when the Keyboard Shortcuts setting is
-  off, while focus is in a text field (the Explorer's filter box included), and while a dialog is open.
+  off, while focus is in a text field, a text area, a select or editable text (the Explorer's filter box
+  included), while a dialog is open (one the modal guard counts, or any `aria-modal` element, the phone's Sections
+  drawer included), and for a key another handler already took.
 
 ## One search
 
