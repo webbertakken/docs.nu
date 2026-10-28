@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { presetSetup } from '@livedoc/items';
+import { presetSetup, tabShowsEveryCard } from '@livedoc/items';
 import { DocumentRoom } from './document-room/document-room';
 import { migrateDocumentSchema } from './document-room/document-schema';
 import { roomSqlStorage } from './test-document-room';
@@ -65,8 +65,9 @@ function newRoom(stored = true) {
         presence: { id, name: id, color: '#abc', role: 'edit' },
         documentId: 'd1',
         tabScope,
-        // As the upgrade works it out (scopedTabShowsAll): the stored t1 holds a board, so it shows every card.
-        tabShowsAll: stored && tabScope === 't1',
+        // What the upgrade computes (DocumentRoom.scopedTabShowsAll): the scoped tab read from the room's own store,
+        // through tabShowsEveryCard. Only t1 is stored; another tab, or no store, reads as missing, so false.
+        tabShowsAll: stored && tabScope === 't1' && tabShowsEveryCard([board, sticky]),
       },
     };
     sockets.push(s);
