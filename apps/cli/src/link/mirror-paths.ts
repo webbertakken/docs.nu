@@ -4,7 +4,7 @@
 // mirror directory, with POSIX separators.
 
 import { posix } from 'node:path';
-import { fileSlug, idSlug, PULL_FILE_SUFFIX } from '../sync/pull-file';
+import { fileSlug, idSlug, nameSafeId, PULL_FILE_SUFFIX } from '../sync/pull-file';
 
 export type FolderNode = { id: string; name: string; parentId: string | null };
 
@@ -30,7 +30,7 @@ export function mirrorPathCandidates(
   folderPath: readonly string[],
 ): string[] {
   const slug = fileSlug(document.name, document.id);
-  const candidates = [slug, `${slug}-${idSlug(document.id)}`, `${slug}-${document.id}`];
+  const candidates = [slug, `${slug}-${idSlug(document.id)}`, `${slug}-${nameSafeId(document.id)}`];
   return candidates.map((name) => posix.join(...folderPath, `${name}${PULL_FILE_SUFFIX}`));
 }
 

@@ -760,6 +760,20 @@ describe('GET /api/teams/:id/access-check (docs/specs/012-collaboration/assigned
     expect(await (await get(QS)).json()).toEqual({ canAccess: true });
   });
 
+  // docs/specs/013-workspace/team-shared-documents.md: a team document is the team's; making it grants nothing once
+  // its maker has left the team.
+  it('false when the assignee made a team document but has left its team', async () => {
+    db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'user-2', teamId: 't9', name: 'Q3' });
+    membershipByUser({ 't9:user-1': member({ role: 'member' }), 't9:user-2': null });
+    expect(await (await get(QS)).json()).toEqual({ canAccess: false });
+  });
+
+  it('404 when the caller made a team document but has left its team', async () => {
+    db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'user-1', teamId: 't9', name: 'Q3' });
+    membershipByUser({ 't9:user-1': null });
+    expect((await get(QS)).status).toBe(404);
+  });
+
   it('400 on missing params, 404 on a non-member assignee or unreachable document', async () => {
     expect((await get('assigneeUserId=user-2')).status).toBe(400);
     membershipByUser({ 't1:user-2': null });
@@ -795,6 +809,19 @@ describe('POST /api/teams/:id/notify-action (docs/specs/012-collaboration/assign
     membershipByUser();
     db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'user-1', teamId: null, name: 'Q3' });
     db.getParticipant.mockResolvedValue({ id: 'user-1', name: 'Sam', color: '#f00' });
+  });
+
+  it('404 when the caller made a team document but has left its team', async () => {
+    db.getDocumentMeta.mockResolvedValue({ id: 'd1', ownerId: 'user-1', teamId: 't9', name: 'Q3' });
+    db.hasSharedAccess.mockResolvedValue(false);
+    db.getMembership.mockImplementation(async (_env: Env, teamId: string, userId: string) => {
+      if (teamId !== 't1') return null;
+      if (userId === 'user-1') return member();
+      if (userId === 'user-2') return member({ id: 'm2', userId: 'user-2', role: 'member' });
+      return null;
+    });
+    expect((await post()).status).toBe(404);
+    expect(notifyActionAssigned).not.toHaveBeenCalled();
   });
 
   it('202 + dispatches the email with server-derived names for the document owner', async () => {

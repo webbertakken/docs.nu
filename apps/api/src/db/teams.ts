@@ -384,6 +384,23 @@ export async function detachUserFromTeams(env: Env, userId: string): Promise<voi
         .run();
     }
   }
+  await dropDeclinedInvitesTo(env, userId);
+}
+
+// The invitations a closing account turned down from the email, before it ever claimed them, are rows keyed by its
+// address alone (user_id NULL, status 'declined'); they go with the account, so no members list keeps the address of
+// someone who has gone. An invitation still waiting is the inviter's, to an address rather than to the account, and
+// stays. Matched in any case: a whole-table read, run once per account closed.
+async function dropDeclinedInvitesTo(env: Env, userId: string): Promise<void> {
+  const res = await env.DB.prepare(
+    `DELETE FROM team_members
+      WHERE user_id IS NULL AND status = 'declined'
+        AND lower(email) = (SELECT lower(email) FROM identity_users WHERE id = ?)`,
+  )
+    .bind(userId)
+    .run();
+  const dropped = res.meta?.changes ?? 0;
+  if (dropped > 0) console.info(`[teams] declined_invites_dropped count=${dropped}`);
 }
 
 // Joined-member count for a team (the public "N members" number the

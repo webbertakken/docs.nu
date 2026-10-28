@@ -4,6 +4,7 @@ export * from './model';
 export * from './limits';
 export * from './read';
 export * from './answers';
+export * from './link-scheme';
 export * from './mapping';
 export * from './card';
 export * from './starters';

@@ -923,4 +923,9 @@ event on the preferences key.
   is opaque to the api worker beyond a size cap (4 KB; defends
   against runaway clients). No per-field validation: the client
   is responsible for the shape, and a malformed client just
-  reflects malformed prefs back to itself.
+  reflects malformed prefs back to itself. It writes only for a
+  guest or an account that still exists: a session token outlives
+  a closed account by up to 15 minutes, and a write in that window
+  answers `404 { error: 'unknown_owner' }` (logged
+  `[preferences] write_refused reason=unknown_owner`) rather than
+  bring back preferences for an account nothing sweeps.

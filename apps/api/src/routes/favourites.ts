@@ -7,15 +7,13 @@
 // Hybrid identity like the rest of the api: the account id when signed
 // in, X-Owner-Id otherwise, so guests get durable favourites too.
 //
-// Deliberately NOT gated on "can this owner read that document". A star is a
-// private bookmark in the starrer's own row — it grants no access, reveals
-// nothing about the document, and the Favourites view renders from the
-// document lists the client already has permission to see, so an id for
-// something you can no longer open simply doesn't appear. Checking access
-// on write would cost a lookup per star to prevent nothing.
+// A star needs the document within the starrer's reach (reachesDocument: their own personal document, a joined
+// member of its team, or a live link they opened). Any other id answers 404 exactly as a missing one and writes
+// nothing, so a star never tells a stranger that an id is real.
 
+import { reachesDocument } from '../auth/document-reach';
 import { json, missingAuth, noContent, notFound } from '../responses';
-import { addFavourite, listFavouriteIds, removeFavourite } from '../db';
+import { addFavourite, getDocumentMeta, listFavouriteIds, removeFavourite } from '../db';
 import type { RouteContext } from './context';
 
 export async function handleFavourites(ctx: RouteContext): Promise<Response> {
@@ -31,6 +29,12 @@ export async function handleFavourites(ctx: RouteContext): Promise<Response> {
   const documentId = segments[2];
   if (segments.length === 3 && documentId) {
     if (request.method === 'PUT') {
+      const liveDoc = await getDocumentMeta(env, documentId);
+      const reacher = { owner: ownerId, accountId: ctx.verifiedAccountId };
+      if (!liveDoc || !(await reachesDocument(env, reacher, liveDoc))) {
+        console.info('[favourites] star_refused reason=out_of_reach');
+        return notFound();
+      }
       if (!(await addFavourite(env, ownerId, documentId))) return notFound();
       return noContent();
     }

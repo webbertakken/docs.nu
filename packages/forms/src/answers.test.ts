@@ -196,4 +196,8 @@ describe('helpers', () => {
     expect(normaliseLink('localhost')).toBeNull();
     expect(normaliseLink('https://exa mple.com')).toBeNull();
   });
+
+  it('normaliseLink reads a host with a port as a bare host, not a scheme', () => {
+    expect(normaliseLink('example.com:8080/x')).toBe('https://example.com:8080/x');
+  });
 });
