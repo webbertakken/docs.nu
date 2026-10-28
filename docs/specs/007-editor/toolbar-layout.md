@@ -1,6 +1,88 @@
 # Toolbar layout
 
-Status: shipped
+Status: the two lines specified, not yet built; the rest shipped
+
+## The two lines
+
+The editor has **no header bar and no tab bar**. All of its chrome sits in [toolbar groups](../004-interface-design/toolbar-group.md)
+on two lines over the canvas, a top line and a bottom line, each a single row while the window is wide enough
+("When a line runs out of room"). The canvas runs the full height of the window under them.
+
+```
+ ┌‹ ◆ │ ☰ │ ⬡ Diagram ▾┐        ┌ the Palette strip ┐        ┌🔍 ⚙ ◐ │ Copy Present Share │ Sign in┐
+
+ ┌Map┐
+ └───┘
+ ┌↶ ↷ │ Session │ Mode │ Collab │ Layers Theme │ − 100% + ┐  ┌ Draw's dock ┐  ┌◉ Name EDITING │ ⬡ Tab ⋯ │ ⧉ 7 │ ●●● │ +┐
+```
+
+### The top line
+
+- **Left: the brand group.** In order: **Back** (a back caret and the logo, one link), a divider, the menu button
+  (☰, the Explorer popover, "The Explorer and the other panels"), the mode switch. The tab's name is no longer here
+  ("The tab's name").
+  - **Back** goes to the Explorer (`EXPLORER_LANDING_PATH`); in a workspace workbench frame it goes where the
+    document was opened from, replacing the frame's separate Back button
+    ([Workbench embeds](../013-workspace/workbench-embeds.md#what-renders)). Its name is "Back to the Explorer" (in a
+    frame, "Back"), with a hover card.
+  - The caret is a chevron 8 × 14 px, a 1.75 px round stroke in the chrome's muted ink (slate-500, slate-400 in dark),
+    8 px before the logo; the logo is the brand mark alone, 24 px, **without the wordmark**, tinted by the tab's theme
+    as today ([Brand mark](../004-interface-design/brand-mark.md)). Caret and mark are one 36 px tall hit area with
+    the group's hover fill.
+  - Where there is nowhere to go back to (a workbench frame with document scope) the caret is not drawn and the mark
+    is not a link.
+- **Centre: the Palette strip** (below), or Draw's dock when it sits at the top ([Draw mode](../023-draw-mode/draw-mode.md)).
+- **Right: the actions group.** In order: Search, Settings, the appearance toggle (the `ChromeControls` trio, icon
+  only; **Button Labels** names them, [User preferences](user-preferences.md)), a divider, the document actions that
+  apply (Start Tour while offered, Make a Copy, Present, Share or Share Form), then the account control (Sign in, or
+  the account menu). Each keeps its own rule for who sees it ([Live app](live-app.md)).
+
+### The bottom line
+
+- **Left: the tools group**, the bottom cluster moved from the right: Undo and Redo, the Session strip, the mode's
+  strip, Collaborate, Layers and the Theme & Canvas brush, Zoom, in that order, each part after a divider
+  ([Live app](live-app.md)). Its popovers hang above their buttons as before. The **Map** keeps its default corner,
+  bottom left, stacked above this group ([Minimap](../008-canvas/minimap.md)); the Quick style panel keeps its
+  collision rule, which lands it just above the Map when both are shown ([Quick style panel](../008-canvas/quick-style-panel.md#collisions)).
+- **Centre: Draw's dock** when it sits at the bottom, on the line, not lifted above it.
+- **Right: the document group.** In order:
+  1. the document's **share-state icon** (the 28 px badge, [The top bar's middle](live-app.md#the-top-bars-middle)), its
+     **name** (click to rename, for someone who may) and the **role pill**, as they were in the header;
+  2. a divider, then the **active tab** as a tinted segment: its kind glyph, its name, its tab menu (⋯). It never
+     shortens; a click on it renames it in place for someone who may change the document's tabs
+     (as the menu box's name did), a double-click on the name does too;
+  3. the **tab stack**: a stack glyph and the number of tabs in the session's scope. A press opens the **tab list**;
+  4. the **contributors**: the avatars of everyone else in the document, up to three, then **+N**. A press opens the
+     same tab list. Not drawn while nobody else is here;
+  5. **Add tab** (+), for someone who may add tabs.
+
+### The tab list
+
+The one place every tab is seen and switched to. A popover hanging above the button that opened it (the tab stack or
+the contributors), arrow at that button, kept 12 px inside the canvas, in the menu surface ([Menus](../004-interface-design/menus.md)).
+
+- **Header**: "Tabs" and the count; on the right, how many people are here ("3 people here"), when anyone is.
+- **Find a tab**: a filter field, when there are more than five tabs; typing narrows the rows by name.
+- **Rows**, in document order, with [tab folders](../006-document/tab-folders.md) as headings (glyph, name, count)
+  and their tabs indented under them: each row is the tab's kind glyph, its name (cut short with an ellipsis), and
+  the [presence stack](../012-collaboration/collaborator-enhancements.md) of who is on it. The active tab's row is
+  tinted and carries its tab menu (⋯). Pressing a row switches to that tab and closes the list.
+- **Footer**: **New Tab**, for someone who may add tabs.
+- Rows drag to reorder and into or out of a folder, and rename on a double-click, for someone who may change the
+  document's tabs; every other tab-bar gesture lives here too, so nothing the tab bar did is lost.
+- It is a menu: the arrow keys walk the rows, Enter switches, Escape closes and returns focus to the button that
+  opened it ([Menus](../004-interface-design/menus.md)).
+
+### When a line runs out of room
+
+Each line is one row while its groups fit side by side with an 8 px gap. When they do not:
+
+1. the document name shortens, down to 72 px, with an ellipsis;
+2. then the Palette's tiles drop as they already do ("Decided in review");
+3. then the centre toolbar (the Palette or Draw's dock) moves to a row of its own, just inside the line, and the
+   side groups keep their corners.
+
+The active tab never shortens. On a phone ("On a phone") the same order runs, and the document name is not drawn.
 
 ## What
 
