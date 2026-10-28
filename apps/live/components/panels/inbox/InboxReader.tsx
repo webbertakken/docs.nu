@@ -7,7 +7,13 @@
 
 import Link from 'next/link';
 import { useId, useImperativeHandle, useRef, useState, type Ref } from 'react';
-import { GlyphDisc, IDENTITY_FILL, identityVars, lucideGlyph } from '@livedoc/ui';
+import {
+  GlyphDisc,
+  IDENTITY_FILL,
+  identityVars,
+  lucideGlyph,
+  SOLID_BRAND_DARK_CONTROL,
+} from '@livedoc/ui';
 import {
   lucideArrowLeft,
   lucideArrowRight,
@@ -51,7 +57,7 @@ const FAILURE_COPY: Record<Failure, string> = {
 
 const VERB =
   'inline-flex items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none';
-const PRIMARY = `${VERB} bg-brand-700 text-white hover:bg-brand-800 dark:bg-brand-500 dark:text-slate-950 dark:hover:bg-brand-400`;
+const PRIMARY = `${VERB} bg-brand-700 text-white hover:bg-brand-800 ${SOLID_BRAND_DARK_CONTROL}`;
 const SECONDARY = `${VERB} border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700`;
 const KBD =
   'rounded border border-current/30 px-1 font-mono text-[10px] font-medium leading-4 opacity-80 pointer-coarse:hidden';

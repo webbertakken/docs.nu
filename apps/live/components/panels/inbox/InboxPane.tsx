@@ -20,7 +20,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
-import { useMediaQuery } from '@livedoc/ui';
+import { SOLID_BRAND_DARK_CONTROL, useMediaQuery } from '@livedoc/ui';
 import type { ActivityFeed } from '@/app/explorer/useActivityFeed';
 import { LIST_CARD } from '@/components/primitives/surface-classes';
 import { track } from '@/lib/telemetry';
@@ -216,7 +216,7 @@ export function InboxPane({
             <button
               type="button"
               onClick={() => setFilter('all')}
-              className="mt-3 inline-flex min-h-9 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 dark:bg-brand-500 dark:text-slate-950 dark:hover:bg-brand-400"
+              className={`mt-3 inline-flex min-h-9 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${SOLID_BRAND_DARK_CONTROL}`}
             >
               Show All
             </button>
