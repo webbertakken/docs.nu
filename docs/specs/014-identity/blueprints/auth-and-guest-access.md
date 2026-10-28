@@ -404,8 +404,8 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
   account" of chips: "LiveDoc Account" (brand tone, shield glyph) or "Guest · This Browser Only", "Joined <Month
   Year>" when known, "Colour: <name>" with its swatch (`presenceColourName`: the palette name, "Custom" off it).
   The colour is read from the participant record (`apiLoadSelf`); until it answers the chip and the cursor hold
-  the neutral swatch ("Colour: …"), so nothing moves when it lands; with no record (a guest who never opened a
-  document) there is no colour to name, and no colour chip. A guest's card adds a box headed "Sign in to make this
+  the neutral swatch ("Colour: …"), so nothing moves when it lands; with no record yet (no document opened)
+  it reads "Colour: Automatic": a colour is given on the first open. A guest's card adds a box headed "Sign in to make this
   yours" with three lines ("Keep your documents and settings on every device.", "Choose the name and colour
   collaborators see on your cursor.", "Share with your team, and get an email when someone comments.") and
   **Sign In** (primary) and **Create Account** (secondary), both returning to Settings (`authHrefWithReturn`).
@@ -420,8 +420,10 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
     right, opening the picker in a popover offering the ten presence colours (`PARTICIPANT_COLORS`) under
     "Presence Colours", by name, and no custom colours (`custom={false}`). A pick shows at once on the row,
     the card and the open editor (`SELF_COLOUR_EVENT`), then saves the participant record (`apiSaveSelf`);
-    refused, it puts back the colour the server last took (newest wins, `createNewestWins`) and says
-    "Couldn't save your colour. Try again."
+    refused, it puts back the colour the server last took (newest wins) and says
+    "Couldn't save your colour. Try again." Before the account has opened a document it has no participant
+    record: the row reads "Automatic", and a pick makes the record (the account's name, the colour picked); a
+    refused first pick goes back to Automatic.
   - **Sign-in methods** (`signInMethods`): one line per method. "Email code" with the account's address, always.
     "Google" when the host offers Google: **Connected** with **Remove** when an `identity_accounts` row has
     `providerId` google, else **Connect Google** (`link-social`, returning to Settings). Removing asks for a fresh

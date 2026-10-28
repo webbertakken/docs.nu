@@ -18,6 +18,7 @@ import { ProfileBanner } from './ProfileBanner';
 import { useInSettingsGroup, SETTINGS_CARD } from './SettingsGroup';
 import type { SettingsIdentityRowSpec } from './settings-catalogue';
 import { useSelfPresence } from './useSelfPresence';
+import { AUTOMATIC } from './SettingsPresenceColourRow';
 
 // The profile card, the `identity` row that opens Settings > Account
 // (docs/specs/014-identity/profile-and-email-notifications.md "Identity"; blueprint auth-and-guest-access.md
@@ -91,19 +92,18 @@ export function SettingsProfileCard({ row }: { row: SettingsIdentityRowSpec }) {
             <Chip tone="muted">Guest · This Browser Only</Chip>
           )}
           {joined ? <Chip tone="muted">Joined {joined}</Chip> : null}
-          {presence.state === 'none' ? null : (
-            <Chip tone="muted">
-              <span
-                aria-hidden="true"
-                data-profile-swatch=""
-                style={colour ? identityVars(colour) : undefined}
-                className={`size-2.5 rounded-full ring-1 ring-black/10 dark:ring-white/20 ${
-                  colour ? IDENTITY_FILL : NEUTRAL_SWATCH
-                }`}
-              />
-              Colour: {colour ? presenceColourName(colour) : '…'}
-            </Chip>
-          )}
+          <Chip tone="muted">
+            <span
+              aria-hidden="true"
+              data-profile-swatch=""
+              style={colour ? identityVars(colour) : undefined}
+              className={`size-2.5 rounded-full ring-1 ring-black/10 dark:ring-white/20 ${
+                colour ? IDENTITY_FILL : NEUTRAL_SWATCH
+              }`}
+            />
+            Colour:{' '}
+            {colour ? presenceColourName(colour) : presence.state === 'none' ? AUTOMATIC : '…'}
+          </Chip>
         </ul>
         {signedIn ? null : <GuestInvitation />}
       </div>

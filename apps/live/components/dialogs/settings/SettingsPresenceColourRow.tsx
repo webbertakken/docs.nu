@@ -10,8 +10,9 @@ import { ColourPopover } from '@/components/colour/ColourPopover';
 import { SwatchChip } from '@/components/colour/ColourSwatch';
 import type { ColourOption } from '@/components/colour/colour-options';
 import { ChevronIcon } from '@/components/primitives/ChevronIcon';
+import { useDeferredAuth } from '@/components/providers/deferred-auth';
 import { apiSaveSelf } from '@/lib/api/self';
-import { PARTICIPANT_COLORS, type Participant } from '@/lib/identity';
+import { PARTICIPANT_COLORS, randomName, type Participant } from '@/lib/identity';
 import { announceSelfColour, presenceColourName } from '@/lib/self-presence';
 import { track } from '@/lib/telemetry';
 import { SettingsRowShell } from './SettingsRowShell';
@@ -19,6 +20,8 @@ import type { SettingsPresenceColourRowSpec } from './settings-catalogue';
 import { useSelfPresence } from './useSelfPresence';
 
 export const COLOUR_FAILED = "Couldn't save your colour. Try again.";
+// No colour chosen yet: one is given when the person first opens a document.
+export const AUTOMATIC = 'Automatic';
 
 const PRESENCE_OPTIONS: readonly ColourOption[] = PARTICIPANT_COLORS.map((colour) => ({
   id: colour,
@@ -29,7 +32,19 @@ const PRESENCE_GROUP = [{ heading: 'Presence Colours', options: PRESENCE_OPTIONS
 
 export function SettingsPresenceColourRow({ row }: { row: SettingsPresenceColourRowSpec }) {
   const presence = useSelfPresence();
+  const { user } = useDeferredAuth();
   const loaded = presence.state === 'ready' ? presence.self : null;
+  // Who a pick is saved for: the record, or, before the first document made one, a new record for this account.
+  const base: Participant | null =
+    loaded ??
+    (presence.state === 'none' && presence.id
+      ? {
+          id: presence.id,
+          name: user?.name ?? user?.email ?? randomName(),
+          color: '',
+          status: 'online',
+        }
+      : null);
   const [open, setOpen] = useState(false);
   // The trigger, held in state (a callback ref) so the popover can anchor to it during render.
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
@@ -38,11 +53,11 @@ export function SettingsPresenceColourRow({ row }: { row: SettingsPresenceColour
   // back, and only when no newer pick has gone since. The colour shown before a pick is not it while an earlier
   // pick is still on its way, so two refusals in a row could leave a colour the server never stored.
   const latest = useRef(0);
-  const confirmed = useRef<{ turn: number; colour: string } | null>(null);
+  const confirmed = useRef<{ turn: number; colour: string | null } | null>(null);
   const colour = loaded?.color ?? null;
 
   const choose = async (self: Participant, next: string) => {
-    confirmed.current ??= { turn: 0, colour: self.color };
+    confirmed.current ??= { turn: 0, colour: self.color || null };
     const turn = ++latest.current;
     setFailed(false);
     track('UI', 'Changed', 'PresenceColour');
@@ -58,7 +73,11 @@ export function SettingsPresenceColourRow({ row }: { row: SettingsPresenceColour
     }
   };
 
-  const label = colour ? presenceColourName(colour) : '…';
+  const label = colour
+    ? presenceColourName(colour)
+    : presence.state === 'loading'
+      ? '…'
+      : AUTOMATIC;
   return (
     <SettingsRowShell
       row={row}
@@ -69,7 +88,7 @@ export function SettingsPresenceColourRow({ row }: { row: SettingsPresenceColour
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-label={`Colour: ${label}`}
-          disabled={!loaded}
+          disabled={!base}
           onClick={() => setOpen(!open)}
           className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-default disabled:opacity-60 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700/60"
         >
@@ -79,11 +98,11 @@ export function SettingsPresenceColourRow({ row }: { row: SettingsPresenceColour
         </button>
       }
     >
-      {open && trigger && loaded ? (
+      {open && trigger && base ? (
         <ColourPopover
           anchor={trigger}
           label="Your colour"
-          value={loaded.color}
+          value={base.color || null}
           theme={[]}
           standard={PRESENCE_GROUP}
           custom={false}
@@ -91,7 +110,7 @@ export function SettingsPresenceColourRow({ row }: { row: SettingsPresenceColour
           onPick={(next) => {
             setOpen(false);
             trigger.focus();
-            if (next !== loaded.color) void choose(loaded, next);
+            if (next !== base.color) void choose(base, next);
           }}
         />
       ) : null}

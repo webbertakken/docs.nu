@@ -282,6 +282,7 @@ Settings > Account opens on the **profile card** ([Account settings & email noti
   fill](../004-interface-design/color-scheme.md)). It is the participant record's colour, so it follows the
   account to every document and device; the open editor takes it at once. Shown at once, put back if refused:
   to what the server last took, newest wins, so two refusals in a row never leave a colour it never stored.
+  Until the first document gives one, the colour is **Automatic**.
 - **Email**: shown; changed as in [Account linking](#account-linking).
 - **Profile picture**: [Profile picture](profile-picture.md).
 - **Sign-in methods**: Google (**Connect Google**, or connected with **Remove**, offered only where email codes are, so

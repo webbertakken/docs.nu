@@ -17,10 +17,11 @@ export function presenceColourName(colour: string): string {
 
 export const SELF_COLOUR_EVENT = 'livedoc:self-colour';
 
-export type SelfColourChange = { id: string; color: string };
+// `color` null: no colour chosen yet (Automatic; one is given when the person first opens a document).
+export type SelfColourChange = { id: string; color: string | null };
 
-/** Tell this page the participant `id` now shows in `color`. */
-export function announceSelfColour(id: string, color: string): void {
+/** Tell this page the participant `id` now shows in `color` (null: Automatic again). */
+export function announceSelfColour(id: string, color: string | null): void {
   window.dispatchEvent(
     new CustomEvent<SelfColourChange>(SELF_COLOUR_EVENT, { detail: { id, color } }),
   );

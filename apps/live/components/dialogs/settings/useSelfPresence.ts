@@ -14,7 +14,7 @@ import { onSelfColour } from '@/lib/self-presence';
 export type SelfPresence =
   | { state: 'loading' }
   // No record yet (a first visit), or it could not be read: the card shows the neutral swatch.
-  | { state: 'none' }
+  | { state: 'none'; id: string | null }
   | { state: 'ready'; self: Participant };
 
 // What a read answered, for the id it was asked for.
@@ -44,15 +44,19 @@ export function useSelfPresence(): SelfPresence {
   useEffect(
     () =>
       onSelfColour(({ id: changed, color }) =>
-        setLoaded((l) =>
-          l?.self && l.self.id === changed ? { id: l.id, self: { ...l.self, color } } : l,
-        ),
+        setLoaded((l) => {
+          if (l?.id !== changed) return l;
+          if (color === null) return { id: l.id, self: null };
+          // A first pick makes the record: its name is the account's, which the card reads from the session.
+          const self = l.self ?? { id: changed, name: '', color, status: 'online' as const };
+          return { id: l.id, self: { ...self, color } };
+        }),
       ),
     [],
   );
 
   if (!authLoaded) return { state: 'loading' };
-  if (!id) return { state: 'none' };
+  if (!id) return { state: 'none', id: null };
   if (loaded?.id !== id) return { state: 'loading' };
-  return loaded.self ? { state: 'ready', self: loaded.self } : { state: 'none' };
+  return loaded.self ? { state: 'ready', self: loaded.self } : { state: 'none', id };
 }

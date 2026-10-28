@@ -59,7 +59,7 @@ export function ProfileBanner({ name, colour }: { name: string; colour: string |
           className="fill-slate-400/70 dark:fill-slate-500/70"
         />
       </svg>
-      <div data-profile-cursor="" className="absolute top-7 right-[22.5rem] flex items-start">
+      <div data-profile-cursor="" className="absolute top-7 right-[15rem] flex items-start">
         <svg viewBox="0 0 16 16" className="size-5 drop-shadow-sm">
           <path
             d="M2 1.5 14 7.2l-5.4 1.4L6 14z"

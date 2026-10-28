@@ -12,6 +12,8 @@ export function useSelfColourUpdates(
   useEffect(
     () =>
       onSelfColour(({ id, color }) => {
+        // Automatic again (a first pick refused): the editor keeps the colour it was given.
+        if (color === null) return;
         setSelf((self) => {
           if (self.id !== id || self.color === color) return self;
           const persisted = lastPersistedSelfRef.current;

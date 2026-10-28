@@ -127,8 +127,8 @@ describe('SettingsProfileCard, as a guest', () => {
     guest.id = null;
     render(<SettingsProfileCard row={row} />);
     expect(screen.getByRole('heading', { level: 3, name: 'Guest' })).toBeTruthy();
-    // No record to read: no colour to name, so no chip for it.
-    expect(chips().queryByText(/^Colour:/)).toBeNull();
+    // No record yet: a colour is given on the first open, so it is Automatic until then.
+    await waitFor(() => expect(chips().getByText('Colour: Automatic')).toBeTruthy());
     expect(self.load).not.toHaveBeenCalled();
   });
 });

@@ -109,3 +109,42 @@ describe('SettingsPresenceColourRow', () => {
     expect(screen.queryByText(COLOUR_FAILED)).toBeNull();
   });
 });
+
+// An account that never opened a document has no participant record yet: its colour is Automatic (one is given on
+// the first open), and a pick makes the record.
+describe('SettingsPresenceColourRow, before the first document', () => {
+  beforeEach(() => {
+    auth.value = {
+      authLoaded: true,
+      isSignedIn: true,
+      accountId: 'acct_1',
+      user: { id: 'acct_1', name: 'Ada', email: 'ada@example.com' },
+    };
+    self.load.mockReset().mockResolvedValue(null);
+  });
+
+  it('says Automatic, and a pick makes the record with the account name', async () => {
+    self.save.mockResolvedValue(undefined);
+    render(<SettingsPresenceColourRow row={row} />);
+    await waitFor(() => expect(trigger().getAttribute('aria-label')).toBe('Colour: Automatic'));
+    pick('Teal');
+    expect(trigger().getAttribute('aria-label')).toBe('Colour: Teal');
+    await waitFor(() =>
+      expect(self.save).toHaveBeenCalledWith({
+        id: 'acct_1',
+        name: 'Ada',
+        color: '#14b8a6',
+        status: 'online',
+      }),
+    );
+  });
+
+  it('goes back to Automatic when that first pick is refused', async () => {
+    self.save.mockRejectedValue(new Error('refused'));
+    render(<SettingsPresenceColourRow row={row} />);
+    await waitFor(() => expect(trigger().getAttribute('aria-label')).toBe('Colour: Automatic'));
+    pick('Teal');
+    await waitFor(() => expect(screen.getByText(COLOUR_FAILED)).toBeTruthy());
+    expect(trigger().getAttribute('aria-label')).toBe('Colour: Automatic');
+  });
+});
