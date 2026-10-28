@@ -308,6 +308,7 @@ export type SettingsDeleteAccountRowSpec = RowBase & { kind: 'deleteAccount' };
 export type SettingsAccountNameRowSpec = RowBase & { kind: 'accountName' };
 export type SettingsSignInMethodsRowSpec = RowBase & { kind: 'signInMethods' };
 export type SettingsSessionsRowSpec = RowBase & { kind: 'sessions' };
+export type SettingsSignOutRowSpec = RowBase & { kind: 'signOut' };
 
 // The Trash (docs/specs/013-workspace/trash.md): not a preference, a way in.
 // Here for everyone, guests and self-hosts without accounts included, because
@@ -350,6 +351,7 @@ export type SettingsRowSpec =
   | SettingsAccountNameRowSpec
   | SettingsSignInMethodsRowSpec
   | SettingsSessionsRowSpec
+  | SettingsSignOutRowSpec
   | SettingsTrashRowSpec
   | SettingsPresetSummaryRowSpec
   | SettingsCloudSyncRowSpec
@@ -1635,9 +1637,19 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         kind: 'sessions',
         key: 'sessions',
         section: 'Signing In',
-        label: 'Sessions',
-        keywords: 'sessions devices browsers signed in sign out everywhere log out security',
+        label: 'Where You’re Signed In',
+        keywords:
+          'sessions devices browsers where signed in sign out everywhere else others log out security',
         description: 'Every browser signed in to this account. Sign one out, or all but this one.',
+        available: (ctx) => ctx.signedIn,
+      },
+      {
+        kind: 'signOut',
+        key: 'signOut',
+        section: 'Signing In',
+        label: 'Sign Out',
+        keywords: 'sign out log out logout leave this browser end session',
+        description: 'Ends this browser’s session. Your documents stay in your account.',
         available: (ctx) => ctx.signedIn,
       },
       {

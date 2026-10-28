@@ -19,11 +19,13 @@ import {
   type AccountSessionRow,
 } from '@/lib/account-manage';
 import { useAuthConfig } from '@/lib/auth-config';
+import { track } from '@/lib/telemetry';
 import { SETTINGS_ROW_BUTTON, SettingsRowShell } from './SettingsRowShell';
 import type {
   SettingsAccountNameRowSpec,
   SettingsSessionsRowSpec,
   SettingsSignInMethodsRowSpec,
+  SettingsSignOutRowSpec,
 } from './settings-catalogue';
 
 export const NAME_SAVED = 'Saved.';
@@ -314,5 +316,30 @@ export function SettingsSessionsRow({ row }: { row: SettingsSessionsRowSpec }) {
         </p>
       ) : null}
     </SettingsRowShell>
+  );
+}
+
+// Sign Out, here as in the account menu: counted first, then the session ends and the page lands on the front door.
+export function SettingsSignOutRow({ row }: { row: SettingsSignOutRowSpec }) {
+  const { signOut } = useDeferredAuth();
+  const [busy, setBusy] = useState(false);
+  return (
+    <SettingsRowShell
+      row={row}
+      control={
+        <button
+          type="button"
+          className={SETTINGS_ROW_BUTTON}
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            track('Session', 'SignedOut');
+            void signOut({ redirectUrl: '/' });
+          }}
+        >
+          {busy ? 'Signing Out…' : 'Sign Out'}
+        </button>
+      }
+    />
   );
 }

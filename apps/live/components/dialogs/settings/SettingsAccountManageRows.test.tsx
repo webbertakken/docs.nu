@@ -10,6 +10,7 @@ import {
   type SettingsAccountNameRowSpec,
   type SettingsSessionsRowSpec,
   type SettingsSignInMethodsRowSpec,
+  type SettingsSignOutRowSpec,
 } from './settings-catalogue';
 
 const auth = vi.hoisted(() => ({ value: {} as Record<string, unknown> }));
@@ -30,6 +31,8 @@ const manage = vi.hoisted(() => ({
   signOutSession: vi.fn(),
   signOutOtherSessions: vi.fn(),
 }));
+const telemetry = vi.hoisted(() => ({ track: vi.fn() }));
+vi.mock('@/lib/telemetry', () => telemetry);
 vi.mock('@/lib/account-manage', () => ({ ...manage, ACCOUNT_NAME_MAX: 100 }));
 
 const {
@@ -39,6 +42,7 @@ const {
   SettingsAccountNameRow,
   SettingsSessionsRow,
   SettingsSignInMethodsRow,
+  SettingsSignOutRow,
 } = await import('./SettingsAccountManageRows');
 
 const rowOf = <T,>(kind: string) =>
@@ -214,5 +218,28 @@ describe('SettingsSessionsRow', () => {
     render(<SettingsSessionsRow row={row()} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Try Again' }));
     expect(await screen.findByText('Safari on iOS')).toBeTruthy();
+  });
+});
+
+describe('SettingsSignOutRow', () => {
+  const row = () => rowOf<SettingsSignOutRowSpec>('signOut');
+
+  it('is in Signing In, after Where You’re Signed In, for the signed in only', () => {
+    const account = SETTINGS_CATEGORIES.find((c) => c.id === 'account')!;
+    const keys = account.rows.map((r) => r.key);
+    expect(keys.indexOf('signOut')).toBe(keys.indexOf('sessions') + 1);
+    expect(row().section).toBe('Signing In');
+    expect(rowOf<SettingsSessionsRowSpec>('sessions').label).toBe('Where You’re Signed In');
+    expect(row().available?.({ signedIn: false } as never)).toBe(false);
+  });
+
+  it('signs this browser out as the account menu does, and counts it', () => {
+    const signOut = vi.fn(async () => {});
+    auth.value = { ...auth.value, signOut };
+    render(<SettingsSignOutRow row={row()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign Out' }));
+    expect(telemetry.track).toHaveBeenCalledWith('Session', 'SignedOut');
+    expect(signOut).toHaveBeenCalledWith({ redirectUrl: '/' });
+    expect(screen.getByRole('button', { name: 'Signing Out…' })).toHaveProperty('disabled', true);
   });
 });

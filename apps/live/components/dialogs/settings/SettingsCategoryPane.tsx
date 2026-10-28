@@ -14,6 +14,7 @@ import { SettingsProfileCard } from './SettingsProfileCard';
 import {
   SettingsAccountNameRow,
   SettingsSessionsRow,
+  SettingsSignOutRow,
   SettingsSignInMethodsRow,
 } from './SettingsAccountManageRows';
 import { SettingsShortcutsRow } from './SettingsShortcutsRow';
@@ -274,6 +275,8 @@ export function SettingsCategoryPane({
         return <SettingsSignInMethodsRow row={row} />;
       case 'sessions':
         return <SettingsSessionsRow row={row} />;
+      case 'signOut':
+        return <SettingsSignOutRow row={row} />;
       case 'trash':
         return <SettingsTrashRow row={row} />;
       case 'cloudSync':
