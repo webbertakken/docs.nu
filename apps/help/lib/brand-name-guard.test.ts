@@ -16,7 +16,6 @@ const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 
 /** Files that are about livediagram, or carry its notice, as a whole. */
 const UPSTREAM_FILES = new Set([
-  'LICENSE', // livediagram's MIT copyright notice, which the licence requires LiveDoc to keep
   'THIRD_PARTY_NOTICES.md',
   'docs/specs/002-project-scope/livediagram-upstream.md',
   'apps/help/lib/brand-name-guard.test.ts',

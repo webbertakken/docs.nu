@@ -5,6 +5,7 @@ Monorepo for LiveDoc, hosted at [docs.nu](https://docs.nu). Multiple apps share 
 - LiveDoc is a parallel product to livediagram, which it grew from: see [Purpose](docs/specs/001-project-vision/purpose.md).
 - Changes from livediagram are picked by hand, never merged: see [livediagram upstream](docs/specs/002-project-scope/livediagram-upstream.md).
 - The upstream's name appears only where something means the upstream; `apps/help/lib/brand-name-guard.test.ts` fails on any other mention.
+- Merge completed features immediately when CI is green and use `gh stack`s where useful, fix forward when fix needed.
 
 ## Before you start
 
