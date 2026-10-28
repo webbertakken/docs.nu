@@ -55,11 +55,20 @@ export async function handlePreferences(ctx: RouteContext): Promise<Response> {
     }
     const serialised = JSON.stringify(body.prefs);
     const now = Date.now();
-    await env.DB.prepare(
-      'INSERT INTO user_preferences (owner_id, prefs, updated_at) VALUES (?1, ?2, ?3) ON CONFLICT (owner_id) DO UPDATE SET prefs = excluded.prefs, updated_at = excluded.updated_at',
+    // Written only for a guest or an account that still exists: a session token outlives a closed account by up to
+    // 15 minutes, and a write in that window would bring back preferences for an account nothing sweeps.
+    const isAccount = ctx.verifiedAccountId !== null && ctx.verifiedAccountId === ownerId;
+    const res = await env.DB.prepare(
+      `INSERT INTO user_preferences (owner_id, prefs, updated_at)
+       SELECT ?1, ?2, ?3 WHERE ?4 = 0 OR EXISTS (SELECT 1 FROM identity_users WHERE id = ?1)
+       ON CONFLICT (owner_id) DO UPDATE SET prefs = excluded.prefs, updated_at = excluded.updated_at`,
     )
-      .bind(ownerId, serialised, now)
+      .bind(ownerId, serialised, now, isAccount ? 1 : 0)
       .run();
+    if ((res.meta?.changes ?? 0) === 0) {
+      console.warn('[preferences] write_refused reason=unknown_owner');
+      return json({ error: 'unknown_owner' }, { status: 404 });
+    }
     return noContent();
   }
   return notFound();

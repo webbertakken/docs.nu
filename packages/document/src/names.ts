@@ -1,3 +1,5 @@
+import { graphemes } from './graphemes';
+
 // Tab + document name length (docs/specs/006-document/name-length.md).
 //
 // Names had no cap. Mostly invisible when you type one by hand, but the
@@ -41,10 +43,13 @@ export function truncateName(raw: string): string {
 // two letters; multi-word names use the first letter of the first and last
 // word ("Curious Falcon" -> "CF"). Here rather than in the editor so the
 // headless export draws the same initials the canvas does (a Roll call's
-// people, docs/specs/020-import-export/export-fidelity.md).
+// people, docs/specs/020-import-export/export-fidelity.md). A letter is a
+// grapheme (docs/specs/014-identity/profile-picture.md "Initials"), so a name
+// that starts with an emoji, a flag or an accented letter keeps it whole.
 export function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+  const first = (word: string, n = 1) => graphemes(word).slice(0, n).join('');
+  if (parts.length === 1) return first(parts[0]!, 2).toUpperCase();
+  return (first(parts[0]!) + first(parts[parts.length - 1]!)).toUpperCase();
 }

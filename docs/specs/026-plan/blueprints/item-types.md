@@ -99,8 +99,10 @@ linkType: 'project' }`) in item-types.ts; Task and the brought Bug and Story car
   order, never self), `linkText` ("Missing card"), and `linkedCardsOf(target, items, types)`: groups
   `{ fieldId, label, fromTypes, cards }`, one per Card field whose `linkType` is the target's type (Parent for a
   Project), trashed cards left out. `LinkedCardField` (apps/live) is the shared control for every Card field
-  (`ItemFieldEditor`), an in-place listbox (inside the panel's focus trap) with a filter past
-  `LINK_FILTER_FROM` (8), Escape taken in the capture phase. `PlanSheetsHost` passes the groups as `linkedGroups`
+  (`ItemFieldEditor`), a listbox in an `AnchoredPopover` (portalled over the page, so the side column never clips it;
+  it takes Escape before the panel and closes on a press outside) of width `max(LINK_LIST_MIN_PX (320), the field's
+width)`, capped by the window, with a filter past `LINK_FILTER_FROM` (8); each title `line-clamp-2` in a `Tooltip` of
+  the whole title. `PlanSheetsHost` passes the groups as `linkedGroups`
   (`LinkedCardGroup` in LinkedCards.tsx, `New {Type}` via `addItem` with the link
   set, first status the type uses, tracked `('Plan', 'Added', 'LinkedCard')`). `customFieldText(field, value, items)`
   names a Card value; `LaneFieldKind` gains `card` (rows named by the linked card with its `itemColourOf` dot, number

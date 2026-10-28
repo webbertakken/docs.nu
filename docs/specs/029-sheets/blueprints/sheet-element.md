@@ -400,7 +400,8 @@ interactive)`, a `BoxedElementView` with the layer's `boxedShared` (the props ev
 
 - `SheetPresence` (`sheet-presence-store.ts`, one per store through `sheetPresenceFor`) sends `sheet-presence` on
   selection change (throttled `PRESENCE_THROTTLE_MS`) and on edit start and end, `null` on blur or unmount; hears
-  others', which `SheetSelectionLayer` draws as outlines and name tags (tag hidden after `PEER_TAG_MS` still). Re-sends on a newcomer and on rejoin as `usePlanPresence` does.
+  others'; `on(sheetId, tabId)` gives a sheet's peers only when the op names that sheet's tab too (the room confines a
+  tab-scoped session's presence by the tab it names), which `SheetSelectionLayer` draws as outlines and name tags (tag hidden after `PEER_TAG_MS` still). Re-sends on a newcomer and on rejoin as `usePlanPresence` does.
 
 ### Cell comments
 

@@ -13,6 +13,7 @@ import { changesetLog } from './log';
 import { planRevert } from './revert-plan';
 import { readStoredTab } from './stored-tab';
 import { SUBMIT_ATTEMPTS, writtenFooter, type SubmitResult } from './submit';
+import { structureChange, structureRefusal } from '../tab-structure';
 import { writeChangeset, type Author } from './write';
 
 // A revert (docs/specs/024-agents/agent-changesets.md "Revert"): the changeset's inverse applied as
@@ -25,6 +26,8 @@ type RevertArgs = {
   record: ChangesetRecord;
   author: Author;
   tokenId: string | null;
+  // The one tab a tab-scoped grant reaches: its structure stays as stored (tab-structure.ts).
+  scope?: string | null;
   frontDoor: FrontDoor;
   waitUntil?: (promise: Promise<unknown>) => void;
 };
@@ -61,6 +64,10 @@ export async function revertChangeset(args: RevertArgs): Promise<SubmitResult> {
       }
     }
     const next = { ...stored.tab, elements: plan.elements };
+    if (args.scope) {
+      const why = structureChange(stored.tab, next, args.scope);
+      if (why) return structureRefusal(why, where);
+    }
     const lint = lintResult(next, where, stored.tab);
     const outcome = await writeChangeset(env, {
       documentId: document.id,

@@ -1,10 +1,16 @@
 // An agent's form write (docs/specs/030-forms/forms.md "Agents", blueprint §15): a Form tab's form replaced whole,
 // at the revision the agent read, then relayed to open editors as the `tab-meta` an editor's own edit sends. The tab
-// takes the form's heading as its name. While the form takes responses only its settings may change. A lost race
-// repeats once from the read.
+// takes the form's heading as its name. While the form takes responses only its settings may change: a form switched
+// on but past its Close On or at its Response Limit takes none, so it is not locked (unless the write would open it
+// again). A lost race repeats once from the read.
 import type { RoomOp } from '@livedoc/api-schema';
 import { tabKindOf, type Tab } from '@livedoc/document';
-import { changesBeyondSettings, readForm } from '@livedoc/forms';
+import {
+  changesBeyondSettings,
+  closedBySettings,
+  readForm,
+  type FormDefinition,
+} from '@livedoc/forms';
 import { getLiveFormLink, isTabRevStale, upsertTabAtRev } from '../db';
 import { TabTooLargeError } from '../limits';
 import { capStoredName } from '../names';
@@ -12,6 +18,7 @@ import { relayPages } from '../room-client';
 import type { DocumentEnv } from '../types';
 import { readStoredTab } from '../changesets/stored-tab';
 import { SUBMIT_ATTEMPTS } from '../changesets/submit';
+import { formLeavesTab, structureRefusal } from '../tab-structure';
 
 const FORM_LOCKED_MESSAGE =
   'This form is taking responses, so only its settings can change. Close it first: its link stays.';
@@ -28,6 +35,9 @@ export async function writeAgentForm(
   documentId: string,
   tabId: string,
   body: Record<string, unknown>,
+  // The one tab a tab-scoped grant reaches (docs/specs/013-workspace/tab-scoped-share-links.md "Structure"): its form
+  // sends responses only to that tab, and the tab keeps its name.
+  scope: string | null = null,
 ): Promise<AgentFormResult> {
   const form = readForm(body['form']);
   if (!form)
@@ -54,15 +64,20 @@ export async function writeAgentForm(
         { rev: stored.rev },
       );
     }
+    if (scope && formLeavesTab(stored.tab.form, form, scope))
+      return structureRefusal('form', where);
     const before = readForm(stored.tab.form);
     if (!before || changesBeyondSettings(before, form)) {
       const live = await getLiveFormLink(env, documentId, tabId);
-      if (live?.open === 1) {
+      const state = { responses: live?.responses ?? 0, now: Date.now() };
+      const taking = (f: FormDefinition | null): boolean => !f || !closedBySettings(f, state);
+      if (live?.open === 1 && (taking(before) || taking(form))) {
         console.info('[forms] agent.locked', where);
         return refused(409, 'form_locked', FORM_LOCKED_MESSAGE);
       }
     }
-    const name = capStoredName(form.heading, null, 'tab');
+    // The tab takes the form's heading as its name, except through a link to one tab: a name is structure.
+    const name = scope ? stored.tab.name : capStoredName(form.heading, null, 'tab');
     // The form wears its tab's look: a theme given is the tab's.
     const next: Tab = {
       ...stored.tab,

@@ -619,7 +619,9 @@ Undo brings the whole branch back.
 - It applies to Delete / Backspace, the element menu's Delete, and a
   multi-selection's delete: each selected node takes its branch.
 - **Cut** takes the branch too, and copies it first, so a paste puts the whole
-  branch back. A plain **Copy** copies only what is selected.
+  branch back. A Cut copies only what its delete takes: a locked node, or one on
+  a locked layer, and the branch under it stay, so none of it is copied to be
+  pasted twice. A plain **Copy** copies only what is selected.
 - A **locked** node in the branch (or one on a locked layer) stays, as do the
   nodes under it, and becomes a root, as any protected element survives a
   delete.

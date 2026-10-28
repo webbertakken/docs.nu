@@ -97,7 +97,7 @@ untouched.
 **Links.** The Link button opens a one-line address field under the toolbar,
 pre-filled when the selection already sits on a link, with Apply / Remove.
 The address goes through the same `normaliseUrl` guard the element link
-picker uses (bare hosts get `https://`, only `http` / `https` / `mailto`
+picker uses (bare hosts get `https://`, a host with a port too, only `http` / `https` / `mailto`
 survive), and rendering re-checks with `isSafeFollowUrl`, so a payload that
 arrived by some other path still cannot execute. Links open in a new tab with
 `rel="noopener noreferrer"`.

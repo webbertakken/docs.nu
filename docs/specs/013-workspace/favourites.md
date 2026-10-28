@@ -45,23 +45,29 @@ both owner-wide operations ([Owner-keyed data](../015-api/api.md#owner-keyed-dat
   `(owner_id, document_id)`, so the move is `INSERT OR IGNORE` then `DELETE`:
   on a collision the account's star, and its original `created_at`, wins.
 
-## No access check on write
+## A star needs the document in reach
 
-`PUT /api/favourites/:id` doesn't verify the caller can read that document. A
-star is a private bookmark in the starrer's own row: it grants no access,
-reveals nothing, and the Favourites view renders by intersecting the starred
-ids with **the document lists the client already has permission to see**. An id
-for something you can no longer open simply doesn't appear. Checking on write
-would cost a lookup per star to prevent nothing.
+`PUT /api/favourites/:id` stars only a document the caller reaches: their own
+personal document, a document of a team they have joined (by their verified
+account, never the guest header), or one shared with them through a link that
+is still live (`reachesDocument`). Anything else, someone else's document, a
+team document once its maker has left the team, a document in the Trash or no
+document at all, answers the same `404` and writes nothing, so a star never
+tells a stranger that an id is real. The refusal logs
+`[favourites] star_refused reason=out_of_reach`.
+
+A star still grants nothing: the Favourites view renders by intersecting the
+starred ids with **the document lists the client already has permission to
+see**, so a star on something the person can no longer open simply doesn't
+appear. Un-starring stays unchecked: it deletes only the caller's own row.
 
 ## An offline document's star lives in the browser
 
 The table's `document_id` is a foreign key into `documents`, and an offline
 document ([Offline Mode](../006-document/offline-mode.md)) has no row there: it lives only in this browser's
 IndexedDB. Sending its star to the server is therefore not merely wasted, it
-is **rejected**: the foreign key refuses the row and the route answers 404, as it
-does for a document deleted meanwhile (no lookup first; the insert's refusal is
-the check). Because the toggle
+is **rejected**: there is no document to reach, and the route answers 404, as it
+does for a document deleted meanwhile. Because the toggle
 is optimistic and the write is swallowed, the star would appear on click and
 be gone on the next reload.
 

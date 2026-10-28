@@ -1,7 +1,9 @@
 // The documents a person can open, as SQL (docs/specs/013-workspace/inbox.md §4;
 // docs/specs/013-workspace/blueprints/explorer-home.md "Reads"). The three sets the Explorer's
-// Recent merges: their own, those in a team they have JOINED (an invite grants nothing), and those
-// shared with them through a link that is still live. Never a document in the Trash.
+// Recent merges: their own personal ones, those in a team they have JOINED (an invite grants nothing), and those
+// shared with them through a link that is still live. Never a document in the Trash. A team document is the
+// team's (docs/specs/013-workspace/team-shared-documents.md): its maker reaches it as a joined member, through the
+// team leg, and loses it with the rest of the team's once they leave; owning the row grants nothing.
 //
 // Activity and Home both scope by this FIRST and filter after, which is the security boundary: an
 // id inside an event or a blob can never surface a document the reader can no longer open.
@@ -23,7 +25,7 @@ export const VISIBLE_DOCUMENTS_CTES = `
     SELECT team_id FROM team_members WHERE user_id = ?1 AND status = 'joined'
   ),
   visible_ids(id) AS (
-    SELECT id FROM documents WHERE owner_id = ?1
+    SELECT id FROM documents WHERE owner_id = ?1 AND team_id IS NULL
     UNION
     SELECT id FROM documents WHERE team_id IN (SELECT team_id FROM my_teams)
     UNION
@@ -31,18 +33,20 @@ export const VISIBLE_DOCUMENTS_CTES = `
   ),
   visible_all AS (
     SELECT d.id, d.name, d.owner_id, d.team_id, d.folder_id, d.saved_at,
-           CASE WHEN d.owner_id = ?1 THEN 'own'
+           CASE WHEN d.owner_id = ?1 AND d.team_id IS NULL THEN 'own'
                 WHEN d.team_id IN (SELECT team_id FROM my_teams) THEN 'team'
                 ELSE 'shared' END AS via,
-           CASE WHEN d.owner_id = ?1 OR d.team_id IN (SELECT team_id FROM my_teams) THEN NULL
+           CASE WHEN (d.owner_id = ?1 AND d.team_id IS NULL)
+                     OR d.team_id IN (SELECT team_id FROM my_teams) THEN NULL
                 ELSE ${visitLinkSql('?2')} END AS share_code,
-           CASE WHEN d.owner_id = ?1 OR d.team_id IN (SELECT team_id FROM my_teams) THEN NULL
+           CASE WHEN (d.owner_id = ?1 AND d.team_id IS NULL)
+                     OR d.team_id IN (SELECT team_id FROM my_teams) THEN NULL
                 ELSE s.tab_id END AS scope_tab_id
       FROM visible_ids vi
       JOIN documents d ON d.id = vi.id
       LEFT JOIN shared_with s ON s.document_id = d.id AND s.owner_id = ?1
      WHERE d.trashed_at IS NULL
-       AND (d.owner_id = ?1
+       AND ((d.owner_id = ?1 AND d.team_id IS NULL)
             OR d.team_id IN (SELECT team_id FROM my_teams)
             OR (s.owner_id IS NOT NULL AND d.shareable = 1))
   ),

@@ -35,19 +35,32 @@ Stored on the element, shared by everyone, undone like any element edit:
   takes both back); a board someone titled differently keeps its title, and a tab that already had a name of its own
   renames no board.
 - **Columns**: each a **status** value and a display name, an optional **WIP limit** and an optional colour. A board
-  has 1 to 12 columns. The first column is where new items land when no column is chosen.
-- **Done column**: optionally one column is marked done: its cards draw muted and count as finished in the
-  header's progress.
+  has 1 to 12 columns. A column's status is read trimmed, as a card's status is, so a card moved into it lands in
+  it. The first column is where new items land when no column is chosen.
+- <a id="done-columns"></a>**Done columns**: any of a board's columns can **count as done** (Done, Won't Do and
+  Cancelled all close a card). Their cards draw muted, count as finished in the header's progress, Completion,
+  Points and the dashboards, and are never overdue or stale. A board may have none, one or several.
+  - **Found by name**: a column added or set up with a done-like name counts as done without anyone saying so:
+    **Done**, **Won't Do**, **Won't Fix**, **Cancelled** (or Canceled), **Completed**, **Complete**, **Closed**,
+    **Resolved**, **Shipped**, **Fixed**, **Released**, **Published**, **Delivered**, **Finished**, **Rejected**,
+    **Declined**, **Abandoned**, **Dropped**, **Merged** and **Deployed**. Names are compared as statuses are
+    (case, spacing, curly or straight apostrophes, "Wont Do"), whole names only: "Not Done" and "Done Soon" are not
+    done.
+  - **Set by hand**: **Counts as Done** in a column's own settings turns it on or off for that column, whatever its
+    name, and that choice is kept (a later rename does not undo it).
+  - **Older boards**: a board saved before columns were flagged keeps reading as it did, its one done column and
+    every column after it counting as done, until its columns are next changed, when each column keeps what it
+    counted as and is flagged so. A board with neither reads its columns' names.
 - **The header's controls** run Focus, Maximise, then the cog. There is no ⋯: the cog is the board's menu.
   Maximised or filling its tab, the board has no Focus. A board has no Add to Slides button in its header.
 - **Board Settings cog**: a board's header ends with a cog (**Board Settings**, with a tooltip) at its far right, after
   Maximise, for someone who may edit. It selects the board and opens its **element menu** under itself (the menu a
   right-click on the board opens, with the same rules: maximised or filling its tab, no Layer, Size, Rotation or
-  Animation; under Style, set apart by a separator, its own rows Board Setup, Columns, Swimlanes, Supported Cards and Card Layout; no Collaborate or
+  Animation; under Style, set apart by a separator, its own rows Board Setup, Columns, Swimlanes, Sort Cards, Supported Cards and Card Layout; no Collaborate or
   Resources, [Nothing attached to Plan items](plan-mode.md#nothing-attached-to-plan-items)); pressed again it
   closes it. A board a collaborator holds opens nothing. In a Dashboard slot, which opens no element menu, the cog
   opens **Board Settings** as a popover instead (as a Sheet's and a chart's cogs do): Board Setup, Columns, Swimlanes,
-  Supported Cards and Card Layout, then the slot's **Slot** section ([Dashboard tab](plan-tabs.md#dashboard-tab)),
+  Sort Cards, Supported Cards and Card Layout, then the slot's **Slot** section ([Dashboard tab](plan-tabs.md#dashboard-tab)),
   one open at a time; someone who may not edit the board sees the slot's own cog there. Telemetry: `Plan` · `Opened` ·
   `BoardSettings`.
 - **Swimlanes**: none, or grouped by assignee, type, priority, status, or **any field** the card types the board
@@ -58,6 +71,30 @@ Stored on the element, shared by everyone, undone like any element edit:
   types offer: None always, Type when it shows more than one type, Assignee, Priority and each field when
   one of its types has it; a board stored grouping by `parent` reads as grouping by the Parent field; a grouping already in use stays listed (and pressed) even once its types no longer offer it.
   A Gantt chart's Swimlanes do the same for the card types it draws.
+- **Sort Cards**: off (cards in rank order, as placed by hand), or up to **two levels** of fields, each with a
+  direction, shared by everyone. Each column (and each cell, with swimlanes) orders its cards by the first field, then
+  the second where the first ties, then rank where both tie. The fields a board can sort by: **Priority**,
+  **Estimate**, **Start Date** and **Due Date**, then every custom **Number**, **Currency**, **Date**, **Rating** and
+  **Choice** field the card types the board shows offer (a Choice by its options' order). A card with no value for a
+  level (or whose type does not have the field) comes after those that have one, whichever way that level runs. The
+  directions read by kind: Priority **Highest First** or **Lowest First**; a number, currency, estimate or rating
+  **Lowest First** or **Highest First**; a date **Earliest First** or **Latest First**; a Choice **In Option Order**
+  or **Reverse Option Order**. A field picked starts on Highest First for Priority and Rating, else on the first.
+  A board sorted by a field its types no longer offer keeps it (listed and pressed, as Swimlanes keeps a grouping),
+  and its cards read as having no value for it. While a board is sorted, **reordering within a column is off**:
+  a card dropped back into its own cell stays where the sort puts it, and Shift+Up/Down announce "Sorted by {Field}:
+  turn Sort Cards off to reorder by hand." Dragging a card to another column, row or board still moves it, its
+  placeholder drawn where the sort will put it. Sort Cards off puts the hand order (rank) back as it was: sorting
+  never changes a card's rank.
+  - **Board Settings**' **Sort Cards** row (the element menu's and the cog's, after Swimlanes) opens with an info note
+    ("Order each column's cards by up to two fields. While sorted, cards are not reordered by hand."), then **Sort
+    By**: an [option list](#option-lists) of **None** then each sortable field (named by the field, drawn with its
+    kind's glyph), and under it, while a field is chosen, its two directions as a two-row option list. Then **Then
+    By**, the same for the second level, shown once Sort By has a field: None, then every sortable field but the
+    first. Choosing None for Sort By turns Sort Cards off (the second level goes with it). Each choice is one element
+    edit, undone like any other. Telemetry: `Plan` · `Changed` · `BoardSort`.
+  - The board's header shows nothing new; a sorted board's column headers carry no handle. Someone who may only view
+    sees the board sorted as everyone does.
 - **Card shows**: which fields a card face draws (key, type, assignee, priority, labels, estimate, due, votes,
   checklist progress). Title always shows.
 - **Voting** is not a board setting: a vote is the tab's session vote (Collaborate, Vote), cast on the cards the
@@ -96,7 +133,8 @@ Where each is set, so a setting lives with what it changes, never in one central
   phone the sheet stays put. Under it: its **name**, **colour** (a row like the WIP limit's: "Colour" over
   its effect, or "No colour", and the colour's swatch at the row's end; pressed, the
   [colour picker](../004-interface-design/colour-picker.md) opens in its own popover beside it, No colour or any
-  colour, the column popover staying open), **WIP limit**, **Width**, **Counts as Done**, then, one to a row, **+ Add Column
+  colour, the column popover staying open), **WIP limit**, **Width**, **Counts as Done** (a switch, on for a
+  [done column](#done-columns) found by its name too), then, one to a row, **+ Add Column
   After** and **Delete Status**. The two ways to take it away: **Remove Column** (the toolbar's) takes it off this board only, at once: the
   state and its cards stay, so another board's column for it still shows them (where none does, the cards read
   as No status, as any card of a state no board names). **Delete Status** (a bin) deletes the state: when it
@@ -125,10 +163,10 @@ Where each is set, so a setting lives with what it changes, never in one central
 - **The Columns section** (the cog's and the element menu's): an info note ("The board's columns, left to right. Press
   one to open its settings."), then **On This Board** (a small uppercase heading with a count badge) over an
   [option list](#option-lists) of the board's columns left to right, a row each: its position number, its colour
-  swatch (a hollow ring for none), its name, a **WIP n** pill when it has a limit, a green **Done** pill on the done
-  column, and a chevron. Pressing a row closes the menu and opens that column's own settings, anchored to its cog
+  swatch (a hollow ring for none), its name, a **WIP n** pill when it has a limit, a green **Done** pill on each
+  [done column](#done-columns), and a chevron. Pressing a row closes the menu and opens that column's own settings, anchored to its cog
   (above). Under a hairline, the **column picker** (below) inline, its button reading **Add** (still named Add
-  Column): a column it adds goes at the end, or before the done column when the board ends with it, and the section
+  Column): a column it adds goes at the end, or before the done columns when the board ends with them, and the section
   stays open so several can be added in a row; the row just added is tinted in the brand colour for a moment
   (1.6 s) as it fades in. At 12 columns the picker gives way to "A board holds up to 12 columns." The document's
   statuses are worked out only while the section is open. Each add is one board change, one undo step, with the
@@ -254,7 +292,7 @@ Where each is set, so a setting lives with what it changes, never in one central
 
 ## What the board shows
 
-- **Header**: title, the count of items shown, a progress bar (done of all, when a done column is set), the
+- **Header**: title, the count of items shown, a progress bar (cards in its done columns of all, when it has one), the
   avatars of people on the board and the quick filter.
 - **Renaming in place**: in Plan mode, someone who may edit double-clicks the board's title (or the header's
   empty space) and the title becomes a text field, its text selected. **Enter** or leaving the field saves the
@@ -270,7 +308,7 @@ Where each is set, so a setting lives with what it changes, never in one central
   width, so a wide column suits a busy stage.
 - **Columns fill the board**: a board resized taller runs its columns to its bottom edge (on a board with
   swimlanes, the last open swimlane takes the spare height); a board shorter than its cards scrolls.
-- **Cards** in rank order, at the board's **card size**. A card is a rounded tile with a hairline border and a soft
+- **Cards** in rank order (or as the board's [Sort Cards](#the-board-set-up) orders them), at the board's **card size**. A card is a rounded tile with a hairline border and a soft
   shadow that lifts a little under the pointer (still under reduced motion, it does not move). Every card carries
   the item type's colour as the fill behind its **number** (white or near-black text, whichever reads better on it); a
   Minimal card, which shows no number, has a small dot of it before the title. A card being dragged or opened by
@@ -473,7 +511,8 @@ In Plan mode:
 ### Keyboard
 
 With focus on a card: arrow keys move focus between cards; Enter opens the item; **Shift+Left/Right** moves the
-card to the previous or next column; **Shift+Up/Down** moves it within the column; Delete moves it to the
+card to the previous or next column; **Shift+Up/Down** moves it within the column (on a sorted board it moves nothing
+and says why); Delete moves it to the
 Trash, focus going on to the next card in its cell (else the one before; a cell left empty hands it to the nearest card on the board, the next in reading order, else the one before); **N** opens the Add a Card menu for the card's cell; the context-menu key opens the card's menu. Every move is announced ("#12 moved to In Progress,
 position 2 of 4").
 
@@ -488,7 +527,8 @@ outside a menu one row is in the Tab order and ArrowUp / ArrowDown / Home / End 
 picks; inside a command menu the rows are its items (`menuitemradio`, `menuitemcheckbox`, `menuitem`) and the menu's
 own keys move between them. In Setup Board it wears the board's colours. It is used by:
 
-- the board menu and cog: **Swimlanes** (Group Rows By), **Supported Cards** (Card Types), **Card Layout** (Card
+- the board menu and cog: **Swimlanes** (Group Rows By), **Sort Cards** (Sort By, Then By and their directions),
+  **Supported Cards** (Card Types), **Card Layout** (Card
   Size), a Gantt chart's Card Types and Swimlanes;
 - **Setup Board**: Card Types, Use an Existing State, and the Layout step's Swimlanes and Card Display;
 - **Add a Card**'s card types; a card type's **States**; the **Card Types** panel's rows (each with its own Edit and
@@ -718,8 +758,9 @@ to import. Import CSV reads files up to 5 MB." Each row after it becomes a new c
 - **Start**, **Due** and a custom date field: YYYY-MM-DD, or a day-first D/M/YYYY (also with `-` or `.`, and a
   two-digit year in this century); a date that is not a real day is left empty.
 - **Labels**: split at commas and semicolons, as many as a card holds. **Description**: plain text, cut to its limit.
-- Custom fields of the row's type by label: a number as a number, a checkbox from Yes/True/1/X, a choice only as one
-  of its options; a Card field is not imported.
+- Custom fields of the row's type by label: a number as a number, a Currency as the amount a card stores (a
+  number of up to two decimals, "£1,200.456" read as 1200.46), an Email only when it is an email address, a checkbox
+  from Yes/True/1/X, a choice only as one of its options; a Card field is not imported.
 - A field the row's type does not offer is ignored, as is a value that does not fit its field.
 
 The rows go in as **one write and one undo step**, each card at the end of its column in file order. At most as many

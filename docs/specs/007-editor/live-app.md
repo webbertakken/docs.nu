@@ -104,6 +104,9 @@ The **role pill** says whether you are editing, participating in or viewing this
 - Boxed elements (shape, text, sticky), arrows (straight / curved / angled, optional label, configurable line thickness + arrowhead size), groups, multi-select via marquee + plain-click + shift-click.
 - Per-element format painter, lock, link-to-tab, comment threads.
 - Real-time presence + selection + cursor broadcast via the per-document Durable Object room (see [11-api.md](../015-api/api.md)).
+  A peer who leaves takes everything of theirs with them on the next roster: their cursor, selection, avatar, laser
+  trail and camera, and any of their cursor, laser or avatar packets still waiting for the next animation frame, so a
+  last move that lands beside the roster that drops them never brings their cursor back as a ghost.
 - Undo and redo (snapshot-based, personal to each editor; the per-tab Activity panel was removed on 2026-10-03, see [Collaboration](../012-collaboration/README.md#removed-the-activity-panel)).
 - Folders in the Explorer (see [15-folders.md](../013-workspace/folders.md)).
 - Themed templates (chosen on the new-document route).

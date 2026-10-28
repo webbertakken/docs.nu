@@ -1774,6 +1774,10 @@ export const EXACT: Readonly<Record<string, string>> = {
     'Someone turned off Plan mode, in Settings > Experimental. No longer recorded: Plan mode is always offered.',
   'UI|Toggled|PlanModeOn':
     'Someone turned on Plan mode, in Settings > Experimental. No longer recorded: Plan mode is always offered.',
+  'UI|Toggled|HideCursorsOff':
+    'Someone showed other people\u2019s cursors again on their screen, in Settings > Collaborate or the Collaborators window.',
+  'UI|Toggled|HideCursorsOn':
+    'Someone hid other people\u2019s cursors and names on their screen, in Settings > Collaborate or the Collaborators window.',
   'UI|Toggled|ReduceMotionOff': 'Someone turned off reduced motion, in Settings > Accessibility.',
   'UI|Toggled|ReduceMotionOn': 'Someone turned on reduced motion, in Settings > Accessibility.',
   'UI|Toggled|ShortcutsOff': 'Someone turned off keyboard shortcuts, in Settings > Keyboard.',

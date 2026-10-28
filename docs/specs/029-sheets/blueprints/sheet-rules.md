@@ -74,7 +74,9 @@ export type FormatRule = IdRange & {
 | `{ k: 'fruleOrder', ids: string[] }`                        | Puts the named format rules in that order (ids gone are skipped, unnamed ones keep their slots, `reorderSlots`) | The order before                           |
 
 - Deleting rows or columns shrinks every rule's range, and a `range` rule's `src`, with `shrinkRange`; a rule whose
-  range (or `src`) is gone is dropped. `store-inverse-delete.ts` puts back the rules a deletion shrank or dropped, as it
+  range (or `src`) is gone is dropped. A Custom Formula Is rule whose top row or left column goes has its `fx`
+  re-anchored (`reanchorFormula`, `store-layout.ts`): each relative reference on the sheet keeps its offset from the
+  new top-left corner, counted in the layout after; one moved off the grid is `#REF!`. `store-inverse-delete.ts` puts back the rules a deletion shrank or dropped, as it
   does named ranges.
 - `resetSheetWrite` (Clear Sheet) removes both lists.
 - Making a validation rule over a range is one layout write: `subtractRange` (`packages/sheets/src/rules/validation-edit.ts`) gives, for

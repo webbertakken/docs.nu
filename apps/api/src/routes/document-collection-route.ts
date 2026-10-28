@@ -51,7 +51,7 @@ import {
   notFound,
   payloadTooLarge,
 } from '../responses';
-import { documentDates, isDocumentSource } from '@livedoc/api-schema';
+import { documentDates, isDocumentSource, isKeyId } from '@livedoc/api-schema';
 import { emailEnabled } from '../email/client';
 import { notifyMilestone } from '../email/notifications';
 import { recordDocumentCreated, recordDocumentSynced } from '../timeline';
@@ -69,7 +69,7 @@ import {
 } from '../placement/placement-log';
 import { intentRejected, placementRejected } from '../placement/placement-response';
 import type { DocumentDTO } from '../types';
-import { requireOwner, type RouteContext, readBody } from './context';
+import { ownsDocument, requireOwner, type RouteContext, readBody } from './context';
 
 export async function handleDocumentCollection(ctx: RouteContext): Promise<Response> {
   const { request, env, segments } = ctx;
@@ -107,6 +107,8 @@ export async function handleDocumentCollection(ctx: RouteContext): Promise<Respo
       if (!body.id || typeof body.name !== 'string') {
         return badRequest('missing id/name');
       }
+      // The id keys the document in paths, its room and every scope (docs/specs/015-api/api.md "Ids").
+      if (!isKeyId(body.id)) return badRequest('invalid id');
       // The document's own dates (docs/specs/015-api/api.md "Document dates"), refused whole when
       // invalid, before anything is written.
       const dates = documentDates(body, Date.now());
@@ -197,9 +199,10 @@ export async function handleDocumentCollection(ctx: RouteContext): Promise<Respo
       // ownership to the caller. Document ids are unguessable UUIDs but they
       // leak to every share-link visitor / team member, so refuse the create
       // when the id is already owned by someone else (legitimate updates go
-      // through PUT, which gates on edit access).
+      // through PUT, which gates on edit access). Owning a team document's row is not enough: its maker re-commits
+      // it only while still in the team (ownsDocument, docs/specs/013-workspace/team-shared-documents.md).
       const clash = await getDocument(env, body.id);
-      if (clash && clash.ownerId !== owner) return forbidden();
+      if (clash && !(await ownsDocument(ctx, clash))) return forbidden();
       // The name cap (docs/specs/006-document/name-length.md): shortened here,
       // whoever the caller. A re-commit of the caller's own id compares against
       // what it already stores, so an unchanged pre-cap name is kept.
@@ -218,7 +221,7 @@ export async function handleDocumentCollection(ctx: RouteContext): Promise<Respo
       // An id in the Trash is taken just the same (docs/specs/013-workspace/trash.md):
       // its owner hears the deleted state, anyone else the same refusal.
       const binned = clash ? null : await getTrashedDocumentMeta(env, body.id);
-      if (binned) return binned.ownerId === owner ? documentTrashed() : forbidden();
+      if (binned) return (await ownsDocument(ctx, binned)) ? documentTrashed() : forbidden();
       if (typeof body.presentation === 'string' && body.presentation.length > MAX_DECK_LEN) {
         return badRequest('presentation too large');
       }

@@ -385,6 +385,13 @@ type SheetWrite =
   header row or every column went is gone, and a deleted Controls column is dropped (`store-layout.ts`). Its
   inverse (`inverseDelete`, `store-inverse-delete.ts`) puts back what the deletion took into the layout the undo
   lands on (below). Pure, used by the api, the offline store and the editor's optimistic apply, so all converge.
+- An open-ended range (`A2:A`, `B1:1`) whose start corner goes borrows the grid's edge for its missing end, as a
+  whole column or row does, so it shrinks rather than reading `#REF!` (`shrinkRef`, `store.ts`).
+- `shrinkReadersOf(targetId, before, changes, cells)` gives another sheet's rewrites when rows or columns go from
+  `targetId`: every formula in `cells` reading that sheet has its ranges shrunk as the target's own are, one pass per
+  delete, linear in references. The editor's `SheetStore.writeAll` adds them to the deletion's change for each loaded
+  sheet on the tab (an undo or redo replays them as they are); the api's `storeSheetWrite` stores and relays them as
+  each reading sheet's own `cells` write (`sheets.readers.shrunk`, `sheets.readers.shrink_failed`).
 - `inverseSheetWrite(before, applied, now?)`: cells → their old inputs and formats (exact keys touched); insert →
   delete of the same ids; delete → insert of the same ids after their old neighbours, plus their cells and sizes;
   move → move back after the old neighbour; orderRows → the old order; size/hide/freeze/merge/filter/options → old
