@@ -42,6 +42,16 @@ export const TEMPLATE_LINKS = chart(
   { types: ['TemplateLink'] },
 );
 
+// The Explorer's New Document menu (docs/specs/013-workspace/new-document-menu.md "Telemetry"): how a new document
+// was started from it.
+export const NEW_DOCUMENT_MENU = chart(
+  'UI',
+  'Used',
+  'New Document Menu',
+  "How documents were started from the Explorer's New Document menu: a blank or a template.",
+  { types: ['NewDocumentBlank', 'NewDocumentTemplate'] },
+);
+
 export const TAB_TEXT_DEFAULTS = chart(
   'Tab',
   'Changed',
@@ -290,6 +300,7 @@ export const DOCUMENT_ACTIONS: MetricStack = {
     DOCUMENTS_DUPLICATED,
     JUST_DRAW,
     TEMPLATE_LINKS,
+    NEW_DOCUMENT_MENU,
     CREATED_OFFLINE,
     NEW_DOCUMENT_BACKED_OUT,
   ],

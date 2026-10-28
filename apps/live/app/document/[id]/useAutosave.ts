@@ -87,6 +87,9 @@ export function useAutosave(opts: {
   // A Participant (docs/specs/013-workspace/share-roles.md): its saves are element ops to the room, never a
   // tab PUT, a tab delete or the document's metadata.
   participant?: boolean;
+  // A document made in this browser whose create has not landed (usePendingCreate): nothing is saved until it has,
+  // and then everything done meanwhile is saved at once.
+  held?: boolean;
 }) {
   const {
     hydrated,
@@ -111,6 +114,7 @@ export function useAutosave(opts: {
     changesetSeen,
     noteTabRevision,
     participant = false,
+    held = false,
   } = opts;
 
   // The caller passes a fresh function each render; read it when a save is refused (an effect event), so
@@ -217,6 +221,7 @@ export function useAutosave(opts: {
   // (useUnloadFlush).
   useUnloadFlush({
     hydrated,
+    held,
     documentId,
     isReadOnly,
     participant,
@@ -250,6 +255,7 @@ export function useAutosave(opts: {
   useEffect(() => {
     if (!hydrated || !documentId) return;
     if (isReadOnly) return;
+    if (held) return;
     // The server has already refused a write to this document. Every further
     // attempt would fail the same way, so stop: the point is that the user is
     // told once, clearly, instead of being told to check their connection
@@ -475,6 +481,7 @@ export function useAutosave(opts: {
     return () => window.clearTimeout(handle);
   }, [
     hydrated,
+    held,
     documentId,
     tabs,
     documentName,

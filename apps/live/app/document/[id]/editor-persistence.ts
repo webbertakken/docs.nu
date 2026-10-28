@@ -1,6 +1,7 @@
 import type { SavedItemTypes } from '@/lib/api/item-types';
 import { getOnline } from '@/lib/online-status';
 import { useEffect, useState } from 'react';
+import type { EditorSeed } from './seed-pending-document';
 
 import { UNTITLED_DOCUMENT_NAME } from '@livedoc/templates';
 import type { SaveStatus } from '@/components/chrome/EditorHeader';
@@ -22,7 +23,14 @@ import {
 // The values render the header pill, footer "Saved X ago", Explorer
 // lists; the setters are written by the autosave,
 // hydration/bootstrap and room-op paths via the returned setters.
-export function useEditorPersistence({ toast }: { toast: ReturnType<typeof useToast> }) {
+export function useEditorPersistence({
+  toast,
+  seed = null,
+}: {
+  toast: ReturnType<typeof useToast>;
+  // A document just made, opened from memory (seed-pending-document.ts).
+  seed?: Pick<EditorSeed, 'documentName' | 'itemTypes'> | null;
+}) {
   // Surfaced in the footer (bottom-right of the TabBar). The autosave
   // used to swallow errors silently which made an offline API look
   // identical to a successful save; the indicator below makes the
@@ -30,7 +38,7 @@ export function useEditorPersistence({ toast }: { toast: ReturnType<typeof useTo
   // write — drives the "Saved 2 minutes ago" relative-time string.
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [savedAt, setSavedAt] = useState<number | null>(null);
-  const [documentName, setDocumentName] = useState(UNTITLED_DOCUMENT_NAME);
+  const [documentName, setDocumentName] = useState(seed?.documentName ?? UNTITLED_DOCUMENT_NAME);
   // The stored slide deck (docs/specs/012-collaboration/presentation-mode.md) exactly as the api returned it, seeded on
   // load and never read again after useSlideDeck parses it. Kept as raw text
   // rather than a parsed Deck so hydration has one obvious moment, and a deck
@@ -39,10 +47,9 @@ export function useEditorPersistence({ toast }: { toast: ReturnType<typeof useTo
   // The document's type catalogue as stored (docs/specs/026-plan/item-types.md), null for the default
   // types, with its revision: seeded on load, then set by a save here or the room's `item-types` op.
   // See useItemTypes, which shows this editor's unsaved changes over it.
-  const [documentItemTypes, setDocumentItemTypes] = useState<SavedItemTypes>({
-    itemTypes: null,
-    itemTypesRev: 0,
-  });
+  const [documentItemTypes, setDocumentItemTypes] = useState<SavedItemTypes>(
+    seed?.itemTypes ?? { itemTypes: null, itemTypesRev: 0 },
+  );
   // Reflect the document name in the browser tab so users with many
   // tabs open can spot the right one. Falls back to the bare brand
   // until hydration lands the real name.

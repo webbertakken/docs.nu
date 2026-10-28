@@ -4,6 +4,7 @@
 // column ids and statuses below are the contract between a template's tabs, so keep them in step.
 
 import {
+  PLAN_BOARD_EMPTY_HEIGHT_PX,
   statusColumn,
   type CardField,
   type MetricKind,
@@ -17,6 +18,7 @@ import type { TemplateStartId } from '@livedoc/sheets';
 export const PLAN_TEMPLATE_KINDS = [
   'blank-plan',
   'blank-spreadsheet',
+  'blank-board',
   'project-planner',
   'kanban',
   'bug-triage',
@@ -138,6 +140,14 @@ export const PLAN_TEMPLATE_TABS: Readonly<Record<PlanTemplateKind, readonly Plan
     {
       name: 'Sheet',
       sheet: { start: 'blank-spreadsheet', width: 880, height: 560, fillTab: true },
+    },
+  ],
+
+  // One empty board filling its tab, with no columns yet: it asks for its first (Setup Board).
+  'blank-board': [
+    {
+      name: 'Board',
+      board: { preset: 'blank', width: W3, height: PLAN_BOARD_EMPTY_HEIGHT_PX, title: 'Board' },
     },
   ],
 

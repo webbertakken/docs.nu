@@ -53,6 +53,7 @@ const TEMPLATE_MODES: Partial<Record<TemplateKind, EditorMode>> = {
   // Plan templates (docs/specs/026-plan/plan-templates.md).
   'blank-plan': 'plan',
   'blank-spreadsheet': 'plan',
+  'blank-board': 'plan',
   kanban: 'plan',
   'project-planner': 'plan',
   'bug-triage': 'plan',
@@ -157,6 +158,7 @@ export const EXTRA_BLANK_TEMPLATES: readonly TemplateKind[] = [
   'blank-wireframe-laptop',
   'blank-wireframe-watch',
   'blank-spreadsheet',
+  'blank-board',
   'blank-form',
 ];
 

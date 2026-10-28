@@ -8,6 +8,7 @@ import {
   type PlanTemplateKind,
 } from './template-builders-plan';
 import { isSpreadsheetPlanTemplate } from './plan-template-catalogue';
+import { isBlankTemplate } from './template-modes';
 
 const TODAY = '2026-10-12';
 
@@ -39,9 +40,10 @@ describe('Plan template example cards', () => {
   it('seed every board template, and only those', () => {
     for (const kind of PLAN_TEMPLATE_KINDS) {
       const seeded = (PLAN_TEMPLATE_SEEDS[kind]?.length ?? 0) > 0;
-      const hasBoards = boardsOf(kind).length > 0;
+      // A blank starts from nothing: Blank Board's board opens empty, waiting for its columns.
+      const hasBoards = boardsOf(kind).length > 0 && !isBlankTemplate(kind);
       expect(seeded, kind).toBe(hasBoards);
-      if (isSpreadsheetPlanTemplate(kind) || kind === 'blank-plan')
+      if (isSpreadsheetPlanTemplate(kind) || isBlankTemplate(kind))
         expect(seeded, kind).toBe(false);
     }
   });
@@ -66,6 +68,7 @@ describe('Plan template example cards', () => {
           `${kind}: "${card.title}" (${card.type} in ${card.status}) shows on no board`,
         ).toBe(true);
       }
+      if (isBlankTemplate(kind)) continue;
       for (const board of boards) {
         expect(
           cards.some((c) => shows(board, c.type, c.status, !!c.archived)),

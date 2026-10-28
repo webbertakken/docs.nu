@@ -41,6 +41,7 @@ export const EDITOR_TIMING_METRICS = [
   'Save',
   'RoomConnect',
   'RoomReconnect',
+  'NewDocumentOpen',
 ] as const;
 export type EditorTimingMetric = (typeof EDITOR_TIMING_METRICS)[number];
 

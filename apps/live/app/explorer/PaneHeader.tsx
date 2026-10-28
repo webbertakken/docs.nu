@@ -2,16 +2,16 @@
 
 // The Explorer pane header (docs/specs/013-workspace/folders.md): title + breadcrumb on the left, and on
 // the right a section "?" help button, any section-specific actions slot, and
-// a single Create dropdown (New document / New folder). Split out of views.tsx
+// the New Document menu (new-document/NewDocumentButton.tsx), New Folder inside it. Split out of views.tsx
 // so that barrel holds the list/row primitives while the header chrome (and
 // its private hamburger / caret icons) stands on its own.
-import { DocumentIcon, FolderOutlineIcon, PlusIcon } from '@/components/primitives/explorer-icons';
+import { PlusIcon } from '@/components/primitives/explorer-icons';
 import { Button, Glyph } from '@livedoc/ui';
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { HelpArticleLink } from '@/components/primitives/HelpArticleLink';
 import type { HelpArticleKey } from '@/lib/help-articles';
-import { PortalMenu } from '@/components/primitives/PortalMenu';
-import { MenuTile } from '@/components/primitives/MenuTiles';
+import { NewDocumentButton } from './new-document/NewDocumentButton';
+import type { NewDocumentRequest } from './new-document/start-new-document';
 import { paneCreateMode } from './pane-create-action';
 import { ViewToggle } from './ViewToggle';
 import type { ExplorerViewMode } from './useExplorerViewMode';
@@ -25,18 +25,10 @@ export function HamburgerIcon() {
   );
 }
 
-function CaretDownIcon() {
-  return (
-    <Glyph size={10} units={16} className="-mr-0.5">
-      <path d="M4 6l4 4 4-4" />
-    </Glyph>
-  );
-}
-
 export function PaneHeader({
   title,
   crumbs,
-  onCreateDocument,
+  newDocumentPlace,
   onCreateFolder,
   folderLabel,
   onOpenNav,
@@ -58,12 +50,11 @@ export function PaneHeader({
   onOpenNav?: () => void;
   // Optional CTAs rendered in the title row's right edge. Replaces
   // the standalone floating "+" FAB so the actions sit in their
-  // current context rather than as a global affordance. New document
-  // renders first, then New folder / New subfolder (the label
-  // varies by selection, so the caller passes it). Both are
-  // optional: the Shared / Gallery views pass neither because the
-  // verbs don't apply.
-  onCreateDocument?: () => void;
+  // current context rather than as a global affordance. A section offering New Document passes where a new document
+  // goes (its folder, or nowhere in particular); the New Document menu shows, New Folder / New Subfolder in it (the
+  // label varies by selection, so the caller passes it). Both are optional: the Shared / Gallery views pass neither
+  // because the verbs don't apply.
+  newDocumentPlace?: NewDocumentRequest['place'];
   onCreateFolder?: () => void;
   // "New folder" at the root level, "New subfolder" inside an
   // existing folder. Caller resolves the wording.
@@ -85,26 +76,14 @@ export function PaneHeader({
   // when there are actual parents to click back to.
   const showCrumbs = crumbs.length >= 2;
   const showViewToggle = Boolean(viewMode && onSetViewMode);
-  // A single "+ Create" dropdown (both desktop and mobile) replaces the
-  // standalone New-document / New-folder buttons where BOTH apply: two
-  // shrink-0 buttons squeezed the folder-name title to nothing on a narrow
-  // phone, and one compact button keeps the title roomy on every screen.
-  // Where only one applies it renders as itself — see pane-create-action.ts.
+  // The New Document menu wherever New Document is offered, New Folder inside it; a lone New Folder as itself
+  // (pane-create-action.ts).
   const createMode = paneCreateMode({
-    hasCreateDocument: Boolean(onCreateDocument),
+    hasCreateDocument: Boolean(newDocumentPlace),
     hasCreateFolder: Boolean(onCreateFolder),
   });
   const hasCreate = createMode.kind !== 'none';
   const hasActions = hasCreate || Boolean(helpArticle) || Boolean(headerActions) || showViewToggle;
-  const singleCreate =
-    createMode.kind === 'single'
-      ? createMode.action === 'document'
-        ? { label: 'New Document', onClick: onCreateDocument! }
-        : { label: folderLabel ?? 'New Folder', onClick: onCreateFolder! }
-      : null;
-  const [createOpen, setCreateOpen] = useState(false);
-  // In state, so the menu anchors to the button on the render that opens it.
-  const [createButton, setCreateButton] = useState<HTMLButtonElement | null>(null);
   return (
     <div className="mb-4">
       {/* Wraps on a phone: the actions take a second line rather than squeezing the title to
@@ -138,77 +117,24 @@ export function PaneHeader({
             {headerActions}
             {showViewToggle ? <ViewToggle mode={viewMode!} onChange={onSetViewMode!} /> : null}
             {helpArticle ? <HelpArticleLink article={helpArticle} variant="button" /> : null}
-            {singleCreate ? (
+            {createMode.kind === 'new-document' ? (
+              <NewDocumentButton
+                place={newDocumentPlace!}
+                onCreateFolder={onCreateFolder}
+                folderLabel={folderLabel}
+              />
+            ) : null}
+            {createMode.kind === 'new-folder' ? (
               <Button
                 size="xs"
-                onClick={singleCreate.onClick}
-                aria-label={singleCreate.label}
+                onClick={onCreateFolder}
+                aria-label={folderLabel ?? 'New Folder'}
                 className="shadow-sm"
               >
                 <PlusIcon />
-                {/* Label collapses to the icon below `sm:`, the same way the
-                    timeline's own mode buttons do — it would otherwise wrap
-                    the header row on a phone. aria-label carries the name. */}
-                <span className="hidden sm:inline">{singleCreate.label}</span>
+                {/* Label collapses to the icon below `sm:`, so the header row never wraps on a phone. */}
+                <span className="hidden sm:inline">{folderLabel ?? 'New Folder'}</span>
               </Button>
-            ) : null}
-            {createMode.kind === 'menu' ? (
-              <Button
-                ref={setCreateButton}
-                size="xs"
-                onClick={() => setCreateOpen((o) => !o)}
-                aria-haspopup="menu"
-                aria-expanded={createOpen}
-                className="shadow-sm"
-              >
-                <PlusIcon />
-                Create
-                <CaretDownIcon />
-              </Button>
-            ) : null}
-            {createOpen ? (
-              <PortalMenu
-                anchor={createButton}
-                placement="below"
-                onClose={() => setCreateOpen(false)}
-              >
-                {/* Icon-over-label tiles (bigger tap targets than thin rows),
-                    laid out 2-up when both actions apply, full-width when one. */}
-                <div
-                  className={`grid gap-1 px-1.5 py-1.5 ${
-                    onCreateDocument && onCreateFolder ? 'grid-cols-2' : 'grid-cols-1'
-                  }`}
-                >
-                  {onCreateDocument ? (
-                    <MenuTile
-                      icon={
-                        <span className="[&_svg]:h-5 [&_svg]:w-5">
-                          <DocumentIcon />
-                        </span>
-                      }
-                      label="New Document"
-                      onClick={() => {
-                        onCreateDocument();
-                        setCreateOpen(false);
-                      }}
-                    />
-                  ) : null}
-                  {onCreateFolder ? (
-                    <MenuTile
-                      icon={
-                        <span className="[&_svg]:h-5 [&_svg]:w-5">
-                          <FolderOutlineIcon />
-                        </span>
-                      }
-                      label={folderLabel ?? 'New Folder'}
-                      onClick={() => {
-                        onCreateFolder();
-                        setCreateOpen(false);
-                      }}
-                    />
-                  ) : null}
-                </div>
-              </PortalMenu>
             ) : null}
           </div>
         ) : null}

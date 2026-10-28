@@ -561,3 +561,61 @@ describe('useAutosave and a peer change during a save', () => {
     expect(apiSaveTab).toHaveBeenCalledTimes(1);
   });
 });
+
+// A document made in this browser saves nothing until its create lands, then everything done meanwhile at once
+// (docs/specs/013-workspace/blueprints/new-document-menu.md "Saves held until the create lands").
+describe('useAutosave held for a create', () => {
+  function heldSubject() {
+    const { refs } = setup();
+    const setters = { setSaveStatus: vi.fn(), setSavedAt: vi.fn(), setDocumentList: vi.fn() };
+    const noneSeen: ReadonlyMap<string, number> = new Map();
+    return (tabs: Tab[], held: boolean) =>
+      useAutosave({
+        hydrated: true,
+        held,
+        documentId: 'd1',
+        isReadOnly: false,
+        tabs,
+        documentName: 'D',
+        selfId: 'me',
+        sessionShareCode: null,
+        opsApplied: 0,
+        ...refs,
+        ...setters,
+        onDocumentTrashed: () => {},
+        changesetSeen: noneSeen,
+      });
+  }
+
+  it('flushes the edits made while held exactly once when released', async () => {
+    const useSubject = heldSubject();
+    const { rerender, result } = renderHook(({ tabs, held }) => useSubject(tabs, held), {
+      initialProps: { tabs: [tab('one')], held: true },
+    });
+    rerender({ tabs: [tab('two')], held: true });
+    rerender({ tabs: [tab('three')], held: true });
+    await act(async () => vi.advanceTimersByTime(5_000));
+    expect(apiSaveTab).not.toHaveBeenCalled();
+    // Held edits are still unsaved, so leaving asks and Back keeps the editor.
+    expect(result.current.hasUnsavedChanges()).toBe(true);
+
+    rerender({ tabs: [tab('three')], held: false });
+    await act(async () => vi.advanceTimersByTime(600));
+    expect(apiSaveTab).toHaveBeenCalledTimes(1);
+    const saved = (apiSaveTab.mock.calls[0] as unknown[])[2] as Tab;
+    expect((saved.elements[0] as { label: string }).label).toBe('three');
+    await act(async () => vi.advanceTimersByTime(5_000));
+    expect(apiSaveTab).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps every edit while a failed create holds it', async () => {
+    const useSubject = heldSubject();
+    const { rerender, result } = renderHook(({ tabs, held }) => useSubject(tabs, held), {
+      initialProps: { tabs: [tab('edit')], held: true },
+    });
+    rerender({ tabs: [tab('more')], held: true });
+    await act(async () => vi.advanceTimersByTime(60_000));
+    expect(apiSaveTab).not.toHaveBeenCalled();
+    expect(result.current.hasUnsavedChanges()).toBe(true);
+  });
+});

@@ -28,6 +28,8 @@ import { getGuestSelfSig } from '../local-identity';
 import { notifyApiWrite } from './write-signal';
 import { API_BASE } from './base';
 import { confinementRefusal, noteWorkbenchResponse } from './workbench-confinement';
+import { heldDocumentIn, whenDocumentCreated } from '../new-document/create-hold';
+import { debugLog } from '../debug-log';
 // A workbench session's confinement (workbench-confinement.ts), part of this module's surface.
 export {
   getWorkbenchConfinement,
@@ -116,6 +118,13 @@ export async function apiFetch(input: string, init?: RequestInit): Promise<Respo
   // A workbench session's request outside its allow-list is refused unsent, and is no network error.
   const refusal = confinementRefusal(input, init);
   if (refusal) throw refusal;
+  // A document made in this browser whose create has not landed (lib/new-document/create-hold.ts): what names it
+  // waits for the create, then goes in the order it was asked.
+  const held = heldDocumentIn(input);
+  if (held) {
+    debugLog(`[new-document] held ${method} ${new URL(input, 'http://x').pathname}`);
+    await whenDocumentCreated(held);
+  }
   let res: Response;
   try {
     res = await fetch(input, init);

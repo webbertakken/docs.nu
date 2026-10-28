@@ -36,6 +36,8 @@ import { documentLoadOrigin, noteDocumentLoadEnded, startEditorTiming } from '@/
 import { errorNameToken, errorTypeToken } from '@livedoc/api-schema';
 import type { WorkbenchDocumentSession } from '@/components/providers/workbench-session-context';
 import { loadWorkbenchDocument } from './workbench-bootstrap';
+import { notePendingOpened } from './seed-pending-document';
+import { pendingDocument } from '@/lib/new-document/pending-documents';
 
 type SetState<T> = Dispatch<SetStateAction<T>>;
 
@@ -649,7 +651,18 @@ export function useIdentityBootstrap(opts: {
       opts.refreshSharedList(self.id);
     })().catch((err: unknown) => console.warn('[load] resolving the reader failed', err));
   });
+  // A document the Explorer has just made was opened from memory in the editor's first render (seed-pending-document.ts):
+  // nothing is left to load, only the reader to settle once auth answers, as for an early open.
+  const tryPendingOpen = useEffectEvent((): boolean => {
+    if (!hydrated || embed || workbench) return false;
+    const pending = pendingDocument(documentIdFromPath(window.location.pathname).id);
+    if (!pending) return false;
+    earlyOpen.current = true;
+    notePendingOpened(pending);
+    return true;
+  });
   useLayoutEffect(() => {
+    if (tryPendingOpen()) return;
     void tryEarlyOpen();
   }, []);
   useLayoutEffect(() => {

@@ -212,6 +212,15 @@ and boots that stack on its own ports (live `:3015`, api `:8788`, marketing `:30
 runs need an account too and boot the same kind of stack on ports of their own. `e2e.yml` runs the account and
 workbench projects in their own job, beside the smoke shards; Drive stays opt-in.
 
+### Timing budgets
+
+A spec that times the app against a budget (`*-budget.spec.ts`, such as `new-document-open-budget.spec.ts` for
+[Opening at once](../013-workspace/new-document-menu.md#opening-at-once)) measures the app, not the runner. In the
+signed-in run it is its own project, `account-budget`, which depends on `account`: it starts once every other
+signed-in spec has finished, and runs its tests one at a time, so no other browser shares the runner's CPU while it
+measures. Its budget and its assertions are the spec's own; only when it runs differs. `test:e2e:account` names both
+projects.
+
 ## Armed guest signatures
 
 Every stack enforces guest signatures (above), so every spec runs as production does once armed.

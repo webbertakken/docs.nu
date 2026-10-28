@@ -587,8 +587,14 @@ export const COMPUTED_EMITTERS: Record<string, ComputedValues> = {
   // the inbound change types and the Open with outcomes, read from their unions.
   'apps/live/lib/drive/browser-engine.ts Drive·Applied': { values: DRIVE_INBOUND_TYPES },
   'apps/live/components/drive/DriveOpen.tsx Drive·Opened': { values: DRIVE_OPEN_WITH_TYPES },
-  'apps/live/app/new/page.tsx Theme·Changed': { values: THEMES, open: THEME_WHY },
-  'apps/live/app/new/page.tsx Template·Used': { values: TEMPLATES, open: TEMPLATE_WHY },
+  'apps/live/lib/new-document/write-new-document.ts Theme·Changed': {
+    values: THEMES,
+    open: THEME_WHY,
+  },
+  'apps/live/lib/new-document/write-new-document.ts Template·Used': {
+    values: TEMPLATES,
+    open: TEMPLATE_WHY,
+  },
   // The landing funnel (docs/specs/019-marketing/landing-funnel.md): the CTA a /new visit came from.
   'apps/live/app/new/useCtaAttribution.ts Cta·Opened': { values: ALL_CTA_SOURCES },
   'apps/live/app/new/useCtaAttribution.ts Cta·Created': { values: ALL_CTA_SOURCES },

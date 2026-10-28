@@ -1465,6 +1465,8 @@ export const EXACT: Readonly<Record<string, string>> = {
     'Someone clicked "Learn more" on the guest sign-in banner shown in the editor, opening the reasons-to-sign-in card.',
   'UI|Opened|SignInReasonsExplorer':
     'Someone clicked "Learn more" on the guest sign-in banner shown in the Explorer, opening the reasons-to-sign-in card.',
+  'UI|Opened|NewDocumentMenu':
+    "Someone opened the Explorer's New Document menu to choose what to start.",
   'UI|Opened|PageContents':
     "Someone opened Pages mode's Contents: every page of the tab in a list.",
   'UI|Used|PageContentsJump': "Someone went to a page from Pages mode's Contents list.",
@@ -1990,6 +1992,10 @@ export const EXACT: Readonly<Record<string, string>> = {
     "Someone turned on zen mode, hiding the editor's chrome for a distraction-free canvas.",
   'UI|Used|JustDraw':
     'Someone landed on the New Document page through a link that skips the wizard and goes straight into a blank document.',
+  'UI|Used|NewDocumentBlank':
+    "Someone made a blank document from the Explorer's New Document menu or its button, opening empty with no template picker.",
+  'UI|Used|NewDocumentTemplate':
+    "Someone made a document from one of the templates in the Explorer's New Document menu.",
   'UI|Used|StartOtherMode':
     "Someone searching an empty tab's start chose a template the search found in another mode, which switched the tab to that mode.",
   'UI|Used|TemplateLink':

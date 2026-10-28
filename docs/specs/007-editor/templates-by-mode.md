@@ -54,6 +54,12 @@ not what the New Document wizard creates; the editor's Popular lists are unchang
 Plan in [other modes](start-diagramming.md#found-in-other-modes)), and Start Planning, which has its own Empty Sheet, does not offer it. The landing page's **Blank Slate**
 shelf lists it after Blank Plan ([Marketing site](../019-marketing/marketing-site.md)).
 
+**Blank Board** (`blank-board`, Plan) is a blank of the same sort: one Board tab holding a Blank board that fills
+it, with no columns, no card types and no example cards, so it opens on Setup Board
+([Plan board](../026-plan/plan-board.md)). It is what the Explorer's
+[New Document menu](../013-workspace/new-document-menu.md) makes for **Board**; like Blank Spreadsheet it leads no
+start, and Start Planning, which places its own Blank board, does not offer it.
+
 ### Blanks of a page kind
 
 Blank Illustration's one page asks what it is for. Four more Pages blanks have already answered, for someone

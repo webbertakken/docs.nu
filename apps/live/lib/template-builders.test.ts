@@ -147,6 +147,7 @@ const ALL_KINDS = [
   'idea-garden',
   'blank-plan',
   'blank-spreadsheet',
+  'blank-board',
   'blank-session',
   'project-planner',
   'bug-triage',

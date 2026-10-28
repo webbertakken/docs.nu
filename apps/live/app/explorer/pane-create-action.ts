@@ -1,25 +1,18 @@
-// Which shape the Explorer header's create affordance takes (docs/specs/013-workspace/folders.md).
-//
-// Two actions (New document + New subfolder, inside a folder) share one
-// compact "+ Create" dropdown: two shrink-0 buttons squeezed the folder-name
-// title to nothing on a narrow phone. But a dropdown holding a single tile is
-// two clicks and a hidden label for one action — it reads as "Create… what?".
-// So a section offering exactly one create action renders that action
-// directly, named. Sections offering neither render nothing.
+// Which shape the Explorer header's create action takes (docs/specs/013-workspace/new-document-menu.md "The button",
+// docs/specs/013-workspace/folders.md "Create"). A section that offers New Document shows the New Document menu's split
+// button, with New Folder inside its menu where the section offers that too; a section offering only New Folder shows
+// that one button, named; a section offering neither shows nothing.
 //
 // Kept pure and separate from PaneHeader.tsx so the branch is unit-testable
 // without mounting the header (docs/specs/003-system-architecture/testing.md).
 
-type PaneCreateMode =
-  { kind: 'none' } | { kind: 'menu' } | { kind: 'single'; action: 'document' | 'folder' };
+type PaneCreateMode = { kind: 'none' } | { kind: 'new-document' } | { kind: 'new-folder' };
 
 export function paneCreateMode(opts: {
   hasCreateDocument: boolean;
   hasCreateFolder: boolean;
 }): PaneCreateMode {
-  const { hasCreateDocument, hasCreateFolder } = opts;
-  if (hasCreateDocument && hasCreateFolder) return { kind: 'menu' };
-  if (hasCreateDocument) return { kind: 'single', action: 'document' };
-  if (hasCreateFolder) return { kind: 'single', action: 'folder' };
+  if (opts.hasCreateDocument) return { kind: 'new-document' };
+  if (opts.hasCreateFolder) return { kind: 'new-folder' };
   return { kind: 'none' };
 }

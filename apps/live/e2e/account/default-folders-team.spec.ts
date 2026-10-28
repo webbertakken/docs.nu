@@ -63,7 +63,8 @@ test('a team folder becomes a member’s default, and new boards land in it', as
   const plan = page.locator('[data-new-mode="plan"]');
   await untilHydrated(plan);
   await plan.click();
-  await expect(page).toHaveURL(/\/document\/[0-9a-f-]{36}$/, { timeout: 30_000 });
+  // The editor pins its open tab (`#t=`) as soon as it has one.
+  await expect(page).toHaveURL(/\/document\/[0-9a-f-]{36}(#t=[^#]*)?$/, { timeout: 30_000 });
   const start = page.getByRole('region', { name: 'Start Planning' });
   await start.locator('[data-rail="inspiration"]').click();
   await start

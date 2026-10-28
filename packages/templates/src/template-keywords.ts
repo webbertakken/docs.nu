@@ -138,6 +138,7 @@ const OWN_KEYWORDS: Readonly<Record<TemplateKind, readonly string[]>> = {
     'mockup',
   ],
   'blank-plan': ['empty', 'board', 'cards', 'tasks', 'sheet'],
+  'blank-board': ['empty', 'board', 'kanban', 'cards', 'columns', 'tasks'],
   'blank-spreadsheet': ['empty', 'sheet', 'spreadsheet', 'excel', 'grid', 'cells', 'table'],
   'blank-session': ['empty', 'workshop', 'meeting', 'facilitate', 'session'],
   // Planning.

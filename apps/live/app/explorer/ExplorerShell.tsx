@@ -4,7 +4,7 @@ import { LocalMovePrompt } from '@/components/dialogs/LocalMovePrompt';
 import dynamic from 'next/dynamic';
 import { dropSettingsLink } from '@/lib/settings-link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Brand, ProductNavLinks } from '@livedoc/ui';
 import { AuthControls } from '@/components/chrome/AuthControls';
 import { LensField } from './lens/LensField';
@@ -34,6 +34,7 @@ import { explorerSurfaceFlags, useExplorerSurface } from './explorer-surface';
 import { explorerPathFor } from './routes';
 import { WorkbenchOpenLink } from '@/components/chrome/WorkbenchChrome';
 import { assignAppLocation } from '@/lib/app-location';
+import { bindNewDocumentCreator } from '@/lib/new-document/new-document-creator';
 
 // Lazy-load SearchPanel — same rationale as the editor route: it's
 // gated on `searchOpen`, never default-rendered, and dropping ~375
@@ -68,6 +69,12 @@ const SIDEBAR_WIDTH = 256;
 export function ExplorerShell({ children }: { children: ReactNode }) {
   const state = useExplorerState();
   const surface = explorerSurfaceFlags(useExplorerSurface());
+  // Who the New Document menu makes documents as (new-document-creator.ts): the person this shell has settled.
+  const { ownerId, accountId } = state;
+  useEffect(
+    () => (ownerId ? bindNewDocumentCreator({ ownerId, signedIn: !!accountId }) : undefined),
+    [ownerId, accountId],
+  );
   // Wait for the session to settle so a signed-in user never momentarily
   // reads the localStorage guest id and refreshes against the wrong
   // owner. After this gate, `ownerId` is either the account id or

@@ -27,6 +27,8 @@ export const shouldWarnOnLeave = (
 
 export function useUnloadFlush(opts: {
   hydrated: boolean;
+  // Saves held until the document's create lands (usePendingCreate): nothing may be sent, and leaving asks first.
+  held?: boolean;
   documentId: string | null;
   isReadOnly: boolean;
   // A Participant's changes go to the open room, never a beacon (docs/specs/013-workspace/share-roles.md).
@@ -69,6 +71,7 @@ export function useUnloadFlush(opts: {
       const o = latest.current;
       const flushed = flushedRef.current;
       if (flushed && flushed.tabs === o.tabs && flushed.name === o.documentName) return;
+      if (o.held) return;
       const diff = unsaved();
       if (!diff || !o.documentId) return;
       const { changedTabs, deletedIds, orderChanged, nameChanged } = diff;
@@ -108,7 +111,11 @@ export function useUnloadFlush(opts: {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       leave();
       if (
-        shouldWarnOnLeave(unsaved() !== null, isSaveFailing() || isTabTooLarge(), navigator.onLine)
+        shouldWarnOnLeave(
+          unsaved() !== null,
+          isSaveFailing() || isTabTooLarge() || latest.current.held === true,
+          navigator.onLine,
+        )
       ) {
         e.preventDefault();
         // Older browsers ask only when returnValue is set.

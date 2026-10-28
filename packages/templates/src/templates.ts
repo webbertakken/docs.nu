@@ -246,6 +246,7 @@ export type TemplateKind =
   // A blank of Plan's beside Blank Plan: one tab holding an empty Sheet (docs/specs/007-editor/templates-by-mode.md
   // "The blanks").
   | 'blank-spreadsheet'
+  | 'blank-board'
   | 'project-planner'
   | 'bug-triage'
   | 'team-retro'
@@ -377,6 +378,12 @@ export const TEMPLATES: TemplateDescriptor[] = [
     kind: 'blank-spreadsheet',
     title: 'Blank Spreadsheet',
     description: 'An empty spreadsheet: cells, formulas and charts, ready to type into.',
+    extra: true,
+  },
+  {
+    kind: 'blank-board',
+    title: 'Blank Board',
+    description: 'An empty board filling its tab: set up its columns and add the first card.',
     extra: true,
   },
   {

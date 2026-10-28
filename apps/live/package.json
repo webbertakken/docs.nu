@@ -14,7 +14,7 @@
     "test:e2e:smoke": "playwright test --project=chromium",
     "test:e2e:sites": "playwright test --project=sites",
     "perf:canvas": "E2E_PERF=1 playwright test --project=perf --reporter=line",
-    "test:e2e:account": "E2E_ACCOUNT=1 playwright test --project=account",
+    "test:e2e:account": "E2E_ACCOUNT=1 playwright test --project=account --project=account-budget",
     "test:e2e:armed": "E2E_GUEST_SIG_ENFORCE=1 playwright test --project=armed",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .next .next-dev .next-analyze out node_modules .turbo coverage",

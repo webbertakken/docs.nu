@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense, type ReactNode } from 'react';
 import { ExplorerShell } from './ExplorerShell';
+import { InPlaceEditor } from './in-place-editor/InPlaceEditor';
 
 // The /explorer layout (docs/specs/013-workspace/folders.md): every section under /explorer is
 // its own route page, and this layout wraps them all in the shared
@@ -24,7 +25,10 @@ export const metadata: Metadata = {
 export default function ExplorerLayout({ children }: { children: ReactNode }) {
   return (
     <Suspense fallback={null}>
-      <ExplorerShell>{children}</ExplorerShell>
+      {/* A document made from the New Document menu opens in the Explorer's place (InPlaceEditor). */}
+      <InPlaceEditor>
+        <ExplorerShell>{children}</ExplorerShell>
+      </InPlaceEditor>
     </Suspense>
   );
 }

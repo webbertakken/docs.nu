@@ -22,22 +22,22 @@ import { EARLY_MODE_SCRIPT, EARLY_MODE_STYLE } from './early-mode-choice';
 import { AnimatedLinesBackdrop } from '@/components/canvas/AnimatedLinesBackdrop';
 import { useAccountApiBootstrap } from '@/hooks/persistence/useAccountApiBootstrap';
 import { useCtaAttribution } from './useCtaAttribution';
-import { apiCreateDocument, apiLoadSelf, apiSaveSelf } from '@/lib/api-client';
-import { attemptCreate, createIdsFor, type CreateFailure, type CreateIds } from './create-failure';
-import { offlineCreateDocument } from '@/lib/offline/offline-store';
-import { offlineWriteItem } from '@/lib/offline/offline-items';
-import { seedAuthor } from '@/lib/seed-author';
-import { withTemplateSheets } from '@/lib/template-sheets';
+import { apiLoadSelf, apiSaveSelf } from '@/lib/api-client';
+import {
+  attemptCreate,
+  createIdsFor,
+  type CreateFailure,
+  type CreateIds,
+} from '@/lib/new-document/create-failure';
 import { isOfflineLocation } from '@/lib/save-locations';
 import { useNewDocumentLocation } from './useNewDocumentLocation';
 import { randomColor, randomName, type Participant } from '@/lib/identity';
-import { titleCaseType, track } from '@/lib/telemetry';
+import { track } from '@/lib/telemetry';
 import { trackDailyReturn } from '@/lib/daily-return';
 import { markNameConfirmed } from '@/lib/local-identity';
 import { ensureSignedGuestIdentity } from '@/lib/guest-identity';
 import { useSignedGuestId } from '@/hooks/persistence/useSignedGuestId';
-import { templateFamilyOf, untitledNameForTemplate, type TemplateKind } from '@livedoc/templates';
-import { creationIntentOf } from '@livedoc/api-schema';
+import { untitledNameForTemplate, type TemplateKind } from '@livedoc/templates';
 import {
   WIZARD_BYPASS_PARAMS,
   choosePlacementAgainUrl,
@@ -48,7 +48,6 @@ import {
   wizardStartsBlank,
 } from '@/lib/new-document-params';
 import { backOutTarget } from '@/lib/back-out';
-import { themeTelemetryLabel } from '@/lib/custom-theme-registry';
 import { useLatest } from '@/hooks/ui/useLatest';
 import { debugLog } from '@/lib/debug-log';
 import { handStartQuery } from '@/components/start/start-query';
@@ -56,13 +55,14 @@ import { closeStartForBlank } from '@/components/start/close-start-for-blank';
 import { handTemplatePick } from '@/lib/placement-defaults/template-pick-handoff';
 import { isBlankTemplate } from '@livedoc/templates';
 import { NEW_DOCUMENT_THEME_ID, newDocumentContent } from '@/lib/new-document-content';
+import { loadEditorPage } from '@/lib/editor-page-loader';
+import { trackNewDocumentCreated, writeNewDocument } from '@/lib/new-document/write-new-document';
 
 // In-place handoff (docs/specs/007-editor/new-document-route.md): once a document is created, this page
 // renders the editor itself under the rewritten /document/<id> URL instead of paying for a second page
-// load. `loadEditor` is also called on mount to fetch the chunk ahead; if it still isn't in at
-// handoff, the opening screen holds at its "opening" stage.
-const loadEditor = () => import('@/app/document/[id]/editor-page');
-const EditorPage = dynamic(loadEditor, {
+// load. `loadEditorPage` (lib/editor-page-loader.ts) is also called on mount to fetch the chunk ahead; if it
+// still isn't in at handoff, the opening screen holds at its "opening" stage.
+const EditorPage = dynamic(loadEditorPage, {
   ssr: false,
   loading: () => <OpeningScreen />,
 });
@@ -189,7 +189,7 @@ export default function NewDocumentPage() {
     document.title = 'New Document | LiveDoc';
     // Fetch the editor's chunk while identity + the create run. Fire-and-forget: a failure here
     // just leaves `dynamic` to retry the import at handoff.
-    loadEditor().catch(() => {});
+    loadEditorPage().catch(() => {});
   }, []);
 
   // Back/forward-cache restore: creating navigates away with
@@ -303,62 +303,25 @@ export default function NewDocumentPage() {
     const attempt = await attemptCreate(async () => {
       // A document in This Browser has no owner on the server to wait for (docs/specs/006-document/offline-mode.md
       // "Instant open"): identity settles in the background while it opens. A cloud create needs the owner.
-      const cloudOwner = offline ? null : await settleIdentity();
       if (offline) {
         void settleIdentity().catch((err: unknown) =>
           debugLog(`[new] background identity failed: ${String(err)}`),
         );
       }
       // The template's tabs, card types and example cards, or one blank tab (lib/new-document-content.ts).
-      const { tabs, tab, itemTypes, seedItems } = await newDocumentContent({
+      const content = await newDocumentContent({ templateKind, themeId, tabId, via: 'new' });
+      // One create for both stores (lib/new-document/write-new-document.ts). Placement is passed through as given:
+      // absent is no choice (a default folder may answer), a null folder the root chosen on purpose.
+      await writeNewDocument({
+        ids: { documentId, tabId },
+        name: documentName,
         templateKind,
-        themeId,
-        tabId,
-        via: 'new',
+        content,
+        location: settings.saveLocation,
+        creator: offline ? async () => selfRef.current : settleIdentity,
+        teamId: settings.teamId,
+        folderId: settings.folderId,
       });
-      if (offline) {
-        // Offline Mode (docs/specs/006-document/offline-mode.md): create the document in IndexedDB only. This
-        // also registers its id so every later load / save routes local. A template's Sheets are made with it, as
-        // the api's create makes them (docs/specs/029-sheets/sheet-store.md "Template starts").
-        const made = tabs ? await withTemplateSheets(tabs, Date.now()) : null;
-        await offlineCreateDocument(
-          {
-            id: documentId,
-            name: documentName,
-            tabs: made?.tabs ?? tabs ?? [tab],
-            itemTypes,
-            ...(made?.sheets.length ? { sheets: made.sheets } : {}),
-          },
-          Date.now(),
-        );
-        // Its example cards, through the same checks the api's create puts them through (offline-items.ts).
-        if (seedItems.length) {
-          await offlineWriteItem(
-            documentId,
-            { kind: 'create', creates: seedItems },
-            await seedAuthor(selfRef.current),
-          );
-        }
-      } else {
-        // Placement rides the create (docs/specs/007-editor/new-document-route.md): a /new?folder= / ?team=
-        // context is filed by the same write, or the create is refused by name and nothing is written.
-        const owner = cloudOwner ?? (await settleIdentity());
-        await apiCreateDocument(owner.id, {
-          id: documentId,
-          name: documentName,
-          tabs: tabs ?? [tab],
-          ...(itemTypes ? { itemTypes } : {}),
-          ...(seedItems.length ? { items: seedItems } : {}),
-          // Passed through as given: absent is no choice (a default folder may answer), a null
-          // folder the root chosen on purpose (docs/specs/013-workspace/default-folders.md).
-          teamId: settings.teamId,
-          folderId: settings.folderId,
-          // What it opens as, captured now and never re-derived
-          // (docs/specs/013-workspace/default-folders.md): with no place chosen, the server files it
-          // in the person's default folder for it.
-          intent: creationIntentOf(tab, templateFamilyOf(templateKind)),
-        });
-      }
     });
     if (!attempt.ok) {
       // Create FAILED (identity, a template's seeds, network / 5xx / a refused placement for cloud, or no IndexedDB
@@ -370,19 +333,13 @@ export default function NewDocumentPage() {
       setCreateError(attempt.failure);
       return;
     }
-    // Anonymous telemetry (docs/specs/017-telemetry/telemetry.md): a document was created. No id or name is
-    // sent — the `type` records only whether it's an Offline or Cloud document
-    // (docs/specs/006-document/offline-mode.md). The chosen theme is recorded separately below.
-    track('Document', 'Created', offline ? 'Offline' : 'Cloud');
-    track('Theme', 'Changed', themeTelemetryLabel(themeId));
-    if (templateKind) track('Template', 'Used', titleCaseType(templateKind));
-    // A whiteboard tab born from the wizard (docs/specs/023-draw-mode/draw-mode.md "Telemetry").
-    if (templateKind === 'whiteboard') track('Draw', 'Created', 'Template');
+    // Anonymous telemetry (docs/specs/017-telemetry/telemetry.md): a document was created (write-new-document.ts).
+    trackNewDocumentCreated({
+      location: settings.saveLocation,
+      templateKind,
+      teamId: settings.teamId,
+    });
     cta.trackCreated();
-    // Created straight into a team library: the same Team·Added·Document an Explorer move into a
-    // team sends (docs/specs/017-telemetry/telemetry.md), only reached once the create, and so
-    // its placement, succeeded.
-    if (!offline && settings.teamId) track('Team', 'Added', 'Document');
     // Hand off in place: the editor URL takes /new's history entry, and the editor mounts here,
     // reading the id from the rewritten path exactly as a direct visit would.
     handedOff.current = true;

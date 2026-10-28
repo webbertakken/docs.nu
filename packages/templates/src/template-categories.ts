@@ -142,6 +142,7 @@ type BlankKind =
   | 'blank-wireframe-watch'
   | 'blank-plan'
   | 'blank-spreadsheet'
+  | 'blank-board'
   | 'blank-session'
   | 'blank-form';
 

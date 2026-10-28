@@ -11,7 +11,7 @@ describe('PaneHeader', () => {
       <PaneHeader
         title="My Documents"
         crumbs={[]}
-        onCreateDocument={() => {}}
+        newDocumentPlace={{}}
         onCreateFolder={() => {}}
         folderLabel="New folder"
         helpArticle="sharing"
@@ -22,7 +22,7 @@ describe('PaneHeader', () => {
     const toggle = screen.getByRole('group', { name: 'View mode' });
     const help = container.querySelector('a[href*="sharing"]')!;
     expect(help).not.toBeNull();
-    const create = screen.getByRole('button', { name: /create/i });
+    const create = screen.getByRole('button', { name: 'New Diagram' });
     for (const after of [help, create]) {
       expect(toggle.compareDocumentPosition(after) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     }

@@ -12,6 +12,7 @@ import {
 import { OFFLINE_IDS_CHANNEL, subscribeOfflineIds, type OfflineIdChange } from './offline-ids';
 import { memBackend, testRecord as rec, testTab as tab } from './offline-test-utils';
 import type { OfflineBackend } from './offline-backend';
+import { holdDocument, releaseDocument } from '../new-document/create-hold';
 
 // docs/specs/006-document/offline-mode.md "Persistence architecture": every tab of a browser keeps
 // its own cache of offline ids, told about the other tabs' changes on a BroadcastChannel.
@@ -112,5 +113,19 @@ describe('a write whose record another tab removed', () => {
     await expect(offlineSaveTab('d1', tab('t1'), 200)).resolves.toBeUndefined();
     await expect(offlineSaveDocumentMeta('d1', { name: 'x' }, 200)).resolves.toBeUndefined();
     expect(await backend.get('d1')).toBeUndefined();
+  });
+});
+
+describe('isOfflineId while a document is being made here', () => {
+  it('answers once the create has landed, so nothing is routed before it is known', async () => {
+    holdDocument('making');
+    let answer: boolean | null = null;
+    void isOfflineId('making').then((a) => (answer = a));
+    await offlinePutRecord(rec({ id: 'making' }));
+    await settle();
+    expect(answer).toBeNull();
+    releaseDocument('making');
+    await settle();
+    expect(answer).toBe(true);
   });
 });

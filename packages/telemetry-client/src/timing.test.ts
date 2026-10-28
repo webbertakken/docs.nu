@@ -124,6 +124,16 @@ describe('startTiming', () => {
     expect(track).toHaveBeenCalledWith('Timing', 'Measured', 'TabLoad.Under250ms');
   });
 
+  it('tells the caller how long it took, as it ends', () => {
+    const track = vi.fn();
+    const measured = vi.fn();
+    const timing = startTiming(track, 'NewDocumentOpen');
+    clock += 140;
+    timing.endAfterPaint(measured);
+    expect(measured).toHaveBeenCalledWith(140);
+    expect(track).toHaveBeenCalledWith('Timing', 'Measured', 'NewDocumentOpen.Under250ms');
+  });
+
   it('ends straight away where there are no frames to wait for', () => {
     const track = vi.fn();
     startTiming(track, 'TabLoad').endAfterPaint();

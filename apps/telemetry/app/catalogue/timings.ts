@@ -51,6 +51,10 @@ const EDITOR_COPY: Record<EditorTimingMetric, [title: string, blurb: string]> = 
     'Live Reconnect',
     'A live room that dropped by itself, from the drop to presence coming back: the outage a person felt.',
   ],
+  NewDocumentOpen: [
+    'New Document Open',
+    'Making a document from the Explorer: from the click to the first frame with the new document on screen, ready to edit.',
+  ],
 };
 
 export const EDITOR_TIMING_CHARTS: readonly TimingChart[] = EDITOR_TIMING_METRICS.map((m) =>

@@ -30,6 +30,8 @@ type PortalMenuBase = {
   children: ReactNode;
   // A wider menu for rows that carry a line under their name (the Sheet's function menus): 20rem, not 14.
   wide?: boolean;
+  // A width of its own, as a Tailwind class, for a menu laid out in panes (the New Document menu); wins over `wide`.
+  frameWidth?: string;
 };
 
 // A command menu (the default) or, when it holds a control, a control menu
@@ -64,6 +66,7 @@ function CommandPortalMenu({
   label,
   initialFocus,
   wide,
+  frameWidth,
 }: PortalMenuBase & { label?: string; initialFocus?: MenuInitialFocus }) {
   const { attach, element, tree, surfaceProps } = useMenu({
     onClose,
@@ -80,6 +83,7 @@ function CommandPortalMenu({
       tree={tree}
       surfaceProps={surfaceProps}
       wide={wide}
+      frameWidth={frameWidth}
     >
       {children}
     </PortalMenuFrame>
@@ -122,6 +126,7 @@ function PortalMenuFrame({
   tree,
   surfaceProps,
   wide = false,
+  frameWidth,
   children,
 }: {
   at: { left: number; top: number; flat: boolean } | null;
@@ -130,6 +135,7 @@ function PortalMenuFrame({
   tree: MenuTree;
   surfaceProps: object;
   wide?: boolean | undefined;
+  frameWidth?: string | undefined;
   children: ReactNode;
 }) {
   if (!at) return null;
@@ -139,7 +145,7 @@ function PortalMenuFrame({
         <div
           ref={attach}
           {...surfaceProps}
-          className={`fixed z-[var(--z-popover)] flex ${wide ? 'w-80' : 'w-56'} animate-fade-in flex-col rounded-md border border-slate-200 bg-white/90 py-1 text-sm shadow-lg outline-none backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/90 dark:shadow-slate-950/40`}
+          className={`fixed z-[var(--z-popover)] flex ${frameWidth ?? (wide ? 'w-80' : 'w-56')} animate-fade-in flex-col rounded-md border border-slate-200 bg-white/90 py-1 text-sm shadow-lg outline-none backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/90 dark:shadow-slate-950/40`}
           style={{
             left: at.left,
             top: at.top,

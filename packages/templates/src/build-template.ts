@@ -147,6 +147,7 @@ function buildUnsettled(kind: TemplateKind, cx: number, cy: number): Element[] {
     case 'kanban':
     case 'blank-plan':
     case 'blank-spreadsheet':
+    case 'blank-board':
     case 'project-planner':
     case 'bug-triage':
     case 'team-retro':

@@ -5,6 +5,7 @@ import { isMobileViewportSync } from '@/lib/responsive';
 import type { CanvasProps } from '@/components/canvas/Canvas.types';
 import { ModeBanner } from '@/components/chrome/ModeBanner';
 import { OfflineBanner } from '@/components/chrome/OfflineBanner';
+import { NotSavedBanner } from '@/components/chrome/NotSavedBanner';
 import { usePaletteStripBox } from '@/components/chrome/PaletteTray';
 import { TopCenterBanner, TopCenterRow, TopCenterStack } from '@/components/chrome/TopCenter';
 import { useCanvasCovered } from '@/hooks/plan/plan-cover-store';
@@ -74,6 +75,8 @@ export function TopCenterChrome({
       {/* Offline (docs/specs/007-editor/load-recovery.md "Offline"): first, since it says whether
           anything else on screen is being saved. */}
       <OfflineBanner readOnly={readOnly === true} />
+      {/* A document just made whose create failed (NotSavedBanner): nothing is saved until it lands. */}
+      <NotSavedBanner />
       {/* Follow-me (docs/specs/012-collaboration/follow-me-viewport.md). Shown on every viewport and in Zen mode: being
           moved around by somebody else without being told why is the one state
           this feature must never leave you in. */}
