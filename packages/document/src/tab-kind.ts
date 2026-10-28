@@ -11,7 +11,9 @@ import { isEventStormingTab } from './event-storming';
 // 'whiteboard' is migrated on read into a general tab that opens in Draw (./legacy-whiteboard-tab).
 // Board, Sheet and Dashboard are the Plan tab kinds (docs/specs/026-plan/plan-tabs.md), and Form
 // (docs/specs/030-forms/forms.md).
-export type TabKind = 'diagram' | 'event-storming' | 'board' | 'sheet' | 'dashboard' | 'form';
+// Every kind, for a reader that checks one from outside (a bug report's context).
+export const TAB_KINDS = ['diagram', 'event-storming', 'board', 'sheet', 'dashboard', 'form'] as const;
+export type TabKind = (typeof TAB_KINDS)[number];
 
 export const PLAN_TAB_KINDS = ['board', 'sheet', 'dashboard', 'form'] as const;
 export type PlanTabKind = (typeof PLAN_TAB_KINDS)[number];
