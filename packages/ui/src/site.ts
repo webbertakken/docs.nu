@@ -31,10 +31,11 @@ export const sentencePitch = () => `${SITE_PITCH[0]!.toUpperCase()}${SITE_PITCH.
 // the editor's bottom bar and Explorer menu, and the `sameAs` JSON-LD.
 export const REPO_URL = 'https://github.com/webbertakken/livedoc';
 
-// The public contact form (a Form,  docs/specs/030-forms/forms.md), the one way to reach the
-// team; no email address is published. Linked from the help centre's contact page, the FAQ, the status
-// page and the Terms and Privacy Policy.
-export const CONTACT_FORM_URL = 'https://www.livediagram.app/form/90Bgj5sY9eTpVrjhx9tTZj';
+// The public contact form (docs/specs/018-help/help-pages.md "The contact form"): a LiveDoc form on docs.nu in
+// Webber's account, its responses cards on that document's board. With GitHub, the one way to reach the team; no
+// email address is published. Linked from the help centre's contact page, home page and article pager, the FAQ,
+// the status page and the Terms and Privacy Policy. Publishing the form again makes a new link, and a new value here.
+export const CONTACT_FORM_URL = 'https://docs.nu/form/M1SK9OVYzeEPolpJZrQQdx';
 
 // Favicon set for the apps that serve their pages from the origin root (or
 // reference the root's assets): the SVG mark, a raster PNG fallback for
