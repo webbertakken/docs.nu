@@ -170,6 +170,7 @@ describe('readActivity', () => {
           you_commented: 1,
           on_your_document: 0,
           mentions_you: 0,
+          share_level: 'edit',
         },
       ],
     ]);
@@ -191,6 +192,7 @@ describe('readActivity', () => {
         youCommented: true,
         onYourDocument: false,
         mentionsYou: false,
+        canComment: true,
       },
     ]);
   });

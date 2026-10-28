@@ -74,6 +74,7 @@ type ActionRow = PlaceRow & {
 };
 
 type ThreadRow = PlaceRow & {
+  share_level: 'view' | 'participate' | 'edit' | null;
   comment_count: number;
   latest_text: string;
   latest_author_name: string;
@@ -115,7 +116,7 @@ export const THREADS_SQL = `${SCOPE_CTES}
   SELECT ct.tab_id, ct.element_id, ct.element_label, ct.comment_count,
          ct.latest_text, ct.latest_author_name, ct.latest_author_color, ct.first_at, ct.latest_at,
          v.id AS document_id, v.name AS document_name, v.team_id AS document_team_id,
-         v.via, v.share_code, ct.tab_name,
+         v.via, v.share_code, ct.tab_name, v.share_level,
          CASE WHEN EXISTS (SELECT 1 FROM json_each(ct.participant_ids) je
                             WHERE je.value IN (SELECT id FROM me)) THEN 1 ELSE 0 END AS you_commented,
          CASE WHEN v.owner_id = ?1 THEN 1 ELSE 0 END AS on_your_document,
@@ -216,6 +217,8 @@ export async function readActivity(
       youCommented: r.you_commented === 1,
       onYourDocument: r.on_your_document === 1,
       mentionsYou: r.mentions_you === 1,
+      // A Participant or an Editor may comment (docs/specs/013-workspace/inbox.md §4); a Viewer only looks.
+      canComment: r.share_level === 'participate' || r.share_level === 'edit',
     }),
   );
   const cards = cardsFromRows((cardsRes?.results ?? []) as CardRow[]);
