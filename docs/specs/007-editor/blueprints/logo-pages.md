@@ -165,7 +165,7 @@ Exclude), **Wordmark**, **Logo Kit**.
   whiteboard, and `computeDrawGuides({ whiteboard })` guides off their box.
 - `useLogoPaletteSwitch(pages, active)` (`hooks/canvas/useLogoPaletteSwitch.ts`), called by
   `CanvasPages` (an editor, not bare), returns `pageShown(page)`, which `CanvasPages`'
-  `goToPage` (the page label and the `PageNavigator`) calls after `focusPage`. It keeps the page
+  `goToPage` (the page label) calls after `focusPage`. It keeps the page
   someone was last on (a press off every page keeps it) and, when that changes, asks
   (`requestPaletteCategory`, in a zero timeout, after React renders; a timeout so a background
   tab answers) for `'logo'` on a logo page, else `'popular'`: on `pageShown` and a capture-phase
@@ -195,8 +195,9 @@ Exclude), **Wordmark**, **Logo Kit**.
   each named, or 28 px each icon-only, three times) is reserved from the label.
 - Layout tiles: `LayoutThumb` hands a logo page's tile to `LayoutRenderThumb`
   (`components/canvas/layout-render-thumb.tsx`) when `EditorContext` has an `activeTab` (else the
-  wireframe): `logoLayoutSvg(tab, page, layout)` = `renderTabToSvg({ ...tab, elements:
-buildPageLayout(layout, page) }, { page })`, memoised on the layout, the page's rect and
+  wireframe): `layoutRenderSvg(tab, page, layout, appearance)` themes `buildPageLayout(layout, page)` for the
+  tab and the page as seen, fills sample pictures (`withSamplePictures`) and draws it with `renderTabToSvg` on a still
+  background, memoised on the layout, the page's rect and
   background, the tab's theme and font, and `useIconCatalogs()`; set as the markup of a div of the
   tile's width and the page's aspect. Measured 0.04 ms a layout.
 - The in-page card is sized by `layoutCardSize` and holds `LayoutGallery` (pages-mode blueprint
@@ -214,12 +215,11 @@ DashedAddButton.tsx`, shared with `AddCardTypeButton`) labelled **Start From Scr
   `showMe={{ button: <PageShowMeButton tour kind onStart={() => freeze(pageId, kind)} />, article }}`, which
   `PagePanel` heads beside the labelled `HelpArticleLink` (`PAGE_TOUR_HELP.logo`: `logoPages`, "Logo Pages
   Help"); `PageTourStage` (overlay layer) is mounted once.
-- `freeze(pageId, 'logo')` imports `page-tour-steps` at the press and fixes `logoTourSteps(combineShowing)`
-  (`combineShowing`: `[aria-label="Combine shapes"]` is in the DOM): `layouts` (rings `[data-page-panel]`, `requires`
+- `freeze(pageId, 'logo')` imports `page-tour-steps` at the press and fixes `logoTourSteps()`: `layouts` (rings `[data-page-panel]`, `requires`
   the page's cog, `prepare` opens the panel on Layouts through `requestPagePanel`, `cleanup` closes it), `guides` and
-  `mirror` (the page's `[data-logo-title-bar]` buttons by name), `combine` (the Combine button, else an unanchored
-  card), `outro`. The same steps are the Pages tour's Logo track, started from the bottom bar's Start Pages Tour button (no welcome
-  card before them since 28 October 2026, when `LOGO_WELCOME` went).
+  `mirror` (the page's `[data-logo-title-bar]` buttons by name), `combine`, `combine-menu` and `combine-unite`
+  (two shapes the tour places on the page with `placeCombineDemo`, selected so the Combine button rings, its menu
+  opened, then united by `uniteCombineDemo`; `PagesTourHost` calls `clearCombineDemo` when the tour ends), `outro`. The same steps are the Pages tour's Logo track, started from the bottom bar's Start Pages Tour button, with no welcome card before them.
 - `UI · Started · LogoTour` on the press; `UI · Ended · LogoTourCompleted` / `LogoTourSkipped` on
   finish.
 

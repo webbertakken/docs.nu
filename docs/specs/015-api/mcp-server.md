@@ -128,7 +128,7 @@ This implements the OAuth flow Manager Toolkit uses:
    `POST /api/oauth/exchange`** on the api worker. This is the one api change: an
    endpoint that requires a verified session (gated exactly like
    `/api/tokens`), and on success **reuses the existing token-mint path**
-   (`generateApiToken` → `hashApiToken` → `createApiToken`,
+   (`mintApiToken`: `generateApiToken` → `hashApiToken` → `insertApiTokenUnderCap`,
    `apps/api/src/auth/api-token.ts` + `db/api-tokens.ts`) to create a `livedoc_`
    token owned by that account, named for the connecting client (e.g. "Claude
    (MCP)"). It binds the PKCE challenge so only the holder of the verifier can

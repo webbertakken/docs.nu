@@ -76,7 +76,7 @@ Every write takes what a person would say, and stores the ids:
   should wait off every board is made with no status. A key a change does not take is refused as well, never dropped
   (`column` for `status` would otherwise leave the card off every board with nothing said).
 - A refused change stops the batch; the answer says what was applied before it, and why the rest was not.
-- The api's own refusals (`status_excluded`, `fields_invalid`, ...) carry their meaning and a hint, the same on the
+- The api's own refusals (`status_excluded`, `field_value_invalid`, ...) carry their meaning and a hint, the same on the
   CLI and the MCP.
 
 ## Adding a board

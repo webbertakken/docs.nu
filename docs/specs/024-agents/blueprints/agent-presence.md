@@ -12,11 +12,11 @@ It builds on the sibling blueprints and calls what they provide by these names:
 
 | Provided by      | Name used here                                                                      | What it is                                                                                                                                                                                                          |
 | ---------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| share-roles      | `ShareRole`, `TokenRole`                                                            | The levels on grants, tickets, room sessions and tokens; no member is named here                                                                                                                                    |
+| share-roles      | `ShareRole`, a token's `readOnly`                                                   | The levels on grants, tickets, room sessions and tokens; no member is named here                                                                                                                                    |
 | share-roles      | `gateParticipate`, `gateEdit` `(ctx, id, ownerId, teamId, tabId?)`                  | True when the caller's grant and its token (if any) pass that gate; until share roles land, `gateParticipate` is read access (`apps/api/src/routes/context.ts`), read-only tokens refused writes at the choke point |
 | share-roles      | The write choke point's route-gate matcher                                          | Lets a token's write reach a route only when the token passes that route's gate                                                                                                                                     |
-| agent-changesets | `ctx.token: { id, ownerId, role } \| null` on `RouteContext`                        | The presenting API token, null for a session or a guest                                                                                                                                                             |
-| agent-changesets | `roomStubFor` returns a stub for every server-stored document                       | Rooms for personal documents                                                                                                                                                                                        |
+| agent-changesets | `ctx.token: { id, readOnly? } \| null` on `RouteContext`                            | The presenting API token, null for a session or a guest                                                                                                                                                             |
+| agent-changesets | `roomFetch` reaches a room for every server-stored document                         | Rooms for personal documents                                                                                                                                                                                        |
 | agent-changesets | `upsertTabAtRev(env, documentId, tab, orderIndex, rev)`, `tabs.rev`                 | The compare-and-swap tab write; every write increments `rev`                                                                                                                                                        |
 | agent-changesets | `frontDoorOf(request): 'Mcp' \| 'Cli' \| 'Editor' \| 'Api'`                         | The telemetry type of an agent request                                                                                                                                                                              |
 | agent-changesets | The changeset route's success step                                                  | Calls `refreshAgentPresence` here                                                                                                                                                                                   |
@@ -76,7 +76,7 @@ Scope, by file:
 | Refresh         | `refreshAgentPresence`, room mode `refresh`                              | A changeset extending the entry, keeping status and focus               |
 | Person tag      | `personTag`, `X-Verified-Person`, `ws_tickets.person_tag`                | Opaque per-document stand-in for an owner id, held inside the room only |
 | Joins           | `AgentPresence.joins`, `AgentPresence.self`, `AgentPresence.person`      | Which roster sessions are the same person as the agent, per recipient   |
-| Thread verbs    | reply, resolve, reopen (`CommentVerb`)                                   | The comment endpoints beside add and delete-own                         |
+| Thread verbs    | reply, resolve, reopen (`ThreadVerb`, `comment-routes.ts`)               | The comment endpoints beside add and delete-own                         |
 | Thread listing  | `DocumentCommentThread`, `CommentListStatus` (`open`, `resolved`, `all`) | One thread across the document, with its element's ref and label        |
 | Comment's token | `Comment.tokenId`                                                        | The token a comment was posted with; audit only                         |
 | Effective level | `AgentPresence.role`                                                     | The level the gates resolve for the token on this document (PR27)       |
@@ -271,7 +271,7 @@ Internal, reached only through the stub:
 The room broadcasts presence after a set, a refresh that creates an entry or changes its name, colour or level, a
 clear and a sweep that removed anything. A refresh that only moves `expiresAt` broadcasts nothing, since `expiresAt`
 is not on the wire. Every write ends in `armAlarm()`: `storage.setAlarm(min(deadlines))`, or `storage.deleteAlarm()`
-when there is none. `startFacilitatorGrace` calls `armAlarm()` instead of setting the alarm itself, and `alarm()`
+when there is none. `RoomFacilitator.startGrace` calls `armAlarm()` instead of setting the alarm itself, and `alarm()`
 sweeps entries, judges the baton unchanged, then calls `armAlarm()` (PR29).
 
 `room-client.ts`: `putAgentPresence(env, liveDoc, body)` returns the room's answer or throws `RoomUnavailableError`;
@@ -324,7 +324,7 @@ none, and the room pins it on the session attachment as `personTag`.
   stack shows its owner's agent.
 - `buildAgentFocusByElement(agents, activeId, elementIds)` returns `Map<elementId, { name, color }[]>` for entries on
   the active tab, ids missing from the tab skipped, once per person. It reaches the canvas through `AgentFocusContext`,
-  apart from `remoteSelectionsByElement`, and never reaches `isElementHeldByOther`.
+  apart from `remoteSelectionsByElement`, and never reaches `lockedByOther`.
 - `withoutAgentRows(rows)` drops standalone agent rows for the roll call and the Collaborators count.
 - `apiSetThreadResolved(ownerId, documentId, tabId, commentId, resolved, shareCode)`: a session that may participate
   but not edit calls it from `resolveThread` / `unresolveThread` with the thread's first comment id, as its add calls

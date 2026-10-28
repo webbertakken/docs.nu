@@ -19,7 +19,7 @@ design decision. Draw mode's own tools are blueprinted in
 | A switch as one tab edit    | `withEditorModeSwitched(tab, mode)` (`packages/document/src/editor-mode-switch.ts`), `switchedTab(tab, next, alsoChange?)` (`useEditorMode.ts`)                                                                                                      |
 | Plan stands apart           | `crossesPlan(from, to)`, `modesBesidePlanRule(mode)` (`editor-mode.ts`); `EditorModeState.crossPlan` (an empty tab crosses), `lockedReason`, `newTabIn`                                                                                              |
 | Leaving Pages               | `useLeavePages(editorMode, { tab, canEdit })`, `LeavePagesDialog` ([Article pages](article-pages.md))                                                                                                                                                |
-| Legacy names elsewhere      | `parsePlacementDefaultKey`, `legacyPlacementDefaultKeys` (`packages/api-schema/src/placement-defaults.ts`); `pagesModeEnabled` / `infographicModeEnabled` / `planModeEnabled` in `RETIRED` (`legacy-preferences.ts`)                                 |
+| Legacy names elsewhere      | `parsePlacementDefaultKey`, `legacyPlacementDefaultKeys` (`packages/api-schema/src/placement-defaults.ts`); `illustrateModeEnabled` / `infographicModeEnabled` / `planModeEnabled` in `RETIRED` (`legacy-preferences.ts`)                            |
 | The tab's mode              | `Tab.opensIn?: EditorMode` (stored name kept), read through `opensInOf(tab)`                                                                                                                                                                         |
 | Setting the mode            | `setTabOpensIn(tab, mode)`                                                                                                                                                                                                                           |
 | A tab offers the switch     | `editorModeSwitchable(tab)`: false on an event-storming board, new or legacy, and on a Board, Sheet or Dashboard tab (always Plan)                                                                                                                   |
@@ -258,7 +258,7 @@ lockedReason?, onLockedPick? })` (`ModeMenu.tsx`), opened by `ModeMenuChip`:
     description and `MODE_TOOLS` chips; no button (choosing is the row's alone).
 - Placement: only on a start panel's rail (`StartFromTemplates`, `StartPlanning`), never in `ToolbarExplorerButton`,
   the `TabPortalMenu`, the `TabBar` or the `Explorer`.
-- `TabModeIcon({ tab, style? })`: the tab's mode's `EDITOR_MODE_ICON`, 12 px, `aria-hidden`;
+- `TabModeIcon({ tab, style? })`: its mode's `EDITOR_MODE_ICONS` entry (a Board, Sheet, Dashboard or Form tab: its kind's icon), 12 px, `aria-hidden`;
   `TabPill` passes `style={{ color: legibleTabAccent(tab, isDark) }}`.
 - `templateOpensIn(overrides: Pick<Tab, 'opensIn' | 'kind'>): EditorMode | undefined`.
 - Wire: `Tab.opensIn` and `TextElement.sizing` are in the OpenAPI schema

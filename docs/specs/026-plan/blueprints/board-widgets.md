@@ -45,7 +45,7 @@ apps/live/components/plan/widgets/BoardWidgetPicker.tsx  the + popover: the widg
 ## Narrowing and feedback
 
 - `QuickFilter` gains `person` (`UNASSIGNED = '-'` for nobody), `type`, `due` (a `QuickDueWindow`
-  `{ from?, to, doneStatus? }`, YYYY-MM-DD, both ends inclusive, the done status excluded, so a Due Soon count
+  `{ from?, to, finished? }`, YYYY-MM-DD, both ends inclusive, the board's finished statuses (`finishedStatuses`) excluded, so a Due Soon count
   narrows to exactly the cards it counts) and `priority`; `quickFilterMatches` applies each.
   `toggle(quick, key, value)` sets one or clears it when equal (compared by value).
 - Item Count while `narrowed(quick)`: a button "`shown` of `total` · Show all" that sets `{}`.

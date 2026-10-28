@@ -25,34 +25,34 @@ telemetry category alone is `Feedback`).
 
 ## Modules
 
-| File                                                                                    | Responsibility                                                                                                      |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `packages/api-schema/src/bug-report.ts`                                                 | Types, `BUG_REPORT_LIMITS`, `parseBugReportSubmission`, `parseBugReportContext`, `parseBugReportScreenshot`         |
-| `packages/api-schema/src/bug-report-context-lines.ts`                                   | `describeUserAgent`, `bugReportContextLines` (the plain-word lines the form and the card share), `redactErrorText`  |
-| `packages/api-schema/src/bug-report-card.ts`                                            | `BUG_REPORT_TYPE_LABEL`, `findBugReportType`, `reporterLine`, `bugReportCard`                                       |
-| `apps/api/migrations/0112_bug_reports.sql`                                              | `bug_reports`, `bug_report_windows`                                                                                 |
-| `apps/api/src/db/bug-reports.ts`                                                        | `storeBugReport`, `listDueBugReports`, `noteBugReportAttempt`, `deleteBugReport`, `countBugReportWindow`            |
-| `apps/api/src/bug-reports/route.ts`                                                     | `handleBugReports(ctx)`: dispatch on method and path                                                                |
-| `apps/api/src/bug-reports/submit.ts`                                                    | `submitBugReport(ctx)`: the spec's filing steps 1-6                                                                 |
-| `apps/api/src/bug-reports/rate.ts`                                                      | `bugReportRateLimit(ctx, visitor)`: the binding, then the D1 window                                                 |
-| `apps/api/src/bug-reports/reporter.ts`                                                  | `resolveBugReporter(ctx)`, `reporterTag`                                                                            |
-| `apps/api/src/bug-reports/screenshots.ts`                                               | `putBugScreenshot`, `serveBugScreenshot(ctx)`, `deleteBugScreenshotsOf(env, id)`, `screenshotKeyPattern`            |
-| `apps/api/src/bug-reports/file.ts`                                                      | `fileBugReport(env, filing)`: configuration, document pre-check, the room call, the outcome                         |
-| `apps/api/src/bug-reports/room-file.ts`                                                 | `fileBugReportInRoom(env, tabId, filing, waitUntil)`: board, type, card, item store write, relay (runs in the room) |
-| `apps/api/src/bug-reports/refile.ts`                                                    | `runBugReportRefile(env, now)`                                                                                      |
-| `apps/api/src/document-room/document-rpc.ts`, `document-client.ts`, `document-room.ts`  | The `fileBugReport` room RPC                                                                                        |
-| `apps/api/src/db/account.ts`                                                            | Account deletion deletes rows; owner migration moves them                                                           |
-| `apps/live/lib/bug-report/recent-errors.ts`                                             | The ring buffer: `recordClientError`, `recentClientErrors`, `installRecentErrorCapture`                             |
-| `apps/live/lib/bug-report/place.ts`                                                     | `useBugReportPlace(place)`, `currentBugReportPlace()`                                                               |
-| `apps/live/lib/bug-report/collect-context.ts`                                           | `collectBugReportContext(deps)`                                                                                     |
-| `apps/live/lib/bug-report/screenshot.ts`                                                | `captureScreen()`, `encodeScreenshot(blob)`: scale, encode, step quality                                            |
-| `apps/live/lib/bug-report/send.ts`                                                      | `sendBugReport(submission)`: identity headers, the POST, the outcome                                                |
-| `apps/live/components/bug-report/BugReportProvider.tsx`                                 | The opener context, `useOpenBugReport()`, the lazy dialog                                                           |
-| `apps/live/components/bug-report/BugReportDialog.tsx`                                   | The form                                                                                                            |
-| `apps/live/components/bug-report/BugReportScreenshotField.tsx`                          | Capture, upload, paste, drop, preview, remove                                                                       |
-| `apps/live/components/bug-report/BugReportAttached.tsx`                                 | What's Attached                                                                                                     |
-| `apps/live/components/bug-report/ReportBugButton.tsx`                                   | `ReportBugButton` (chrome icon), `ReportBugScreenButton` (error cards)                                              |
-| `apps/live/app/report-a-bug/page.tsx`, `apps/live/app/report-a-bug/screenshot/page.tsx` | The standalone form page and the screenshot page                                                                    |
+| File                                                                                    | Responsibility                                                                                                                      |
+| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/api-schema/src/bug-report.ts`                                                 | Types, `BUG_REPORT_LIMITS`, `parseBugReportSubmission`, `parseBugReportContext`, `parseBugReportScreenshot`                         |
+| `packages/api-schema/src/bug-report-context-lines.ts`                                   | `describeUserAgent`, `bugReportContextLines` (the plain-word lines the form and the card share), `redactErrorText`                  |
+| `packages/api-schema/src/bug-report-card.ts`                                            | `BUG_REPORT_TYPE_LABEL`, `findBugReportType`, `reporterLine`, `bugReportCard`                                                       |
+| `apps/api/migrations/0112_bug_reports.sql`                                              | `bug_reports`, `bug_report_windows`                                                                                                 |
+| `apps/api/src/db/bug-reports.ts`                                                        | `storeBugReport`, `listDueBugReports`, `noteBugReportAttempt`, `deleteBugReport`, `claimBugReportSlot`, `deleteOldBugReportWindows` |
+| `apps/api/src/bug-reports/route.ts`                                                     | `handleBugReports(ctx)`: dispatch on method and path                                                                                |
+| `apps/api/src/bug-reports/submit.ts`                                                    | `submitBugReport(ctx)`: the spec's filing steps 1-6                                                                                 |
+| `apps/api/src/bug-reports/rate.ts`                                                      | `bugReportRateLimit(ctx, visitor)`: the binding, then the D1 window                                                                 |
+| `apps/api/src/bug-reports/reporter.ts`                                                  | `resolveBugReporter(ctx)`, `reporterTag`                                                                                            |
+| `apps/api/src/bug-reports/screenshots.ts`                                               | `putBugScreenshot`, `serveBugScreenshot(ctx)`, `deleteBugScreenshotsOf(env, id)`, `SCREENSHOT_KEY_PATTERN`                          |
+| `apps/api/src/bug-reports/file.ts`                                                      | `fileBugReport(env, filing)`: configuration, document pre-check, the room call, the outcome                                         |
+| `apps/api/src/bug-reports/room-file.ts`                                                 | `fileBugReportInRoom(env, tabId, filing, waitUntil)`: board, type, card, item store write, relay (runs in the room)                 |
+| `apps/api/src/bug-reports/refile.ts`                                                    | `runBugReportRefile(env, now)`                                                                                                      |
+| `apps/api/src/document-room/document-rpc.ts`, `document-client.ts`, `document-room.ts`  | The `fileBugReport` room RPC                                                                                                        |
+| `apps/api/src/db/account.ts`                                                            | Account deletion deletes rows; owner migration moves them                                                                           |
+| `apps/live/lib/bug-report/recent-errors.ts`                                             | The ring buffer: `recordClientError`, `recentClientErrors`, `installRecentErrorCapture`                                             |
+| `apps/live/lib/bug-report/place.ts`                                                     | `useBugReportPlace(place)`, `currentBugReportPlace()`                                                                               |
+| `apps/live/lib/bug-report/collect-context.ts`                                           | `collectBugReportContext(deps)`                                                                                                     |
+| `apps/live/lib/bug-report/screenshot.ts`                                                | `captureScreen()`, `encodeImageFile(blob)`, `encodeCanvas`, `encodeToFit`: scale, encode, step quality                              |
+| `apps/live/lib/bug-report/send.ts`                                                      | `sendBugReport(submission)`: identity headers, the POST, the outcome                                                                |
+| `apps/live/components/bug-report/BugReportProvider.tsx`                                 | The opener context, `useOpenBugReport()`, the lazy dialog                                                                           |
+| `apps/live/components/bug-report/BugReportDialog.tsx`                                   | The form                                                                                                                            |
+| `apps/live/components/bug-report/BugReportScreenshotField.tsx`                          | Capture, upload, paste, drop, preview, remove                                                                                       |
+| `apps/live/components/bug-report/BugReportAttached.tsx`                                 | What's Attached                                                                                                                     |
+| `apps/live/components/bug-report/ReportBugButton.tsx`                                   | `ReportBugButton` (chrome icon), `ReportBugScreenButton` (error cards)                                                              |
+| `apps/live/app/report-a-bug/page.tsx`, `apps/live/app/report-a-bug/screenshot/page.tsx` | The standalone form page and the screenshot page                                                                                    |
 
 ## Interfaces and contracts
 
@@ -135,7 +135,8 @@ CREATE TABLE bug_report_windows (
 ## Behaviour and state
 
 Dialog states: `editing` → `sending` → `sent { number } | stored` or back to `editing` with `error`. A capture
-(`capturing`) runs beside `editing`; Send pressed while capturing sets `sendAfterCapture`, and the capture's end sends.
+(`capturing`) runs beside `editing`; Send pressed while capturing enters `sending` and awaits the capture
+(`useBugReportScreenshot().settled()`), then sends with whatever it produced.
 Closing the dialog clears everything; closing while sending drops the answer (the request still lands).
 
 Filing (worker, `submitBugReport`): method → `content-length` and text length ≤ 1,500,000 → rate → parse → reporter
@@ -156,7 +157,7 @@ first; each `fileBugReport`, filed → delete row, refused → `noteBugReportAtt
 
 Copy is the spec's, verbatim. The bottom-bar button uses `CHROME_BTN` and `HoverCard` ("Report a Bug" / "Tell us what
 went wrong. Opens a short form."); the error-card button is `Button variant="secondary"`; links use the host's link
-class. The screenshot preview is `max-h-48 w-auto rounded border object-contain`. The counter shows `n/200` from 160
+class. The screenshot preview is `max-h-48 w-auto max-w-[70%] rounded border object-contain`. The counter shows `n/200` from 160
 characters on. `/report-a-bug` shows the form open over a plain page with a "Report a Bug" button to open it again; closing
 the form calls `history.back()` when there is history, else loads `/` (`leaveReportPage`), never a URL from the query.
 
@@ -201,9 +202,11 @@ the document, one room call. Refile ≤ 20 rows a run, each one room call, well 
 
 Fingerprint `[bug-reports]`, one line per decision: `report.received`, `report.refused` (`problem`), `rate.limited`
 (`by: binding | window`), `rate.uncounted`, `context.dropped`, `reporter.anonymous` (`why`), `screenshot.stored`,
-`screenshot.unstored`, `report.filed` (`number`), `report.stored` (`reason`), `report.lost`, `refile.run` (`due`,
-`filed`, `stored`), `refile.failed`, `screenshot.served`, `screenshot.refused`, `erasure.done` (`rows`, `objects`).
-Client: `[bug-reports] opened`, `sent`, `send.failed` (`status`), `capture.failed`, `image.refused`.
+`screenshot.unstored` (`why`), `screenshot.put-failed`, `report.filed` (`number`, `refiled` on a refile),
+`report.stored` (`reason`), `report.lost`, `room.failed`, `card.unmade` (`rejection`), `refile.run` (`due`, `filed`,
+`stored`), `refile.failed`, `screenshot.served`, `screenshot.refused` (`why`), `erasure.screenshots` (`objects`).
+Client: `[bug-reports] opened`, `opened.outside-provider`, `sent` (`number` or `stored`), `send.failed` (`status`),
+`send.anonymous`, `capture.failed`, `image.refused`, `screenshot.unavailable`.
 
 ## Testing
 

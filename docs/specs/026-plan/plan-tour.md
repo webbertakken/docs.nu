@@ -81,18 +81,19 @@ recorded as tour content (`plan-tour-content` in localStorage) while it exists, 
   it, zooming out only if it is too big to fit. One maximised or filling its tab is already on screen.
 - **Never over Start Planning.** An empty Plan tab shows Start Planning, so the tour is on offer only once the tab
   has a board or Sheet (see [Where it appears](#where-it-appears)).
-- **It changes nothing.** The tour adds no element, card, row or cell, moves nothing, selects no cell and writes
-  nothing, so there is nothing to take away, nothing in the document's history, and nothing a collaborator
-  sees. Undo after the tour is exactly as before it.
-- The one thing it opens is a card's panel (the Boards track's **The Card Panel**, on the board's first card),
+- **It changes nothing of the person's.** Besides the Boards track's example card (see [Tour content](#tour-content)),
+  the tour adds no element, card, row or cell, moves nothing, selects no cell and writes nothing; the example card
+  goes when the tour ends and leaves nothing in the document's history. Undo after the tour is exactly as before it.
+- The one thing it opens is a card's panel (the Boards track's **The Card Panel**, on the example card),
   which is the person's own view, saved nowhere, and closed on leaving the step or the tour.
-- A step whose part of the subject is missing is left out up front: **Move Work Along** and **The Card Panel**
-  need a card, so a board with no cards shows neither.
+- Every board gets the card steps, on the example card. A step whose target is missing is skipped: a board with no
+  column gets no example card, so **Add Cards** and **Move Work Along** are skipped; on a board with one column the
+  example card stays where it was added.
 - If the tour subject goes mid-tour (deleted, by the person or a collaborator), the tour ends as skipped.
-- **Leftovers from the old tour.** Until October 2026 the tour placed its own Example Board (with three example
-  cards) or Example Sheet and took them away at the end, keeping a leftover record so a reload mid-tour could
-  tidy them on the next visit. That sweep stays, so content an older tour left behind is still removed; nothing
-  new is ever recorded. A leftover Example Sheet goes with its element, never the element alone: until a Sheet has
+- **Leftovers.** The example card is recorded while it exists, so a tour cut short by a reload or a closed window
+  has it taken away on the next visit to that document. Until October 2026 the tour placed its own Example Board
+  (with three example cards) or Example Sheet, recorded the same way; the same sweep still removes what an older
+  tour left behind. A leftover Example Sheet goes with its element, never the element alone: until a Sheet has
   drawn to take the sheet, the element and the record stay, and the sweep tries again every 2 seconds.
 
 ## The steps

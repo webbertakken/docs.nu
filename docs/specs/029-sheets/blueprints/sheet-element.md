@@ -193,8 +193,10 @@ shares with DiagramBuildAnimation) and `packages/ui/src/LoadingSweep.tsx` (the p
 - `layout.setupPending` (sheets-engine blueprint) marks a sheet awaiting setup. `PlanSheetView` shows `SheetSetup`
   in place of the grid while it is set, the sheet has no cells, Plan mode is on and the person may edit; any cell
   arriving clears it (`{ k: 'options', setupPending: false }`), and Sheet Settings' **Setup Sheet** sets it again.
-- Create Sheet builds the start's starter (`sheetStarter`, or `cardsStarter` for Plan Cards) and writes it with the
-  look, freeze and sizes through the engine's `setupWrite`, as one change; Clear Sheet (`useSheetActions`) writes
+- Create Sheet writes a template start through `designWrite(workbook, sheetId, sheetTemplate(start, today), { look,
+freezeHeader, size, dark })`, then places the template's charts; Plan Cards builds `cardsStarter(...)` and a blank
+  start none, each written with the look, freeze (with a starter only) and sizes through the engine's `setupWrite`, as
+  one change; Clear Sheet (`useSheetActions`) writes
   `resetSheetWrite`. Telemetry `Sheet · Created · <Start>`.
 
 ### Layout
@@ -550,36 +552,35 @@ Editor logs (`[sheets]`): `sheets.load.failed`, `sheets.write.failed <error>`, `
 
 ## Constants and configuration
 
-| Constant                   | Value                                                                                     | Provenance / safe range                         |
-| -------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Default element size       | 960 × 560                                                                                 | Spec                                            |
-| `HEADER_PX`                | 40                                                                                        | As the board header                             |
-| `TOOLBAR_PX`               | 44                                                                                        | Default (D9)                                    |
-| `FORMULA_BAR_PX`           | 28                                                                                        | Default (D9)                                    |
-| `STATUS_BAR_PX`            | 24                                                                                        | Default (D9)                                    |
-| `ROW_HEADER_PX`            | 46                                                                                        | Default (D10); fits `10000`                     |
-| `COL_HEADER_PX`            | 22                                                                                        | Default (D10)                                   |
-| `GRID_OVERSCAN`            | 4                                                                                         | Rows and columns each side                      |
-| `RESIZE_HIT_PX`            | 4                                                                                         | Default (D11)                                   |
-| `DRAG_START_PX`            | 4                                                                                         | As board widgets' reorder                       |
-| `AUTOSCROLL_EDGE_PX`       | 24                                                                                        | Default (D12)                                   |
-| `PRESENCE_THROTTLE_MS`     | 120                                                                                       | Default (D13)                                   |
-| `PEER_TAG_MS`              | 3000                                                                                      | Spec                                            |
-| `FREEZE_GRAB_PX`           | 3                                                                                         | Default (D22)                                   |
-| `ADD_ROWS_PX`              | 44                                                                                        | The Add Rows footer's room                      |
-| `ADD_ROWS_DEFAULT`         | 100                                                                                       | Spec; Default (D17)                             |
-| `FIND_HIGHLIGHTS_MAX`      | 2000                                                                                      | Default (D18)                                   |
-| `CELLS_MAX` (status)       | 100000                                                                                    | Default (D19)                                   |
-| `SHEET_CSV_DROP_BYTES_MAX` | 8 MB                                                                                      | Default (D20)                                   |
-| `KEPT_SELECTIONS_MAX`      | 200                                                                                       | Default (D21)                                   |
-| `DATE_YEAR_MIN`            | 1900                                                                                      | Spec (`SheetCardRows.tsx`)                      |
-| `STRIP_PX`                 | 52                                                                                        | Save / Cancel strip width (`SheetCardRows.tsx`) |
-| `SEPARATOR_PX`             | 17                                                                                        | A divider's room (`SheetToolbar.tsx`)           |
-| `CHEVRON_PX`               | 12                                                                                        | A menu button's chevron (`SheetToolbar.tsx`)    |
-| `STATS_MENU_PX`            | 208                                                                                       | Totals pick width (`SheetStatusBar.tsx`)        |
-| `CELL_THREADS_MAX`         | 1000                                                                                      | Default (D28)                                   |
-| `CELL_COMMENT_COLOUR`      | `#f59e0b`                                                                                 | Spec (amber-500)                                |
-| `CELL_MARKER_PX`           | 8                                                                                         | Default (D29)                                   |
-| `CELL_PREVIEW_DELAY_MS`    | 400                                                                                       | Default (D29)                                   |
-| `CELL_PREVIEW_CHARS`       | 140                                                                                       | Default (D29)                                   |
-| `SHEET_FILL_TAB_HINT`      | "The sheet always fills this tab, for everyone, so the rest of the canvas can’t be used." | Spec (`SheetSettingsPanel.tsx`)                 |
+| Constant                                    | Value     | Provenance / safe range                         |
+| ------------------------------------------- | --------- | ----------------------------------------------- |
+| Default element size                        | 960 × 560 | Spec                                            |
+| `HEADER_PX`                                 | 40        | As the board header                             |
+| `TOOLBAR_PX`                                | 44        | Default (D9)                                    |
+| Formula bar `minHeight` (`SheetFormulaBar`) | 28        | Default (D9)                                    |
+| `STATUS_BAR_PX`                             | 24        | Default (D9)                                    |
+| `ROW_HEADER_PX`                             | 46        | Default (D10); fits `10000`                     |
+| `COL_HEADER_PX`                             | 22        | Default (D10)                                   |
+| `GRID_OVERSCAN`                             | 4         | Rows and columns each side                      |
+| `RESIZE_HIT_PX`                             | 4         | Default (D11)                                   |
+| `DRAG_START_PX`                             | 4         | As board widgets' reorder                       |
+| `AUTOSCROLL_EDGE_PX`                        | 24        | Default (D12)                                   |
+| `PRESENCE_THROTTLE_MS`                      | 120       | Default (D13)                                   |
+| `PEER_TAG_MS`                               | 3000      | Spec                                            |
+| `FREEZE_GRAB_PX`                            | 3         | Default (D22)                                   |
+| `ADD_ROWS_PX`                               | 44        | The Add Rows footer's room                      |
+| `ADD_ROWS_DEFAULT`                          | 100       | Spec; Default (D17)                             |
+| `FIND_HIGHLIGHTS_MAX`                       | 2000      | Default (D18)                                   |
+| `CELLS_MAX` (status)                        | 100000    | Default (D19)                                   |
+| `SHEET_CSV_DROP_BYTES_MAX`                  | 8 MB      | Default (D20)                                   |
+| `KEPT_SELECTIONS_MAX`                       | 200       | Default (D21)                                   |
+| `DATE_YEAR_MIN`                             | 1900      | Spec (`SheetCardRows.tsx`)                      |
+| `STRIP_PX`                                  | 52        | Save / Cancel strip width (`SheetCardRows.tsx`) |
+| `SEPARATOR_PX`                              | 17        | A divider's room (`SheetToolbar.tsx`)           |
+| `CHEVRON_PX`                                | 12        | A menu button's chevron (`SheetToolbar.tsx`)    |
+| `STATS_MENU_PX`                             | 208       | Totals pick width (`SheetStatusBar.tsx`)        |
+| `CELL_THREADS_MAX`                          | 1000      | Default (D28)                                   |
+| `CELL_COMMENT_COLOUR`                       | `#f59e0b` | Spec (amber-500)                                |
+| `CELL_MARKER_PX`                            | 8         | Default (D29)                                   |
+| `CELL_PREVIEW_DELAY_MS`                     | 400       | Default (D29)                                   |
+| `CELL_PREVIEW_CHARS`                        | 140       | Default (D29)                                   |

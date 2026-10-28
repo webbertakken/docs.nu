@@ -6,33 +6,34 @@ bottom bar's Start Tour button live once in `apps/live/components/tour`
 
 ## Domain and naming
 
-| Spec term    | Identifier                                                                                               |
-| ------------ | -------------------------------------------------------------------------------------------------------- |
-| Plan tour    | `PlanTourHost`, `planTourSteps(track)`, `planTourStepTelemetryType`                                      |
-| tour track   | `BoardSheetTrack` (`'boards' \| 'sheets'`), of `PLAN_TOUR_TRACKS`                                        |
-| offer        | `useOfferTour('plan', …)` (`tour-offer.ts`): the track the bottom bar button names, `offerTrack`         |
-| tour subject | `Subject` (`{ boardId, sheetId }`, element ids) in `PlanTourHost`, fixed at a press by `visiblePlanWork` |
-| plan work    | `plan-board` / `plan-sheet` shape elements on `activeTab.elements` (`isBoard`, `isSheet`)                |
-| leftovers    | `PlanTourContent` and its leftover record, swept by `usePlanTourLeftovers` (old tour only)               |
-| seen guard   | `UserPreferences.planTourTracks` (the answered tracks), read by `planTrackSeen`                          |
+| Spec term    | Identifier                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Plan tour    | `PlanTourHost`, `planTourSteps(track)`, `planTourStepTelemetryType`                                                |
+| tour track   | `BoardSheetTrack` (`'boards' \| 'sheets'`), of `PLAN_TOUR_TRACKS`                                                  |
+| offer        | `useOfferTour('plan', …)` (`tour-offer.ts`): the track the bottom bar button names, `offerTrack`                   |
+| tour subject | `Subject` (`{ boardId, sheetId }`, element ids) in `PlanTourHost`, fixed at a press by `visiblePlanWork`           |
+| plan work    | `plan-board` / `plan-sheet` shape elements on `activeTab.elements` (`isBoard`, `isSheet`)                          |
+| example card | The Boards track's own card: `TOUR_CARD_TITLE` (`'Your First Card'`), held in `tourCardRef` in `PlanTourHost`      |
+| leftovers    | `PlanTourContent` and its leftover record, swept by `usePlanTourLeftovers` (the example card's, and an old tour's) |
+| seen guard   | `UserPreferences.planTourTracks` (the answered tracks), read by `planTrackSeen`                                    |
 
 ## Files
 
-| File                                            | Holds                                                                                                                                                 |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/live/components/tour/tour-step.ts`        | `TourStepOf<Api>` (the shared step shape), `hasAnchor`, `stepTelemetryType(prefix, id)`                                                               |
-| `apps/live/components/tour/useTourEngine.ts`    | The shared step runner: step index, direction, target rect, prepare / wait / heal                                                                     |
-| `apps/live/components/tour/tour-offer.ts`       | `useOfferTour`, `TOUR_OFFER_RANK`: each host publishes its tour; the most specific one is on the button                                               |
-| `apps/live/components/tour/TourOfferButton.tsx` | The bottom bar's Start Tour button, left of Search (`ChromeControls`)                                                                                 |
-| `apps/live/components/tour/TourStage.tsx`       | The shared overlay: highlight ring, `TourPopover`                                                                                                     |
-| `apps/live/components/tour/TourPopover.tsx`     | `copy` (`TourCardCopy`): the step card, the last card included                                                                                        |
-| `apps/live/components/tour/TourHost.tsx`        | The Diagram tour on the engine; publishes itself to `tour-active`                                                                                     |
-| `apps/live/components/tour/plan-tour-steps.ts`  | `planTourSteps`, `PLAN_TOUR_STEPS` (Boards), `PlanTourApi`, `boardRoot`, `sheetRoot`, `firstCardOn`, `visiblePlanWork`, `needsReveal`, telemetry type |
-| `apps/live/components/tour/PlanTourHost.tsx`    | On the button (`useOfferTour`), subject, relaunch, end; builds `PlanTourApi`                                                                          |
-| `apps/live/lib/tour-tracks.ts`                  | `tourTrackSeen`, `withTracksAnswered`: the tracks a person has taken                                                                                  |
-| `apps/live/lib/tour-active.ts`                  | Which tour is on screen (`'welcome' \| 'plan' \| 'workshop' \| null`), a module store                                                                 |
-| `apps/live/lib/plan-tour.ts`                    | Relaunch event, tracks, `planTrackSeen` / `markPlanTracksSeen`, the old tour's `PlanTourContent` record                                               |
-| `apps/live/hooks/plan/usePlanTourLeftovers.ts`  | The sweep of an old tour's leftover record; nothing new is placed (see Leftovers)                                                                     |
+| File                                            | Holds                                                                                                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/live/components/tour/tour-step.ts`        | `TourStepOf<Api>` (the shared step shape), `hasAnchor`, `stepTelemetryType(prefix, id)`                                                                 |
+| `apps/live/components/tour/useTourEngine.ts`    | The shared step runner: step index, direction, target rect, prepare / wait / heal                                                                       |
+| `apps/live/components/tour/tour-offer.ts`       | `useOfferTour`, `TOUR_OFFER_RANK`: each host publishes its tour; the most specific one is on the button                                                 |
+| `apps/live/components/tour/TourOfferButton.tsx` | The bottom bar's Start Tour button, left of Search (`ChromeControls`)                                                                                   |
+| `apps/live/components/tour/TourStage.tsx`       | The shared overlay: highlight ring, `TourPopover`                                                                                                       |
+| `apps/live/components/tour/TourPopover.tsx`     | `copy` (`TourCardCopy`): the step card, the last card included                                                                                          |
+| `apps/live/components/tour/TourHost.tsx`        | The Diagram tour on the engine; publishes itself to `tour-active`                                                                                       |
+| `apps/live/components/tour/plan-tour-steps.ts`  | `planTourSteps`, `BOARD_STEPS`, `SHEET_STEPS`, `PlanTourApi`, `boardRoot`, `sheetRoot`, `firstCardOn`, `visiblePlanWork`, `needsReveal`, telemetry type |
+| `apps/live/components/tour/PlanTourHost.tsx`    | On the button (`useOfferTour`), subject, relaunch, end; builds `PlanTourApi`                                                                            |
+| `apps/live/lib/tour-tracks.ts`                  | `tourTrackSeen`, `withTracksAnswered`: the tracks a person has taken                                                                                    |
+| `apps/live/lib/tour-active.ts`                  | Which tour is on screen (`'welcome' \| 'plan' \| 'workshop' \| null`), a module store                                                                   |
+| `apps/live/lib/plan-tour.ts`                    | Relaunch event, tracks, `planTrackSeen` / `markPlanTracksSeen`, the old tour's `PlanTourContent` record                                                 |
+| `apps/live/hooks/plan/usePlanTourLeftovers.ts`  | The sweep of an old tour's leftover record; nothing new is placed (see Leftovers)                                                                       |
 
 Also touched: `ClusterPopoverButton` (a `dataTourId` prop; Card Types passes `card-types`), the Settings catalogue
 and dialog, `power-user-mode.ts`, `help-articles.ts`, the help article
@@ -96,24 +97,21 @@ At a press: `subject = { boardId: visiblePlanWork(boardIds, boardRoot), sheetId:
 first whose box meets the window, else the first). "Subject deleted": `subject[tourTrack]` no longer among
 `activeTab.elements`.
 
-End: close the item panel, write `markPlanTracksSeen(prefs, [tourTrack])` (rebased onto
-the freshest preferences); then send `Ended` · `PlanTourCompleted` or `Ended` · `PlanTourSkipped`. Until 25 October
-2026 it also sent `Closed` · `PlanTourOffer` on a declined welcome card, and a declined choice card answered both
-tracks.
+End: close the item panel, take the example card away (`removeTourCard`), write
+`markPlanTracksSeen(prefs, [tourTrack])` (rebased onto the freshest preferences); then send `Ended` ·
+`PlanTourCompleted` or `Ended` · `PlanTourSkipped`. The host's unmount takes the example card away too.
 
 ### Tracks
 
-The engine's `steps` are `planTourSteps(tourTrack, { hasCards })`: that track's steps and its last card, the Boards
-track without `move-card` and `card-panel` when `hasCards` is false. The last card's help link follows the track
-(`/help/canvas/plan-mode/` or `/help/canvas/plan-mode/sheets/`). There is no welcome card and no choice card: until
-28 October 2026 a tab with both asked **Boards** or **Spreadsheets** (`welcomeChoices`, sending `Selected` ·
-`PlanTourBoards` | `PlanTourSheets`).
+The engine's `steps` are `planTourSteps(tourTrack)`: that track's steps and its last card. Every board has the card
+steps: the tour adds its own card to show them on. The last card's help link follows the track
+(`/help/canvas/plan-mode/` or `/help/canvas/plan-mode/sheets/`). There is no welcome card and no choice card.
 
 Boards steps, each scoped to the board's drawn body `[data-plan-board="<board>"]` (`boardRoot`; never its
 `data-element-id` canvas node, hidden under a maximised or tab-filling body): `board` (no anchor, a centred card; prepare
 `reveal('boards')`), `add-cards`
-(`[data-add-card-trigger]`, the first column's Add card), `move-card` (`[data-plan-card="<first card>"]`), `card-panel`
-(`[role="dialog"][aria-label^="Item #"]`; prepare `openCard`, cleanup `closeCard`), `board-header`
+(prepare `addTourCard`; `[data-plan-card="<example card>"]`), `move-card` (prepare `moveTourCard`; the same card),
+`card-panel` (`[role="dialog"][aria-label^="Item #"]`; prepare `openTourCard`, cleanup `closeCard`), `board-header`
 (`[data-board-header]`; prepare `closeCard`), `card-types` (data-tour-id `card-types`), `outro`.
 
 Sheets steps, each scoped to the Sheet's drawn body `[data-plan-sheet="<sheet>"]` (`sheetRoot`, on
@@ -124,12 +122,20 @@ the A1 cell box `SheetCells` marks; skipped when A1 is not drawn),
 
 ### Tour subject
 
-`PlanTourApi` is `{ boardId(), sheetElementId(), firstCardId(), openCard(), closeCard(), reveal(track) }`, built
-fresh each render over the subject. `firstCardId` and `openCard` read `firstCardOn(boardId)`: the `data-plan-card`
+`PlanTourApi` is `{ boardId(), sheetElementId(), firstCardId(), openCard(), closeCard(), addTourCard(),
+moveTourCard(), openTourCard(), tourCardId(), reveal(track) }`, built fresh each render over the subject. `firstCardId` and `openCard` read `firstCardOn(boardId)`: the `data-plan-card`
 of the first card drawn inside the board's body, or null. `reveal(track)` asks `needsReveal(root)` (false inside
 `[data-canvas-cover]`; true when the body's box leaves the window) and, if so, calls
 `scrollIntoView(x, y, width, height)` on the subject element: a minimal pan, zooming out only when it overflows. `openCard` calls `plan.showItem(id)` when that card is not already
-open; `closeCard` calls `plan.closeItem()` when one is open. Nothing else in the api writes.
+open; `closeCard` calls `plan.closeItem()` when one is open.
+
+The example card is the only thing the api writes, each write through `plan.writeQuiet(op, { silent: true })` (no
+undo step, no content event). `addTourCard` (once per run) creates an item titled `TOUR_CARD_TITLE`, of the board's
+first add type (`planBoard.addTypes[0]`, else `task`), in its first column's status, after recording it
+(`writeLeftover({ documentId, elementId: '', itemIds: [id] })`); it returns its id, or null (logging `[plan-tour] card
+not added` with no board setup, column or document, `[plan-tour] card refused` when the write fails, clearing the
+record). `moveTourCard` moves it to the second column's status, when there is one. `openTourCard` shows it (else the
+first drawn card). `removeTourCard` closes its panel, deletes it and clears the record.
 
 ### Leftovers (`usePlanTourLeftovers`)
 
@@ -139,7 +145,7 @@ When `releaseSheets` returns false (no Sheet has drawn to take it), the element 
 content.failed` is logged once, and the sweep tries again after `LEFTOVER_SHEET_RETRY_MS` (2000, a cheap check; the
 sheet goes soon after the first Sheet draws). Once the items are ready, its items go too (`writeQuiet` deletes,
 `[plan-tour] content.swept`); the record is cleared only once both the element and the items are swept. A record for
-another document is kept. Nothing writes a record any more.
+another document is kept. The example card writes the record while it exists, so a reload mid-tour sweeps it.
 
 ## Interfaces and contracts
 
@@ -147,7 +153,7 @@ another document is kept. Nothing writes a record any more.
   first two, `BoardSheetTrack`); missing = none answered. `planTourSeen?: boolean` counts every
   track only while `powerUserMode` is on. No migration (free-form preferences blob).
 - `PLAN_TOUR_RELAUNCH_EVENT = 'livedoc:plan-tour-relaunch'`, dispatched by `requestPlanTourRelaunch()`.
-- Leftover record (read only): `localStorage['livedoc:v2:plan-tour-content']` = JSON `PlanTourContent`; a
+- Leftover record: `localStorage['livedoc:v2:plan-tour-content']` = JSON `PlanTourContent`; a
   malformed value is dropped, never thrown. A record from before the Sheets track (`boardId`) reads as its
   `elementId`.
 - Settings switches: **Plan Tours** (`tourTracksSwitch`, key `planTourSeen`, label **Plan Tours**, the second toggle
@@ -166,28 +172,30 @@ another document is kept. Nothing writes a record any more.
 ## Data and persistence
 
 - `planTourTracks` and `planTourSeen`: synced preferences, per person.
-- The tour writes no document data: no element, item, cell or history entry. The subject is held in component
-  state for the run only.
-- The leftover record in `localStorage` is only read and cleared (the old tour's).
+- The tour's only document data is the example card: one item, written and deleted with no history entry. The
+  subject is held in component state for the run only.
+- The leftover record in `localStorage` holds the example card while it exists, and is swept and cleared.
 
 ## Errors and edge cases
 
-| Case                                              | Handling                                                    |
-| ------------------------------------------------- | ----------------------------------------------------------- |
-| No board or Sheet on the tab (empty, Dashboard)   | Not on offer; the button names another tour or is not drawn |
-| Settings rerun with no board or Sheet             | Nothing starts; nothing is placed                           |
-| A press while another tour is on screen           | Nothing happens                                             |
-| A board with no cards                             | `move-card` and `card-panel` are left out up front          |
-| The board or Sheet has not drawn when a step runs | The step's target is awaited 3500 ms, then skipped          |
-| The subject is deleted mid-tour                   | The tour ends as skipped                                    |
-| The person switches tab or leaves Plan mid-tour   | The tour ends as skipped; the card panel is closed          |
-| A Sheet's toolbar or cog not shown to this person | Its step finds no target and is skipped                     |
-| Locked tab                                        | Not on offer                                                |
-| A leftover record from the old tour               | Swept on the next visit to that document, as before         |
+| Case                                                  | Handling                                                                                          |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| No board or Sheet on the tab (empty, Dashboard)       | Not on offer; the button names another tour or is not drawn                                       |
+| Settings rerun with no board or Sheet                 | Nothing starts; nothing is placed                                                                 |
+| A press while another tour is on screen               | Nothing happens                                                                                   |
+| A board with no column, or the card's create refused  | `addTourCard` returns null and logs; Add Cards and Move Work Along find no target and are skipped |
+| A board with one column                               | `moveTourCard` does nothing; Move Work Along rings the card where it is                           |
+| The board or Sheet has not drawn when a step runs     | The step's target is awaited 3500 ms, then skipped                                                |
+| The subject is deleted mid-tour                       | The tour ends as skipped                                                                          |
+| The person switches tab or leaves Plan mid-tour       | The tour ends as skipped; the card panel is closed                                                |
+| A Sheet's toolbar or cog not shown to this person     | Its step finds no target and is skipped                                                           |
+| Locked tab                                            | Not on offer                                                                                      |
+| A leftover record (a reload mid-tour, or an old tour) | Swept on the next visit to that document                                                          |
 
 ## Security and trust
 
-The tour writes nothing, so nothing crosses a trust boundary. A Participant and a Viewer never see the
+The tour writes only its example card, as the person, through the item store's ordinary writes, so it crosses no
+new trust boundary. A Participant and a Viewer never see the
 button for it (`isReadOnly`).
 
 ## Performance and limits
@@ -198,16 +206,16 @@ button for it (`isReadOnly`).
   elements).
 - `visiblePlanWork` runs at a press only: one `querySelector` and one `getBoundingClientRect` per board or Sheet
   on the tab.
-- `firstCardOn` is one `querySelector`, run on the card steps only.
+- `firstCardOn` is one `querySelector`, run on the card panel step only.
+- The example card costs one item create, at most one move and one delete per run.
 - The engine's 150 ms re-measure runs only while a tour is on screen.
 
 ## Presentation and UX
 
 As the Diagram tour ([Diagram tour](../../007-editor/editor-tour.md)). The bottom bar's button reads **Start Boards
 Tour** or **Start Sheets Tour**. The cards' `ariaPrefix` is **Boards tour** or **Sheets tour**. The last card is a
-step card in `TourPopover`, with **Help** linking the track's article (`/help/canvas/plan-mode`) and **Start**
-(`TOUR_FINISH`). The welcome cards and their art (`BoardsTourArt`, `SheetsTourArt`, `PlanChoiceTourArt`,
-`TourArtFrame`, `TourHelpArt`) were deleted on 28 October 2026.
+step card in `TourPopover`, with **Help** linking the track's article (`BOARDS_TOUR_COPY` or `SHEETS_TOUR_COPY`)
+and **Start** (`TOUR_FINISH`). The tour has no art.
 
 ## Accessibility
 
@@ -227,27 +235,27 @@ surface is fixed-position over the canvas.
 
 ## Testing
 
-| Rule                                                                      | Test                                                     |
-| ------------------------------------------------------------------------- | -------------------------------------------------------- |
-| On the button with a board or Sheet on the tab; never starts on its own   | `PlanTourHost.test.tsx`                                  |
-| Not on offer on an empty tab or a Dashboard; a rerun there places nothing | `PlanTourHost.test.tsx`                                  |
-| Not on offer when read-only, locked, unhydrated, embedded                 | `PlanTourHost.test.tsx`                                  |
-| Starts nothing while another tour is on screen                            | `PlanTourHost.test.tsx`                                  |
-| Reruns from Settings in Plan only                                         | `PlanTourHost.test.tsx`                                  |
-| The button names the first untaken track; the track runs on the subject   | `PlanTourHost.test.tsx`                                  |
-| A board with no cards leaves out the card steps                           | `PlanTourHost.test.tsx`, `plan-tour-steps.test.ts`       |
-| Runs to the end without changing the document or sending content events   | `PlanTourHost.test.tsx`                                  |
-| Ends as skipped on another tab or the subject deleted                     | `PlanTourHost.test.tsx`                                  |
-| Steps, selectors on the subject, nothing prepared but the card panel      | `plan-tour-steps.test.ts`                                |
-| Title Case step titles                                                    | `plan-tour-steps.test.ts`                                |
-| Leftover record round trip, malformed value dropped                       | `plan-tour.test.ts`                                      |
-| Sweep of a leftover record                                                | `usePlanTourLeftovers.test.ts`                           |
-| Engine: prepare, skip a missing target, heal, finish outcomes             | `useTourEngine.test.tsx`                                 |
-| Stage: default and Plan card words, ring, labels                          | `TourStage.test.tsx`                                     |
-| Start Tour button: label, order left of Search, retake, none on offer     | `TourOfferButton.test.tsx`, `ChromeControls.test.tsx`    |
-| Active-tour store                                                         | `tour-active.test.ts`                                    |
-| Settings row inverted, events                                             | `settings-catalogue.test.ts`                             |
-| Telemetry tokens charted and explained                                    | `apps/telemetry` `metric-emitters.test.ts`, explanations |
+| Rule                                                                       | Test                                                     |
+| -------------------------------------------------------------------------- | -------------------------------------------------------- |
+| On the button with a board or Sheet on the tab; never starts on its own    | `PlanTourHost.test.tsx`                                  |
+| Not on offer on an empty tab or a Dashboard; a rerun there places nothing  | `PlanTourHost.test.tsx`                                  |
+| Not on offer when read-only, locked, unhydrated, embedded                  | `PlanTourHost.test.tsx`                                  |
+| Starts nothing while another tour is on screen                             | `PlanTourHost.test.tsx`                                  |
+| Reruns from Settings in Plan only                                          | `PlanTourHost.test.tsx`                                  |
+| The button names the first untaken track; the track runs on the subject    | `PlanTourHost.test.tsx`                                  |
+| A board with no cards still gets the card steps, on the card the tour adds | `PlanTourHost.test.tsx`, `plan-tour-steps.test.ts`       |
+| Runs to the end, taking its example card away, sending no content events   | `PlanTourHost.test.tsx`                                  |
+| Ends as skipped on another tab or the subject deleted                      | `PlanTourHost.test.tsx`                                  |
+| Steps and selectors on the subject; adds, moves and opens its own card     | `plan-tour-steps.test.ts`                                |
+| Title Case step titles                                                     | `plan-tour-steps.test.ts`                                |
+| Leftover record round trip, malformed value dropped                        | `plan-tour.test.ts`                                      |
+| Sweep of a leftover record                                                 | `usePlanTourLeftovers.test.ts`                           |
+| Engine: prepare, skip a missing target, heal, finish outcomes              | `useTourEngine.test.tsx`                                 |
+| Stage: default and Plan card words, ring, labels                           | `TourStage.test.tsx`                                     |
+| Start Tour button: label, order left of Search, retake, none on offer      | `TourOfferButton.test.tsx`, `ChromeControls.test.tsx`    |
+| Active-tour store                                                          | `tour-active.test.ts`                                    |
+| Settings row inverted, events                                              | `settings-catalogue.test.ts`                             |
+| Telemetry tokens charted and explained                                     | `apps/telemetry` `metric-emitters.test.ts`, explanations |
 
 ## Constants and configuration
 
@@ -259,4 +267,4 @@ surface is fixed-position over the canvas.
 ## Defaults ledger
 
 D28 (how long the old tour waited for items before its card steps) in [DEFAULTS.md](DEFAULTS.md), retired with
-the example cards: the card steps now read the drawn board.
+the old tour's example cards.

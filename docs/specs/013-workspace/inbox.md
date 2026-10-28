@@ -311,7 +311,7 @@ CREATE TABLE collab_threads (
 Every write to a tab in a room, whatever its path (the autosave, a comment through the api, a create, a copy, an
 agent's changeset, a Q&A board write, a shared tab's copy taken in), keys the tab in the room's outbox from a
 trigger, in the same transaction as the write; the drain replaces that tab's rows in one D1 batch
-(`onTabCollabChanged`, the one function that writes these tables).
+(`collabStatements` in `drainOutbox`, `document-room/document-outbox.ts`, the one function that writes these tables).
 A tab removed from the document, and every tab of a purged document, drops its rows the same way or by cascade.
 
 The rows are derived by a pure function over the tab's elements
@@ -377,9 +377,9 @@ read filters that table; the rules below are what the push keeps. Two pieces mak
   not of the card: a status is Done when one of a board's done columns holds it
   ([Done columns](../026-plan/plan-board.md#done-columns)) ([Plan views](../026-plan/plan-views.md) "What a plan view reads"). The
   boards live in tab JSON, so they get the same treatment as actions:
-  a per-tab projection written in the tab save's batch by
-  `collabIndexStatements` (so every path in §2.1 writes it, and the copy
-  path copies it).
+  a per-tab projection in the document's room, written in the tab write's own batch by
+  `planBoardIndexStatements` (`db/plan-board-index.ts`, so every path in §2.1 writes it); the room pushes the open
+  cards it yields to D1's `inbox_cards`.
 
 ```sql
 CREATE TABLE plan_board_statuses (
@@ -586,7 +586,7 @@ The section checklist from [Timeline](timeline.md) §8.3: `views.tsx` gains
 gets the Overview row (with `InboxIcon` in
 `components/primitives/explorer-icons.tsx`),
 `useExplorerPane` names it, `ExplorerPane` dispatches to the
-lazy-loaded `InboxPane` (not a `BROWSE_KIND`; no New Document / New
+lazy-loaded `InboxPane` (not in `BROWSE_KINDS`; no New Document / New
 Folder header actions; Help links the new article), and
 `routes.test.ts`'s `STATIC_NODES` lists it. The sidebar badge and the
 pane read the same fetch (`useActivityFeed`, held in Explorer state
@@ -661,6 +661,6 @@ Never an action name, comment text, document name, or any identity.
   (`apps/help/app/explorer/activity/page.mdx`, the slug kept so links already out there keep
   working), registered with keywords ("activity", "to do", "todo", "assigned to me", "my actions",
   "outstanding", "waiting", "open threads"), a card glyph + hue, and
-  an `InboxSections` illustration.
+  an `InboxListAndPane` illustration.
 - README / `docs/development/architecture.md` / `docs/specs/005-project-roadmap/prototype-scope.md` gain
   the section; [Assigned actions](../012-collaboration/assigned-actions.md) §9 and [Folders](folders.md)'s sidebar list point here.

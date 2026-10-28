@@ -7,7 +7,7 @@ Derived from [Toasts](../toasts.md). Implementation detail only; the spec decide
 | File                                          | Holds                                                                                                                   |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `apps/live/hooks/ui/useToast.tsx`             | `ToastProvider`, `useToast`, the `ToastApi` (`info`, `success`, `warning`, `error`, `offer`, `action`, `dismissAction`) |
-| `apps/live/components/toast/toast-queue.ts`   | Pure queue writes: `pushToast`, `upsertActionToast`, `retireToast`, `TOAST_LIMIT`, durations                            |
+| `apps/live/components/toast/toast-queue.ts`   | Pure queue writes: `pushToast`, `upsertActionToast`, `retireToasts`, `TOAST_LIMIT`, durations                           |
 | `apps/live/components/toast/ToastStack.tsx`   | The always-mounted `Notifications` region, its placement and the floor                                                  |
 | `apps/live/components/toast/ToastCard.tsx`    | One toast: icon, message, actions, close; `TOAST_SURFACE` for the look shared by other notices                          |
 | `apps/live/components/toast/useToastTimer.ts` | The pausable timeout                                                                                                    |
@@ -144,8 +144,7 @@ rect:
 
 Bottom chrome that comes or goes without resizing anything the stack watches dispatches `TOAST_FLOOR_CHANGED_EVENT`
 on `window` (`announceToastFloorChange()`): the sign-in banner on mount and unmount, the whiteboard dock on mount,
-move and unmount, the new-version prompt when it shows or hides. (The tour banner did too until 28 October 2026,
-when tours stopped drawing banners.)
+move and unmount, the new-version prompt when it shows or hides.
 
 ## Errors and edge cases
 

@@ -53,8 +53,8 @@ proved the better introduction.
   while another tour is on screen does nothing ("One tour at a time").
 - **The last card is a step card.** "You're ready to diagram" is drawn in the same popover as the steps
   (`TourPopover`), centred, with the help link and the finish button; every mode tour's finish button reads just
-  **Start** (`TOUR_FINISH`), and its help link reads **Help** behind a help icon (an element tour's names its
-  article, "Sankey Diagram Help", behind the same icon). It takes no focus, so the person carries on where they were.
+  **Start** (`TOUR_FINISH`; an element tour's and Show Me's read **Done**), and every tour's help link reads **Learn
+  More** behind a help icon, opening its own tour's help article in a new tab. It takes no focus, so the person carries on where they were.
 - **How a step reads.** Every tour's words, the editor's, each mode's and each element's, are written to get someone
   going fast: what to do first, in one idea and about twenty words at most; the control named exactly as it is
   labelled; a menu path written as it is pressed ("Tools › Boundary", or "In its menu, Mind Map"); no inside terms
@@ -127,8 +127,8 @@ words too (`touchBody`), which a touch screen (a coarse pointer) reads instead: 
    button, over the dialog layer. It closes as the step ends, however it ends, including when the step is left
    while the panel is still opening. A phone's dock has the same button, but opens Tab Style as a modal sheet, and the
    tour stands aside while a modal is open, so the step would show the sheet with no card: it is skipped there.
-7. **Outro** (card): "You're ready to diagram": a help-article illustration, a **Learn More** link to the help
-   centre (new tab, no underline), and a **Start** button that completes the tour.
+7. **Outro** (card): "You're ready to diagram": a **Learn More** link to the help centre behind a help icon (new
+   tab, no underline), and a **Start** button that completes the tour.
 
 Retired steps: **Tab Mode** (opening the editor mode switch's menu, step 4 until October 2026) was cut to keep
 the tour on diagramming; each mode now has a tour of its own, on the Start Tour button while the person is in it. **The Explorer** (the document browser behind the top-left menu button) was step 5 of the

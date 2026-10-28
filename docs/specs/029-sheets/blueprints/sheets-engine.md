@@ -16,14 +16,14 @@ the live editor (lazily loaded), the api worker (validation, renders, agents) an
 | input             | `CellInput`                                                                                |
 | value             | `Value` (`packages/sheets/src/formula/values.ts`)                                          |
 | format            | `CellFormat`                                                                               |
-| range             | `GridRange { r1, c1, r2, c2 }` (positions), `RefRange` (ids, stored)                       |
+| range             | `GridRange { r1, c1, r2, c2 }` (positions), `IdRange` (ids, stored)                        |
 | cell write        | `SheetWrite` of kind `cells`                                                               |
 | layout write      | `SheetWrite` of kind `layout`                                                              |
 | sheet rev         | `Sheet.rev`                                                                                |
 | selection         | `Selection { ranges: GridRange[]; active: { r, c } }` (`packages/sheets/src/selection.ts`) |
 
 Positions (`r`, `c`) are zero-based indexes into the layout's current order; ids are what is stored. A function
-that takes positions says so in its name or parameter (`atPos`); everything stored takes ids.
+that takes positions says so in its name or parameter (`posToRange`, `a1ToPos`); everything stored takes ids.
 
 ## Source layout
 
@@ -230,7 +230,7 @@ Order of reading, first match wins (spec formulas.md "What a typed input becomes
 7. Empty after trim → clear (no input).
 8. Otherwise `{ s: text }`.
 
-`formatHint` is applied only when the cell's `nf` is unset or `auto` (`commands.ts`). A hint marked `ifAutomatic`
+The read's format `hint` is applied only when the cell's `nf` is unset or `auto` (`commands.ts`). A hint marked `ifAutomatic`
 (a formula's) is held to that by every writer: a paste keeps the copied cell's own `nf` over it, and an agent write
 (`a1-io.ts`) keeps the target cell's. Agent inputs use locale `en-GB`.
 
@@ -238,12 +238,13 @@ Order of reading, first match wins (spec formulas.md "What a typed input becomes
 
 ### Tokens
 
-`number`, `string` (double quotes, `""` escape), `bool` (`TRUE`/`FALSE` not followed by `(`), `ref` (A1 cell, with
-`$`s; column-only `A:C`; row-only `2:4` handled in the parser from `number ':' number`), `sheetRef` (`Name!` or
-`'Quoted Name'!`, `''` escape), `func` (name followed by `(`; names `[A-Z][A-Z0-9.]*`, case-insensitive, stored
-upper), `op` (`+ - * / ^ & = <> < > <= >= % :`), `(`, `)`, `,`, `;` (inside `{}`), `{`, `}`, `#` (spill suffix,
-directly after a ref), `error` literals (`#N/A`, `#REF!`, ...), `stored` (`@n`, only in templates), whitespace
-(kept as trivia for offsets). Every token carries `start`, `end` source offsets.
+`tokenize` (`packages/sheets/src/formula/tokens.ts`) yields `Token { k: TokenKind; v; start; end }`, `TokenKind` one of `num`, `str`
+(double quotes, `""` escape), `err` (`#N/A`, `#REF!`, ...), `ident` (a name, a function name, `TRUE`/`FALSE` or an
+A1 reference: the parser tells them apart; column-only `A:C` and row-only `2:4` are read by the parser), `sheet`
+(`Name!` or `'Quoted Name'!`, `''` escape; `v` is the title), `op` (`+ - * / ^ & = <> < > <= >= % :`), `lparen`,
+`rparen`, `comma`, `semi` (inside `{}`), `lbrace`, `rbrace`, `hash` (the spill suffix, `B2#`), `stored` (`@n`, only
+in stored templates), `ws` (kept for offsets) and `bad` (a character no token starts with). Every token carries its
+`start` and `end` source offsets.
 
 ### Grammar (precedence climbing)
 
@@ -280,7 +281,7 @@ closing bracket", ...). Unknown function names parse (they evaluate to `#NAME?`)
 - `storedAst(stored)` parses the template once and caches by object identity (a `WeakMap`).
 - `shiftForCopy(stored, dr, dc, from, to)`: relative parts move by `dr`/`dc` positions in the target layout; a
   part moved off the grid becomes `#REF!`. Used by copy-paste, fill and Ctrl+Enter. Cut-paste does not shift:
-  the moved cells keep their stored refs, and refs to the moved cells are rewritten (`rewriteRefsForMove`).
+  the moved cells keep their stored refs, and refs to the moved cells are rewritten (`pasteCut`, `commands-paste.ts`).
 
 ### Values and coercion
 
@@ -293,16 +294,15 @@ closing bracket", ...). Unknown function names parse (they evaluate to `#NAME?`)
 
 ### Functions
 
-- `FunctionDef = { min: number; max: number /* Infinity */; impl; volatile?: true; lazy?: true; arrayArgs?: number[];
-returnsArray?: true }`. `lazy` functions (`IF`, `IFS`, `SWITCH`, `IFERROR`, `IFNA`, `AND`, `OR`, `CHOOSE`) get
+- `FnDef = { min: number; max: number /* MANY, Infinity */; impl; volatile?: true; lazy?: true }` (`packages/sheets/src/formula/fn.ts`). `lazy` functions (`IF`, `IFS`, `SWITCH`, `IFERROR`, `IFNA`, `AND`, `OR`, `CHOOSE`) get
   thunks so unused branches are not evaluated.
 - The closed name list is exactly formulas.md's catalogue. `FUNCTION_DOCS[name] = { args: string[]; summary;
 example }` feeds autocomplete, the hint card and the help article; a test checks the docs, the registry and
   formulas.md list the same names.
 - A call whose argument count is outside `min..max` evaluates to `#N/A` with the reason "Wrong number of
   arguments to SUM. Expected at least 1", which the editor shows on hover.
-- Scalar functions applied to an array argument broadcast (lift) element-wise, producing an array, unless the
-  parameter is in `arrayArgs` (aggregates take ranges as they are).
+- Scalar functions (built with `lift`, `packages/sheets/src/formula/fn.ts`) applied to an array argument broadcast element-wise,
+  producing an array; aggregates take ranges as they are.
 - `REGEX*`: compiled with `new RegExp(pattern, 'u')`. A regex cannot be interrupted, so two estimates are checked
   first, either over its budget → `#VALUE!`: the plain pass (`text.length * pattern.length` > `REGEX_WORK_MAX`), and
   the backtracking (`regex-cost.ts`: `regexWork(regexShape(pattern), text.length)` > `REGEX_BACKTRACK_MAX`), which
@@ -316,25 +316,28 @@ example }` feeds autocomplete, the hint card and the help article; a test checks
 
 ### Workbook and recalculation
 
-- `new Workbook({ sheets, now, cards, locale })` holds the sheets of one tab. `values(sheetId)` returns the computed
-  `Value` grid lazily per cell; `setCards(source)`, `applyChange(change)` (from `store.ts`) and `recalc()`.
-- **Dependency graph**: for each formula cell, its precedent refs resolved to `(sheetId, rowId|*, colId|*)` cells and
-  ranges. Single-cell precedents go in a `Map<cellId, Set<formulaCell>>`; ranges in a per-sheet interval index
-  (`RangeIndex`: ranges bucketed by column id, each bucket a sorted array of row-position intervals rebuilt on layout
-  change), so `dependentsOf(cell)` is O(log n + hits).
-- **Dirty propagation**: a change marks the changed cells, then walks dependents breadth-first (each once), plus
-  every volatile cell and, when cards changed, every card-function cell. Evaluation is on demand with memo; a cell
-  re-entered while on the evaluation stack is a cycle: every cell on the stack from it is `#REF!` with reason
-  `cycle` (the path kept for the hover).
+- `new Workbook({ sheets, locale, now?, rand?, cards? })` (`packages/sheets/src/engine/workbook.ts`) holds the sheets of one tab.
+  `value(sheetId, r, c)` reads a cell by position (its input, its formula's value, or what a spill puts there);
+  `formulaResult`, `spillOwnerAt` and `extent` read the rest. `updateSheet(sheet, keys?)`, `removeSheet(id)`,
+  `setCards(source)` and `tick()` (TODAY and NOW move on) are the changes.
+- **Dependency graph**: `Dependencies` (`packages/sheets/src/engine/dependencies.ts`) records who reads what while a formula is worked
+  out (`noteCell`, `noteRange`), so INDIRECT and OFFSET are tracked as they are read. Single cells go by id; ranges
+  by position in a per-column index (sheet id, then column position, then entries), so the readers of one changed
+  cell are found without scanning every formula.
+- **Invalidation**: values are worked out on demand and kept by cell id (`sheetId|rowId:colId`). A change to cells
+  (`updateSheet` with `keys`) forgets only the cells that read them, directly or through others, plus every volatile
+  cell; new cards forget every card reader; a change to a sheet's layout or title, a new sheet or a removed one
+  forgets everything. A cell read while it is being worked out is a cycle: `#REF!` "Circular reference: ...",
+  naming the loop. A chain nested past `DEPTH_MAX` (250) works the deep cell out first, then reads again, so long
+  chains never overflow the stack.
 - **Spills**: a formula's array value claims the rectangle below and right; a claimed cell with its own input, or
-  another formula's claim, makes the formula `#SPILL!` (reason names the blocker). Claims are tracked in a
-  `SpillMap` (cell → owner); a change to a cell inside a claim re-checks its owner.
-- **Budget**: each recalc counts cell reads; past `RECALC_READS_MAX` it stops, marks unreached dirty cells
-  `#NUM!` with reason `too_large`, and returns `{ truncated: true }` (the editor toasts the spec's line once). A
-  single range of more than `RANGE_CELLS_MAX` cells read at once is `#NUM!`. Whole-column refs read only to the last
-  filled row (`layoutSize` plus the sheet's filled extent).
-- **Incremental**: `recalc()` returns `{ changed: Set<cellId> }` so views redraw only those. Slicing over frames is
-  the editor's (it calls `recalcSome(budgetMs)`); the engine keeps the dirty queue between calls.
+  another formula's claim, makes the formula `#SPILL!` (reason names the blocker). Claims are kept owner to
+  rectangle and position to owner; a spill reads its whole rectangle (`noteRange`), so filling or emptying a cell in
+  it works the spill out again.
+- **Budget**: each read counts cells (`spend`); past `RECALC_READS_MAX` it stops, the formulas worked out in that
+  read take its "too large" error and are worked out afresh on the next read, and `truncated` is set (the editor
+  toasts the spec's line once). A single range of more than `RANGE_CELLS_MAX` cells read at once is `#NUM!`.
+  Whole-column refs read only to the last filled row (`extent`).
 
 ## Writes (`store.ts`)
 
@@ -443,14 +446,14 @@ columns) is never refused.
   that width is > 0 and ≥ the comma's (a tie is `;`), else `,`; text holding no `;` is `,` without parsing.
   `toCsv` quotes fields holding `,`, `;`, `"`, CR or LF (a `;` so a one-column sheet's file reads back as one
   column).
-- `detectSeries(values)`: all numbers with a constant step → arithmetic; all dates with a constant day step, or the
+- `fillSeries(source, count, copy, dateLike, backward)` (`fill.ts`): all numbers with a constant step → arithmetic; all dates with a constant day step, or the
   same day of month a month apart → date series; text with a trailing integer and the same prefix → number series;
   English month (`Jan`/`January`) and day names (`Mon`/`Monday`), case kept → cyclic; else copy. A single number
   copies (Sheets) unless Ctrl is held, which increments by 1.
 - `sortKeyCompare` implements the spec order (numbers, text case-insensitive by `localeCompare(…, 'en', { sensitivity:
 'base', numeric: true })`, booleans, errors, empty last both ways), stable.
 - `FilterCondition = { values?: string[] /* displayed texts kept */; op?: ConditionOp; a?: string; b?: string }` with
-  `ConditionOp` the spec's list. `visibleRowsAfterFilter(workbook, sheetId)` returns the hidden row ids.
+  `ConditionOp` the spec's list. `filteredOutRows(wb, sheetId)` returns the hidden row ids.
 - `findMatches` scans filled cells in row-major order of the layout; `replaceAll` returns one `cells` write of the
   changed inputs (text inputs and formula templates' string literals only when "Also Search Formulas"; formulas'
   values are never replaced), with the count.

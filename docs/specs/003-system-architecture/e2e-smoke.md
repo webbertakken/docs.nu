@@ -108,11 +108,8 @@ Cost controls, all in `e2e.yml` and `playwright.config.ts`:
   uploads them whenever any holds a trace, a timed-out run included, one artefact per job
   (`playwright-report-shard-i`, `playwright-report-sites`, `playwright-report-account`). Locally a trace is kept for a
   retry only.
-- **No waiting on what is not coming.** A helper waits for a thing only when the app owes it:
-  `dismissQuickTour` returns at once: no tour offers itself since 28 October 2026 (tours start
-  from the bottom bar's Start Tour button), so there is nothing to dismiss. Until then it waited
-  only when /new's tour handoff flag was in sessionStorage, rather than sitting out a 5-second
-  timeout after every reload or by-URL visit, which cost the suite minutes. `seedTab` returns once the seeded elements have
+- **No waiting on what is not coming.** A helper waits for a thing only when the app owes it: no tour offers
+  itself (tours start from the bottom bar's Start Tour button), so no helper dismisses one. `seedTab` returns once the seeded elements have
   finished popping in (`settledBox`), so a test never measures or drags a box that is still changing.
 - **No model downloads.** The photo-import tests stub the handwriting reader
   and serve the boundary model's weights from the app itself; nothing pulls
@@ -308,7 +305,7 @@ tests where it's cheap.
   which `vitest.config.ts` runs and Playwright never loads.
 - `apps/live/e2e/fixtures.ts`: the `test` with its `pageErrors` fixture, `expectNoPageErrors`, and the
   shared flows (`startBlankDocument`, `startTemplateDocument`, `startEventStormingRow`, `seedTab`,
-  `dismissQuickTour`, `openJustDraw`). `startTemplateDocument` exists because the blank helper skips the
+  `createInMode`, `settledBox`, `paletteTile`). `startTemplateDocument` exists because the blank helper skips the
   wizard's category step and so never exercises template creation.
 - `apps/live/e2e/fixtures/`: drawn wall photos for the photo import; `audit-screens.ts`, `contrast.ts`,
   `optical.ts` and `optical-discover.ts`: the screens and measurements the dark-mode audits share.
