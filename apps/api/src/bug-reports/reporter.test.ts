@@ -43,9 +43,10 @@ describe('resolveBugReporter', () => {
   });
 
   it('files an account id sent as the guest header as anonymous', async () => {
-    expect(
-      await resolveBugReporter(ctx({ headers: { 'X-Owner-Id': 'acct_webber' } })),
-    ).toEqual({ kind: 'anonymous', id: null });
+    expect(await resolveBugReporter(ctx({ headers: { 'X-Owner-Id': 'acct_webber' } }))).toEqual({
+      kind: 'anonymous',
+      id: null,
+    });
   });
 
   it('files a request with no identity as anonymous', async () => {

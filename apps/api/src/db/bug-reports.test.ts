@@ -35,17 +35,39 @@ const filing = (extra: Partial<BugReportFiling> = {}): BugReportFiling => ({
 
 describe('stored bug reports', () => {
   it('stores a filing and gives it back whole, oldest first', async () => {
-    await storeBugReport(db.env, { filing: filing({ title: 'second' }), screenshotKey: null, reason: 'board_busy' }, 20);
-    await storeBugReport(db.env, { filing: filing(), screenshotKey: 'k', reason: 'unconfigured' }, 10);
+    await storeBugReport(
+      db.env,
+      { filing: filing({ title: 'second' }), screenshotKey: null, reason: 'board_busy' },
+      20,
+    );
+    await storeBugReport(
+      db.env,
+      { filing: filing(), screenshotKey: 'k', reason: 'unconfigured' },
+      10,
+    );
     const due = await listDueBugReports(db.env, 5);
     expect(due.map((r) => r.filing.title)).toEqual(['Save fails', 'second']);
-    expect(due[0]).toMatchObject({ filing: filing(), reason: 'unconfigured', attempts: 0, createdAt: 10 });
+    expect(due[0]).toMatchObject({
+      filing: filing(),
+      reason: 'unconfigured',
+      attempts: 0,
+      createdAt: 10,
+    });
   });
 
   it('keeps an anonymous reporter as no owner', async () => {
     await storeBugReport(
       db.env,
-      { filing: filing({ reporter: { kind: 'anonymous', id: null }, details: undefined, context: undefined, screenshotUrl: undefined }), screenshotKey: null, reason: 'unconfigured' },
+      {
+        filing: filing({
+          reporter: { kind: 'anonymous', id: null },
+          details: undefined,
+          context: undefined,
+          screenshotUrl: undefined,
+        }),
+        screenshotKey: null,
+        reason: 'unconfigured',
+      },
       1,
     );
     const [row] = await listDueBugReports(db.env, 5);
@@ -54,21 +76,36 @@ describe('stored bug reports', () => {
   });
 
   it('notes a refused attempt and deletes a filed one', async () => {
-    const id = await storeBugReport(db.env, { filing: filing(), screenshotKey: null, reason: 'unconfigured' }, 1);
+    const id = await storeBugReport(
+      db.env,
+      { filing: filing(), screenshotKey: null, reason: 'unconfigured' },
+      1,
+    );
     await noteBugReportAttempt(db.env, id, 'type_missing', 5);
-    expect((await listDueBugReports(db.env, 5))[0]).toMatchObject({ reason: 'type_missing', attempts: 1 });
+    expect((await listDueBugReports(db.env, 5))[0]).toMatchObject({
+      reason: 'type_missing',
+      attempts: 1,
+    });
     await deleteBugReport(db.env, id);
     expect(await listDueBugReports(db.env, 5)).toEqual([]);
   });
 
   it('lists at most the batch', async () => {
     for (let i = 0; i < 3; i++)
-      await storeBugReport(db.env, { filing: filing(), screenshotKey: null, reason: 'unconfigured' }, i);
+      await storeBugReport(
+        db.env,
+        { filing: filing(), screenshotKey: null, reason: 'unconfigured' },
+        i,
+      );
     expect(await listDueBugReports(db.env, 2)).toHaveLength(2);
   });
 
   it('reads a row whose context no longer parses without it', async () => {
-    const id = await storeBugReport(db.env, { filing: filing(), screenshotKey: null, reason: 'unconfigured' }, 1);
+    const id = await storeBugReport(
+      db.env,
+      { filing: filing(), screenshotKey: null, reason: 'unconfigured' },
+      1,
+    );
     db.sql.prepare(`UPDATE bug_reports SET context = '{"route":5}' WHERE id = ?`).run(id);
     expect((await listDueBugReports(db.env, 5))[0]?.filing.context).toBeUndefined();
   });
@@ -91,13 +128,17 @@ describe('claimBugReportSlot', () => {
 
   it('starts a new window once the old one has passed', async () => {
     for (let i = 0; i <= BUG_REPORT_WINDOW_MAX; i++) await claimBugReportSlot(db.env, 'v', 1000);
-    expect(await claimBugReportSlot(db.env, 'v', 1000 + BUG_REPORT_WINDOW_MS)).toEqual({ allowed: true });
+    expect(await claimBugReportSlot(db.env, 'v', 1000 + BUG_REPORT_WINDOW_MS)).toEqual({
+      allowed: true,
+    });
   });
 
   it('sweeps windows older than the cut-off', async () => {
     await claimBugReportSlot(db.env, 'old', 1000);
     await claimBugReportSlot(db.env, 'new', 5000);
     expect(await deleteOldBugReportWindows(db.env, 2000)).toBe(1);
-    expect(db.sql.prepare('SELECT visitor FROM bug_report_windows').all()).toEqual([{ visitor: 'new' }]);
+    expect(db.sql.prepare('SELECT visitor FROM bug_report_windows').all()).toEqual([
+      { visitor: 'new' },
+    ]);
   });
 });

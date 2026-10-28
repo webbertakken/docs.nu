@@ -61,6 +61,9 @@ import { handleDocuments } from './routes/documents';
 import { handleEvents } from './routes/events';
 import { handleFolders } from './routes/folders';
 import { handleForms } from './routes/forms';
+import { handleBugReports } from './bug-reports/route';
+import { isBugReportRefileMinute, runBugReportRefile } from './bug-reports/refile';
+import { deleteOldBugReportWindows } from './db/bug-reports';
 import { handleImages } from './routes/images';
 import { handleMigrate } from './routes/migrate';
 import { handleGuestId } from './routes/guest-id';
@@ -417,6 +420,8 @@ async function routeApiRequest(
       case 'folders':
         return await handleFolders(ctx);
       // A form link's public doors (docs/specs/030-forms/forms.md "Filling in a form").
+      case 'bug-reports':
+        return handleBugReports(ctx);
       case 'forms':
         return await handleForms(ctx);
       case 'custom-themes':
@@ -542,6 +547,15 @@ const worker = {
         now - TIMELINE_RETENTION_MS,
         deleteOldDocumentOpens,
       );
+      // docs/specs/016-platform/bug-reports.md: a report window a day old counts nothing.
+      scheduleSweep(
+        ctx,
+        env,
+        'bug_report_windows',
+        'rows',
+        now - DAY_MS,
+        deleteOldBugReportWindows,
+      );
       // docs/specs/012-collaboration/assigned-actions.md §4: a notify-email claim past its dedupe window
       // decides nothing any more.
       scheduleSweep(
@@ -621,6 +635,14 @@ const worker = {
           console.error('[content-move] sweep failed', err),
         ),
       );
+      // docs/specs/016-platform/bug-reports.md "Filing": every 15 minutes, stored bug reports are filed again.
+      if (isBugReportRefileMinute(event.scheduledTime)) {
+        ctx.waitUntil(
+          runBugReportRefile(env, Date.now())
+            .then(() => undefined)
+            .catch((err: unknown) => console.error('[bug-reports] refile.failed', err)),
+        );
+      }
     }
   },
 } satisfies ExportedHandler<Env>;
@@ -653,6 +675,9 @@ function scheduleSweep(
 
 // A day in ms: how long a preview's outbox keeps mail (routes/preview-outbox.ts).
 const OUTBOX_RETENTION_MS = 86_400_000;
+
+// A day in ms: how long a bug report window is kept (docs/specs/016-platform/bug-reports.md).
+const DAY_MS = 86_400_000;
 
 // 60 days in ms. The /telemetry dashboard's longest window is
 // "Last 30 days", so anything past 60 days is dead storage (twice

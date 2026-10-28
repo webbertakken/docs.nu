@@ -1,11 +1,7 @@
 // A bug report filed in the Bug Tracker's room (docs/specs/016-platform/bug-reports.md "Filing" step 5, "The Bug
 // Tracker board"): the first live board on the configured tab that takes Bug Report cards, a card in its first
 // column through the item store (the write a form response makes), relayed to everyone with the board open.
-import {
-  bugReportCard,
-  findBugReportType,
-  type BugReportFiling,
-} from '@livedoc/api-schema';
+import { bugReportCard, findBugReportType, type BugReportFiling } from '@livedoc/api-schema';
 import { boardTakesType, readItemCreate, typesOf, type ItemPerson } from '@livedoc/items';
 import { getDocument } from '../db';
 import type { BugReportStoreReason } from '../db/bug-reports';
@@ -16,8 +12,7 @@ import { relay } from '../routes/item-route-kit';
 import type { DocumentEnv } from '../types';
 
 export type BugReportFileOutcome =
-  | { filed: true; number: number }
-  | { filed: false; reason: BugReportStoreReason };
+  { filed: true; number: number } | { filed: false; reason: BugReportStoreReason };
 
 // The maker every report's card names: the form itself, never the reporter.
 const BUG_REPORTS_PERSON: ItemPerson = { id: 'bug-reports', name: 'Bug reports', color: '#dc2626' };

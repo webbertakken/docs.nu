@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { sentJson } from '@livedoc/vitest-config/sent-request';
 import type { BugReportFiling } from '@livedoc/api-schema';
-import { ITEMS_MAX, statusColumn, type Item, type PlanBoardSetup } from '@livedoc/items';
+import { ITEMS_MAX, statusColumn, type PlanBoardSetup } from '@livedoc/items';
 import { listItems } from '../db';
 import { sqliteD1, type SqliteD1 } from '../test-sqlite-d1';
 import type { Env } from '../types';
 import { withTestDocumentRooms } from '../test-document-room';
 import { fileBugReport } from './file';
+import { seedBugTracker, trackerBoard, writeTrackerBoards, type Relayed } from './test-bug-tracker';
 
 let roomFails = false;
 vi.mock('../document-room/document-client', async (importOriginal) => {
@@ -26,57 +26,9 @@ vi.mock('../document-room/document-client', async (importOriginal) => {
 // first column of the first board that takes it, through the item store, or the reason the board did not take it.
 
 let db: SqliteD1;
-let relayed: { op: { kind: string; upserts: Item[] } }[];
-
-const bugReportType = {
-  id: 'bug-report',
-  label: 'Bug Report',
-  newTitle: 'New bug report',
-  glyph: 'bug',
-  color: '#dc2626',
-  fields: ['title', 'status', 'description', 'f-sev', 'f-rep'],
-  custom: [
-    { id: 'f-sev', label: 'Severity', kind: 'choice', options: ['Low', 'High'] },
-    { id: 'f-rep', label: 'Reporter', kind: 'text' },
-  ],
-};
-
-const taskType = {
-  ...bugReportType,
-  id: 'task',
-  label: 'Task',
-  fields: ['title', 'status', 'description'],
-  custom: [],
-};
-
-const board = (extra: Partial<PlanBoardSetup> = {}): PlanBoardSetup => ({
-  title: 'Bugs',
-  columns: [
-    statusColumn('reported', 'Reported'),
-    statusColumn('triaged', 'Triaged'),
-    statusColumn('fixed', 'Fixed', { done: true }),
-  ],
-  swimlaneBy: 'none',
-  cardFields: ['key'],
-  hideWriting: false,
-  ...extra,
-});
-
-function writeBoards(...setups: PlanBoardSetup[]) {
-  const elements = setups.map((planBoard, i) => ({
-    id: `b${i}`,
-    type: 'shape',
-    shape: 'plan-board',
-    x: 0,
-    y: i * 600,
-    width: 800,
-    height: 500,
-    planBoard,
-  }));
-  db.sql
-    .prepare(`UPDATE tabs SET data = ?, rev = rev + 1 WHERE id = 'board'`)
-    .run(JSON.stringify({ kind: 'board', elements }));
-}
+let relayed: Relayed[];
+const writeBoards = (...setups: PlanBoardSetup[]) => writeTrackerBoards(db, ...setups);
+const board = trackerBoard;
 
 const filing: BugReportFiling = {
   title: 'Save fails',
@@ -101,28 +53,7 @@ const file = (vars: Partial<Env> = {}) => {
 beforeEach(() => {
   db = sqliteD1();
   roomFails = false;
-  relayed = [];
-  (db.env as unknown as { DOCUMENT_ROOM: unknown }).DOCUMENT_ROOM = {
-    idFromName: (n: string) => n,
-    get: () => ({
-      fetch: async (_url: string, init: RequestInit) => {
-        relayed.push(sentJson(init) as (typeof relayed)[number]);
-        return new Response(null, { status: 204 });
-      },
-    }),
-  };
-  db.sql
-    .prepare(
-      `INSERT INTO documents (id, owner_id, name, shareable, saved_at, created_at, item_types) VALUES ('tracker', 'acct_webber', 'Bug Tracker', 0, 1, 1, ?)`,
-    )
-    .run(JSON.stringify({ version: 1, types: [bugReportType, taskType] }));
-  db.sql.exec(`
-    INSERT INTO tabs (id, name, data, updated_at) VALUES ('board', 'Bugs', '{"kind":"board","elements":[]}', 1);
-    INSERT INTO tabs (id, name, data, updated_at) VALUES ('notes', 'Notes', '{"kind":"diagram","elements":[]}', 1);
-    INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES ('tracker', 'board', 0, 1);
-    INSERT INTO document_tabs (document_id, tab_id, order_index, added_at) VALUES ('tracker', 'notes', 1, 1);
-  `);
-  writeBoards(board());
+  relayed = seedBugTracker(db);
 });
 
 describe('fileBugReport', () => {

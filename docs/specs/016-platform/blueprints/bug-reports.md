@@ -91,7 +91,7 @@ type BugReportScreenshot = { contentType: 'image/webp' | 'image/jpeg' | 'image/p
 - `POST /api/bug-reports`, JSON body. Answers `201 BugReportFiledResponse`, `202 BugReportStoredResponse`, `400
 { error: 'invalid_bug_report', problem }`, `405`, `413 { error: 'payload_too_large' }`, `429 { error:
 'rate_limited' }` with `Retry-After`, `503 { error: 'bug_reports_unavailable' }`.
-- `GET /api/bug-reports/screenshots/<tag>/<uuid>.<ext>`: the bytes, or `404 { error: 'not_found' }`.
+- `GET /api/bug-reports/screenshots/<tag>/<uuid>.<ext>`: the bytes, or `404 { error: 'screenshot_not_found' }`.
 - Room RPC: `fileBugReport(documentId, tabId, filing): Promise<BugReportFileOutcome>`, where
   `BugReportFileOutcome = { filed: true; number } | { filed: false; reason: BugReportStoreReason }`.
 - `bugReportCard(filing, type)`: `{ type: type.id, fields }`, fields keyed by the type's custom field ids, the

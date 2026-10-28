@@ -81,6 +81,13 @@ migrations_dir = "migrations"
 binding = "IMAGES"
 bucket_name = "docs-nu-images"
 
+# Bug report screenshots (docs/specs/016-platform/bug-reports.md "Screenshots"), apart from images: read only by
+# the Bug Tracker's owner, expired after 90 days by the bucket's lifecycle rule (docs/operations/docs-nu.md
+# "Bug Tracker"). Absent, a report goes without its screenshot.
+[[r2_buckets]]
+binding = "BUG_SCREENSHOTS"
+bucket_name = "docs-nu-bug-screenshots"
+
 # Per-owner rate limiter (Cloudflare Workers Rate Limiting API).
 # Caps writes at 300 / 60s per owner: a generous ceiling for normal
 # editing (autosave + comment posts + log appends) but well below
@@ -200,6 +207,14 @@ name = "SHARE_GUESS_ITEM_LIMITER"
 type = "ratelimit"
 namespace_id = "7017"
 simple = { limit = 30, period = 60 }
+
+# Report a Bug's burst gate per network (docs/specs/016-platform/bug-reports.md "Filing"): the binding's longest
+# period is 60 s, so the 600 s window is counted in D1. Absent, only that window limits.
+[[unsafe.bindings]]
+name = "BUG_REPORT_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "7018"
+simple = { limit = 5, period = 60 }
 
 # Per-IP throttle for GET /api/unfurl (docs/specs/009-elements/link-cards.md): an unauthenticated outbound
 # page fetch for link-card previews. 60/60s is plenty for a user dropping

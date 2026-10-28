@@ -23,7 +23,7 @@ let db: SqliteD1;
 
 beforeEach(() => {
   bucket = testR2();
-  db = sqliteD1({ BUG_SCREENSHOTS: bucket } as Partial<Env>);
+  db = sqliteD1({ BUG_SCREENSHOTS: bucket });
 });
 
 describe('putBugScreenshot', () => {
@@ -79,7 +79,7 @@ describe('serveBugScreenshot', () => {
   ) =>
     serveBugScreenshot(
       makeTestRouteContext('GET', `/api/bug-reports/screenshots/${path}`, {
-        env: { ...db.env, BUG_REPORT_DOCUMENT_ID: 'tracker', ...opts.env } as Env,
+        env: { ...db.env, BUG_REPORT_DOCUMENT_ID: 'tracker', ...opts.env },
         ...(opts.verifiedAccountId ? { verifiedAccountId: opts.verifiedAccountId } : {}),
         ...(opts.headers ? { headers: opts.headers } : {}),
       }),
@@ -100,11 +100,16 @@ describe('serveBugScreenshot', () => {
     ['the owner id sent as a bare guest header', { headers: { 'X-Owner-Id': 'acct_webber' } }],
     ['no identity', {}],
   ])('answers 404 to %s', async (_label, opts) => {
-    expect((await get(key, opts)).status).toBe(404);
+    const res = await get(key, opts);
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'screenshot_not_found' });
   });
 
   it('answers 404 on a host with no Bug Tracker', async () => {
-    const res = await get(key, { verifiedAccountId: 'acct_webber', env: { BUG_REPORT_DOCUMENT_ID: '' } });
+    const res = await get(key, {
+      verifiedAccountId: 'acct_webber',
+      env: { BUG_REPORT_DOCUMENT_ID: '' },
+    });
     expect(res.status).toBe(404);
   });
 
@@ -131,6 +136,6 @@ describe('deleteBugScreenshotsOf', () => {
   });
 
   it('does nothing without a bucket', async () => {
-    expect(await deleteBugScreenshotsOf({ ...db.env, BUG_SCREENSHOTS: undefined } as Env, 'g-1')).toBe(0);
+    expect(await deleteBugScreenshotsOf({ ...db.env, BUG_SCREENSHOTS: undefined }, 'g-1')).toBe(0);
   });
 });

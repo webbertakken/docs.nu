@@ -56,7 +56,11 @@ export type DocumentRoomRpc = {
   // A public form's doors, /api/forms/:code... (read, respond, report), for a form this document holds.
   respondToForm(documentId: string, request: Request, identity: RouteIdentity): Promise<Response>;
   // A bug report filed on the Bug Tracker board this document holds (docs/specs/016-platform/bug-reports.md).
-  fileBugReport(documentId: string, tabId: string, filing: BugReportFiling): Promise<BugReportFileOutcome>;
+  fileBugReport(
+    documentId: string,
+    tabId: string,
+    filing: BugReportFiling,
+  ): Promise<BugReportFileOutcome>;
   // A tab shared between documents (tab-shares.ts): a joining document's copy, the join recorded, and what
   // another holder (`from`) sends.
   sharedTabCopy(documentId: string, tabId: string): Promise<SharedTabCopy | null>;

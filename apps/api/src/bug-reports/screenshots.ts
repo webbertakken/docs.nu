@@ -9,7 +9,7 @@ import {
   type BugReportScreenshotType,
 } from '@livedoc/api-schema';
 import { getDocument } from '../db';
-import { notFound } from '../responses';
+import { json } from '../responses';
 import type { RouteContext } from '../routes/context';
 import type { Env } from '../types';
 import { reporterTag, resolveBugReporter } from './reporter';
@@ -58,7 +58,7 @@ export async function serveBugScreenshot(ctx: RouteContext): Promise<Response> {
   const key = segments.slice(3).join('/');
   const refuse = (why: string) => {
     console.info('[bug-reports] screenshot.refused', { why });
-    return notFound();
+    return json({ error: 'screenshot_not_found' }, { status: 404 });
   };
   if (!SCREENSHOT_KEY_PATTERN.test(key)) return refuse('malformed');
   if (!env.BUG_REPORT_DOCUMENT_ID || !env.BUG_SCREENSHOTS) return refuse('unconfigured');

@@ -190,7 +190,7 @@ The board is read and worked with the CLI and MCP, like any document.
 A filed card's Screenshot is a link to `/report-a-bug/screenshot?key=<key>`, a page of the editor app that fetches
 `GET /api/bug-reports/screenshots/<key>` with the viewer's identity and shows the picture. The api serves it **only to
 the Bug Tracker's owner** (the configured document's owner, by the request's resolved identity); anyone else, an
-unknown or expired key, or an unconfigured host, gets `404`. A hit is served with its stored type,
+unknown or expired key, or an unconfigured host, gets the same `404` `screenshot_not_found`. A hit is served with its stored type,
 `Cache-Control: private, max-age=3600`, `X-Content-Type-Options: nosniff` and `Content-Security-Policy:
 default-src 'none'`. Agents read it with their token the same way.
 
