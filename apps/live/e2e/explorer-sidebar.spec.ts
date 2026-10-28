@@ -1,6 +1,13 @@
 import type { Page } from '@playwright/test';
 import { apiBase, darkVisitor } from './audit-screens';
-import { expect, expectNoPageErrors, mintSignedGuest, ownerHeaders, test } from './fixtures';
+import {
+  expect,
+  expectNoPageErrors,
+  mintSignedGuest,
+  openContextMenuFromKeyboard,
+  ownerHeaders,
+  test,
+} from './fixtures';
 
 // The Explorer sidebar for a guest (docs/specs/013-workspace/explorer-structure.md), in dark
 // mode: the three groups as ARIA trees, the keyboard model, Minimal chrome's separators, and the
@@ -111,8 +118,7 @@ test.describe('explorer sidebar', () => {
     await openExplorer(page);
     const projects = row(page, 'Projects');
     await expect(projects).toBeVisible();
-    await projects.focus();
-    await page.keyboard.press('Shift+F10');
+    await openContextMenuFromKeyboard(projects);
     await expect(page.getByRole('menu')).toBeVisible();
     // Only the folder's own menu opens, never an ancestor's.
     await expect(page.getByRole('menu')).toHaveCount(1);

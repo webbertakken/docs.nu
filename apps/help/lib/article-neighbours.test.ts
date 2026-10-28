@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { articles, getCategoryGroups } from '@/lib/articles';
-import { articleByTitle, articleCategoryLink, articleNeighbours } from './article-neighbours';
+import {
+  articleByTitle,
+  articleCategoryLink,
+  articleNeighbours,
+  parentArticleOf,
+} from './article-neighbours';
 
 // docs/specs/018-help/help-pages.md "Article pages": an article's previous and next are its neighbours in the order
 // its listing page shows, and every article page finds itself in the registry.
@@ -32,5 +37,23 @@ describe('article neighbours', () => {
   it('names the top-level category of a nested article', () => {
     const nested = articles.find((a) => a.categorySlug.includes('/'))!;
     expect(articleCategoryLink(nested)?.href).toBe(`/${nested.categorySlug.split('/')[0]}/`);
+  });
+});
+
+// docs/specs/018-help/help-pages.md "Article pages": a nested article's parent is the article at its categorySlug.
+describe('parentArticleOf', () => {
+  it('is the article at a nested article’s categorySlug path', () => {
+    expect(parentArticleOf(articleByTitle('The Draw Tour')!)?.title).toBe('Draw Mode');
+    expect(parentArticleOf(articleByTitle('Boards')!)?.title).toBe('Plan Mode');
+  });
+
+  it('is nothing for a top-level article', () => {
+    expect(parentArticleOf(articleByTitle('Draw Mode')!)).toBeUndefined();
+  });
+
+  it('finds a parent for every nested article', () => {
+    for (const a of articles.filter((x) => x.categorySlug.includes('/'))) {
+      expect(parentArticleOf(a), a.title).toBeDefined();
+    }
   });
 });

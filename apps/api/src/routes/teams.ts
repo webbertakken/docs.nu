@@ -390,7 +390,7 @@ export async function handleTeams(ctx: RouteContext): Promise<Response> {
       // off the response path; no-op when email is off / admins opted out.
       const responder = member.email ?? accountEmail;
       if (responder) {
-        ctx.waitUntil?.(notifyInviteResponse(env, team, responder, true, userId).catch(() => {}));
+        ctx.waitUntil?.(notifyInviteResponse(env, team, responder, true, userId));
       }
     }
     const updated = await getTeamMember(env, member.id);
@@ -450,9 +450,7 @@ export async function handleTeams(ctx: RouteContext): Promise<Response> {
           ctx.waitUntil?.(recordInviteDeclined(env, team, userId, memberDisplayName(member)));
           const responder = member.email ?? accountEmail;
           if (responder) {
-            ctx.waitUntil?.(
-              notifyInviteResponse(env, team, responder, false, userId).catch(() => {}),
-            );
+            ctx.waitUntil?.(notifyInviteResponse(env, team, responder, false, userId));
           }
         }
         return noContent();
@@ -480,7 +478,7 @@ export async function handleTeams(ctx: RouteContext): Promise<Response> {
       // Their open sessions on the team's documents end too, or a removed member would keep
       // reading (and editing) live until they disconnect (docs/specs/013-workspace/team-shared-documents.md).
       if (member.status === 'joined' && member.userId) {
-        ctx.waitUntil?.(closeMemberTeamSessions(env, teamId, member.userId).catch(() => {}));
+        ctx.waitUntil?.(closeMemberTeamSessions(env, teamId, member.userId));
       }
       const who = { userId: member.userId, name: memberDisplayName(member) };
       if (member.status === 'joined') {

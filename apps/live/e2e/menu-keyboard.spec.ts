@@ -6,6 +6,7 @@ import {
   expectNoPageErrors,
   guestSigFor,
   mintSignedGuest,
+  openContextMenuFromKeyboard,
   ownerHeaders,
   startBlankDocument,
   test,
@@ -73,8 +74,7 @@ test.describe('menus by keyboard', () => {
     const row = nav.getByRole('treeitem', { name: 'Retros' });
     await expect(row).toBeVisible({ timeout: 30_000 });
 
-    await row.focus();
-    await page.keyboard.press('Shift+F10');
+    await openContextMenuFromKeyboard(row);
     const menu = page.getByRole('menu', { name: 'Retros' });
     await expect(menu).toBeVisible();
     await expect(menu).toMatchAriaSnapshot(`
@@ -121,7 +121,7 @@ test.describe('menus by keyboard', () => {
     await expect(row).toBeFocused();
 
     // Tab closes it and moves on from there.
-    await page.keyboard.press('Shift+F10');
+    await openContextMenuFromKeyboard(row);
     await expect(menu).toBeVisible();
     await page.keyboard.press('Tab');
     await expect(menu).toHaveCount(0);

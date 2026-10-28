@@ -278,7 +278,10 @@ Six articles about the container moved when it became a document ([Document](../
 | `/help/canvas/facilitate-mode/facilitate-tour/`        | `/help/canvas/workshop-mode/workshop-tour/`             |
 
 "Your First Diagram" and "Exporting Diagrams" keep their addresses: they are about drawing a diagram and getting the drawing out, not about the container.
+
 <!-- /legacy-names -->
+
+A moved page the router does not answer is a thin client redirect inside the help app (`components/Redirect.tsx`), and the marketing site's retired legal routes are the same (`components/LegalRedirect.tsx`). **Both keep an old deep link's `#section`**: `location.replace` drops the address's hash, so the redirect carries it onto the new address, unless the new address names its own section (`redirectTarget` in `@livedoc/ui`). An old link to a section lands on that section of the new page, never at its top.
 
 ## Header
 
@@ -296,6 +299,7 @@ One rule for every public page, shared with the marketing site ([Marketing site]
 - **Breadcrumb structured data** is a `BreadcrumbList` rooted at the help home, built by the shared `breadcrumbJsonLd` (the one marketing's `BreadcrumbJsonLd` uses) and rendered through `JsonLd` from the `Breadcrumb` component.
 - **A sub-article's parent crumb and its `TechArticle` url come from its route.** Sub-articles nest under their parent's folder, so the parent is the route one level up and the article's own URL is its route (`lib/article-route.ts`), never rebuilt from the page's `categorySlug` prop, which names the top category on some pages and the parent's path on others. `article-route.test.ts` checks every sub-article sits directly under a real page.
 - **Meta descriptions are 50 to 160 characters**, the same range the marketing site holds, so a search result shows each one whole; the article meta is written for the result, not copied from the search card. **Page titles are unique** across articles, static pages and category landings. `meta-descriptions.test.ts` holds every page to both.
+- **The Features index's description is made from the catalogue** (`featuresDescription`, `lib/features-description.ts`): "Browse LiveDoc feature guides by area: A, B, and C.", every feature category in the registry's order, so it never drifts from the page, which lists the same ones. A list that would run past 160 characters names as many as fit and ends "and more.".
 
 ## In-editor entry point
 

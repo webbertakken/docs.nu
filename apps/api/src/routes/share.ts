@@ -104,8 +104,7 @@ export async function handleShare(ctx: RouteContext): Promise<Response> {
             ctx.waitUntil?.(
               getParticipant(env, visitor)
                 .catch(() => null)
-                .then((p) => notifyDocumentJoin(env, d, p?.name ?? null))
-                .catch(() => {}),
+                .then((p) => notifyDocumentJoin(env, d, p?.name ?? null)),
             );
           }
         }

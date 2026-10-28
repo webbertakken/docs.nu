@@ -90,6 +90,14 @@ own reading order, which is the registry order of its siblings (the sub-articles
 category's top-level articles). The first article has no previous link and the last no next link. A closing
 **Still need help?** card links Troubleshooting and Contact.
 
+Above the header, the **breadcrumb trail** below Help is read off the article's route (`articleCrumbs`,
+`lib/article-route.ts`): the **top category**, linked to its own landing (the route's first segment, never the
+`categorySlug` prop, which on a nested article is the parent's path), then the **parent article** one level up
+when the article is nested, linked to the parent's page, then the article itself. The category is left out when it
+would repeat the title or the parent. A nested article whose MDX names no `parentArticle` (a mode's tour, a Plan
+mode article) gets the article at its `categorySlug` path as its parent (`ArticleLayout`), so its trail names the
+mode, never skips it, and never labels the mode's page with the category's name. No two crumbs share one URL.
+
 ## Search
 
 The search box answers `/` from anywhere on the page (unless focus is already in a text field, or a modifier is

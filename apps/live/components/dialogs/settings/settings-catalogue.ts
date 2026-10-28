@@ -312,8 +312,10 @@ export type SettingsIdentityRowSpec = RowBase & { kind: 'identity' };
 export type SettingsDeleteAccountRowSpec = RowBase & { kind: 'deleteAccount' };
 // The account's name, sign-in methods and sessions (docs/specs/014-identity/auth-and-guest-access.md "Account settings").
 export type SettingsAccountNameRowSpec = RowBase & { kind: 'accountName' };
+export type SettingsPresenceColourRowSpec = RowBase & { kind: 'presenceColour' };
 export type SettingsSignInMethodsRowSpec = RowBase & { kind: 'signInMethods' };
 export type SettingsSessionsRowSpec = RowBase & { kind: 'sessions' };
+export type SettingsSignOutRowSpec = RowBase & { kind: 'signOut' };
 
 // The Trash (docs/specs/013-workspace/trash.md): not a preference, a way in.
 // Here for everyone, guests and self-hosts without accounts included, because
@@ -355,8 +357,10 @@ export type SettingsRowSpec =
   | SettingsIdentityRowSpec
   | SettingsDeleteAccountRowSpec
   | SettingsAccountNameRowSpec
+  | SettingsPresenceColourRowSpec
   | SettingsSignInMethodsRowSpec
   | SettingsSessionsRowSpec
+  | SettingsSignOutRowSpec
   | SettingsTrashRowSpec
   | SettingsPresetSummaryRowSpec
   | SettingsCloudSyncRowSpec
@@ -1639,6 +1643,16 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         available: (ctx) => ctx.signedIn,
       },
       {
+        kind: 'presenceColour',
+        key: 'presenceColour',
+        section: 'You',
+        label: 'Colour',
+        keywords:
+          'colour color presence cursor avatar name tag collaborators participant my colour change colour',
+        description: 'The colour collaborators see on your cursor, avatar and name tag.',
+        available: (ctx) => ctx.signedIn,
+      },
+      {
         kind: 'signInMethods',
         key: 'signInMethods',
         section: 'Signing In',
@@ -1651,9 +1665,19 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         kind: 'sessions',
         key: 'sessions',
         section: 'Signing In',
-        label: 'Sessions',
-        keywords: 'sessions devices browsers signed in sign out everywhere log out security',
+        label: 'Where You’re Signed In',
+        keywords:
+          'sessions devices browsers where signed in sign out everywhere else others log out security',
         description: 'Every browser signed in to this account. Sign one out, or all but this one.',
+        available: (ctx) => ctx.signedIn,
+      },
+      {
+        kind: 'signOut',
+        key: 'signOut',
+        section: 'Signing In',
+        label: 'Sign Out',
+        keywords: 'sign out log out logout leave this browser end session',
+        description: 'Ends this browser’s session. Your documents stay in your account.',
         available: (ctx) => ctx.signedIn,
       },
       {

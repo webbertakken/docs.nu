@@ -6,18 +6,23 @@ import { LicenceTexts } from './LicenceTexts';
 // "The page"): server-rendered sections of collapsed entries; only the texts
 // are client-side, and they load when an entry opens.
 
-const SECTION_COPY: Record<LicencesSection['side'], { title: string; intro: string }> = {
-  browser: {
-    title: 'In your browser',
-    intro:
-      'Sent to your browser by the editor, this website, the help centre and the telemetry dashboard.',
-  },
+const SECTION_COPY: Record<LicencesSection['side'], { title: string; lead: string }> = {
+  browser: { title: 'In your browser', lead: 'Sent to your browser by these apps' },
   server: {
     title: 'On our servers',
-    intro:
-      'Bundled into the API, MCP server and router, which run on Cloudflare rather than on your device.',
+    lead: 'Bundled into these services, which run on Cloudflare rather than on your device',
   },
 };
+
+// A section's intro names its apps from the manifest, the list the page is built from, so an app added to
+// LICENCE_APPS is named without a copy edit: "…: Editor, Website, Help centre and Telemetry."
+export function sectionIntro(side: LicencesSection['side'], labels: readonly string[]): string {
+  const apps =
+    labels.length < 2
+      ? (labels[0] ?? '')
+      : `${labels.slice(0, -1).join(', ')} and ${labels.at(-1)}`;
+  return `${SECTION_COPY[side].lead}: ${apps}.`;
+}
 
 // The project LiveDoc was forked from (docs/specs/002-project-scope/livediagram-upstream.md).
 const UPSTREAM_REPO_URL = 'https://github.com/livediagram-app/livediagram.app';
@@ -67,7 +72,12 @@ function Section({ section, manifest }: { section: LicencesSection; manifest: Li
           {count} {count === 1 ? 'work' : 'works'}
         </p>
       </div>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{copy.intro}</p>
+      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+        {sectionIntro(
+          section.side,
+          section.apps.map((app) => app.label),
+        )}
+      </p>
       {count === 0 ? (
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
           Nothing third-party ships here.

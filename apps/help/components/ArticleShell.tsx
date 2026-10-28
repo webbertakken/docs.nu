@@ -8,9 +8,9 @@ import { SectionedContent } from './SectionedContent';
 import { TableOfContents } from './TableOfContents';
 // The hrefs alone, not lib/articles: that would bundle the whole article registry (about 300 articles with their
 // descriptions and keywords) into every article's JavaScript.
-import { articleHref, categoryHref } from '@livedoc/help-registry/hrefs';
+import { articleHref } from '@livedoc/help-registry/hrefs';
 import type { Article } from '@/lib/articles';
-import { parentRouteHref, routeHref } from '@/lib/article-route';
+import { articleCrumbs, routeHref } from '@/lib/article-route';
 import { articleJsonLd } from '@/lib/structured-data';
 import { track } from '@/lib/telemetry';
 import { helpPathTelemetryId } from '@livedoc/help-registry/telemetry';
@@ -88,7 +88,6 @@ export function ArticleShell({
   title,
   description,
   categoryTitle,
-  categorySlug,
   subArticles,
   parentArticle,
   category,
@@ -122,22 +121,15 @@ export function ArticleShell({
   // The helpful vote reports only the reader's final choice (C9).
   const { vote: feedback, cast } = useArticleVote(articleId);
 
-  // Build breadcrumb. Skip the category when it duplicates the title or
-  // the parent title.
-  const showCategory = categoryTitle !== title && categoryTitle !== parentArticle?.title;
-  // Both read off the route (lib/article-route.ts): sub-articles nest under
-  // their parent's folder, and the props cannot say where that is.
+  // This page's URL and its breadcrumb trail, both read off the route (lib/article-route.ts): sub-articles nest
+  // under their parent's folder, and the props cannot say where that is (help-pages.md "Article pages").
   const selfHref = routeHref(pathname ?? '');
-  const parentHref = parentRouteHref(pathname ?? '');
-  const breadcrumbItems = parentArticle
-    ? [
-        ...(showCategory ? [{ label: categoryTitle, href: categoryHref(categorySlug) }] : []),
-        { label: parentArticle.title, href: parentHref },
-        { label: title },
-      ]
-    : showCategory
-      ? [{ label: categoryTitle, href: categoryHref(categorySlug) }, { label: title }]
-      : [{ label: title }];
+  const breadcrumbItems = articleCrumbs({
+    pathname: pathname ?? '',
+    title,
+    categoryTitle,
+    parentTitle: parentArticle?.title,
+  });
 
   // Article structured data (docs/specs/018-help/help-app.md). The Breadcrumb component already emits
   // the BreadcrumbList, so this only adds the TechArticle node, at this

@@ -151,6 +151,34 @@ describe('handleTelemetry', () => {
     expect(body.windows.today.total).toBe(1);
   });
 
+  // docs/specs/015-api/api.md "Caching": storing the summary is best effort.
+  it('still answers when the edge cache refuses the put, and logs it', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const original = (globalThis as { caches?: unknown }).caches;
+    (globalThis as { caches?: unknown }).caches = {
+      default: {
+        match: async () => undefined,
+        put: async () => {
+          throw new Error('cache down');
+        },
+      },
+    };
+    try {
+      const url = new URL('https://docs.nu/api/telemetry/summary');
+      const res = await handleTelemetry({
+        request: new Request(url),
+        env: { TELEMETRY_ENABLED: 'true' } as Env,
+        url,
+        segments: ['api', 'telemetry', 'summary'],
+      } as unknown as RouteContext);
+      expect(res.status).toBe(200);
+      expect(error).toHaveBeenCalledWith('[telemetry] summary cache put failed', expect.any(Error));
+    } finally {
+      (globalThis as { caches?: unknown }).caches = original;
+      error.mockRestore();
+    }
+  });
+
   it('answers disabled without touching D1', async () => {
     const res = await handleTelemetry(ctx({}));
     expect(await res.json()).toEqual({ enabled: false });

@@ -44,6 +44,9 @@ export type ColourPickerProps = {
   yours?: readonly string[];
   // The custom colour editor's hard-to-see warning, for a canvas line or text.
   boardWarning?: boolean;
+  // Custom colours and +, true unless the surface's colours must stay a set (the presence colours,
+  // colour-picker.md "The colours").
+  custom?: boolean;
   // Live preview while a swatch is hovered or focused, and its revert.
   onPreview?: (id: string) => void;
   onPreviewEnd?: () => void;
@@ -60,6 +63,7 @@ export function ColourPicker({
   standard = [],
   yours = [],
   boardWarning = false,
+  custom = true,
   onPreview,
   onPreviewEnd,
 }: ColourPickerProps) {
@@ -100,10 +104,9 @@ export function ColourPicker({
   const [shown, setShown] = useState<readonly string[]>(yourHexes);
   const nextShown = editorOpen ? shown : stableColours(shown, yourHexes, YOUR_COLOURS_MAX);
   if (nextShown !== shown) setShown(nextShown);
-  const all: Group[] = [
-    ...groups,
-    { heading: 'Custom Colours', options: nextShown.map(hexOption) },
-  ];
+  const all: Group[] = custom
+    ? [...groups, { heading: 'Custom Colours', options: nextShown.map(hexOption) }]
+    : groups;
 
   // The one Tab stop: the picked swatch, else the first key (a swatch, or + alone).
   const flat = all.flatMap((g) => g.options);
@@ -128,7 +131,7 @@ export function ColourPicker({
     >
       {all.map((group, g) => {
         const id = `${headingId}-${g}`;
-        const yoursGroup = g === all.length - 1;
+        const yoursGroup = custom && g === all.length - 1;
         return (
           <div key={group.heading + g} role="group" aria-labelledby={id}>
             <p

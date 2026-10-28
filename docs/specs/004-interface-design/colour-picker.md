@@ -64,6 +64,12 @@ A picker shows up to three groups, always in this order, each under a small head
 
 3. **Custom Colours**: the colours picked with **Add a custom colour** in this document, newest first, at most twelve, then **Add a custom colour** (four coloured dots).
 
+**Presence colours** are the one set offered in place of the standard colours: the ten participant colours
+(Sky, Emerald, Amber, Red, Violet, Pink, Teal, Orange, Indigo, Lime), each drawn under white initials at AA
+(dark mode paints its deeper shade), under the heading "Presence Colours". A person's colour must stay
+one of them, so that picker shows no Theme Palette and no Custom Colours (`custom={false}`): only the ten.
+Used by Settings > Account's **Colour** ([Account settings](../014-identity/auth-and-guest-access.md#account-settings)).
+
 **Leading options** go first in the first group: **no colour** where a surface can have none (No ... colour,
 None, No colour, Default colour, No highlight, Paper), and the surface's own named defaults (the article's
 Accent, the article style's Theme, the laser's Your colour).
@@ -153,7 +159,7 @@ pick commits it, once, for undo.
 | Skin              | What it is                                                                                  | Used by                                                                                                                                                                                                                                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Inline**        | The picker drawn in place, inside a flyout, panel or popover                                | Draw pen flyout, Plan column, page background, article toolbar Colour, article Accent                                                                                                                                                                                                                          |
-| **Row**           | A labelled row (the colour in force on its right) opening the picker in a popover beside it | Element, selection and table cell menu colour rows (the menu is 224px, narrower than the picker), the Laser Panel's Colour                                                                                                                                                                                     |
+| **Row**           | A labelled row (the colour in force on its right) opening the picker in a popover beside it | Element, selection and table cell menu colour rows (the menu is 224px, narrower than the picker), the Laser Panel's Colour, Settings > Account's Colour                                                                                                                                                        |
 | **Field**         | A field-sized trigger (swatch, name, chevron) opening the picker in a popover               | Plan card Colour                                                                                                                                                                                                                                                                                               |
 | **Swatch button** | A small swatch-only trigger opening the picker in a popover                                 | Rich-text label colour, gradient From and To, chart slice and legend colours, canvas and pattern colours, custom theme builder tiles, Quick Style's **More colours**, Plan card type (end of its Name field), a tag's colour in the tag picker and its menu's Change Colour ([Tags](../013-workspace/tags.md)) |
 
@@ -175,4 +181,5 @@ Colours** (the four-dot glyph), which opens the full picker.
 ## Not colour pickers
 
 Preset tiles that set several things at once (sticky presets, chart palettes, theme cards, gradient presets),
-and colours that are assigned rather than chosen (Plan labels, presence colours) stay as they are.
+and colours that are assigned rather than chosen (Plan labels, a presence colour given at random) stay as they
+are. A presence colour someone chooses is chosen in the picker, from the presence colours.

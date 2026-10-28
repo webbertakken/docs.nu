@@ -274,6 +274,12 @@ export const NOTIFICATION_SETTINGS = settingsStack(
       'Show My Profile Picture',
       'Whether signed-in collaborators see your profile picture.',
     ),
+    changed(
+      'PresenceColour',
+      'Presence Colour',
+      'A colour picked for your cursor, avatar and name tag.',
+      true,
+    ),
     toggle(
       'UI',
       'NotifyMentionsOn',

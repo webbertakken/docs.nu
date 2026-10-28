@@ -136,7 +136,7 @@ export async function handleTeamActionRoutes(
         assigneeCanOpen,
         actionName,
         description,
-      }).catch(() => {}),
+      }),
     );
     return json({ ok: true }, { status: 202 });
   }

@@ -246,6 +246,16 @@ context before any page loads, so the production build the suite drives writes i
 A spec that opens its own context with `browser.newContext()` sets it there with
 `enableDebugLogs(context)`.
 
+## Keyboard on every platform
+
+The suite runs where a contributor runs it, macOS included. A shortcut a spec presses names the
+platform's modifier: paste, undo, redo and select-all press **`ControlOrMeta`** (Meta on macOS, where
+Control+V pastes nothing), never a bare `Control`. A spec that opens a control's context menu from the
+keyboard calls **`openContextMenuFromKeyboard(target)`** from `fixtures.ts`: it focuses the control and
+presses Shift+F10 where Chromium turns that key into a `contextmenu` event (Windows, Linux), and sends the
+event itself on macOS, which has no such key. A control whose own key handler answers Shift+F10 (a
+Quick Style swatch) is pressed directly, since that handler is what the spec proves.
+
 ## What the suite asserts
 
 One spec file per feature, each linking the spec it proves:

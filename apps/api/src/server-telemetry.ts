@@ -7,7 +7,7 @@
 // than through POST /api/events.
 //
 // Gated on TELEMETRY_ENABLED like every other emit, and its own failure is
-// swallowed: telemetry must never turn a successful request into a thrown one.
+// logged, never thrown: telemetry must never turn a successful request into a failed one.
 
 import type { TelemetryAction, TelemetryCategory } from '@livedoc/api-schema';
 import { insertTelemetryEvents } from './db/telemetry';
@@ -24,5 +24,7 @@ export async function reportServerEvent(
   type: string | null = null,
 ): Promise<void> {
   if (!telemetryEnabled(env)) return;
-  await insertTelemetryEvents(env, [{ category, action, type }], Date.now()).catch(() => {});
+  await insertTelemetryEvents(env, [{ category, action, type }], Date.now()).catch((err: unknown) =>
+    console.error(`[telemetry] server event failed category=${category} action=${action}`, err),
+  );
 }

@@ -189,24 +189,24 @@ carries `schemaVersion: 1`, and the page refuses any other (`LicencesManifestInv
 
 ## Errors and edge cases
 
-| Code                         | When                                                         | Handling                              |
-| ---------------------------- | ------------------------------------------------------------ | ------------------------------------- |
-| `BundlerFailed`              | analyzer or wrangler exits non-zero                          | build fails, output tail logged       |
-| `AnalyzeDataMissing`         | no `analyze.data` after a successful run                     | build fails                           |
-| `AnalyzeFormatUnrecognised`  | header, JSON shape or indices off                            | build fails                           |
-| `MetafileFormatUnrecognised` | no `inputs` object                                           | build fails                           |
-| `PackageManifestInvalid`     | root `package.json` missing, unreadable, or name/version off | build fails                           |
-| `StorePathUnrecognised`      | package not under `.pnpm/<name>@<version>…`                  | build fails                           |
-| `VersionMismatch`            | store-path version differs from `package.json`               | build fails                           |
-| `LicenceTextMissing`         | no licence file and no override for `name@version`           | build fails; add an override          |
-| `LicenceIdUnknown`           | no usable `license` field, text unrecognised                 | build fails; add an override licence  |
-| `LicenceNotAllowed`          | id outside the allowlist                                     | build fails; a human decides          |
-| `UnreviewedBinaryAsset`      | a `.wasm` or font no embedded work matches                   | build fails; add a table entry        |
-| `EmbeddedPackageNotShipped`  | an embedded text names a package this bundle does not ship   | build fails                           |
-| `TextSourceIntegrity`        | committed text missing, unlisted, or sha256 differs          | build and tests fail                  |
-| `LicencesManifestMissing`    | the page builds with no manifest (e.g. bare `next dev`)      | page build fails: run `pnpm licences` |
-| `LicencesManifestInvalid`    | manifest `schemaVersion` is not 1                            | page build fails                      |
-| `LicencesVerifyFailed`       | exported page or a text missing, or HTML over budget         | marketing build fails                 |
+| Code                         | When                                                            | Handling                              |
+| ---------------------------- | --------------------------------------------------------------- | ------------------------------------- |
+| `BundlerFailed`              | analyzer or wrangler exits non-zero                             | build fails, output tail logged       |
+| `AnalyzeDataMissing`         | no `analyze.data` after a successful run                        | build fails                           |
+| `AnalyzeFormatUnrecognised`  | header, JSON shape or indices off                               | build fails                           |
+| `MetafileFormatUnrecognised` | no `inputs` object                                              | build fails                           |
+| `PackageManifestInvalid`     | root `package.json` missing, unreadable, or name/version off    | build fails                           |
+| `StorePathUnrecognised`      | package not under `.pnpm/<name>@<version>…`                     | build fails                           |
+| `VersionMismatch`            | store-path version differs from `package.json`                  | build fails                           |
+| `LicenceTextMissing`         | no licence file and no override for `name@version`              | build fails; add an override          |
+| `LicenceIdUnknown`           | no usable `license` field, text unrecognised                    | build fails; add an override licence  |
+| `LicenceNotAllowed`          | id outside the allowlist                                        | build fails; a human decides          |
+| `UnreviewedBinaryAsset`      | a `.wasm` or font no embedded work matches                      | build fails; add a table entry        |
+| `EmbeddedPackageNotShipped`  | an embedded text names a package this bundle does not ship      | build fails                           |
+| `TextSourceIntegrity`        | committed text missing, unlisted, or sha256 differs             | build and tests fail                  |
+| `LicencesManifestMissing`    | the page builds with no manifest (e.g. bare `next dev`)         | page build fails: run `pnpm licences` |
+| `LicencesManifestInvalid`    | `schemaVersion` not 1, `sections` or `texts` (`null`) malformed | page build fails                      |
+| `LicencesVerifyFailed`       | exported page or a text missing, or HTML over budget            | marketing build fails                 |
 
 Edge cases: a package shipped in two versions yields two works; the same text across works is one
 file; a work in both sides appears in both sections; a vendored boundary without a licence file is
@@ -221,7 +221,9 @@ copy in the same box.
   makes no network request.
 - Texts reach the page only as text: served as static `.txt`, rendered as React text nodes inside
   `<pre>`, never as HTML. Homepages are emitted only when they parse as `https:` URLs (D8), and render
-  with `rel="noopener noreferrer"`.
+  with `rel="noopener noreferrer"`. A repository npm writes as `git+ssh://git@host/path.git`,
+  `ssh://git@host:path.git` or with a `#branch` resolves to its plain `https://host/path` first, so it
+  keeps its Source link.
 - The page and texts are static assets on the marketing worker: no server work, no cost per view.
 
 ## Performance and limits
@@ -250,9 +252,11 @@ content column `max-w-3xl`.
 - Origin credit, a second paragraph: "LiveDoc began as a fork of livediagram, which is MIT licensed too. Its
   copyright notice is kept in the repository's licence.", with "livediagram" linking to its repository
   ([livediagram upstream](../livediagram-upstream.md)).
-- Section h2 "In your browser", intro: "Sent to your browser by the editor, this website, the help
-  centre and the telemetry dashboard." Section h2 "On our servers", intro: "Bundled into the API,
-  MCP server and router, which run on Cloudflare rather than on your device."
+- Section h2 "In your browser", intro: "Sent to your browser by these apps: {apps}." Section h2 "On our
+  servers", intro: "Bundled into these services, which run on Cloudflare rather than on your device: {apps}."
+  `{apps}` is the section's own app labels from the manifest, in its order, joined "A, B and C"
+  (`sectionIntro`), so an app added to `LICENCE_APPS` is named without a copy edit: today "Editor,
+  Website, Help centre and Telemetry", and "API, MCP server and Router".
 - Each section shows its work count: "{n} works".
 - Entry summary: the native disclosure marker (D16), name (medium weight), version, then a row of
   licence id (monospace) and app chips ("Editor", "Website", "Help centre", "Telemetry", "API",

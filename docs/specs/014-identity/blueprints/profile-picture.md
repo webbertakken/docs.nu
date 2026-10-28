@@ -157,7 +157,7 @@ and cached. Images: one 96px request per distinct URL per page.
 - `PictureDisc`: outer `relative inline-flex shrink-0` box at `size`; the `GlyphDisc` with all
   caller props; an `img` `absolute inset-0 rounded-full object-cover`, `opacity-0` until loaded,
   initial text `invisible` once loaded. Ring shadows stay on the disc and show around the picture.
-- Sizes unchanged per surface (20, 44, 16/22/28 presence, 24 popover, 20 bubbles, 32 members); the
+- Sizes per surface (20 header, 72 the Settings profile card, 16/22/28 presence, 24 popover, 20 bubbles, 32 members); the
   cursor pill gains a leading 14px disc only when a picture exists (D5).
 - Toggle copy: label "Show my profile picture"; description "Signed-in collaborators see your
   picture on presence, cursors, comments and teams. People who open your share links without
@@ -171,7 +171,7 @@ switch with its label.
 ## Web Experience
 
 CLS 0: fixed boxes, the cursor pill is a transient absolutely positioned overlay. LCP unaffected
-(≤ 44px images after auth settles).
+(≤ 72px images after auth settles).
 
 ## Observability
 

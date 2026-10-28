@@ -84,6 +84,8 @@ An email code is only as good as its delivery, so sign-in email is not best-effo
   everywhere the api reads it; an issued session token keeps working until its own 15 minutes run out.
 - **Seeing and ending sessions.** Settings > Account lists this account's signed-in browsers (browser and system,
   from the user agent; last active), marks this one, and offers **Sign out** on each and **Sign out everywhere else**.
+  A session signed out there leaves the list at once (every other one, for Sign out everywhere else), while the list
+  is read again; its button is busy while the request is on its way, so it is never pressed twice.
 - **Fresh enough for the dangerous things.** Deleting the account and removing a sign-in method need a session
   verified within the last 10 minutes. An older one asks the person to verify again (an email code, or Google) first.
 
@@ -275,14 +277,23 @@ A guest id is a bearer value that **leaks**: it rides in document DTOs and realt
 
 ## Account settings
 
-Settings > Account, signed in ([Account settings & email notifications](profile-and-email-notifications.md)):
+Settings > Account opens on the **profile card** ([Account settings & email notifications](profile-and-email-notifications.md)
+"Identity"): who this is, drawn as others see them. Signed in, then:
 
-- **Name**: editable inline.
+- **Name**: editable inline. A refusal says so until the name is edited again, never after the field holds the
+  stored name once more.
+- **Colour**: the colour collaborators see on this person's cursor, avatar and name tag, chosen in place from the
+  ten presence colours (the participant palette, every one holding white initials at AA, [Identity
+  fill](../004-interface-design/color-scheme.md)). It is the participant record's colour, so it follows the
+  account to every document and device; the open editor takes it at once. Shown at once, put back if refused:
+  to what the server last took, newest wins, so two refusals in a row never leave a colour it never stored.
+  Until the first document gives one, the colour is **Automatic**.
 - **Email**: shown; changed as in [Account linking](#account-linking).
 - **Profile picture**: [Profile picture](profile-picture.md).
 - **Sign-in methods**: Google (**Connect Google**, or connected with **Remove**, offered only where email codes are, so
   the address stays a way in), Email code (the account's address, where the host sends codes).
-- **Sessions**: [Sessions](#sessions).
+- **Where You're Signed In**: [Sessions](#sessions).
+- **Sign Out**: ends this browser's session, as the account menu's Sign Out does.
 - **Delete Account**: below.
 
 ## Deleting an account

@@ -15,6 +15,7 @@ import { WindowPanel } from './WindowPanel';
 import { StickyWindowBar } from './StickyWindowBar';
 import { ViewTabs } from './ViewTabs';
 import { ActiveView, prefetchViews } from './ActiveView';
+import { DashboardSkeleton } from './DashboardSkeleton';
 import { SECTION_TAB, type SectionKey, type ViewKey } from './view-keys';
 import type { SectionFocus } from './SectionedView';
 import { dropRetiredEvents } from './retired-events';
@@ -104,7 +105,8 @@ export default function TelemetryDashboard() {
         </p>
 
         {status === 'loading' ? (
-          <p className="mt-12 text-slate-500 dark:text-slate-400">Loading…</p>
+          // The shapes the numbers will take, never an empty page (docs/specs/017-telemetry/telemetry.md).
+          <DashboardSkeleton variant="page" />
         ) : status === 'error' ? (
           <div className="mt-12">
             <EmptyState

@@ -82,7 +82,7 @@ export async function handleTimeline(ctx: RouteContext): Promise<Response> {
     // their personal scope; a team's history is whatever its members
     // have actually done since the team existed.
     if (scope.scopeType === 'user' && !state?.backfilledAt) {
-      ctx.waitUntil?.(backfillUserScope(env, ownerId).catch(() => {}));
+      ctx.waitUntil?.(backfillUserScope(env, ownerId));
     }
 
     // The unread watermark (docs/specs/013-workspace/timeline.md §2.5). The response carries the
@@ -99,7 +99,7 @@ export async function handleTimeline(ctx: RouteContext): Promise<Response> {
     const isFirstPage = !url.searchParams.get('cursor');
     const staleEnough = isNewVisit(state?.lastSeenAt, Date.now());
     if (scope.scopeType === 'user' && isFirstPage && staleEnough) {
-      ctx.waitUntil?.(markScopeSeen(env, scope).catch(() => {}));
+      ctx.waitUntil?.(markScopeSeen(env, scope));
     }
 
     // An owner id is a credential (a guest's X-Owner-Id is their whole
@@ -143,7 +143,10 @@ export async function handleTimeline(ctx: RouteContext): Promise<Response> {
       return json({ lastSeenAt: state.lastSeenAt });
     }
     if (!state?.backfilledAt) {
-      await backfillUserScope(env, ownerId).catch(() => {});
+      // A failed seed still marks the scope seen; it is logged, and the next refresh tries again.
+      await backfillUserScope(env, ownerId).catch((err: unknown) =>
+        console.error('[timeline] backfill failed', err),
+      );
     }
     await markScopeSeen(env, scope);
     return json({ lastSeenAt: now });

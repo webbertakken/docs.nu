@@ -627,12 +627,13 @@ describe('GET /api/share/<code> (docs/specs/013-workspace/share-password.md + do
     expect(notifyDocumentJoinMock).not.toHaveBeenCalled();
   });
 
-  it('swallows a failing notification rather than surfacing it', async () => {
+  // docs/specs/015-api/api.md "Background work": the route's waitUntil logs it (background.test.ts).
+  it('answers the visit and hands a failing notification to the background, where it is logged', async () => {
     recordSharedAccessMock.mockResolvedValue(true);
     notifyDocumentJoinMock.mockRejectedValue(new Error('Resend down'));
     const { ctx, settled } = resolveCtx({ visitor: 'visitor-1', signedIn: true });
     expect((await handleShare(ctx)).status).toBe(200);
-    await expect(settled()).resolves.toBeDefined();
+    await expect(settled()).rejects.toThrow('Resend down');
   });
 
   it('gates on the password before recording anything', async () => {

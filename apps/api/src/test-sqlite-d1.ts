@@ -4,6 +4,7 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 import { DocumentDb } from './document-room/document-db';
 import { migrateDocumentSchema } from './document-room/document-schema';
+import { assertD1Compound } from './test-d1-compound';
 import { nodeDocumentSql, nodeTransaction } from './test-document-sql';
 import { withTestDocumentRooms } from './test-document-room';
 import type { DocumentEnv, Env } from './types';
@@ -75,19 +76,26 @@ function migrationFiles(): string[] {
     .sort();
 }
 
+// A migration runs on D1 too, so it meets D1's limits (testing.md "Every test database refuses what D1 refuses").
+function runMigration(sql: DatabaseSync, file: string): void {
+  const migration = readFileSync(MIGRATIONS_DIR + file, 'utf8');
+  assertD1Compound(migration);
+  sql.exec(migration);
+}
+
 // Run the one migration whose file name starts with `prefix` (e.g. '0049'),
 // for a test that seeds rows under the previous schema first.
 export function applyMigration(sql: DatabaseSync, prefix: string): void {
   const file = migrationFiles().find((f) => f.startsWith(`${prefix}_`));
   if (!file) throw new Error(`no migration ${prefix}`);
-  sql.exec(readFileSync(MIGRATIONS_DIR + file, 'utf8'));
+  runMigration(sql, file);
 }
 
 // Run every migration from `prefix` on, bringing a database seeded under an older schema up to
 // the one the current code reads.
 export function migrateFrom(sql: DatabaseSync, prefix: string): void {
   for (const file of migrationFiles().filter((f) => f >= prefix)) {
-    sql.exec(readFileSync(MIGRATIONS_DIR + file, 'utf8'));
+    runMigration(sql, file);
   }
 }
 
@@ -121,7 +129,7 @@ export function sqliteD1(base: Partial<Env> = {}, opts: SqliteD1Options = {}): S
   sql.exec('PRAGMA foreign_keys = ON');
   for (const file of migrationFiles()) {
     if (opts.before && file >= opts.before) break;
-    sql.exec(readFileSync(MIGRATIONS_DIR + file, 'utf8'));
+    runMigration(sql, file);
   }
   const rooms = !opts.before && !opts.keepD1Content;
   if (rooms) addRoomTables(sql);
@@ -154,7 +162,9 @@ export function sqliteD1(base: Partial<Env> = {}, opts: SqliteD1Options = {}): S
     }
   };
 
+  // D1 refuses a compound SELECT of more than five terms, where node:sqlite allows 500.
   const statement = (query: string, args: SQLInputValue[]) => {
+    assertD1Compound(query);
     const rows = () =>
       sql
         .prepare(query)
@@ -224,6 +234,7 @@ export function sqliteD1(base: Partial<Env> = {}, opts: SqliteD1Options = {}): S
     },
     // Present so better-auth recognises the binding as D1 (it tests for prepare, batch and exec).
     exec: async (query: string) => {
+      assertD1Compound(query);
       sql.exec(query);
       return { count: 0, duration: 0 };
     },

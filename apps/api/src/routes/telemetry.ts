@@ -52,9 +52,12 @@ export async function handleTelemetry(ctx: RouteContext): Promise<Response> {
   // A few minutes of edge + browser cache. Fixed windows mean the
   // body only drifts on the next ingest, so staleness is bounded
   // and acceptable for a usage dashboard. Awaited (the worker's
-  // fetch signature has no ctx.waitUntil) so the put completes.
+  // fetch signature has no ctx.waitUntil) so the put completes. Best effort: a failed put is
+  // logged and the summary still answers (docs/specs/015-api/api.md "Caching").
   res.headers.set('Cache-Control', 'public, max-age=300');
-  await caches.default.put(cacheKey, res.clone());
+  await caches.default
+    .put(cacheKey, res.clone())
+    .catch((err: unknown) => console.error('[telemetry] summary cache put failed', err));
   return res;
 }
 

@@ -21,11 +21,17 @@ look for the same kind of thing, and the email toggles in particular were
 findable only by someone who already knew the page existed. The page was
 retired and its three parts redistributed:
 
-- **Identity** (avatar, name, email, joined) is the `identity` row in the
-  **Account** category. Read from the account session on the client, never written here: it
-  shows the name and email as the account holds them, so it is a card, not a form. The
-  avatar is the [Profile picture](profile-picture.md) when there is one. A
-  guest sees a card explaining that they are working as a guest.
+- **Identity** is the `identity` row in the **Account** category: the **profile card**, who this is as
+  others see them. A banner drawn as a dotted canvas holds the person's own cursor and name tag in their
+  presence colour, as collaborators see it, beside two faint cards and a collaborator's faint cursor. Below
+  it: the avatar (the [Profile picture](profile-picture.md) when there is one, else the initials on their
+  colour), the name, the email, and a row of chips: **LiveDoc Account** (or **Guest · This Browser Only**),
+  **Joined <month year>**, and **Colour: <name>** with its swatch. Read from the account session and the
+  participant record on the client, never written here: Name and Colour are edited in the rows below it.
+- **A guest** gets the same card as a guest ("Guest", "Not signed in", their colour), then **Sign in to make
+  this yours**: keep your documents and settings on every device; choose the name and colour collaborators
+  see on your cursor; share with your team, and get an email when someone comments. Then **Sign In** and
+  **Create Account**, returning to Settings. The rows that cannot apply to a guest are absent, not empty.
 - **Email notifications** are the six rows in **Notifications > Email**
   (§3). Absent unless Resend is configured AND the reader is signed in, since
   a guest has no address to send to.

@@ -339,6 +339,27 @@ it. Not `no-store`: the browser's cache drains a stored answer's body, and witho
 whose caller never reads the body holds its request open. Images and SVG snapshots set their own
 policies.
 
+The public telemetry summary keeps a few minutes in the edge cache. Storing it is best effort: a
+put that fails logs `[telemetry] summary cache put failed` and the summary still answers.
+
+## Background work
+
+Work that runs after the answer has gone (`waitUntil`: telemetry rows, Timeline events, team
+mail, Timeline backfills) never fails silently, and never fails the request it came from.
+
+- **Every route's background work logs its failure.** The route context's `waitUntil` attaches one
+  catch to whatever a handler hands it: `[background] failed route=<route words>` with the error,
+  the route named by its words only (`Post.Teams.Invites`), never an id. A handler hands its work
+  over as it is; it adds no catch of its own that would hide a failure from that line.
+- **Best-effort writes say so.** A server-side telemetry row that fails to land logs
+  `[telemetry] server event failed`; the call still resolves, so no caller waits on telemetry.
+- **Each daily cron step is isolated.** The `0 3 * * *` run hands every step (each retention
+  sweep, the onboarding emails, the token-expiry warnings, the Trash purge, the empty-document
+  sweep, image retention, the Workbench sweep) to `waitUntil` on its own, each with its own catch
+  and its own log line, so one failed step never skips another. Inside the onboarding emails each
+  stage (welcome, activation, week 1, week 2, win-back) is a step too: a failure logs
+  `[lifecycle] stage failed stage=<name>`, and the next stage still runs.
+
 ## Rate limiting
 
 The limiters, each a Cloudflare Workers Rate Limiting binding declared under `[[unsafe.bindings]]` in `apps/api/wrangler.toml` (where the ceilings live). Over-limit requests get `429` with `{ "error": "rate_limited" }`, except the telemetry ingest, which answers with its usual no-op `204` so a throttled beacon never surfaces as an error.

@@ -1,3 +1,4 @@
+import { assertD1Compound } from './test-d1-compound';
 import type { Env } from './types';
 
 // A recording D1 stub for the db/ modules and the routes that drive them.
@@ -89,7 +90,11 @@ export function fakeD1(respond: D1Responder = () => undefined, base: Partial<Env
   }
 
   const db = {
-    prepare: (sql: string) => statement(sql, []),
+    // D1 refuses a compound SELECT of more than five terms; this stub runs no SQL, so it checks the text.
+    prepare: (sql: string) => {
+      assertD1Compound(sql);
+      return statement(sql, []);
+    },
     batch: async (statements: { __sql: string; __bindings: unknown[] }[]) => {
       // D1 runs a batch as writes; recording them as such keeps `matching()`
       // honest for a module that mixes batch and run.
