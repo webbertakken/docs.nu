@@ -32,6 +32,25 @@ const keys = (root: HTMLElement) =>
   Array.from(root.querySelectorAll<HTMLElement>('[data-colour-key]'));
 
 describe('ColourPicker', () => {
+  // colour-picker.md "The colours": a surface whose colours must stay a set (the presence colours) offers no custom ones.
+  it('offers no Custom Colours and no + when the surface takes none', () => {
+    const { root } = setup({
+      theme: [],
+      standard: [
+        {
+          heading: 'Presence Colours',
+          options: [{ id: '#ef4444', colour: '#ef4444', label: 'Red' }],
+        },
+      ],
+      custom: false,
+      value: '#123456',
+    });
+    expect(screen.queryByRole('group', { name: 'Custom Colours' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Add a custom colour' })).toBeNull();
+    expect(keys(root)).toHaveLength(1);
+    expect(keys(root)[0]!.tabIndex).toBe(0);
+  });
+
   it('is 276px wide and shows the ten standard colours, then Custom colours with +', () => {
     const { root } = setup();
     expect(COLOUR_PICKER_WIDTH).toBe(276);

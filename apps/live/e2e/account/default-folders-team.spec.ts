@@ -13,7 +13,6 @@ async function signedIn(page: Page, baseURL: string) {
   await page.addInitScript(() => {
     localStorage.setItem('livedoc:v2:ui-mode', 'dark');
     localStorage.setItem('livedoc:v2:name-confirmed', '1');
-    localStorage.setItem('livedoc:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
   const pat = await signIn(page.context(), { baseURL, name: 'Pat Lane' });
   return pat.apiHeaders();

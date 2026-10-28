@@ -137,7 +137,7 @@ export const TOUR_OFFER_DISMISSED = chart(
   'UI',
   'Closed',
   'Tours Declined',
-  'The Diagram tour (the welcome tour until October 2026) turned down on its welcome card, before it started. (The editor records this decline as closing the offer.)',
+  'The Diagram tour (the welcome tour until October 2026) turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves). (The editor records this decline as closing the offer.)',
   { types: ['TourOffer'], rising: 'neutral' },
 );
 
@@ -197,7 +197,7 @@ export const PLAN_TOUR_DECLINED = chart(
   'UI',
   'Closed',
   'Plan Tours Declined',
-  'The Plan tour turned down on its welcome card, before it started.',
+  'The Plan tour turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves).',
   { types: ['PlanTourOffer'], rising: 'neutral' },
 );
 
@@ -215,7 +215,7 @@ export const PLAN_TOUR_BOARDS_PICKED = chart(
   'UI',
   'Selected',
   'Plan Tours: Boards',
-  "Boards picked on the Plan tour's welcome card.",
+  "Boards picked on the Plan tour's welcome card (until 28 October 2026).",
   { types: ['PlanTourBoards'] },
 );
 
@@ -223,7 +223,7 @@ export const PLAN_TOUR_SHEETS_PICKED = chart(
   'UI',
   'Selected',
   'Plan Tours: Spreadsheets',
-  "Spreadsheets picked on the Plan tour's welcome card.",
+  "Spreadsheets picked on the Plan tour's welcome card (until 28 October 2026).",
   { types: ['PlanTourSheets'] },
 );
 
@@ -275,7 +275,7 @@ export const WORKSHOP_TOUR_DECLINED = chart(
   'UI',
   'Closed',
   'Workshop Tours Declined',
-  'The Workshop tour turned down on its welcome card, before it started.',
+  'The Workshop tour turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves).',
   { types: ['WorkshopTourOffer'], rising: 'neutral' },
 );
 
@@ -341,7 +341,7 @@ export const DRAW_TOUR_DECLINED = chart(
   'UI',
   'Closed',
   'Draw Tours Declined',
-  'The Draw tour turned down on its welcome card, before it started.',
+  'The Draw tour turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves).',
   { types: ['DrawTourOffer'], rising: 'neutral' },
 );
 
@@ -398,7 +398,7 @@ export const FORM_TOUR_DECLINED = chart(
   'UI',
   'Closed',
   'Forms Tours Declined',
-  'The Forms tour turned down on its welcome card, before it started.',
+  'The Forms tour turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves).',
   { types: ['FormTourOffer'], rising: 'neutral' },
 );
 
@@ -455,7 +455,7 @@ export const AVATAR_TOUR_DECLINED = chart(
   'UI',
   'Closed',
   'Avatar Tours Declined',
-  'The Avatar tour turned down on its welcome card, before it started.',
+  'The Avatar tour turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves).',
   { types: ['AvatarTourOffer'], rising: 'neutral' },
 );
 
@@ -512,7 +512,7 @@ export const PAGES_TOUR_DECLINED = chart(
   'UI',
   'Closed',
   'Pages Tours Declined',
-  'The Pages tour turned down on its welcome card, before it started.',
+  'The Pages tour turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves).',
   { types: ['PagesTourOffer'], rising: 'neutral' },
 );
 
@@ -680,7 +680,7 @@ export const DASHBOARD_TOUR_DECLINED = chart(
   'UI',
   'Closed',
   'Dashboards Tours Declined',
-  'The Dashboards tour turned down on its welcome card, before it started.',
+  'The Dashboards tour turned down on its welcome card, before it started (until 28 October 2026, when tours stopped offering themselves).',
   { types: ['DashboardTourOffer'], rising: 'neutral' },
 );
 

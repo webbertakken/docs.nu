@@ -6,7 +6,13 @@
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocumentThumbnail } from './DocumentThumbnail';
-import { resetThumbnailCache } from '@/lib/thumbnail-cache';
+import {
+  loadThumbnail,
+  peekThumbnail,
+  resetThumbnailCache,
+  THUMBNAIL_CACHE_MAX,
+  thumbnailKey,
+} from '@/lib/thumbnail-cache';
 
 type Result = { url: string; backgroundColor: string | null } | null;
 const pending: ((r: Result) => void)[] = [];
@@ -141,5 +147,31 @@ describe('DocumentThumbnail', () => {
     expect(pending).toHaveLength(1);
     await act(async () => pending[0]!({ url: 'blob:one', backgroundColor: null }));
     expect(document.querySelectorAll('img')).toHaveLength(2);
+  });
+
+  it('keeps its picture in the cache while mounted, however many others load', async () => {
+    render(thumb(1));
+    await act(async () => pending[0]!({ url: 'blob:one', backgroundColor: null }));
+    const others = Array.from({ length: THUMBNAIL_CACHE_MAX }, (_, i) =>
+      loadThumbnail({ ownerId: 'me', documentId: `other-${i}`, version: 1, shareCode: null }),
+    );
+    await act(async () => {
+      for (const answer of pending.slice(1)) answer({ url: 'blob:other', backgroundColor: null });
+      await Promise.all(others);
+    });
+    const key = thumbnailKey({ ownerId: 'me', documentId: 'd1', version: 1, shareCode: null });
+    expect(peekThumbnail(key)).toBeDefined();
+    cleanup();
+    await act(async () => {
+      const late = loadThumbnail({
+        ownerId: 'me',
+        documentId: 'late',
+        version: 1,
+        shareCode: null,
+      });
+      pending.at(-1)!({ url: 'blob:late', backgroundColor: null });
+      await late;
+    });
+    expect(peekThumbnail(key)).toBeUndefined();
   });
 });

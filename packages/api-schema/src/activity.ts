@@ -55,6 +55,9 @@ export type ActivityThread = ActivityPlace & {
   onYourDocument: boolean;
   // The reader is @-mentioned in the thread (docs/specs/012-collaboration/comment-mentions.md).
   mentionsYou: boolean;
+  // The reader may comment on the document (docs/specs/013-workspace/inbox.md §4): their own, a joined team's, or
+  // reached through a participate or edit link. A hint for the Inbox's Reply and Resolve; the comment routes decide.
+  canComment: boolean;
 };
 
 // An open Plan card (docs/specs/026-plan/items.md) whose Assignee is the reader (docs/specs/013-workspace/

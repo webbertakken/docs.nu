@@ -21,9 +21,13 @@ function fromRepository(repository: unknown): string | undefined {
   if (typeof raw !== 'string') return undefined;
   const shorthand = GITHUB_SHORTHAND.exec(raw);
   if (shorthand) return `https://github.com/${shorthand[1]}`;
+  // `git+ssh://git@host/path` and `git+https://…#branch` are how npm writes many repositories: strip the
+  // branch and turn the ssh form into https, or the work shows no Source link or a broken one.
   return https(
     raw
+      .replace(/#.*$/, '')
       .replace(/^git\+/, '')
+      .replace(/^ssh:\/\/git@([^/:]+)[:/]/, 'https://$1/')
       .replace(/^git:\/\//, 'https://')
       .replace(/^git@([^:]+):/, 'https://$1/')
       .replace(/\.git$/, ''),

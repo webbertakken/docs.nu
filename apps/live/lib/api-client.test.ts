@@ -146,13 +146,20 @@ describe('apiLoadShared password gate (docs/specs/013-workspace/share-password.m
   it('returns passwordRequired (not invalid) on 401', async () => {
     stubFetch(401, { error: 'password_required' });
     const res = await apiLoadShared('CODE2345', 'guest-1');
-    expect(res).toEqual({ passwordRequired: true, invalid: false });
+    expect(res).toEqual({ passwordRequired: true, invalid: false, rateLimited: false });
   });
 
   it('returns passwordRequired with invalid=true on 403 (wrong password)', async () => {
     stubFetch(403, { error: 'password_invalid' });
     const res = await apiLoadShared('CODE2345', 'guest-2');
-    expect(res).toEqual({ passwordRequired: true, invalid: true });
+    expect(res).toEqual({ passwordRequired: true, invalid: true, rateLimited: false });
+  });
+
+  // Too many tries at the password: the gate stays up and says to wait, rather than calling the try wrong.
+  it('returns passwordRequired with rateLimited=true on a password 429', async () => {
+    stubFetch(429, { error: 'password_rate_limited' });
+    const res = await apiLoadShared('CODE2345', 'guest-5');
+    expect(res).toEqual({ passwordRequired: true, invalid: false, rateLimited: true });
   });
 
   it('returns null on 404 (revoked / nonexistent)', async () => {

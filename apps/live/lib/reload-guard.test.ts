@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { RELOAD_GUARD_KEY, RELOAD_GUARD_WINDOW_MS, claimReload } from './reload-guard';
+import {
+  RELOAD_GUARD_KEY,
+  RELOAD_GUARD_WINDOW_MS,
+  claimReload,
+  releaseReload,
+} from './reload-guard';
 
 // docs/specs/016-platform/stale-builds.md "One reload guard": every reload the app or its page
 // guard starts on its own claims the same allowance, one per page per window.
@@ -46,5 +51,30 @@ describe('claimReload', () => {
   it('is one minute, under the key the chunk recovery has always used', () => {
     expect(RELOAD_GUARD_WINDOW_MS).toBe(60_000);
     expect(RELOAD_GUARD_KEY).toBe('livedoc:stale-chunk-reloads');
+  });
+});
+
+describe('releaseReload', () => {
+  it('gives back the claim it made, so the page may reload once again', () => {
+    const storage = memoryStorage();
+    expect(claimReload('/document/a#x', storage, 1_000)).toBe(true);
+    releaseReload('/document/a', storage, 1_000);
+    expect(claimReload('/document/a', storage, 2_000)).toBe(true);
+  });
+
+  it('leaves a newer claim alone', () => {
+    const storage = memoryStorage();
+    claimReload('/document/a', storage, 1_000);
+    releaseReload('/document/a', storage, 500);
+    expect(claimReload('/document/a', storage, 2_000)).toBe(false);
+  });
+
+  it('leaves other pages and junk alone', () => {
+    const storage = memoryStorage();
+    claimReload('/document/b', storage, 1_000);
+    releaseReload('/document/a', storage, 1_000);
+    expect(claimReload('/document/b', storage, 2_000)).toBe(false);
+    storage.setItem(RELOAD_GUARD_KEY, '"junk"');
+    expect(() => releaseReload('/document/a', storage, 1_000)).not.toThrow();
   });
 });

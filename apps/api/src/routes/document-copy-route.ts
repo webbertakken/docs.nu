@@ -100,11 +100,14 @@ export async function handleDocumentCopy(ctx: RouteContext): Promise<Response> {
       // route's read check admits joined team members, who present no share
       // code, and telling an owner that a teammate duplicating a team-library
       // document was "copied by a visitor" is simply untrue.
+      // A visitor is someone the grant admitted through a link, never merely a request carrying a share header.
       if (owner !== source.ownerId && shareCodeOf(request) !== null) {
         ctx.waitUntil?.(
-          getParticipant(env, owner).then((p) =>
-            recordVisitorCopied(env, source, owner, p?.name ?? null),
-          ),
+          gateGrant(ctx, source.id, source.ownerId, source.teamId).then(async (grant) => {
+            if (!grant?.shareCode) return;
+            const p = await getParticipant(env, owner);
+            await recordVisitorCopied(env, source, owner, p?.name ?? null);
+          }),
         );
       }
       return json({ document: copy }, { status: 201 });

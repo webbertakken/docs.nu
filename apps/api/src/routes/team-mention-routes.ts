@@ -124,7 +124,7 @@ export async function handleTeamMentionRoutes(
         document: { id: liveDoc.id, name: liveDoc.name },
         commentText,
         ...(itemId ? { itemId, commentId: commentId as string } : {}),
-      }).catch(() => {}),
+      }),
     );
   }
   return json({ ok: true }, { status: 202 });

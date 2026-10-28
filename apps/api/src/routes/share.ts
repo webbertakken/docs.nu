@@ -13,7 +13,12 @@ import {
 import { notifyDocumentJoin } from '../email/notifications';
 import { documentTrashed, forbidden, json, notFound, svgImage } from '../responses';
 import { reportServerEvent } from '../server-telemetry';
-import { shareGrantOf, sharePasswordStatus, type SharePasswordAttempt } from '../auth/share-access';
+import {
+  SHARE_GUESS_RETRY_AFTER_S,
+  shareGrantOf,
+  sharePasswordStatus,
+  type SharePasswordAttempt,
+} from '../auth/share-access';
 import { redactDocumentForReader, redactDocumentForScope } from '../redact-document';
 import { sharePasswordOf, type DocumentRouteContext, type RouteContext } from './context';
 import { askRoom, documentRoom } from '../document-room/document-client';
@@ -99,8 +104,7 @@ export async function handleShare(ctx: RouteContext): Promise<Response> {
             ctx.waitUntil?.(
               getParticipant(env, visitor)
                 .catch(() => null)
-                .then((p) => notifyDocumentJoin(env, d, p?.name ?? null))
-                .catch(() => {}),
+                .then((p) => notifyDocumentJoin(env, d, p?.name ?? null)),
             );
           }
         }
@@ -167,8 +171,8 @@ export async function handleShareImage(ctx: DocumentRouteContext, code: string):
   return svg == null ? notFound() : svgImage(svg, SHARE_IMAGE_CACHE);
 }
 
-// Returns a 401/403 Response when the document is password-protected and
-// the provided password is missing / wrong, else null (access allowed).
+// Returns a 401/403/429 Response when the document is password-protected and
+// the provided password is missing / wrong / over the guess budget, else null (access allowed).
 // The error codes mirror what the client maps to its password gate.
 // Exported for the focused unit suite at routes/share.test.ts that pins
 // the status-code mapping, since SharePasswordGate distinguishes 401
@@ -182,6 +186,11 @@ export async function passwordGate(
   const status = await sharePasswordStatus(env, documentId, provided);
   if (status === 'missing') return json({ error: 'password_required' }, { status: 401 });
   if (status === 'invalid') return forbidden('password_invalid');
+  if (status === 'rate_limited')
+    return json(
+      { error: 'password_rate_limited' },
+      { status: 429, headers: { 'Retry-After': String(SHARE_GUESS_RETRY_AFTER_S) } },
+    );
   return null;
 }
 

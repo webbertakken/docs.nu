@@ -127,8 +127,12 @@ export function useDocumentTagsState(ownerId: string | null, enabled: boolean) {
   }, [ownerId, wanted, load]);
 
   const request = useCallback(() => setWanted(true), []);
+  // Try again after a failed read shows the list loading again at once, rather than the old failure until the
+  // new read lands (tags.md "The Tags page"). A reload of a list that loaded keeps it on screen meanwhile.
   const reload = useCallback(async () => {
-    if (ownerId) await load(ownerId);
+    if (!ownerId) return;
+    setLoaded((prev) => (prev && !prev.ok ? null : prev));
+    await load(ownerId);
   }, [ownerId, load]);
 
   const fail = useCallback(

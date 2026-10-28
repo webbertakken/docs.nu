@@ -52,6 +52,9 @@ beforeEach(() => {
   room.exec(`INSERT INTO document (id, saved_at, created_at) VALUES ('${D}', 1, 1)`);
 });
 
+// The fastest of RUNS, in CPU time: wall-clock time also counts waiting for a core while other suites run, which
+// failed a 30 ms read at 34 ms on CI. Budgets are cpuBudgetMs, widened on CI and under coverage
+// (packages/vitest-config/cpu-time.js).
 async function best(run: (i: number) => Promise<unknown>): Promise<number> {
   let fastest = Infinity;
   for (let i = 0; i < RUNS; i++) {

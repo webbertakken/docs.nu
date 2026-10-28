@@ -128,7 +128,9 @@ export function EditorAnchoredPopovers() {
                   )
                 }
                 // The server re-checks authorId === caller, so a read-only session can only land its own deletes.
-                onDeleteComment={(cid) => deleteComment(target.id, cid, persist.remove(cid))}
+                onDeleteComment={(cid) =>
+                  deleteComment(target.id, cid, persist.remove(cid), thread, cell)
+                }
                 // A session that may comment but not edit resolves and reopens through the comment endpoints, as it
                 // adds (docs/specs/024-agents/agent-presence.md "Comments"); the thread is named by its first comment.
                 onResolve={() => resolveThread(target.id, persist.threadState(thread, true), cell)}

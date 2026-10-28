@@ -46,6 +46,7 @@ export async function handleTokens(ctx: RouteContext): Promise<Response> {
     }
     if (request.method === 'POST') {
       const body = await readOptionalBody(request);
+      if (body instanceof Response) return body;
       const name = typeof body.name === 'string' ? body.name.trim() : '';
       if (name.length > MAX_NAME_LEN) return badRequest('name too long');
       const minted = await mintApiToken(env, { ownerId: owner, name: name || null });

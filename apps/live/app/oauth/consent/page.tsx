@@ -2,7 +2,7 @@
 
 // MCP OAuth consent screen (docs/specs/015-api/mcp-server.md §3). The MCP authorize endpoint redirects
 // the signed-in user here with a `session` (and a display-only `client` name +
-// `to` redirect host). On approve we mint an lvd_ token via the api
+// `to` redirect host). On approve we mint an livedoc_ token via the api
 // (with the session token) and hand it to the MCP's /oauth/complete bound to a one-time
 // PKCE code, then bounce the browser to the client's redirect. Signed-in only;
 // absent end-to-end on a host without sign-in.

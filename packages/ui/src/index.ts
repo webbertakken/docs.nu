@@ -108,6 +108,7 @@ export {
   type PageMetadataInput,
   type BreadcrumbCrumb,
 } from './seo';
+export { redirectTarget } from './redirect-target';
 export * from './appearance';
 export * from './random-uuid-boot';
 export { indefiniteArticle, withArticle } from '@livedoc/items';
@@ -132,3 +133,5 @@ export * from './browser-repair';
 // icons' contract (icons/), shared by the editor's palette and the marketing site's mock of it.
 export * from './palette-icons/palette-tab-icons';
 export * from './palette-icons/palette-group-icons';
+// The one on/off switch (docs/specs/004-interface-design/design-principles.md "One switch"): Switch, SwitchRow, SwitchChip.
+export { Switch, SwitchChip, SwitchRow, type SwitchSize } from './Switch';

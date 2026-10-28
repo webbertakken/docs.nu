@@ -45,7 +45,7 @@ keeps its name. The Collaborate elements keep `toolGroup: 'behaviour'` and their
 ## Behaviour and state
 
 - **No new state.** The mode is `Tab.opensIn = 'workshop'`, written by the existing switch,
-  Shift+D on an empty tab, a start's switch and template overrides. Everything else derives from the mode.
+  Shift+D, the switch beside the menu button, a start's switch and template overrides. Everything else derives from the mode.
 - **Gates:** `hasBoardLook`, `hasPageLook`, `hasPlanInput` are all `false` for `workshop`; it
   takes Diagram's look and input. `useModeDefaultTool` starts it on Select (Hand on a phone), as
   Diagram.

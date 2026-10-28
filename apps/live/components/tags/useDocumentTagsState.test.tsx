@@ -73,6 +73,18 @@ describe('useDocumentTagsState', () => {
     await waitFor(() => expect(result.current.status).toBe('error'));
   });
 
+  it('shows loading the moment Try again asks again, not the old failure', async () => {
+    api.apiListTags.mockRejectedValueOnce(new Error('offline'));
+    const { result } = renderHook(() => useDocumentTagsState('u1', true));
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    let answer!: (list: TagsList) => void;
+    api.apiListTags.mockReturnValueOnce(new Promise((r) => (answer = r)));
+    act(() => void result.current.reload());
+    expect(result.current.status).toBe('loading');
+    await act(async () => answer({ tags: [], links: [] }));
+    expect(result.current.status).toBe('ready');
+  });
+
   it('puts a tag on and takes it off at once, the request behind', async () => {
     const { result } = await ready();
     act(() => result.current.setDocumentTag('d2', 't2', true));

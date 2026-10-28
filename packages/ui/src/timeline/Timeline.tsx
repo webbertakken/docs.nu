@@ -61,6 +61,8 @@ export type TimelineProps = {
   onRetry?: () => void;
   hasMore?: boolean;
   loadingMore?: boolean;
+  /** The last next-page read failed: Show More says so and becomes Try Again (§2.3). */
+  loadMoreFailed?: boolean;
   onLoadMore?: () => void;
   onStackExpand?: () => void;
   /** Events after this timestamp are marked New (docs/specs/013-workspace/timeline.md §2.5). */
@@ -82,6 +84,7 @@ export function Timeline({
   onRetry,
   hasMore,
   loadingMore,
+  loadMoreFailed,
   onLoadMore,
   onStackExpand,
   lastSeenAt,
@@ -192,7 +195,7 @@ export function Timeline({
           hint={hasMore ? 'Show More to look further back, or remove a filter.' : undefined}
           onClear={controls.resetFilters}
         />
-        {hasMore && <ShowMore loading={loadingMore} onClick={onLoadMore} />}
+        {hasMore && <ShowMore loading={loadingMore} failed={loadMoreFailed} onClick={onLoadMore} />}
       </div>
     );
   }
@@ -279,22 +282,35 @@ export function Timeline({
         </TimelineGroup>
       ))}
 
-      {hasMore && <ShowMore loading={loadingMore} onClick={onLoadMore} />}
+      {hasMore && <ShowMore loading={loadingMore} failed={loadMoreFailed} onClick={onLoadMore} />}
     </div>
   );
 }
 
 /** Appends the next page (docs/specs/013-workspace/timeline.md §2.3). */
-function ShowMore({ loading, onClick }: { loading?: boolean; onClick?: () => void }) {
+function ShowMore({
+  loading,
+  failed,
+  onClick,
+}: {
+  loading?: boolean;
+  failed?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <div className="pt-2 text-center">
+      {failed && !loading ? (
+        <p role="status" className="mb-2 text-xs text-slate-600 dark:text-slate-300">
+          Couldn’t load older events.
+        </p>
+      ) : null}
       <button
         type="button"
         disabled={loading}
         onClick={onClick}
         className="rounded-lg border border-slate-200 px-4 py-2 text-xs text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
       >
-        {loading ? 'Loading…' : 'Show More'}
+        {loading ? 'Loading…' : failed ? 'Try Again' : 'Show More'}
       </button>
     </div>
   );

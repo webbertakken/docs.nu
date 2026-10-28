@@ -51,6 +51,8 @@ import {
   afterWord,
   isSequenceDiagram,
   parseSequenceDiagram,
+  SEQUENCE_MAX_ITEMS,
+  SEQUENCE_MAX_PARTICIPANTS,
   type SequenceDiagram,
 } from './mermaid-sequence';
 import { layoutSequence } from './sequence-layout';
@@ -397,8 +399,10 @@ export function graphFromMermaid(
 }
 
 // A sequence from a graph: its nodes the participants (a node shaped actor a stick figure), its edges the messages in
-// order, a dashed edge a reply.
+// order, a dashed edge a reply. An edge naming no node is dropped, as on every other style: kept, its end had no
+// lifeline to stand on and was stored at x NaN.
 function sequenceFromGraph(input: GraphInput): SequenceDiagram {
+  const ids = new Set(input.nodes.map((n) => n.id));
   return {
     participants: input.nodes.map((n) => ({
       id: n.id,
@@ -406,13 +410,15 @@ function sequenceFromGraph(input: GraphInput): SequenceDiagram {
       ...(n.shape === 'actor' ? { actor: true } : {}),
       ...(n.icon ? { icon: n.icon } : {}),
     })),
-    items: input.edges.map((e) => ({
-      kind: 'message' as const,
-      from: e.from,
-      to: e.to,
-      label: e.label ?? '',
-      style: e.line === 'dashed' ? ('reply' as const) : ('call' as const),
-    })),
+    items: input.edges
+      .filter((e) => ids.has(e.from) && ids.has(e.to))
+      .map((e) => ({
+        kind: 'message' as const,
+        from: e.from,
+        to: e.to,
+        label: e.label ?? '',
+        style: e.line === 'dashed' ? ('reply' as const) : ('call' as const),
+      })),
   };
 }
 
@@ -433,6 +439,14 @@ function repeatedId(ids: readonly string[]): string | undefined {
 }
 
 export function graphShapeError(graph: GraphInput): string | undefined {
+  // A sequence drawn from nodes and edges is held to the caps a Mermaid sequence is (mermaid.md "Sequence diagrams"):
+  // its nodes are the participants, its edges the messages.
+  if (
+    graph.style === 'sequence' &&
+    !graph.sequence &&
+    (graph.nodes.length > SEQUENCE_MAX_PARTICIPANTS || graph.edges.length > SEQUENCE_MAX_ITEMS)
+  )
+    return `a sequence graph is too large: up to ${SEQUENCE_MAX_PARTICIPANTS} participants (nodes) and ${SEQUENCE_MAX_ITEMS} messages (edges)`;
   // Each node and each group becomes an element of its id, so no id can name two of either.
   const twiceNode = repeatedId(graph.nodes.map((n) => n.id));
   if (twiceNode !== undefined)

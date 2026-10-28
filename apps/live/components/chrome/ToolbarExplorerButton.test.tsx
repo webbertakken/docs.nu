@@ -58,14 +58,38 @@ describe('ToolbarExplorerButton', () => {
     ).not.toBeNull();
   });
 
-  // docs/specs/007-editor/editor-modes.md "The mode switch": a tab's mode is chosen on its start, never
-  // beside the menu button, on any screen.
-  it.each([false, true])('carries no mode switch (inline %s)', (inline) => {
+  // docs/specs/007-editor/editor-modes.md "The mode switch": beside the menu button, named on a computer, its icon
+  // alone on a phone or in the strip's row.
+  it.each([
+    [false, 'Draw'],
+    [true, null],
+  ] as const)(
+    'carries the editor mode switch right after the menu button (inline %s)',
+    (inline, name) => {
+      const { container } = render(
+        <EditorModeProvider
+          value={{ mode: 'draw', setMode: vi.fn(), canSwitch: true, canEdit: true }}
+        >
+          <ToolbarExplorerButton open={false} onToggle={vi.fn()} inline={inline} />
+        </EditorModeProvider>,
+      );
+      const chip = screen.getByRole('button', { name: 'Editor mode: Draw' });
+      expect(chip.getAttribute('aria-haspopup')).toBe('menu');
+      expect(chip.textContent?.includes('Draw') ? 'Draw' : null).toBe(name);
+      const buttons: HTMLElement[] = Array.from(container.querySelectorAll('button'));
+      expect(buttons.indexOf(chip)).toBe(
+        buttons.indexOf(screen.getByRole('button', { name: 'Explorer' })) + 1,
+      );
+    },
+  );
+
+  it.each([
+    ['a Participant or a Viewer', { canSwitch: false, canEdit: false }],
+    ['a locked tab or an event-storming board', { canSwitch: false, canEdit: true }],
+  ])('carries no mode switch for %s', (_, gate) => {
     render(
-      <EditorModeProvider
-        value={{ mode: 'diagram', setMode: vi.fn(), canSwitch: true, canEdit: true }}
-      >
-        <ToolbarExplorerButton open={false} onToggle={vi.fn()} inline={inline} />
+      <EditorModeProvider value={{ mode: 'diagram', setMode: vi.fn(), ...gate }}>
+        <ToolbarExplorerButton open={false} onToggle={vi.fn()} />
       </EditorModeProvider>,
     );
     expect(screen.getByRole('button', { name: 'Explorer' })).toBeTruthy();

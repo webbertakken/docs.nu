@@ -96,13 +96,35 @@ export function clearVerifiedSharePasswords(): void {
   verified.clear();
 }
 
+// How long a visitor refused for guessing too often is told to wait (Retry-After): the period of
+// SHARE_GUESS_VISITOR_LIMITER and SHARE_GUESS_ITEM_LIMITER (wrangler.toml), whose own limits are 10 and 30 a minute.
+export const SHARE_GUESS_RETRY_AFTER_S = 60;
+
+// Whether a guess may be checked (docs/specs/013-workspace/share-password.md "Guessing is limited"). Counted twice,
+// at Cloudflare's edge so the counts hold across isolates: against the caller's network
+// (SHARE_GUESS_VISITOR_LIMITER, 10 a minute) and against the document from any network (SHARE_GUESS_ITEM_LIMITER,
+// 30 a minute), so a guesser can't spread tries across addresses either. A limiter not bound (self-host) allows.
+async function guessAllowed(env: Env, documentId: string, rateKey: string): Promise<boolean> {
+  const [byVisitor, byDocument] = await Promise.all([
+    env.SHARE_GUESS_VISITOR_LIMITER?.limit({ key: `share-pw:${rateKey}` }),
+    env.SHARE_GUESS_ITEM_LIMITER?.limit({ key: `share-pw-doc:${documentId}` }),
+  ]);
+  if (byVisitor?.success === false || byDocument?.success === false) {
+    console.warn('[share-password] guess budget spent', {
+      documentId,
+      by: byVisitor?.success === false ? 'network' : 'document',
+    });
+    return false;
+  }
+  return true;
+}
+
 // Share-password check (docs/specs/013-workspace/share-password.md). `ok` when the document has no password or the
-// provided one matches; otherwise `missing` (none sent) or `invalid` (sent,
-// wrong, or the caller's network is out of guesses: answered the same way, so
-// an over-limit caller never learns whether a guess was right). The share-code
-// resolve maps the two failures to 401 / 403 for the client's password gate;
-// every other caller only asks whether it is `ok`.
-type SharePasswordStatus = 'ok' | 'missing' | 'invalid';
+// provided one matches; otherwise `missing` (none sent), `invalid` (sent and wrong) or `rate_limited` (the
+// guess budget is spent, so it was not checked: an over-limit caller never learns whether a guess was right). The
+// share-code resolve maps the three failures to 401 / 403 / 429 for the client's password gate; every other caller
+// only asks whether it is `ok`.
+type SharePasswordStatus = 'ok' | 'missing' | 'invalid' | 'rate_limited';
 
 export async function sharePasswordStatus(
   env: Env,
@@ -121,15 +143,9 @@ export async function sharePasswordStatus(
   const now = Date.now();
   const key = await verifiedKey(stored, attempt.value);
   if (isVerified(key, now)) return 'ok';
-  // Every derivation spends one unit of the network's budget, so guessing is
-  // bounded on every share-code door, and so is the CPU each guess costs.
-  if (env.SHARE_RATE_LIMITER) {
-    const { success } = await env.SHARE_RATE_LIMITER.limit({ key: `share-pw:${attempt.rateKey}` });
-    if (!success) {
-      console.warn('[share-password] guess budget spent', { documentId });
-      return 'invalid';
-    }
-  }
+  // Every derivation spends the guess budget first, so guessing is bounded on every share-code door, and so is the
+  // CPU each guess costs. A visitor already in is answered from the cache above and spends nothing.
+  if (!(await guessAllowed(env, documentId, attempt.rateKey))) return 'rate_limited';
   const { ok, legacy } = await verifySharePassword(stored, attempt.value);
   if (!ok) return 'invalid';
   rememberVerified(key, now);

@@ -112,11 +112,25 @@ describe('useIdentityBootstrap on an address that names no document', () => {
     },
   );
 
-  it('still hands the editor’s own empty route to /new', async () => {
+  // In place of this page: Back from /new must never land on the empty route, which would only hand off again.
+  it('still hands the editor’s own empty route to /new, replacing it in history', async () => {
     window.history.replaceState(null, '', '/document/placeholder');
+    const replace = vi.fn();
+    const assign = vi.fn();
+    vi.stubGlobal('location', {
+      ...window.location,
+      origin: 'https://docs.test',
+      pathname: '/document/placeholder',
+      href: 'https://docs.test/document/placeholder',
+      replace,
+      assign,
+    });
     const s = render();
     await vi.advanceTimersByTimeAsync(0);
+    vi.unstubAllGlobals();
     expect(s.setDocumentNotFound).not.toHaveBeenCalled();
     expect(api.apiLoadSelf).not.toHaveBeenCalled();
+    expect(replace).toHaveBeenCalledWith('https://docs.test/new');
+    expect(assign).not.toHaveBeenCalled();
   });
 });

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import {
   CUSTOM_FIELD_KINDS,
   PLAN_BOARD_PRESET_IDS,
+  PLAN_COLUMNS_MAX,
   PLAN_GLYPH_IDS,
   PLAN_TYPE_COLOURS,
 } from '@livedoc/items';
@@ -26,7 +27,8 @@ const typeArg = z
 const fieldsArg = z
   .record(z.string(), z.unknown())
   .describe(
-    'Fields by name: description, status (a column name), assignee (a person’s name, e.g. "Sam"), priority ' +
+    'Fields by name: description (Markdown: # headings, **bold**, *italic*, [links](https://…), - bullets; ' +
+      'shown formatted on the card), status (a column name), assignee (a person’s name, e.g. "Sam"), priority ' +
       '(urgent|high|medium|low), labels (["seo","copy"] or "seo, copy"), estimate (0-999), start and due ' +
       '(YYYY-MM-DD), color (a #rrggbb colour, e.g. ' +
       PLAN_TYPE_COLOURS.slice(0, 4).join(' ') +
@@ -160,12 +162,44 @@ export const changeBoardShape = {
       'Its rows: none, assignee, type, priority, status, or a field by name ("Severity", "Role"): a row per ' +
         'value, across every column.',
     ),
+  sortBy: z
+    .array(
+      z.object({
+        field: z
+          .string()
+          .describe(
+            'A field by name or id: Priority, Estimate, Start Date, Due Date, or a number, currency, date, ' +
+              'rating or choice field ("Value").',
+          ),
+        direction: z
+          .enum(['ascending', 'descending'])
+          .optional()
+          .describe(
+            'ascending (lowest or earliest first, a choice in option order; the default) or descending.',
+          ),
+      }),
+    )
+    .max(2)
+    .optional()
+    .describe(
+      'Sort Cards: each column orders its cards by up to two fields, then by hand order; [] turns it off. ' +
+        'While sorted, people cannot reorder cards within a column.',
+    ),
+  doneColumns: z
+    .array(z.string())
+    .max(PLAN_COLUMNS_MAX)
+    .optional()
+    .describe(
+      'The columns whose cards count as done (Completion, Points, and the Done phase charts read), by name, ' +
+        'whole: the named ones count and no other does; [] for none. A column added without it counts as done ' +
+        'when its name is a closing one (Done, Won’t Do, Cancelled, Closed, Shipped ...).',
+    ),
   doneColumn: z
     .string()
     .nullable()
     .optional()
     .describe(
-      'The column whose cards count as done (Completion, and the Done phase charts read), by name; null for none.',
+      'Older: the column whose cards count as done, and every column after it; null for none. Not with doneColumns.',
     ),
   renameColumns: z
     .record(z.string(), z.string())
@@ -412,12 +446,19 @@ const listedBoard = z.object({
   takes: z
     .union([z.array(z.string()), z.literal('every type')])
     .describe('The card types it shows.'),
+  sortBy: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Sort Cards, as "Priority (Highest First)": its columns list their cards in that order.',
+    ),
   columns: z
     .array(
       z.object({
         name: z.string().describe('The column name: what status takes.'),
         status: z.string().describe('The status id items store.'),
         wipLimit: z.number().optional().describe('The most cards the column should hold.'),
+        done: z.literal(true).optional().describe('Its cards count as done.'),
         cards: z.array(z.string()).describe('The cards in it, top to bottom ("#3").'),
       }),
     )
@@ -493,6 +534,7 @@ export const changeBoardOutput = {
       z.object({
         name: z.string().describe('The column name: what change_items takes.'),
         status: z.string().describe('The status id items store.'),
+        done: z.literal(true).optional().describe('Its cards count as done.'),
       }),
     )
     .describe('Its columns now, left to right.'),
@@ -501,6 +543,9 @@ export const changeBoardOutput = {
     .describe('The card types it shows now.'),
   cardSize: z.enum(['minimal', 'compact', 'detailed']).describe('How much of each card it draws.'),
   cardFields: z.array(z.string()).describe('The built-in fields its cards show, by name.'),
+  sortBy: z
+    .array(z.string())
+    .describe('Sort Cards now, as "Priority (Highest First)"; empty for hand order.'),
   changesetId: z.string().nullable().describe('The changeset that changed it (revertible).'),
   rev: z.number().nullable().describe('The tab revision after it.'),
   url,

@@ -78,7 +78,14 @@ describe('checkAnswer', () => {
     expect(checkAnswer(q, ['A'])).toEqual({ error: 'too_few' });
     expect(checkAnswer(q, ['A', 'B', 'C', OTHER_ANSWER], 'D')).toEqual({ error: 'too_many' });
     expect(checkAnswer(q, ['A', OTHER_ANSWER], 'D')).toEqual({ value: ['A', 'D'] });
-    expect(checkAnswer(q, ['A', OTHER_ANSWER], 'A')).toEqual({ value: ['A'] });
+    // An Other repeating a ticked option merges into it before the picks are counted (the owner's call): one pick.
+    expect(checkAnswer(q, ['A', OTHER_ANSWER], 'A')).toEqual({ error: 'too_few' });
+    expect(checkAnswer({ ...q, min: undefined, max: 2 }, ['A', 'B', OTHER_ANSWER], 'A')).toEqual({
+      value: ['A', 'B'],
+    });
+    expect(checkAnswer({ ...q, min: undefined }, ['A', OTHER_ANSWER], 'A')).toEqual({
+      value: ['A'],
+    });
     // Other typed as an option that was not ticked counts as that option, never as nothing.
     expect(checkAnswer({ ...q, min: undefined }, [OTHER_ANSWER], 'B')).toEqual({ value: ['B'] });
     expect(checkAnswer({ ...q, min: undefined }, ['C', OTHER_ANSWER], 'A')).toEqual({
@@ -188,5 +195,9 @@ describe('helpers', () => {
     expect(normaliseLink('mailto:a@b.co')).toBeNull();
     expect(normaliseLink('localhost')).toBeNull();
     expect(normaliseLink('https://exa mple.com')).toBeNull();
+  });
+
+  it('normaliseLink reads a host with a port as a bare host, not a scheme', () => {
+    expect(normaliseLink('example.com:8080/x')).toBe('https://example.com:8080/x');
   });
 });

@@ -20,6 +20,7 @@ type Call = {
   token?: { id: string; readOnly?: boolean } | null;
   owner?: string | null;
   raw?: string;
+  shareCode?: string;
 };
 
 function call({
@@ -29,12 +30,14 @@ function call({
   token = { id: 'tok_1' },
   owner = 'owner',
   raw,
+  shareCode,
 }: Call = {}) {
   return handleDocuments(
     makeTestRouteContext(method, `/api/documents/d1/tabs/${tab}/presence`, {
       env: sql.env,
       owner,
       token,
+      ...(shareCode ? { headers: { 'X-Share-Code': shareCode } } : {}),
       ...(raw !== undefined ? { rawBody: raw } : body === undefined ? {} : { body }),
       waitUntil: (p) => void pending.push(p),
     }),
@@ -86,6 +89,23 @@ describe('PUT presence', () => {
       }),
     );
     expect(pending.length).toBe(1);
+  });
+
+  // The entry names the link the grant came through (docs/specs/024-agents/agent-presence.md "Presence"), so a revoke of
+  // that link closes it; an owner's entry names none, whatever share header rides along.
+  it('names the link the grant came through, never a header the grant did not use', async () => {
+    sql.sql.exec(`
+      INSERT INTO share_links (code, document_id, role, created_at) VALUES ('LINKCODE1', 'd1', 'edit', 1);
+      INSERT INTO participants (id, name, color, created_at) VALUES ('visitor', 'Ada', '#f97316', 1);
+    `);
+    await call({ body: {}, shareCode: 'LINKCODE1' });
+    expect(put).toHaveBeenLastCalledWith(sql.env, expect.objectContaining({ shareCode: null }));
+
+    await call({ body: {}, owner: 'visitor', shareCode: 'LINKCODE1' });
+    expect(put).toHaveBeenLastCalledWith(
+      sql.env,
+      expect.objectContaining({ shareCode: 'LINKCODE1', role: 'edit' }),
+    );
   });
 
   it('shows a read-only token as a viewer and counts no repeat set', async () => {

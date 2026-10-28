@@ -12,6 +12,7 @@ import {
   type SessionTool,
   type ShapeKind,
 } from '@livedoc/document';
+import { noteAriaLabel } from '@/lib/article/article-note-look';
 
 // The tool a session button starts, as its kind reads (docs/specs/012-collaboration/session-button.md).
 const SESSION_TOOL_KIND: Record<SessionTool, string> = {
@@ -133,6 +134,8 @@ export function describeMany(elements: Element[]): string {
 // 'Arrow "yes"'. Unlike describeOne this always leads with the kind,
 // so a screen-reader user hears WHAT the thing is before its text.
 export function elementAriaLabel(el: Element): string {
+  // A margin note names which it is and where it stands (docs/specs/007-editor/article-pages.md "Its name").
+  if (el.type === 'annotation' && el.articleNote) return noteAriaLabel(el);
   // A path is read by its points (docs/specs/023-draw-mode/path-tool.md "Accessibility").
   if (el.type === 'path') {
     return `${el.closed ? 'Closed path' : 'Path'}, ${el.nodes.length} points`;

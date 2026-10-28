@@ -539,7 +539,9 @@ view gets the header and **Copy** alone.
   `[h]:mm:ss`, `@`), then **Cancel** and **Apply** (one change, one undo step). A code takes what
   [`TEXT`](formulas.md#functions) reads: digits (`0`, `#`, `,`, `.`), percent, scientific, literal text in quotes, a
   currency symbol, the date and time parts, elapsed hours, `@` for text, and up to four `;` sections (positive,
-  negative, zero, text). A code up to 64 characters (`FORMAT_CODE_MAX`); one that cannot be read is not applied ("That
+  negative, zero, text; an empty one hides its values, so `;;;` hides everything). Numbers round half away from zero,
+  as `ROUND` does (`1.005` in `0.00` is `1.01`). A code up to 64 characters (`FORMAT_CODE_MAX`); one that cannot be
+  read is not applied ("That
   format code can't be read"). A custom code is drawn the same in every locale, as `TEXT` writes it.
 - Number formats are drawn in the viewer's locale (separators, date order), so two people may see `1,234.50` and
   `1.234,50` for the same value.
@@ -875,7 +877,8 @@ not in Sheet Settings, not anywhere.
 - **Presence**: each other person's selection on the sheet is outlined in their colour, with their full name on a
   tag at its top right (hidden after 3 seconds still, shown again on hover). A cell someone is editing shows their
   outline thicker. It is sent as an ephemeral `sheet-presence` room op, never stored, and only while the person has
-  a selection on a sheet; a late joiner hears it as a Plan card hold is said again ([Plan mode](../026-plan/plan-mode.md#collaboration)).
+  a selection on a sheet. A selection is drawn only on the sheet and tab it names, so a person confined to one tab
+  never shows on a sheet of another; a late joiner hears it as a Plan card hold is said again ([Plan mode](../026-plan/plan-mode.md#collaboration)).
 - Two people typing in different cells never overwrite each other. Two saving the same cell: the later save
   wins. A cell being edited by you that someone else changes keeps your edit; saving it wins.
 - A row or column someone else inserts or deletes while you edit moves your edit with its cell; if your cell was
@@ -936,7 +939,10 @@ changeset onto one is refused. Its grid takes no input outside Plan, and a doubl
 - Images, thumbnails, PDFs, slides and api or MCP renders draw the Sheet element as in other modes: header, column
   and row headers, and the cells that fit its frame from the top left (after frozen rows and columns), with values
   worked out from the sheet store.
-- Card functions ([Formulas](formulas.md#plan-cards)) in an export read the document's items, as boards do.
+- Card functions ([Formulas](formulas.md#plan-cards)) in an export read the document's items, as boards do. An image
+  of one named tab (the picture a link confined to that tab gets) reads only the items that tab shows
+  ([Items](../026-plan/items.md) "Who may do what"), so it never tells a tab-scoped visitor more than their editor
+  does; the first tab's snapshot, which only whole-document readers get, reads them all.
 
 ## Performance
 

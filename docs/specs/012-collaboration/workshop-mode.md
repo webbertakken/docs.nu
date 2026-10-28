@@ -223,7 +223,7 @@ as for a viewer, as every mode does.
   registered per [Register a help article](../../instructions/register-a-help-article.md), and
   **Editor Modes** covers five modes.
 - The Session tools article says the set-up lives in Workshop (and Plan).
-- An optional [Workshop tour](workshop-tour.md) shows the mode the first time someone is in it.
+- An optional [Workshop tour](workshop-tour.md) shows the mode, from the bottom bar's **Start Workshop Tour** button.
 
 ## Existing tabs
 

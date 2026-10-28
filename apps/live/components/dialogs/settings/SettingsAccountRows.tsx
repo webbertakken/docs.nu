@@ -2,14 +2,13 @@
 
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { Button, SOLID_BRAND_DARK, PictureDisc } from '@livedoc/ui';
+import { Button } from '@livedoc/ui';
 import { SettingsRowShell } from './SettingsRowShell';
 import { SettingsSignInLink } from './SettingsSignInLink';
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
-import { accountInitial } from '@/lib/account-avatar';
-import type { SettingsDeleteAccountRowSpec, SettingsIdentityRowSpec } from './settings-catalogue';
+import type { SettingsDeleteAccountRowSpec } from './settings-catalogue';
 
-// The account rows, moved here from the Explorer's /explorer/profile page
+// The Delete Account row (the profile card is SettingsProfileCard.tsx), moved here from the Explorer's /explorer/profile page
 // (docs/specs/014-identity/profile-and-email-notifications.md) when that page was retired: everything it held now lives in
 // Settings, so a second account home was a second place to look.
 //
@@ -19,62 +18,6 @@ const DeleteAccountDialog = dynamic(
   () => import('@/components/dialogs/DeleteAccountDialog').then((m) => m.DeleteAccountDialog),
   { ssr: false },
 );
-
-// The identity card's avatar diameter.
-const IDENTITY_AVATAR_PX = 44;
-
-// Identity, read from the session. Never written here: this is a card, not a form
-// (the account's name and email are shown as the account holds them).
-export function SettingsIdentityRow({ row }: { row: SettingsIdentityRowSpec }) {
-  const { authLoaded, isSignedIn, user } = useDeferredAuth();
-  const signedIn = Boolean(authLoaded && isSignedIn && user);
-  const name = user?.name ?? user?.email ?? 'Your account';
-  const joined = user?.createdAt
-    ? user.createdAt.toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
-
-  // Signed in, the row IS the account: the picture, the name, the email and when it joined.
-  // A guest gets the guest row and the way in.
-  const shown = signedIn
-    ? {
-        ...row,
-        helpArticle: undefined,
-        label: name,
-        description: [user?.email, joined ? `Joined ${joined}` : null].filter(Boolean).join(' · '),
-      }
-    : row;
-  return (
-    <SettingsRowShell
-      row={shown}
-      leading={
-        signedIn ? (
-          <PictureDisc
-            pictureUrl={user?.pictureUrl}
-            size={IDENTITY_AVATAR_PX}
-            aria-hidden
-            className={`bg-brand-700 text-lg font-semibold text-white ${SOLID_BRAND_DARK}`}
-          >
-            {accountInitial(user)}
-          </PictureDisc>
-        ) : null
-      }
-      descriptionContent={
-        signedIn ? undefined : (
-          <>
-            {GUEST_IDENTITY}
-            <SettingsSignInLink />
-          </>
-        )
-      }
-    />
-  );
-}
-
-const GUEST_IDENTITY = 'Your documents live in this browser. Sign in to keep them across devices.';
 
 // Delete account. Signed-in only, and not because of the UI: the api's
 // DELETE /api/account is account-only by design (docs/specs/014-identity/profile-and-email-notifications.md), since the whole

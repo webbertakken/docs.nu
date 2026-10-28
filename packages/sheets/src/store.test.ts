@@ -4,6 +4,7 @@ import {
   inverseSheetWrite,
   mergeSheetChange,
   rebase,
+  shrinkReadersOf,
   writeTouches,
   type SheetWrite,
 } from './store';
@@ -350,6 +351,71 @@ describe('applySheetWrite', () => {
     expect(both.sheet.layout.rows[0]).toBe(R(3));
     const cols = roundTrip(s, { kind: 'layout', changes: [{ k: 'deleteCols', ids: [C(0)] }] });
     expect(cols.applied.kind).toBe('layout');
+  });
+  it('shrinks another sheet’s ranges into this one when their corners go, linearly', () => {
+    const [target, reader] = makeSheets(
+      {
+        Costs: { A1: '1', A2: '2', A3: '3', B1: '4' },
+        Sum: {
+          A1: '=SUM(Costs!A1:A3)',
+          A2: '=Costs!A1',
+          A3: '=SUM(A5:A6)',
+          A4: '=SUM(Costs!A1:B1)',
+        },
+      },
+      { rows: 8, cols: 4 },
+    ) as [Sheet, Sheet];
+    const write: SheetWrite = { kind: 'layout', changes: [{ k: 'deleteRows', ids: ['s0r0'] }] };
+    const rewrites = shrinkReadersOf(target.id, target.layout, write.changes, reader.cells);
+    // Only the range with a corner in the deleted row changes; a single cell reads #REF! as before.
+    expect(rewrites.map((rw) => rw.r)).toEqual(['s1r0']);
+    const after = applySheetWrite(target, write, ctx).sheet;
+    const read = applySheetWrite(reader, { kind: 'cells', cells: rewrites }, ctx).sheet;
+    const wb = new Workbook({ sheets: [after, read], locale: 'en' });
+    const input = read.cells.get(cellKey('s1r0', 's1c0'))?.input as { f: never };
+    expect(renderFormula(input.f, wb.ctxFor(read.id))).toBe('=SUM(Costs!A1:A2)');
+    expect(wb.value(read.id, 0, 0)).toBe(5);
+    // A delete elsewhere, or a sheet nobody reads, rewrites nothing.
+    expect(shrinkReadersOf('other', target.layout, write.changes, reader.cells)).toEqual([]);
+    // Linear in references: 5,000 formulas, each with a range into the target, against 2,000 deleted rows.
+    const big = new Map(reader.cells);
+    for (let i = 0; i < 5000; i++)
+      big.set(cellKey(`x${i}`, 's1c1'), reader.cells.get(cellKey('s1r0', 's1c0'))!);
+    const ids = Array.from({ length: 2000 }, (_, i) => `g${i}`);
+    const wide = { rows: [...target.layout.rows, ...ids], cols: target.layout.cols };
+    const t0 = performance.now();
+    const many = shrinkReadersOf(
+      target.id,
+      wide,
+      [{ k: 'deleteRows', ids: ['s0r0', ...ids] }],
+      big,
+    );
+    expect(performance.now() - t0).toBeLessThan(500);
+    expect(many).toHaveLength(5001);
+  });
+  it('keeps an open-ended range when its first row or column goes', () => {
+    const s = base({
+      A1: '1',
+      A2: '2',
+      A3: '3',
+      A4: '4',
+      B1: '5',
+      C1: '6',
+      D1: '=SUM(A2:A)',
+      D3: '=SUM(B1:1)',
+    });
+    const r = roundTrip(s, { kind: 'layout', changes: [{ k: 'deleteRows', ids: [R(1)] }] });
+    const wb = new Workbook({ sheets: [r.sheet], locale: 'en' });
+    const formula = (row: number, col: number) => {
+      const input = r.sheet.cells.get(cellKey(R(row), C(col)))?.input as { f: never };
+      return renderFormula(input.f, wb.ctxFor(r.sheet.id));
+    };
+    expect(formula(0, 3)).toBe('=SUM(A2:A)');
+    expect(wb.value(r.sheet.id, 0, 3)).toBe(7);
+    const c = roundTrip(s, { kind: 'layout', changes: [{ k: 'deleteCols', ids: [C(1)] }] });
+    const wc = new Workbook({ sheets: [c.sheet], locale: 'en' });
+    const input = c.sheet.cells.get(cellKey(R(2), C(3)))?.input as { f: never };
+    expect(renderFormula(input.f, wc.ctxFor(c.sheet.id))).toBe('=SUM(B1:1)');
   });
   it('puts formats back exactly on undo', () => {
     const s = applySheetWrite(

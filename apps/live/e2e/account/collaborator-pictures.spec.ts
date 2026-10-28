@@ -23,7 +23,6 @@ async function personPage(browser: Browser, baseURL: string, name: string | null
   });
   await ctx.addInitScript(() => {
     localStorage.setItem('livedoc:v2:name-confirmed', '1');
-    localStorage.setItem('livedoc:user-preferences:v1', JSON.stringify({ tourSeen: true }));
   });
   const pictureRequests: string[] = [];
   await ctx.route(GOOGLE_PICTURES, (route) => {

@@ -149,9 +149,10 @@ last 90 UTC days, today included, the same days the browser keeps for its local 
 ### Reads
 
 Both reads scope by `visible` **first**, then filter. `visible` is the union of three indexed lookups (own
-documents by `owner_id`, joined teams' documents by `team_id`, `shared_with` by its primary key), each document
-then checked: not trashed, and owned, or in a joined team, or shared with `shareable = 1`; a shared row whose live
-code is gone (expired or revoked) is dropped. `via` is `own`, then `team`, then `shared`; `share_code` the oldest
+personal documents by `owner_id` with no `team_id`, joined teams' documents by `team_id`, `shared_with` by its primary
+key), each document then checked: not trashed, and owned as a personal document, or in a joined team, or shared with `shareable = 1`; a shared row whose live
+code is gone (expired or revoked) is dropped. `via` is `own`, then `team`, then `shared`: a team document is `team` to its maker as to every member, and gone from
+their reads once they leave the team ([Team shared documents](../team-shared-documents.md)); `share_code` the oldest
 live code at the person's role and tab scope; `scope_tab_id` the person's tab scope for `shared`, else null.
 
 - **Jump Back In** (`readJumpBackIn`): above.

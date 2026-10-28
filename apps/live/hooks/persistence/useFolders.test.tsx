@@ -155,4 +155,23 @@ describe('useFolders when the api refuses a create or a rename', () => {
     expect(result.current.folders[0]!.name).toBe('Roadmaps');
     expect(toast.error).not.toHaveBeenCalled();
   });
+
+  // docs/specs/013-workspace/folders.md "Refused changes".
+  it('keeps a newer name when an older rename is refused', async () => {
+    apiListFolders.mockResolvedValue([folder('plans')]);
+    let refuse!: (e: Error) => void;
+    apiUpdateFolder
+      .mockReturnValueOnce(new Promise((_, r) => (refuse = r)))
+      .mockResolvedValueOnce(folder('plans'));
+    const { result } = renderHook(() => useFolders('u9'));
+    await waitFor(() => expect(result.current.folders).toHaveLength(1));
+    act(() => result.current.renameFolder('plans', 'Roadmaps'));
+    act(() => result.current.renameFolder('plans', 'Goals'));
+    await act(async () => {
+      refuse(new Error('500'));
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(result.current.folders[0]!.name).toBe('Goals');
+  });
 });

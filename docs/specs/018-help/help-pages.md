@@ -90,6 +90,14 @@ own reading order, which is the registry order of its siblings (the sub-articles
 category's top-level articles). The first article has no previous link and the last no next link. A closing
 **Still need help?** card links Troubleshooting and Contact.
 
+Above the header, the **breadcrumb trail** below Help is read off the article's route (`articleCrumbs`,
+`lib/article-route.ts`): the **top category**, linked to its own landing (the route's first segment, never the
+`categorySlug` prop, which on a nested article is the parent's path), then the **parent article** one level up
+when the article is nested, linked to the parent's page, then the article itself. The category is left out when it
+would repeat the title or the parent. A nested article whose MDX names no `parentArticle` (a mode's tour, a Plan
+mode article) gets the article at its `categorySlug` path as its parent (`ArticleLayout`), so its trail names the
+mode, never skips it, and never labels the mode's page with the category's name. No two crumbs share one URL.
+
 ## Search
 
 The search box answers `/` from anywhere on the page (unless focus is already in a text field, or a modifier is
@@ -119,3 +127,15 @@ figures, cutting off Media and Search, so the strip is spaced to fit beside the 
 
 The help centre is public static content with no document in it; there is nothing an Editor, Participant or
 Viewer could do differently, so no role gates apply.
+
+## The contact form
+
+LiveDoc's one way to reach the team, besides GitHub, is a **LiveDoc form** on docs.nu itself: a Form tab
+([Forms](../030-forms/forms.md)) in a document of Webber's, published at `https://docs.nu/form/<code>` and named once,
+as `CONTACT_FORM_URL` in `packages/ui/src/site.ts`. Every page that offers it (the help centre's contact page, home
+page and article pager, the FAQ, the status page, the privacy policy and the terms) links that constant or its value.
+
+- It starts from the **Contact** starter: Name, Email and Subject (required), a **How can we help?** choice (a question,
+  a problem, or a suggestion or feature request) and the Message. Each response becomes a card on the document's board,
+  to assign and close, and its owner is emailed for each one.
+- It is never another product's form; the [brand guard](../../../apps/help/lib/brand-name-guard.test.ts) fails on one.

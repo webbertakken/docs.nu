@@ -478,6 +478,13 @@ it stays in view as the dashboard scrolls; Settings opens the same synced
     `[team-folders] <verb> failed` or `[team-library] <what> failed` with
     the error. These used to fail silently: a New Folder that did nothing, a
     rename that snapped back.
+- **Refused changes.** A rename or a move shows at once, as a layer over
+  what the api holds (`createOptimisticField`, `apps/live/lib/optimistic-layers.ts`).
+  A refusal takes back only its own layer: rename to B (slow), then to C,
+  and B's refusal leaves C showing, never the name from before B. The
+  stored value comes back only when every change still waiting is refused;
+  an accepted change becomes the stored value. This holds for a document's
+  rename and move to a folder, and a folder's rename.
 - **Selection state**: the selected sidebar row is the current route;
   which branches are expanded is session-local state that doesn't
   survive reload ([Explorer structure](explorer-structure.md#expansion)).

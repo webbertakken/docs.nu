@@ -109,9 +109,10 @@ Cost controls, all in `e2e.yml` and `playwright.config.ts`:
   (`playwright-report-shard-i`, `playwright-report-sites`, `playwright-report-account`). Locally a trace is kept for a
   retry only.
 - **No waiting on what is not coming.** A helper waits for a thing only when the app owes it:
-  `dismissQuickTour` returns at once unless /new's tour handoff flag is in sessionStorage
-  (`lib/tour-pending.ts`), rather than sitting out a 5-second timeout after every reload or
-  by-URL visit, which cost the suite minutes. `seedTab` returns once the seeded elements have
+  `dismissQuickTour` returns at once: no tour offers itself since 28 October 2026 (tours start
+  from the bottom bar's Start Tour button), so there is nothing to dismiss. Until then it waited
+  only when /new's tour handoff flag was in sessionStorage, rather than sitting out a 5-second
+  timeout after every reload or by-URL visit, which cost the suite minutes. `seedTab` returns once the seeded elements have
   finished popping in (`settledBox`), so a test never measures or drags a box that is still changing.
 - **No model downloads.** The photo-import tests stub the handwriting reader
   and serve the boundary model's weights from the app itself; nothing pulls
@@ -244,6 +245,16 @@ context before any page loads, so the production build the suite drives writes i
 ([Console logging](console-logging.md)) and a spec may wait for one (`[drive-mirror] pass-end`).
 A spec that opens its own context with `browser.newContext()` sets it there with
 `enableDebugLogs(context)`.
+
+## Keyboard on every platform
+
+The suite runs where a contributor runs it, macOS included. A shortcut a spec presses names the
+platform's modifier: paste, undo, redo and select-all press **`ControlOrMeta`** (Meta on macOS, where
+Control+V pastes nothing), never a bare `Control`. A spec that opens a control's context menu from the
+keyboard calls **`openContextMenuFromKeyboard(target)`** from `fixtures.ts`: it focuses the control and
+presses Shift+F10 where Chromium turns that key into a `contextmenu` event (Windows, Linux), and sends the
+event itself on macOS, which has no such key. A control whose own key handler answers Shift+F10 (a
+Quick Style swatch) is pressed directly, since that handler is what the spec proves.
 
 ## What the suite asserts
 

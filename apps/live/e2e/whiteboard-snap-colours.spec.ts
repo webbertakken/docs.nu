@@ -1,14 +1,6 @@
 import type { Page } from '@playwright/test';
 import { penColourHex, WHITEBOARD_INK } from '@livedoc/document';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  seedTab,
-  settledBox,
-  test,
-  type Seed,
-} from './fixtures';
+import { expect, expectNoPageErrors, seedTab, settledBox, test, type Seed } from './fixtures';
 
 // Snap colours (docs/specs/023-draw-mode/draw-mode.md "Snap colours"): a synthesised board with
 // custom-coloured marker strokes, a shape and an arrow, beside a stock stroke and a highlighter
@@ -133,7 +125,6 @@ for (const [scheme, position] of [
     await placeDock(page, position);
     await page.goto('/new?template=whiteboard');
     await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-    await dismissQuickTour(page);
     await seedTab(page, BOARD);
     await page.locator('[data-element-id="link"]').first().waitFor();
     await page.keyboard.press('v');

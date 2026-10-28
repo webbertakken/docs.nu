@@ -187,7 +187,7 @@ export const KEYBOARD_SETTINGS = settingsStack(
 
 export const PANELS_SETTINGS = settingsStack(
   'Panels Settings',
-  'What the Layers and minimap panels show.',
+  'What the Layers and minimap panels show, and other people\u2019s cursors.',
   [
     toggle(
       'UI',
@@ -218,6 +218,13 @@ export const PANELS_SETTINGS = settingsStack(
       'The minimap dimming what is off screen.',
     ),
     changed('MapSize', 'Minimap Size', 'Short, Medium or Tall.'),
+    toggle(
+      'UI',
+      'HideCursorsOn',
+      'HideCursorsOff',
+      'Hide Participant Cursors',
+      'Other people\u2019s cursors hidden on this screen, for this device.',
+    ),
   ],
 );
 
@@ -266,6 +273,12 @@ export const NOTIFICATION_SETTINGS = settingsStack(
       'ShowProfilePictureOff',
       'Show My Profile Picture',
       'Whether signed-in collaborators see your profile picture.',
+    ),
+    changed(
+      'PresenceColour',
+      'Presence Colour',
+      'A colour picked for your cursor, avatar and name tag.',
+      true,
     ),
     toggle(
       'UI',

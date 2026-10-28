@@ -33,7 +33,9 @@ export function parseLicencesManifest(raw: string | undefined): LicencesManifest
   if (
     manifest?.schemaVersion !== LICENCES_SCHEMA_VERSION ||
     !Array.isArray(manifest.sections) ||
-    typeof manifest.texts !== 'object'
+    // typeof null is 'object' too: a manifest with `texts: null` would pass here and fail later, at render.
+    typeof manifest.texts !== 'object' ||
+    manifest.texts === null
   ) {
     throw new LicencesManifestError(
       'LicencesManifestInvalid',

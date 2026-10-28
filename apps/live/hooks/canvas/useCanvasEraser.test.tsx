@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createFreehand, type Element } from '@livedoc/document';
+import { createFreehand, type ArrowElement, type Element } from '@livedoc/document';
 import { canvasGestureNow, resetCanvasGesturesForTests } from '@/lib/canvas-gesture';
 import { useCanvasEraser } from './useCanvasEraser';
 
-vi.mock('@/lib/dom-hit-test', () => ({ elementHostsAtPoint: () => [] }));
+const hit = vi.hoisted(() => ({ hosts: [] as { id: string }[] }));
+vi.mock('@/lib/dom-hit-test', () => ({ elementHostsAtPoint: () => hit.hosts }));
 vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));
 
 // docs/specs/008-canvas/canvas-performance.md: an eraser sweep is an erase gesture, press to lift,
@@ -32,7 +33,10 @@ const lift = (type: 'pointerup' | 'pointercancel') =>
     window.dispatchEvent(new MouseEvent(type));
   });
 
-afterEach(() => resetCanvasGesturesForTests());
+afterEach(() => {
+  resetCanvasGesturesForTests();
+  hit.hosts = [];
+});
 
 describe('useCanvasEraser gesture', () => {
   it('opens an erase from the press to the lift', () => {
@@ -133,5 +137,53 @@ describe('useCanvasEraser on a whiteboard (docs/specs/023-draw-mode/draw-mode.md
     lift('pointerup');
     expect(tick).toHaveBeenCalled();
     expect(cut).toEqual([]);
+  });
+});
+
+// docs/specs/008-canvas/arrow-to-arrow.md: erasing a box takes its connector and the arrows hung off that connector.
+describe('useCanvasEraser on a diagram tab', () => {
+  it('erases the arrows hung off a cascaded connector too', () => {
+    const box = (id: string): Element => ({
+      id,
+      type: 'shape',
+      shape: 'square',
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+    });
+    const connector: ArrowElement = {
+      id: 'x',
+      type: 'arrow',
+      from: { kind: 'pinned', elementId: 'a', anchor: 'e' },
+      to: { kind: 'pinned', elementId: 'b', anchor: 'w' },
+    };
+    const hung: ArrowElement = {
+      id: 'y',
+      type: 'arrow',
+      from: { kind: 'free', x: 0, y: 0 },
+      to: { kind: 'on-arrow', arrowId: 'x', t: 0.5 },
+    };
+    const elements = [box('a'), box('b'), connector, hung];
+    let left: Element[] = elements;
+    hit.hosts = [{ id: 'a' }];
+    const { result } = renderHook(() =>
+      useCanvasEraser({
+        editsBlocked: false,
+        layerInertIds: new Set<string>(),
+        activeId: 't',
+        activeTab: { id: 't', name: 'Tab', elements },
+        tick: (fn: (els: Element[]) => Element[]) => {
+          left = fn(elements);
+        },
+        markCheckpoint: () => 1,
+        setSelectedId: vi.fn(),
+        setEditingId: vi.fn(),
+        whiteboard: null,
+      }),
+    );
+    act(() => result.current.beginErase(10, 10));
+    lift('pointerup');
+    expect(left.map((el) => el.id)).toEqual(['b']);
   });
 });

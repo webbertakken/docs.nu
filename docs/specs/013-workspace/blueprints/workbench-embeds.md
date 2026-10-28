@@ -58,7 +58,7 @@ It provides these names to sibling blueprints ([CLI](../../015-api/blueprints/cl
 | `apps/api/src/routes/workbench-access.ts`                                                                                                                                    | `ownerDocumentAccess`: the owner's own access to a document, shared by the mint and redemption (WB3)                                                                                                                      |
 | `apps/api/src/routes/workbench-test-fixtures.ts`                                                                                                                             | The route suites' shared real-SQLite arrangement (not a suite)                                                                                                                                                            |
 | `apps/api/src/routes/context.ts`                                                                                                                                             | `RouteContext.workbench`; `WorkbenchContext`                                                                                                                                                                              |
-| `apps/api/src/index.ts`                                                                                                                                                      | `lvw_` resolution beside `lvd_`; confinement; level refusal; rate limiter; `case 'workbench'`; the daily sweep                                                                                                            |
+| `apps/api/src/index.ts`                                                                                                                                                      | `lvw_` resolution beside `livedoc_`; confinement; level refusal; rate limiter; `case 'workbench'`; the daily sweep                                                                                                        |
 | `apps/api/src/routes/document-room-routes.ts`                                                                                                                                | Ticket mint under a session: `account` true, owner's person tag, role capped at the session's level, `workbenchPairing`; upgrade forwards `X-Verified-Workbench-Pairing`                                                  |
 | `apps/api/src/db/ws-tickets.ts`                                                                                                                                              | `WsAdmission.workbenchPairing`; insert and consume the column                                                                                                                                                             |
 | `apps/api/src/document-room/document-room.ts`, `room-session.ts`                                                                                                             | Attachment `workbenchPairing` from the header; `/close-sessions` closes a `workbench` match with 4006                                                                                                                     |
@@ -205,7 +205,7 @@ The workspace scope adds or changes, by file:
 
 Banned: "workspace" for a document-scope frame, and "scope" for anything but `WorkbenchScope` here (the end of
 access names its `target`, a share link its `tabScope`); "integration", "host app" or "client" for a workbench; "link" or "connect" for pairing (a repository link
-is another thing); "token" for a workbench session or a ticket (`lvd_` is the token); "share", "embed code" or
+is another thing); "token" for a workbench session or a ticket (`livedoc_` is the token); "share", "embed code" or
 "share code" for a ticket; "iframe mode" for the surface; "authorise" for approve (the page's verbs are Allow and
 Don't allow).
 
@@ -304,7 +304,7 @@ RETURNING ...`. No row: `SELECT used_at, expires_at` classifies `used`, `expired
 
 ### A request bearing `lvw_` (the choke point, `index.ts`)
 
-Resolved right after `lvd_` and before any session token, which is only tried when neither matched:
+Resolved right after `livedoc_` and before any session token, which is only tried when neither matched:
 
 1. `bearer` matching `isWorkbenchSessionFormat` → `resolveWorkbenchSession(env, bearer, now)`:
    `SELECT s.*, t.read_only, t.revoked, t.expires_at AS token_expires_at FROM workbench_sessions s JOIN api_tokens t
@@ -653,7 +653,7 @@ string | null }`. `workspaceFramePath(place)`:
 | any other view  | `/embed/workbench` + the view's `explorerPathFor` path and query |
 | a document      | `/embed/workbench/document/<id>[?s=<code>][&tab=<tabId>]`        |
 
-`workspacePlaceOf(pathname, search)` is its inverse; an address it cannot read is `home`. One static page,
+`workspacePlaceOf(pathname, search)` is its inverse; an address it cannot read is `home`, a document or folder segment with a malformed percent-escape (`%`, `%E0%A4%A`, `decodePathSegment`) included, never a URIError that takes the frame down. One static page,
 `app/embed/workbench/explorer/page.tsx`, backs every frame path: the live worker (`isWorkspaceFramePath`) and the e2e
 stack serve `/embed/workbench/explorer/**` and `/embed/workbench/document/**` from it, and the App Router reads the
 real address. Every frame path is under `/embed`, so frameable.
@@ -1111,7 +1111,7 @@ CREATE TABLE workbench_session_rooms (
 - **E4** Approve after Don't allow, or twice: `409 pairing_answered`; nothing changes.
 - **E5** Approve after expiry: `410 pairing_expired`; the CLI reads `expired`.
 - **E6** Another signed-in account opens the pairing URL: `404`; the page says it cannot find the request.
-- **E7** A token approving its own request (`lvd_` on approve): `401 sign_in_required`.
+- **E7** A token approving its own request (`livedoc_` on approve): `401 sign_in_required`.
 - **E8** Token revoked while a request is pending: the request is deleted; the CLI's next poll gets 404, exit 4.
 - **E9** Token revoked while the pair page is open: approve answers 404.
 - **E10** A ticket redeemed twice: the second `401 invalid_ticket { reason: 'used' }`.

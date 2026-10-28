@@ -45,7 +45,7 @@ Send the token as a **bearer header** to the API, which lives under `/api` on yo
 ```bash
 # List your documents
 curl https://docs.nu/api/documents \
-  -H "Authorization: Bearer lvd_your_token_here"
+  -H "Authorization: Bearer livedoc_your_token_here"
 ```
 
 Every request authenticated this way acts as your account, with the same read and write access you have in the editor. A few rules are particular to tokens: edits go through changesets rather than whole-tab saves, a token can't delete a document's last tab, and each token has its own rate limits. Keep the `Authorization` header on each request; there is no separate login step.

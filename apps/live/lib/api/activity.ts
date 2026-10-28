@@ -1,8 +1,8 @@
 // The Explorer's Inbox (docs/specs/013-workspace/inbox.md): what is outstanding for the
 // reader across every document they can open.
 //
-// Read-only: every row links into the editor, where completing /
-// resolving already live. Offline Mode (docs/specs/006-document/offline-mode.md) is a deliberate no-op
+// A read: the reading pane's Reply and Resolve go through the comment routes (./comments.ts).
+// Offline Mode (docs/specs/006-document/offline-mode.md) is a deliberate no-op
 // here for the same reason as the Timeline: this endpoint is scoped to
 // an owner, not a document id, and a browser-only document never reaches
 // the worker, so it has no rows to show.

@@ -4,7 +4,7 @@ import { useAuthHrefs } from '@/components/chrome/auth-shared';
 import { useSignInAvailable } from '@/lib/auth-config';
 
 // The Sign In link every signed-out Settings message ends with
-// (docs/specs/007-editor/user-preferences.md): the guest identity card, Delete
+// (docs/specs/007-editor/user-preferences.md): Delete
 // Account, the email stand-in card and the API Tokens manager. It returns to
 // the page the dialog was opened on. Absent where the deployment has no
 // sign-in, since there would be nowhere for it to go.

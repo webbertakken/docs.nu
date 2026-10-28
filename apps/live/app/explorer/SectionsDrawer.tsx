@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, type ReactNode } from 'react';
 import { CloseIcon, useFocusTrap } from '@livedoc/ui';
+import { useModalGuard } from '@/hooks/ui/useModalGuard';
 
 // The Explorer's sections on a phone (docs/specs/013-workspace/explorer-structure.md): the sidebar is hidden below
 // `sm`, so this slides the same tree in from the left, opened by the hamburger in the pane header or the Home hero.
-// A modal like any other: focus moves in and comes back, Tab stays inside, and Escape or the backdrop closes it.
+// A modal like any other: focus moves in and comes back, Tab stays inside, Escape or the backdrop closes it, and
+// the modal guard counts it, so window shortcuts (Search's Cmd/Ctrl+K and Cmd/Ctrl+.) stand down behind it.
 export function SectionsDrawer({
   onClose,
   children,
@@ -15,6 +17,7 @@ export function SectionsDrawer({
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef);
+  useModalGuard(true);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;

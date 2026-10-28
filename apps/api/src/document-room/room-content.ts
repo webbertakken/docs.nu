@@ -312,6 +312,12 @@ export class RoomContent {
     );
   }
 
+  // The SQLite the document's tabs live in, or null while this room stores none (before its schema): the room's
+  // scoped structure check reads a stored tab from it as a frame arrives (room-scoped-structure.ts).
+  tabStore(): SqlStorage | null {
+    return this.schemaReady ? this.state.storage.sql : null;
+  }
+
   // After the room's storage was deleted (a purge): this instance forgets the document it held, so a later create of
   // the same id (a document synced back from This Browser) starts from an empty room, schema and move record alike.
   forget(): void {

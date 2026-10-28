@@ -20,13 +20,12 @@ const summary = (id: string, savedAt: number) =>
   ({ id, name: `Doc ${id}`, savedAt, empty: false }) as DocumentListing['documents'][number];
 
 describe('RecentDocumentsCard', () => {
-  it('merges team documents by save time, marks them, and counts them', async () => {
+  it('merges team documents by save time and marks them', async () => {
     listing.current = {
       documents: [summary('mine', 1)],
       teamRecent: [{ ...summary('team', 2), teamName: 'Design' }],
     };
-    const onCount = vi.fn();
-    render(<RecentDocumentsCard ownerId="owner" onCount={onCount} />);
+    render(<RecentDocumentsCard ownerId="owner" />);
 
     await waitFor(() => expect(screen.getAllByRole('link')).toHaveLength(3));
     const [team, mine] = screen.getAllByRole('link');
@@ -34,6 +33,5 @@ describe('RecentDocumentsCard', () => {
     expect(team!.textContent).toContain('Design team: Doc team');
     expect(mine!.getAttribute('href')).toBe('/document/mine');
     expect(mine!.textContent).not.toContain('team:');
-    expect(onCount).toHaveBeenCalledWith(2);
   });
 });

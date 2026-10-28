@@ -619,7 +619,9 @@ Undo brings the whole branch back.
 - It applies to Delete / Backspace, the element menu's Delete, and a
   multi-selection's delete: each selected node takes its branch.
 - **Cut** takes the branch too, and copies it first, so a paste puts the whole
-  branch back. A plain **Copy** copies only what is selected.
+  branch back. A Cut copies only what its delete takes: a locked node, or one on
+  a locked layer, and the branch under it stay, so none of it is copied to be
+  pasted twice. A plain **Copy** copies only what is selected.
 - A **locked** node in the branch (or one on a locked layer) stays, as do the
   nodes under it, and becomes a root, as any protected element survives a
   delete.
@@ -642,7 +644,7 @@ centred one would land underneath the very "+" the actions live in.
 
 ## Element tour
 
-The first time an Editor selects a mind node, a small **Show Me** toolbar beside its selection toolbar offers the
+While an Editor has a mind node selected, once its kind is opted in to (Settings › Tours › Show Me), the bottom bar's **Start Mind Map Tour** button offers the
 [Mind Map tour](../007-editor/element-tours.md#the-mind-map-tour): Add Child and Add Sibling (with their keys), a
 branch moved as one, and the Mind Map menu. A person node is the org chart's, with its own tour.
 

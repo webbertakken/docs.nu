@@ -7,9 +7,10 @@
 
 // The token from an `Authorization: Bearer <token>` header, trimmed, or null
 // when the header is absent, uses another scheme, or carries an empty token.
+// The scheme is matched in any case and followed by spaces or tabs (RFC 7235 §2.1).
 export function bearerTokenOf(authorization: string | null | undefined): string | null {
-  if (!authorization?.startsWith('Bearer ')) return null;
-  const token = authorization.slice('Bearer '.length).trim();
+  const match = /^bearer[ \t]+(.*)$/is.exec(authorization ?? '');
+  const token = (match?.[1] ?? '').trim();
   return token.length > 0 ? token : null;
 }
 

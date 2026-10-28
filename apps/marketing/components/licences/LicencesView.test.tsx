@@ -2,7 +2,7 @@ import type { LicencesManifest } from '@livedoc/licences';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import { LicencesView } from './LicencesView';
+import { LicencesView, sectionIntro } from './LicencesView';
 
 const manifest: LicencesManifest = {
   schemaVersion: 1,
@@ -64,6 +64,20 @@ describe('LicencesView', () => {
     expect(html).toMatch(/<h2[^>]*>On our servers<\/h2>/);
     expect(html).toContain('2 works');
     expect(html).toContain('0 works');
+  });
+
+  // docs/specs/002-project-scope/blueprints/third-party-licences.md "Presentation and UX".
+  it('names every app of each section in its intro, from the manifest', () => {
+    expect(html).toContain('Sent to your browser by these apps: Editor and Website.');
+    expect(html).toContain(
+      'Bundled into these services, which run on Cloudflare rather than on your device: API.',
+    );
+  });
+
+  it('joins three apps or more with commas and a last "and"', () => {
+    expect(sectionIntro('server', ['API', 'MCP server', 'Router'])).toBe(
+      'Bundled into these services, which run on Cloudflare rather than on your device: API, MCP server and Router.',
+    );
   });
 
   it('renders each work as a collapsed disclosure anchored for deep links', () => {

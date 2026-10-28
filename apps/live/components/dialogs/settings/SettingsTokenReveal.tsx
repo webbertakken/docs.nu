@@ -4,14 +4,13 @@
 // A credential card in the current theme: an emerald-edged "done" card with
 // the secret in a monospace field, copied from inside the field.
 import { useState } from 'react';
+import { API_TOKEN_PREFIX } from '@livedoc/api-schema';
 import { Button, CheckIcon, CopyIcon, Tooltip, useCopiedFlash } from '@livedoc/ui';
-
-const SECRET_PREFIX = 'lvd_';
 
 export function SettingsTokenReveal({ secret, onDone }: { secret: string; onDone: () => void }) {
   // Outlives each 1.5s "Copied" flash: once the secret is safe, Done leads.
   const [secretCopied, setSecretCopied] = useState(false);
-  const hasPrefix = secret.startsWith(SECRET_PREFIX);
+  const hasPrefix = secret.startsWith(API_TOKEN_PREFIX);
 
   return (
     <div
@@ -32,8 +31,8 @@ export function SettingsTokenReveal({ secret, onDone }: { secret: string; onDone
       <CopyField label="Copy token" onCopied={() => setSecretCopied(true)} value={secret}>
         {hasPrefix ? (
           <>
-            <span className="text-emerald-600 dark:text-emerald-400">{SECRET_PREFIX}</span>
-            {secret.slice(SECRET_PREFIX.length)}
+            <span className="text-emerald-600 dark:text-emerald-400">{API_TOKEN_PREFIX}</span>
+            {secret.slice(API_TOKEN_PREFIX.length)}
           </>
         ) : (
           secret

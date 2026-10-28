@@ -29,9 +29,31 @@ describe('SharePasswordSection', () => {
     const field = screen.getByLabelText('Share password') as HTMLInputElement;
     expect(field.value).toBe('');
     expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Save' }).disabled).toBe(true);
-    fireEvent.change(field, { target: { value: 'otter' } });
+    fireEvent.change(field, { target: { value: 'otters' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-    await vi.waitFor(() => expect(onSetPassword).toHaveBeenCalledWith('otter'));
+    await vi.waitFor(() => expect(onSetPassword).toHaveBeenCalledWith('otters'));
+  });
+
+  // The api refuses a new password under SHARE_PASSWORD_MIN characters (after trimming): Save waits for them.
+  it('waits for six characters before Save, and says so', async () => {
+    const onSetPassword = vi.fn().mockResolvedValue(true);
+    renderSection({ onSetPassword });
+    fireEvent.click(screen.getByRole('switch', { name: /Password Protection/ }));
+    const field = screen.getByLabelText('Share password') as HTMLInputElement;
+    const save = () => screen.getByRole<HTMLButtonElement>('button', { name: 'Save' });
+
+    fireEvent.change(field, { target: { value: '  abcde ' } });
+    expect(save().disabled).toBe(true);
+    const hint = screen.getByText('At least 6 characters.');
+    expect(field.getAttribute('aria-describedby')).toBe(hint.id);
+    fireEvent.keyDown(field, { key: 'Enter' });
+    expect(onSetPassword).not.toHaveBeenCalled();
+
+    fireEvent.change(field, { target: { value: 'abcdef' } });
+    expect(screen.queryByText('At least 6 characters.')).toBeNull();
+    expect(field.getAttribute('aria-describedby')).toBeNull();
+    fireEvent.click(save());
+    await vi.waitFor(() => expect(onSetPassword).toHaveBeenCalledWith('abcdef'));
   });
 
   it('shows a saved password as set, with Replace and Remove, and no field', () => {

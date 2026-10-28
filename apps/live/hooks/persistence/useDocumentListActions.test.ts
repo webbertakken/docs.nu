@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ToastActionSpec } from '@/hooks/ui/useToast';
 import type { DocumentListItem } from '@/lib/api-client';
 
 vi.mock('@/lib/api-client', () => ({
@@ -12,7 +13,8 @@ vi.mock('@/lib/api-client', () => ({
 vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));
 vi.mock('@/lib/api/trash', () => ({ apiRestoreDocument: vi.fn() }));
 
-const { apiDeleteDocument, apiSetDocumentFolder } = await import('@/lib/api-client');
+const { apiDeleteDocument, apiSaveDocumentMeta, apiSetDocumentFolder } =
+  await import('@/lib/api-client');
 const { track } = await import('@/lib/telemetry');
 const { isDocumentDeleted } = await import('@/lib/document-tombstones');
 const { apiRestoreDocument } = await import('@/lib/api/trash');
@@ -31,7 +33,12 @@ function setup() {
       list = typeof next === 'function' ? next(list) : next;
     },
   );
-  const toast = { success: vi.fn(), error: vi.fn(), action: vi.fn(), dismissAction: vi.fn() };
+  const toast = {
+    success: vi.fn(),
+    error: vi.fn(),
+    action: vi.fn<(spec: ToastActionSpec) => void>(),
+    dismissAction: vi.fn(),
+  };
   const { result } = renderHook(() =>
     useDocumentListActions({
       ownerId: 'owner-1',
@@ -50,6 +57,7 @@ function setup() {
     confirm,
     ids: () => list.map((d) => d.id),
     folderOf: (id: string) => list.find((d) => d.id === id)?.folderId,
+    nameOf: (id: string) => list.find((d) => d.id === id)?.name,
   };
 }
 
@@ -105,11 +113,17 @@ describe('deleteDocument from a list', () => {
 
 // docs/specs/013-workspace/folders.md "A move that fails says so".
 describe('moveDocumentToFolder', () => {
-  it('says where it went once the api accepted it', async () => {
+  // docs/specs/004-interface-design/toasts.md "Naming what it acted on": the move names the document and where it
+  // went, with an Undo that moves it back.
+  it('says where it went once the api accepted it, with an Undo', async () => {
     vi.mocked(apiSetDocumentFolder).mockResolvedValueOnce(undefined);
     const { actions, toast } = setup();
     actions.moveDocumentToFolder('b', 'f1');
-    await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith('“Doc b” moved to “Plans”'));
+    await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
+    const offer = toast.action.mock.calls[0]![0];
+    expect(offer.message).toBe('“Doc b” moved to “Plans”');
+    expect(offer.actions.map((a) => a.label)).toEqual(['Undo']);
+    expect(offer.actions[0]!.ariaLabel).toBe('Undo: move “Doc b” back');
     expect(track).toHaveBeenCalledWith('Document', 'Moved');
   });
 
@@ -118,8 +132,25 @@ describe('moveDocumentToFolder', () => {
     const { actions, toast } = setup();
     actions.moveDocumentToFolder('b', null);
     await vi.waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith('“Doc b” moved to My Documents'),
+      expect(toast.action.mock.calls[0]?.[0].message).toBe('“Doc b” moved to My Documents'),
     );
+  });
+
+  it('moves it back to where it was on Undo, and says so without another Undo', async () => {
+    vi.mocked(apiSetDocumentFolder).mockResolvedValue(undefined);
+    const { actions, toast, folderOf } = setup();
+    actions.moveDocumentToFolder('b', 'f1');
+    await vi.waitFor(() => expect(toast.action).toHaveBeenCalledOnce());
+    const offer = toast.action.mock.calls[0]![0];
+    offer.actions[0]!.onSelect();
+    expect(toast.dismissAction).toHaveBeenCalledWith(offer.key);
+    expect(folderOf('b')).toBeNull();
+    expect(vi.mocked(apiSetDocumentFolder)).toHaveBeenLastCalledWith('owner-1', 'b', null);
+    await vi.waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('“Doc b” moved back to My Documents'),
+    );
+    expect(toast.action).toHaveBeenCalledOnce();
+    expect(track).toHaveBeenCalledWith('Document', 'Moved', 'Undo');
   });
 
   it('puts the row back, says so and logs it when the move fails', async () => {
@@ -135,5 +166,53 @@ describe('moveDocumentToFolder', () => {
     expect(vi.mocked(console.warn).mock.calls.map(([message]) => String(message))).toEqual([
       '[explorer-move] document failed document=b: offline',
     ]);
+  });
+});
+
+// docs/specs/013-workspace/folders.md "Refused changes": a refusal takes back only its own change.
+describe('a refused change', () => {
+  const deferred = () => {
+    let reject!: (e: Error) => void;
+    const promise = new Promise<undefined>((_, r) => (reject = r));
+    return { promise, reject };
+  };
+
+  it('keeps a newer name when an older rename is refused', async () => {
+    const slow = deferred();
+    vi.mocked(apiSaveDocumentMeta)
+      .mockReturnValueOnce(slow.promise)
+      .mockResolvedValueOnce(undefined);
+    const { actions, toast, nameOf } = setup();
+    actions.renameDocument('b', 'Second');
+    actions.renameDocument('b', 'Third');
+    await vi.waitFor(() => expect(track).toHaveBeenCalledWith('Document', 'Renamed'));
+    slow.reject(new Error('refused'));
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(nameOf('b')).toBe('Third');
+  });
+
+  it('falls back to the stored name only when every rename is refused', async () => {
+    vi.mocked(apiSaveDocumentMeta)
+      .mockRejectedValueOnce(new Error('refused'))
+      .mockRejectedValueOnce(new Error('refused'));
+    const { actions, toast, nameOf } = setup();
+    actions.renameDocument('b', 'Second');
+    actions.renameDocument('b', 'Third');
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalledTimes(2));
+    expect(nameOf('b')).toBe('Doc b');
+  });
+
+  it('keeps a newer folder when an older move is refused', async () => {
+    const slow = deferred();
+    vi.mocked(apiSetDocumentFolder)
+      .mockReturnValueOnce(slow.promise)
+      .mockResolvedValueOnce(undefined);
+    const { actions, toast, folderOf } = setup();
+    actions.moveDocumentToFolder('b', 'f1');
+    actions.moveDocumentToFolder('b', 'f2');
+    await vi.waitFor(() => expect(track).toHaveBeenCalledWith('Document', 'Moved'));
+    slow.reject(new Error('refused'));
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(folderOf('b')).toBe('f2');
   });
 });

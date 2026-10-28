@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect, test, dismissQuickTour, expectNoPageErrors } from './fixtures';
+import { expect, test, expectNoPageErrors } from './fixtures';
 
 // Settings reopens where it was left (docs/specs/007-editor/user-preferences.md): the same category, and the
 // same row at the same spot, even after a resize reflowed every row. Unit
@@ -72,7 +72,6 @@ test('Settings reopens on the last category and row, across a resize', async ({
   // Straight to a blank canvas: the /new?blank=1 bypass (Start Blank).
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
 
   await openSettings(page);
   await dialog(page).getByRole('button', { name: 'Editor', exact: true }).click();
@@ -128,7 +127,6 @@ test('Settings reopens deep inside a tall row without drifting', async ({ page, 
   // Straight to a blank canvas: the /new?blank=1 bypass (Start Blank).
   await page.goto('/new?blank=1');
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
 
   await openSettings(page);
   await dialog(page).getByRole('button', { name: 'Editor', exact: true }).click();

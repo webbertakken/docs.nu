@@ -30,7 +30,7 @@ test('renames the account and signs out the other browser', async ({
   await expect(settings.getByText('Saved.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Account menu' })).toContainText('Iris');
 
-  await expect(settings.getByText('This browser')).toBeVisible();
+  await expect(settings.getByText('This browser', { exact: true })).toBeVisible();
   await settings.getByRole('button', { name: 'Sign Out Everywhere Else' }).click();
   await expect(settings.getByRole('button', { name: 'Sign Out Everywhere Else' })).toHaveCount(0);
   await expect.poll(() => sessionOf(other)).toBeNull();

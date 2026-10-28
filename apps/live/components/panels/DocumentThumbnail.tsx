@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MOTION_MS } from '@livedoc/tailwind-config/motion';
 import {
+  holdThumbnail,
   loadThumbnail,
   peekThumbnail,
   thumbnailKey,
@@ -110,6 +111,13 @@ export function DocumentThumbnail({
     const timer = setTimeout(() => setSettledKey(fetchKey), MOTION_MS.long);
     return () => clearTimeout(timer);
   }, [shown, settled, fetchKey]);
+
+  // While mounted, this thumbnail holds its picture in the cache, so another one loading never evicts it
+  // (document-snapshots.md): an evicted picture still on screen would be asked for again.
+  useEffect(() => {
+    if (offline || empty || !ownerId) return;
+    return holdThumbnail(fetchKey);
+  }, [offline, empty, ownerId, fetchKey]);
 
   // Defer the fetch until the row/card is near the viewport.
   useEffect(() => {

@@ -131,7 +131,9 @@ titled **Document not found**. The card stands alone under the app header, with
 no Explorer panel beside it: its buttons are the way on (Open Explorer goes to
 `/explorer`, New Document to `/new`). An embed shows the card with New Document
 only, opening the app in a new tab. Only the editor's own empty route (`/document`,
-`/document/placeholder`) hands off to `/new`. Before, every address without a
+`/document/placeholder`) hands off to `/new`, in place of itself
+(`location.replace`): Back from `/new` never lands on the empty route again,
+where it would only hand off once more. Before, every address without a
 document id went to `/new`, so a mistyped or retired page opened the New
 Document wizard with no word of what went wrong.
 
@@ -444,9 +446,9 @@ default document name) without walking the wizard:
     redirects to the plain `/new` wizard rather than silently minting
     another blank document or trapping the user behind a page that always
     navigates forward again.
-  - The Diagram tour's welcome offer ([Diagram tour ("Getting started with Diagrams?")](editor-tour.md)) is not queued on
-    this path: the create fires before the document count resolves, and a
-    Start Blank user has asked to get straight to the canvas.
+  - No tour is queued on this path, nor on any other: since 28 October 2026 tours start only from
+    the bottom bar's Start Tour button ([Diagram tour ("Start Diagram Tour")](editor-tour.md) "Handoff"),
+    so no create waits for the document count.
   - **The wizard must never paint on this path, not even for a frame.**
     `/new` is a static export, so its prerendered HTML is the wizard and
     the query param is only knowable in the browser. A React-side check
@@ -548,10 +550,13 @@ it cannot tell the difference from a direct visit.
 - **`replaceState`, not `pushState`:** `/new` is a one-shot creator, so the
   editor URL takes its history entry. Reload and Back behave exactly as they
   do after a direct `/document/<id>` visit.
-- **Nothing crosses the handoff but the URL and `sessionStorage`.** The
-  tour's pending flag (`markTourPending`) is written before the swap and
-  read by the editor on mount, as it was across the hard navigation.
+- **Nothing crosses the handoff but the URL and `sessionStorage`.** (Until
+  28 October 2026 the tour's pending flag, `markTourPending`, was one of them;
+  it went with the tour offers.)
 - A failed create never hands off: the retryable error card shows instead.
+- **Every step of the create can fail to that card.** Settling the owner's identity (signing a guest id) and
+  loading a template's tabs and seeds are part of the create: either failing shows the error card, never leaves
+  `/new` on its creating screen with no way on.
 
 ### The opening screen
 

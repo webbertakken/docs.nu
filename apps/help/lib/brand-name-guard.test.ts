@@ -35,8 +35,6 @@ const ALLOWED_TOKENS = [
   // The upstream project: its repository, and the spec about it.
   'livediagram-app/livediagram.app',
   'livediagram-upstream',
-  // livediagram's contact form, linked until docs.nu has its own channel.
-  'www.livediagram.app/form/',
 ];
 
 /**
@@ -44,9 +42,7 @@ const ALLOWED_TOKENS = [
  * the count and fails, so it is looked at rather than waved through.
  */
 const UPSTREAM_MENTIONS: Record<string, number> = {
-  // Three about the upstream; four stale lines (the CLI, the MCP host, a storage key) wait for Webber's
-  // permission, since the agents' file is edited only with it.
-  'AGENTS.md': 7,
+  'AGENTS.md': 3, // the parallel product it grew from, and the upstream spec's link
   'apps/api/src/email/email-brand.test.ts': 1, // asserts no email names livediagram
   'apps/marketing/components/licences/LicencesView.tsx': 1, // "LiveDoc began as a fork of livediagram"
   'apps/marketing/components/licences/LicencesView.test.tsx': 5,

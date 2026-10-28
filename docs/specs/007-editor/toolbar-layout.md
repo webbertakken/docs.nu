@@ -21,8 +21,9 @@ and one category's tiles:
  Explorer            (Undo/Redo, Layers, zoom: the bottom-right cluster)
 ```
 
-- **Top left, before the strip: the menu button**, in a card with the tab's name. No mode switch sits there: a
-  tab's mode is chosen on its start while it is empty ([The mode switch](editor-modes.md#the-mode-switch)).
+- **Top left, before the strip: the menu button and the editor mode switch**
+  ([The mode switch](editor-modes.md#the-mode-switch)), then the tab's name, in one card. The switch shows the
+  mode's icon and name; on a phone, its icon alone.
   On a phone that card sits at the far left of the strip's row, the strip beside it (below). In a workspace
   workbench frame, which has no Explorer button, the card holds **Back** instead
   ([Workbench embeds](../013-workspace/workbench-embeds.md#what-renders)).
@@ -175,7 +176,7 @@ A strip shows one category at a time, so finding an element means knowing which 
   stays put beside More while the tiles swipe.
 - **Not on an event-storming board:** the notation is the palette there, as the board hides the
   pickers. Draw mode has no strip, so no Search.
-- **Opening it clears the way**: a tile armed to place is let go (its "Tap to drop" banner goes), and the
+- **Opening it clears the way**: a tile armed to place is let go (its "Click to drop" banner goes), and the
   session timer's pill stands aside while the panel is open, since both sit where the panel hangs.
 - **The popover** hangs from the button's right edge like More's, 26rem wide (spanning the
   screen between the gutters on a phone), and is capped to the window, scrolling when long. It is a
@@ -384,8 +385,8 @@ better layout. Its parts went with it:
 
 - The `panelLayout` preference is gone ([User preferences](user-preferences.md)). A stored value
   (`'floating'`, `'toolbar'`, a legacy `'minimal'`) is ignored and left as it is.
-- Settings has no Panel Layout row, and the Diagram tour's welcome card no layout picker
-  ([Diagram tour ("Getting started with Diagrams?")](editor-tour.md)).
+- Settings has no Panel Layout row, and the Diagram tour no layout picker (it was on the tour's welcome card, itself gone since 28 October 2026)
+  ([Diagram tour ("Start Diagram Tour")](editor-tour.md)).
 - The Palette, the Explorer and Layers are no longer corner panels, so a stored panel placement
   that names them is ignored ([Panel docking](panel-docking.md)).
 - Telemetry's `PanelLayoutFloating` / `PanelLayoutToolbar` stay in the catalogue as retired
@@ -402,7 +403,8 @@ button always was. It gets the same chrome as a desktop ([Live app](live-app.md)
 panels in their corners, Layers and Collaborate as popovers over
 their bottom-row buttons. What changes to fit the width:
 
-- **The menu button gets its own card, left of the strip.**
+- **The menu button gets its own card, left of the strip,** with the mode switch beside it as an icon and a
+  chevron, no name, and no tab name.
   The card sits at the left gutter and the strip follows it 8px to the right,
   left-aligned rather than centred, so the two read as separate toolbars on
   one row. There is no room for a corner card above a strip that needs the
@@ -466,7 +468,7 @@ their bottom-row buttons. What changes to fit the width:
 - Read-only sessions have no palette, so no strip. The menu button still
   shows.
 - Zen hides the strip and the menu button along with the rest of the chrome.
-- The Diagram tour ([Diagram tour ("Getting started with Diagrams?")](editor-tour.md)) follows the layout: its Palette step rings the
+- The Diagram tour ([Diagram tour ("Start Diagram Tour")](editor-tour.md)) follows the layout: its Palette step rings the
   strip's card. (Its Explorer step, which opened the Explorer from the menu button, went when the
   welcome tour became the Diagram tour.)
 

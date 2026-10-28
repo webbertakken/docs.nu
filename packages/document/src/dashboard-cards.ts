@@ -5,6 +5,7 @@
 
 import { PLAN_SHEET_ID_PATTERN } from './element-types';
 import type { DashboardCardStyle } from './dashboard-card-style';
+import { withUrlScheme } from '@livedoc/forms';
 
 export const DASHBOARD_CARD_TITLE_MAX = 120;
 export const DASHBOARD_CARD_TEXT_MAX = 500;
@@ -132,7 +133,7 @@ export function safeLinkUrl(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
   const t = raw.trim().slice(0, DASHBOARD_LINK_URL_MAX);
   if (!t) return null;
-  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : `https://${t}`;
+  const withScheme = withUrlScheme(t);
   try {
     const u = new URL(withScheme);
     if (u.protocol === 'mailto:') return u.href;

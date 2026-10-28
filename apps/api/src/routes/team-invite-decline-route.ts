@@ -37,9 +37,7 @@ export async function handleTeamInviteDecline(ctx: RouteContext, token: string):
     const name = memberDisplayName({ email: invite.email });
     ctx.waitUntil?.(recordInviteDeclined(env, team, invite.userId, name));
     if (invite.email) {
-      ctx.waitUntil?.(
-        notifyInviteResponse(env, team, invite.email, false, invite.userId).catch(() => {}),
-      );
+      ctx.waitUntil?.(notifyInviteResponse(env, team, invite.email, false, invite.userId));
     }
     console.log('[team-invites] declined from the email');
     return json({ teamName: invite.teamName, status: 'declined' });

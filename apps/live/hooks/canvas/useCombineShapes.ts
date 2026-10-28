@@ -5,13 +5,13 @@
 // element's place in the stacking order; the inputs go, with the arrows pinned to them, as Delete
 // takes them. One edit, one undo.
 import {
-  arrowReferencesAny,
   isBoxed,
   logoPageAt,
   type BoxedElement,
   type Element,
   type LaidOutPage,
   type Tab,
+  withAttachedArrows,
 } from '@livedoc/document';
 import { combineElements, type CombineOp } from '@/lib/combine/combine';
 import { isCombinable } from '@/lib/combine/outline';
@@ -42,6 +42,26 @@ export function combinableSelection(
   const page = logoPageAt(pages, centre(chosen[0]!));
   if (!page) return null;
   return chosen.every((el) => logoPageAt(pages, centre(el))?.id === page.id) ? chosen : null;
+}
+
+/** The elements once a combination lands: the result sits where the bottom-most input sat, and the inputs go with
+ *  the arrows attached to them and those hung off those arrows (docs/specs/008-canvas/arrow-to-arrow.md). */
+export function withCombinedResult(
+  elements: readonly Element[],
+  removed: ReadonlySet<string>,
+  result: Element,
+): Element[] {
+  const gone = withAttachedArrows(elements, removed);
+  const out: Element[] = [];
+  let placed = false;
+  for (const el of elements) {
+    if (removed.has(el.id) && !placed) {
+      out.push(result);
+      placed = true;
+    }
+    if (!gone.has(el.id)) out.push(el);
+  }
+  return out;
 }
 
 export function useCombineShapes({
@@ -93,19 +113,7 @@ export function useCombineShapes({
     const removed = new Set(result.removedIds);
     commit((els) => {
       if (!unchanged(els)) return els;
-      const out: Element[] = [];
-      let placed = false;
-      for (const el of els) {
-        if (removed.has(el.id)) {
-          // The result sits where the bottom-most input sat.
-          if (!placed) out.push(result.path);
-          placed = true;
-          continue;
-        }
-        if (el.type === 'arrow' && arrowReferencesAny(el, removed)) continue;
-        out.push(el);
-      }
-      return out;
+      return withCombinedResult(els, removed, result.path);
     });
     setMultiSelectedIds(new Set());
     setSelectedId(result.path.id);

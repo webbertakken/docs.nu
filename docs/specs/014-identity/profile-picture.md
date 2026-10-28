@@ -32,7 +32,7 @@ There is one candidate, so the **profile picture URL** is:
 
 The picture is fetched straight from Google, sized by Google's own option: the path's options after its last `=` are
 replaced with `s<px>-c` (square, centred), so a URL stored at one size draws crisp at any. Each disc offers a 96px and a
-192px source (`srcset` with `sizes` set to the disc's size), so a 44px disc is crisp at 2x and 3x and the smaller discs
+192px source (`srcset` with `sizes` set to the disc's size), so the profile card's 72px disc is crisp at 2x, a 44px disc at 2x and 3x, and the smaller discs
 reuse the 96px download.
 
 ## 3. What "automatically" means
@@ -126,6 +126,15 @@ already present somebody else's name.
 initial is always rendered, and the picture is an overlay with explicit
 `width` and `height` inside the same box, shown only once it has loaded. A
 presence ring stays around the disc, over the picture's edge.
+
+### Initials
+
+Without a picture a disc shows the person's (or team's) **initials**: the first letter of the name's first and last
+words, or the first two letters of a one-word name, in capitals, and `?` for a blank name. A letter is a character as a
+reader sees it (a grapheme), so a name that starts or ends with an emoji, a flag, an emoji with a skin tone or an
+accented letter keeps it whole ("🚀 Launch" reads "🚀L"), never half of one as a replacement character. One helper,
+`initialsOf` in `@livedoc/document`, draws them everywhere: presence avatars, cursor labels, comment authors, team
+discs, the Share dialog's identity and the headless export.
 
 The identity row's note reads "Your name, email and picture come from your
 account. Signed out, your documents belong to this browser." The help article Signing In

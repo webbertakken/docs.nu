@@ -18,8 +18,13 @@ function memoryStorage() {
 }
 
 const live = (entries: [string, LiveSession][]) => new Map(entries);
-const bea: LiveSession = { name: 'Bea', color: '#f00', personTag: 'tag-bea' };
-const webber: LiveSession = { name: 'Webber', color: '#0ea5e9', personTag: 'tag-webber' };
+const bea: LiveSession = { name: 'Bea', color: '#f00', personTag: 'tag-bea', holds: true };
+const webber: LiveSession = {
+  name: 'Webber',
+  color: '#0ea5e9',
+  personTag: 'tag-webber',
+  holds: true,
+};
 
 describe('selectionFromOp', () => {
   it('reads the whole selection, defaulting to the single element', () => {
@@ -77,6 +82,30 @@ describe('RoomSelectionStore', () => {
       { elementIds: ['a', 'b'], name: 'Bea', color: '#f00', mine: false },
       { elementIds: ['c'], name: 'Webber', color: '#0ea5e9', mine: true },
     ]);
+  });
+
+  // A Viewer may select but cannot change what an agent would, so their selection holds nothing
+  // (docs/specs/024-agents/agent-changesets.md "Held elements").
+  it("answers no Viewer's selection, but still the agent owner's own from a Viewer's seat", async () => {
+    const storage = memoryStorage();
+    const store = new RoomSelectionStore(storage);
+    await store.note('p-viewer', { tabId: 't1', elementIds: ['a'] });
+    await store.note('p-bea', { tabId: 't1', elementIds: ['b'] });
+    const viewer: LiveSession = { name: 'Vic', color: '#000', personTag: 'tag-vic', holds: false };
+    const answer = await store.read(
+      't1',
+      live([
+        ['p-viewer', viewer],
+        ['p-bea', bea],
+      ]),
+      '',
+    );
+    expect(answer.map((s) => s.name)).toEqual(['Bea']);
+    // Still noted: the viewer is live, only not answered.
+    expect(storage.map.size).toBe(2);
+    // The agent owner's own selection is what `selected` reads: answered, as theirs, even from a Viewer's seat.
+    const own = await store.read('t1', live([['p-viewer', viewer]]), 'tag-vic');
+    expect(own).toEqual([{ elementIds: ['a'], name: 'Vic', color: '#000', mine: true }]);
   });
 
   it('never marks a session mine without both tags', async () => {

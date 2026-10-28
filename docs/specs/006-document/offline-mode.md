@@ -280,8 +280,33 @@ reload:
 5. **The room opens** (`documentServerStored` turns true) and the Explorer list
    refreshes.
 
-The Explorer's row menu and the move prompt after signing in still reload after a
-sync: the document there is not the one on screen, or several move at once.
+The Explorer's Sync Document and Take Offline (a row's or card's menu, on the
+Explorer page and in the editor's Explorer panel) never reload either
+(`useOfflineConversion`): the document open in the editor moves in place, as
+above or as [Taking offline in place](#taking-offline-in-place) below; any other
+moves on its own, and the surface's lists are read again once the move settles
+(the editor panel's own list, or the Explorer page's). Only the move prompt after
+signing in still reloads, since several move at once.
+
+### Taking offline in place
+
+Take Offline on the document open in the editor, from the editor's Explorer panel
+once its confirmation is answered (`useTakeOfflineInPlace` in
+`app/document/[id]/useTakeOfflineInPlace.ts`), converts it without a reload:
+
+1. **It waits for this browser's last save**, as a sync in place does
+   (`SYNC_SAVE_WAIT_MS`, then `SyncStillSavingError`, whose words the toast says).
+2. **It closes the room first** (`documentServerStored` turns false), so the server
+   delete's echo never reaches the open editor as a deletion. A failure opens it
+   again and the document stays on the server.
+3. **It takes the document offline** with `takeCloudOffline`, exactly as Take
+   Offline below.
+4. **The offline index announces the move**: the header badge and every
+   `useIsOfflineDocument` follow, and every later save goes to IndexedDB by the
+   document's id.
+5. **The template-pick note is dropped** (a template picked now has no server
+   folder to go to), the move prompt after signing in is told the document stays
+   here, and the Explorer list refreshes.
 
 ### Save to server (Offline → Cloud)
 
@@ -333,7 +358,7 @@ Share dialog gate, Share Form's, and the move prompt after signing in).
   of truth; the document is now a cloud document (Share / AI / Teams reappear). The
   id is unchanged, so the route stays the same: from the Share dialog the editor
   turns into the cloud document in place ([Syncing in place](#syncing-in-place));
-  from the Explorer it reloads.
+  from the Explorer's menus it moves without a reload too.
 
 ### Take offline (Cloud → Offline)
 
@@ -476,9 +501,9 @@ Track adoption without content, reusing the closed vocabulary:
 - On conversion, a coarse event for each direction, so uptake and the
   destructive take-offline path are visible: `Document`/`Moved` with type
   `SavedToCloud` or `TakenOffline`, emitted after the conversion succeeds: from
-  the shared `useOfflineConversion` handlers before their reload (the telemetry
-  engine's pagehide beacon carries it through), from `useSyncInPlace` for the
-  Share dialog, and per document from the move prompt.
+  the shared `useOfflineConversion` handlers, from `useSyncInPlace` and
+  `useTakeOfflineInPlace` for the document open in the editor, and per document
+  from the move prompt.
 - No document content or ids ever leave (the `type` bound in [Telemetry + public transparency dashboard](../017-telemetry/telemetry.md) holds).
 
 ## Non-goals
@@ -508,7 +533,7 @@ Track adoption without content, reusing the closed vocabulary:
   `lib/signed-in-hint.ts`, `app/new/useNewDocumentLocation.ts`, the early open in
   `app/document/[id]/useIdentityBootstrap.ts` with `app/document/[id]/resolve-participant.ts`.
 - Share's offline gate and syncing in place: `components/dialogs/ShareOfflineGate.tsx`,
-  `app/document/[id]/useSyncInPlace.ts`, `subscribeOfflineIds` in `lib/offline/offline-store.ts`.
+  `app/document/[id]/useSyncInPlace.ts`, `app/document/[id]/useTakeOfflineInPlace.ts`, `subscribeOfflineIds` in `lib/offline/offline-store.ts`.
 - The move prompt after signing in: `components/dialogs/LocalMovePrompt.tsx`,
   `hooks/persistence/useLocalMovePrompt.ts`, `lib/offline/local-move-dismissal.ts`.
 - Conversion actions (Explorer row menu + the Share dialog's offline gate):

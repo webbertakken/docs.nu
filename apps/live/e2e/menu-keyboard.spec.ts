@@ -2,11 +2,11 @@ import { mkdirSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { apiBase } from './audit-screens';
 import {
-  dismissQuickTour,
   expect,
   expectNoPageErrors,
   guestSigFor,
   mintSignedGuest,
+  openContextMenuFromKeyboard,
   ownerHeaders,
   startBlankDocument,
   test,
@@ -74,8 +74,7 @@ test.describe('menus by keyboard', () => {
     const row = nav.getByRole('treeitem', { name: 'Retros' });
     await expect(row).toBeVisible({ timeout: 30_000 });
 
-    await row.focus();
-    await page.keyboard.press('Shift+F10');
+    await openContextMenuFromKeyboard(row);
     const menu = page.getByRole('menu', { name: 'Retros' });
     await expect(menu).toBeVisible();
     await expect(menu).toMatchAriaSnapshot(`
@@ -122,7 +121,7 @@ test.describe('menus by keyboard', () => {
     await expect(row).toBeFocused();
 
     // Tab closes it and moves on from there.
-    await page.keyboard.press('Shift+F10');
+    await openContextMenuFromKeyboard(row);
     await expect(menu).toBeVisible();
     await page.keyboard.press('Tab');
     await expect(menu).toHaveCount(0);
@@ -135,7 +134,6 @@ test.describe('menus by keyboard', () => {
     pageErrors,
   }) => {
     await startBlankDocument(page);
-    await dismissQuickTour(page);
     await (await paletteTile(page, 'Add Square')).click();
     await page.locator('[data-canvas-a11y-root]').click({ position: { x: 520, y: 360 } });
     const square = page.getByRole('img', { name: 'Square', exact: true });
@@ -190,7 +188,6 @@ test.describe('menus by keyboard', () => {
     pageErrors,
   }) => {
     await startBlankDocument(page);
-    await dismissQuickTour(page);
 
     const tabMenu = page.getByRole('button', { name: 'Tab menu' });
     await expect(tabMenu).toHaveAttribute('aria-haspopup', 'dialog');

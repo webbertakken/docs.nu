@@ -15,17 +15,17 @@ across devices, teams, tokens, collaborating under one name).
 
 ## Who is who
 
-| Term                  | What it is                                                                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **guest**             | A visitor without an account. Works fully, keyed to one browser.                                                                               |
-| **guest id**          | The guest's owner id: a UUID the server mints, with an HMAC **guest signature** only the browser it was minted for holds.                      |
-| **account**           | A person who signed in. One row in LiveDoc's own identity tables, however many sign-in methods it has.                                         |
-| **account id**        | The account's owner id: `acct_` and 24 base62 characters, never a UUID, so the two shapes never meet.                                          |
-| **sign-in method**    | A way to prove who you are: Google, an email code (and later others). Several can belong to one account.                                       |
-| **session**           | A signed-in browser. A cookie on `/api/auth/*`, and the short-lived **session token** the browser sends to the rest of the api.                |
-| **API token**         | An `lvd_` secret for scripts, the CLI and MCP clients, owned by an account ([Public API and API tokens](../015-api/public-api-and-tokens.md)). |
-| **workbench session** | An `lvw_` credential for one framed editor, minted from a token ([Workbench embeds](../013-workspace/workbench-embeds.md)).                    |
-| **owner id**          | Whichever of guest id or account id owns a row. Every owner-keyed column holds one ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).   |
+| Term                  | What it is                                                                                                                                         |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **guest**             | A visitor without an account. Works fully, keyed to one browser.                                                                                   |
+| **guest id**          | The guest's owner id: a UUID the server mints, with an HMAC **guest signature** only the browser it was minted for holds.                          |
+| **account**           | A person who signed in. One row in LiveDoc's own identity tables, however many sign-in methods it has.                                             |
+| **account id**        | The account's owner id: `acct_` and 24 base62 characters, never a UUID, so the two shapes never meet.                                              |
+| **sign-in method**    | A way to prove who you are: Google, an email code (and later others). Several can belong to one account.                                           |
+| **session**           | A signed-in browser. A cookie on `/api/auth/*`, and the short-lived **session token** the browser sends to the rest of the api.                    |
+| **API token**         | An `livedoc_` secret for scripts, the CLI and MCP clients, owned by an account ([Public API and API tokens](../015-api/public-api-and-tokens.md)). |
+| **workbench session** | An `lvw_` credential for one framed editor, minted from a token ([Workbench embeds](../013-workspace/workbench-embeds.md)).                        |
+| **owner id**          | Whichever of guest id or account id owns a row. Every owner-keyed column holds one ([Owner-keyed data](../015-api/api.md#owner-keyed-data)).       |
 
 ## Deployment modes
 
@@ -50,10 +50,12 @@ across devices, teams, tokens, collaborating under one name).
 Two methods ship first:
 
 - **Google.** "Continue with Google" on both auth pages. The account takes Google's verified email, name and picture.
+  On an address that already has an account it joins that account only when Google verified the address.
   It is proven end to end against a fake Google on the signed-in e2e stack
   ([Signed-in specs](../003-system-architecture/e2e-smoke.md#signed-in-specs)).
 - **Email code.** Type an email, receive a 6-digit code valid for 5 minutes, type it. Three wrong tries spend the
-  code. The first sign-in with a new address creates the account with that address verified.
+  code. A code is checked only by signing in with it: no other route reads one, so guesses sent at once can't race the
+  count of tries. The first sign-in with a new address creates the account with that address verified.
 - **Not in the first release:** passwords (they need hashing budget on the worker and a reset flow), magic links (a
   second email method for the same job), Google One Tap, passkeys and two-factor. Each is a later addition to this list.
 
@@ -82,6 +84,8 @@ An email code is only as good as its delivery, so sign-in email is not best-effo
   everywhere the api reads it; an issued session token keeps working until its own 15 minutes run out.
 - **Seeing and ending sessions.** Settings > Account lists this account's signed-in browsers (browser and system,
   from the user agent; last active), marks this one, and offers **Sign out** on each and **Sign out everywhere else**.
+  A session signed out there leaves the list at once (every other one, for Sign out everywhere else), while the list
+  is read again; its button is busy while the request is on its way, so it is never pressed twice.
 - **Fresh enough for the dangerous things.** Deleting the account and removing a sign-in method need a session
   verified within the last 10 minutes. An older one asks the person to verify again (an email code, or Google) first.
 
@@ -90,7 +94,7 @@ An email code is only as good as its delivery, so sign-in email is not best-effo
 One resolution at the top of every api request, in this order; the first credential present decides, and a
 credential that is present but wrong is refused, never read as a guest:
 
-1. **API token** (`Bearer lvd_…`): its owner account. Refused `401 invalid_token` when unknown, revoked or expired.
+1. **API token** (`Bearer livedoc_…`): its owner account. Refused `401 invalid_token` when unknown, revoked or expired.
 2. **Workbench session** (`Bearer lvw_…`): its owner, confined to its document or workspace.
 3. **Session token** (any other `Bearer`): the account, when it verifies. A token that fails verification (expired,
    wrong key, wrong issuer) falls through to the guest header, as a failed token always has, because the guest path must
@@ -133,6 +137,9 @@ Routes inside `apps/live/`:
   is what a returning person wants first.
 - **`/get-started/`**: sign-up, the same methods with a name field first (one **name**, not first and last). Its
   default destination is the welcome flow (`POST_AUTH_DEFAULT`, `/new`).
+- **Leaving is in place.** A code sign-in or sign-up goes to its destination in place of the auth page
+  (`location.replace`), as a visitor already signed in does, so Back from the destination never lands on an auth page
+  that would only send the person on again.
 - **Google's round trip** ends at better-auth's own callback (`/api/auth/callback/google`), which redirects to the
   destination the page asked for. There is no separate callback page: the destination is passed as better-auth's
   `callbackURL` (and `newUserCallbackURL` for a first sign-in), and a failed round trip comes back to the page it
@@ -270,14 +277,23 @@ A guest id is a bearer value that **leaks**: it rides in document DTOs and realt
 
 ## Account settings
 
-Settings > Account, signed in ([Account settings & email notifications](profile-and-email-notifications.md)):
+Settings > Account opens on the **profile card** ([Account settings & email notifications](profile-and-email-notifications.md)
+"Identity"): who this is, drawn as others see them. Signed in, then:
 
-- **Name**: editable inline.
+- **Name**: editable inline. A refusal says so until the name is edited again, never after the field holds the
+  stored name once more.
+- **Colour**: the colour collaborators see on this person's cursor, avatar and name tag, chosen in place from the
+  ten presence colours (the participant palette, every one holding white initials at AA, [Identity
+  fill](../004-interface-design/color-scheme.md)). It is the participant record's colour, so it follows the
+  account to every document and device; the open editor takes it at once. Shown at once, put back if refused:
+  to what the server last took, newest wins, so two refusals in a row never leave a colour it never stored.
+  Until the first document gives one, the colour is **Automatic**.
 - **Email**: shown; changed as in [Account linking](#account-linking).
 - **Profile picture**: [Profile picture](profile-picture.md).
 - **Sign-in methods**: Google (**Connect Google**, or connected with **Remove**, offered only where email codes are, so
   the address stays a way in), Email code (the account's address, where the host sends codes).
-- **Sessions**: [Sessions](#sessions).
+- **Where You're Signed In**: [Sessions](#sessions).
+- **Sign Out**: ends this browser's session, as the account menu's Sign Out does.
 - **Delete Account**: below.
 
 ## Deleting an account
@@ -300,9 +316,9 @@ be deleted again. The goodbye email goes to the address the account had.
 - **Teams** stay LiveDoc's own ([Teams](../013-workspace/teams.md)), not better-auth's organisations. A pending email invite becomes a membership when its address equals the
   account's email **and** that email is verified; the address is read from the verified session token, never a
   header.
-- **API tokens** are unchanged: `lvd_` secrets, hashed, six months, per-account cap, owned by an account id, minted
+- **API tokens** are unchanged: `livedoc_` secrets, hashed, six months, per-account cap, owned by an account id, minted
   only from a session ([Public API and API tokens](../015-api/public-api-and-tokens.md)).
-- **The MCP server** keeps its own OAuth 2.1 server and its `lvd_` tokens ([MCP server](../015-api/mcp-server.md)
+- **The MCP server** keeps its own OAuth 2.1 server and its `livedoc_` tokens ([MCP server](../015-api/mcp-server.md)
   §3); its consent page in `apps/live` trusts the LiveDoc session.
 - **The CLI** keeps `livedoc auth login` on the MCP worker's OAuth server, which already offers loopback PKCE and the
   device grant (`--device`); better-auth's device plugin would add a second OAuth server for the same job. Its device page in `apps/live`

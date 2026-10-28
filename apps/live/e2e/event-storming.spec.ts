@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test';
 import {
-  dismissQuickTour,
   expect,
   expectNoPageErrors,
   startEventStormingRow,
@@ -77,7 +76,6 @@ test('timeline lanes snap a dragged note without moving anything else', async ({
 }) => {
   await startEventStormingRow(page);
   const canvas = page.locator('[data-canvas-a11y-root]');
-  await dismissQuickTour(page);
 
   const notes = canvas.getByRole('img', { name: /^Sticky note/ });
   await expect(notes).toHaveCount(3);
@@ -136,7 +134,7 @@ test('timeline lanes snap a dragged note without moving anything else', async ({
 
   // Undo puts the note back, in ONE step: there is no switch flip underneath
   // it any more.
-  await page.keyboard.press('Control+z');
+  await page.keyboard.press('ControlOrMeta+z');
   await expect.poll(async () => (await notes.nth(2).boundingBox())!.x).toBeCloseTo(third.x, 0);
 
   // …and the board still snaps after a reload, with nothing stored to restore.
@@ -157,7 +155,6 @@ test('a dragged note takes the slot two events suggest', async ({ page, pageErro
   test.slow();
   await startEventStormingRow(page);
   const canvas = page.locator('[data-canvas-a11y-root]');
-  await dismissQuickTour(page);
   const notes = canvas.getByRole('img', { name: /^Sticky note/ });
   await expect(notes).toHaveCount(3);
   await page.waitForTimeout(500);
@@ -233,7 +230,6 @@ test('a dragged note takes the slot two events suggest', async ({ page, pageErro
 test('an ordinary diagram has no timeline lanes', async ({ page, pageErrors }) => {
   await startTemplateDocument(page, 'Technical', /^Sequence/i);
   await page.locator('[data-canvas-a11y-root]').waitFor();
-  await dismissQuickTour(page);
   await expect(page.getByRole('switch', { name: /timeline lanes/i })).toHaveCount(0);
   expectNoPageErrors(pageErrors);
 });
@@ -247,7 +243,6 @@ test('a next-note button adds a command before an event, and nothing ties them',
 }) => {
   await startEventStormingRow(page);
   const canvas = page.locator('[data-canvas-a11y-root]');
-  await dismissQuickTour(page);
   const notes = canvas.getByRole('img', { name: /^Sticky note/ });
   await expect(notes).toHaveCount(3);
   await page.waitForTimeout(500);
@@ -303,7 +298,6 @@ test('pasting copied notes into a note open for typing puts them on the board', 
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await startEventStormingRow(page);
   const canvas = page.locator('[data-canvas-a11y-root]');
-  await dismissQuickTour(page);
   const notes = canvas.getByRole('img', { name: /^Sticky note/ });
   await expect(notes).toHaveCount(3);
   await page.waitForTimeout(500);
@@ -331,7 +325,6 @@ test('an armed note tile shows the note it will add and places it there', async 
   pageErrors,
 }) => {
   await startEventStormingRow(page);
-  await dismissQuickTour(page);
   const notes = page.locator('[data-canvas-a11y-root]').getByRole('img', { name: /^Sticky note/ });
   await expect(notes).toHaveCount(3);
   await page.waitForTimeout(500);

@@ -1,11 +1,4 @@
-import {
-  test,
-  expect,
-  dismissQuickTour,
-  expectNoPageErrors,
-  startBlankDocument,
-  paletteTile,
-} from './fixtures';
+import { test, expect, expectNoPageErrors, startBlankDocument, paletteTile } from './fixtures';
 
 // A failed autosave names its real cause (docs/specs/006-document/per-tab-storage.md). Production showed
 // `Http401.SaveTab` reading as "Check your connection" on a wired fibre line.
@@ -34,7 +27,6 @@ test('a save refused as unauthenticated says so, then recovers', async ({ page, 
   await expect(alert).not.toContainText(/connection/i);
 
   await page.unroute(tabWrites);
-  await dismissQuickTour(page);
   const saved = page.waitForResponse(
     (r) => r.request().method() === 'PUT' && /\/api\/documents\/[^/]+\/tabs\//.test(r.url()),
   );

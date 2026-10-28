@@ -9,18 +9,20 @@ import {
   TAB_SAVE_CAS_ATTEMPTS,
   parseChangesetSeen,
 } from '@livedoc/api-schema';
+import { tabShowsEveryCard } from '@livedoc/items';
 import { isValidTab, migrateIncomingTab, preferNewerQaAll, type Tab } from '@livedoc/document';
 import { mergeChangesetsIntoSave } from '../changesets/merge-on-save';
-import { hasNewComments, rewriteCommentAuthors } from '../comments';
+import { ANONYMOUS_AUTHOR, hasNewComments, rewriteCommentAuthors } from '../comments';
 import { changesetMergePages, getParticipant, getTab, isTabRevStale, upsertTabAtRev } from '../db';
 import { emailEnabled } from '../email/client';
 import { notifyNewComment } from '../email/notifications';
 import { MAX_TAB_BYTES, bodyExceedsCap, storeTab } from '../limits';
 import { capStoredName } from '../names';
-import { badRequest, conflict, json, payloadTooLarge } from '../responses';
+import { badRequest, conflict, forbidden, json, payloadTooLarge } from '../responses';
 import { applyRoomLedger, fetchRoomLedger } from '../room-client';
 import { recordTabSave } from '../timeline';
 import type { TabSaveDocument } from '../db/tab-save-document';
+import { keepStoredStructure } from '../tab-structure';
 import { readBody, type DocumentRouteContext } from './context';
 
 // Fields of the stored record, not of the tab body; a client echoing them back never stores them
@@ -50,6 +52,8 @@ export async function handleTabPut(
   existing: TabSaveDocument,
   tabId: string,
   owner: string,
+  // The one tab the caller's grant reaches, or null: a scoped save keeps the tab's structure as stored.
+  scope: string | null = null,
 ): Promise<Response> {
   const { request, env } = ctx;
   const id = existing.id;
@@ -83,7 +87,13 @@ export async function handleTabPut(
     const ledger = applyRoomLedger(merge.tab, fetchedLedger);
     const commentAuthors = ledger.commentAuthors;
     // A copy: each attempt starts again from the save as sent.
-    const body: Tab = { ...ledger.tab };
+    // A tab-scoped link's save keeps its tab's structure (docs/specs/013-workspace/tab-scoped-share-links.md
+    // "Structure"): the stored name, Plan elements and form targets, so it can neither rename its tab nor widen
+    // what it reaches; the rest lands.
+    const kept =
+      scope && existingTab ? keepStoredStructure(ledger.tab, existingTab, scope) : ledger.tab;
+    if (kept !== ledger.tab) console.info('[tabs] tab.structure.kept', { documentId: id, tabId });
+    const body: Tab = { ...kept };
     // The name cap (docs/specs/006-document/name-length.md): a new or changed name is shortened;
     // an autosave echoing the stored name unchanged keeps it.
     body.name = capStoredName(body.name, existingTab?.name ?? null, 'tab');
@@ -97,6 +107,14 @@ export async function handleTabPut(
       request.headers.get('X-Allow-Empty') !== '1'
     ) {
       return conflict('empty_tab_overwrite_blocked');
+    }
+    // The save as sent, not the merge: a board the owner added in the room meanwhile is theirs, not the visitor's.
+    if (
+      scope !== null &&
+      tabShowsEveryCard(received.elements) &&
+      !tabShowsEveryCard(existingTab?.elements ?? [])
+    ) {
+      return forbidden('tab_scope_widen');
     }
     // A Q&A board's notes are owned by the qa endpoint (docs/specs/012-collaboration/qa-board.md):
     // keep whichever copy has the higher `qaRev`.
@@ -115,17 +133,17 @@ export async function handleTabPut(
             pictureUrl: null,
           }
         : await getParticipant(env, owner);
-    const sanitised: Tab = writerParticipant
-      ? {
-          ...body,
-          elements: rewriteCommentAuthors(
-            body.elements,
-            existingTab?.elements ?? [],
-            writerParticipant,
-            commentAuthors,
-          ),
-        }
-      : body;
+    // With no participant record (a guest who never set a name) the writer is still the owner: the comments
+    // already stored stay locked and a new one is credited to them as Anonymous.
+    const sanitised: Tab = {
+      ...body,
+      elements: rewriteCommentAuthors(
+        body.elements,
+        existingTab?.elements ?? [],
+        writerParticipant ?? { id: owner, ...ANONYMOUS_AUTHOR, createdAt: 0, pictureUrl: null },
+        commentAuthors,
+      ),
+    };
     let rev = 0;
     try {
       // The merged tab may outgrow the request: the storage layer measures what it stores

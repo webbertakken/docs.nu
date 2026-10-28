@@ -1,12 +1,5 @@
 import type { Page } from '@playwright/test';
-import {
-  dismissQuickTour,
-  expect,
-  expectNoPageErrors,
-  seedTab,
-  settledBox,
-  test,
-} from './fixtures';
+import { expect, expectNoPageErrors, seedTab, settledBox, test } from './fixtures';
 
 // Where the whiteboard dock sits (docs/specs/023-draw-mode/draw-mode.md "Where the dock sits"):
 // the top by default, the bottom by choice in Settings, Editor › Draw; flyouts open on the board
@@ -20,7 +13,6 @@ async function openWhiteboard(page: Page, viewport = { width: 1600, height: 900 
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/new?template=whiteboard');
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
-  await dismissQuickTour(page);
   await dock(page).waitFor();
 }
 

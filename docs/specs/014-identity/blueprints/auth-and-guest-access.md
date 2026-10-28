@@ -105,6 +105,10 @@ One Google key without the other logs `[auth] google_half_configured`. The email
   `BETTER_AUTH_SECRETS` when set). Static, never the dynamic `allowedHosts` form: each deployment has one canonical
   host, and the dynamic form answers an unlisted host with 500 and trusts every listed host as an origin.
 - `trustedOrigins: [origin of APP_BASE_URL]`.
+- `disabledPaths: UNUSED_CODE_PATHS`: the email-otp plugin's routes other than sending a code and signing in with it
+  (`check-verification-otp`, `verify-email`, the password-reset and email-change code routes) answer 404.
+  `check-verification-otp` checks a code without spending it and counts a wrong guess in a read and a separate write,
+  so guesses sent at once would all count as one.
 - `advanced`: `useSecureCookies` true unless `APP_BASE_URL` is `http://localhost…` (D13); `cookiePrefix: 'livedoc'`;
   `ipAddress.ipAddressHeaders: ['cf-connecting-ip']`; `database.generateId` for the user model only →
   `generateAccountId()`, other models the default; `database.validateSchema: false` (the schema is checked in CI, D11); No `backgroundTasks` handler: better-auth would then send a code in the background and answer success whatever
@@ -117,7 +121,9 @@ One Google key without the other logs `[auth] google_half_configured`. The email
   would also refuse listing sessions; the freshness gates below are LiveDoc's, on `FRESH_SESSION_AGE_S`);
   cookie cache off (a revoked session must stop at once).
 - `account: { accountLinking: { enabled: true, allowDifferentEmails: false, requireLocalEmailVerified: true,
-updateUserInfoOnLink: false }, encryptOAuthTokens: true }`. Google's access and refresh tokens are not stored
+updateUserInfoOnLink: false }, encryptOAuthTokens: true }`, with no `trustedProviders`: a Google sign-in on an
+  address that already has an account joins it only when Google says it verified the address (`email_verified`); a
+  trusted provider would join on an address it never verified. Google's access and refresh tokens are not stored
   (`mapProfileToUser` keeps name, email, picture; the account row's token columns are written null by an
   `account.create.before` hook).
 - `user: { deleteUser: { enabled: false } }`: deletion is LiveDoc's own route. `changeEmail` off (first release).
@@ -159,7 +165,7 @@ sightings, migration 0047) are dropped; nothing else is named `identity_*` today
 
 ```text
 bearer = bearerTokenOf(Authorization)
-if bearer starts lvd_      → resolveApiToken           (refused 401 invalid_token when it does not resolve)
+if bearer starts livedoc_      → resolveApiToken           (refused 401 invalid_token when it does not resolve)
 elif bearer starts lvw_    → resolveWorkbenchSession   (refused 401 invalid_session)
 elif bearer                → getAccountSession(env, bearer)   (null → guest fall-through, logged)
 X-Owner-Id                 → guest, after the shape and signature gates
@@ -280,7 +286,7 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 - The session token's claims: `iss`, `aud`, `sub` (account id), `iat`, `exp`, `email`, `email_verified`,
   `auth_time`. Nothing else is read.
 - OpenAPI (`apps/api/src/openapi/manifest.ts`): the bearer scheme reads "A LiveDoc session token or an API token
-  (`lvd_…`)"; `clerk` and `guest-or-clerk` auth kinds become `session` and `guest-or-session`. better-auth's own routes
+  (`livedoc_…`)"; `clerk` and `guest-or-clerk` auth kinds become `session` and `guest-or-session`. better-auth's own routes
   are not in LiveDoc's OpenAPI document (they are documented by better-auth).
 
 ## Data and persistence
@@ -306,30 +312,30 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 
 ## Errors and edge cases
 
-| Case                                                                                                                      | Handling                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Email provider down or refusing                                                                                           | `502 EMAIL_SEND_FAILED`; copy "We couldn't send the code. Try again in a minute."; log `[auth] code_send_failed provider=<p> status=<s>`                                                                                                        |
-| Too many attempts (either limiter)                                                                                        | `429 RATE_LIMITED`; copy "Too many attempts. Wait a minute and try again."                                                                                                                                                                      |
-| Two code requests at once for one address (better-auth #11181)                                                            | The second rotates the first; the code step always says "Use the newest code if you asked for more than one."                                                                                                                                   |
-| Wrong code                                                                                                                | `INVALID_OTP`; copy "That code isn't right. Check it, or use the newest code we sent."                                                                                                                                                          |
-| Wrong code three times                                                                                                    | `TOO_MANY_ATTEMPTS`, code spent; copy "That code has been used up. Send a new one."                                                                                                                                                             |
-| Code older than 5 minutes                                                                                                 | `OTP_EXPIRED`; copy "That code has expired. Send a new one."                                                                                                                                                                                    |
-| Not an email address                                                                                                      | `INVALID_EMAIL`; copy "Enter a valid email address."                                                                                                                                                                                            |
-| Google returns `access_denied` (person cancelled)                                                                         | Back on the start page, no error banner                                                                                                                                                                                                         |
-| Google email unverified (rare Workspace)                                                                                  | `account_not_linked` when an account has the address; copy "That Google account isn't verified for this email. Sign in with an email code instead."                                                                                             |
-| Any other failure, or one with no code                                                                                    | Copy "Something went wrong. Try again."; a failed fetch: "We couldn't reach the server. Check your connection and try again." The server's own wording is never shown                                                                           |
-| D1 write fails mid sign-up (D1 has no transactions; better-auth writes user, then session or Google account, in sequence) | Nothing to repair: an email-code user is found by address on the next try (email codes write no `identity_accounts` row at all), and a Google user missing its account row is linked again on the next Google sign-in, its email being verified |
-| `/api/auth/token` 401 while the page thinks it is signed in                                                               | Bridge to `guest`, hint `0`, `sessionEnded`; the warning toast "You've been signed out. Sign in again to keep working in your account." (`SessionEndedNotice`, also after a sign-out in another tab); owner data reloads as guest               |
-| Sign-out cannot reach the api                                                                                             | The browser forgets the session anyway and logs `[auth] sign_out_failed`; the next read shows whether the cookie still lives                                                                                                                    |
-| Session read fails (offline, 5xx)                                                                                         | `guest-offline`: settled as a guest, nothing written, read again on `online`                                                                                                                                                                    |
-| Migration fails                                                                                                           | Settles, retries next load, 10 s cap                                                                                                                                                                                                            |
-| Sign-in reached through the preview's workers.dev host                                                                    | better-auth `403 INVALID_ORIGIN`; copy "Sign-in works only at this site's main address. Open it there and try again."                                                                                                                           |
-| `APP_BASE_URL` unset with identity on                                                                                     | `enabled` false, log `[auth] base_url_missing`                                                                                                                                                                                                  |
-| Secret changed without `BETTER_AUTH_SECRETS`                                                                              | Every session invalid; JWT keys undecryptable: `/api/auth/token` 500 logged `[auth] jwks_undecryptable`; documented, never silent                                                                                                               |
-| Deleted account's token still within 15 minutes                                                                           | `getAccountSession` verifies, but the account row is gone: `auth/account-gate.ts` answers `401 account_not_found` on every administration segment, logged `[auth] account_not_found route=<seg>`                                                |
-| Delete with a session older than 10 minutes                                                                               | `403 SESSION_NOT_FRESH`; the dialog verifies again with a code and retries once                                                                                                                                                                 |
-| Account id in `X-Owner-Id`                                                                                                | `401 account_id_not_a_guest_credential`                                                                                                                                                                                                         |
-| Unsigned guest id on a host that signs                                                                                    | Owner-scoped routes refuse it (`401 signature_required`); the browser takes a fresh signed id; the old id's rows stay unreachable                                                                                                               |
+| Case                                                                                                                      | Handling                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Email provider down or refusing                                                                                           | `502 EMAIL_SEND_FAILED`; copy "We couldn't send the code. Try again in a minute."; log `[auth] code_send_failed provider=<p> status=<s>`                                                                                                                                       |
+| Too many attempts (either limiter)                                                                                        | `429 RATE_LIMITED`; copy "Too many attempts. Wait a minute and try again."                                                                                                                                                                                                     |
+| Two code requests at once for one address (better-auth #11181)                                                            | The second rotates the first; the code step always says "Use the newest code if you asked for more than one."                                                                                                                                                                  |
+| Wrong code                                                                                                                | `INVALID_OTP`; copy "That code isn't right. Check it, or use the newest code we sent."                                                                                                                                                                                         |
+| Wrong code three times                                                                                                    | `TOO_MANY_ATTEMPTS`, code spent; copy "That code has been used up. Send a new one."                                                                                                                                                                                            |
+| Code older than 5 minutes                                                                                                 | `OTP_EXPIRED`; copy "That code has expired. Send a new one."                                                                                                                                                                                                                   |
+| Not an email address                                                                                                      | `INVALID_EMAIL`; copy "Enter a valid email address."                                                                                                                                                                                                                           |
+| Google returns `access_denied` (person cancelled)                                                                         | Back on the start page, no error banner                                                                                                                                                                                                                                        |
+| Google email unverified (rare Workspace)                                                                                  | `account_not_linked` when an account has the address; copy "That Google account isn't verified for this email. Sign in with an email code instead."                                                                                                                            |
+| Any other failure, or one with no code                                                                                    | Copy "Something went wrong. Try again."; a failed fetch: "We couldn't reach the server. Check your connection and try again." The server's own wording is never shown                                                                                                          |
+| D1 write fails mid sign-up (D1 has no transactions; better-auth writes user, then session or Google account, in sequence) | Nothing to repair: an email-code user is found by address on the next try (email codes write no `identity_accounts` row at all), and a Google user missing its account row is linked again on the next Google sign-in, its email being verified                                |
+| `/api/auth/token` 401 while the page thinks it is signed in                                                               | Bridge to `guest`, hint `0`, `sessionEnded`; the warning toast "You've been signed out. Sign in again to keep working in your account." (`SessionEndedNotice`, also after a sign-out in another tab); owner data reloads as guest                                              |
+| Sign-out cannot reach the api                                                                                             | The browser forgets the session anyway and logs `[auth] sign_out_failed`; the next read shows whether the cookie still lives                                                                                                                                                   |
+| Session read fails (offline, 5xx)                                                                                         | `guest-offline`: settled as a guest, nothing written, read again on `online`                                                                                                                                                                                                   |
+| Migration fails                                                                                                           | Settles, retries next load, 10 s cap                                                                                                                                                                                                                                           |
+| Sign-in reached through the preview's workers.dev host                                                                    | better-auth `403 INVALID_ORIGIN`; copy "Sign-in works only at this site's main address. Open it there and try again."                                                                                                                                                          |
+| `APP_BASE_URL` unset with identity on                                                                                     | `enabled` false, log `[auth] base_url_missing`                                                                                                                                                                                                                                 |
+| Secret changed without `BETTER_AUTH_SECRETS`                                                                              | Every session invalid; JWT keys undecryptable: `/api/auth/token` 500 logged `[auth] jwks_undecryptable`; documented, never silent                                                                                                                                              |
+| Deleted account's token still within 15 minutes                                                                           | `getAccountSession` verifies, but the account row is gone: `auth/account-gate.ts` answers `401 account_not_found` on every administration segment, logged `[auth] account_not_found route=<seg>`; `PUT /api/preferences` writes nothing for it and answers `404 unknown_owner` |
+| Delete with a session older than 10 minutes                                                                               | `403 SESSION_NOT_FRESH`; the dialog verifies again with a code and retries once                                                                                                                                                                                                |
+| Account id in `X-Owner-Id`                                                                                                | `401 account_id_not_a_guest_credential`                                                                                                                                                                                                                                        |
+| Unsigned guest id on a host that signs                                                                                    | Owner-scoped routes refuse it (`401 signature_required`); the browser takes a fresh signed id; the old id's rows stay unreachable                                                                                                                                              |
 
 ## Security and trust
 
@@ -397,21 +403,46 @@ hint and the recent diagrams, nudges the other tabs, and the dialog signs out to
 - Already signed in on arrival: the "Redirecting…" card, then the destination.
 - Deleting the account: the dialog's copy is in [Deletion](#deletion); its verify step reads "You signed in a while ago,
   so confirm it's you before anything is deleted."
-- Settings > Account, signed in, under the identity card (`SettingsAccountManageRows.tsx` (planned)), each row only
+- Settings > Account opens on the profile card (`SettingsProfileCard.tsx`, the `identity` row): a banner
+  (`ProfileBanner`, decorative, `aria-hidden`) drawn as a dotted canvas with the person's cursor and name tag in
+  their presence colour; the avatar disc (picture, else initials on `identityVars(colour)`, 72px, a ring the card
+  colour); the name as an `h3`; the email (signed in) or "Not signed in" (guest); then a list labelled "About this
+  account" of chips: "LiveDoc Account" (brand tone, shield glyph) or "Guest · This Browser Only", "Joined <Month
+  Year>" when known, "Colour: <name>" with its swatch (`presenceColourName`: the palette name, "Custom" off it).
+  The colour is read from the participant record (`apiLoadSelf`); until it answers the chip and the cursor hold
+  the neutral swatch ("Colour: …"), so nothing moves when it lands; with no record yet (no document opened)
+  it reads "Colour: Automatic": a colour is given on the first open. A guest's card adds a box headed "Sign in to make this
+  yours" with three lines ("Keep your documents and settings on every device.", "Choose the name and colour
+  collaborators see on your cursor.", "Share with your team, and get an email when someone comments.") and
+  **Sign In** (primary) and **Create Account** (secondary), both returning to Settings (`authHrefWithReturn`).
+- Settings > Account, signed in, under the profile card (`SettingsAccountManageRows.tsx`), each row only
   when signed in:
   - **Name** (`accountName`): a text field holding the account's name and a **Save** button, enabled once the
     field differs and is not blank (at most 100 characters). Saving calls `update-user`, then the auth bridge
     re-reads the session (`refreshSession`) and tells the other tabs. Status line: "Saved." or "Couldn't save your
-    name. Try again."
+    name. Try again."; editing the field clears a refusal's line, so it never stands beside the stored name.
+  - **Colour** (`presenceColour`, `SettingsPresenceColourRow.tsx`): the Row skin of the one colour picker
+    ([Colour picker](../../004-interface-design/colour-picker.md)): "Colour" with the colour in force on its
+    right, opening the picker in a popover offering the ten presence colours (`PARTICIPANT_COLORS`) under
+    "Presence Colours", by name, and no custom colours (`custom={false}`). A pick shows at once on the row,
+    the card and the open editor (`SELF_COLOUR_EVENT`), then saves the participant record (`apiSaveSelf`);
+    refused, it puts back the colour the server last took (newest wins) and says
+    "Couldn't save your colour. Try again." Before the account has opened a document it has no participant
+    record: the row reads "Automatic", and a pick makes the record (the account's name, the colour picked); a
+    refused first pick goes back to Automatic.
   - **Sign-in methods** (`signInMethods`): one line per method. "Email code" with the account's address, always.
     "Google" when the host offers Google: **Connected** with **Remove** when an `identity_accounts` row has
     `providerId` google, else **Connect Google** (`link-social`, returning to Settings). Removing asks for a fresh
     sign-in when `403 SESSION_NOT_FRESH`: "For your safety, sign in again first." with a **Sign In Again** link
     (`/sign-in?redirect_url=<here>`).
-  - **Sessions** (`sessions`): every session of the account, newest activity first: "<Browser> on <System>" (from
+  - **Where You're Signed In** (`sessions`): every session of the account, newest activity first: "<Browser> on <System>" (from
     the user agent, `describeUserAgent`; "Unknown browser" when it says nothing), "Last active <date>", "This
     browser" on the current one. **Sign Out** on each other one (`revoke-session`) and **Sign Out Everywhere
-    Else** (`revoke-other-sessions`) when there is more than one.
+    Else** (`revoke-other-sessions`) when there is more than one. While a sign-out is on its way its button is
+    busy ("Signing Out…") and disabled; once it succeeds, the session (every other one, for Everywhere Else)
+    leaves the list at once and the list is read again without blanking.
+  - **Sign Out** (`signOut`): "Ends this browser's session. Your documents stay in your account." and a **Sign
+    Out** button, which signs out as the account menu does (`useDeferredAuth().signOut`, landing on `/`).
   - Loading: the rows show "Loading…" until the lists answer; a failed read says "Couldn't load this. Try again."
     with a **Try Again** button.
 - Empty states: a sessions list always holds this browser; sign-in methods always hold one.
@@ -467,6 +498,7 @@ Never logged: tokens, codes, emails, names, IPs.
 | Capabilities name the methods and the outbox                                           | `routes/capabilities.test.ts`, `index.auth.test.ts`                                                                           |
 | Credential order, refusals, fall-through                                               | `index.auth.test.ts`                                                                                                          |
 | Session token verify (good, expired, wrong iss/aud/alg, kid rotation, non-account sub) | `auth/session-token.test.ts` (keys minted in the test)                                                                        |
+| Code checked only by signing in; unused code routes 404; Google never trusted          | `auth/identity.test.ts`                                                                                                       |
 | Account id shape; refused as guest header                                              | `request-auth.test.ts`, `index.auth.test.ts`                                                                                  |
 | Guest signing key derived, kept across a rotation, enforced whenever it exists         | `auth/guest-key.test.ts`, `auth/guest-rest.test.ts`, `auth/owner-signature.test.ts`                                           |
 | Migration (signature, account-shaped source, idempotent, end to end)                   | `routes/migrate.test.ts`, `index.auth.test.ts`                                                                                |

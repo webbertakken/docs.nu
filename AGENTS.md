@@ -4,7 +4,7 @@ Monorepo for LiveDoc, hosted at [docs.nu](https://docs.nu). Multiple apps share 
 
 - LiveDoc is a parallel product to livediagram, which it grew from: see [Purpose](docs/specs/001-project-vision/purpose.md).
 - Changes from livediagram are picked by hand, never merged: see [livediagram upstream](docs/specs/002-project-scope/livediagram-upstream.md).
-- Code, packages and specs still named `livediagram` keep that name until a LiveDoc change renames them.
+- The upstream's name appears only where something means the upstream; `apps/help/lib/brand-name-guard.test.ts` fails on any other mention.
 
 ## Before you start
 
@@ -203,9 +203,9 @@ apps/
   telemetry/    # public anonymous-events dashboard (Next.js, /telemetry)
   help/         # help centre (Next.js export + MDX, /help)
   api/          # Cloudflare Worker REST + WebSocket API (D1 + Durable Objects, /api)
-  mcp/          # Cloudflare Worker MCP server for AI tools (OAuth + tools, mcp.livediagram.app)
+  mcp/          # Cloudflare Worker MCP server for AI tools (OAuth + tools, mcp.docs.nu)
   router/       # Cloudflare Worker stitching the apps under one hostname
-  cli/          # the livediagram command line for agents and scripts (Node, one esbuild bundle)
+  cli/          # the livedoc command line for agents and scripts (Node, one esbuild bundle)
 packages/
   ui/             # shared UI primitives (Brand, SiteHeader, Button, TextInput, Select, Tooltip, hooks) + chrome icons (src/icons)
   document/       # document data model (Tab, Element types + element helpers)
@@ -274,7 +274,7 @@ See [Auth + guest access](docs/specs/014-identity/auth-and-guest-access.md).
 
 - **The canvas always works without signing in.** Friction-free engagement is the acquisition strategy. Never put a sign-in wall in front of the editor.
 - **Hybrid identity** — the api accepts two equivalent ways of identifying the owner of a request:
-  - **Guest path**: a per-browser participant id (`livediagram:v2:self-id` in `localStorage`) carried as `X-Owner-Id`. Default for unsigned visitors. Full feature set (persistence, share links, real-time collab).
+  - **Guest path**: a per-browser participant id (`livedoc:v2:self-id` in `localStorage`) carried as `X-Owner-Id`. Default for unsigned visitors. Full feature set (persistence, share links, real-time collab).
   - **Authed path**: a Clerk session JWT in `Authorization: Bearer <token>`, verified via `CLERK_JWKS_URL`.
   - The api worker uses the `sub` claim as the owner id.
 - The two paths coexist forever — a signed-in user can still hand a share link to a guest who edits without auth.

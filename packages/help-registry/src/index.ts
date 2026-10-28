@@ -376,9 +376,9 @@ export const articles: Article[] = [
     slug: 'diagram-tour',
     title: 'The Diagram Tour',
     description:
-      'The interactive Diagram mode walkthrough, offered once and replayable from Settings.',
+      'The interactive Diagram mode walkthrough, started from Start Diagram Tour in the bottom bar.',
     keywords:
-      'tour walkthrough guide onboarding show me around intro tutorial replay rerun steps welcome diagram mode palette',
+      'tour walkthrough guide onboarding show me around intro tutorial replay rerun steps welcome start tour button diagram mode palette',
     category: 'Getting Started',
     categorySlug: 'getting-started',
   },
@@ -982,7 +982,7 @@ export const articles: Article[] = [
     slug: 'avatar-tour',
     title: 'The Avatar Tour',
     description:
-      'A short, optional walkthrough of Avatar mode, offered the first time you walk as an avatar and replayable from Settings.',
+      'A short, optional walkthrough of Avatar mode, started from Start Avatar Tour in the bottom bar.',
     keywords:
       'avatar tour walkthrough onboarding intro introduction getting started guide tutorial first time learn character walk dress outfit hair behaviour reactions speech bubble message say talk chat push shove replay rerun settings',
     category: 'Selection Modes',
@@ -1602,7 +1602,7 @@ export const articles: Article[] = [
     slug: 'draw-tour',
     title: 'The Draw Tour',
     description:
-      "A short, optional walkthrough of Draw mode's dock, offered the first time you work in Draw and replayable from Settings.",
+      "A short, optional walkthrough of Draw mode's dock, started from Start Draw Tour in the bottom bar.",
     keywords:
       'draw tour tour walkthrough onboarding intro introduction getting started guide tutorial first time learn draw mode whiteboard sketch pen pens marker markers highlighter eraser path tool shapes sticky dock settings background cursor shape recognition replay rerun settings accessibility',
     category: 'Canvas',
@@ -1613,7 +1613,7 @@ export const articles: Article[] = [
     slug: 'workshop-tour',
     title: 'The Workshop Tour',
     description:
-      'A short, optional walkthrough of Workshop mode, offered once after the welcome tour and replayable from Settings.',
+      'A short, optional walkthrough of Workshop mode, started from Start Workshop Tour in the bottom bar.',
     keywords:
       'workshop tour facilitate tour tour walkthrough onboarding intro introduction show me around getting started guide tutorial first time learn workshop mode session retro workshop timer vote poll session strip collaborate share participant replay rerun settings accessibility',
     category: 'Canvas',
@@ -1624,7 +1624,7 @@ export const articles: Article[] = [
     slug: 'plan-tour',
     title: 'The Plan Tour',
     description:
-      'A guided walkthrough of Plan mode on an example board or sheet, offered once and replayable from Settings.',
+      'A guided walkthrough of Plan mode on your own board or sheet, started from Start Boards Tour or Start Sheets Tour in the bottom bar.',
     keywords:
       'plan tour tour walkthrough onboarding intro introduction show me around getting started guide tutorial example board example cards example sheet first time learn plan mode kanban board cards spreadsheet spreadsheets sheet sheets formulas replay rerun settings accessibility',
     category: 'Canvas',
@@ -1754,7 +1754,7 @@ export const articles: Article[] = [
     slug: 'pages-tour',
     title: 'The Pages Tour',
     description:
-      'A short, optional walkthrough for each kind of page, offered the first time you work on one and replayable from Settings or Show Me.',
+      'A short, optional walkthrough for each kind of page, started from Start Pages Tour in the bottom bar or Show Me on any page.',
     keywords:
       'pages tour tour walkthrough onboarding intro introduction getting started guide tutorial first time learn pages mode pages page name cog page settings layout background add page slides slide deck add to slides present presentation infographic article logo show me replay rerun settings accessibility',
     category: 'Canvas',
@@ -2010,7 +2010,7 @@ export const articles: Article[] = [
     description:
       'What is outstanding for you across every document: open actions and comment threads.',
     keywords:
-      'activity inbox to do todo tasks my actions assigned to me assigned by me outstanding waiting open threads unresolved comments replies pending work queue what needs me badge count cross document all documents cross diagram all diagrams local only offline this browser',
+      'activity inbox to do todo tasks my actions assigned to me assigned by me outstanding waiting open threads unresolved comments replies pending work queue what needs me badge count reading pane reply resolve mark done filters form responses keyboard j k phone cross document all documents cross diagram all diagrams local only offline this browser',
     category: 'Explorer',
     categorySlug: 'explorer',
     group: 'Activity',

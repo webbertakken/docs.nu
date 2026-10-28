@@ -96,10 +96,18 @@ const {
   DRIVE_STALE_WATCH_MS,
 } = await import('@/lib/drive/cadence');
 
-const seen = { connecting: false, checking: false, requestCheck: () => {} };
+const seen = {
+  connecting: false,
+  checking: false,
+  requestCheck: () => {},
+  state: '' as string,
+  disconnect: async () => {},
+};
 function Probe() {
-  const { connecting, checking, requestCheck } = useDriveMirror();
+  const { connecting, checking, requestCheck, status, disconnect } = useDriveMirror();
   useEffect(() => {
+    seen.state = status.state;
+    seen.disconnect = disconnect;
     seen.connecting = connecting;
     seen.checking = checking;
     seen.requestCheck = requestCheck;
@@ -160,6 +168,32 @@ describe('DriveMirrorProvider', () => {
     await flush();
     expect(engines).toHaveLength(1);
     expect(engines[0]!.start).toHaveBeenCalledOnce();
+  });
+
+  // docs/specs/022-drive-mirror/drive-mirror.md "Disconnecting": a late status never undoes Disconnect.
+  it('keeps Disconnect when a pass begun before it reports afterwards', async () => {
+    auth.value = { isSignedIn: true, authLoaded: true, accountId: 'user_1' };
+    render(tree());
+    await flush();
+    await flush();
+    act(() => engines[0]!.publish(status({ state: 'idle', lastSyncedAt: 1 })));
+    expect(seen.state).toBe('idle');
+    await act(async () => {
+      await seen.disconnect();
+    });
+    expect(seen.state).toBe('disconnected');
+    posted.length = 0;
+    // The pass that was running when Disconnect landed ends, connected as it began.
+    act(() => engines[0]!.publish(status({ state: 'idle', lastSyncedAt: 2 })));
+    expect(seen.state).toBe('disconnected');
+    expect(posted).toEqual([]);
+    // Another tab's late answer is refused the same way.
+    act(() => election.deliver!({ type: 'status', status: status({ state: 'syncing' }) }));
+    expect(seen.state).toBe('disconnected');
+    // The pass after it sees no connection: the truth from now on.
+    act(() => engines[0]!.publish(status({ state: 'disconnected' })));
+    act(() => engines[0]!.publish(status({ state: 'syncing' })));
+    expect(seen.state).toBe('syncing');
   });
 
   it('back from a finished connection, asks the tab that runs the mirror to sync at once', async () => {

@@ -5,6 +5,7 @@ import { HoverCard, Glyph } from '@livedoc/ui';
 import { useIsMobileViewport } from '@/hooks/ui/useIsMobileViewport';
 import { MenuNameSlot, TabNameInBox } from '@/components/plan/menu-name-slot';
 import { ToolbarMenuCard } from './ToolbarMenuCard';
+import { EditorModeSwitch } from './editor-mode/EditorModeSwitch';
 
 // The Toolbar layout's menu button (docs/specs/007-editor/toolbar-layout.md), top-left of the canvas where
 // the Explorer panel would float. It toggles that same Explorer panel open as
@@ -17,6 +18,10 @@ import { ToolbarMenuCard } from './ToolbarMenuCard';
 // rather than closing it on pointer-down and reopening it on click.
 //
 // `inline`: in the strip's row, as a phone puts it (ToolbarMenuCard).
+//
+// The editor mode switch (docs/specs/007-editor/editor-modes.md "The mode switch") rides right of the button in the
+// same card, so it goes wherever the menu goes: named on a computer, its icon alone on a phone. It renders nothing
+// where no switch is offered (a Participant, a Viewer, a locked tab, an event-storming board).
 export function ToolbarExplorerButton({
   open,
   onToggle,
@@ -55,6 +60,7 @@ export function ToolbarExplorerButton({
       <HoverCard title="Explorer" description="Your documents, folders and teams." disabled={open}>
         {button}
       </HoverCard>
+      <EditorModeSwitch iconOnly={phone || inline} />
       {/* A maximised or tab-filling element's name, while its header holds the top row (menu-name-slot). */}
       {phone || inline ? null : <MenuNameSlot />}
       {/* Else the open tab's name, in every mode (not on a phone). */}
