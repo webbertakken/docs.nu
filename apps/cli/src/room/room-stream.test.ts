@@ -5,6 +5,7 @@ import { fakeIo, type Route } from '../testing/fake-io';
 import {
   openRoomStream,
   ROOM_FULL_LINE,
+  ROOM_FULL_SETTLE_MS,
   ROOM_RECONNECT_MAX_MS,
   ROOM_RECONNECT_MIN_MS,
 } from './room-stream';
@@ -112,6 +113,20 @@ describe('openRoomStream', () => {
     await io.advance(1_000);
     expect(reconnected()).toBe(1);
     stream.stop();
+  });
+
+  it('never says reconnected once stopped while a socket after a full room settles', async () => {
+    const { io, reconnected, stream } = setUp(ticketing);
+    await tick();
+    io.sockets[0]!.open();
+    io.sockets[0]!.drop(ROOM_FULL_CLOSE);
+    await io.advance(ROOM_RECONNECT_MAX_MS);
+    await tick();
+    io.sockets[1]!.open();
+    stream.stop();
+    await io.advance(ROOM_FULL_SETTLE_MS);
+    expect(reconnected()).toBe(0);
+    expect(await stream.ended).toBe('stopped');
   });
 
   it('caps the backoff, and retries a ticket the network lost', async () => {

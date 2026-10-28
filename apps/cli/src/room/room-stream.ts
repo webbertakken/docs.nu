@@ -53,6 +53,8 @@ export function openRoomStream(deps: Deps): RoomStream {
   let backoff = ROOM_RECONNECT_MIN_MS;
   let reconnecting = false;
   let roomFull = false;
+  // The pending "stayed open" check of a socket that opened after a full room (see ROOM_FULL_SETTLE_MS).
+  let cancelSettle: (() => void) | null = null;
   let cancelRetry: (() => void) | null = null;
   let settle!: (end: RoomStreamEnd) => void;
   let fail!: (err: unknown) => void;
@@ -90,12 +92,10 @@ export function openRoomStream(deps: Deps): RoomStream {
     socket = ws;
     // After a full room, a socket that opens may be closed again at once: it counts as rejoined only once it
     // has stayed open ROOM_FULL_SETTLE_MS, so a stream waiting outside the room never hears "reconnected" each try.
-    let cancelSettle: (() => void) | null = null;
     ws.onOpen(() => {
       log('room open');
       const rejoined = () => {
         cancelSettle = null;
-        if (stopped) return;
         backoff = ROOM_RECONNECT_MIN_MS;
         roomFull = false;
         if (reconnecting) deps.onReconnected();
@@ -147,6 +147,7 @@ export function openRoomStream(deps: Deps): RoomStream {
       if (stopped) return;
       stopped = true;
       cancelRetry?.();
+      cancelSettle?.();
       socket?.close(NORMAL_CLOSE);
       settle('stopped');
     },
