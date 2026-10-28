@@ -299,32 +299,32 @@ Timing `NewDocumentOpen` ([Timing telemetry](../../017-telemetry/timing-telemetr
 
 ## Testing
 
-| Rule                                                         | Test                                                               |
-| ------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Eight blanks, in order, each a known blank of its mode       | `new-document-blanks.test.ts`                                      |
-| Groups as the start lists them; each template once, no blank | `pane-groups.test.ts`                                              |
-| Page and Slides one group; Sheet, Board, Form a Plan family  | `pane-groups.test.ts`                                              |
-| Last blank round trip, unknown, no storage                   | `last-blank.test.ts`                                               |
-| Menu aim triangle                                            | `menu-aim.test.ts`                                                 |
-| Keys                                                         | `new-document-keys.test.ts`                                        |
-| Face makes the last blank; caret opens on it; digits; Escape | `NewDocumentButton.test.tsx`                                       |
-| A template card's request; the pane lists the blank's groups | `NewDocumentButton.test.tsx`                                       |
-| New Folder in the list where offered                         | `NewDocumentButton.test.tsx`, `PaneHeader.test.tsx`                |
-| Blank opens with its start closed; template not              | e2e `new-document-menu.spec.ts`                                    |
-| Folder section files into the folder                         | e2e `new-document-menu.spec.ts`                                    |
-| Click to editable within budget                              | e2e `new-document-open-budget.spec.ts` (production build)          |
-| Retry uses the same ids; Save to My Documents drops place    | `pending-documents.test.ts`, `start-new-document.test.ts`          |
-| Busy guard; frame; no creator; blank closes its start        | `start-new-document.test.ts`                                       |
-| One create for both stores; telemetry on landing             | `write-new-document.test.ts`                                       |
-| Seeded from memory, every tab loaded, baseline set           | `seed-pending-document.test.ts`                                    |
-| Held saves flush once; failed create keeps edits             | `usePendingCreate.test.tsx`, `useAutosave.test.tsx`                |
-| Editor shown on its address; Back hides; kept until settled  | `InPlaceEditor.test.tsx`                                           |
-| Signed-in cloud create within budget                         | e2e `account/new-document-open-budget.spec.ts`                     |
-| Hold resolves on landing, never on failure; url matching     | `pending-documents.test.ts`, `core.test.ts`, `offline-ids.test.ts` |
-| Opened from memory before auth, nothing fetched              | `useIdentityBootstrap.pending.test.ts`                             |
-| Not-saved banner: Try again or Save to My Documents          | `NotSavedBanner.test.tsx`                                          |
-| Creator bound by the shell; editor chunk loaded once         | `new-document-creator.test.ts`, `editor-page-loader.test.ts`       |
-| `NewDocumentOpen` timing reports its duration                | `timing.test.ts` (telemetry-client)                                |
+| Rule                                                         | Test                                                                 |
+| ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| Eight blanks, in order, each a known blank of its mode       | `new-document-blanks.test.ts`                                        |
+| Groups as the start lists them; each template once, no blank | `pane-groups.test.ts`                                                |
+| Page and Slides one group; Sheet, Board, Form a Plan family  | `pane-groups.test.ts`                                                |
+| Last blank round trip, unknown, no storage                   | `last-blank.test.ts`                                                 |
+| Menu aim triangle                                            | `menu-aim.test.ts`                                                   |
+| Keys                                                         | `new-document-keys.test.ts`                                          |
+| Face makes the last blank; caret opens on it; digits; Escape | `NewDocumentButton.test.tsx`                                         |
+| A template card's request; the pane lists the blank's groups | `NewDocumentButton.test.tsx`                                         |
+| New Folder in the list where offered                         | `NewDocumentButton.test.tsx`, `PaneHeader.test.tsx`                  |
+| Blank opens with its start closed; template not              | e2e `new-document-open-budget.spec.ts`, `start-new-document.test.ts` |
+| Folder section files into the folder                         | `start-new-document.test.ts`                                         |
+| Click to editable within budget                              | e2e `new-document-open-budget.spec.ts` (production build)            |
+| Retry uses the same ids; Save to My Documents drops place    | `pending-documents.test.ts`, `start-new-document.test.ts`            |
+| Busy guard; frame; no creator; blank closes its start        | `start-new-document.test.ts`                                         |
+| One create for both stores; telemetry on landing             | `write-new-document.test.ts`                                         |
+| Seeded from memory, every tab loaded, baseline set           | `seed-pending-document.test.ts`                                      |
+| Held saves flush once; failed create keeps edits             | `usePendingCreate.test.tsx`, `useAutosave.test.tsx`                  |
+| Editor shown on its address; Back hides; kept until settled  | `InPlaceEditor.test.tsx`                                             |
+| Signed-in cloud create within budget                         | e2e `account/new-document-open-budget.spec.ts`                       |
+| Hold resolves on landing, never on failure; url matching     | `pending-documents.test.ts`, `core.test.ts`, `offline-ids.test.ts`   |
+| Opened from memory before auth, nothing fetched              | `useIdentityBootstrap.pending.test.ts`                               |
+| Not-saved banner: Try again or Save to My Documents          | `NotSavedBanner.test.tsx`                                            |
+| Creator bound by the shell; editor chunk loaded once         | `new-document-creator.test.ts`, `editor-page-loader.test.ts`         |
+| `NewDocumentOpen` timing reports its duration                | `timing.test.ts` (telemetry-client)                                  |
 
 ## Constants and configuration
 

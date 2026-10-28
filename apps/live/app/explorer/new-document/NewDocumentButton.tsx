@@ -13,6 +13,7 @@ import { useLastBlank, writeLastBlank } from '@/lib/new-document/last-blank';
 import { track } from '@/lib/telemetry';
 import { BlankGlyph } from './blank-glyphs';
 import {
+  prefetchNewDocumentOpen,
   startNewDocument,
   type NewDocumentChoice,
   type NewDocumentRequest,
@@ -54,6 +55,8 @@ export function NewDocumentButton({
 
   const prefetch = useCallback(() => {
     void (phone ? loadSheet() : loadMenu()).catch(() => {});
+    // And what opening a document needs, so the first click opens at once (blueprint "Instant open").
+    prefetchNewDocumentOpen();
   }, [phone]);
 
   const choose = useCallback(

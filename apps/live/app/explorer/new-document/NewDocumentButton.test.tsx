@@ -2,10 +2,13 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NewDocumentButton } from './NewDocumentButton';
-import { startNewDocument } from './start-new-document';
+import { prefetchNewDocumentOpen, startNewDocument } from './start-new-document';
 import { writeLastBlank } from '@/lib/new-document/last-blank';
 
-vi.mock('./start-new-document', () => ({ startNewDocument: vi.fn() }));
+vi.mock('./start-new-document', () => ({
+  startNewDocument: vi.fn(),
+  prefetchNewDocumentOpen: vi.fn(),
+}));
 
 const started = vi.mocked(startNewDocument);
 
@@ -128,5 +131,11 @@ describe('NewDocumentButton', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'New Subfolder' }));
     expect(onCreateFolder).toHaveBeenCalledOnce();
     expect(started).not.toHaveBeenCalled();
+  });
+
+  it('fetches what opening needs when the pointer reaches it', () => {
+    render(<NewDocumentButton place={{}} />);
+    fireEvent.pointerEnter(screen.getByRole('button', { name: 'New Diagram' }).parentElement!);
+    expect(vi.mocked(prefetchNewDocumentOpen)).toHaveBeenCalled();
   });
 });

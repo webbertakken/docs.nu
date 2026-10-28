@@ -70,9 +70,7 @@ export function InPlaceEditor({ children }: { children: ReactNode }) {
       {shown ? null : children}
       {editor ? (
         <div style={{ display: shown ? 'contents' : 'none' }}>
-          <Suspense fallback={<OpeningScreen />}>
-            {createElement(editor, { key: openId })}
-          </Suspense>
+          <Suspense fallback={<OpeningScreen />}>{createElement(editor, { key: openId })}</Suspense>
         </div>
       ) : null}
     </>
