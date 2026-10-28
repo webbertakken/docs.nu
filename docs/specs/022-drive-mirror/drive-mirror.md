@@ -528,6 +528,10 @@ What decides it:
   and **leaves every Drive file in place**. Reconnecting later starts a fresh
   mirror into a new or re-chosen root, matching existing files by
   `ldDocumentId` where it can.
+- **A late status never undoes Disconnect.** A pass begun before Disconnect (in this tab or in the tab
+  that syncs) can still report the connection it began with. Until a status says "Not connected", the
+  editor drops every other one (`[drive-mirror] status-after-disconnect-dropped`), so the row stays
+  Not connected rather than flicking back to Connected. Connecting again clears the wait.
 - **Account deletion** does the same revoke and delete as part of deleting the
   account. Drive files are the user's and stay.
 - **Not connected, the mirror asks Google for nothing.** Without a connection

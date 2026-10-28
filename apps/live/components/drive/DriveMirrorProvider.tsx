@@ -131,24 +131,42 @@ export function DriveMirrorProvider({ children }: { children: ReactNode }) {
   // Cloud Sync came into view during a pass: check once it ends.
   const viewCheckPending = useRef(false);
   const requestCheckRef = useRef<() => void>(() => {});
-  const showStatus = useCallback((next: DriveMirrorStatus) => {
-    statusRef.current = next;
-    setStatus(next);
-    if (next.state !== 'starting' && next.state !== 'disconnected') setSettingUp(false);
-    if (viewCheckPending.current && next.state !== 'syncing') {
-      viewCheckPending.current = false;
-      if (next.state === 'idle') queueMicrotask(() => requestCheckRef.current());
+  // Set by Disconnect until a status says disconnected: a pass (here or in the tab that syncs) begun before it can
+  // still report the connection it began with, and that late status must not undo Disconnect
+  // (docs/specs/022-drive-mirror/drive-mirror.md "Disconnecting"). Connect clears it.
+  const awaitingDisconnected = useRef(false);
+  // Whether a status may land: false for one that predates Disconnect.
+  const landsAfterDisconnect = useCallback((next: DriveMirrorStatus) => {
+    if (!awaitingDisconnected.current) return true;
+    if (next.state !== 'disconnected') {
+      driveLog('status-after-disconnect-dropped', { state: next.state });
+      return false;
     }
-    const since = checkingSinceRef.current;
-    if (
-      since !== null &&
-      next.state !== 'syncing' &&
-      (next.state !== 'idle' || (next.lastSyncedAt ?? 0) >= since)
-    ) {
-      checkingSinceRef.current = null;
-      setCheckingSince(null);
-    }
+    awaitingDisconnected.current = false;
+    return true;
   }, []);
+  const showStatus = useCallback(
+    (next: DriveMirrorStatus) => {
+      if (!landsAfterDisconnect(next)) return;
+      statusRef.current = next;
+      setStatus(next);
+      if (next.state !== 'starting' && next.state !== 'disconnected') setSettingUp(false);
+      if (viewCheckPending.current && next.state !== 'syncing') {
+        viewCheckPending.current = false;
+        if (next.state === 'idle') queueMicrotask(() => requestCheckRef.current());
+      }
+      const since = checkingSinceRef.current;
+      if (
+        since !== null &&
+        next.state !== 'syncing' &&
+        (next.state !== 'idle' || (next.lastSyncedAt ?? 0) >= since)
+      ) {
+        checkingSinceRef.current = null;
+        setCheckingSince(null);
+      }
+    },
+    [landsAfterDisconnect],
+  );
   useEffect(() => {
     if (checkingSince === null) return;
     const timer = window.setTimeout(() => {
@@ -193,6 +211,7 @@ export function DriveMirrorProvider({ children }: { children: ReactNode }) {
     if (mode === 'off' || quiet || !accountId) return;
     const tokens = createBrowserTokens(mode, accountId);
     const publish = (next: DriveMirrorStatus) => {
+      if (!landsAfterDisconnect(next)) return;
       showStatus(next);
       channel.post({ type: 'status', status: next });
     };
@@ -365,7 +384,7 @@ export function DriveMirrorProvider({ children }: { children: ReactNode }) {
       channel.close();
       runtime.current = null;
     };
-  }, [mode, quiet, accountId, showStatus]);
+  }, [mode, quiet, accountId, showStatus, landsAfterDisconnect]);
 
   const handToEngine = useCallback((token: DriveAccessToken) => {
     const rt = runtime.current;
@@ -414,6 +433,7 @@ export function DriveMirrorProvider({ children }: { children: ReactNode }) {
 
   const connect = useCallback(async () => {
     if (!accountId || mode === 'off') return;
+    awaitingDisconnected.current = false;
     setConnecting(true);
     setConnectError(null);
     setConnectNote(null);
@@ -475,7 +495,9 @@ export function DriveMirrorProvider({ children }: { children: ReactNode }) {
     if (rt?.tokens.mode === 'broker') rt.tokens.source.clear();
     const next = { ...DRIVE_STATUS_INITIAL, state: 'disconnected' as const };
     setSettingUp(false);
+    statusRef.current = next;
     setStatus(next);
+    awaitingDisconnected.current = true;
     rt?.channel.post({ type: 'status', status: next });
     syncNow();
   }, [accountId, confirm, mode, syncNow]);
