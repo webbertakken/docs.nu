@@ -40,6 +40,7 @@ const TEMPLATE_PATTERNS: Partial<Record<TemplateKind, BackgroundPattern>> = {
   kanban: 'grid',
   'blank-plan': 'grid',
   'blank-spreadsheet': 'grid',
+  'blank-board': 'grid',
   'project-planner': 'grid',
   'bug-triage': 'grid',
   'team-retro': 'grid',

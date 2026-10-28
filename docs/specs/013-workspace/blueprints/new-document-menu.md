@@ -64,8 +64,8 @@ function startNewDocument(request: NewDocumentRequest): void;
 
 | Blank      | `blank`             | `templates` (in order)                                                                                          | `picker`                   |
 | ---------- | ------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| diagram    | `blank`             | Start Diagramming's Recommended less its blank, first six                                                       | `diagram` / `recommended`  |
-| whiteboard | `whiteboard`        | Start Drawing's Recommended less its blank, first six                                                           | `draw` / `recommended`     |
+| diagram    | `blank`             | Start Diagramming's Recommended less its blank, then `swimlane`                                                 | `diagram` / `recommended`  |
+| whiteboard | `whiteboard`        | Start Drawing's Recommended less its blank, then `paper-prototype`                                              | `draw` / `recommended`     |
 | page       | `blank-article`     | `article`, `working-backwards`, `resume`, `recipe-card`                                                         | `pages` / `articles`       |
 | sheet      | `blank-spreadsheet` | `budget-planner`, `timesheet`, `invoice`, `expense-report`, `contact-list`, `sales-pipeline`                    | `plan` / `spreadsheets`    |
 | board      | `blank-board`       | `kanban`, `bug-triage`, `weekly-planner`, `content-calendar`, `hiring-pipeline`, `feedback-board`               | `plan` / `boards`          |
@@ -73,8 +73,8 @@ function startNewDocument(request: NewDocumentRequest): void;
 | form       | `blank-form`        | `feedback-form`, `bug-report-form`, `feature-request-form`, `rsvp-form`, `job-application-form`, `contact-form` | `plan` / `forms`           |
 | workshop   | `blank-session`     | Start a Workshop's Recommended less its blank, first six                                                        | `workshop` / `recommended` |
 
-- Diagram, Whiteboard and Workshop are written out in the data as their Recommended stands today; a test holds them
-  equal to `templateStartFor(mode)`'s Recommended less blanks, first six, so the two cannot drift (D191).
+- Diagram, Whiteboard and Workshop are written out in the data as their Recommended stands today; a test holds
+  their lead equal to the mode's Popular shelf less blanks (Recommended's source), so the two cannot drift (D191).
 - `pickerGroupCount` counts the cards the picker group shows on an empty document with no cards: a template start's
   group `kinds.length` less blanks; for Recommended, every template the mode's start lists (its "All 61"); for Start
   Planning, the group's cards from `start-planning-items.ts` with no document cards (D192).

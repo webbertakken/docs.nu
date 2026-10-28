@@ -101,6 +101,7 @@ describe('the shelves, as the template step lays them out', () => {
       'blank-wireframe-phone',
       'blank-plan',
       'blank-spreadsheet',
+      'blank-board',
       'blank-form',
     ]);
     for (const t of popularTemplates()) expect(isBlankTemplate(t.kind), t.kind).toBe(true);

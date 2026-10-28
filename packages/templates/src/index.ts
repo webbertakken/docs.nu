@@ -41,3 +41,4 @@ export { withBlankPageThemed } from './blank-page-templates';
 export * from './form-templates';
 export * from './form-start';
 export * from './linked-board-start';
+export * from './new-document-blanks';

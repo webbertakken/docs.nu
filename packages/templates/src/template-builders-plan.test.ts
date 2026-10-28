@@ -49,6 +49,7 @@ describe('plan templates', () => {
     expect(names).toEqual({
       'blank-plan': ['Board'],
       'blank-spreadsheet': ['Sheet'],
+      'blank-board': ['Board'],
       'project-planner': ['Roadmap', 'Backlog', 'Sprint', 'Daily Standup'],
       kanban: ['Board', 'Requests', 'Flow'],
       'bug-triage': ['Triage', 'Fixing', 'Health'],
@@ -191,7 +192,8 @@ describe('plan templates', () => {
     for (const { spec, label } of everyTab()) {
       if (!spec.board) continue;
       const setup = boardSetup(spec.board);
-      if (setup.archive) continue;
+      // The archive takes every type; a Blank board, set up by no template, brings none (docs/specs/026-plan/plan-mode.md).
+      if (setup.archive || !spec.board.setup) continue;
       expect(setup.addTypes?.length, label).toBeGreaterThan(0);
       for (const t of setup.addTypes!) expect(known.has(t), `${label} ${t}`).toBe(true);
     }
