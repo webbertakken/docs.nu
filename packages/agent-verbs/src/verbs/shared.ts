@@ -7,6 +7,10 @@ import type { VerbContext } from '../define';
 export const LIST_DEFAULT_LIMIT = 20;
 export const LIST_MAX_LIMIT = 200;
 
+// How long `wait` listens when no --timeout is given, and the longest it may (CLI61); `--wait-held` shares the cap.
+export const WAIT_DEFAULT_TIMEOUT_S = 600;
+export const WAIT_MAX_TIMEOUT_S = 3600;
+
 // `YYYY-MM-DD`, and `YYYY-MM-DD HH:MM`, in UTC so output does not depend on the machine.
 export const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 export const minute = (ms: number) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');

@@ -4,6 +4,7 @@ import { run } from '../main';
 import { capabilities, fakeIo, NOW, TOKEN, type FakeIo, type Route } from '../testing/fake-io';
 import { DEFAULT_PROFILE } from '../config/profiles';
 import { fileReadCopies } from '../sync/read-copies';
+import { WAIT_DEFAULT_TIMEOUT_S, WAIT_MAX_TIMEOUT_S } from '@livedoc/agent-verbs';
 import { WAIT_SETTLE_MS } from './wait';
 
 // `wait` and `watch` through the whole command (docs/specs/015-api/blueprints/cli.md "The room stream", CLI33, CLI80):
@@ -170,6 +171,28 @@ describe('wait endings', () => {
     await io.advance(30_000);
     expect(await exit).toBe(0);
     expect(io.out()).toBe('nothing new in 30 s\n');
+  });
+
+  it('gives up after WAIT_DEFAULT_TIMEOUT_S when no --timeout is given', async () => {
+    const { io, exit } = await start(['wait', DOC, '--for', 'comment']);
+    await io.advance(WAIT_DEFAULT_TIMEOUT_S * 1000 - 1);
+    expect(io.out()).toBe('');
+    await io.advance(1);
+    expect(await exit).toBe(0);
+    expect(io.out()).toBe(`nothing new in ${WAIT_DEFAULT_TIMEOUT_S} s\n`);
+  });
+
+  it('waits as long as WAIT_MAX_TIMEOUT_S, and refuses a longer --timeout', async () => {
+    const longest = await start(['wait', DOC, '--for', 'comment', '--timeout', '3600']);
+    await longest.io.advance(WAIT_MAX_TIMEOUT_S * 1000);
+    expect(await longest.exit).toBe(0);
+    expect(longest.io.out()).toBe('nothing new in 3600 s\n');
+
+    const io = fakeIo({ env: { LIVEDOC_TOKEN: TOKEN }, routes: [capabilities, host()] });
+    const code = await run(['wait', DOC, '--for', 'comment', '--timeout', '3601'], io);
+    expect(code).toBe(2);
+    expect(io.err()).toContain('--timeout: at most 3600 seconds');
+    expect(io.sockets).toHaveLength(0);
   });
 
   it('exits 1 on Ctrl-C, and 3 when the document goes to the Trash', async () => {

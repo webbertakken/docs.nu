@@ -15,6 +15,7 @@ import { jwt } from 'better-auth/plugins/jwt';
 import { generateAccountId } from './account-id';
 import { identityConfigOf, reportIdentityConfig, versionedSecrets } from './identity-config';
 import { identityHooks, sendSignInCode } from './identity-hooks';
+import { identityLogger } from './identity-logger';
 import type { Env } from '../types';
 
 // Sessions last 30 days and slide forward at most once a day (blueprint "Constants"; D15).
@@ -139,6 +140,7 @@ export function identityOptions(
       },
     },
     databaseHooks: identityHooks(env, executionCtx),
+    logger: identityLogger,
     plugins: [
       emailOTP({
         otpLength: EMAIL_CODE_LENGTH,

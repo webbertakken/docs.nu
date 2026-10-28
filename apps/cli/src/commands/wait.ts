@@ -1,6 +1,7 @@
 // `wait <doc> --for comment|change` (docs/specs/015-api/blueprints/cli.md "The room stream", CLI33, CLI80): listens
-// until a comment is added, or until a change settles for WAIT_SETTLE_MS, then prints it. `--timeout` ends with a
-// line saying nothing came; Ctrl-C ends with exit 1; the document moved to the Trash with exit 3.
+// until a comment is added, or until a change settles for WAIT_SETTLE_MS, then prints it. Past `--timeout`
+// (WAIT_DEFAULT_TIMEOUT_S unless given) it prints a line saying nothing came; Ctrl-C ends with exit 1; the document
+// moved to the Trash with exit 3.
 
 import { documentOf, resolveTab, tabPath, type VerbContext } from '@livedoc/agent-verbs';
 import { revOfEtag, type DocumentCommentsResponse } from '@livedoc/api-schema';
@@ -14,7 +15,7 @@ import { oneLine } from '../output/one-line';
 
 export const WAIT_SETTLE_MS = 2_000;
 
-export type WaitInput = { doc: string; for: 'comment' | 'change'; tab?: string; timeout?: number };
+export type WaitInput = { doc: string; for: 'comment' | 'change'; tab?: string; timeout: number };
 export type StreamResult = { lines: string[]; exit: number };
 
 export const trashedError = () =>
@@ -136,13 +137,11 @@ export async function waitFor(
       },
     );
     cleanups.push(io.onInterrupt(() => finish({ lines: [], exit: EXIT.rejected })));
-    if (input.timeout !== undefined) {
-      const seconds = input.timeout;
-      cleanups.push(
-        io.timer(seconds * 1000, () =>
-          finish({ lines: [`nothing new in ${seconds} s`], exit: EXIT.done }),
-        ),
-      );
-    }
+    const seconds = input.timeout;
+    cleanups.push(
+      io.timer(seconds * 1000, () =>
+        finish({ lines: [`nothing new in ${seconds} s`], exit: EXIT.done }),
+      ),
+    );
   });
 }

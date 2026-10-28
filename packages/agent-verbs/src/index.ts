@@ -57,6 +57,8 @@ export {
   LIST_MAX_LIMIT,
   tabOf,
   tabPath,
+  WAIT_DEFAULT_TIMEOUT_S,
+  WAIT_MAX_TIMEOUT_S,
 } from './verbs/shared';
 export { graphLint, graphOfSource } from './verbs/graph';
 export { tabListOf } from './verbs/tab';
