@@ -1992,8 +1992,6 @@ export const EXACT: Readonly<Record<string, string>> = {
     "Someone turned on zen mode, hiding the editor's chrome for a distraction-free canvas.",
   'UI|Used|JustDraw':
     'Someone landed on the New Document page through a link that skips the wizard and goes straight into a blank document.',
-  'UI|Used|NewDocumentAllTemplates':
-    "Someone chose All templates in the Explorer's New Document menu, opening a new document on that blank's templates.",
   'UI|Used|NewDocumentBlank':
     "Someone made a blank document from the Explorer's New Document menu or its button, opening empty with no template picker.",
   'UI|Used|NewDocumentTemplate':

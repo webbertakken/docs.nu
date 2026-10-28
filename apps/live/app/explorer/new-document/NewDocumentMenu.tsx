@@ -2,7 +2,7 @@
 
 // The New Document menu on a desktop (docs/specs/013-workspace/new-document-menu.md "The menu"): a command menu under
 // the split button, the list of blanks on the right (straight under the button, where the pointer already is) and the
-// selected blank's pane to its left. Hover selects a row, held while the pointer heads for the pane (useMenuAim); the
+// selected blank's templates, grouped and scrolling, to its left. Hover selects a row, held while the pointer heads for the pane (useMenuAim); the
 // arrow keys walk the list and the pane's grid (new-document-keys.ts); 1 to 8 make a blank from anywhere in it. The
 // menu's own keys (Enter, Escape, Tab) and focus return are the shared command menu's (PortalMenu).
 import { useCallback, useMemo, useRef, useState, type KeyboardEvent } from 'react';
@@ -15,7 +15,7 @@ import { lucideChevronLeft } from '@livedoc/icons/lucide';
 import { lucideGlyph } from '@livedoc/ui';
 import { PortalMenu } from '@/components/primitives/PortalMenu';
 import { FolderOutlineIcon } from '@/components/primitives/explorer-icons';
-import { pickerGroupCount } from '@/lib/new-document/picker-group-count';
+import { paneGroupsFor } from '@/lib/new-document/pane-groups';
 import { BlankGlyph } from './blank-glyphs';
 import { NewDocumentPane, spotAttr } from './NewDocumentPane';
 import { digitRow, moveInMenu, paneRowsFor, type MenuSpot } from './new-document-keys';
@@ -24,8 +24,10 @@ import type { NewDocumentChoice } from './start-new-document';
 
 const ChevronLeftIcon = lucideGlyph(lucideChevronLeft, 12);
 
-// NEW_DOCUMENT_MENU_WIDTH_REM (blueprint "Constants"): the list's 14.5rem beside a pane of three cards a row.
+// NEW_DOCUMENT_MENU_WIDTH_REM and NEW_DOCUMENT_PANE_HEIGHT_REM (blueprint "Constants"): the list's 14.5rem beside a
+// pane of three cards a row, tall enough to show about four rows of templates at once.
 const MENU_WIDTH = 'w-[40rem]';
+const PANE_HEIGHT = 'h-[26rem]';
 
 export type NewDocumentMenuProps = {
   anchor: HTMLElement | null;
@@ -52,15 +54,18 @@ export default function NewDocumentMenu({
   const aim = useMenuAim<NewDocumentBlankId>(pane, setSelected);
   const index = NEW_DOCUMENT_BLANKS.findIndex((b) => b.id === selected);
   const blank = NEW_DOCUMENT_BLANKS[index]!;
-  const counts = useMemo(
-    () => new Map(NEW_DOCUMENT_BLANKS.map((b) => [b.id, pickerGroupCount(b)])),
+  const groups = useMemo(
+    () => new Map(NEW_DOCUMENT_BLANKS.map((b) => [b.id, paneGroupsFor(b)])),
     [],
   );
+  const paneGroups = groups.get(blank.id)!;
 
-  const focusSpot = (spot: string) =>
-    root.current
-      ?.querySelector<HTMLElement>(`[data-spot="${spot}"]`)
-      ?.focus({ preventScroll: true });
+  // A card reached from the keyboard is scrolled into the pane's view, clear of its sticky heading.
+  const focusSpot = (spot: string) => {
+    const el = root.current?.querySelector<HTMLElement>(`[data-spot="${spot}"]`);
+    el?.focus({ preventScroll: true });
+    el?.scrollIntoView?.({ block: 'nearest' });
+  };
 
   // The menu opens on the last blank, its row focused once the menu is placed (PortalMenu's own first-item focus is
   // off).
@@ -98,7 +103,7 @@ export default function NewDocumentMenu({
     if (!at) return;
     const to = moveInMenu(event.key, at, {
       listLength: NEW_DOCUMENT_BLANKS.length,
-      pane: paneRowsFor(blank.templates.length),
+      pane: paneRowsFor(paneGroups.map((g) => g.kinds.length)),
     });
     if (!to) return;
     event.preventDefault();
@@ -121,7 +126,11 @@ export default function NewDocumentMenu({
       frameWidth={MENU_WIDTH}
     >
       {/* The list comes first in reading order and sits on the right, under the button. */}
-      <div ref={attachRoot} onKeyDownCapture={onKeyDownCapture} className="flex flex-row-reverse">
+      <div
+        ref={attachRoot}
+        onKeyDownCapture={onKeyDownCapture}
+        className="flex flex-row-reverse items-start"
+      >
         <div className="w-[14.5rem] shrink-0 px-1.5 py-0.5">
           {NEW_DOCUMENT_BLANKS.map((b, row) => {
             const isSelected = b.id === selected;
@@ -183,12 +192,14 @@ export default function NewDocumentMenu({
         <div
           ref={pane}
           onPointerEnter={aim.cancel}
-          className="min-w-0 flex-1 border-r border-slate-200 dark:border-slate-800"
+          className={`min-w-0 flex-1 self-stretch border-r border-slate-200 dark:border-slate-800 ${PANE_HEIGHT}`}
         >
+          {/* Keyed on the blank, so another blank's templates start at their top. */}
           <NewDocumentPane
+            key={blank.id}
             blank={blank}
-            count={counts.get(blank.id) ?? 0}
-            onChoose={(choice, template) => onChoose(blank.id, choice, template)}
+            groups={paneGroups}
+            onChoose={(template) => onChoose(blank.id, 'template', template)}
           />
         </div>
       </div>

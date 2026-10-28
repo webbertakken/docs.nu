@@ -199,13 +199,6 @@ A `/new?q=<words>` link (the marketing site's **Build yours**, a gallery search)
 its words become the search of that mode's start on the new document, so the templates it meant are the ones shown.
 They are kept for the browser tab only and read once (`start-query.ts`).
 
-## Group handed over
-
-The New Document menu's **All templates** ([New Document menu](../013-workspace/new-document-menu.md)) makes its
-mode's blank and hands over its **picker group** (Articles, Slides, Spreadsheets, Boards, Forms, or Recommended): the
-new document's start opens on that group instead of Recommended. Start Planning reads it too. Kept for the browser
-tab only and read once (`start-group.ts`); an unknown group opens on Recommended.
-
 ## Look
 
 - **The tab's colours.** The panel's paper is the tab's canvas colour, its accent (the chosen category, the focus

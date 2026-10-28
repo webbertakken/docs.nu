@@ -1,13 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { digitRow, moveInMenu, paneRowsFor } from './new-document-keys';
+import { digitRow, moveInMenu, paneRowsFor, paneSpots } from './new-document-keys';
 
-const layout = { listLength: 8, pane: paneRowsFor(6) };
+const layout = { listLength: 8, pane: paneRowsFor([6, 2]) };
 
 // docs/specs/013-workspace/new-document-menu.md "Keyboard and screen readers"
 describe('New Document menu keys', () => {
-  it('lays six templates out as the blank card, two rows of three and All templates', () => {
-    expect(paneRowsFor(6)).toEqual([1, 3, 3, 1]);
-    expect(paneRowsFor(4)).toEqual([1, 3, 1, 1]);
+  it('lays each group out three to a row, one group after another', () => {
+    expect(paneRowsFor([6, 2])).toEqual([3, 3, 2]);
+    expect(paneRowsFor([4])).toEqual([3, 1]);
+    expect(paneSpots([4, 2])).toEqual([
+      [
+        { row: 0, col: 0 },
+        { row: 0, col: 1 },
+        { row: 0, col: 2 },
+        { row: 1, col: 0 },
+      ],
+      [
+        { row: 2, col: 0 },
+        { row: 2, col: 1 },
+      ],
+    ]);
   });
 
   it('moves along the list, wrapping at its ends', () => {
@@ -22,7 +34,7 @@ describe('New Document menu keys', () => {
     expect(moveInMenu('End', { area: 'list', row: 2 }, layout)).toEqual({ area: 'list', row: 7 });
   });
 
-  it('moves left from the list into the pane, on the blank card', () => {
+  it('moves left from the list into the pane, on its first template', () => {
     expect(moveInMenu('ArrowLeft', { area: 'list', row: 3 }, layout)).toEqual({
       area: 'pane',
       row: 0,
@@ -30,30 +42,26 @@ describe('New Document menu keys', () => {
     });
   });
 
-  it('moves through the templates as a grid', () => {
-    expect(moveInMenu('ArrowDown', { area: 'pane', row: 0, col: 0 }, layout)).toEqual({
+  it('moves through the templates as a grid, across groups', () => {
+    expect(moveInMenu('ArrowDown', { area: 'pane', row: 0, col: 2 }, layout)).toEqual({
       area: 'pane',
       row: 1,
-      col: 0,
+      col: 2,
+    });
+    expect(moveInMenu('ArrowDown', { area: 'pane', row: 1, col: 2 }, layout)).toEqual({
+      area: 'pane',
+      row: 2,
+      col: 1,
     });
     expect(moveInMenu('ArrowRight', { area: 'pane', row: 1, col: 0 }, layout)).toEqual({
       area: 'pane',
       row: 1,
       col: 1,
     });
-    expect(moveInMenu('ArrowDown', { area: 'pane', row: 2, col: 2 }, layout)).toEqual({
-      area: 'pane',
-      row: 3,
-      col: 0,
-    });
   });
 
   it('goes back to the list from the pane’s right column', () => {
     expect(moveInMenu('ArrowRight', { area: 'pane', row: 1, col: 2 }, layout)).toEqual({
-      area: 'list',
-      row: -1,
-    });
-    expect(moveInMenu('ArrowRight', { area: 'pane', row: 0, col: 0 }, layout)).toEqual({
       area: 'list',
       row: -1,
     });

@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NewDocumentButton } from './NewDocumentButton';
 import { startNewDocument } from './start-new-document';
-import { takeStartGroup } from '@/components/start/start-group';
 import { writeLastBlank } from '@/lib/new-document/last-blank';
 
 vi.mock('./start-new-document', () => ({ startNewDocument: vi.fn() }));
@@ -17,6 +16,10 @@ async function openMenu() {
 
 // docs/specs/013-workspace/new-document-menu.md
 describe('NewDocumentButton', () => {
+  // The menu is a lazy chunk: loaded once up front, so opening it never races the first import.
+  beforeAll(async () => {
+    await import('./NewDocumentMenu');
+  });
   beforeEach(() => {
     act(() => writeLastBlank('diagram'));
   });
@@ -93,19 +96,13 @@ describe('NewDocumentButton', () => {
     );
   });
 
-  it('opens a group of the picker from All templates', async () => {
+  it('lists every template of the blank, in its groups', async () => {
     act(() => writeLastBlank('page'));
     render(<NewDocumentButton place={{}} />);
     await openMenu();
-    fireEvent.click(screen.getByRole('menuitem', { name: /^All \d+ Page templates$/ }));
-    expect(started).toHaveBeenCalledWith(
-      expect.objectContaining({
-        choice: 'all-templates',
-        blank: 'page',
-        template: 'blank-illustration',
-      }),
-    );
-    expect(takeStartGroup()).toBe('articles');
+    const pane = screen.getByRole('group', { name: 'Page templates' });
+    expect(pane.querySelectorAll('h3')[0]?.textContent).toBe('Articles');
+    expect(screen.getByRole('menuitem', { name: 'Project Brief' })).toBeTruthy();
   });
 
   it('moves along the list and into the pane with the arrow keys', async () => {
@@ -119,7 +116,7 @@ describe('NewDocumentButton', () => {
     );
     expect(screen.getByRole('group', { name: 'Whiteboard templates' })).toBeTruthy();
     fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' });
-    expect(document.activeElement?.textContent).toContain('Blank Whiteboard');
+    expect(document.activeElement?.getAttribute('data-spot')).toBe('pane:0:0');
   });
 
   it('offers New Folder in the menu where the section does', async () => {

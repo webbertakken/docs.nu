@@ -48,8 +48,8 @@ export const NEW_DOCUMENT_MENU = chart(
   'UI',
   'Used',
   'New Document Menu',
-  "How documents were started from the Explorer's New Document menu: a blank, a template, or All templates into the picker.",
-  { types: ['NewDocumentBlank', 'NewDocumentTemplate', 'NewDocumentAllTemplates'] },
+  "How documents were started from the Explorer's New Document menu: a blank or a template.",
+  { types: ['NewDocumentBlank', 'NewDocumentTemplate'] },
 );
 
 export const TAB_TEXT_DEFAULTS = chart(

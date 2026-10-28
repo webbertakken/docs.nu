@@ -9,7 +9,7 @@ import { lucideChevronLeft, lucideLayoutGrid } from '@livedoc/icons/lucide';
 import { MenuTreeContext, lucideGlyph, useMenu } from '@livedoc/ui';
 import { BottomSheet } from '@/components/primitives/BottomSheet';
 import { FolderOutlineIcon } from '@/components/primitives/explorer-icons';
-import { pickerGroupCount } from '@/lib/new-document/picker-group-count';
+import { paneGroupsFor } from '@/lib/new-document/pane-groups';
 import { BlankGlyph } from './blank-glyphs';
 import { NewDocumentPane } from './NewDocumentPane';
 import type { NewDocumentMenuProps } from './NewDocumentMenu';
@@ -56,11 +56,13 @@ export default function NewDocumentSheet({
                 <BackIcon aria-hidden />
                 Back
               </button>
-              <NewDocumentPane
-                blank={blank}
-                count={pickerGroupCount(blank)}
-                onChoose={(choice, template) => onChoose(blank.id, choice, template)}
-              />
+              <div className="h-[50dvh]">
+                <NewDocumentPane
+                  blank={blank}
+                  groups={paneGroupsFor(blank)}
+                  onChoose={(template) => onChoose(blank.id, 'template', template)}
+                />
+              </div>
             </>
           ) : (
             <>

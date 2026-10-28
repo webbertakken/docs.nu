@@ -1,20 +1,33 @@
 // The New Document menu's keys (docs/specs/013-workspace/new-document-menu.md "Keyboard and screen readers"): where
-// focus goes from where it is. The list is one column; the pane is rows of cards (the blank card, the templates three
-// to a row, All templates), each row as wide as the pane. Pure: the menu moves focus to the answer.
+// focus goes from where it is. The list is one column; the pane is its groups' templates, three to a row, the rows of
+// every group one after another. Pure: the menu moves focus to the answer.
 export type MenuSpot = { area: 'list'; row: number } | { area: 'pane'; row: number; col: number };
 
-// The pane's rows, as how many cards each holds: [1, 3, 3, 1] for a blank with six templates.
+// The pane's rows, as how many cards each holds: [3, 3, 2, 3, 1] for groups of eight and four.
 export type PaneRows = readonly number[];
 
 export const TEMPLATES_PER_ROW = 3;
 
-export function paneRowsFor(templateCount: number): PaneRows {
-  const rows: number[] = [1];
-  for (let left = templateCount; left > 0; left -= TEMPLATES_PER_ROW) {
-    rows.push(Math.min(TEMPLATES_PER_ROW, left));
+export function paneRowsFor(groupSizes: readonly number[]): PaneRows {
+  const rows: number[] = [];
+  for (const size of groupSizes) {
+    for (let left = size; left > 0; left -= TEMPLATES_PER_ROW)
+      rows.push(Math.min(TEMPLATES_PER_ROW, left));
   }
-  rows.push(1);
   return rows;
+}
+
+// Where each card of each group sits on the pane's rows, in order: the spot the arrow keys reach it by.
+export function paneSpots(groupSizes: readonly number[]): { row: number; col: number }[][] {
+  let row = 0;
+  return groupSizes.map((size) => {
+    const spots = Array.from({ length: size }, (_, i) => ({
+      row: row + Math.floor(i / TEMPLATES_PER_ROW),
+      col: i % TEMPLATES_PER_ROW,
+    }));
+    row += Math.ceil(size / TEMPLATES_PER_ROW);
+    return spots;
+  });
 }
 
 export function moveInMenu(
@@ -34,7 +47,7 @@ export function moveInMenu(
       case 'End':
         return { area: 'list', row: listLength - 1 };
       case 'ArrowLeft':
-        return { area: 'pane', row: 0, col: 0 };
+        return pane.length > 0 ? { area: 'pane', row: 0, col: 0 } : null;
       default:
         return null;
     }

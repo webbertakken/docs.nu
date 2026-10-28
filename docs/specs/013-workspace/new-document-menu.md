@@ -1,7 +1,7 @@
 # New Document menu
 
 The Explorer's **New Document** is a split button and a menu. Its face makes a blank document at once; its menu
-offers every blank LiveDoc makes, each with six of its templates and the way to all of them. A blank opens in the
+offers every blank LiveDoc makes, each beside every one of its templates. A blank opens in the
 editor straight away, without a page load and without waiting on the server, and opens empty, its template start
 closed: whoever asked for a blank gets a blank.
 
@@ -20,7 +20,7 @@ closed: whoever asked for a blank gets a blank.
 | **New Document menu** | The split button and its menu in the Explorer's pane header                       | create menu, new menu, launcher   |
 | **blank**             | One entry of the menu: what a new document starts as (Diagram, Sheet, ...), empty | kind, type, document type, mode   |
 | **last blank**        | The blank this browser made last; the face makes it                               | default blank, favourite          |
-| **picker group**      | The group of a template start that a blank's **All templates** opens on           | category (the catalogue's), shelf |
+| **template group**    | One heading of a blank's templates in the pane, a group of its template start     | category (the catalogue's), shelf |
 
 - A blank is never called a kind: a kind is what a tab is, and Diagram and Whiteboard are modes of one kind
   ([Domain language](../003-system-architecture/domain-language.md#mode-kind-and-template)). The blanks name what
@@ -30,16 +30,16 @@ closed: whoever asked for a blank gets a blank.
 
 In this order, each with its glyph and number key:
 
-| #   | Blank      | Makes (its blank template)              | Its templates                             | All templates opens              |
-| --- | ---------- | --------------------------------------- | ----------------------------------------- | -------------------------------- |
-| 1   | Diagram    | Blank Diagram (`blank`)                 | Start Diagramming's Recommended           | Start Diagramming, Recommended   |
-| 2   | Whiteboard | Blank Whiteboard (`whiteboard`)         | Start Drawing's Recommended               | Start Drawing, Recommended       |
-| 3   | Page       | Blank Article (`blank-article`)         | Start Making Pages' Articles              | Start Making Pages, **Articles** |
-| 4   | Sheet      | Blank Spreadsheet (`blank-spreadsheet`) | Sheet templates (Budget, Timesheet, ...)  | Start Planning, **Spreadsheets** |
-| 5   | Board      | Blank Board (`blank-board`)             | Board templates (Kanban, Bug Triage, ...) | Start Planning, **Boards**       |
-| 6   | Slides     | Blank Slide Deck (`blank-slide-deck`)   | Start Making Pages' Slides                | Start Making Pages, **Slides**   |
-| 7   | Form       | Blank Form (`blank-form`)               | The form templates                        | Start Planning, **Forms**        |
-| 8   | Workshop   | Blank Session (`blank-session`)         | Start a Workshop's Recommended            | Start a Workshop, Recommended    |
+| #   | Blank      | Makes (its blank template)              | Its templates, in the pane                                      |
+| --- | ---------- | --------------------------------------- | --------------------------------------------------------------- |
+| 1   | Diagram    | Blank Diagram (`blank`)                 | Start Diagramming's, in its groups, Recommended first           |
+| 2   | Whiteboard | Blank Whiteboard (`whiteboard`)         | Start Drawing's, in its groups, Recommended first               |
+| 3   | Page       | Blank Article (`blank-article`)         | Start Making Pages' Articles                                    |
+| 4   | Sheet      | Blank Spreadsheet (`blank-spreadsheet`) | The spreadsheet templates (Budget, Timesheet, Invoice, ...)     |
+| 5   | Board      | Blank Board (`blank-board`)             | The Plan templates that set up boards (Kanban, Bug Triage, ...) |
+| 6   | Slides     | Blank Slide Deck (`blank-slide-deck`)   | Start Making Pages' Slides                                      |
+| 7   | Form       | Blank Form (`blank-form`)               | The form templates                                              |
+| 8   | Workshop   | Blank Session (`blank-session`)         | Start a Workshop's, in its groups, Recommended first            |
 
 - **Page** is prose. It makes an Article ([Article pages](../007-editor/article-pages.md)) until the
   [markdown tab](../031-markdown/markdown-tab.md) ships; then it makes a page, a document of one markdown tab.
@@ -66,32 +66,33 @@ A popover under the button, its right edge on the button's. Two panes side by si
 - **The list**, on the right, straight under the button where the pointer already is: the eight blanks, each its
   glyph in its own tint, its name and its number key in a key cap. The selected row is filled. Where the section
   offers New Folder ([Folders](folders.md)), a hairline and **New Folder** (or **New Subfolder**) end the list.
-- **The pane**, to the left of the list, for the selected blank:
-  - **The blank card**: the blank's preview, **Blank <name>** ("Blank Diagram"), one line ("An empty canvas, open at
-    once."), and an **Enter** key cap. Ringed in brand blue: it is what Enter makes.
-  - **From a template**: up to **six** of the blank's templates, three to a row, each its preview and name. Fewer
-    when the blank has fewer. No group chips.
-  - **All <N> <name> templates** at the foot, N the number the picker group holds.
+- **The pane**, to the left of the list: **every template of the selected blank**, three to a row, each its preview
+  and name, under the headings of its template groups (Recommended, Brainstorm, Design, ...). A template appears
+  once, under the first group holding it. The pane scrolls within the menu; each group's heading stays at the top
+  while its templates pass under it, and a soft fade at the foot says there is more. A blank with one group (Page,
+  Slides, Sheet, Board, Form) has one heading.
+- **There is no blank card.** A row of the list is the blank: clicking it, or Enter on it, makes the blank. The pane
+  holds templates only.
+- **There is no way out to a bigger picker.** The pane holds every template of the blank; the editor's template
+  start remains on any empty tab (**Show Templates**).
 - **The menu opens on the last blank.** Hovering a row selects it; the arrow keys do too.
 - **Hovering never steals the selection on the way to the pane.** While the pointer moves towards the pane, the rows
   it crosses do not select (menu aim): a row selects once the pointer rests on it, or moves away from the pane.
-- **Both panes keep their size** whatever is selected: the pane is the height of the list, so nothing jumps.
+- **Both panes keep their size** whatever is selected: the pane is a fixed height, about four rows of templates,
+  so nothing jumps; another blank's templates start at their top.
 
 ### What each choice does
 
-| Choice                                                    | Makes                                                                       | Opens on                               |
-| --------------------------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------- |
-| The face, a list row, the blank card, Enter, a number key | The blank                                                                   | The canvas, its start closed           |
-| A template card                                           | A document from that template                                               | The template                           |
-| All N templates                                           | The blank's mode blank (Blank Diagram, Blank Plan, Blank Illustration, ...) | That mode's start, on the picker group |
-| New Folder                                                | A folder, as before                                                         | The folder, its name being edited      |
+| Choice                                             | Makes                         | Opens on                          |
+| -------------------------------------------------- | ----------------------------- | --------------------------------- |
+| The face, a list row, Enter on a row, a number key | The blank                     | The canvas, its start closed      |
+| A template card                                    | A document from that template | The template                      |
+| New Folder                                         | A folder, as before           | The folder, its name being edited |
 
 - Every document choice remembers its blank as the last blank and closes the menu.
 - **A blank opens with its start closed** (`closeStartForBlank`): no template picker over it. The palette tray's
   **Show Templates** still brings the start back while the tab is empty
   ([Template starts](../007-editor/start-diagramming.md#bringing-it-back)).
-- **All templates** hands the picker group to the new document's start, read once, as a `/new?q=` search is
-  ([Template starts](../007-editor/start-diagramming.md#group-handed-over)).
 
 ## Where it goes
 
@@ -123,11 +124,12 @@ A blank is on screen, editable, **within 200 ms of the click**, and a template w
 ## Keyboard and screen readers
 
 - The face and the caret are buttons; the caret has `aria-haspopup="menu"` and `aria-expanded`.
-- The list is a `menu` of `menuitem`s named "<name>, blank" with `aria-keyshortcuts` 1 to 8. The pane's template
-  cards are `menuitem`s in a labelled `group` ("Diagram templates"), as are the blank card and All templates.
+- The list is a `menu` of `menuitem`s named "<name>, blank" with `aria-keyshortcuts` 1 to 8. The pane is a labelled
+  `group` ("Diagram templates") of `menuitem`s, under headings (`h3`) naming its template groups.
 - **Up and Down** move along the list, wrapping; **Home** and **End** reach its ends. **Enter** makes the selected
-  blank. **1 to 8** make that blank from anywhere in the menu. **Left** moves into the pane (the blank card, then
-  the templates, then All templates, as a grid), **Right** from the pane's right column back to the list. **Escape**
+  blank. **1 to 8** make that blank from anywhere in the menu. **Left** moves into the pane, on its first template;
+  there the arrow keys move as a grid, three to a row, the rows of every group one after another, and the card
+  reached scrolls into view. **Right** from the pane's right column goes back to the list. **Escape**
   closes the menu and puts focus back on the caret; **Tab** moves through the menu and leaves it closed.
 - Focus is visible on every row and card (the brand ring). Reduced motion: the menu appears without its fade.
 
@@ -144,13 +146,13 @@ a blank's or template's link), unchanged ([New document route](../007-editor/new
 ## Telemetry
 
 - `UI · Opened · NewDocumentMenu` when the menu opens.
-- `UI · Used · NewDocumentBlank`, `NewDocumentTemplate` or `NewDocumentAllTemplates` for each choice; the usual
+- `UI · Used · NewDocumentBlank` or `NewDocumentTemplate` for each choice; the usual
   `Document · Created` and `Template · Used` follow.
 - `Timing` of the open, from click to the editor painted ([Timing telemetry](../017-telemetry/timing-telemetry.md)),
   as `NewDocumentOpen`.
 
 ## Logs
 
-`[new-document] choice=<blank|template|all-templates> blank=<id> template=<kind>`, then
+`[new-document] choice=<blank|template> blank=<id> template=<kind>`, then
 `[new-document] opened ms=<n>`, `[new-document] create-landed ms=<n>` or
 `[new-document] create-failed action=<retry|choose>`.

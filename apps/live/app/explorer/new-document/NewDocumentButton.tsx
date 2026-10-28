@@ -5,18 +5,12 @@
 // Every choice goes through startNewDocument; New Folder rides in the menu where the section offers it.
 import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
-import {
-  BLANK_TEMPLATE_FOR_MODE,
-  newDocumentBlankOf,
-  type NewDocumentBlankId,
-  type TemplateKind,
-} from '@livedoc/templates';
+import { newDocumentBlankOf, type NewDocumentBlankId, type TemplateKind } from '@livedoc/templates';
 import { Button, Glyph } from '@livedoc/ui';
 import { PlusIcon } from '@/components/primitives/explorer-icons';
 import { useIsMobileViewport } from '@/hooks/ui/useIsMobileViewport';
 import { useLastBlank, writeLastBlank } from '@/lib/new-document/last-blank';
 import { track } from '@/lib/telemetry';
-import { handStartGroup } from '@/components/start/start-group';
 import { BlankGlyph } from './blank-glyphs';
 import {
   startNewDocument,
@@ -33,7 +27,6 @@ const NewDocumentSheet = dynamic(loadSheet, { ssr: false });
 const CHOICE_TELEMETRY: Record<NewDocumentChoice, string> = {
   blank: 'NewDocumentBlank',
   template: 'NewDocumentTemplate',
-  'all-templates': 'NewDocumentAllTemplates',
 };
 
 function CaretDownIcon() {
@@ -65,17 +58,13 @@ export function NewDocumentButton({
 
   const choose = useCallback(
     (id: NewDocumentBlankId, choice: NewDocumentChoice, template: TemplateKind) => {
-      const blank = newDocumentBlankOf(id)!;
       setOpen(false);
       writeLastBlank(id);
       track('UI', 'Used', CHOICE_TELEMETRY[choice]);
-      // All templates opens the picker mode's blank on the blank's group (start-group.ts).
-      if (choice === 'all-templates') handStartGroup(blank.picker.group);
       startNewDocument({
         choice,
         blank: id,
-        template:
-          choice === 'all-templates' ? BLANK_TEMPLATE_FOR_MODE[blank.picker.mode] : template,
+        template,
         place,
       });
     },
