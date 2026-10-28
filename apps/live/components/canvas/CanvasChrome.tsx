@@ -21,8 +21,8 @@ const IdentityPrompt = dynamic(
 import { OffscreenContentHint } from '@/components/canvas/OffscreenContentHint';
 import { ToolbarPalette } from '@/components/palette/ToolbarPalette';
 import { pickPaletteAddHandlers } from '@/components/palette/palette-add-handlers';
-import { ToolbarExplorerButton } from '@/components/chrome/ToolbarExplorerButton';
-import { WorkbenchBackButton } from '@/components/chrome/WorkbenchChrome';
+import { BrandGroup } from '@/components/chrome/lines/BrandGroup';
+import { getTheme } from '@/lib/themes';
 import { showsSlidesButton, SlidesClusterSegment } from '@/components/canvas/SlidesClusterSegment';
 import { PlanCardsClusterStrip } from '@/components/canvas/PlanCardsClusterStrip';
 import { useTabShowsCards } from '@/hooks/sheets/card-table-sheets';
@@ -351,24 +351,20 @@ export function CanvasChrome(props: CanvasChromeProps) {
   // "Where the dock sits").
   const dockShown = whiteboard && !!props.whiteboardDock && !readOnly && !chromeHidden;
   const dockOnTop = dockShown && props.whiteboardDock?.position === 'top';
-  // The Explorer menu button: top-left on desktop; on a phone, its own card at
-  // the left of the strip's row, the strip beside it (no room for a corner card
-  // above a strip that needs the whole top row). A read-only visitor has no
-  // strip, and nor does a whiteboard, so it keeps the corner there.
-  const menuInStrip = isMobile && paletteShown;
-  // A workspace frame puts its Back in the menu button's place (WB59), held sideways too: it is the frame's way out.
-  const { workbenchBack } = props;
-  const explorerMenuButton = workbenchBack ? (
-    <WorkbenchBackButton
-      onBack={workbenchBack.back}
-      backTitle={workbenchBack.backTitle}
-      inline={menuInStrip}
-    />
-  ) : props.explorerHidden ? null : (
-    <ToolbarExplorerButton
-      open={activeDockPanel === 'explorer'}
-      onToggle={(button) => handleDockButtonClick('explorer', button)}
-      inline={menuInStrip}
+  // The brand group at the top left (docs/specs/007-editor/toolbar-layout.md "The top line"), on a phone too: Back,
+  // the menu button (not in a workbench, nor held sideways) and the mode switch.
+  const brandGroup = (
+    <BrandGroup
+      explorer={
+        props.explorerHidden
+          ? null
+          : {
+              open: activeDockPanel === 'explorer',
+              onToggle: (button) => handleDockButtonClick('explorer', button),
+            }
+      }
+      accent={getTheme(tabThemeId).elementStroke ?? undefined}
+      phone={isMobile}
     />
   );
 
@@ -508,10 +504,9 @@ export function CanvasChrome(props: CanvasChromeProps) {
 
   return (
     <>
-      {/* The menu button's card at the top left (or a workspace frame's Back), first of the canvas's controls in the
-          keyboard order (docs/specs/007-editor/toolbar-layout.md); on a phone it rides in the strip's row instead.
-          Zen hides it with the rest of the chrome. */}
-      {zenMode || menuInStrip ? null : explorerMenuButton}
+      {/* The brand group at the top left, first of the canvas's controls in the keyboard order
+          (docs/specs/007-editor/toolbar-layout.md "The top line"). Zen hides it with the rest of the chrome. */}
+      {zenMode ? null : brandGroup}
 
       {/* The empty-canvas hint is now a dismissible bottom banner
           (EmptyCanvasBanner), rendered by EditorView alongside the sign-in /
@@ -609,7 +604,8 @@ export function CanvasChrome(props: CanvasChromeProps) {
           esBoard={props.esBoard}
           esBoardControls={props.esBoardControls}
           themeTint={paletteTint}
-          leading={menuInStrip ? explorerMenuButton : undefined}
+          // A phone's strip takes its own row under the top line, no menu card in it.
+          leading={isMobile ? null : undefined}
           tabElements={elements}
         />
       ) : null}

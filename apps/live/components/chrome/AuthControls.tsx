@@ -14,7 +14,7 @@
 
 import { useDeferredAuth } from '@/components/providers/deferred-auth';
 import Link from 'next/link';
-import { useId, useRef, type ReactNode } from 'react';
+import { Fragment, useId, useRef, type ReactNode } from 'react';
 import {
   useClickOutside,
   SOLID_BRAND_DARK,
@@ -34,6 +34,11 @@ import {
   HEADER_ICON_SLOT_PX,
   HeaderGlyph,
 } from '@/components/chrome/header-action';
+import { useInToolbarGroup } from '@/components/chrome/ToolbarGroup';
+import { TOOLBAR_BUTTON } from '@/components/chrome/toolbar-surface';
+
+// The account picture's disc in the editor's actions group: 20px, the group's icon size beside a 13px name.
+const GROUP_DISC_PX = 20;
 
 // Account self-deletion now lives on the Explorer profile page (docs/specs/014-identity/profile-and-email-notifications.md),
 // reachable from the "Profile" item below, so the destructive action has one
@@ -63,6 +68,12 @@ function AuthControlsEnabled({ onOpenAccount }: AuthControlsProps) {
   // Return here after sign-in (must run before the early returns below).
   const { signInHref } = useAuthHrefs();
   const openBugReport = useOpenBugReport();
+  // In the editor's actions group, the group's flat button (icon beside the name); in the Explorer's header, its
+  // full-height action.
+  const inGroup = useInToolbarGroup();
+  const buttonClass = inGroup ? TOOLBAR_BUTTON : `${HEADER_ACTION_BTN} ${HEADER_ACTION_TONE}`;
+  const Slot = inGroup ? Fragment : HeaderGlyph;
+  const discSize = inGroup ? GROUP_DISC_PX : HEADER_ICON_SLOT_PX;
 
   // Click-outside closes the menu. Listener installs only while
   // the menu is open so an inert button doesn't pay for it.
@@ -72,11 +83,11 @@ function AuthControlsEnabled({ onOpenAccount }: AuthControlsProps) {
 
   if (!isSignedIn) {
     return (
-      <Link href={signInHref} className={`${HEADER_ACTION_BTN} ${HEADER_ACTION_TONE}`}>
-        <HeaderGlyph>
-          <SignInIcon />
-        </HeaderGlyph>
-        Sign in
+      <Link href={signInHref} className={buttonClass}>
+        <Slot>
+          <SignInIcon size={inGroup ? 14 : 13} />
+        </Slot>
+        <span className={inGroup ? 'text-optical-centre' : undefined}>Sign in</span>
       </Link>
     );
   }
@@ -94,7 +105,7 @@ function AuthControlsEnabled({ onOpenAccount }: AuthControlsProps) {
   })();
 
   return (
-    <div className="relative flex h-full" ref={menuRef}>
+    <div className={`relative flex ${inGroup ? '' : 'h-full'}`} ref={menuRef}>
       <button
         ref={setTrigger}
         type="button"
@@ -103,20 +114,22 @@ function AuthControlsEnabled({ onOpenAccount }: AuthControlsProps) {
         aria-label="Account menu"
         aria-haspopup="menu"
         aria-expanded={menuOpen}
-        className={`${HEADER_ACTION_BTN} ${HEADER_ACTION_TONE}`}
+        className={buttonClass}
       >
-        <HeaderGlyph>
+        <Slot>
           {/* The profile picture when there is one (docs/specs/014-identity/profile-picture.md). */}
           <PictureDisc
             pictureUrl={user?.pictureUrl}
-            size={HEADER_ICON_SLOT_PX}
+            size={discSize}
             aria-hidden
             className={`bg-brand-700 text-[10px] font-semibold text-white ${SOLID_BRAND_DARK}`}
           >
             {accountInitial(user)}
           </PictureDisc>
-        </HeaderGlyph>
-        <span className="max-w-[4.5rem] truncate">{pillLabel ?? 'Account'}</span>
+        </Slot>
+        <span className={`max-w-[4.5rem] truncate ${inGroup ? 'text-optical-centre' : ''}`}>
+          {pillLabel ?? 'Account'}
+        </span>
       </button>
       {menuOpen ? (
         <AccountMenu trigger={trigger} onClose={closeMenu}>
@@ -214,7 +227,7 @@ function AccountMenu({
     <div
       ref={attach}
       {...surfaceProps}
-      className="absolute right-0 top-full mt-1 w-56 rounded-md border border-slate-200 bg-white p-1 shadow-lg shadow-slate-900/10 outline-none dark:border-slate-700 dark:bg-slate-800 dark:shadow-black/30"
+      className="absolute right-0 top-full z-[var(--z-popover)] mt-1 w-56 rounded-md border border-slate-200 bg-white p-1 shadow-lg shadow-slate-900/10 outline-none dark:border-slate-700 dark:bg-slate-800 dark:shadow-black/30"
     >
       {children}
     </div>

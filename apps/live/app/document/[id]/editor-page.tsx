@@ -10,10 +10,10 @@ import {
   useWorkbenchSession,
   type WorkspaceFrameHooks,
 } from '@/components/providers/workbench-session-context';
-import { WorkbenchBackButton } from '@/components/chrome/WorkbenchChrome';
+import { BrandGroup } from '@/components/chrome/lines/BrandGroup';
+import { StatusTopLine } from '@/components/chrome/lines/StatusTopLine';
 import { track } from '@/lib/telemetry';
 import { requestDriveFlush } from '@/lib/drive/tab-election';
-import { EditorHeader } from '@/components/chrome/EditorHeader';
 import { LazyExplorer } from '@/components/panels/LazyExplorer';
 import { OpeningScreen } from '@/components/chrome/OpeningScreen';
 // Static, unlike the other status cards: it must render offline (docs/specs/007-editor/load-recovery.md
@@ -168,9 +168,7 @@ export default function LivePage({ surface = 'app' }: { surface?: EditorSurface 
     return !appChrome ? (
       <EmbedShell frame={workspaceFrame}>{card}</EmbedShell>
     ) : (
-      <StatusShell title="Document deleted" explorer={fullExplorer}>
-        {card}
-      </StatusShell>
+      <StatusShell explorer={fullExplorer}>{card}</StatusShell>
     );
   }
 
@@ -184,9 +182,7 @@ export default function LivePage({ surface = 'app' }: { surface?: EditorSurface 
     return !appChrome ? (
       <EmbedShell frame={workspaceFrame}>{card}</EmbedShell>
     ) : (
-      <StatusShell title="Couldn’t load document" explorer={fullExplorer}>
-        {card}
-      </StatusShell>
+      <StatusShell explorer={fullExplorer}>{card}</StatusShell>
     );
   }
 
@@ -208,15 +204,7 @@ export default function LivePage({ surface = 'app' }: { surface?: EditorSurface 
     ) : (
       // No Explorer panel beside it: the card stands alone and offers the Explorer as a button
       // (docs/specs/007-editor/new-document-route.md "Unknown addresses").
-      <StatusShell
-        title={
-          page
-            ? 'Page not found'
-            : accessEnded !== null
-              ? 'No Longer Shared With You'
-              : 'Document not found'
-        }
-      >
+      <StatusShell>
         <NotFound
           page={page}
           accessEnded={accessEnded !== null}
@@ -234,7 +222,7 @@ export default function LivePage({ surface = 'app' }: { surface?: EditorSurface 
   // embed the gate renders headerless inside the iframe (docs/specs/013-workspace/embeds.md).
   if (sharePasswordGate) {
     return (
-      <StatusShell title="Password required" showHeader={!embedMode}>
+      <StatusShell showTopLine={!embedMode}>
         <SharePasswordGate
           invalid={sharePasswordGate.invalid}
           rateLimited={sharePasswordGate.rateLimited}
@@ -286,39 +274,24 @@ export default function LivePage({ surface = 'app' }: { surface?: EditorSurface 
   );
 }
 
-// Full-height status chrome (error / not-found / password gate): the
-// editor header (title-only, every action disabled) over a slate surface
-// that holds the status card and, optionally, the Explorer for
-// navigation. Shared by the status branches so the header + main wrapper
-// (and the Explorer behind it) isn't repeated per branch.
+// Full-height status chrome (error / not-found / password gate): the top line's Back and account control
+// (StatusTopLine) over a slate surface that holds the status card and, optionally, the Explorer for navigation.
+// Shared by the status branches so the wrapper (and the Explorer behind it) isn't repeated per branch.
 function StatusShell({
-  title,
-  showHeader = true,
+  showTopLine = true,
   explorer,
   children,
 }: {
-  title: string;
-  showHeader?: boolean;
+  showTopLine?: boolean;
   explorer?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <div className="flex h-dvh flex-col">
-      {showHeader ? (
-        <EditorHeader
-          documentName={title}
-          hideTitle
-          showShare={false}
-          shareable={false}
-          onOpenShare={() => {}}
-          onRename={() => {}}
-        />
-      ) : null}
-      <main className="relative flex-1 bg-slate-50 dark:bg-slate-950">
-        {children}
-        {explorer}
-      </main>
-    </div>
+    <main className="relative h-dvh bg-slate-50 dark:bg-slate-950">
+      {showTopLine ? <StatusTopLine /> : null}
+      {children}
+      {explorer}
+    </main>
   );
 }
 
@@ -334,7 +307,7 @@ function EmbedShell({
 }) {
   return (
     <main className="relative h-dvh bg-slate-50 dark:bg-slate-950">
-      {frame ? <WorkbenchBackButton onBack={frame.back} backTitle={frame.backTitle} /> : null}
+      {frame ? <BrandGroup explorer={null} /> : null}
       {children}
     </main>
   );

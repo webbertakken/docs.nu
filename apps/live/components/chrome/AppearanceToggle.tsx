@@ -9,7 +9,7 @@ import {
 } from '@livedoc/ui';
 import type { AppearanceSetting } from '@livedoc/ui';
 import { useAppearance } from '@/hooks/ui/useAppearance';
-import { CHROME_BTN, CHROME_BTN_LABELLED, ChromeLabel } from '@/components/chrome/chrome-button';
+import { ChromeLabel, useChromeButtonClass } from '@/components/chrome/chrome-button';
 
 // The editor's Appearance control: one button that CYCLES Light → Dark → System
 // (docs/specs/004-interface-design/appearance.md), hosted in the tab bar's trailing
@@ -39,6 +39,7 @@ export function AppearanceToggle({
 }) {
   const { setting, appearance, set, cycle } = useAppearance();
   const opposite = oppositeAppearanceSetting(appearance);
+  const buttonClass = useChromeButtonClass(labelled);
 
   const onContextMenu = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -60,7 +61,7 @@ export function AppearanceToggle({
         aria-label={
           quick ? quickAppearanceToggleName(setting, appearance) : appearanceToggleName(setting)
         }
-        className={labelled ? `${CHROME_BTN} ${CHROME_BTN_LABELLED}` : CHROME_BTN}
+        className={buttonClass}
       >
         <AppearanceIcon setting={setting} />
         <ChromeLabel show={labelled}>{APPEARANCE_LABEL[setting]}</ChromeLabel>

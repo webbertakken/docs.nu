@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { lucidePlay } from '@livedoc/icons/lucide';
 import { HoverCard, lucideGlyph } from '@livedoc/ui';
 import { useTourOffer } from './tour-offer';
+import { useInToolbarGroup } from '@/components/chrome/ToolbarGroup';
+import { TOOLBAR_BUTTON } from '@/components/chrome/toolbar-surface';
 
 const PlayGlyph = lucideGlyph(lucidePlay, 10);
 // The play triangle inks 0.4px right of its viewBox centre at 10px: moved back by a transform, which lands on the
@@ -25,6 +27,8 @@ export const startTourLabel = (name: string) => `Start ${name} Tour`;
 // words (`labelled`), keeping its name for assistive technology.
 export function TourOfferButton({ labelled = true }: { labelled?: boolean }) {
   const offer = useTourOffer();
+  // In a toolbar group (the editor's actions group) a flat group button, never a bordered pill inside the group.
+  const inGroup = useInToolbarGroup();
   const id = offer?.id ?? null;
   useEffect(() => {
     if (!id || counted.has(id)) return;
@@ -42,7 +46,11 @@ export function TourOfferButton({ labelled = true }: { labelled?: boolean }) {
         onClick={offer.start}
         aria-label={label}
         data-tour-offer={offer.id}
-        className={`relative touch-target ml-0.5 flex h-7 min-w-7 shrink-0 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-1.5 text-slate-600 transition duration-micro hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 sm:ml-1 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white ${labelled ? 'sm:pl-1 sm:pr-2.5' : ''}`}
+        className={
+          inGroup
+            ? `${TOOLBAR_BUTTON} ${labelled ? '' : 'w-9 px-0'}`
+            : `relative touch-target ml-0.5 flex h-7 min-w-7 shrink-0 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-1.5 text-slate-600 transition duration-micro hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 sm:ml-1 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white ${labelled ? 'sm:pl-1 sm:pr-2.5' : ''}`
+        }
       >
         <span
           aria-hidden
@@ -51,7 +59,11 @@ export function TourOfferButton({ labelled = true }: { labelled?: boolean }) {
           <PlayGlyph style={{ translate: `${PLAY_GLYPH_SHIFT_PX}px 0` }} />
         </span>
         {labelled ? (
-          <span className="hidden whitespace-nowrap text-xs font-medium sm:inline">{label}</span>
+          <span
+            className={`hidden whitespace-nowrap sm:inline ${inGroup ? 'text-optical-centre' : 'text-xs font-medium'}`}
+          >
+            {label}
+          </span>
         ) : null}
       </button>
     </HoverCard>

@@ -38,6 +38,14 @@ type BrandProps = {
   // The site and editor headers' logo builds itself as the page loads, once per load
   // (docs/specs/004-interface-design/brand-mark.md "Size and motion"; brand-motion.css).
   assemble?: boolean;
+  // The editor's Back (docs/specs/007-editor/toolbar-layout.md "The top line"): the mark without the wordmark, a
+  // caret leading it, the link named for where it goes, the mark at the group's 24px.
+  wordmark?: boolean;
+  leading?: React.ReactNode;
+  label?: string;
+  markClassName?: string;
+  // Called on a press of the link, before it navigates (the editor counts its Back).
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
 // Type size, and the gap between the mark and the wordmark at that size.
@@ -78,6 +86,11 @@ export function Brand({
   accentColor,
   wordmarkClassName = '',
   assemble = false,
+  wordmark = true,
+  leading,
+  label = 'LiveDoc',
+  markClassName,
+  onClick,
 }: BrandProps) {
   // Pointing at the logo (or reaching it by keyboard) fans the stack open; the wordmark holds still.
   const [fanning, setFanning] = useState(false);
@@ -103,30 +116,35 @@ export function Brand({
     onKeyUp: pressHandlers.onKeyUp,
     'data-assemble': assemble ? '' : undefined,
   };
-  const classes =
-    `inline-flex items-center ${sizeClasses[size]} text-slate-900 dark:text-slate-100 ${className}`.trim();
+  // The mark alone takes its whole look from its caller (the editor's Back draws it in a toolbar button).
+  const classes = wordmark
+    ? `inline-flex items-center ${sizeClasses[size]} text-slate-900 dark:text-slate-100 ${className}`.trim()
+    : className;
   const content = (
     <>
+      {leading}
       <BrandMark
-        className={`${markClasses[size]} shrink-0`}
+        className={`${markClassName ?? markClasses[size]} shrink-0`}
         accentColor={accentColor}
         fanning={fanning}
       />
       {/* A logotype: WCAG 1.4.3 sets text that is part of a logo no contrast minimum, and the
           contrast audits skip it by this mark. */}
-      <span className={wordmarkClassName || undefined} data-logotype="">
-        <span
-          className={accentColor ? '' : 'text-brand-700 dark:text-sky-400'}
-          style={
-            accentColor
-              ? { color: accentColor, transition: COLOUR_TRANSITION }
-              : { transition: COLOUR_TRANSITION }
-          }
-        >
-          Live
+      {wordmark ? (
+        <span className={wordmarkClassName || undefined} data-logotype="">
+          <span
+            className={accentColor ? '' : 'text-brand-700 dark:text-sky-400'}
+            style={
+              accentColor
+                ? { color: accentColor, transition: COLOUR_TRANSITION }
+                : { transition: COLOUR_TRANSITION }
+            }
+          >
+            Live
+          </span>
+          <span>Doc</span>
         </span>
-        <span>Doc</span>
-      </span>
+      ) : null}
     </>
   );
 
@@ -136,9 +154,12 @@ export function Brand({
       // mark alone has no text. The name is the wordmark's own text, so a visible one still matches it.
       <a
         href={href}
-        aria-label="LiveDoc"
+        aria-label={label}
         className={classes}
-        onClick={scrollTopIfHere}
+        onClick={(e) => {
+          onClick?.(e);
+          scrollTopIfHere(e);
+        }}
         {...fanHandlers}
       >
         {content}

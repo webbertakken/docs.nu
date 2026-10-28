@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
-import { WorkbenchBackButton, WorkbenchOpenLink, WorkbenchReconnectLine } from './WorkbenchChrome';
+import { WorkbenchOpenLink, WorkbenchReconnectLine } from './WorkbenchChrome';
 
 // The workbench's chrome (docs/specs/013-workspace/blueprints/workbench-embeds.md "Presentation and UX",
 // "Accessibility"): Open in LiveDoc in the tab bar, and the Reconnect line once the session ended.
@@ -25,39 +23,6 @@ describe('WorkbenchOpenLink', () => {
 
     const link = screen.getByRole('link', { name: 'Open in LiveDoc (opens in a new tab)' });
     expect(link.textContent).toBe('');
-  });
-});
-
-describe('WorkbenchBackButton', () => {
-  it('goes back, named by where it goes, a native button at the toolbar’s size', () => {
-    const onBack = vi.fn();
-    render(<WorkbenchBackButton onBack={onBack} backTitle="Minigames" />);
-
-    const back = screen.getByRole('button', { name: 'Back to Minigames' });
-    fireEvent.click(back);
-
-    expect(onBack).toHaveBeenCalledTimes(1);
-    expect(back.textContent).toBe('Back');
-    expect(back.className).toContain('min-w-9');
-  });
-
-  it('is the top-left card the strip keeps clear of, alone, and the Header region for F6', () => {
-    render(<WorkbenchBackButton onBack={() => {}} backTitle="Minigames" />);
-
-    const back = screen.getByRole('button', { name: 'Back to Minigames' });
-    const card = back.closest<HTMLElement>('[data-toolbar-menu]')!;
-    expect(card).not.toBeNull();
-    expect(card.className).toContain('left-3 top-3');
-    expect(card.dataset.region).toBe('header');
-    expect(card.querySelectorAll('button, a, input')).toHaveLength(1);
-  });
-
-  it('sits in the strip’s row on a phone, the glyph alone', () => {
-    render(<WorkbenchBackButton onBack={() => {}} backTitle="Minigames" inline />);
-
-    const back = screen.getByRole('button', { name: 'Back to Minigames' });
-    expect(back.textContent).toBe('');
-    expect(back.closest<HTMLElement>('[data-toolbar-menu]')!.className).not.toContain('absolute');
   });
 });
 
