@@ -6,7 +6,9 @@
 // preview over its name and line; a search across them and every other mode's templates (otherModeMatches); the × starts
 // from nothing. Choosing a template lands it on the tab at once, another mode's switching the tab to that mode.
 import { DeviceGlyph } from '@/components/canvas/wireframe/DeviceGlyph';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { takeStartGroup } from './start-group';
+import { initialStartGroup } from './initial-start-group';
 import { lucideGlyph } from '@livedoc/ui';
 import {
   lucideClock,
@@ -148,6 +150,13 @@ export function StartFromTemplates({
   // The × starts from nothing: the panel stays closed on this tab in this mode, for this person (empty-card-dismissed.ts),
   // until the palette tray's Show Templates brings it back (StartAgainTray). Remembered per mode: closing Start
   // Diagramming leaves Start a Workshop to show when the tab switches to it.
+  // The group the New Document menu's All templates handed over, taken once as the panel opens (start-group.ts).
+  const [initialGroup] = useState(() =>
+    initialStartGroup(
+      takeStartGroup(),
+      start.groups.map((g) => g.id),
+    ),
+  );
   const closedKey = startClosedKey(tabId, mode);
   const closed = useEmptyCardDismissed(closedKey);
   // On screen: the tours hold their offer until it goes (start-panel-open.ts).
@@ -170,7 +179,7 @@ export function StartFromTemplates({
       helpArticle={copy.help}
       palette={palette}
       categories={categories}
-      initialCategory="recommended"
+      initialCategory={initialGroup}
       cardsIn={(id) => (start.groups.find((g) => g.id === id)?.kinds ?? []).map(templateCard)}
       search={(query) =>
         start.search(query).map((g) => ({ category: g.group, cards: g.kinds.map(templateCard) }))
