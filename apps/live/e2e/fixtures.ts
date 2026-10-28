@@ -420,14 +420,34 @@ export async function settledBox(
   return box!;
 }
 
-/** A palette tile, from its category's flyout on the category bar (docs/specs/007-editor/toolbar-layout.md "The
- *  category bar"): opens the category (a press, so it stays open whatever the pointer does next) unless its flyout is
- *  already showing, and returns the tile. */
+/** A palette tile (docs/specs/007-editor/toolbar-layout.md). On the category bar (Workshop, Pages): from its
+ *  category's flyout, opened by a press (so it stays open whatever the pointer does next) unless already showing. On
+ *  the category picker's strip (Diagram, Plan): the tile on the strip when the current category shows it, else the
+ *  category picked first, then More when the strip has no room for it. */
 export async function paletteTile(page: Page, name: string, category = 'Shapes'): Promise<Locator> {
-  const flyout = page.locator('[data-category-flyout]');
+  await page.locator('[data-toolbar-palette]').waitFor();
   const button = page.locator(`[data-category-bar-button][aria-label="${category}"]`);
-  if ((await button.getAttribute('aria-expanded')) !== 'true') await button.click();
-  const tile = flyout.getByRole('button', { name, exact: true }).first();
+  if ((await button.count()) > 0) {
+    if ((await button.getAttribute('aria-expanded')) !== 'true') await button.click();
+    const tile = page
+      .locator('[data-category-flyout]')
+      .getByRole('button', { name, exact: true })
+      .first();
+    await tile.waitFor();
+    return tile;
+  }
+  const strip = page.locator('[data-toolbar-palette]');
+  const onStrip = () => strip.getByRole('button', { name, exact: true }).first();
+  if (await onStrip().isVisible()) return onStrip();
+  await strip.getByRole('button', { name: 'Palette category' }).click();
+  await page
+    .locator('[data-tour-id="palette-category-menu"]')
+    .getByRole('option', { name: category })
+    .first()
+    .click();
+  if (await onStrip().isVisible()) return onStrip();
+  await strip.locator('button[data-toolbar-more-button]').click();
+  const tile = page.getByRole('button', { name, exact: true }).first();
   await tile.waitFor();
   return tile;
 }

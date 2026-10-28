@@ -120,12 +120,11 @@ words too (`touchBody`), which a touch screen (a coarse pointer) reads instead: 
    tour."
 2. **Selection Modes**: opens the canvas-tool dropdown (Select / Hand / Eraser / ...) and explains mode
    switching. No "default" claim in the copy: desktop defaults to Select but mobile to Hand.
-3. **Palette Categories**: opens the first category on the palette's category bar (Shapes), its flyout highlighted
-   with the bar ([Toolbar layout](toolbar-layout.md#the-category-bar)): "The palette's categories sit along the
-   top: rest on one to see its elements, then click one to add it, or drag it onto the canvas." Plan's strip still
-   opens its category dropdown here. A dedicated "Tools category" step existed briefly and was cut: the category
-   dropdown already tells that story. On touch: "Tap a category to see what is in it. Tap to add, or drag onto the
-   canvas." (the flyout's own touch hint).
+3. **Palette Categories**: opens the palette's category picker, its banded grid highlighted with the picker
+   ([Toolbar layout](toolbar-layout.md)): "Pick a category to see its elements on the strip. Click one to add it,
+   or drag it onto the canvas." Plan's strip opens its own category picker here. A dedicated "Tools category"
+   step existed briefly and was cut: the category picker already tells that story. On touch: "Pick a category to
+   see its elements on the strip. Tap one to add it, or drag it onto the canvas."
 4. **The Element Menu**: selects an element (adding a theme-coloured square at the viewport centre first if the
    tab is empty) and opens its right-click menu programmatically. A square it added is the tour's own: placed
    with no history and taken away, with its selection, when the tour ends however it ends (`useTourSquare`), so

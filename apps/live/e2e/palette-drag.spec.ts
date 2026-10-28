@@ -2,16 +2,27 @@ import type { Page } from '@playwright/test';
 import { expect, test, expectNoPageErrors, openBlankSession, openStartBlank } from './fixtures';
 
 // Palette drag-to-canvas (docs/specs/010-palette/palette-drag-ghost.md) from the Palette strip
-// (docs/specs/007-editor/toolbar-layout.md "The category bar"): a tile in a category's flyout drags onto the canvas
+// (docs/specs/007-editor/toolbar-layout.md): a tile in a category's flyout or More popover drags onto the canvas
 // like the tile it stands for, whatever its catalogue: a shape from Shapes' flyout, a line icon and
 // a sticker found by searching their own catalogue's body (Stickers are Workshop's,
 // docs/specs/012-collaboration/workshop-mode.md).
 
 const CANVAS = '[data-canvas-a11y-root]';
 
-// A category's flyout on the category bar, searched when the body has a search field.
+// A category's whole body, searched when it has a search field: its flyout on the category bar (Workshop), or its
+// More popover on the category picker's strip (Diagram).
 async function openMore(page: Page, category: string, query?: string): Promise<void> {
-  await page.locator(`[data-category-bar-button][aria-label="${category}"]`).click();
+  const bar = page.locator(`[data-category-bar-button][aria-label="${category}"]`);
+  if ((await bar.count()) > 0) await bar.click();
+  else {
+    await page.getByRole('button', { name: 'Palette category' }).click();
+    await page
+      .locator('[data-tour-id="palette-category-menu"]')
+      .getByRole('option', { name: category })
+      .first()
+      .click();
+    await page.locator('[data-toolbar-palette] button[data-toolbar-more-button]').click();
+  }
   await more(page).waitFor();
   if (query)
     await more(page)
@@ -19,7 +30,7 @@ async function openMore(page: Page, category: string, query?: string): Promise<v
       .fill(query);
 }
 
-const more = (page: Page) => page.locator('[data-category-flyout]');
+const more = (page: Page) => page.locator('[data-category-flyout], [data-toolbar-more]');
 
 // The elements on the canvas, by accessible name (the canvas a11y root names each one).
 const placed = (page: Page, name: RegExp) => page.locator(CANVAS).getByRole('img', { name });

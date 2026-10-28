@@ -18,7 +18,7 @@ element that lays itself out from data rather than holding work you place in it;
 Sankey is a structure you choose for a whole picture (how much moves where), the same moment as choosing
 lanes or a timeline. It is in Diagram and Pages (as an infographic), and left out of Workshop,
 where a session does not stop to chart a flow. It has since **moved to Concepts**
-([Editor modes](../007-editor/editor-modes.md#the-palette-per-mode)): on the category bar a flow drawn as wide as
+([Editor modes](../007-editor/editor-modes.md#the-palette-per-mode)): among the categories a flow drawn as wide as
 what it carries reads as an idea laid out, beside the funnel and the cycle, more than as a structure you build in.
 
 The **Timeline** has **moved to Concepts** too: it is a concept graphic now
