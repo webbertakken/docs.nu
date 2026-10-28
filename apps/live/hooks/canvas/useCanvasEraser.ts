@@ -27,7 +27,7 @@
 // working even if the pointer leaves the canvas surface mid-drag.
 
 import { useEffect, useRef } from 'react';
-import { arrowReferencesAny, type Element, type Tab } from '@livedoc/document';
+import { withAttachedArrows, type Element, type Tab } from '@livedoc/document';
 
 import { elementHostsAtPoint } from '@/lib/dom-hit-test';
 import {
@@ -155,19 +155,17 @@ export function useCanvasEraser(deps: EraserDeps) {
     return true;
   };
 
-  // Drop everything erased so far, cascading arrows pinned to it.
+  // Drop everything erased so far, cascading the arrows attached to it and those hung off them, matching
+  // deleteSelected (docs/specs/008-canvas/arrow-to-arrow.md).
   const removeErased = () => {
     checkpointOnce();
     const ids = erasedRef.current;
-    depsRef.current.tick((els) =>
-      els.filter((el) => {
-        if (el.locked === true || depsRef.current.layerInertIds.has(el.id)) return true;
-        if (ids.has(el.id)) return false;
-        // Drop arrows pinned to an erased element, matching deleteSelected.
-        if (el.type === 'arrow' && arrowReferencesAny(el, ids)) return false;
-        return true;
-      }),
-    );
+    depsRef.current.tick((els) => {
+      const inert = depsRef.current.layerInertIds;
+      const isProtected = (el: Element) => el.locked === true || inert.has(el.id);
+      const gone = withAttachedArrows(els, ids, isProtected);
+      return els.filter((el) => isProtected(el) || !gone.has(el.id));
+    });
   };
 
   const eraseAtPoint = (clientX: number, clientY: number) => {

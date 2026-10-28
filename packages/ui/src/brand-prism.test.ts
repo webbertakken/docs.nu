@@ -16,8 +16,14 @@ describe('prismPalette', () => {
   });
 
   it('falls back to the brand palette for an accent it cannot read', () => {
-    expect(prismPalette('light', 'red')).toBe(PRISM_PALETTES.light);
-    expect(prismPalette('light', '#abc')).toBe(PRISM_PALETTES.light);
+    expect(prismPalette('light', 'nope')).toBe(PRISM_PALETTES.light);
+    expect(prismPalette('light', 'rgb(1, 2, 3)')).toBe(PRISM_PALETTES.light);
+  });
+
+  // docs/specs/011-theme/light-and-dark.md "Colours an agent writes": a shorthand or named accent is a colour.
+  it('reads a shorthand or named accent as its hex', () => {
+    expect(prismPalette('light', 'red')).toEqual(prismPalette('light', '#ff0000'));
+    expect(prismPalette('dark', '#abc')).toEqual(prismPalette('dark', '#aabbcc'));
   });
 
   it('derives six in-gamut hex stops from any theme stroke', () => {
