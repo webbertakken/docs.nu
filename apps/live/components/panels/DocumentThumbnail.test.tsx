@@ -5,6 +5,7 @@
 
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetAppearanceForTests, setAppearance } from '@livedoc/ui';
 import { DocumentThumbnail } from './DocumentThumbnail';
 import {
   loadThumbnail,
@@ -16,8 +17,13 @@ import {
 
 type Result = { url: string; backgroundColor: string | null } | null;
 const pending: ((r: Result) => void)[] = [];
+// What each fetch asked for (its options: version, share code, appearance).
+const asked: unknown[] = [];
 vi.mock('@/lib/api-client', () => ({
-  apiFetchDocumentThumbnailUrl: () => new Promise<Result>((resolve) => pending.push(resolve)),
+  apiFetchDocumentThumbnailUrl: (_owner: string, _id: string, opts: unknown) => {
+    asked.push(opts);
+    return new Promise<Result>((resolve) => pending.push(resolve));
+  },
 }));
 
 beforeAll(() => {
@@ -43,7 +49,10 @@ beforeAll(() => {
 });
 beforeEach(() => {
   pending.length = 0;
+  asked.length = 0;
   resetThumbnailCache();
+  resetAppearanceForTests();
+  localStorage.clear();
 });
 afterEach(() => cleanup());
 
@@ -59,6 +68,19 @@ describe('DocumentThumbnail', () => {
     expect(img()).toBeNull();
     await act(async () => pending[0]!({ url: 'blob:one', backgroundColor: '#fff' }));
     expect(img()?.getAttribute('src')).toBe('blob:one');
+  });
+
+  it('asks for the viewer’s half, and the other half when the appearance switches', async () => {
+    setAppearance('light');
+    render(thumb(1));
+    expect(asked[0]).toMatchObject({ version: 1, appearance: 'light' });
+    await act(async () => pending[0]!({ url: 'blob:light', backgroundColor: '#fbfaf7' }));
+    act(() => setAppearance('dark'));
+    expect(asked[1]).toMatchObject({ version: 1, appearance: 'dark' });
+    // Never the light picture under dark chrome while the dark one loads.
+    expect(img()).toBeNull();
+    await act(async () => pending[1]!({ url: 'blob:dark', backgroundColor: '#0d121a' }));
+    expect(img()?.getAttribute('src')).toBe('blob:dark');
   });
 
   it('drops the previous image while a new version loads', async () => {
@@ -153,13 +175,25 @@ describe('DocumentThumbnail', () => {
     render(thumb(1));
     await act(async () => pending[0]!({ url: 'blob:one', backgroundColor: null }));
     const others = Array.from({ length: THUMBNAIL_CACHE_MAX }, (_, i) =>
-      loadThumbnail({ ownerId: 'me', documentId: `other-${i}`, version: 1, shareCode: null }),
+      loadThumbnail({
+        ownerId: 'me',
+        documentId: `other-${i}`,
+        version: 1,
+        shareCode: null,
+        appearance: 'light',
+      }),
     );
     await act(async () => {
       for (const answer of pending.slice(1)) answer({ url: 'blob:other', backgroundColor: null });
       await Promise.all(others);
     });
-    const key = thumbnailKey({ ownerId: 'me', documentId: 'd1', version: 1, shareCode: null });
+    const key = thumbnailKey({
+      ownerId: 'me',
+      documentId: 'd1',
+      version: 1,
+      shareCode: null,
+      appearance: 'light',
+    });
     expect(peekThumbnail(key)).toBeDefined();
     cleanup();
     await act(async () => {
@@ -168,6 +202,7 @@ describe('DocumentThumbnail', () => {
         documentId: 'late',
         version: 1,
         shareCode: null,
+        appearance: 'light',
       });
       pending.at(-1)!({ url: 'blob:late', backgroundColor: null });
       await late;

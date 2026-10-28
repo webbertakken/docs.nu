@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PEN_INK, penColourHex } from '@livedoc/document';
+import {
+  DARK_CANVAS_BACKGROUND_COLOR,
+  DEFAULT_BACKGROUND_COLOR,
+  PAGE_PAPER_DARK,
+  PEN_INK,
+  THEMES,
+  formLook,
+  penColourHex,
+  themeHalf,
+} from '@livedoc/document';
 import { defaultCatalogue, presetSetup, type Item } from '@livedoc/items';
 import type { DocumentDTO, DocumentEnv } from './types';
 
@@ -15,7 +24,9 @@ const db = vi.hoisted(() => ({
   stampTabElementCount: vi.fn(),
   getThumbRenderedAt: vi.fn(),
   markThumbRendered: vi.fn(),
-  thumbnailKey: (id: string) => `thumb/${id}`,
+  getCustomTheme: vi.fn(),
+  thumbnailKey: (id: string, appearance?: string) =>
+    appearance ? `thumb/${id}/${appearance}` : `thumb/${id}`,
   // Placement grants (docs/specs/009-elements/images.md): by default every placed image is servable.
   servableImageIds: vi.fn(async (_env: unknown, _doc: string, ids: string[]) => new Set(ids)),
 }));
@@ -585,5 +596,186 @@ describe('a thumbnail of named stock colours', () => {
     );
     expect(out).toContain(penColourHex('blue', 'light'));
     expect(out).toContain(PEN_INK.light);
+  });
+});
+
+// docs/specs/006-document/document-snapshots.md "In the viewer's half": the Explorer asks for the viewer's appearance
+// and gets the tab as they would see it, whichever half the last save stored, each half cached on its own.
+describe('a thumbnail in the viewer’s half', () => {
+  const ink = {
+    type: 'shape',
+    shape: 'square',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 80,
+    penColour: 'ink',
+  };
+  const setup = (data: string) => {
+    const images = r2();
+    images.get.mockResolvedValue(null);
+    db.getTabBody.mockResolvedValue(stored(data));
+    return { images, env: { IMAGES: images } as unknown as DocumentEnv };
+  };
+
+  it('draws a Default tab stored light on the dark canvas, and caches it as the dark half', async () => {
+    const { images, env } = setup(JSON.stringify({ elements: [{ ...ink, id: 'e1' }] }));
+
+    const out = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' });
+
+    expect(out).toContain(`fill="${DARK_CANVAS_BACKGROUND_COLOR}"`);
+    expect(out).toContain(PEN_INK.dark);
+    expect(images.put).toHaveBeenCalledWith('thumb/d1/dark', out, {
+      httpMetadata: { contentType: expect.stringContaining('image/svg+xml') },
+      customMetadata: { savedAt: '1000' },
+    });
+    // The stored snapshot's stamp is not this half's to set.
+    expect(db.getThumbRenderedAt).not.toHaveBeenCalled();
+    expect(db.markThumbRendered).not.toHaveBeenCalled();
+  });
+
+  it('draws a Default tab stored dark on the light canvas', async () => {
+    const { env } = setup(
+      JSON.stringify({
+        backgroundColor: DARK_CANVAS_BACKGROUND_COLOR,
+        elements: [{ ...ink, id: 'e1' }],
+      }),
+    );
+    const out = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'light' });
+    expect(out).toContain(`fill="${DEFAULT_BACKGROUND_COLOR}"`);
+    expect(out).not.toContain(DARK_CANVAS_BACKGROUND_COLOR);
+    expect(out).toContain(PEN_INK.light);
+  });
+
+  it('streams a half drawn from the current save, without drawing again', async () => {
+    const { images, env } = setup(TAB_DATA);
+    images.get.mockResolvedValue({
+      text: async () => '<svg>dark</svg>',
+      customMetadata: { savedAt: '1000' },
+    });
+
+    const out = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' });
+
+    expect(out).toBe('<svg>dark</svg>');
+    expect(images.get).toHaveBeenCalledWith('thumb/d1/dark');
+    expect(db.getTabBody).not.toHaveBeenCalled();
+  });
+
+  it('draws again a half from an older save, or one that says nothing of its save', async () => {
+    const { images, env } = setup(TAB_DATA);
+    images.get.mockResolvedValue({
+      text: async () => '<svg>old</svg>',
+      customMetadata: { savedAt: '999' },
+    });
+    expect(await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' })).not.toBe(
+      '<svg>old</svg>',
+    );
+    images.get.mockResolvedValue({ text: async () => '<svg>old</svg>' });
+    expect(await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' })).not.toBe(
+      '<svg>old</svg>',
+    );
+    expect(images.put).toHaveBeenCalledTimes(2);
+  });
+
+  it('still returns the drawing when the half cannot be written, and says so', async () => {
+    const { images, env } = setup(TAB_DATA);
+    images.put.mockRejectedValue(new Error('r2 down'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' });
+    expect(out).toContain('<svg');
+    expect(warn).toHaveBeenCalledWith(
+      '[thumbnail] half write failed',
+      expect.objectContaining({ appearance: 'dark' }),
+    );
+    warn.mockRestore();
+  });
+
+  it('draws a catalogue theme in the asked half', async () => {
+    const { env } = setup(
+      JSON.stringify({
+        theme: 'forest',
+        backgroundColor: '#f0fdf4',
+        elements: [{ ...ink, id: 'e1' }],
+      }),
+    );
+    const forest = THEMES.find((t) => t.id === 'forest')!;
+    const out = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' });
+    expect(out).toContain(`fill="${themeHalf(forest, 'dark').backgroundColor}"`);
+  });
+
+  it('reads a custom theme from its saved row, and draws as stored when it is gone', async () => {
+    const definition = {
+      backgroundColor: '#fff7ed',
+      backgroundPattern: 'grid',
+      patternColor: '#fed7aa',
+      elementFill: null,
+      elementStroke: null,
+      elementText: null,
+    };
+    const data = JSON.stringify({
+      theme: 'custom:1',
+      backgroundColor: '#fff7ed',
+      elements: [{ ...ink, id: 'e1' }],
+    });
+    const { env } = setup(data);
+    db.getCustomTheme.mockResolvedValue({ id: 'custom:1', name: 'Peach', definition });
+    const dark = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' });
+    expect(db.getCustomTheme).toHaveBeenCalledWith(env, 'custom:1');
+    expect(dark).not.toContain('fill="#fff7ed"');
+    db.getCustomTheme.mockResolvedValue(null);
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {});
+    expect(await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' })).toContain(
+      'fill="#fff7ed"',
+    );
+    expect(info).toHaveBeenCalledWith('[thumbnail] theme not found', { themeId: 'custom:1' });
+    info.mockRestore();
+  });
+
+  it('draws as stored when the custom theme cannot be read, and says so', async () => {
+    const data = JSON.stringify({
+      theme: 'custom:1',
+      backgroundColor: '#fff7ed',
+      elements: [{ ...ink, id: 'e1' }],
+    });
+    const { env } = setup(data);
+    db.getCustomTheme.mockRejectedValue(new Error('d1 down'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' })).toContain(
+      'fill="#fff7ed"',
+    );
+    expect(warn).toHaveBeenCalledWith(
+      '[thumbnail] theme unreadable',
+      expect.objectContaining({ themeId: 'custom:1' }),
+    );
+    warn.mockRestore();
+  });
+
+  it('draws a Form tab’s form in the asked half', async () => {
+    const form = {
+      v: 1,
+      heading: 'Contact Us',
+      sections: [
+        { id: 's1', title: '', questions: [{ id: 'q1', type: 'short', prompt: 'Your name' }] },
+      ],
+    };
+    const { env } = setup(JSON.stringify({ kind: 'form', theme: 'forest', elements: [], form }));
+    const look = formLook({ theme: 'forest' });
+    const dark = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' });
+    expect(dark).toContain(`fill="${look.backdrop.dark}"`);
+    expect(dark).not.toContain(`fill="${look.backdrop.light}"`);
+  });
+
+  it('lays a plain first page on the dark paper', async () => {
+    const page = { id: 'p1', orientation: 'portrait', size: 'a4', kind: 'infographic' };
+    const { env } = setup(
+      JSON.stringify({
+        opensIn: 'pages',
+        pages: [page],
+        elements: [{ ...ink, id: 'e1', x: 40, y: 40 }],
+      }),
+    );
+    const dark = await getDocumentThumbnailSvg(env, liveDoc(), { appearance: 'dark' });
+    expect(dark).toContain(PAGE_PAPER_DARK);
+    expect(dark).toContain(PEN_INK.dark);
   });
 });

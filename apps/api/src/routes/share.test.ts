@@ -314,7 +314,10 @@ describe('GET /api/share/<code>/image.svg (docs/specs/013-workspace/live-image-s
     expect(await res.text()).toBe('<svg>tab2</svg>');
     // The per-tab path renders on read; the cached first-tab snapshot is
     // never touched for a ?tab= request.
-    expect(getTabImageMock).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'tab-2');
+    expect(getTabImageMock).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'tab-2', {
+      // No viewer, so drawn as stored.
+      appearance: undefined,
+    });
     expect(getThumbnailMock).not.toHaveBeenCalled();
   });
 
@@ -344,7 +347,10 @@ describe('GET /api/share/<code>/image.svg (docs/specs/013-workspace/live-image-s
     it('renders its tab, not the first-tab snapshot, when no tab is asked for', async () => {
       const res = await handleShare(imageCtx('C'));
       expect(await res.text()).toBe('<svg>tab2</svg>');
-      expect(getTabImageMock).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'tab-2');
+      expect(getTabImageMock).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'tab-2', {
+        // No viewer, so drawn as stored.
+        appearance: undefined,
+      });
       expect(getThumbnailMock).not.toHaveBeenCalled();
     });
 

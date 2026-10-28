@@ -48,6 +48,18 @@ describe('formArt', () => {
     );
   });
 
+  it('draws the dark half: the theme’s dark backdrop and accent, and the dark card', () => {
+    const look = formLook({ theme: 'ocean' });
+    const dark = formArt(every, look, undefined, 'dark').svg;
+    expect(dark).toContain(`fill="${look.backdrop.dark}"`);
+    expect(dark).toContain(look.accent.dark);
+    expect(dark).not.toContain(`fill="${look.backdrop.light}"`);
+    // The card is slate 900 with light words, never the light half's white.
+    expect(dark).toContain('fill="#0f172a"');
+    expect(dark).not.toContain('fill="#ffffff"');
+    expect(dark.match(/<tspan fill="#f87171"> \*<\/tspan>/g)).toHaveLength(QUESTION_TYPES.length);
+  });
+
   it('draws a gradient cover, and squares the boxes on a Professional finish', () => {
     const cover = {
       fill: { kind: 'gradient' as const, from: '#7c3aed', to: '#db2777', angle: 135 },

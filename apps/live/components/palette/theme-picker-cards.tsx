@@ -5,7 +5,7 @@ import type { CustomTheme } from '@livedoc/api-schema';
 import { CopyIcon, PencilIcon, PlusIcon, TrashIcon } from '@livedoc/ui';
 import { type ThemeDefinition } from '@/lib/themes';
 import { themeDescription } from '@/lib/themes-taxonomy';
-import { materialiseCustomTheme } from '@/lib/custom-theme-registry';
+import { customThemeDefinition } from '@livedoc/api-schema';
 import { ThemeSwatch } from '@/components/primitives/ThemeSwatch';
 
 // A single selectable theme tile. Click selects; double-click is the
@@ -107,7 +107,7 @@ export function CustomThemeCard({
         className="flex flex-col items-center gap-1"
         aria-label={theme.name}
       >
-        <ThemeSwatch theme={materialiseCustomTheme(theme)} size="md" />
+        <ThemeSwatch theme={customThemeDefinition(theme)} size="md" />
         <span className="w-full truncate text-center text-[10px] font-medium text-slate-700 dark:text-slate-300">
           {theme.name}
         </span>

@@ -31,13 +31,15 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function Row({ request }: { request: ThumbnailRequest | null }) {
+type Asked = Omit<ThumbnailRequest, 'appearance'>;
+
+function Row({ request }: { request: Asked | null }) {
   const ref = useRef<HTMLDivElement>(null);
   useSnapshotPrefetch(ref, request);
   return <div ref={ref} />;
 }
 
-const req: ThumbnailRequest = { ownerId: 'me', documentId: 'd1', version: 3, shareCode: null };
+const req: Asked = { ownerId: 'me', documentId: 'd1', version: 3, shareCode: null };
 
 describe('useSnapshotPrefetch', () => {
   it('asks for the snapshot once the row nears the viewport, then stops watching', () => {
@@ -45,7 +47,8 @@ describe('useSnapshotPrefetch', () => {
     sightings[0]!([{ isIntersecting: false }]);
     expect(loadThumbnail).not.toHaveBeenCalled();
     sightings[0]!([{ isIntersecting: true }]);
-    expect(loadThumbnail).toHaveBeenCalledWith(req);
+    // In the viewer's half, as the thumbnails ask, so the two share one cache entry.
+    expect(loadThumbnail).toHaveBeenCalledWith({ ...req, appearance: 'light' });
     expect(disconnect).toHaveBeenCalled();
   });
 

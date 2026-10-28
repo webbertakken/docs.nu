@@ -2,8 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { DARK_CANVAS_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR } from './canvas-colors';
 import { DEFAULT_SCHEME_LIGHT, THEMES } from './themes';
 import { themeHalf } from './theme-halves';
-import { builtInThemeSource, labelsFollowCanvas, tabAsSeen } from './tab-as-seen';
+import {
+  PAGE_PAPER_DARK,
+  builtInThemeSource,
+  labelsFollowCanvas,
+  pageInAppearance,
+  pagesInAppearance,
+  tabAsSeen,
+} from './tab-as-seen';
 import type { Tab } from './index';
+import type { Page } from './page';
 
 // A tab as one appearance sees it (docs/specs/011-theme/light-and-dark.md), shared by exports and thumbnails.
 const tab = (over: Partial<Tab> = {}): Tab => ({ id: 't', name: 'T', elements: [], ...over });
@@ -77,7 +85,7 @@ describe('tabAsSeen', () => {
           width: 10,
           height: 10,
           penColour: 'ink',
-        } as Tab['elements'][number],
+        },
       ],
     });
     const light = tabAsSeen(stroke, 'light', DEFAULT_SCHEME_LIGHT).elements[0]!;
@@ -85,5 +93,33 @@ describe('tabAsSeen', () => {
     expect((light as { strokeColor?: string }).strokeColor).not.toBe(
       (dark as { strokeColor?: string }).strokeColor,
     );
+  });
+});
+
+describe('pageInAppearance', () => {
+  const plain: Page = { id: 'p', orientation: 'portrait' };
+  const filled: Page = { ...plain, background: { fill: { kind: 'solid', color: '#fde68a' } } };
+
+  it('lays a plain page on the dark paper in dark chrome', () => {
+    expect(pageInAppearance(plain, 'dark').background?.fill).toEqual({
+      kind: 'solid',
+      color: PAGE_PAPER_DARK,
+    });
+  });
+
+  it('leaves a plain page in light chrome, and a page with its own fill in either', () => {
+    expect(pageInAppearance(plain, 'light')).toBe(plain);
+    expect(pageInAppearance(filled, 'dark')).toBe(filled);
+  });
+
+  it('lays every page of a tab, and leaves a tab with none', () => {
+    const pages = tab({ pages: [plain, filled] });
+    expect(pagesInAppearance(pages, 'dark').pages?.map((p) => p.background?.fill)).toEqual([
+      { kind: 'solid', color: PAGE_PAPER_DARK },
+      filled.background!.fill,
+    ]);
+    expect(pagesInAppearance(pages, 'light')).toBe(pages);
+    const none = tab();
+    expect(pagesInAppearance(none, 'dark')).toBe(none);
   });
 });

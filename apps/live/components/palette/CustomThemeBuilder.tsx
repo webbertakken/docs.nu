@@ -23,7 +23,7 @@ import {
 } from '@livedoc/document';
 import type { CustomThemeDefinition } from '@livedoc/api-schema';
 import { Button } from '@livedoc/ui';
-import { materialiseCustomTheme } from '@/lib/custom-theme-registry';
+import { customThemeDefinition } from '@livedoc/api-schema';
 import { PATTERNS, PatternButton } from '@/components/palette/palette-controls';
 import {
   ColorTile,
@@ -140,13 +140,10 @@ export function CustomThemeBuilder({
 
   // Materialise the draft so the live preview reuses the exact ThemeSwatch
   // scene the picker cards show.
-  const previewTheme = materialiseCustomTheme({
+  const previewTheme = customThemeDefinition({
     id: 'custom:preview',
-    ownerId: '',
     name: name || 'Preview',
     definition: def,
-    createdAt: 0,
-    updatedAt: 0,
   });
 
   return (

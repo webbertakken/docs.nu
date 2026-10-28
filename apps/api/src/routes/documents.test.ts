@@ -207,6 +207,40 @@ describe('GET /documents/:id/thumbnail (docs/specs/006-document/document-snapsho
     expect(await res.text()).toBe('<svg>ok</svg>');
   });
 
+  it('draws the snapshot in the appearance the viewer asks for, and as stored when none', async () => {
+    db.getDocumentThumbMeta.mockResolvedValue(fakeDocument('owner-1'));
+    canReadDocument.mockResolvedValue(true);
+    getDocumentThumbnailSvg.mockResolvedValue('<svg>ok</svg>');
+    await handleDocuments(makeCtx('GET', '/api/documents/d1/thumbnail?v=1&appearance=dark'));
+    expect(getDocumentThumbnailSvg.mock.calls[0]![2]).toMatchObject({ appearance: 'dark' });
+    await handleDocuments(makeCtx('GET', '/api/documents/d1/thumbnail?v=1'));
+    expect(getDocumentThumbnailSvg.mock.calls[1]![2]).toMatchObject({ appearance: undefined });
+  });
+
+  it('draws a tab-scoped visitor\u2019s tab in their appearance too', async () => {
+    db.getDocumentThumbMeta.mockResolvedValue(fakeDocument('owner-1'));
+    resolveDocumentGrant.mockResolvedValue({ role: 'view', tabScope: 't2' });
+    getDocumentTabImageSvg.mockResolvedValue('<svg>tab</svg>');
+    const res = await handleDocuments(
+      makeCtx('GET', '/api/documents/d1/thumbnail?appearance=light'),
+    );
+    expect(res.status).toBe(200);
+    expect(getDocumentTabImageSvg).toHaveBeenCalledWith({}, expect.anything(), 't2', {
+      appearance: 'light',
+    });
+  });
+
+  it('refuses an appearance that is neither light nor dark, before the gate and the renderer', async () => {
+    db.getDocumentThumbMeta.mockResolvedValue(fakeDocument('owner-1'));
+    canReadDocument.mockResolvedValue(true);
+    const res = await handleDocuments(
+      makeCtx('GET', '/api/documents/d1/thumbnail?appearance=sepia'),
+    );
+    expect(res.status).toBe(400);
+    expect(db.getDocumentThumbMeta).not.toHaveBeenCalled();
+    expect(getDocumentThumbnailSvg).not.toHaveBeenCalled();
+  });
+
   it('404s when access is allowed but there is no snapshot (empty document / no R2)', async () => {
     db.getDocumentThumbMeta.mockResolvedValue(fakeDocument('owner-1'));
     canReadDocument.mockResolvedValue(true);
@@ -787,7 +821,14 @@ describe('a tab-scoped visitor', () => {
     getDocumentTabImageSvg.mockResolvedValue('<svg>t2</svg>');
     const res = await handleDocuments(makeCtx('GET', '/api/documents/d1/thumbnail', visitor));
     expect(await res.text()).toBe('<svg>t2</svg>');
-    expect(getDocumentTabImageSvg).toHaveBeenCalledWith(expect.anything(), expect.anything(), 't2');
+    expect(getDocumentTabImageSvg).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      't2',
+      {
+        appearance: undefined,
+      },
+    );
     expect(getDocumentThumbnailSvg).not.toHaveBeenCalled();
   });
 

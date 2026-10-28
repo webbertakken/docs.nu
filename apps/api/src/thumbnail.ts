@@ -12,8 +12,10 @@
 // render, and every write path (editor, collaborators, MCP, API token)
 // invalidates the snapshot uniformly because they all bump saved_at.
 
-import { embedTabImages } from '@livedoc/api-schema';
+import { customThemeDefinition, embedTabImages } from '@livedoc/api-schema';
 import {
+  builtInThemeSource,
+  DEFAULT_SCHEME_ID,
   drawnCount,
   elementsOnPage,
   formLook,
@@ -22,9 +24,13 @@ import {
   pagesOf,
   renderElementsToSvg,
   renderPageToSvg,
+  pagesInAppearance,
   resolveFontStack,
+  tabAsSeen,
   tabKindOf,
+  type Appearance,
   type Tab,
+  type ThemeDefinition,
 } from '@livedoc/document';
 import { readForm } from '@livedoc/forms';
 import { formArt } from '@livedoc/plan-art';
@@ -35,6 +41,7 @@ import { renderModelsForTab, sheetFramesOf } from '@livedoc/sheets';
 // the renderer's box-with-label fallback.
 import { resolveIconExportArt, resolveStickerArt } from '@livedoc/icons/resolve';
 import {
+  getCustomTheme,
   getDocumentItemTypes,
   getTab,
   getTabBody,
@@ -80,7 +87,18 @@ export type ThumbnailSubject = Pick<DocumentDTO, 'id' | 'name' | 'savedAt'> & {
 // request's waitUntil, so a stale snapshot's response goes out as soon as
 // it is rendered instead of after two more round trips. Without it the
 // write is awaited inline, as before.
-export type ThumbnailOptions = { defer?: (write: Promise<unknown>) => void };
+//
+// `appearance` is the viewer's (docs/specs/006-document/document-snapshots.md "In the viewer's half"): the snapshot is
+// drawn as a person in that appearance sees the tab and cached per half. Absent, it is drawn as stored (the share
+// image and the share card, which have no viewer).
+export type ThumbnailOptions = {
+  defer?: (write: Promise<unknown>) => void;
+  appearance?: Appearance;
+};
+
+// The custom metadata a half's snapshot carries: the document's saved_at it was drawn from. A half has no
+// freshness column of its own (thumb_rendered_at stamps the stored snapshot), so its object says when it is from.
+const SNAPSHOT_SAVED_AT = 'savedAt';
 
 // Resolve a document's cached SVG snapshot, rendering + caching it first
 // if stale. Returns null — caller should 404 / fall back to an icon —
@@ -95,6 +113,7 @@ export async function getDocumentThumbnailSvg(
   // 404 and the Explorer row keeps its generic icon, same graceful
   // degradation as the image gallery (docs/specs/009-elements/images.md) on a binding-less deploy.
   if (!env.IMAGES) return null;
+  if (opts.appearance) return getHalfSnapshotSvg(env, env.IMAGES, liveDoc, opts.appearance, opts);
   const key = thumbnailKey(liveDoc.id);
 
   // Fresh = rendered at or after the last save. saved_at is bumped by
@@ -134,6 +153,41 @@ export async function getDocumentThumbnailSvg(
   return svg;
 }
 
+// The first-tab snapshot in one appearance's half, for the Explorer (docs/specs/006-document/document-snapshots.md
+// "In the viewer's half"): fresh when its object was drawn from the document's current save, else drawn again and
+// written back, best effort, as the stored snapshot is.
+async function getHalfSnapshotSvg(
+  env: DocumentEnv,
+  images: R2Bucket,
+  liveDoc: ThumbnailSubject,
+  appearance: Appearance,
+  opts: ThumbnailOptions,
+): Promise<string | null> {
+  const key = thumbnailKey(liveDoc.id, appearance);
+  const cached = await images.get(key);
+  if (cached && Number(cached.customMetadata?.[SNAPSHOT_SAVED_AT]) >= liveDoc.savedAt) {
+    return await cached.text();
+  }
+  const svg = await renderTabBodyToSvg(env, liveDoc, await getTabBody(env, liveDoc.id), opts);
+  if (svg == null) return null;
+  const write = images
+    .put(key, svg, {
+      httpMetadata: { contentType: THUMBNAIL_CONTENT_TYPE },
+      customMetadata: { [SNAPSHOT_SAVED_AT]: String(liveDoc.savedAt) },
+    })
+    .catch((error: unknown) => {
+      // The drawing is still returned; the next read draws it again.
+      console.warn('[thumbnail] half write failed', {
+        documentId: liveDoc.id,
+        appearance,
+        error: String(error),
+      });
+    });
+  if (opts.defer) opts.defer(write);
+  else await write;
+  return svg;
+}
+
 // Live image for a SPECIFIC tab (docs/specs/013-workspace/live-image-share.md's per-tab picker, now surfaced
 // in the Share dialog). Rendered on read and deliberately NOT written to
 // the R2 snapshot cache: `thumb/<documentId>` is the first-tab artifact
@@ -147,12 +201,13 @@ export async function getDocumentTabImageSvg(
   env: DocumentEnv,
   liveDoc: ThumbnailSubject,
   tabId: string,
+  opts: Pick<ThumbnailOptions, 'appearance'> = {},
 ): Promise<string | null> {
   // Gate on the same optional R2 binding as the cached path, so the
   // whole live-image feature is uniformly off on a binding-less deploy.
   if (!env.IMAGES) return null;
   // A named tab's picture is what a link confined to it gets: its card functions read only the cards it shows.
-  return renderTabBodyToSvg(env, liveDoc, await getTabBody(env, liveDoc.id, tabId), {}, true);
+  return renderTabBodyToSvg(env, liveDoc, await getTabBody(env, liveDoc.id, tabId), opts, true);
 }
 
 // One tab drawn by the shared renderer, for `GET .../tabs/:tabId/render.svg` (docs/specs/015-api/api.md): the
@@ -226,7 +281,7 @@ async function renderTabBodyToSvg(
   const form = tabKindOf(parsed) === 'form' ? readForm(parsed.form) : null;
   if (form) {
     const look = formLook(parsed);
-    return formArt(form, look, resolveFontStack(look.font)).svg;
+    return formArt(form, look, resolveFontStack(look.font), opts.appearance).svg;
   }
   if (parsed.elements.length === 0) return null;
   // `tabs.data` is the tab body minus id + name (see db/tabs.ts
@@ -234,7 +289,16 @@ async function renderTabBodyToSvg(
   // renderer only reads `elements` + `backgroundColor`, both already in
   // the parsed body.
   // Migrated like every other stored-tab read (docs/specs/011-theme/retired-schemes.md).
-  const tab = migrateStoredTab({ id: liveDoc.id, name: liveDoc.name, ...parsed } as Tab);
+  const stored = migrateStoredTab({ id: liveDoc.id, name: liveDoc.name, ...parsed } as Tab);
+  // In the viewer's half when there is one (docs/specs/006-document/document-snapshots.md "In the viewer's half"):
+  // its plain pages on that half's paper, its theme's colours in that half, as the canvas draws them for them.
+  const tab = opts.appearance
+    ? tabAsSeen(
+        pagesInAppearance(stored, opts.appearance),
+        opts.appearance,
+        await themeSourceOf(env, stored.theme),
+      )
+    : stored;
   // A Pages tab previews as its first page alone, drawn as an export draws it
   // (docs/specs/006-document/document-snapshots.md "Pages tabs"): every page side by
   // side on the canvas shrinks to a row of slivers nobody can read at thumbnail size.
@@ -299,6 +363,25 @@ async function renderTabBodyToSvg(
     itemTypes: plan ? typesOf(catalogue) : undefined,
   };
   return firstPage ? renderPageToSvg(tab, firstPage, drawWith) : renderElementsToSvg(tab, drawWith);
+}
+
+// The tab's scheme as written, which its halves are drawn from: a built-in one (Default when it names none), else
+// the custom theme it names (docs/specs/011-theme/custom-themes.md), read from its saved row. Undefined when the id
+// names nothing (a deleted custom theme) or the read fails: the tab is then drawn as stored.
+async function themeSourceOf(
+  env: DocumentEnv,
+  id: string | undefined,
+): Promise<ThemeDefinition | undefined> {
+  const builtIn = builtInThemeSource(id ?? DEFAULT_SCHEME_ID);
+  if (builtIn || !id) return builtIn;
+  try {
+    const custom = await getCustomTheme(env, id);
+    if (!custom) console.info('[thumbnail] theme not found', { themeId: id });
+    return custom ? customThemeDefinition(custom) : undefined;
+  } catch (error) {
+    console.warn('[thumbnail] theme unreadable', { themeId: id, error: String(error) });
+    return undefined;
+  }
 }
 
 // Read each image element's bytes from R2 and return them keyed by imageId

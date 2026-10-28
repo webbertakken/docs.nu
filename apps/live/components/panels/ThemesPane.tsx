@@ -13,7 +13,7 @@ import { lucidePalette } from '@livedoc/icons/lucide';
 
 import { useState } from 'react';
 import { useConfirm } from '@/hooks/ui/useConfirm';
-import { materialiseCustomTheme } from '@/lib/custom-theme-registry';
+import { customThemeDefinition } from '@livedoc/api-schema';
 import { useCustomThemes } from '@/components/primitives/CustomThemeProvider';
 import type { CustomThemeDraft, ThemeBuilding } from '@/components/palette/CustomThemeBuilder';
 import {
@@ -92,7 +92,7 @@ export function ThemesPane({ compact = false }: { compact?: boolean } = {}) {
               key={t.id}
               className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900"
             >
-              <ThemeSwatch theme={materialiseCustomTheme(t)} size="lg" />
+              <ThemeSwatch theme={customThemeDefinition(t)} size="lg" />
               <span className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">
                 {t.name}
               </span>

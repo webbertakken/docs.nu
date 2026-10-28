@@ -7,7 +7,7 @@
 import { canvasSurface, type CanvasSurface } from './colors';
 import { DEFAULT_BACKGROUND_COLOR, DEFAULT_PATTERN_COLOR } from './canvas-colors';
 import { hasPageLook, opensInOf } from './editor-mode';
-import { layOutPages, pagesOf } from './page';
+import { layOutPages, pagesOf, type Page } from './page';
 import { elementPageSurfaces } from './page-content';
 import { resolveStockColours } from './stock-colours';
 import { themeColourMap, viewBackdropInTheme, viewElementInTheme } from './theme-halves';
@@ -35,6 +35,29 @@ export type ResolvedBackdrop = {
   backgroundPattern: BackgroundPattern | undefined;
   backgroundOpacity: number | undefined;
 };
+
+// A plain page's paper in dark chrome, as the canvas paints it (CanvasPages' dark:bg-slate-900).
+export const PAGE_PAPER_DARK = '#0f172a';
+
+/** The page as a viewer in `appearance` sees it: a plain page in dark chrome takes the dark paper; a page with a
+ *  fill of its own keeps it. */
+export function pageInAppearance<P extends Pick<Page, 'background'>>(
+  page: P,
+  appearance: Appearance,
+): P {
+  if (appearance !== 'dark' || page.background?.fill) return page;
+  return {
+    ...page,
+    background: { ...page.background, fill: { kind: 'solid', color: PAGE_PAPER_DARK } },
+  };
+}
+
+/** The tab with every page as a viewer in `appearance` sees it (pageInAppearance), so what is drawn on a plain page
+ *  in dark chrome is inked for the dark paper. A tab with no pages is itself. */
+export function pagesInAppearance(tab: Tab, appearance: Appearance): Tab {
+  if (!Array.isArray(tab.pages) || tab.pages.length === 0 || appearance !== 'dark') return tab;
+  return { ...tab, pages: tab.pages.map((p) => pageInAppearance(p, appearance)) };
+}
 
 /** A built-in scheme as written (its native half, before tuning), or undefined for an id that names none. */
 export function builtInThemeSource(id: string | undefined): ThemeDefinition | undefined {

@@ -4,7 +4,6 @@ import {
   clearCustomThemeRegistry,
   isCustomThemeId,
   lookupCustomTheme,
-  materialiseCustomTheme,
   registerCustomTheme,
   registerCustomThemes,
   unregisterCustomTheme,
@@ -31,14 +30,6 @@ const theme = (id: string, name: string): CustomTheme => ({
 afterEach(() => clearCustomThemeRegistry());
 
 describe('custom-theme registry (docs/specs/011-theme/custom-themes.md)', () => {
-  it('materialises a CustomTheme into a ThemeDefinition (id + name become id + label)', () => {
-    const def = materialiseCustomTheme(theme('custom:1', 'Brandy'));
-    expect(def.id).toBe('custom:1');
-    expect(def.label).toBe('Brandy');
-    expect(def.elementStroke).toBe('#2563eb');
-    expect(def.shapeColors?.diamond?.fill).toBe('#fef3c7');
-  });
-
   it('getTheme resolves a registered custom theme by id', () => {
     registerCustomTheme(theme('custom:1', 'Brandy'));
     expect(getTheme('custom:1').label).toBe('Brandy');

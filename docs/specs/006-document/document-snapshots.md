@@ -180,6 +180,35 @@ document renders lazily.
   carries the same `private, max-age=86400` as the image, because it is
   version-keyed too; an access-denied 404 carries no cache header.
 
+### In the viewer's half
+
+A thumbnail is the tab as the person looking at it would see it on opening it
+([Light and dark halves](../011-theme/light-and-dark.md)): a Default tab is on the dark canvas in dark chrome and
+on the light one in light chrome, whichever half the last save happened to store. Drawing what is stored made a
+new, imported or untouched document preview in its author's half (or the light one), and only come right once
+someone in the viewer's appearance opened and saved it.
+
+- The live app asks with `&appearance=light|dark`, the viewer's resolved appearance. It is part of the
+  page cache's key, so switching appearance asks for the other half and never shows the old one meanwhile.
+  The Details view's prefetch asks for the same half, so the two share one entry.
+- Any other value is refused (400, `[thumbnail] appearance refused`) before the gate; no value is drawn as
+  stored, as before.
+- The worker draws the first tab through `tabAsSeen` (`@livedoc/document`, the one the editor's exports use):
+  the backdrop in that half of its theme (a colour someone picked stays), every theme colour mapped to the
+  same slot in that half, stock colours for that canvas, and labels re-inked where the half sank them. A plain
+  page of a Pages tab is laid on the dark paper in dark (`pagesInAppearance`, `PAGE_PAPER_DARK`), as the
+  canvas shows it. A Form tab's form is drawn by `formArt` in that half: the theme's backdrop and accent for
+  it, and the dark card colours the builder uses.
+- A custom theme is read from its saved row (`custom_themes`) and drawn the same way. One that is gone
+  (`[thumbnail] theme not found`) or unreadable (`[thumbnail] theme unreadable`) leaves the tab drawn as
+  stored.
+- Each half is cached in R2 on its own (`thumb/<documentId>/light`, `thumb/<documentId>/dark`), carrying the
+  `saved_at` it was drawn from as custom metadata (`savedAt`): fresh when that is at or after the document's,
+  otherwise drawn again. A half has no freshness column, so `thumb_rendered_at` stays the stored snapshot's
+  alone. A failed write (`[thumbnail] half write failed`) still returns the drawing. Deleting a document
+  clears both halves with the rest of its snapshots.
+- A tab-scoped visitor's tab is drawn in their half too, uncached as before.
+
 ## Delivery path 2 — Live image share (public, share-code-scoped)
 
 `GET /api/share/:code/image.svg` — this is [Live image share link](../013-workspace/live-image-share.md)'s endpoint.
