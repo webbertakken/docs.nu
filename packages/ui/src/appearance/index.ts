@@ -24,6 +24,12 @@ export {
   oppositeAppearanceSetting,
   quickAppearanceToggleName,
 } from './appearance-cycle';
+export {
+  CHROME_SURFACE_ATTRIBUTE,
+  CHROME_SURFACES,
+  syncChromeColour,
+  type ChromeSurface,
+} from './chrome-colour';
 export { AppearanceIcon } from './AppearanceIcon';
 export { useAppearance } from './useAppearance';
 export { SiteAppearanceToggle } from './SiteAppearanceToggle';

@@ -149,8 +149,9 @@ const VIEW_TRANSITION_OPT_IN =
 // VIEW_TRANSITION_GUARD_SCRIPT skips that transition when the link leaves for another app.
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    // suppressHydrationWarning: the pre-paint script may add `dark` to <html>.
-    <html lang="en-GB" suppressHydrationWarning>
+    // suppressHydrationWarning: the pre-paint script may add `dark` to <html>. The browser's chrome takes the page
+    // ground, which the translucent site header shows (docs/specs/004-interface-design/appearance.md).
+    <html lang="en-GB" data-chrome-surface="ground" suppressHydrationWarning>
       <head>
         {/* Trusted Types before anything else (docs/specs/016-platform/trusted-types.md). */}
         <script dangerouslySetInnerHTML={{ __html: trustedHtml(TRUSTED_TYPES_BOOT) }} />

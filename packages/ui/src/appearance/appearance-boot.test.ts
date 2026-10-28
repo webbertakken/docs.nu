@@ -7,6 +7,7 @@ import {
   APPEARANCE_STORAGE_KEY,
   DARK_MEDIA_QUERY,
 } from './appearance-storage';
+import { CHROME_SURFACES } from './chrome-colour';
 
 // The pre-paint appearance script (docs/specs/004-interface-design/appearance.md). Every
 // app's root layout inlines it, so a first-time visitor on a dark machine lands dark
@@ -63,8 +64,13 @@ function runAppearanceBoot(opts: {
   osPrefersDark?: boolean;
   matchMedia?: boolean;
   throwOnRead?: boolean;
-}): { classes: string[] } {
+  meta?: boolean;
+  ground?: boolean;
+}): { classes: string[]; themeColor: string | undefined; added: number } {
   const classes: string[] = [];
+  const existing = opts.meta ? { name: 'theme-color', content: '#0ea5e9' } : null;
+  let meta: { name?: string; content?: string } | null = existing;
+  let added = 0;
   const stubs = {
     localStorage: {
       getItem: (): string | null => {
@@ -76,10 +82,24 @@ function runAppearanceBoot(opts: {
       opts.matchMedia === false
         ? undefined
         : (query: string) => ({ matches: !!opts.osPrefersDark && query.includes('dark') }),
-    document: { documentElement: { classList: { add: (c: string) => classes.push(c) } } },
+    document: {
+      documentElement: {
+        classList: { add: (c: string) => classes.push(c) },
+        getAttribute: (name: string) =>
+          name === 'data-chrome-surface' && opts.ground ? 'ground' : null,
+      },
+      querySelector: (selector: string) => (selector === 'meta[name="theme-color"]' ? meta : null),
+      createElement: (tag: string) => (tag === 'meta' ? {} : null),
+      head: {
+        appendChild: (el: { name?: string; content?: string }) => {
+          added++;
+          meta = el;
+        },
+      },
+    },
   };
   runInlineScript(APPEARANCE_BOOT_SCRIPT, stubs);
-  return { classes };
+  return { classes, themeColor: meta?.name === 'theme-color' ? meta.content : undefined, added };
 }
 
 describe('the appearance boot script', () => {
@@ -107,6 +127,30 @@ describe('the appearance boot script', () => {
 
   it('survives a browser with no matchMedia', () => {
     expect(runAppearanceBoot({ stored: 'system', matchMedia: false }).classes).toEqual([]);
+  });
+
+  it('tints the browser chrome before first paint, light or dark', () => {
+    expect(runAppearanceBoot({ stored: 'light' })).toMatchObject({
+      themeColor: CHROME_SURFACES.header.light,
+      added: 1,
+    });
+    expect(runAppearanceBoot({ stored: 'dark' }).themeColor).toBe(CHROME_SURFACES.header.dark);
+  });
+
+  it('tints it the page ground where the layout declares one', () => {
+    expect(runAppearanceBoot({ stored: 'light', ground: true }).themeColor).toBe(
+      CHROME_SURFACES.ground.light,
+    );
+    expect(runAppearanceBoot({ stored: 'dark', ground: true }).themeColor).toBe(
+      CHROME_SURFACES.ground.dark,
+    );
+  });
+
+  it('reuses a theme-color meta already in the head', () => {
+    expect(runAppearanceBoot({ stored: 'dark', meta: true })).toMatchObject({
+      themeColor: CHROME_SURFACES.header.dark,
+      added: 0,
+    });
   });
 
   it('survives localStorage being unavailable', () => {

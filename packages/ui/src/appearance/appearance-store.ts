@@ -1,4 +1,5 @@
 import { APPEARANCE_STORAGE_KEY, DARK_MEDIA_QUERY } from './appearance-storage';
+import { syncChromeColour } from './chrome-colour';
 
 // The Appearance value and its side effects, shared by every app on the origin
 // (docs/specs/004-interface-design/appearance.md), split from the hook so both are
@@ -89,6 +90,7 @@ export function applyAppearance(appearance: Appearance): void {
   const html = document.documentElement;
   if (appearance === 'dark') html.classList.add('dark');
   else html.classList.remove('dark');
+  syncChromeColour();
 }
 
 // null until first read so the store seeds lazily on the client; getSnapshot
