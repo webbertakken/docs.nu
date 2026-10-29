@@ -26,7 +26,6 @@ import {
 import {
   apiRouteLabel,
   bearerTokenOf,
-  errorTypeToken,
   isAccountIdShape,
   TIMELINE_RETENTION_MS,
 } from '@livedoc/api-schema';
@@ -43,7 +42,7 @@ import { handleOauthExchange } from './routes/oauth';
 import { DocumentRoom } from './document-room/document-room';
 import { LegacyDocumentRoom } from './document-room/legacy-document-room';
 import { CORS_HEADERS, forbidden, json, notFound, payloadTooLarge, rateLimited } from './responses';
-import { insertTelemetryEvents } from './db/telemetry';
+import { failedRequestResponse } from './request-failure';
 import { deleteOldDocumentOpens } from './db/document-opens';
 import { clientIp, clientNetwork, clientRateKey } from './client-ip';
 import { MAX_BODY_BYTES, MAX_IMAGE_BYTES } from './limits';
@@ -386,108 +385,84 @@ async function routeApiRequest(
     // Every handler's background work logs its failure here (docs/specs/015-api/api.md "Background work").
     waitUntil: backgroundWaitUntil(executionCtx, apiRouteLabel(request.method, url.pathname)),
   };
-  try {
-    switch (segments[1]) {
-      case 'capabilities':
-        return handleCapabilities(ctx);
-      case 'templates':
-      case 'icons':
-      case 'schema':
-        return handleCatalogues(ctx);
-      case 'openapi.json':
-        return handleOpenapi(ctx);
-      case 'unfurl':
-        return await handleUnfurl(ctx);
-      case 'ai':
-        // Two model routes, one gate (docs/specs/007-editor/ai-assistance.md + docs/specs/021-event-storming/event-storming.md Phase 8): the
-        // assistant at /api/ai, and the crop reader one segment deeper.
-        if (segments[2] === undefined) return await handleAi(ctx);
-        if (segments[2] === 'read-notes' && segments.length === 3)
-          return await handleAiReadNotes(ctx);
-        return notFound();
-      case 'events':
-        return await handleEvents(ctx);
-      case 'telemetry':
-        return await handleTelemetry(ctx);
-      case 'share':
-        return await handleShare(ctx);
-      case 'shared':
-        return await handleShared(ctx);
-      case 'images':
-        return await handleImages(ctx);
-      case 'documents':
-        return await handleDocuments(ctx);
-      case 'folders':
-        return await handleFolders(ctx);
-      // A form link's public doors (docs/specs/030-forms/forms.md "Filling in a form").
-      case 'bug-reports':
-        return handleBugReports(ctx);
-      case 'forms':
-        return await handleForms(ctx);
-      case 'custom-themes':
-        return await handleCustomThemes(ctx);
-      case 'shape-libraries':
-        return await handleShapeLibraries(ctx);
-      case 'teams':
-        return await handleTeams(ctx);
-      case 'tokens':
-        return await handleTokens(ctx);
-      case 'oauth':
-        return await handleOauthExchange(ctx);
-      case 'account':
-        return await handleAccount(ctx);
-      case 'favourites':
-        return await handleFavourites(ctx);
-      // Per-person document tags (docs/specs/013-workspace/tags.md).
-      case 'tags':
-        return await handleTags(ctx);
-      case 'placement-defaults':
-        return await handlePlacementDefaults(ctx);
-      case 'trash':
-        return await handleTrash(ctx);
-      case 'timeline':
-        return await handleTimeline(ctx);
-      case 'activity':
-        return await handleActivity(ctx);
-      case 'home':
-        return await handleHome(ctx);
-      case 'search':
-        return await handleContentSearch(ctx);
-      case 'preferences':
-        return await handlePreferences(ctx);
-      case 'migrate':
-        return await handleMigrate(ctx);
-      case 'guest-id':
-        return await handleGuestId(ctx);
-      case 'participants':
-        return await handleParticipants(ctx);
-      case 'drive':
-        return await handleDrive(ctx);
-      case 'workbench':
-        return await handleWorkbench(ctx);
-    }
-  } catch (err) {
-    // Log the real error server-side, but don't echo its message to the
-    // client — internal error text can leak implementation details (table
-    // names, stack hints). Return a generic body instead.
-    console.error('api error', err);
-    // Self-report the crash to the events table (docs/specs/017-telemetry/telemetry.md 'Error'
-    // category): the worker owns the D1 binding, so a server-side
-    // exception counts even when no client survives to report it.
-    // Same TELEMETRY_ENABLED gate as the ingest; off the response's
-    // critical path (waitUntil), and its own failure is logged, never
-    // thrown: the 500 must still go out. The type names the endpoint by its
-    // route words only (`Internal.Put.Documents.Tabs`), never an id.
-    if (env.TELEMETRY_ENABLED === 'true') {
-      const type = errorTypeToken('Internal', apiRouteLabel(request.method, url.pathname));
-      const report = insertTelemetryEvents(
-        env,
-        [{ category: 'Error', action: 'Api', type }],
-        Date.now(),
-      ).catch((err: unknown) => console.error('[telemetry] crash report failed', err));
-      executionCtx?.waitUntil?.(report);
-    }
-    return json({ error: 'internal_error' }, { status: 500 });
+  switch (segments[1]) {
+    case 'capabilities':
+      return handleCapabilities(ctx);
+    case 'templates':
+    case 'icons':
+    case 'schema':
+      return handleCatalogues(ctx);
+    case 'openapi.json':
+      return handleOpenapi(ctx);
+    case 'unfurl':
+      return await handleUnfurl(ctx);
+    case 'ai':
+      // Two model routes, one gate (docs/specs/007-editor/ai-assistance.md + docs/specs/021-event-storming/event-storming.md Phase 8): the
+      // assistant at /api/ai, and the crop reader one segment deeper.
+      if (segments[2] === undefined) return await handleAi(ctx);
+      if (segments[2] === 'read-notes' && segments.length === 3)
+        return await handleAiReadNotes(ctx);
+      return notFound();
+    case 'events':
+      return await handleEvents(ctx);
+    case 'telemetry':
+      return await handleTelemetry(ctx);
+    case 'share':
+      return await handleShare(ctx);
+    case 'shared':
+      return await handleShared(ctx);
+    case 'images':
+      return await handleImages(ctx);
+    case 'documents':
+      return await handleDocuments(ctx);
+    case 'folders':
+      return await handleFolders(ctx);
+    // A form link's public doors (docs/specs/030-forms/forms.md "Filling in a form").
+    case 'bug-reports':
+      return handleBugReports(ctx);
+    case 'forms':
+      return await handleForms(ctx);
+    case 'custom-themes':
+      return await handleCustomThemes(ctx);
+    case 'shape-libraries':
+      return await handleShapeLibraries(ctx);
+    case 'teams':
+      return await handleTeams(ctx);
+    case 'tokens':
+      return await handleTokens(ctx);
+    case 'oauth':
+      return await handleOauthExchange(ctx);
+    case 'account':
+      return await handleAccount(ctx);
+    case 'favourites':
+      return await handleFavourites(ctx);
+    // Per-person document tags (docs/specs/013-workspace/tags.md).
+    case 'tags':
+      return await handleTags(ctx);
+    case 'placement-defaults':
+      return await handlePlacementDefaults(ctx);
+    case 'trash':
+      return await handleTrash(ctx);
+    case 'timeline':
+      return await handleTimeline(ctx);
+    case 'activity':
+      return await handleActivity(ctx);
+    case 'home':
+      return await handleHome(ctx);
+    case 'search':
+      return await handleContentSearch(ctx);
+    case 'preferences':
+      return await handlePreferences(ctx);
+    case 'migrate':
+      return await handleMigrate(ctx);
+    case 'guest-id':
+      return await handleGuestId(ctx);
+    case 'participants':
+      return await handleParticipants(ctx);
+    case 'drive':
+      return await handleDrive(ctx);
+    case 'workbench':
+      return await handleWorkbench(ctx);
   }
 
   return notFound();
@@ -496,7 +471,15 @@ async function routeApiRequest(
 const worker = {
   // Every response carries the server release signal (docs/specs/016-platform/new-version-prompt.md, stale-builds.md).
   async fetch(request: Request, env: Env, executionCtx?: ExecutionContext): Promise<Response> {
-    return withServerRelease(await routeApiRequest(request, env, executionCtx), env.BUILD_ID);
+    // One guard for the whole request, identity resolution included (docs/specs/015-api/api.md "When a request
+    // fails"): nothing that throws is left to the runtime's bare error page.
+    let response: Response;
+    try {
+      response = await routeApiRequest(request, env, executionCtx);
+    } catch (err) {
+      response = failedRequestResponse(err, request, env, executionCtx);
+    }
+    return withServerRelease(response, env.BUILD_ID);
   },
 
   // Scheduled handler. Wired to the cron schedule in wrangler.toml.

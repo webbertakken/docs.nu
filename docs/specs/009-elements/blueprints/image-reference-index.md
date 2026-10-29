@@ -228,7 +228,7 @@ export async function deleteOldUnusedImages(env: Env, cutoff: number): Promise<n
 
 `imageRefIds` accepts `unknown` and returns `[]` for anything that isn't an array; a non-object entry is skipped. No
 HTTP contract changes: `GET /api/images/usage` and `GET /api/images/:id` keep their shapes and status codes. A
-`placesImage` call that throws is not wrapped in `askRoom`: it reaches the worker's outer catch, logged `api error`,
+`placesImage` call that throws is not wrapped in `askRoom`: it reaches the worker's outer catch, logged `api error route=<route words>`,
 and answers 500; no bytes are served.
 
 ## Data and persistence
@@ -319,7 +319,7 @@ JSON_CHUNK_BYTES)` inserts and one grant statement, at most once a minute per do
 | `image sweep: deleted <n> images older than <cutoff>`                                            | info  | End of every sweep                |
 | `image sweep failed`                                                                             | error | The sweep threw                   |
 | `[images] not servable by document`                                                              | warn  | The share read refused            |
-| `api error`                                                                                      | error | The room's `placesImage` threw    |
+| `api error route=<route words>`                                                                  | error | The room's `placesImage` threw    |
 | `[outbox] unit failed id=<id> unit=summary`                                                      | warn  | The document unit (images) failed |
 | `[outbox] drained id=<id> units=<n> keys=<k> more=<bool>`                                        | info  | Every drain, images included      |
 
