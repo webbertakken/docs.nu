@@ -75,6 +75,23 @@ describe('useStripPlacement', () => {
     expect(seen.at(-1)).toEqual({ crowded: false, shift: 0 });
   });
 
+  // Centred, the strip takes no shift at all, whatever its width, so a Plan tab's band end (--plan-strip-end) still
+  // applies; only an off-centre strip lands on a whole pixel.
+  it('centres a strip of odd width with no shift (1440)', () => {
+    vi.stubGlobal('innerWidth', 1440);
+    const seen: StripPlacement[] = [];
+    render(<Strip width={601} seen={seen} />);
+    expect(seen.at(-1)).toEqual({ crowded: false, shift: 0 });
+  });
+
+  it('lands an off-centre strip of fractional width on a whole pixel (864)', () => {
+    vi.stubGlobal('innerWidth', 864);
+    const seen: StripPlacement[] = [];
+    render(<Strip width={440.5} seen={seen} />);
+    const { shift } = seen.at(-1)!;
+    expect(Number.isInteger(432 + shift - 440.5 / 2)).toBe(true);
+  });
+
   it('slides it off centre between the groups when centred would run under one (864)', () => {
     vi.stubGlobal('innerWidth', 864);
     const seen: StripPlacement[] = [];
