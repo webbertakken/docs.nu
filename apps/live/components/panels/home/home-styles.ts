@@ -38,9 +38,9 @@ export const GRID_THUMB = 'h-20 w-full';
 /** The grid: four across, filled from the top left. */
 export const GRID = 'grid grid-cols-4 content-start gap-3';
 
-/** Two tile rows whatever lands in them (D131): 2 × 116 px and the 12 px gap. The grid and its skeleton
+/** Two tile rows whatever lands in them (D131): 2 × 100 px and the 12 px gap. The grid and its skeleton
  *  both hold it, so fewer documents never shift what follows. */
-export const GRID_MIN_HEIGHT = 'min-h-[15.25rem]';
+export const GRID_MIN_HEIGHT = 'min-h-[13.25rem]';
 
 /** An empty list's one slot, the size of the tile it stands in for: a dashed edge. */
 export const EMPTY_SLOT = 'rounded-md border border-dashed border-slate-300 dark:border-slate-600';

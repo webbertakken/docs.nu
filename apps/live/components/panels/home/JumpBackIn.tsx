@@ -2,20 +2,18 @@
 
 // Jump Back In (docs/specs/013-workspace/explorer-home.md "Jump Back In"): the person's Within reach
 // set of documents. On a desktop or tablet a 4 by 2 grid of thumbnails, most used on top and recent below, each tile
-// with its quiet line, with See More in the heading row; on a phone the alternating strip that ends in its See More
+// its thumbnail and name, with See More in the heading row; on a phone the alternating strip that ends in its See More
 // tile. The two halves carry no titles: the documents are one list named Jump Back In (Calm by default). Each document carries its Explorer ⋯ menu when the Explorer has it,
 // and a document that leaves the Explorer's lists (moved to the Trash, taken off Shared With Me) leaves at once.
 
 import { useMemo } from 'react';
 import { CompactEmptyState, useMediaQuery } from '@livedoc/ui';
 import { track } from '@/lib/telemetry';
-import { useRelativeNow } from '@/lib/relative-time';
 import { HOME_COPY } from '@/app/explorer/home/home-copy';
-import {
-  jumpBackInLine,
-  type JumpBackInGroup,
-  type JumpBackInItem,
-  type JumpBackInSet,
+import type {
+  JumpBackInGroup,
+  JumpBackInItem,
+  JumpBackInSet,
 } from '@/app/explorer/home/home-model';
 import type { DocumentEntryFor } from '@/app/explorer/useDocumentEntryFor';
 import { HomeSection } from './HomeSection';
@@ -50,7 +48,6 @@ export function JumpBackIn({
   documentMenus?: DocumentEntryFor;
 }) {
   const wide = useMediaQuery(HOME_WIDE_QUERY);
-  const now = useRelativeNow();
   const set = useMemo(() => {
     if (!documentMenus) return fullSet;
     const here = (item: JumpBackInSet['mostUsed'][number]) =>
@@ -95,7 +92,7 @@ export function JumpBackIn({
         // The shared empty state (docs/specs/004-interface-design/empty-states.md) in place of one tile's thumbnail and
         // words, so an empty Jump Back In looks like a list with one thing in it.
         <div className={GRID}>
-          <div className={`col-span-2 h-[7.25rem] ${EMPTY_SLOT}`}>
+          <div className={`col-span-2 h-[6.25rem] ${EMPTY_SLOT}`}>
             <CompactEmptyState
               className="h-full w-full"
               icon={<JumpBackInEmptyIcon />}
@@ -112,7 +109,6 @@ export function JumpBackIn({
               ownerId={ownerId}
               item={item}
               group="mostUsed"
-              now={now}
               menuFor={menuFor}
             />
           ))}
@@ -122,7 +118,6 @@ export function JumpBackIn({
               ownerId={ownerId}
               item={item}
               group="recent"
-              now={now}
               menuFor={menuFor}
               // The recent open the second row, whatever the length of the first.
               startsRow={i === 0 && set.mostUsed.length > 0}
@@ -139,14 +134,12 @@ function GridTile({
   ownerId,
   item,
   group,
-  now,
   menuFor,
   startsRow = false,
 }: {
   ownerId: string;
   item: JumpBackInItem;
   group: JumpBackInGroup;
-  now: number;
   menuFor?: JumpBackInMenuFor;
   startsRow?: boolean;
 }) {
@@ -157,7 +150,6 @@ function GridTile({
         item={item}
         group={group}
         thumbClassName={GRID_THUMB}
-        line={jumpBackInLine(item, group, now)}
         entry={menuFor?.(item.documentId) ?? null}
       />
     </li>

@@ -85,12 +85,9 @@ the **4 most used** and the **4 most recent**, no document twice.
 - A document stored only in this browser ([Offline Mode](../006-document/offline-mode.md)) takes part with this
   browser's own record of its opens and edits ([Opens](#opens)), and carries the **This Browser** pill on its
   thumbnail, as every other row and card of one does.
-- Each document is a **tile**: its snapshot thumbnail, its name under it, and on a desktop or tablet one quiet line
-  under the name that says why it is there. The full name is its accessible name and its tooltip (a long name is cut
-  short under the picture); the quiet line is its description. Activating a tile opens the document.
-  - A most used document's line counts its use days: "Used on 1 day", "Used on N days".
-  - A recent document's line says when the person last used it: "Used 2 hours ago", "Used yesterday" (the
-    Explorer's relative time).
+- Each document is a **tile**: its snapshot thumbnail with its name under it in a small font, and nothing more: no
+  line says why it is there (Calm by default). The full name is its accessible name and its tooltip (a long name is
+  cut short under the picture). Activating a tile opens the document.
 - **Each tile has the document's ⋯ menu**, the same menu its row and card carry everywhere else in the Explorer
   (Rename, Duplicate, Move, Favourite, History, Delete and the rest; a document shared with you gets the
   shared-with-you menu), so it can be changed from Home without opening it. A ⋯ button at the top right of the tile's
@@ -128,8 +125,7 @@ the **4 most used** and the **4 most recent**, no document twice.
 ### Phone
 
 - One **sideways-scrolling strip** of at most **8** thumbnails: most used, recent, most used, recent, and so on;
-  when one group runs out, the rest of the other follows. Its tiles carry no quiet line: each tile is its thumbnail
-  and name.
+  when one group runs out, the rest of the other follows. Each tile is its thumbnail and name, as in the grid.
 - The strip ends in a **See More** tile, the same size as a thumbnail, that opens the Recent page.
 - The strip scrolls sideways (touch, trackpad, Shift+wheel, and keyboard focus moving through it). Its trailing
   edge fades to say there is more, and only while there is more.

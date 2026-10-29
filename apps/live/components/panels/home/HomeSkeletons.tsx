@@ -16,18 +16,13 @@ const GRID_ITEMS = 8;
 const STRIP_ITEMS = 4;
 const ENTRY_ROWS = 3;
 
-function TileSkeleton({ thumb, line = false }: { thumb: string; line?: boolean }) {
+function TileSkeleton({ thumb }: { thumb: string }) {
   return (
     <>
       <div className={`${thumb} ${SKELETON}`} />
       <div className="mt-1 h-4 py-0.5">
         <div className={`h-3 w-3/4 ${SKELETON}`} />
       </div>
-      {line ? (
-        <div className="h-4 py-1">
-          <div className={`h-2 w-1/2 ${SKELETON}`} />
-        </div>
-      ) : null}
     </>
   );
 }
@@ -38,7 +33,7 @@ export function GridSkeleton() {
     <div aria-hidden className={`${GRID} ${GRID_MIN_HEIGHT}`}>
       {Array.from({ length: GRID_ITEMS }, (_, i) => (
         <div key={i} className="min-w-0">
-          <TileSkeleton thumb={GRID_THUMB} line />
+          <TileSkeleton thumb={GRID_THUMB} />
         </div>
       ))}
     </div>
