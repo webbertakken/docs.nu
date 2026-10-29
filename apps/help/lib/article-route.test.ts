@@ -73,15 +73,15 @@ describe('articleCrumbs', () => {
   it('names a mode’s page as the parent of its tour, never the category', () => {
     expect(
       articleCrumbs({
-        pathname: '/canvas/draw-mode/draw-tour',
-        title: 'The Draw Tour',
+        pathname: '/canvas/sketch-mode/sketch-tour',
+        title: 'The Sketch Tour',
         categoryTitle: 'Canvas',
-        parentTitle: 'Draw Mode',
+        parentTitle: 'Sketch Mode',
       }),
     ).toEqual([
       { label: 'Canvas', href: '/canvas/' },
-      { label: 'Draw Mode', href: '/canvas/draw-mode/' },
-      { label: 'The Draw Tour' },
+      { label: 'Sketch Mode', href: '/canvas/sketch-mode/' },
+      { label: 'The Sketch Tour' },
     ]);
   });
 

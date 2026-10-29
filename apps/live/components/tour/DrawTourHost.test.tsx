@@ -101,7 +101,7 @@ describe('DrawTourHost offer', () => {
     act(() => tourOffer()!.start());
     expect(startedTour()).toBe(true);
     expect(stage.engine?.active).toBe(true);
-    expect(stage.helpHref).toBe('/help/canvas/draw-mode/');
+    expect(stage.helpHref).toBe('/help/canvas/sketch-mode/');
   });
 
   it('stays on offer once seen, so it can be taken again', () => {

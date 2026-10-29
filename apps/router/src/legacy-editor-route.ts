@@ -14,10 +14,11 @@ export function legacyEditorRedirect(url: URL): Response | null {
 }
 
 // Renamed help articles: the ones about the container moved when it became a document,
-// Whiteboards became Draw mode, the Highlighter went from a selection mode to a Draw tile, and
+// Whiteboards became Draw mode and then Sketch mode, the Highlighter went from a selection mode to a Draw tile, and
 // the Activity Panel category went when the panel was removed (Undo and Redo moved to Canvas;
 // its other articles land on Undo), Infographics became Illustrate mode and then Pages mode,
-// Facilitate mode became Workshop mode, and the Welcome Tour became the Diagram Tour. The old
+// Facilitate mode became Workshop mode and then the Workshop control, Plan mode became Plan tabs, and the
+// Welcome Tour became the Diagram Tour. The old
 // addresses are links people have already shared (docs/specs/018-help/help-app.md, "Renamed articles").
 const LEGACY_HELP_ARTICLES: Readonly<Record<string, string>> = {
   'tabs/add-to-diagram': 'tabs/add-to-document',
@@ -26,7 +27,9 @@ const LEGACY_HELP_ARTICLES: Readonly<Record<string, string>> = {
   'search-panel/the-search-panel/search-diagrams': 'search-panel/the-search-panel/search-documents',
   'getting-started/sharing-your-diagram': 'getting-started/sharing-your-document',
   'developers/working-with-diagrams': 'developers/working-with-documents',
-  'canvas/whiteboards': 'canvas/draw-mode',
+  'canvas/whiteboards': 'canvas/sketch-mode',
+  'canvas/draw-mode': 'canvas/sketch-mode',
+  'canvas/draw-mode/draw-tour': 'canvas/sketch-mode/sketch-tour',
   'canvas/infographics': 'canvas/pages-mode',
   'canvas/infographics/infographic-layouts': 'canvas/pages-mode/infographic-layouts',
   'canvas/infographics/exporting-infographics': 'canvas/pages-mode/exporting-pages',
@@ -38,8 +41,21 @@ const LEGACY_HELP_ARTICLES: Readonly<Record<string, string>> = {
   'canvas/illustrate/logo-pages': 'canvas/pages-mode/logo-pages',
   'canvas/illustrate/slide-pages': 'canvas/pages-mode/slide-pages',
   'canvas/illustrate/tab-windows': 'canvas/pages-mode/tab-windows',
-  'canvas/facilitate-mode': 'canvas/workshop-mode',
-  'canvas/facilitate-mode/facilitate-tour': 'canvas/workshop-mode/workshop-tour',
+  'canvas/facilitate-mode': 'canvas/workshop',
+  'canvas/facilitate-mode/facilitate-tour': 'canvas/workshop/workshop-tour',
+  'canvas/workshop-mode': 'canvas/workshop',
+  'canvas/workshop-mode/workshop-tour': 'canvas/workshop/workshop-tour',
+  'canvas/plan-mode': 'canvas/plan-tabs',
+  'canvas/plan-mode/boards': 'canvas/plan-tabs/boards',
+  'canvas/plan-mode/card-types': 'canvas/plan-tabs/card-types',
+  'canvas/plan-mode/cards': 'canvas/plan-tabs/cards',
+  'canvas/plan-mode/dashboards': 'canvas/plan-tabs/dashboards',
+  'canvas/plan-mode/forms': 'canvas/plan-tabs/forms',
+  'canvas/plan-mode/items': 'canvas/plan-tabs/items',
+  'canvas/plan-mode/plan-tour': 'canvas/plan-tabs/plan-tour',
+  'canvas/plan-mode/sheet-functions': 'canvas/plan-tabs/sheet-functions',
+  'canvas/plan-mode/sheets': 'canvas/plan-tabs/sheets',
+  'canvas/plan-mode/visualisations': 'canvas/plan-tabs/visualisations',
   'selection-modes/highlighter': 'palette/tools/highlighter',
   'activity-panel': 'canvas/undo',
   'activity-panel/what-it-is': 'canvas/undo',

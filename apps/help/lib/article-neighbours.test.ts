@@ -43,12 +43,12 @@ describe('article neighbours', () => {
 // docs/specs/018-help/help-pages.md "Article pages": a nested article's parent is the article at its categorySlug.
 describe('parentArticleOf', () => {
   it('is the article at a nested article’s categorySlug path', () => {
-    expect(parentArticleOf(articleByTitle('The Draw Tour')!)?.title).toBe('Draw Mode');
-    expect(parentArticleOf(articleByTitle('Boards')!)?.title).toBe('Plan Mode');
+    expect(parentArticleOf(articleByTitle('The Sketch Tour')!)?.title).toBe('Sketch Mode');
+    expect(parentArticleOf(articleByTitle('Boards')!)?.title).toBe('Plan Tabs');
   });
 
   it('is nothing for a top-level article', () => {
-    expect(parentArticleOf(articleByTitle('Draw Mode')!)).toBeUndefined();
+    expect(parentArticleOf(articleByTitle('Sketch Mode')!)).toBeUndefined();
   });
 
   it('finds a parent for every nested article', () => {

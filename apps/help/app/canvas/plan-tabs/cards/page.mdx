@@ -6,21 +6,21 @@ export const metadata = helpMetadata({
   title: 'Cards',
   description:
     'Work with Plan cards: add them, fill in Details, link cards, comment, flag, find any card, archive or trash it, and present a card as a slide.',
-  path: '/help/canvas/plan-mode/cards/',
+  path: '/help/canvas/plan-tabs/cards/',
 });
 
 <ArticleLayout
   title="Cards"
   description="Every card is a piece of work you can open, fill in, move, flag, archive or present."
   categoryTitle="Canvas"
-  categorySlug="canvas/plan-mode"
+  categorySlug="canvas/plan-tabs"
 >
 
-A **card** shows one [item](/help/canvas/plan-mode/items/) on a [board](/help/canvas/plan-mode/boards/). The same item can sit on more than one board, and a change to it shows everywhere at once.
+A **card** shows one [item](/help/canvas/plan-tabs/items/) on a [board](/help/canvas/plan-tabs/boards/). The same item can sit on more than one board, and a change to it shows everywhere at once.
 
 ## Add a Card
 
-- **+ Add card** at the foot of a column (or of a row, on a board with swimlanes) opens **Add a Card**: press a type (Project, Task, Note, Idea, Action or [your own](/help/canvas/plan-mode/card-types/)) and a card of it lands at the end of the column and opens straight away with its title selected, ready to name.
+- **+ Add card** at the foot of a column (or of a row, on a board with swimlanes) opens **Add a Card**: press a type (Project, Task, Note, Idea, Action or [your own](/help/canvas/plan-tabs/card-types/)) and a card of it lands at the end of the column and opens straight away with its title selected, ready to name.
 - **With the keyboard:** focus a card and press **N** to open **Add a Card** for its column.
 - **Off any board:** the **New Card** (+) button in the tools group at the bottom left makes a card of any type without placing it on a board.
 
@@ -30,7 +30,7 @@ A board shows and offers only the card types set in its menu's **Supported Cards
 
 ## Open a Card
 
-Click a card (in Plan mode), or double-click it in the other modes, to open its panel. It closes with **Escape** or the close button, and every change saves as you make it.
+Click a card (on a Plan tab), or double-click it anywhere else, to open its panel. It closes with **Escape** or the close button, and every change saves as you make it.
 
 <Figure caption="The card panel: a breadcrumb back to the project, the card's tabs and Linked as Parent on the left, Details on the right.">
   <PlanCardPanelScene />
@@ -58,7 +58,7 @@ Every card has a conversation at the end of its **Overview** tab, the same [comm
 - **Resolve** closes the thread once it is settled; it then shows **Resolved**, and **Reopen** opens it again, as does a new comment.
 - Delete your own comments from their bin. Someone who can edit the document can delete any comment.
 - Editors and Participants can comment on a card; a Viewer reads the comments but can't add one.
-- A card shows how many comments its open thread has, beside its votes. Whether the count shows is part of the card type's **Display** ([Card Types](/help/canvas/plan-mode/card-types/)).
+- A card shows how many comments its open thread has, beside its votes. Whether the count shows is part of the card type's **Display** ([Card Types](/help/canvas/plan-tabs/card-types/)).
 
 Trashing or archiving a card keeps its comments; deleting it for good from the Trash deletes them. Comments are not undone with **Undo**, as on the canvas. A card holds up to 200 comments.
 
@@ -78,7 +78,7 @@ Its element menu has a **Card** section with **Card Size**: **Minimal**, **Compa
 
 ## Find a Card
 
-The **Find a Card** button in Plan mode's tools group, at the bottom left (beside **Card Types**), lists every card in the document that isn't archived or in the Trash, of every card type, your own included, newest change first:
+The **Find a Card** button in a Plan tab's tools group, at the bottom left (beside **Card Types**), lists every card in the document that isn't archived or in the Trash, of every card type, your own included, newest change first:
 
 - **Search** by number (`12` or `#12`), title, description or a type's name (**Person** finds every Person card).
 - **Add Filter**, at the right of the search box, narrows the list by any field, **Card Type** included: pick a field, then one of its values (each says how many cards have it), such as **State: Done** or **Assignee: No assignee**. Each filter shows inside the search box; add up to eight. A filter's cross takes it off (so does Backspace in an empty box), and the box's clear takes off the words and every filter.
@@ -87,7 +87,7 @@ The **Find a Card** button in Plan mode's tools group, at the bottom left (besid
 
 ## The Trash
 
-Every way of deleting a card moves it to the Trash: **Trash** in its menus, **Delete** on a focused card, or dragging it onto the **Trash** button at the start of Plan mode's buttons in the tools group (it opens out into a drop target as you drag). The button's badge counts the cards in it. On a phone there is no Trash button, so use **Trash** in a card's menu (hold your finger on the card).
+Every way of deleting a card moves it to the Trash: **Trash** in its menus, **Delete** on a focused card, or dragging it onto the **Trash** button at the start of a Plan tab's buttons in the tools group (it opens out into a drop target as you drag). The button's badge counts the cards in it. On a phone there is no Trash button, so use **Trash** in a card's menu (hold your finger on the card).
 
 Open the Trash to **Restore** a card to the column it came from, **Delete** one for good (it asks first), or **Empty Trash** (which empties it at once, without asking). Deleting for good can't be undone. The Trash button is only shown to Editors.
 

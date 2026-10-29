@@ -3,48 +3,48 @@ import { helpMetadata } from '@/lib/seo';
 import { ModeSwitchScene, DrawDockScene } from '@/components/illustrations/editor-mode-switch';
 
 export const metadata = helpMetadata({
-  title: 'Draw Mode',
+  title: 'Sketch Mode',
   description:
-    'Switch any tab into Draw mode to sketch by hand: a dock of pens, two erasers, stickies, text and every palette shape, on the same canvas as your diagram.',
-  path: '/help/canvas/draw-mode/',
+    'Switch any tab into Sketch mode to sketch by hand: a dock of pens, two erasers, stickies, text and every palette shape, on the same canvas as your diagram.',
+  path: '/help/canvas/sketch-mode/',
 });
 
 <ArticleLayout
-  title="Draw Mode"
+  title="Sketch Mode"
   description="Freehand whiteboarding on any tab: pick up a pen and draw."
   categoryTitle="Canvas"
   categorySlug="canvas"
 >
 
-**Draw mode** is a way of working on a tab, made for sketching by hand. There are five [editor modes](/help/canvas/editor-modes/): **Diagram**, with the palette, shapes, arrows and templates, **Draw**, with pens, erasers and a dock of tools, **Pages**, which lays the tab out as pages to build infographics and write articles (see [Pages Mode](/help/canvas/pages-mode/)), **Plan**, for boards of items in tabs of their own (see [Plan mode](/help/canvas/plan-mode/)), and **Workshop**, for running a session with your team (see [Workshop Mode](/help/canvas/workshop-mode/)). Switching never changes what is on the tab: a stroke you draw in Draw mode is still there in Diagram mode, and a shape placed in Diagram mode is still there in Draw mode, in the same colours. So a workshop can keep a free sketch next to a tidy diagram on the same canvas. Everything else works as always: sharing, live collaboration, comments, layers, undo and export.
+**Sketch mode** is a way of working on a tab, made for sketching by hand. It used to be called **Sketch mode**. There are three [editor modes](/help/canvas/editor-modes/): **Sketch**, with pens, erasers and a dock of tools, **Structured**, with the palette, shapes, arrows and templates, and **Pages**, which lays the tab out as pages to build infographics and write articles (see [Pages Mode](/help/canvas/pages-mode/)). Boards, sheets and dashboards are [Plan tabs](/help/canvas/plan-tabs/) of their own, and running a session with your team is the [Workshop control](/help/canvas/workshop/), which works in Sketch too. Switching never changes what is on the tab: a stroke you draw in Sketch mode is still there in Structured mode, and a shape placed in Structured mode is still there in Sketch mode, in the same colours. So a workshop can keep a free sketch next to a tidy diagram on the same canvas. Everything else works as always: sharing, live collaboration, comments, layers, undo and export.
 
 ## Switching Modes
 
-- **Beside the menu button**, the mode switch shows the current mode: press it and choose **Draw**. On an empty tab the switch at the top of its start's list does the same, and the start turns into **Start Drawing**, with a pen in hand.
-- **Shift+D** moves the tab to the next mode (Diagram, then Draw, Workshop, Pages, and Plan while the tab is empty), and screen readers announce the mode you are now in. The switch's menu shows **⇧D** on the mode it leads to. It follows the character-key shortcuts setting.
-- **A tab with something on it switches too**, keeping every element where it is: sketch over a diagram in Draw, then switch back to Diagram to tidy it. See [Editor Modes](/help/canvas/editor-modes/#choosing-a-mode).
+- **Beside the menu button**, the mode switch shows the current mode: press it and choose **Sketch**. On an empty tab the switch at the top of its start's list does the same, and the start turns into **Start Sketching**, with a pen in hand.
+- **Shift+D** moves the tab to the next mode (Sketch, then Structured, Pages and back to Sketch), and screen readers announce the mode you are now in. It follows the character-key shortcuts setting.
+- **A tab with something on it switches too**, keeping every element where it is: sketch over a diagram in Sketch, then switch back to Structured to tidy it. See [Editor Modes](/help/canvas/editor-modes/#choosing-a-mode).
 
-<Figure caption="The mode switch at the top of an empty tab's start, open on the five modes: the current one checked, ⇧D on the next.">
+<Figure caption="The mode switch at the top of an empty tab's start, open on the three modes, the current one checked.">
   <ModeSwitchScene />
 </Figure>
 
 - **One mode for everyone:** the mode belongs to the tab, so everyone on it switches together, and **Undo** switches it back (see [Editor Modes](/help/canvas/editor-modes/#one-mode-for-everyone)). The icon at the start of each tab shows its mode.
 - People who can only view a tab see it in the mode it opens in, without the switch. Event storming boards have their own tools and no switch.
 
-## Starting a Drawing
+## Starting a Sketch
 
-- **A new document:** in the New Document wizard, choose **Draw**. The document is made straight away, and its tab opens in Draw mode with a pen in hand.
-- **From a drawn template:** an empty Draw tab opens on **Start Drawing**, which lists the templates drawn by hand under **Visual Notes**, **Exercises** and **Prototypes**, such as **Sketchnote**, **Rich Picture**, **Comic Strip**, **Doodle Warm-Up**, **Journey Doodle** and **Idea Garden** ([Templates](/help/canvas/templates/)).
-- **A new tab:** on a Draw tab, press **+** at the right of the bottom line and the new tab opens in Draw too, on **Start Drawing** with a pen in hand. From a tab in another mode, the new tab opens in that mode: switch it to **Draw** while it is empty.
-- **Any tab:** switch it to **Draw**.
+- **A new document:** in the New Document wizard, choose **Sketch**. The document is made straight away, and its tab opens in Sketch mode with a pen in hand.
+- **From a drawn template:** an empty Sketch tab opens on **Start Sketching**, which lists the templates drawn by hand under **Visual Notes**, **Exercises** and **Prototypes**, such as **Sketchnote**, **Rich Picture**, **Comic Strip**, **Doodle Warm-Up**, **Journey Doodle** and **Idea Garden** ([Templates](/help/canvas/templates/)).
+- **A new tab:** on a Sketch tab, press **+** after your tabs and choose **Tab**: the new tab opens in Sketch too, on **Start Sketching** with a pen in hand. From a tab in another mode, the new tab opens in that mode: switch it to **Sketch** while it is empty.
+- **Any tab:** switch it to **Sketch**.
 
-Already drew it in Excalidraw? Copy it there and paste it onto a tab in Draw mode: it lands as pen strokes, text boxes, shapes and sticky notes, in colours that follow the board. See [Paste from Excalidraw](/help/tabs/import-tabs/#paste-from-excalidraw).
+Already drew it in Excalidraw? Copy it there and paste it onto a tab in Sketch mode: it lands as pen strokes, text boxes, shapes and sticky notes, in colours that follow the board. See [Paste from Excalidraw](/help/tabs/import-tabs/#paste-from-excalidraw).
 
 ## The Dock
 
-Draw mode swaps the palette strip for its own tools, in three groups: the **drawing tools**, the **shapes** and **Settings**. They form a dock across the top of the canvas, the same height as the strip, and a tool's options open just below it, pointing at its button. Undo and Redo are in the tools group at the bottom left, as in Diagram mode. Prefer the dock at the bottom, closer to hand when drawing on a tablet? Open **Settings**, choose **Editor**, then **Draw**, and set **Dock Position** to **Bottom**. The choice follows your account to every tab you draw on.
+Sketch mode swaps the palette strip for its own tools, in three groups: the **drawing tools**, the **shapes** and **Settings**. They form a dock across the top of the canvas, the same height as the strip, and a tool's options open just below it, pointing at its button. Undo and Redo are in the tools group at the bottom left, as in Structured mode. Prefer the dock at the bottom, closer to hand when drawing on a tablet? Open **Settings**, choose **Editor**, then **Sketch**, and set **Dock Position** to **Bottom**. The choice follows your account to every tab you draw on.
 
-<Figure caption="Draw mode's dock: the drawing tools, your pinned shapes and Shapes, then Settings, each with its key.">
+<Figure caption="Sketch mode's dock: the drawing tools, your pinned shapes and Shapes, then Settings, each with its key.">
   <DrawDockScene />
 </Figure>
 
@@ -63,17 +63,17 @@ The shapes:
 
 The **sticky note** is one of the shapes: search for it in Shapes ("sticky", "note" or "post-it"), pin it like any shape, or press **N** from anywhere to place one.
 
-Shapes, lines, arrows and paths are drawn in Ink with no fill, whichever pen you last used, and stay that way when you switch to Diagram mode: the pens colour only their own strokes. To change a shape's colour or width, select it and use the style panel on the left; a selected marker stroke gets its **Marker colour** and **Marker width** there as well: nine colours, Ink and eight hues, in one row. **More colours** at its end opens the full colour picker, with Grey and the custom colours used in this document.
+Shapes, lines, arrows and paths are drawn in Ink with no fill, whichever pen you last used, and stay that way when you switch to Structured mode: the pens colour only their own strokes. To change a shape's colour or width, select it and use the style panel on the left; a selected marker stroke gets its **Marker colour** and **Marker width** there as well: nine colours, Ink and eight hues, in one row. **More colours** at its end opens the full colour picker, with Grey and the custom colours used in this document.
 
 Last comes the **Settings** cog (press it to open it): your **Background**, the pen's **Cursor** (Crosshair + nib, the default, or Dot) and **Drawing** (Basic or Shape recognition), then **Colours** while the tab has custom colours (see [Snap colours](#snap-colours)).
 
-Pick a shape, line, arrow or text tool and the style panel shows what it will draw next ("Next rectangle"): choose a colour or width there and every rectangle after it follows. Draw mode remembers its own styles, apart from Diagram mode.
+Pick a shape, line, arrow or text tool and the style panel shows what it will draw next ("Next rectangle"): choose a colour or width there and every rectangle after it follows. Sketch mode remembers its own styles, apart from Structured mode.
 
 To select a pen stroke, click its line; clicking elsewhere in its box selects what is underneath, or nothing. Hold **Shift** with Select to drag a selection box from anywhere, even over a shape, adding what it encloses to the selection; **Shift-click** a mark to add it or take it out. With a pen in your hand the cursor stays a pen everywhere, because the pen always draws. To write in a shape, double-click anywhere inside it, selected or not.
 
-What you draw shows in the pen's colour and width as you draw it, smoothed as it goes, and nothing animates in: a mark lands exactly as you drew it. With a pen (stylus) the line follows your pressure: press lightly for a finer line, harder for a bolder one, with the chosen width in between. With a mouse or a finger it keeps the chosen width all along. A pen stays in your hand after each stroke, so you can keep writing. Press **Select** or **Escape** to put it down. Switching an empty tab to Draw mode puts your last pen in your hand straight away; a tab that already has something on it opens on **Select**, so you can look around first. Switching back to Diagram mode puts the pen down.
+What you draw shows in the pen's colour and width as you draw it, smoothed as it goes, and nothing animates in: a mark lands exactly as you drew it. With a pen (stylus) the line follows your pressure: press lightly for a finer line, harder for a bolder one, with the chosen width in between. With a mouse or a finger it keeps the chosen width all along. A pen stays in your hand after each stroke, so you can keep writing. Press **Select** or **Escape** to put it down. Switching an empty tab to Sketch mode puts your last pen in your hand straight away; a tab that already has something on it opens on **Select**, so you can look around first. Switching back to Structured mode puts the pen down.
 
-The dock works from the keyboard too. Every tool has a key (shown on its button in the dock) that picks it from anywhere on the board, and **Escape** puts the tool down again (unless you are typing into a note or text box); the other single-letter shortcuts of Diagram mode do nothing here. To reach the dock itself, Tab to it, move along it with the **arrow keys**, and press **Enter** or **Space**. In the colour picker the arrow keys move along a row of colours, and **Enter** picks one. Escape closes a marker's colour and width options and takes you back to the dock. Each group is one Tab stop, so Tab moves from one group to the next.
+The dock works from the keyboard too. Every tool has a key (shown on its button in the dock) that picks it from anywhere on the board, and **Escape** puts the tool down again (unless you are typing into a note or text box); the other single-letter shortcuts of Structured mode do nothing here. To reach the dock itself, Tab to it, move along it with the **arrow keys**, and press **Enter** or **Space**. In the colour picker the arrow keys move along a row of colours, and **Enter** picks one. Escape closes a marker's colour and width options and takes you back to the dock. Each group is one Tab stop, so Tab moves from one group to the next.
 
 ## Your Shapes
 
@@ -131,11 +131,11 @@ Under **Settings** (the cog), **Drawing** switches between **Basic** and **Shape
 
 ## Backgrounds
 
-Under **Settings**, choose **Plain**, **Dots** or **Grid**. The choice is yours: it shows behind every tab you work on in Draw mode, starts on **Grid**, and follows your account. It never changes the tab, so nobody else's view changes, and in Diagram mode the tab's own background shows again. Exports always use the tab's own background.
+Under **Settings**, choose **Plain**, **Dots** or **Grid**. The choice is yours: it shows behind every tab you work on in Sketch mode, starts on **Grid**, and follows your account. It never changes the tab, so nobody else's view changes, and in Structured mode the tab's own background shows again. Exports always use the tab's own background.
 
 ## Light and Dark
 
-Draw mode looks like the rest of the tab: the same theme and canvas colour as Diagram mode. On the Default theme the canvas is an off-white board in light mode and the editor's own dark canvas in dark mode. **Ink** is dark on a light canvas and light on a dark one, so **Marker 1**, and any stroke or text you draw without choosing a colour, reads clearly for everyone. The stock colours of Markers 2 and 3 adapt the same way: each has a darker version for a light canvas and a lighter one for a dark canvas, so a blue stroke reads clearly in both modes, for everyone, on screen and in exports. A custom colour is the same everywhere.
+Sketch mode looks like the rest of the tab: the same theme and canvas colour as Structured mode. On the Default theme the canvas is an off-white board in light mode and the editor's own dark canvas in dark mode. **Ink** is dark on a light canvas and light on a dark one, so **Marker 1**, and any stroke or text you draw without choosing a colour, reads clearly for everyone. The stock colours of Markers 2 and 3 adapt the same way: each has a darker version for a light canvas and a lighter one for a dark canvas, so a blue stroke reads clearly in both modes, for everyone, on screen and in exports. A custom colour is the same everywhere.
 
 ## Snap Colours
 

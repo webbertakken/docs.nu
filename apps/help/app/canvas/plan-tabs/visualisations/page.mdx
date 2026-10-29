@@ -9,17 +9,17 @@ export const metadata = helpMetadata({
   title: 'Charts of Your Cards',
   description:
     'Chart your Plan cards on visualisation tabs: a Gantt chart, due and start calendars, Cards by Field, Priority by Status and Card Search, all live.',
-  path: '/help/canvas/plan-mode/visualisations/',
+  path: '/help/canvas/plan-tabs/visualisations/',
 });
 
 <ArticleLayout
   title="Charts of Your Cards"
   description="A Gantt chart, calendars and more, each filling a tab and drawn live from every card in the document."
   categoryTitle="Canvas"
-  categorySlug="canvas/plan-mode"
+  categorySlug="canvas/plan-tabs"
 >
 
-A **Visualisation tab** is a [Plan mode](/help/canvas/plan-mode/) tab given over to one chart of your cards: a Gantt chart of what runs when, a calendar of what is due, or a breakdown of who has what. The chart reads every card in the document, whichever board it sits on, and changes as the cards do, for everyone at once. The same charts can also sit in the slots of a [Dashboard](/help/canvas/plan-mode/dashboards/), beside your boards and sheets.
+A **Visualisation tab** is a [Plan tab](/help/canvas/plan-tabs/) given over to one chart of your cards: a Gantt chart of what runs when, a calendar of what is due, or a breakdown of who has what. The chart reads every card in the document, whichever board it sits on, and changes as the cards do, for everyone at once. The same charts can also sit in the slots of a [Dashboard](/help/canvas/plan-tabs/dashboards/), beside your boards and sheets.
 
 ## Start a Visualisation Tab
 
@@ -29,7 +29,7 @@ On an empty Plan tab, **Start Planning** shows in the middle. Choose **Visualisa
   <PlanVisualisationsPickerScene />
 </Figure>
 
-Only people who can edit the document see **Start Planning**. To get an empty Plan tab, add a tab while you are on a Plan tab, or add one anywhere and choose **Plan** in the mode switch on its start.
+Only people who can edit the document see **Start Planning**. To get an empty Plan tab, press the **+** after your tabs and choose **Board**, **Sheet** or **Dashboard**: it opens on Start Planning, whose rail has **Visualisations**.
 
 ## The Charts
 
@@ -46,7 +46,7 @@ A card counts as done when its status is one of a board's done columns. Press a 
 
 Press the cog at the end of the chart's header to open **Chart Settings**. Its sections open one at a time:
 
-- **Card Types**: which card types the chart shows. Only types with the fields it reads are listed (a **Due** field for the Due Calendar, both **Start** and **Due** for the Gantt Chart), and at least one stays picked. Add those fields to a type in [Card Types](/help/canvas/plan-mode/card-types/) to bring it onto the chart.
+- **Card Types**: which card types the chart shows. Only types with the fields it reads are listed (a **Due** field for the Due Calendar, both **Start** and **Due** for the Gantt Chart), and at least one stays picked. Add those fields to a type in [Card Types](/help/canvas/plan-tabs/card-types/) to bring it onto the chart.
 - **Group By** (Cards by Field): the field it gives a bar to each value of.
 - **Statuses** (Cards by Field and Priority by Status): untick a status to leave its cards out.
 - **Swimlanes** (Gantt Chart): group the rows by **Assignee**, **Type**, **Priority**, **Status** or any field your card types have, or **None**. Each lane has a header with its name and count; click it to fold the lane away (just for you).
@@ -68,7 +68,7 @@ A chart on a canvas or in a Dashboard slot has **Maximise View** in its header, 
 
 ## In a Dashboard
 
-Every chart here can be one slot of a [Dashboard](/help/canvas/plan-mode/dashboards/): press **Add to Slot** in an empty slot and choose **Visualisations**. In a slot the chart sizes its bars, cells and cards to the room it has, and its cog holds the slot's own settings after the chart's. The [suggested dashboards](/help/canvas/plan-mode/dashboards/#dashboards-made-from-your-work) Start Planning makes from your boards come with charts already in place.
+Every chart here can be one slot of a [Dashboard](/help/canvas/plan-tabs/dashboards/): press **Add to Slot** in an empty slot and choose **Visualisations**. In a slot the chart sizes its bars, cells and cards to the room it has, and its cog holds the slot's own settings after the chart's. The [suggested dashboards](/help/canvas/plan-tabs/dashboards/#dashboards-made-from-your-work) Start Planning makes from your boards come with charts already in place.
 
 ## Who Can Do What
 

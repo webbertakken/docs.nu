@@ -24,7 +24,7 @@ import { TOUR_OFFER_RANK, useOfferTour } from './tour-offer';
 import { useStartPanelOpen } from '@/components/start/start-panel-open';
 
 const WORKSHOP_TOUR_COPY = {
-  helpHref: '/help/canvas/workshop-mode/',
+  helpHref: '/help/canvas/workshop/',
 };
 
 // The demo elements' row: a Timer, a Dot Vote and a Poll, at their palette sizes, this far apart.

@@ -378,7 +378,7 @@ export function MultiSelectionBar() {
 // --- Templates ---------------------------------------------------------------------------------
 
 /** A start's search finding a template in another mode (docs/specs/007-editor/start-diagramming.md "Found in other
- *  modes"): Start Planning searched for "sailboat", its own one-line no-match, then In Other Modes with the
+ *  modes"): Start Planning searched for "sailboat", its own one-line no-match, then Elsewhere with the
  *  Workshop block and its Sailboat retrospective card, which says it opens in Workshop. */
 export function StartSearchOtherModes() {
   const card = { x: 36, y: 192, w: 168, h: 90 };
@@ -427,13 +427,13 @@ export function StartSearchOtherModes() {
           No boards, sheets, forms or layouts match “sailboat”.
         </Label>
         <Label x={46} y={107} size={9} tone="muted">
-          Found in other modes.
+          Found elsewhere.
         </Label>
         <Label x={36} y={136} size={12} weight={700} tone="strong">
-          In Other Modes
+          Elsewhere
         </Label>
         <Label x={36} y={150} size={9} tone="muted">
-          Choosing one switches this tab to its mode.
+          Choosing one changes this tab to match.
         </Label>
         {/* The Workshop block: its mark on a soft tile, its name and how many it found. */}
         <rect x={36} y={162} width={18} height={18} rx={4.5} className="fill-brand-50" />

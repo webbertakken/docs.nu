@@ -210,7 +210,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             Card types carry your own fields, the same card can sit on two boards, and charts of the
             cards (a Gantt chart, due and start calendars, counts by person or priority) can fill a
             tab of their own. A Dashboard puts boards, Sheets, charts and figures side by side. See{' '}
-            <a href="/help/canvas/plan-mode/">Plan mode</a>.
+            <a href="/help/canvas/plan-tabs/">Plan mode</a>.
           </>
         ),
         aText:
@@ -310,7 +310,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             Yes. Switch a tab to Draw for a plain whiteboard: three pressure-sensitive markers,
             text, an eraser and shapes, on a plain, dotted or grid board in light or dark. With a
             stylus, a resting palm never leaves a mark. See{' '}
-            <a href="/help/canvas/draw-mode/">Draw mode</a>.
+            <a href="/help/canvas/sketch-mode/">Draw mode</a>.
           </>
         ),
         aText:
@@ -326,7 +326,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             chart them in a bar, line or pie chart that sits in the Sheet over its cells. CSV files
             come in and go out, and twelve templates start you off, from a Budget Planner and an
             Invoice to a Loan Calculator and a Habit Tracker. See{' '}
-            <a href="/help/canvas/plan-mode/sheets/">Sheets</a>.
+            <a href="/help/canvas/plan-tabs/sheets/">Sheets</a>.
           </>
         ),
         aText:
@@ -340,7 +340,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             RSVP, or a blank one, and build it in place. Share its link and anyone can fill it in
             without an account; every response lands as a card on a board or a row in a Sheet, so
             the answers turn straight into work. See{' '}
-            <a href="/help/canvas/plan-mode/forms/">forms</a>.
+            <a href="/help/canvas/plan-tabs/forms/">forms</a>.
           </>
         ),
         aText:
@@ -442,7 +442,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             holds the facilitator role runs the room’s timer, votes, polls and reveals. Estimate
             cards run planning poker, a temperature check shows how the room feels, a quiz asks what
             it knows, and an idea box collects anonymous ideas. See{' '}
-            <a href="/help/canvas/workshop-mode/">Workshop mode</a>.
+            <a href="/help/canvas/workshop/">Workshop mode</a>.
           </>
         ),
         aText:

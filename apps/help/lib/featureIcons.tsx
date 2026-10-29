@@ -392,7 +392,7 @@ export const FEATURE_ICONS: Record<string, ReactNode> = {
       <path d="M5.5 17.5c1-2.2 2-2.2 2.8 0s1.9 2.2 2.8-0.3" />
     </Glyph>
   ),
-  'draw-mode': (
+  'sketch-mode': (
     <Glyph>
       <rect x="3" y="3.5" width="18" height="12" rx="1.5" />
       <path d="M6.5 10c1-2.2 2.3-2.2 3 0s2 2.2 3 0 2-2.2 3 0" />
@@ -400,7 +400,7 @@ export const FEATURE_ICONS: Record<string, ReactNode> = {
     </Glyph>
   ),
   // A board of three columns, a card raised in the middle one: work on the move.
-  'plan-mode': (
+  'plan-tabs': (
     <Glyph>
       <rect x="2.5" y="4" width="19" height="16" rx="1.5" />
       <path d="M8.8 4v16M15.2 4v16" />
@@ -410,7 +410,7 @@ export const FEATURE_ICONS: Record<string, ReactNode> = {
     </Glyph>
   ),
   // Three people round a speech bubble: a team in a session, someone asking the room.
-  'workshop-mode': (
+  workshop: (
     <Glyph>
       <path d="M8 3h8a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 16 9h-3l-2 2v-2H8A1.5 1.5 0 0 1 6.5 7.5v-3A1.5 1.5 0 0 1 8 3z" />
       <circle cx="5" cy="15" r="2" />
@@ -464,7 +464,7 @@ export const FEATURE_ICONS: Record<string, ReactNode> = {
     </Glyph>
   ),
   // A pen over a squiggle with a dashed spotlight ring round it: a guided look at Draw.
-  'draw-tour': (
+  'sketch-tour': (
     <Glyph>
       <path d="M4 17c2-3 4 1 6-2s3-4 5-1" />
       <path d="M15 4l5 5-7 7h-5v-5z" />

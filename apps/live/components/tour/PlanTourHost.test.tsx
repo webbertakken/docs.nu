@@ -189,7 +189,7 @@ describe('PlanTourHost tracks', () => {
       await vi.advanceTimersByTimeAsync(10);
     });
     expect(track).toHaveBeenCalledWith('UI', 'View', 'PlanTourStepBoard');
-    expect(stage.helpHref).toBe('/help/canvas/plan-mode/');
+    expect(stage.helpHref).toBe('/help/canvas/plan-tabs/');
     expect(stage.engine!.countableSteps).toBe(6);
   });
 
@@ -223,7 +223,7 @@ describe('PlanTourHost tracks', () => {
       await vi.advanceTimersByTimeAsync(10);
     });
     expect(track).toHaveBeenCalledWith('UI', 'View', 'PlanTourStepSheet');
-    expect(stage.helpHref).toBe('/help/canvas/plan-mode/sheets/');
+    expect(stage.helpHref).toBe('/help/canvas/plan-tabs/sheets/');
   });
 
   // spec "Tour content": the tour adds its own card to show the card steps on, so an empty board gets them too.

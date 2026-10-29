@@ -26,7 +26,7 @@ Each tab is a self-contained canvas inside the document. A tab carries its own e
 - One tab per system, team, or phase of a project.
 - A scratch tab for ideas you are not ready to file yet.
 
-Each tab also has its own [mode](/help/canvas/editor-modes/) (Diagram, Draw, Workshop, Pages or Plan), the same for everyone on it, chosen on its start while it is empty. The small icon at the start of a tab's name, on the active tab and in the tab list, shows it.
+Each tab also has its own [mode](/help/canvas/editor-modes/) (Sketch, Structured or Pages), the same for everyone on it, chosen on its start while it is empty; boards, sheets and dashboards are [Plan tabs](/help/canvas/plan-tabs/) of their own. The small icon at the start of a tab's name, on the active tab and in the tab list, shows it.
 
 <Figure caption="The document group at the bottom right: the active tab with its ⋯ menu button, the tab stack with the number of tabs, the people here, and the plus button that adds another tab.">
   <TabBarOverview />
@@ -34,12 +34,13 @@ Each tab also has its own [mode](/help/canvas/editor-modes/) (Diagram, Draw, Wor
 
 ## Adding a tab
 
-Press the **+** button at the end of the document group, bottom right, or **New Tab** in the tab list, or run **Create New Tab** from the [command palette](/help/search-panel/the-search-panel/command-palette/) (`Cmd` / `Ctrl` + `K`). The new tab:
+Press the **+** button at the end of the document group, bottom right, and choose **Tab** in the add menu, or **New Tab** in the tab list, or run **Create New Tab** from the [command palette](/help/search-panel/the-search-panel/command-palette/) (`Cmd` / `Ctrl` + `K`). The same menu, and the tab list's **New Board**, **New Sheet** and **New Dashboard**, add a [Plan tab](/help/canvas/plan-tabs/) instead. The new tab:
 
 - is named `Tab 2`, `Tab 3` and so on, after the number of tabs in the document;
 - takes the theme, background and font of the tab you were on, so it matches the work around it;
-- opens in the same mode as the tab you were on: made from a Pages tab it is a Pages tab, from a Draw tab a Draw tab, and from a Plan tab a Plan tab;
-- starts on that mode's own start, such as **Start Making Pages** or **Start Planning**, so you can begin from a template or close it to keep the tab blank.
+- opens in the same mode as the tab you were on: made from a Pages tab it is a Pages tab, from a Sketch tab a Sketch tab, and from a Plan tab or an Event Storming board a Structured tab;
+- has the [Workshop control](/help/canvas/workshop/) on when the tab you were on has;
+- starts on that mode's own start, such as **Start Sketching** or **Start Making Pages**, so you can begin from a template or close it to keep the tab blank.
 
 **Duplicate** in the tab menu makes a copy instead: it is named after the original with "copy" on the end, sits right after it, and is a separate tab with its own elements from then on.
 
@@ -82,7 +83,7 @@ The [session tools](/help/collaboration/session-tools/) (timer, vote and poll) a
 
 Choose **Delete** in the tab menu. The tab goes straight away, and **Undo** brings it back. Once you reload or leave the document it is gone, unless another document also holds it ([Add to Document](/help/tabs/add-to-document/)), so export or duplicate anything you might want later. A few things to know:
 
-- Delete asks first only when it does something Undo can't take back: a [form](/help/canvas/plan-mode/forms/)'s tab deletes the form's link with it, and a board or sheet that forms send their responses to stops them taking responses.
+- Delete asks first only when it does something Undo can't take back: a [form](/help/canvas/plan-tabs/forms/)'s tab deletes the form's link with it, and a board or sheet that forms send their responses to stops them taking responses.
 
 - A document always keeps at least one tab, so Delete is greyed out on the last one.
 - A [locked tab](/help/tabs/locking-tabs/) can't be deleted until you unlock it.

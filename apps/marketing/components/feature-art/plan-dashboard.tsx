@@ -1,4 +1,4 @@
-// Feature art for Plan's Dashboard tab (docs/specs/026-plan/, help: canvas/plan-mode/dashboards): a
+// Feature art for Plan's Dashboard tab (docs/specs/026-plan/, help: canvas/plan-tabs/dashboards): a
 // page of rows split into slots, each showing one thing live. A row of figures over a board, a chart
 // and a Sheet, drawn from ./mode-parts on the 300 by 96 stage; the slots arrive on the fa-f-* loops
 // and settle to the finished page under reduced motion.

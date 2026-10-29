@@ -97,7 +97,7 @@ describe('Dashboard Show Me', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard Settings' }));
     expect(screen.getByRole('button', { name: 'Show Me' })).toBeTruthy();
     expect(screen.getByRole('link', { name: /dashboards/i }).getAttribute('href')).toBe(
-      '/help/canvas/plan-mode/dashboards/',
+      '/help/canvas/plan-tabs/dashboards/',
     );
   });
 

@@ -4,24 +4,24 @@ import { helpMetadata } from '@/lib/seo';
 export const metadata = helpMetadata({
   title: 'Sheets',
   description:
-    'Use Sheets, the Plan mode spreadsheet: formulas, number formats, merges, dropdowns, checkboxes, conditional formatting, sort, filter, find and CSV import.',
-  path: '/help/canvas/plan-mode/sheets/',
+    'Use Sheets, the Plan tab spreadsheet: formulas, number formats, merges, dropdowns, checkboxes, conditional formatting, sort, filter, find and CSV import.',
+  path: '/help/canvas/plan-tabs/sheets/',
 });
 
 <ArticleLayout
   title="Sheets"
   description="A spreadsheet tab on the canvas: cells, formulas, formatting, sort and filter, next to your boards."
   categoryTitle="Canvas"
-  categorySlug="canvas/plan-mode"
+  categorySlug="canvas/plan-tabs"
 >
 
-A **Sheet** is one spreadsheet tab, the kind you know from Google Sheets or Excel, placed on a [Plan mode](/help/canvas/plan-mode/) tab beside your boards. Its formulas can read the other sheets on the tab and count or add up your [cards](/help/canvas/plan-mode/cards/).
+A **Sheet** is one spreadsheet tab, the kind you know from Google Sheets or Excel, on a [Plan tab](/help/canvas/plan-tabs/) of its own beside your boards. Its formulas can read the other sheets on the tab and count or add up your [cards](/help/canvas/plan-tabs/cards/).
 
 ## Place a Sheet
 
 On an empty Plan tab, choose **Spreadsheets** in **Start Planning**'s rail, then a start: **Empty Sheet** gives you a blank grid at once, and the others set it up from a layout or your cards. A new sheet has 100 rows by 26 columns, and is called **Sheet 1** (or the next free number on the tab).
 
-You can also drop a `.csv` or `.tsv` file on the canvas in Plan mode: it becomes a Sheet named after the file, filled with its rows.
+You can also drop a `.csv` or `.tsv` file on the canvas of a Plan tab: it becomes a Sheet named after the file, filled with its rows.
 
 A Sheet moves by its header and resizes by its handles, like a board. Its colours follow the tab's theme. Sheets live on Plan tabs, as boards do: pasting one onto a tab in another mode leaves it out.
 
@@ -74,7 +74,7 @@ The colours are set for the canvas the template is made on (light or dark). A te
 - Click a cell and type. **Enter** saves and moves down, **Tab** moves right, **Escape** throws the edit away. After a run of Tabs, Enter goes back to the column you started in, one row down.
 - What you type is read the way a spreadsheet reads it: `12` is a number, `12%` a percent, `£12` currency, `8/10/2026` a date, `true` a true or false, and a leading `'` keeps it as text.
 - Start with `=` for a formula: `=SUM(A1:A10)`, `=IF(B2>100,"Over","OK")`. While you write one, click a cell (or drag across a range) to put its reference in; each reference is coloured, with its cells outlined to match. **F4** cycles `A1`, `$A$1`, `A$1` and `$A1`.
-- Typing a function name lists the matching functions; inside its brackets a hint shows what it takes. The toolbar's **Functions** category also lists every function, a menu per family (Maths, Statistics, Lookup and the rest), each with what it takes and what it does: pick one to start it in the selected cell, or, with several cells selected, to total them in the cell below. See [Sheet Functions](/help/canvas/plan-mode/sheet-functions/) for every function.
+- Typing a function name lists the matching functions; inside its brackets a hint shows what it takes. The toolbar's **Functions** category also lists every function, a menu per family (Maths, Statistics, Lookup and the rest), each with what it takes and what it does: pick one to start it in the selected cell, or, with several cells selected, to total them in the cell below. See [Sheet Functions](/help/canvas/plan-tabs/sheet-functions/) for every function.
 - Read another sheet on the tab by clicking its cells while you write, or by typing its name: `='Budget'!B4`.
 - A formula that can't be read isn't saved: the part that can't be read is underlined, with a line saying why.
 
@@ -107,7 +107,7 @@ Below the last row, **Add** puts more rows at the bottom (100 at a time, or the 
 
 ## Formatting
 
-The toolbar (shown in Plan mode to Editors) starts with a category switcher: **Text**, **Cells**, **Numbers**, **Data** and **Functions**, each showing just its own buttons. Together they set bold, italic, underline, strikethrough, text and fill colour, **Font** (each font listed in its own lettering; **Default** follows the tab), **Font Size** (step it with − and +, or type a size), borders, alignment (a button each for left, centre and right, and for top, middle and bottom), merging and wrapping, number formats (Automatic, Number, Percent, Currency, Accounting, Scientific, Date, Time, Date Time, Duration, Plain Text, and **Custom…** for a format code of your own, like `0.0 "h"` or `dd mmm yyyy`, with a live preview) and decimals. When the Sheet is narrow, the toolbar folds the buttons that don't fit into **More**. To find a function, press **Search** at the toolbar's far right and type its name or what it does: pick one and the toolbar opens its family's menu with the function highlighted.
+The toolbar (shown on a Plan tab to Editors) starts with a category switcher: **Text**, **Cells**, **Numbers**, **Data** and **Functions**, each showing just its own buttons. Together they set bold, italic, underline, strikethrough, text and fill colour, **Font** (each font listed in its own lettering; **Default** follows the tab), **Font Size** (step it with − and +, or type a size), borders, alignment (a button each for left, centre and right, and for top, middle and bottom), merging and wrapping, number formats (Automatic, Number, Percent, Currency, Accounting, Scientific, Date, Time, Date Time, Duration, Plain Text, and **Custom…** for a format code of your own, like `0.0 "h"` or `dd mmm yyyy`, with a live preview) and decimals. When the Sheet is narrow, the toolbar folds the buttons that don't fit into **More**. To find a function, press **Search** at the toolbar's far right and type its name or what it does: pick one and the toolbar opens its family's menu with the function highlighted.
 
 ### Paint Format
 

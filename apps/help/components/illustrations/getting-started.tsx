@@ -6,7 +6,7 @@
 import { Scene, Shape, Arrow, Dialog, Button, Label, Avatar } from './primitives';
 
 /** The New Document wizard, its one question: "What are you making today?", the
- *  five mode cards, three then two at one height (Diagram first and chosen),
+ *  five cards (Sketch, Structured, Pages, Workshop, Plan), three then two at one height (Structured chosen),
  *  each with its number key, and the footer's Skip and Create. Choosing a card
  *  creates the document there and then. */
 export function NewDocumentWelcome() {
@@ -30,14 +30,14 @@ export function NewDocumentWelcome() {
           What are you making today?
         </Label>
         {/* The five mode cards, three then two, every one the same build and height: a plate
-            on top, then the name and its number key. Diagram, where most start, leads and is
-            chosen; its plate holds a small flow. */}
-        {(['Diagram', 'Draw', 'Workshop', 'Pages', 'Plan'] as const).map((mode, i) => {
+            on top, then the name and its number key. Structured, where most start, is chosen;
+            its plate holds a small flow. */}
+        {(['Sketch', 'Structured', 'Pages', 'Workshop', 'Plan'] as const).map((mode, i) => {
           const top = i < 3;
           const w = top ? 106 : 164;
           const x = 42 + (top ? i * (w + 9) : (i - 3) * (w + 8));
           const y = top ? 84 : 152;
-          const chosen = i === 0;
+          const chosen = i === 1;
           return (
             <g key={mode}>
               <rect

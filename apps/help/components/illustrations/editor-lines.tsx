@@ -350,7 +350,7 @@ function StackMark({ x, y }: { x: number; y: number }) {
 export function BrandGroup({
   x,
   y,
-  mode = 'Diagram',
+  mode = 'Structured',
   named = false,
   menu = true,
 }: {
@@ -679,7 +679,7 @@ export function DocumentGroup({
     name = 'Roadmap',
     role = true,
     tab = 'Overview',
-    mode = 'Diagram',
+    mode = 'Structured',
     count = 6,
     people = PEOPLE,
     more = 0,
@@ -938,7 +938,7 @@ export function TabList({
               ) : (
                 <g transform={`translate(${left + 11} ${ry + 11})`}>
                   <ModeMark
-                    mode={row.mode ?? 'Diagram'}
+                    mode={row.mode ?? 'Structured'}
                     scale={0.4}
                     className={row.active ? 'stroke-brand-600' : 'stroke-slate-500'}
                   />
