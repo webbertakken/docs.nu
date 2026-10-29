@@ -8,6 +8,7 @@ import { deleteTabWarning } from '@/hooks/forms/forms-feeding';
 import { useAppearance } from '@/hooks/ui/useAppearance';
 import type { Participant } from '@/lib/identity';
 import type { EllipsisMenuButton } from '@/components/chrome/EllipsisMenuButton';
+import type { AddTabChoice } from '@/lib/new-tab-seed';
 import { tabDataRows } from '@/components/chrome/tab-data-rows';
 import { useTabReorderDrag } from '@/components/chrome/useTabReorderDrag';
 
@@ -27,7 +28,8 @@ export type TabsChromeProps = {
   tabs: Tab[];
   activeId: string;
   onSelect: (id: string) => void;
-  onAdd: () => void;
+  // The add menu's choice (docs/specs/007-editor/editor-modes.md "+ adds a tab or a Plan tab").
+  onAdd: (choice: AddTabChoice) => void;
   onRename: (id: string, name: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;

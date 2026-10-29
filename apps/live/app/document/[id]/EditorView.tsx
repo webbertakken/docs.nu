@@ -387,7 +387,7 @@ export function EditorView() {
               onRenameFolder: renameTabFolder,
               activeTabHasContent: activeTab.elements.length > 0,
               onSelect: selectTab,
-              onAdd: () => addTab(),
+              onAdd: (choice) => addTab(choice),
               onRename: renameTab,
               onDuplicate: duplicateTab,
               onDelete: deleteTab,

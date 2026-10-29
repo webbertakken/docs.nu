@@ -141,16 +141,31 @@ describe('TabList', () => {
     expect(within(list).queryByRole('searchbox')).toBeNull();
   });
 
-  it('adds a tab from New Tab, for someone who may', () => {
+  it('offers New Tab, New Board, New Sheet and New Dashboard, for someone who may', () => {
+    const { list } = renderList();
+    const footer = [...list.querySelectorAll<HTMLElement>('[data-tab-list-new]')];
+    expect(footer.map((b) => b.textContent)).toEqual([
+      'New Tab',
+      'New Board',
+      'New Sheet',
+      'New Dashboard',
+    ]);
+  });
+
+  it.each([
+    ['New Tab', 'tab'],
+    ['New Sheet', 'sheet'],
+  ] as const)('adds from %s, and closes', (name, choice) => {
     const { list, props, onClose } = renderList();
-    fireEvent.click(within(list).getByRole('button', { name: 'New Tab' }));
-    expect(props.onAdd).toHaveBeenCalledOnce();
+    fireEvent.click(within(list).getByRole('button', { name }));
+    expect(props.onAdd).toHaveBeenCalledWith(choice);
     expect(onClose).toHaveBeenCalledOnce();
   });
 
   it('for someone who may not change the tabs: no New Tab, no menu, no rename, no drag', () => {
     const { list } = renderList({ readOnly: true });
     expect(within(list).queryByRole('button', { name: 'New Tab' })).toBeNull();
+    expect(within(list).queryByRole('button', { name: 'New Board' })).toBeNull();
     expect(within(list).queryByRole('button', { name: 'Tab menu' })).toBeNull();
     const row = within(list).getByRole('button', { name: 'Roadmap' });
     fireEvent.doubleClick(row);
@@ -196,12 +211,16 @@ describe('TabList keyboard', () => {
     fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
     expect(document.activeElement).toBe(within(list).getByRole('button', { name: 'User flows' }));
     fireEvent.keyDown(document.activeElement!, { key: 'End' });
-    expect(document.activeElement).toBe(within(list).getByRole('button', { name: 'New Tab' }));
+    expect(document.activeElement).toBe(
+      within(list).getByRole('button', { name: 'New Dashboard' }),
+    );
     fireEvent.keyDown(document.activeElement!, { key: 'Home' });
     expect(document.activeElement).toBe(filter);
     fireEvent.keyDown(filter, { key: 'ArrowUp' });
-    expect(document.activeElement).toBe(within(list).getByRole('button', { name: 'New Tab' }));
-    fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
+    expect(document.activeElement).toBe(
+      within(list).getByRole('button', { name: 'New Dashboard' }),
+    );
+    for (let i = 0; i < 4; i += 1) fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
     fireEvent.click(document.activeElement!);
     expect(props.onSelect).toHaveBeenCalledWith('g');
   });

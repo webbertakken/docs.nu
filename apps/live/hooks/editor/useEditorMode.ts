@@ -15,7 +15,6 @@
 import { useCallback } from 'react';
 import { useLatest } from '@/hooks/ui/useLatest';
 import {
-  crossesPlan,
   editorModeLabel,
   withEditorModeSwitched,
   type EditorMode,
@@ -30,12 +29,6 @@ export type EditorModeState = {
   setMode: (next: EditorMode, alsoChange?: (tab: Tab) => Tab) => void;
   canSwitch: boolean;
   canEdit: boolean;
-  // The tab keeps its mode, for this reason (resolveEditorMode): picking another offers a new tab in it instead.
-  lockedReason?: string;
-  newTabIn?: (mode: EditorMode) => void;
-  // The tab is empty, so it may cross into or out of Plan: with nothing on it there is nothing either side's tools
-  // could not hold (docs/specs/007-editor/editor-modes.md "Plan stands apart").
-  crossPlan?: boolean;
 };
 
 // The telemetry type a switch into each mode fires.
@@ -69,20 +62,17 @@ export function useEditorMode(
     canEdit: boolean;
     commitTabs: (map: (ts: Tab[]) => Tab[]) => void;
     toastInfo: (message: string) => void;
-    // A new tab in a mode: what a mode picked on a tab that cannot switch offers instead (plan-tabs.md).
-    newTabIn?: (mode: EditorMode) => void;
   },
 ): EditorModeState {
   const { canEdit, commitTabs, toastInfo } = deps;
   const tabId = tab?.id;
-  const { mode, canSwitch, lockedReason } = resolveEditorMode({ tab, canEdit });
-  const crossPlan = canSwitch && (tab?.elements.length ?? 0) === 0;
+  const { mode, canSwitch } = resolveEditorMode({ tab, canEdit });
   // The tab as it is now, read when a switch is asked for: a stable setter rather than a new one per edit of the tab.
   const tabRef = useLatest(tab);
   const setMode = useCallback(
     (next: EditorMode, alsoChange?: (tab: Tab) => Tab) => {
-      // Never into or out of Plan (crossesPlan) unless the tab is empty: the mode menu offers a new tab in it instead.
-      if (!canSwitch || !tabId || next === mode || (crossesPlan(mode, next) && !crossPlan)) return;
+      // Never into Plan: a Plan tab is added from +, never switched to (docs/specs/007-editor/editor-modes.md).
+      if (!canSwitch || !tabId || next === mode || next === 'plan') return;
       trackModeSwitch(next);
       // Whether the board goes onto a page is read from the tab as it is, not from inside the commit's updater,
       // which React may run after this returns (the toast and its event would be lost). The switch worked out
@@ -101,15 +91,7 @@ export function useEditorMode(
       }
       debugLog('[editor-mode] switched', { tabId, from: mode, to: next, paged });
     },
-    [canSwitch, crossPlan, tabRef, tabId, mode, commitTabs, toastInfo],
+    [canSwitch, tabRef, tabId, mode, commitTabs, toastInfo],
   );
-  return {
-    mode,
-    setMode,
-    canSwitch,
-    canEdit,
-    ...(lockedReason ? { lockedReason } : {}),
-    ...(crossPlan ? { crossPlan } : {}),
-    ...(deps.newTabIn ? { newTabIn: deps.newTabIn } : {}),
-  };
+  return { mode, setMode, canSwitch, canEdit };
 }

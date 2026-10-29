@@ -57,7 +57,7 @@ describe('useEditorMode', () => {
     expect(h.commitTabs).toHaveBeenCalledTimes(1);
     expect(h.tab()).toMatchObject({ opensIn: 'pages', pages: [{ size: 'fit' }] });
     expect(h.toastInfo).toHaveBeenCalledWith(
-      'Put onto a page that fits it. Undo switches back to Diagram.',
+      'Put onto a page that fits it. Undo switches back to Structured.',
     );
     expect(events).toContainEqual(['Tab', 'Changed', 'PageFitToContent']);
   });
@@ -97,20 +97,19 @@ describe('useEditorMode', () => {
     expect(h.tab()).toMatchObject({ opensIn: 'diagram', name: 'Converted' });
   });
 
-  // "Plan stands apart", unless the tab is empty (docs/specs/007-editor/start-diagramming.md "Changing mode").
-  it('crosses into and out of Plan while the tab is empty, and only then', () => {
+  // docs/specs/007-editor/editor-modes.md "The mode switch": Plan is tabs from +, never switched to or from.
+  it('never switches a tab into Plan, empty or not, and offers no switch on a Plan tab', () => {
     const empty = setup({ id: 't', name: 'T', elements: [] });
-    expect(empty.hook.result.current.crossPlan).toBe(true);
     act(() => empty.hook.result.current.setMode('plan'));
-    expect(empty.tab().opensIn).toBe('plan');
-    empty.hook.rerender();
-    act(() => empty.hook.result.current.setMode('diagram'));
-    expect(empty.tab().opensIn).toBe('diagram');
+    expect(empty.commitTabs).not.toHaveBeenCalled();
 
-    const full = setup({ id: 't', name: 'T', elements: [sticky('s', 0)] });
-    expect(full.hook.result.current.crossPlan).toBeUndefined();
-    act(() => full.hook.result.current.setMode('plan'));
-    expect(full.tab().opensIn).toBeUndefined();
+    const start = setup({ id: 't', name: 'T', opensIn: 'plan', elements: [] });
+    expect(start.hook.result.current).toMatchObject({ mode: 'plan', canSwitch: false });
+    act(() => start.hook.result.current.setMode('diagram'));
+    expect(start.commitTabs).not.toHaveBeenCalled();
+
+    const board = setup({ id: 't', name: 'T', kind: 'board', elements: [sticky('s', 0)] });
+    expect(board.hook.result.current).toMatchObject({ mode: 'plan', canSwitch: false });
   });
 
   it('does nothing when asked for the mode already in use', () => {

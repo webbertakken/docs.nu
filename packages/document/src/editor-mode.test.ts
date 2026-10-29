@@ -3,9 +3,11 @@ import {
   DEFAULT_EDITOR_MODE,
   EDITOR_MODE_CATALOGUE,
   EDITOR_MODES,
+  SWITCHABLE_EDITOR_MODES,
   editorModeLabel,
   setTabOpensIn,
   editorModeSwitchable,
+  tabModeWritable,
   hasBoardLook,
   hasPageLook,
   hasPlanInput,
@@ -18,8 +20,8 @@ import type { Tab } from './index';
 
 // Editor modes (docs/specs/007-editor/editor-modes.md): how a general tab is worked on.
 describe('editor modes', () => {
-  it('are Diagram, Draw, Workshop, Pages and Plan, Diagram by default', () => {
-    expect(EDITOR_MODES).toEqual(['diagram', 'draw', 'workshop', 'pages', 'plan']);
+  it('are Sketch, Structured, Pages, Workshop and Plan, Structured by default', () => {
+    expect(EDITOR_MODES).toEqual(['draw', 'diagram', 'pages', 'workshop', 'plan']);
     expect(DEFAULT_EDITOR_MODE).toBe('diagram');
   });
 
@@ -75,6 +77,18 @@ describe('opensInOf', () => {
 });
 
 describe('editorModeSwitchable', () => {
+  it('never on a Plan tab: a Plan kind, or a general tab stored in Plan', () => {
+    for (const kind of ['board', 'sheet', 'dashboard', 'form'] as const)
+      expect(editorModeSwitchable({ kind })).toBe(false);
+    expect(editorModeSwitchable({ kind: 'diagram', opensIn: 'plan' })).toBe(false);
+  });
+
+  it('lets a template write the mode of the Plan start, never of a Plan kind', () => {
+    expect(tabModeWritable({ opensIn: 'plan' })).toBe(true);
+    expect(tabModeWritable({ kind: 'board' })).toBe(false);
+    expect(tabModeWritable({ kind: 'event-storming' })).toBe(false);
+  });
+
   it('offers the switch on a general tab', () => {
     expect(editorModeSwitchable({})).toBe(true);
     expect(editorModeSwitchable({ kind: 'diagram', opensIn: 'draw' })).toBe(true);
@@ -98,13 +112,16 @@ describe('the editor mode catalogue', () => {
   it('lists every mode once, in order, with the words the interface shows', () => {
     expect(EDITOR_MODE_CATALOGUE.map((m) => m.id)).toEqual(EDITOR_MODES);
     expect(EDITOR_MODES.map(editorModeLabel)).toEqual([
-      'Diagram',
-      'Draw',
-      'Workshop',
+      'Sketch',
+      'Structured',
       'Pages',
+      'Workshop',
       'Plan',
     ]);
-    for (const m of EDITOR_MODE_CATALOGUE) expect(m.description.length).toBeGreaterThan(0);
+  });
+
+  it('offers Sketch, Structured and Pages to switch between, in that order', () => {
+    expect(SWITCHABLE_EDITOR_MODES).toEqual(['draw', 'diagram', 'pages']);
   });
 });
 
@@ -130,29 +147,23 @@ describe('setTabOpensIn', () => {
   });
 });
 
-// Shift+D and the switch's arrows walk the catalogue (docs/specs/007-editor/editor-modes.md).
+// Shift+D walks the three switchable modes (docs/specs/007-editor/editor-modes.md "The mode switch").
 describe('nextEditorMode', () => {
-  it('moves forward through the catalogue, wrapping at the end', () => {
-    expect(nextEditorMode('diagram')).toBe('draw');
-    expect(nextEditorMode('draw')).toBe('workshop');
-    expect(nextEditorMode('workshop')).toBe('pages');
-    expect(nextEditorMode('pages')).toBe('plan');
-    expect(nextEditorMode('plan')).toBe('diagram');
+  it('moves forward through Sketch, Structured and Pages, wrapping at the end', () => {
+    expect(nextEditorMode('draw')).toBe('diagram');
+    expect(nextEditorMode('diagram')).toBe('pages');
+    expect(nextEditorMode('pages')).toBe('draw');
   });
 
   it('moves backward with a negative step, wrapping at the start', () => {
-    expect(nextEditorMode('diagram', -1)).toBe('plan');
-    expect(nextEditorMode('plan', -1)).toBe('pages');
-    expect(nextEditorMode('pages', -1)).toBe('workshop');
-    expect(nextEditorMode('workshop', -1)).toBe('draw');
-    expect(nextEditorMode('draw', -1)).toBe('diagram');
+    expect(nextEditorMode('draw', -1)).toBe('pages');
+    expect(nextEditorMode('pages', -1)).toBe('diagram');
+    expect(nextEditorMode('diagram', -1)).toBe('draw');
   });
 
-  it('visits every mode once in a full cycle', () => {
-    const seen = EDITOR_MODES.map((_, i) =>
-      EDITOR_MODES.slice(0, i).reduce((m) => nextEditorMode(m), DEFAULT_EDITOR_MODE),
-    );
-    expect(new Set(seen).size).toBe(EDITOR_MODES.length);
+  it('never steps into Plan, and from Plan steps to an end of the three', () => {
+    expect(nextEditorMode('plan')).toBe('draw');
+    expect(nextEditorMode('plan', -1)).toBe('pages');
   });
 });
 

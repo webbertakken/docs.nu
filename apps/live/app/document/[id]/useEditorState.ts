@@ -72,7 +72,6 @@ import {
   type CommentMention,
   type Element,
   type ShapeElement,
-  type EditorMode,
   type Tab,
 } from '@livedoc/document';
 
@@ -1455,14 +1454,10 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
   const activeTab = tabs.find((t) => t.id === activeId) ?? tabs[0]!;
   // The tab's editor mode, the same for everyone on it (docs/specs/007-editor/editor-modes.md): every
   // tool and rule gate keys on it, never on what the tab is. A switch is one tab edit.
-  // A new tab in a mode, for a Plan tab's switch (set once the tab actions exist, below).
-  const newTabInRef = useRef<((mode: EditorMode) => void) | null>(null);
   const rawEditorMode = useEditorMode(activeTab, {
     canEdit,
     commitTabs,
     toastInfo: toast.info,
-    // Only a session that may add tabs is offered one (a tab-scoped link edits its one tab).
-    ...(isStructureReadOnly ? {} : { newTabIn: (mode: EditorMode) => newTabInRef.current?.(mode) }),
   });
   // A colour picked with + joins the tab's custom colours, which every picker offers.
   const addCustomColour = useAddCustomColour({ activeId: activeTab.id, canEdit, tickTabs });
@@ -2674,7 +2669,6 @@ export function useEditorState(opts: { surface?: EditorSurface } = {}) {
     retitleSheets: sheets.retitleSheets,
     sheetTitle: sheets.sheetTitle,
   });
-  useAssignRef(newTabInRef, (mode: EditorMode) => addTab(mode));
 
   // Tab-folder membership (docs/specs/006-document/tab-folders.md), kept separate from the busy
   // useTabActions. Menu-only: drag-reorder lives above.

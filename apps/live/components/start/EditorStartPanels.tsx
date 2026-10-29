@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { pagesOf, readDashboard, type EditorMode } from '@livedoc/document';
+import { isPlanTabKind, pagesOf, readDashboard, type EditorMode } from '@livedoc/document';
 import type { TemplateKind } from '@livedoc/templates';
 import { useEditorContext } from '@/app/document/[id]/EditorContext';
 import { useSelectTab } from '@/app/document/[id]/useSelectTab';
@@ -165,6 +165,9 @@ export function EditorStartPanels() {
       <StartViewTransition>
         {showPlanBoardPicker ? (
           <PlanBoardPicker
+            // One per tab, so a Plan start made from the add menu reads its own landing.
+            key={activeTab.id}
+            tabId={activeTab.id}
             // Each choice makes the tab its kind (docs/specs/026-plan/plan-tabs.md).
             onPick={(preset) => {
               const c = ctx.getViewportCenter();
@@ -187,7 +190,11 @@ export function EditorStartPanels() {
               );
             }}
             onDashboard={ctx.planTabs.startDashboard}
-            onOtherModeTemplate={chooseFromOtherMode}
+            // Another start's template changes the tab, so only the Plan start, never a Plan kind's tab (which keeps
+            // its kind) nor a locked tab, searches beyond Plan.
+            {...(isPlanTabKind(activeTab.kind) || ctx.activeTabLocked
+              ? {}
+              : { onOtherModeTemplate: chooseFromOtherMode })}
             onTemplate={(kind) => {
               void ctx.chooseTemplate(kind);
               moveOnTemplatePick(kind);

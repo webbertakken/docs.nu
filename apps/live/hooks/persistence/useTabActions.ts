@@ -29,8 +29,18 @@ import {
   type Tab,
 } from '@livedoc/document';
 import { apiLinkTab } from '@/lib/api-client';
-import { newTabOpening, newTabSeed } from '@/lib/new-tab-seed';
+import { newTabOpening, newTabSeed, type AddTabChoice } from '@/lib/new-tab-seed';
+import { PLAN_START_LANDING, setPlanStartLanding } from '@/lib/plan-start-landing';
 import { track } from '@/lib/telemetry';
+import { debugLog } from '@/lib/debug-log';
+import type { PlanTabChoice } from '@/lib/plan-start-landing';
+
+// The telemetry type each Plan row of the add menu sends (docs/specs/007-editor/editor-modes.md "Telemetry").
+const ADD_TAB_EVENT: Readonly<Record<PlanTabChoice, string>> = {
+  board: 'Board',
+  sheet: 'Sheet',
+  dashboard: 'Dashboard',
+};
 import { useBoardSceneImport } from './useBoardSceneImport';
 import { remintTabElements, useTabImport } from './useTabImport';
 import { trackTabFolderTransition } from './tab-folder-reporting';
@@ -112,25 +122,30 @@ export function useTabActions(deps: TabActionsDeps) {
     toast,
   } = deps;
 
-  // `mode`: open it in that mode (a Plan tab's switch offering a new tab instead, plan-tabs.md); else in the active
-  // tab's mode, so a Pages tab's + makes a Pages tab (newTabOpening).
-  const addTab = (mode?: EditorMode) => {
-    // A session that cannot change the document's tabs adds none, whichever control asked.
+  // The add menu's choice (docs/specs/007-editor/editor-modes.md "+ adds a tab or a Plan tab"): a Tab in the active
+  // tab's mode, so a Pages tab's + makes a Pages tab, or a Board, Sheet or Dashboard, a Plan start landing on that
+  // choice (newTabOpening, plan-start-landing.ts).
+  const addTab = (choice: AddTabChoice = 'tab') => {
+    // A session that cannot change the document's tabs adds none, whichever row asked.
     if (!deps.canEditStructure) return;
     // The new tab takes the active tab's look (newTabSeed); its mode is newTabOpening's.
     // Skips the look when the active tab can't be resolved (mid-mount, or removed in another
     // window), falling back to brand defaults the same way Tab 1 does.
-    const seed = newTabSeed(tabs.find((t) => t.id === activeId));
-    // A new tab opens on its mode's own start (Start Diagramming, Start Drawing...) (newTabOpening).
-    const opening = newTabOpening(deps.editorMode, mode);
+    const source = tabs.find((t) => t.id === activeId);
+    const seed = newTabSeed(source);
+    // A new tab opens on its own start (Start Diagramming, Start Sketching, Start Planning...) (newTabOpening).
+    const opening = newTabOpening(source, choice);
     const tab: Tab = {
       ...createTab(defaultTabName(tabs.length + 1)),
       ...seed,
       ...(opening.opensIn ? { opensIn: opening.opensIn } : {}),
     };
+    if (choice !== 'tab') setPlanStartLanding(tab.id, PLAN_START_LANDING[choice]);
     commitTabs((ts) => [...ts, tab]);
     markTabLoaded(tab.id);
-    track('Tab', 'Created');
+    if (choice === 'tab') track('Tab', 'Created');
+    else track('Tab', 'Created', ADD_TAB_EVENT[choice]);
+    debugLog('[tabs] added', { tabId: tab.id, choice, opensIn: tab.opensIn ?? 'diagram' });
     setActiveId(tab.id);
     setSelectedId(null);
     setEditingId(null);

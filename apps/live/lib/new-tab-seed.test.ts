@@ -2,22 +2,28 @@ import { describe, expect, it } from 'vitest';
 import type { Tab } from '@livedoc/document';
 import { newTabOpening, newTabSeed } from './new-tab-seed';
 
-// docs/specs/007-editor/editor-modes.md "A new tab opens in the mode it was made from", with no Quick Start.
+// docs/specs/007-editor/editor-modes.md "+ adds a tab or a Plan tab": the add menu's Tab opens in the mode it was made
+// from; Board, Sheet and Dashboard open a Plan start.
 describe('newTabOpening', () => {
-  it('opens a tab added from any mode but Diagram in that mode, with no Quick Start', () => {
-    for (const mode of ['draw', 'workshop', 'pages', 'plan'] as const)
-      expect(newTabOpening(mode)).toEqual({ opensIn: mode });
+  const tab = (over: Partial<Tab> = {}): Tab => ({ id: 's', name: 'S', elements: [], ...over });
+
+  it('opens a Tab added from Sketch or Pages in that mode', () => {
+    for (const mode of ['draw', 'pages'] as const)
+      expect(newTabOpening(tab({ opensIn: mode }), 'tab')).toEqual({ opensIn: mode });
   });
 
-  it('opens a tab added from Diagram in Diagram, on Start Diagramming, writing no opening mode', () => {
-    expect(newTabOpening('diagram')).toEqual({});
+  it('opens a Tab added from Structured, an event-storming board or a Plan tab in Structured, writing no mode', () => {
+    expect(newTabOpening(tab(), 'tab')).toEqual({});
+    expect(newTabOpening(tab({ kind: 'event-storming' }), 'tab')).toEqual({});
+    expect(newTabOpening(tab({ kind: 'board' }), 'tab')).toEqual({});
+    expect(newTabOpening(tab({ opensIn: 'plan' }), 'tab')).toEqual({});
+    expect(newTabOpening(undefined, 'tab')).toEqual({});
   });
 
-  it('opens a tab asked for in a mode in that mode, on its own start, never the Quick Start', () => {
-    for (const creator of ['plan', 'diagram'] as const) {
-      expect(newTabOpening(creator, 'diagram')).toEqual({});
-      for (const mode of ['draw', 'workshop', 'pages', 'plan'] as const)
-        expect(newTabOpening(creator, mode)).toEqual({ opensIn: mode });
+  it('opens a Board, Sheet or Dashboard as a Plan start, whatever it was made from', () => {
+    for (const choice of ['board', 'sheet', 'dashboard'] as const) {
+      expect(newTabOpening(tab({ opensIn: 'draw' }), choice)).toEqual({ opensIn: 'plan' });
+      expect(newTabOpening(tab({ kind: 'sheet' }), choice)).toEqual({ opensIn: 'plan' });
     }
   });
 });

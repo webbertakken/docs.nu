@@ -23,6 +23,8 @@ import { TabListRow } from './TabListRow';
 import { track } from '@/lib/telemetry';
 import type { TabsChrome, TabsChromeProps } from './tabs-chrome';
 import { peopleHereLabel } from './TabListButtons';
+import { ADD_TAB_ROWS, addTabMark } from './AddTabMenu';
+import { newTabMode } from '@/lib/new-tab-seed';
 
 // Where the list hangs: above its opener, its arrow at the opener's centre, kept inside the window's edge.
 function placeAbove(opener: HTMLElement | null) {
@@ -239,18 +241,31 @@ export function TabList({
           ) : null}
         </ul>
         {readOnly ? null : (
-          <div className="mt-1.5 border-t border-slate-200 pt-1.5 dark:border-slate-800">
-            <button
-              type="button"
-              data-tab-list-new=""
-              onClick={() => {
-                tabs.onAdd();
-                onClose();
-              }}
-              className="flex h-8 w-full items-center gap-1.5 rounded-md px-2 text-[12px] font-medium text-slate-700 outline-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-brand-400 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              <span aria-hidden>+</span> New Tab
-            </button>
+          // The add menu's four (docs/specs/007-editor/toolbar-layout.md "The tab list"): New Tab, New Board, New
+          // Sheet, New Dashboard, each adding its choice and closing the list.
+          <div className="mt-1.5 flex flex-col gap-px border-t border-slate-200 pt-1.5 dark:border-slate-800">
+            {ADD_TAB_ROWS.map(({ choice, footer }) => {
+              const Mark = addTabMark(choice, newTabMode(chrome.activeTab));
+              return (
+                <button
+                  key={choice}
+                  type="button"
+                  data-tab-list-new={choice}
+                  onClick={() => {
+                    tabs.onAdd(choice);
+                    onClose();
+                  }}
+                  className="flex h-8 w-full items-center gap-2 rounded-md px-2 text-[12px] font-medium text-slate-700 outline-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-brand-400 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <Mark
+                    size={14}
+                    aria-hidden
+                    className="shrink-0 text-slate-500 dark:text-slate-400"
+                  />
+                  {footer}
+                </button>
+              );
+            })}
           </div>
         )}
         <span

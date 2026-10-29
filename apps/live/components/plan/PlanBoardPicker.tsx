@@ -122,6 +122,7 @@ function GenericPreview({ preset, palette }: { preset: PlanBoardPresetId; palett
 // Start Planning (docs/specs/026-plan/plan-mode.md "Starting a board"): the panel lives in start/StartPlanning.tsx; the
 // pictures it draws stay here, where Add to Slot reads them too.
 export function PlanBoardPicker({
+  tabId,
   onPick,
   onPickSheet,
   onOtherModeTemplate,
@@ -133,6 +134,8 @@ export function PlanBoardPicker({
   onVisualisation,
   onForm,
 }: {
+  // The tab it starts (Start Planning's landing).
+  tabId?: string;
   onPick: (preset: string) => void;
   // Makes the tab a Form tab from a starter (Start Planning's Forms, docs/specs/030-forms/forms.md).
   onForm?: (starter: StarterId) => void;
@@ -168,6 +171,7 @@ export function PlanBoardPicker({
   }, []);
   return (
     <StartPlanning
+      tabId={tabId}
       onPickBoard={onPick}
       onPickSheet={onPickSheet}
       onDashboard={onDashboard}

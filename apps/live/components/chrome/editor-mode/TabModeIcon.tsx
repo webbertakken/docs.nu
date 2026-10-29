@@ -11,7 +11,7 @@ import type { EditorModeTab } from '@/lib/editor-mode-store';
 
 // A Plan kind's own glyph (docs/specs/026-plan/plan-tabs.md "Tab kinds"): a Board, Sheet or Dashboard tab is always in
 // Plan, so its mode says nothing the others' don't; what it is tells them apart.
-const KIND_ICONS: Record<PlanTabKind, ReturnType<typeof lucideGlyph>> = {
+export const PLAN_KIND_ICONS: Record<PlanTabKind, ReturnType<typeof lucideGlyph>> = {
   board: lucideGlyph(lucideSquareKanban, 12),
   sheet: lucideGlyph(lucideGrid3x3, 12),
   dashboard: lucideGlyph(lucideLayoutGrid, 12),
@@ -24,6 +24,6 @@ const KIND_ICONS: Record<PlanTabKind, ReturnType<typeof lucideGlyph>> = {
 // collaborator's switch updates it at once; a Board, Sheet, Dashboard or Form tab shows its kind instead.
 export function TabModeIcon({ tab, style }: { tab: EditorModeTab; style?: CSSProperties }) {
   const kind = isPlanTabKind(tab.kind) ? tab.kind : null;
-  const Icon = kind ? KIND_ICONS[kind] : EDITOR_MODE_ICONS[opensInOf(tab)];
+  const Icon = kind ? PLAN_KIND_ICONS[kind] : EDITOR_MODE_ICONS[opensInOf(tab)];
   return <Icon aria-hidden size={12} className="shrink-0" style={style} />;
 }

@@ -25,8 +25,8 @@ const mount = (mode: EditorMode, canEdit = true) => {
 describe('StartModeSwitch', () => {
   it('names the mode and opens its menu, switching the tab', () => {
     const setMode = mount('diagram');
-    const chip = screen.getByRole('button', { name: /^Tab mode: Diagram/ });
-    expect(chip.textContent).toContain('Diagram');
+    const chip = screen.getByRole('button', { name: /^Tab mode: Structured/ });
+    expect(chip.textContent).toContain('Structured');
     fireEvent.click(chip);
     expect(screen.getByRole('menu').className).toMatch(/top-full/);
     fireEvent.click(screen.getByRole('menuitemradio', { name: /Pages/ }));
@@ -35,7 +35,7 @@ describe('StartModeSwitch', () => {
 
   it('switches inside a start-mode transition, so the start cross-fades', () => {
     const setMode = mount('diagram');
-    fireEvent.click(screen.getByRole('button', { name: /^Tab mode: Diagram/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Tab mode: Structured/ }));
     fireEvent.click(screen.getByRole('menuitemradio', { name: /Pages/ }));
     expect(transition).toHaveBeenCalledWith('start-mode', expect.any(Function));
     expect(setMode).toHaveBeenCalledOnce();
