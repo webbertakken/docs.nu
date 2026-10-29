@@ -42,9 +42,9 @@ const subscribe = (listener: () => void) => {
   };
 };
 
-// Followed as a transition: the editor mounts, or the standby is revealed, at a non-urgent priority, so React lets the
-// browser paint it before the editor's effects run, rather than holding the first frame until every effect and the
-// renders they cause have finished (blueprint "Instant open", D204).
+// Followed as a transition: the editor mounts, or the standby is revealed, at a non-urgent priority, outside the
+// click's own event. Its commit still mounts the editor's effects before the first frame: the measuring layout effects
+// set state, and React runs the passive effects ahead of the render that follows (blueprint "Instant open", D204).
 export function useInPlaceDocuments(): InPlaceDocuments {
   const [shown, setShown] = useState<InPlaceDocuments>(current);
   useEffect(() => {

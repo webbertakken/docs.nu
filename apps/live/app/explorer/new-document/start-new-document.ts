@@ -14,6 +14,7 @@ import { assignAppLocation, interceptAppNavigation } from '@/lib/app-location';
 import { signInOfferedHere } from '@/lib/auth-config';
 import { debugLog } from '@/lib/debug-log';
 import { loadEditorPage } from '@/lib/editor-page-loader';
+import { ensureIconCatalogs } from '@/lib/icon-registry';
 import { prefetchWhenIdle } from '@/lib/idle-prefetch';
 import { markNameConfirmed } from '@/lib/local-identity';
 import { createIdsFor, type CreateIds } from '@/lib/new-document/create-failure';
@@ -75,8 +76,14 @@ function locationFor(place: NewDocumentPlace, creator: NewDocumentCreator): Save
   });
 }
 
-// The code a new document opens with: the editor's, and a Plan template's example cards.
-const OPEN_CODE = [loadEditorPage, () => import('@livedoc/templates/plan-template-seeds')] as const;
+// What a new document opens with: the editor's code, a Plan template's example cards, and the icon catalogues the
+// editor draws with. The standby is rendered hidden, which runs none of its effects, so a load an effect starts in the
+// editor (useIconCatalogs) would otherwise only begin at the click (blueprint "Standby").
+const OPEN_CODE = [
+  loadEditorPage,
+  () => import('@livedoc/templates/plan-template-seeds'),
+  ensureIconCatalogs,
+] as const;
 
 // Fetches what opening needs ahead of the click: on idle, and on pointer enter or focus of the button.
 export function prefetchNewDocumentOpen(): void {

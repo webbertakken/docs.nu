@@ -54,7 +54,12 @@ const ownStack = account
 const BASE_URL =
   process.env.E2E_BASE_URL ??
   (ownStack ? `http://localhost:${ownStack.ports.live}` : 'http://localhost:4002');
-const runName = ownStack ? `-${ownStack.name}` : '';
+// The guest budget run (`test:e2e:budget`) keeps its own report and results beside a smoke shard's in the same job.
+const budgetRun = process.env.E2E_BUDGET === '1';
+const runName = ownStack ? `-${ownStack.name}` : budgetRun ? '-budget' : '';
+// The guest specs that time the app against a wall-clock budget (docs/specs/003-system-architecture/e2e-smoke.md
+// "Timing budgets"): the `budget` project's alone, never a smoke shard's.
+const GUEST_TIMING_BUDGETS = /\/e2e\/new-document-open-budget\.spec\.ts$/;
 
 export default defineConfig({
   testDir: './e2e',
@@ -104,7 +109,18 @@ export default defineConfig({
         /perf\//,
         /optical-audit-sites\.spec\.ts/,
         /workbench-(embed|workspace)\.spec\.ts/,
+        GUEST_TIMING_BUDGETS,
       ],
+    },
+    // A budget times the app, not the runner (docs/specs/003-system-architecture/e2e-smoke.md "Timing budgets"): the
+    // guest budgets run once every smoke spec has finished, one test at a time, so no other browser shares the CPU
+    // while they measure. CI runs them on their own (`test:e2e:budget`, --no-deps) after a smoke shard.
+    {
+      name: 'budget',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: GUEST_TIMING_BUDGETS,
+      dependencies: ['chromium'],
+      fullyParallel: false,
     },
     // The optical audit of the help centre, telemetry dashboard and marketing site: the one suite
     // that needs their builds, so CI gives it its own job and the shards build only live

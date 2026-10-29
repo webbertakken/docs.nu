@@ -39,16 +39,16 @@ pull request never queues two runs of the suite.
 It runs **every** spec file in `apps/live/e2e/` (bar the opt-in Drive, perf and WebKit projects),
 spread over parallel jobs so the wall time is the slowest job, not the sum:
 
-| Job                 | Builds                                | Runs                                                                                      |
-| ------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **Smoke shard i/6** | live                                  | `test:e2e:smoke --shard=i/6`: a sixth of the `chromium` project's tests                   |
-| **Sites audit**     | live, help, telemetry, then marketing | `test:e2e:sites`: the `sites` project, `optical-audit-sites.spec.ts`                      |
-| **Signed-in specs** | live                                  | the `account` project ([Signed-in specs](#signed-in-specs)), then the `workbench` project |
+| Job                 | Builds                                | Runs                                                                                                                                             |
+| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Smoke shard i/6** | live                                  | `test:e2e:smoke --shard=i/6`: a sixth of the `chromium` project's tests; shard 1 then runs `test:e2e:budget` ([Timing budgets](#timing-budgets)) |
+| **Sites audit**     | live, help, telemetry, then marketing | `test:e2e:sites`: the `sites` project, `optical-audit-sites.spec.ts`                                                                             |
+| **Signed-in specs** | live                                  | the `account` project ([Signed-in specs](#signed-in-specs)), then the `workbench` project                                                        |
 
 Only the sites audit opens help, telemetry and marketing, so only its job pays for their builds. Marketing builds after the
 others, as `turbo.json` orders it: its licences page runs Next's analyzer in each other app on that
 app's Turbopack cache, and beside the app's own build the two corrupt it.
-Locally `test:e2e` runs the `chromium` and `sites` projects together, as one run.
+Locally `test:e2e` runs the `chromium`, `budget` and `sites` projects together, as one run.
 
 Cost controls, all in `e2e.yml` and `playwright.config.ts`:
 
@@ -215,11 +215,13 @@ workbench projects in their own job, beside the smoke shards; Drive stays opt-in
 ### Timing budgets
 
 A spec that times the app against a budget (`*-budget.spec.ts`, such as `new-document-open-budget.spec.ts` for
-[Opening at once](../013-workspace/new-document-menu.md#opening-at-once)) measures the app, not the runner. In the
-signed-in run it is its own project, `account-budget`, which depends on `account`: it starts once every other
-signed-in spec has finished, and runs its tests one at a time, so no other browser shares the runner's CPU while it
-measures. Its budget and its assertions are the spec's own; only when it runs differs. `test:e2e:account` names both
-projects.
+[Opening at once](../013-workspace/new-document-menu.md#opening-at-once)) measures the app, not the runner: a CI runner has four CPUs, and a budget timed beside three other browsers measures
+them as much as the app. In the signed-in run it is its own project, `account-budget`, which depends on `account`: it
+starts once every other signed-in spec has finished, and runs its tests one at a time, so no other browser shares the
+runner's CPU while it measures. `test:e2e:account` names both projects. The guest budgets are the `budget` project,
+which depends on `chromium` and is never part of a smoke shard: CI runs it with `test:e2e:budget` (`--no-deps`, its
+report and results under `-budget`) on shard 1's build once that shard has finished, whatever its outcome. Their
+budgets and assertions are the specs' own; only when they run differs.
 
 ## Armed guest signatures
 
