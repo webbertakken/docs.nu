@@ -1,11 +1,5 @@
 import type { Page } from '@playwright/test';
-import {
-  expect,
-  expectNoPageErrors,
-  openContextMenuFromKeyboard,
-  paletteTile,
-  test,
-} from './fixtures';
+import { expect, expectNoPageErrors, paletteTile, test } from './fixtures';
 
 // Power user mode and Minimal chrome (docs/specs/007-editor/power-user-mode.md), and the role pill
 // (docs/specs/007-editor/live-app.md#role-pill), in a real browser, dark mode.
@@ -217,47 +211,6 @@ test.describe('Power user mode', () => {
     expect(prefs.autoRebindArrows).toBe(false);
     // Minimal chrome is off with the mode: the role pill is back.
     await expect(documentGroup(page).locator('[data-role-pill]')).toBeVisible();
-    expectNoPageErrors(pageErrors);
-  });
-
-  test('the Appearance control flips on click and follows the device on right-click', async ({
-    page,
-    pageErrors,
-  }) => {
-    await openEditor(page);
-    const appearance = actions(page).getByRole('button', { name: /^Appearance: / });
-    const painted = () =>
-      page.evaluate(() => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'));
-    // Outside the mode: the three-step cycle, System first on this dark device.
-    await expect(appearance).toHaveAccessibleName('Appearance: System. Switch to Light.');
-
-    await setPowerUserMode(page, true);
-    await closeSettings(page);
-    await expect(appearance).toHaveAccessibleName(
-      'Appearance: System. Switch to Light. Right-click to follow your device.',
-    );
-
-    await appearance.click();
-    await expect(appearance).toHaveAccessibleName(/^Appearance: Light\. Switch to Dark\./);
-    expect(await painted()).toBe('light');
-    await appearance.click();
-    await expect(appearance).toHaveAccessibleName(/^Appearance: Dark\. Switch to Light\./);
-    expect(await painted()).toBe('dark');
-    await appearance.click();
-    await expect(appearance).toHaveAccessibleName(/^Appearance: Light\./);
-
-    // Right-click: back to System, which paints this device's dark, and no browser menu.
-    await appearance.click({ button: 'right' });
-    await expect(appearance).toHaveAccessibleName(/^Appearance: System\./);
-    expect(await painted()).toBe('dark');
-    expect(await page.evaluate(() => localStorage.getItem('livedoc:v2:ui-mode'))).toBe('system');
-    await expect(page.getByRole('menu')).toHaveCount(0);
-
-    // The keyboard reaches System too: Shift+F10 on the focused control (its macOS stand-in there).
-    await appearance.click();
-    await expect(appearance).toHaveAccessibleName(/^Appearance: Light\./);
-    await openContextMenuFromKeyboard(appearance);
-    await expect(appearance).toHaveAccessibleName(/^Appearance: System\./);
     expectNoPageErrors(pageErrors);
   });
 });

@@ -17,7 +17,6 @@ import { useSignInAvailable } from '@/lib/auth-config';
 import { HELP_SEARCH_ITEMS } from '@/lib/help-search';
 import { SETTINGS_SEARCH_ITEMS } from '@/lib/settings-search-items';
 import { commitUserPreferences } from '@/lib/user-preferences';
-import { isPowerUserMode } from '@/lib/power-user-mode';
 import { useDismissibleBanner } from '@/hooks/ui/useDismissibleBanner';
 import { useSearchShortcut } from '@/hooks/ui/useSearchShortcut';
 import { CustomThemeProvider } from '@/components/primitives/CustomThemeProvider';
@@ -275,7 +274,6 @@ function ShellChrome({ children }: { children: ReactNode }) {
         <ChromeControls
           onOpenSearch={() => setSearchOpen(true)}
           onOpenSettings={surface.settings ? () => setSettingsOpen(true) : undefined}
-          powerUser={isPowerUserMode(prefs)}
           github={surface.appLinks}
           appearance={surface.appearance}
         />

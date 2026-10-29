@@ -304,7 +304,6 @@ export function EditorView() {
               setSettingsOpen(true);
               track('UI', 'Opened', 'Settings');
             }}
-            powerUser={isPowerUserMode(userPreferences)}
             // Settings > Appearance > Button Labels names Search, Settings and the appearance (never on a phone). Icons
             // alone unless it is turned on, so the top line leaves the strip its room (mock-up F).
             labelled={!minimalChrome && buttonLabelsOn(userPreferences)}

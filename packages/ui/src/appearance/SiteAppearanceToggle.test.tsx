@@ -40,7 +40,10 @@ describe('SiteAppearanceToggle', () => {
     });
     expect(localStorage.getItem(APPEARANCE_STORAGE_KEY)).toBe('light');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
-    expect(toggle()).toHaveProperty('ariaLabel', 'Appearance: Light. Switch to Dark.');
+    expect(toggle()).toHaveProperty(
+      'ariaLabel',
+      'Appearance: Light. Switch to Dark. Right-click to follow your device.',
+    );
 
     act(() => {
       fireEvent.click(toggle());
@@ -53,6 +56,15 @@ describe('SiteAppearanceToggle', () => {
     });
     expect(localStorage.getItem(APPEARANCE_STORAGE_KEY)).toBe('system');
     expect(toggle()).toHaveProperty('ariaLabel', 'Appearance: System. Switch to Light.');
+  });
+
+  it('sets System on right-click, without the browser menu', () => {
+    localStorage.setItem(APPEARANCE_STORAGE_KEY, 'dark');
+    render(<SiteAppearanceToggle />);
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    act(() => void toggle().dispatchEvent(event));
+    expect(event.defaultPrevented).toBe(true);
+    expect(localStorage.getItem(APPEARANCE_STORAGE_KEY)).toBe('system');
   });
 
   it('keeps an explicit Light over a dark device', () => {

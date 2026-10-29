@@ -21,8 +21,8 @@ export {
   APPEARANCE_LABEL,
   appearanceToggleName,
   nextAppearanceSetting,
-  oppositeAppearanceSetting,
-  quickAppearanceToggleName,
+  FOLLOW_DEVICE_HINT,
+  followDeviceOnContextMenu,
 } from './appearance-cycle';
 export {
   CHROME_SURFACE_ATTRIBUTE,

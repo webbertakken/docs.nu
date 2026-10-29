@@ -1,4 +1,4 @@
-import type { Appearance, AppearanceSetting } from './appearance-store';
+import type { AppearanceSetting } from './appearance-store';
 
 // The cycle every Appearance control walks. Light and Dark first (the two picks
 // anyone reaching for the control wants), System last as the "you decide" step
@@ -17,21 +17,23 @@ export const APPEARANCE_LABEL: Record<AppearanceSetting, string> = {
   system: 'System',
 };
 
-// The accessible name of a cycling control: where you are, then where a click goes.
+// The hint every Appearance control carries while it is off System: the context menu gesture hands the choice
+// back to the device (docs/specs/004-interface-design/appearance.md "The control").
+export const FOLLOW_DEVICE_HINT = 'Right-click to follow your device.';
+
+// The accessible name of the control: where you are, where a click goes, and, off System, the right-click.
 export function appearanceToggleName(setting: AppearanceSetting): string {
-  return `Appearance: ${APPEARANCE_LABEL[setting]}. Switch to ${APPEARANCE_LABEL[nextAppearanceSetting(setting)]}.`;
+  const name = `Appearance: ${APPEARANCE_LABEL[setting]}. Switch to ${APPEARANCE_LABEL[nextAppearanceSetting(setting)]}.`;
+  return setting === 'system' ? name : `${name} ${FOLLOW_DEVICE_HINT}`;
 }
 
-// Power user mode's quick switch (docs/specs/007-editor/power-user-mode.md#quick-appearance-switch):
-// a click goes to the explicit setting opposite the PAINTED appearance, so it always
-// visibly flips, System included; the context menu gesture hands the pick back to System.
-export function oppositeAppearanceSetting(appearance: Appearance): AppearanceSetting {
-  return appearance === 'dark' ? 'light' : 'dark';
-}
-
-export function quickAppearanceToggleName(
+// The context menu gesture on any Appearance control: System, and never the browser's menu.
+export function followDeviceOnContextMenu(
   setting: AppearanceSetting,
-  appearance: Appearance,
-): string {
-  return `Appearance: ${APPEARANCE_LABEL[setting]}. Switch to ${APPEARANCE_LABEL[oppositeAppearanceSetting(appearance)]}. Right-click to follow your device.`;
+  set: (next: AppearanceSetting) => void,
+): (event: { preventDefault: () => void }) => void {
+  return (event) => {
+    event.preventDefault();
+    if (setting !== 'system') set('system');
+  };
 }

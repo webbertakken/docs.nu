@@ -1,12 +1,16 @@
 'use client';
 
 import { Tooltip } from '../Tooltip';
-import { APPEARANCE_LABEL, appearanceToggleName } from './appearance-cycle';
+import {
+  APPEARANCE_LABEL,
+  appearanceToggleName,
+  followDeviceOnContextMenu,
+} from './appearance-cycle';
 import { AppearanceIcon } from './AppearanceIcon';
 import { useAppearance } from './useAppearance';
 
 // The public sites' Appearance control (docs/specs/004-interface-design/appearance.md): a
-// quiet icon button that cycles Light → Dark → System, on its own rail under the share rail
+// quiet icon button that cycles Light → Dark → System (a right-click sets System), on its own rail under the share rail
 // (`rail`) on wide screens, in the SiteHeader (`header`) everywhere else. No telemetry: the
 // public sites report page views only.
 const LOOK = {
@@ -23,12 +27,13 @@ export function SiteAppearanceToggle({
   look?: keyof typeof LOOK;
   className?: string;
 }) {
-  const { setting, cycle } = useAppearance();
+  const { setting, set, cycle } = useAppearance();
   return (
     <Tooltip label={`Appearance: ${APPEARANCE_LABEL[setting]}`}>
       <button
         type="button"
         onClick={cycle}
+        onContextMenu={followDeviceOnContextMenu(setting, set)}
         aria-label={appearanceToggleName(setting)}
         className={`inline-flex shrink-0 items-center justify-center text-slate-500 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:text-slate-400 ${LOOK[look]} ${className}`}
       >
