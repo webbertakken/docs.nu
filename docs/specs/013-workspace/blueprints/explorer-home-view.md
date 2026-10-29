@@ -74,7 +74,7 @@ Scope, by file:
 | Action entry  | `ActionEntry`                                    | One action of a one-person group, a link                      |
 | Summary entry | `SummaryEntry`                                   | A group of several people, a disclosure                       |
 
-Banned: "Most Used" and "Recent" anywhere on Home but the two group labels, "frecency",
+Banned: "Most Used" and "Recent" anywhere on Home (the groups carry no titles), "frecency",
 "timeline" for anything on Home but the See Timeline link that leaves for it, "notification" for an action.
 
 ## Behaviour and state
@@ -158,11 +158,12 @@ it runs out; at most `2n` (8) items, each with the half it came from (`group`), 
 
 ### Grid (desktop and tablet)
 
-`JumpBackIn` reads `useMediaQuery(HOME_WIDE_QUERY)`. Wide: the Most Used label and its `ul` of `JumpBackInTile`s, then the
-Recent label and its `ul` of tiles; a group with no item draws neither its label nor its list. Each tile's `line`,
-its quiet line, is `jumpBackInLine(item, group, now)` (`now` from `useRelativeNow`): most used `Used on ${useDays} day(s)`,
-recent `Used ${relativeSince(lastUsedAt, now)}`. The two groups' container holds `JUMP_BACK_IN_MIN_HEIGHT`, so it keeps
-both groups' height with fewer items (`D131`, `D168`).
+`JumpBackIn` reads `useMediaQuery(HOME_WIDE_QUERY)`. Wide: one `ul` of `JumpBackInTile`s, the most used then the
+recent, no group titles. The first recent `li` takes `col-start-1` when there is at least one most used, so the
+recent open the second row whatever the length of the first; with no most used, the recent take the top row. Each
+tile's `line`, its quiet line, is `jumpBackInLine(item, group, now)` (`now` from `useRelativeNow`): most used
+`Used on ${useDays} day(s)`, recent `Used ${relativeSince(lastUsedAt, now)}`. The list holds `GRID_MIN_HEIGHT`, so it
+keeps two rows' height with fewer items (`D131`).
 
 ### The ⋯ menu
 
@@ -340,15 +341,12 @@ Component props:
   `border-slate-700`), 12 px above the section's body. The heading (`h2`, `SECTION_HEADING`): `text-base
 font-semibold text-slate-900 dark:text-slate-100`. The quiet link at the end (See More, See Timeline): `text-sm
 font-medium text-brand-700 dark:text-brand-300 hover:underline`.
-- Group label (`GROUP_LABEL`): `text-[10px] font-semibold uppercase tracking-wider text-slate-500
-dark:text-slate-400`, 8 px above its list; Recent's 16 px below Most Used's list.
 - Grid tile (`JumpBackInTile`, `thumbClassName={GRID_THUMB}`): the thumbnail `h-20 w-full rounded-md border
 border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `slate-300` (dark `slate-500`) on hover;
   the name `mt-1 h-4 text-xs truncate text-slate-700` (dark `slate-300`); the quiet line `h-4 text-[11px] truncate`
   muted, the link's `aria-describedby`. 116 px high in all.
-- Lists: each group `grid grid-cols-4 content-start gap-3` (`GRID`). Their container holds `JUMP_BACK_IN_MIN_HEIGHT`
-  (`min-h-[18.5rem]`: a label and a tile row each, and the gap) so neither the load nor a short group moves what
-  follows (`D168`).
+- List: `grid grid-cols-4 content-start gap-3` (`GRID`) with `GRID_MIN_HEIGHT` (`min-h-[15.25rem]`: two tile rows,
+  2 × 116 px, and the 12 px gap), so neither the load nor a short group moves what follows (`D131`).
   This Browser: `ThisBrowserPill asLabel` absolutely in the thumbnail's bottom-left corner (4 px inset).
 - Strip: a scroller `scrollbar-slim -mx-1 flex h-28 snap-x gap-3 overflow-x-auto px-1 pb-2 pt-1`; the `ul` inside it
   `flex gap-3`; tiles `w-32 shrink-0 snap-start` with a 128 × 80 thumbnail. See More tile: the same 128 × 80 box,
@@ -380,9 +378,8 @@ border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `s
 - Each section is a `section aria-labelledby` its `h2` (**Jump Back In**, **What Happened**): two region landmarks.
 - Jump Back In: one `ul aria-labelledby` the heading, grid or strip; each `li` one link whose accessible name is the
   document name ("Payments architecture", plus ", This Browser" for a local one, from the pill label); a `Tooltip`
-  shows the full name; the quiet line is the link's `aria-describedby`. On a desktop or tablet each group is its own
-  `ul aria-labelledby` its label (**Most Used**, **Recent**) inside the section; the strip stays one list named by the
-  section's heading.
+  shows the full name; the quiet line is the link's `aria-describedby`. No group carries a label of its own, on screen
+  or for assistive technology.
 - A loaded document's tile also holds a `button` "Menu for ${name}" (`aria-haspopup="menu"`,
   `aria-expanded`), a sibling of the link rather than inside it; Down or Up Arrow on it opens the menu, which takes
   focus to its first item and gives it back on close (`useRowMenu`, `DocumentEntryMenu`). Under a fine pointer it
@@ -399,8 +396,8 @@ border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `s
 ## Web Experience
 
 - LCP: the first screen is one api read; the largest element is a heading or the skeleton, both painted at once.
-- CLS 0: the page header renders whole with the shell (its text needs no read); headings render with the skeletons; Jump Back In, its skeleton and its empty state share
-  `JUMP_BACK_IN_MIN_HEIGHT` (tiles are a fixed height); the strip, its skeleton and its empty state share `h-28`; What
+- CLS 0: the page header renders whole with the shell (its text needs no read); headings render with the skeletons; Jump Back In's grid and its skeleton share
+  `GRID_MIN_HEIGHT` (tiles are a fixed height); the strip, its skeleton and its empty state share `h-28`; What
   happened is last on the page; thumbnails keep their box (`DocumentThumbnail`); the fade and the chevron change
   opacity / transform only. Expanding a group is a user-initiated change.
 - INP: handlers are one state set or one navigation each.
@@ -429,7 +426,7 @@ border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `s
 | Sentences, people, verbs, updates, location                                         | `apps/live/app/explorer/home/home-copy.test.ts`                                      |
 | Read, error, retry, stale owner, unread clear, mark kept                            | `apps/live/app/explorer/home/useHome.test.tsx`                                       |
 | A clear outlives an unread count still in flight                                    | `apps/live/app/explorer/useTimelineUnread.test.tsx`                                  |
-| Grid and strip: group labels, quiet lines, tiles, pill, fade, See More, telemetry   | `apps/live/components/panels/home/JumpBackIn.test.tsx`                               |
+| Grid and strip: one list, two rows, quiet lines, tiles, pill, fade, See More, telem | `apps/live/components/panels/home/JumpBackIn.test.tsx`                               |
 | ⋯ menu: button beside the link, right-click, rename in place, gone, unloaded, strip | `apps/live/components/panels/home/JumpBackInMenu.test.tsx`                           |
 | Menu props by id: lists, bound actions, shared dismiss, history, gone               | `apps/live/app/explorer/useDocumentEntryFor.test.tsx`                                |
 | Headings: the heading row, its rule and its link, per section                       | `apps/live/components/panels/home/HomePane.test.tsx`                                 |
@@ -441,17 +438,18 @@ border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `s
 
 ## Constants and configuration
 
-| Constant                  | Value                | Where            | Provenance                       | Safe range     |
-| ------------------------- | -------------------- | ---------------- | -------------------------------- | -------------- |
-| `HOME_WIDE_QUERY`         | `(min-width: 768px)` | `JumpBackIn.tsx` | Spec (`md:`: desktop and tablet) | fixed          |
-| `STRIP_FADE_EPSILON_PX`   | 1                    | `home-model.ts`  | Sub-pixel scroll widths          | 1 to 2         |
-| `SUMMARY_NAMES_MAX`       | 3                    | `home-copy.ts`   | Spec ("Priya, Sam and Lee")      | 2 to 4         |
-| `AVATAR_STACK_MAX`        | 3                    | `HomeAvatar.tsx` | `D99`                            | 2 to 5         |
-| `JUMP_BACK_IN_MIN_HEIGHT` | see `home-styles.ts` | `home-styles.ts` | `D168`: both groups' rows        | fixed          |
-| Section gap               | 28 px (`gap-7`)      | `HomePane.tsx`   | Pre-restyle Home                 | 24 to 40 px    |
-| Grid thumbnail            | 80 px high           | `home-styles.ts` | Spec ("80 px high")              | 64 to 96 px    |
-| Strip thumbnail           | 128 × 80 px          | `home-styles.ts` | `D100`: "small", 16:10           | 96 to 160 wide |
+| Constant                | Value                | Where            | Provenance                       | Safe range     |
+| ----------------------- | -------------------- | ---------------- | -------------------------------- | -------------- |
+| `HOME_WIDE_QUERY`       | `(min-width: 768px)` | `JumpBackIn.tsx` | Spec (`md:`: desktop and tablet) | fixed          |
+| `STRIP_FADE_EPSILON_PX` | 1                    | `home-model.ts`  | Sub-pixel scroll widths          | 1 to 2         |
+| `SUMMARY_NAMES_MAX`     | 3                    | `home-copy.ts`   | Spec ("Priya, Sam and Lee")      | 2 to 4         |
+| `AVATAR_STACK_MAX`      | 3                    | `HomeAvatar.tsx` | `D99`                            | 2 to 5         |
+| `GRID_MIN_HEIGHT`       | see `home-styles.ts` | `home-styles.ts` | `D131`: two tile rows            | fixed          |
+| Section gap             | 28 px (`gap-7`)      | `HomePane.tsx`   | Pre-restyle Home                 | 24 to 40 px    |
+| Grid thumbnail          | 80 px high           | `home-styles.ts` | Spec ("80 px high")              | 64 to 96 px    |
+| Strip thumbnail         | 128 × 80 px          | `home-styles.ts` | `D100`: "small", 16:10           | 96 to 160 wide |
 
 ## Defaults ledger
 
-D94 to D104, D128 to D132, D140 and D168 to D170 in [DEFAULTS.md](DEFAULTS.md); D96, D97, D98, D101 and D169 are retired there.
+D94 to D104, D128 to D132, D140 and D168 to D170 in [DEFAULTS.md](DEFAULTS.md); D96, D97, D98, D101, D168 and D169 are
+retired there.

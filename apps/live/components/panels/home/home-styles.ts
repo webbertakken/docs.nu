@@ -32,19 +32,15 @@ export const SKELETON = 'rounded-md bg-slate-200/70 motion-safe:animate-pulse da
 
 // ---- Jump Back In's tiles (desktop and tablet), shared by the tiles and their skeletons ----
 
-/** A group's label: Most Used, Recent. */
-export const GROUP_LABEL =
-  'mb-2 h-4 text-[10px] font-semibold uppercase leading-4 tracking-wider text-slate-500 dark:text-slate-400';
-
 /** A grid tile's thumbnail: the column's width, a fixed 80 px high. */
 export const GRID_THUMB = 'h-20 w-full';
 
-/** Each group's list: four across, filled from the left. */
+/** The grid: four across, filled from the top left. */
 export const GRID = 'grid grid-cols-4 content-start gap-3';
 
-/** Both groups' height whatever lands in them (D168): a label and a row of tiles each (24 + 116, 16, 24 + 116).
- *  Their skeleton and empty state hold it too, so fewer documents never shift what follows. */
-export const JUMP_BACK_IN_MIN_HEIGHT = 'min-h-[18.5rem]';
+/** Two tile rows whatever lands in them (D131): 2 × 116 px and the 12 px gap. The grid and its skeleton
+ *  both hold it, so fewer documents never shift what follows. */
+export const GRID_MIN_HEIGHT = 'min-h-[15.25rem]';
 
 /** An empty list's one slot, the size of the tile it stands in for: a dashed edge. */
 export const EMPTY_SLOT = 'rounded-md border border-dashed border-slate-300 dark:border-slate-600';

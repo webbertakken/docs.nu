@@ -1,13 +1,12 @@
 'use client';
 
 // Jump Back In (docs/specs/013-workspace/explorer-home.md "Jump Back In"): the person's Within reach
-// set of documents. On a desktop or tablet a grid of thumbnails, four across: Most Used then Recent, each group under
-// its small label and each tile with its quiet line,
-// with See More in the heading row; on a phone the alternating strip that ends in its See More tile, which
-// interleaves the groups and so labels neither. Each document carries its Explorer ⋯ menu when the Explorer has it,
+// set of documents. On a desktop or tablet a 4 by 2 grid of thumbnails, most used on top and recent below, each tile
+// with its quiet line, with See More in the heading row; on a phone the alternating strip that ends in its See More
+// tile. The two halves carry no titles: the documents are one list named Jump Back In (Calm by default). Each document carries its Explorer ⋯ menu when the Explorer has it,
 // and a document that leaves the Explorer's lists (moved to the Trash, taken off Shared With Me) leaves at once.
 
-import { useId, useMemo } from 'react';
+import { useMemo } from 'react';
 import { CompactEmptyState, useMediaQuery } from '@livedoc/ui';
 import { track } from '@/lib/telemetry';
 import { useRelativeNow } from '@/lib/relative-time';
@@ -15,6 +14,7 @@ import { HOME_COPY } from '@/app/explorer/home/home-copy';
 import {
   jumpBackInLine,
   type JumpBackInGroup,
+  type JumpBackInItem,
   type JumpBackInSet,
 } from '@/app/explorer/home/home-model';
 import type { DocumentEntryFor } from '@/app/explorer/useDocumentEntryFor';
@@ -23,15 +23,13 @@ import { GridSkeleton, StripSkeleton } from './HomeSkeletons';
 import { JumpBackInStrip } from './JumpBackInStrip';
 import { JumpBackInTile } from './JumpBackInTile';
 import type { JumpBackInMenuFor } from './JumpBackInMenu';
-import { EMPTY_SLOT, GRID, GRID_THUMB, GROUP_LABEL, JUMP_BACK_IN_MIN_HEIGHT } from './home-styles';
+import { EMPTY_SLOT, GRID, GRID_MIN_HEIGHT, GRID_THUMB } from './home-styles';
 import { JumpBackInEmptyIcon } from './home-icons';
 
 /** The grid from the spec's `md:` up: desktop and tablet. */
 const HOME_WIDE_QUERY = '(min-width: 768px)';
 
 const HEADING_ID = 'home-jump-back-in';
-
-const GROUP_LABELS: Record<JumpBackInGroup, string> = { mostUsed: 'Most Used', recent: 'Recent' };
 
 export function JumpBackIn({
   ownerId,
@@ -52,6 +50,7 @@ export function JumpBackIn({
   documentMenus?: DocumentEntryFor;
 }) {
   const wide = useMediaQuery(HOME_WIDE_QUERY);
+  const now = useRelativeNow();
   const set = useMemo(() => {
     if (!documentMenus) return fullSet;
     const here = (item: JumpBackInSet['mostUsed'][number]) =>
@@ -106,49 +105,61 @@ export function JumpBackIn({
           </div>
         </div>
       ) : (
-        <div className={`flex flex-col gap-4 ${JUMP_BACK_IN_MIN_HEIGHT}`}>
-          <CardGroup ownerId={ownerId} group="mostUsed" items={set.mostUsed} menuFor={menuFor} />
-          <CardGroup ownerId={ownerId} group="recent" items={set.recent} menuFor={menuFor} />
-        </div>
+        <ul aria-labelledby={HEADING_ID} className={`${GRID} ${GRID_MIN_HEIGHT}`}>
+          {set.mostUsed.map((item) => (
+            <GridTile
+              key={item.documentId}
+              ownerId={ownerId}
+              item={item}
+              group="mostUsed"
+              now={now}
+              menuFor={menuFor}
+            />
+          ))}
+          {set.recent.map((item, i) => (
+            <GridTile
+              key={item.documentId}
+              ownerId={ownerId}
+              item={item}
+              group="recent"
+              now={now}
+              menuFor={menuFor}
+              // The recent open the second row, whatever the length of the first.
+              startsRow={i === 0 && set.mostUsed.length > 0}
+            />
+          ))}
+        </ul>
       )}
     </HomeSection>
   );
 }
 
-/** One labelled group of tiles; a group with no document draws nothing, label included. */
-function CardGroup({
+/** One document of the grid; `startsRow` puts it in the first column, opening a new row. */
+function GridTile({
   ownerId,
+  item,
   group,
-  items,
+  now,
   menuFor,
+  startsRow = false,
 }: {
   ownerId: string;
+  item: JumpBackInItem;
   group: JumpBackInGroup;
-  items: JumpBackInSet['mostUsed'];
+  now: number;
   menuFor?: JumpBackInMenuFor;
+  startsRow?: boolean;
 }) {
-  const labelId = useId();
-  const now = useRelativeNow();
-  if (items.length === 0) return null;
   return (
-    <div data-jump-back-in-group={group}>
-      <h3 id={labelId} className={GROUP_LABEL}>
-        {GROUP_LABELS[group]}
-      </h3>
-      <ul aria-labelledby={labelId} className={GRID}>
-        {items.map((item) => (
-          <li key={item.documentId} className="min-w-0">
-            <JumpBackInTile
-              ownerId={ownerId}
-              item={item}
-              group={group}
-              thumbClassName={GRID_THUMB}
-              line={jumpBackInLine(item, group, now)}
-              entry={menuFor?.(item.documentId) ?? null}
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <li className={`min-w-0 ${startsRow ? 'col-start-1' : ''}`}>
+      <JumpBackInTile
+        ownerId={ownerId}
+        item={item}
+        group={group}
+        thumbClassName={GRID_THUMB}
+        line={jumpBackInLine(item, group, now)}
+        entry={menuFor?.(item.documentId) ?? null}
+      />
+    </li>
   );
 }
