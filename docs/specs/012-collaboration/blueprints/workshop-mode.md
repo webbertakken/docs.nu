@@ -60,12 +60,13 @@ categories keep their ids: `collab-ask`, `collab-tools`, `collab-record`, `colla
   offered list).
 - **Strip:** `CanvasChrome` mounts the Session strip when `sessionStripTools(mode, { workshop, esBoard })` is
   non-null; `useCanvasChromePanels` closes a session popover whose tool the tab no longer offers.
-- **Category bar:** `CategoryBarStrip` shows when `showsCategoryBar(mode, workshop)`, gathering `collab-tools` to
+- **Category bar:** `ToolbarPalette` shows `CategoryBar` when `showsCategoryBar(mode, workshop)`, gathering `collab-tools` to
   `collab-navigate` into `session` as it did for Workshop mode.
 - **Start:** `templateStartMode({ ..., workshop })` returns `'workshop'` for an empty Structured tab with the
   control on; the start's closed key is `<tab id>:workshop`.
 - **Tour:** `EditorTours` mounts `WorkshopTourHost` once `workshop` has been true; the host offers the tour while
-  `workshop` is on and ends it as skipped when it goes off.
+  `workshop` is on, at `TOUR_OFFER_RANK.session` (above a mode's own tour, below a tool's), and ends it as skipped
+  when it goes off.
 - **New tab and Duplicate:** `newTabOpening(source, 'tab')` copies `workshop: true` from `workshopOf(source)`;
   Duplicate copies the tab whole.
 - **Templates:** `templateCanvasOverrides(kind)` writes `workshop: true` when `templateOpening(kind) === 'workshop'`,
@@ -91,9 +92,10 @@ export function WorkshopControl(p: {
 ```
 
 - `ModeTab` gains `workshop?: unknown` (a stored value of any shape is read through `workshopOf`).
-- `Tab.workshop?: true` is in the OpenAPI schema; `isValidTab` keeps it only when `true` (`parseTabWorkshop`).
+- `Tab.workshop?: true` is in the OpenAPI schema; `isValidTab` does not read it, and `workshopOf` reads only `true`, so
+  any other stored value is off.
 - Every `Record<EditorMode, …>` loses its `workshop` entry; a map of what a template or document is made as is
-  keyed by `TabOpening` instead (`MODE_WORDS`, `BLANK_TEMPLATE_FOR_OPENING`, `POPULAR_BY_OPENING`, the template
+  keyed by `TabOpening` instead (`MODE_WORDS`, `BLANK_TEMPLATE_FOR_OPENING`, `POPULAR_BY_MODE` (keyed by `TabOpening`), the template
   filter's events and counts, the New Document wizard's pitches, explorer `VALUE_LABELS['opens-in']`).
 
 ## Data and persistence
@@ -108,22 +110,22 @@ export function WorkshopControl(p: {
 
 ## Errors and edge cases
 
-| Case                                                       | Handling                                                                         |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `workshop: true` on an event-storming board or a Plan tab  | `workshopOf` false; the control is not offered; `setTabWorkshop` returns the tab |
-| A session button pressed with the control off              | Starts its tool as before; no strip in Structured or Sketch (spec)               |
-| A strip popover open when the control goes off             | Closes (`useCanvasChromePanels` re-check)                                        |
-| The palette shows a kit category when the control goes off | Re-lands on the layout's landing                                                 |
-| A peer turns it off mid-tour                               | The tour ends as skipped                                                         |
-| Locked tab                                                 | No control for anyone; a stored state still shows its kit                        |
-| `/new?mode=workshop`                                       | `parseTabOpening` → `'workshop'`; Blank Session                                  |
-| `workshop` not `true` (forged `1`, `"yes"`)                | Dropped by `parseTabWorkshop` on write; `workshopOf` reads only `true`           |
+| Case                                                       | Handling                                                                                 |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `workshop: true` on an event-storming board or a Plan tab  | `workshopOf` false; the control is not offered; `setTabWorkshop` returns the tab         |
+| A session button pressed with the control off              | Starts its tool as before; no strip in Structured or Sketch (spec)                       |
+| A strip popover open when the control goes off             | Closes (`useCanvasChromePanels` re-check)                                                |
+| The palette shows a kit category when the control goes off | Re-lands on the layout's landing                                                         |
+| A peer turns it off mid-tour                               | The tour ends as skipped                                                                 |
+| Locked tab                                                 | No control for anyone; a stored state still shows its kit                                |
+| `/new?mode=workshop`                                       | `parseTabOpening` → `'workshop'`; Blank Session                                          |
+| `workshop` not `true` (forged `1`, `"yes"`)                | Read as off: `workshopOf` reads only `true`, and the next toggle writes `true` or no key |
 
 ## Security and trust
 
 - No new trust boundary. The field is a tab-metadata write, accepted from an editor only as every tab-meta op is
   (the room drops view-role tab writes); the control is shown only where `canSwitch` (`can.level === 'edit'`, not
-  locked). A forged value is reduced to `true` or absent by `parseTabWorkshop`.
+  locked). A forged value other than `true` reads as off (`workshopOf`).
 
 ## Performance and limits
 
@@ -159,8 +161,8 @@ export function WorkshopControl(p: {
 
 - Telemetry: `Editor · Toggled · WorkshopOn / WorkshopOff`, `UI · Toggled · TemplateModeWorkshop`, each with an
   explanation sentence in `apps/telemetry/app/event-explanations.ts`. Log `[workshop] control turned { tabId, on }`
-  at `info` from `setWorkshop`, and `[workshop] legacy tab read as Structured with the control on { tabId }` once
-  per tab per session from the editor's mode resolution.
+  (`debugLog`, the editor's trace channel) from `setWorkshop`, beside the add menu's `[tabs] added { tabId, choice,
+opensIn }` from `useTabActions.addTab`.
 
 ## Testing
 
