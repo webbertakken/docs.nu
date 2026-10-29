@@ -153,8 +153,8 @@ export type LandingSection = {
 
 /**
  * The feature categories, in the order the landing page tells them: collaborate,
- * then each way of working on a tab (Diagram, Draw, Pages mode's infographics, its
- * slide decks and its documents, Plan's boards, then its sheets and forms). `page.tsx` renders one beat per entry and
+ * then each way of working on a tab (Structured's diagrams, Sketch's whiteboard, Pages mode's
+ * infographics, its slide decks and its documents, then the Plan tabs: boards, sheets and forms). `page.tsx` renders one beat per entry and
  * alternates its background by index; `/about/features/<id>` renders each one's cards.
  */
 export const LANDING_SECTIONS: LandingSection[] = [
@@ -165,7 +165,7 @@ export const LANDING_SECTIONS: LandingSection[] = [
     cta: 'Explore collaboration',
     title: 'Work on it together, live',
     description:
-      'Share a link and your team is on the canvas with you: live cursors, comments on any element, actions handed to teammates, and Workshop, a mode for running a workshop, with timers, votes and a spotlight on the thing you mean.',
+      'Share a link and your team is on the canvas with you: live cursors, comments on any element, actions handed to teammates, and the Workshop control, which brings timers, votes and a spotlight on the thing you mean into any tab.',
     metaDescription:
       'Share a link and your team is on the canvas with you: live cursors, comments, assigned actions and workshop tools, from timers and votes to polls.',
     highlights: [
@@ -245,15 +245,15 @@ export const LANDING_SECTIONS: LandingSection[] = [
         group: 'Present & workshop',
         title: 'Run the session: timer + voting',
         description:
-          'Run the room from the canvas. In Workshop, Timer, Vote and Poll sit in the Session strip at the foot of the canvas: start a countdown or stopwatch the whole room sees, its time on the button, or drop a timer onto the canvas as a session button so a template carries its own running order. Then open dot-voting to surface the group’s priorities. Everyone votes with a budget of dots; results tally in real time, and revealing them starts a guided walkthrough: each top pick lights up and centres on screen while you step through with Next and Previous. Perfect for retros, workshops, and timeboxed planning.',
+          'Run the room from the canvas. With the Workshop control on, Timer, Vote and Poll sit in the Session strip at the foot of the canvas: start a countdown or stopwatch the whole room sees, its time on the button, or drop a timer onto the canvas as a session button so a template carries its own running order. Then open dot-voting to surface the group’s priorities. Everyone votes with a budget of dots; results tally in real time, and revealing them starts a guided walkthrough: each top pick lights up and centres on screen while you step through with Next and Previous. Perfect for retros, workshops, and timeboxed planning.',
       },
       {
         art: <WorkshopModeArt />,
         href: '/help/canvas/workshop/',
         group: 'Present & workshop',
-        title: 'A mode for running the room',
+        title: 'The session kit, on any tab',
         description:
-          'Switch a tab to Workshop and it brings the session to hand: stickies, timers, votes, polls, reveals, quizzes and the Q&A board on its palette, and the Session strip at the foot of the canvas. Retrospectives, Lean Coffee and town halls open there, and Diagram stays about diagrams.',
+          'Turn on the Workshop control at the top right and the tab brings the session to hand, whether you sketch, diagram or lay out pages: stickies, timers, votes, polls, reveals, quizzes and the Q&A board on its palette, and the Session strip at the foot of the canvas. Retrospectives, Lean Coffee and town halls open with it on, and turning it off puts the kit away, leaving the canvas as it is.',
       },
       {
         art: <FacilitatorArt />,
@@ -811,9 +811,9 @@ export const LANDING_SECTIONS: LandingSection[] = [
     cta: 'Explore the whiteboard',
     title: 'A whiteboard that feels like paper',
     description:
-      'Switch a tab to Draw and the canvas becomes a whiteboard: three markers in hand, a pen that answers to pressure, and erasers that take a whole stroke or just a smudge. Sketch it rough, and let it snap to shape when you want it neat.',
+      'Switch a tab to Sketch and the canvas becomes a whiteboard: three markers in hand, a pen that answers to pressure, and erasers that take a whole stroke or just a smudge. Sketch it rough, and let it snap to shape when you want it neat.',
     metaDescription:
-      'Switch a tab to Draw for a whiteboard that feels like paper: three pressure-sensitive markers, smart erasers, and rough shapes that snap neat.',
+      'Switch a tab to Sketch for a whiteboard that feels like paper: three pressure-sensitive markers, smart erasers, and rough shapes that snap neat.',
     highlights: [
       'Three markers in hand',
       'Pressure-sensitive pens',
@@ -833,7 +833,7 @@ export const LANDING_SECTIONS: LandingSection[] = [
         href: '/help/canvas/sketch-mode/',
         title: 'Shapes and text in the dock',
         description:
-          'Draw mode swaps the palette for a dock across the top: select, the three markers, text, the Path tool and the eraser, each on its own key, then the shapes you use. Pin up to seven favourites, an arrow and a rectangle to start, and the Shapes button offers the ones you pick most.',
+          'Sketch mode swaps the palette for a dock across the top: select, the three markers, text, the Path tool and the eraser, each on its own key, then the shapes you use. Pin up to seven favourites, an arrow and a rectangle to start, and the Shapes button offers the ones you pick most.',
       },
       {
         art: <PressureArt />,
@@ -1102,9 +1102,9 @@ export const LANDING_SECTIONS: LandingSection[] = [
     cta: 'Explore plans and boards',
     title: 'Plan the work, then watch it move',
     description:
-      'Switch a tab to Plan and the work moves onto boards of cards: columns with WIP limits, swimlanes, card types with fields of your own, live charts of every card, and dashboards that bring it all onto one page, right beside the diagram that explains it.',
+      'Add a Board tab from the + button and the work moves onto boards of cards: columns with WIP limits, swimlanes, card types with fields of your own, live charts of every card, and dashboards that bring it all onto one page, right beside the diagram that explains it.',
     metaDescription:
-      'Plan mode puts the work on boards of cards: WIP limits, swimlanes, your own card types, live charts, Sheets with real formulas and dashboards.',
+      'Plan tabs put the work on boards of cards: WIP limits, swimlanes, your own card types, live charts, Sheets with real formulas and dashboards.',
     highlights: [
       'Boards with WIP limits',
       'One card, every board',
@@ -1159,14 +1159,14 @@ export const LANDING_SECTIONS: LandingSection[] = [
         href: '/help/canvas/plan-tabs/dashboards/',
         title: 'Dashboards on one page',
         description:
-          'Lay a tab out as rows of slots and put one thing in each, live: a board you can work on, a Sheet you can edit, a chart, a figure like Completion or a column total, a diagram from another tab, or a note, a checklist or a key date. Start from a layout such as Overview or Report, then add, move and resize slots as you go.',
+          'Add a Dashboard tab and lay it out as rows of slots and put one thing in each, live: a board you can work on, a Sheet you can edit, a chart, a figure like Completion or a column total, a diagram from another tab, or a note, a checklist or a key date. Start from a layout such as Overview or Report, then add, move and resize slots as you go.',
       },
       {
         art: <SheetsArt />,
         href: '/help/canvas/plan-tabs/sheets/',
         title: 'Sheets with real formulas',
         description:
-          'Put a spreadsheet on a Plan tab: cells, over 150 functions, number formats, sort, filter and freeze, live for everyone. Formulas can read the cards on the board, or list the cards as rows that stay linked both ways. Select some cells and chart them as bars, lines or a pie that sits in the Sheet over its cells. Copy and paste works with Google Sheets and Excel, CSV files come in and go out, and cells come Compact, Default or Roomy and zoom from 50% to 200%.',
+          'Add a Sheet tab from the + button: cells, over 150 functions, number formats, sort, filter and freeze, live for everyone. Formulas can read the cards on the board, or list the cards as rows that stay linked both ways. Select some cells and chart them as bars, lines or a pie that sits in the Sheet over its cells. Copy and paste works with Google Sheets and Excel, CSV files come in and go out, and cells come Compact, Default or Roomy and zoom from 50% to 200%.',
       },
       {
         art: <BoardWidgetsArt />,
@@ -1219,9 +1219,9 @@ export const LANDING_SECTIONS: LandingSection[] = [
     cta: 'Explore sheets',
     title: 'Spreadsheets that sit beside the work',
     description:
-      'Put a spreadsheet on a Plan tab: real formulas, number formats, sort and filter, live for everyone. Read the cards on the board, or list them as rows that stay linked both ways, and chart any cells in a click.',
+      'Add a Sheet tab from the + button for a spreadsheet: real formulas, number formats, sort and filter, live for everyone. Read the cards on the board, or list them as rows that stay linked both ways, and chart any cells in a click.',
     metaDescription:
-      'Spreadsheets on a Plan tab: real formulas, live for everyone, reading the board’s cards or listing them as linked rows, with charts from any cells.',
+      'Spreadsheets on tabs of their own: real formulas, live for everyone, reading the board’s cards or listing them as linked rows, with charts from any cells.',
     highlights: [
       'Sheets with real formulas',
       'Cards as rows, linked both ways',

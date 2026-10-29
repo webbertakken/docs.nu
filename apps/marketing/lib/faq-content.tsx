@@ -51,7 +51,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: 'What is LiveDoc?',
-        a: 'A free, real-time canvas for diagrams, whiteboards, illustrations and plans. Every document is a stack of tabs, and each tab can be worked on in five modes: Diagram for shapes and arrows, Draw for freehand whiteboarding, Workshop for running a session with your team, Pages for slides, articles, posters and logos, and Plan for boards of cards, spreadsheets and forms. Your team can join any of them live.',
+        a: 'A free, real-time canvas for diagrams, whiteboards, illustrations and plans. Every document is a stack of tabs, and each tab is worked on in one of three modes: Sketch for freehand whiteboarding, Structured for shapes and arrows, and Pages for slides, articles, posters and logos. The Workshop control brings timers, votes and polls into any of them for a session with your team, and Plan tabs hold boards of cards, spreadsheets, dashboards and forms. Your team can join any of them live.',
       },
       {
         q: 'Do I need an account to use LiveDoc?',
@@ -69,20 +69,20 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'How do I start my first document?',
-        a: `Press Start drawing and choose what you are making: Diagram, Draw, Workshop, Pages or Plan. The document opens straight away on that mode's start, where you begin from a blank canvas or one of ${TEMPLATE_COUNT} templates, and a short tour offers to show you round.`,
+        a: `Press Start drawing and choose what you are making: Sketch, Structured, Pages, Workshop or Plan. The document opens straight away on that choice's start, where you begin from a blank canvas or one of ${TEMPLATE_COUNT} templates, and a short tour offers to show you round.`,
       },
       {
         q: 'Does it work on my phone or tablet?',
         a: (
           <>
             It runs in any modern browser, with nothing to install. A laptop, desktop or tablet
-            gives you the full editor, and a tablet with a pen is lovely in Draw mode. Small phone
+            gives you the full editor, and a tablet with a pen is lovely in Sketch mode. Small phone
             screens are best for viewing and light edits. See{' '}
             <a href="/help/supported-devices/">supported devices</a>.
           </>
         ),
         aText:
-          'It runs in any modern browser, with nothing to install. A laptop, desktop or tablet gives you the full editor, and a tablet with a pen is lovely in Draw mode. Small phone screens are best for viewing and light edits. See supported devices.',
+          'It runs in any modern browser, with nothing to install. A laptop, desktop or tablet gives you the full editor, and a tablet with a pen is lovely in Sketch mode. Small phone screens are best for viewing and light edits. See supported devices.',
       },
       {
         q: 'Are there keyboard shortcuts?',
@@ -182,8 +182,8 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
           "Yes. Every tab has a finish: Flexible (the everyday look), Professional (crisp and print-ready), Sketch (wobbly pencil lines and handwriting) or Marker (bold felt-tip, like a flip chart). Switch it from the tab's style, or set it on one element, and nothing about the diagram changes underneath. Ready-made looks set the theme, finish, font and canvas pattern in one click. See choosing a finish.",
       },
       {
-        q: 'What are the five modes?',
-        a: 'Diagram is for structured shapes, connectors and layouts. Draw is a freehand whiteboard with pressure-sensitive markers. Workshop runs a session with your team, with timers, dot votes, polls and reveals to hand. Pages lays out designed pages like posters and slides. Plan turns a tab into boards of cards with columns, WIP limits and quick add, beside spreadsheets with formulas. A mode belongs to the tab, so everyone on it works in the same one, and each tab of a document can have its own.',
+        q: 'What are the three modes?',
+        a: 'Sketch is a freehand whiteboard with pressure-sensitive markers. Structured is for shapes, connectors and layouts. Pages lays out designed pages like posters and slides. Pick one from the mode switch beside the menu button, or press Shift+D to cycle through them. A mode belongs to the tab, so everyone on it works in the same one, and each tab of a document can have its own. Two things sit beside the modes: the Workshop control, which brings timers, dot votes, polls and reveals into any of them for a session with your team, and Plan tabs (a Board, Sheet or Dashboard from the + button) for boards of cards with columns, WIP limits and quick add, beside spreadsheets with formulas.',
       },
       {
         q: 'Can I organise a big document?',
@@ -206,15 +206,15 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         q: 'Can I plan projects with it?',
         a: (
           <>
-            Yes. Switch a tab to Plan for boards of cards with columns, swimlanes and WIP limits.
-            Card types carry your own fields, the same card can sit on two boards, and charts of the
-            cards (a Gantt chart, due and start calendars, counts by person or priority) can fill a
-            tab of their own. A Dashboard puts boards, Sheets, charts and figures side by side. See{' '}
-            <a href="/help/canvas/plan-tabs/">Plan mode</a>.
+            Yes. Add a Board tab from the + button for boards of cards with columns, swimlanes and
+            WIP limits. Card types carry your own fields, the same card can sit on two boards, and
+            charts of the cards (a Gantt chart, due and start calendars, counts by person or
+            priority) can fill a tab of their own. A Dashboard puts boards, Sheets, charts and
+            figures side by side. See <a href="/help/canvas/plan-tabs/">Plan tabs</a>.
           </>
         ),
         aText:
-          'Yes. Switch a tab to Plan for boards of cards with columns, swimlanes and WIP limits. Card types carry your own fields, the same card can sit on two boards, and charts of the cards (a Gantt chart, due and start calendars, counts by person or priority) can fill a tab of their own. A Dashboard puts boards, Sheets, charts and figures side by side. See Plan mode.',
+          'Yes. Add a Board tab from the + button for boards of cards with columns, swimlanes and WIP limits. Card types carry your own fields, the same card can sit on two boards, and charts of the cards (a Gantt chart, due and start calendars, counts by person or priority) can fill a tab of their own. A Dashboard puts boards, Sheets, charts and figures side by side. See Plan tabs.',
       },
       {
         q: 'Can I add pictures?',
@@ -233,12 +233,12 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         a: (
           <>
             Yes. Add a table and paste cells straight in from a spreadsheet, or place a pie, bar or
-            line chart, a progress bar, a rating or a timeline. For real formulas, put a Sheet on a
-            Plan tab. See <a href="/help/palette/tools/data-elements/">data elements</a>.
+            line chart, a progress bar, a rating or a timeline. For real formulas, add a Sheet tab
+            from the + button. See <a href="/help/palette/tools/data-elements/">data elements</a>.
           </>
         ),
         aText:
-          'Yes. Add a table and paste cells straight in from a spreadsheet, or place a pie, bar or line chart, a progress bar, a rating or a timeline. For real formulas, put a Sheet on a Plan tab. See data elements.',
+          'Yes. Add a table and paste cells straight in from a spreadsheet, or place a pie, bar or line chart, a progress bar, a rating or a timeline. For real formulas, add a Sheet tab from the + button. See data elements.',
       },
       {
         q: 'Can I animate things?',
@@ -307,22 +307,22 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         q: 'Can I use it as a whiteboard?',
         a: (
           <>
-            Yes. Switch a tab to Draw for a plain whiteboard: three pressure-sensitive markers,
+            Yes. Switch a tab to Sketch for a plain whiteboard: three pressure-sensitive markers,
             text, an eraser and shapes, on a plain, dotted or grid board in light or dark. With a
             stylus, a resting palm never leaves a mark. See{' '}
-            <a href="/help/canvas/sketch-mode/">Draw mode</a>.
+            <a href="/help/canvas/sketch-mode/">Sketch mode</a>.
           </>
         ),
         aText:
-          'Yes. Switch a tab to Draw for a plain whiteboard: three pressure-sensitive markers, text, an eraser and shapes, on a plain, dotted or grid board in light or dark. With a stylus, a resting palm never leaves a mark. See Draw mode.',
+          'Yes. Switch a tab to Sketch for a plain whiteboard: three pressure-sensitive markers, text, an eraser and shapes, on a plain, dotted or grid board in light or dark. With a stylus, a resting palm never leaves a mark. See Sketch mode.',
       },
       {
         q: 'Is there a spreadsheet?',
         a: (
           <>
-            Yes. Put a Sheet on a Plan tab: cells with over 150 functions, number formats, sort,
-            filter and freeze, edited live by everyone on the tab. Formulas can read the cards on
-            the board, or list the cards as rows that stay linked both ways. Select some cells to
+            Yes. Add a Sheet tab from the + button: cells with over 150 functions, number formats,
+            sort, filter and freeze, edited live by everyone on the tab. Formulas can read the cards
+            on the board, or list the cards as rows that stay linked both ways. Select some cells to
             chart them in a bar, line or pie chart that sits in the Sheet over its cells. CSV files
             come in and go out, and twelve templates start you off, from a Budget Planner and an
             Invoice to a Loan Calculator and a Habit Tracker. See{' '}
@@ -330,21 +330,21 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
           </>
         ),
         aText:
-          'Yes. Put a Sheet on a Plan tab: cells with over 150 functions, number formats, sort, filter and freeze, edited live by everyone on the tab. Formulas can read the cards on the board, or list the cards as rows that stay linked both ways. Select some cells to chart them in a bar, line or pie chart that sits in the Sheet over its cells. CSV files come in and go out, and twelve templates start you off, from a Budget Planner and an Invoice to a Loan Calculator and a Habit Tracker. See Sheets.',
+          'Yes. Add a Sheet tab from the + button: cells with over 150 functions, number formats, sort, filter and freeze, edited live by everyone on the tab. Formulas can read the cards on the board, or list the cards as rows that stay linked both ways. Select some cells to chart them in a bar, line or pie chart that sits in the Sheet over its cells. CSV files come in and go out, and twelve templates start you off, from a Budget Planner and an Invoice to a Loan Calculator and a Habit Tracker. See Sheets.',
       },
       {
         q: 'Can I make a form or survey?',
         a: (
           <>
-            Yes. In Plan mode, start a form from a starter such as Feedback, Bug Report or Event
-            RSVP, or a blank one, and build it in place. Share its link and anyone can fill it in
-            without an account; every response lands as a card on a board or a row in a Sheet, so
+            Yes. Choose Forms on a Plan tab’s start, then a starter such as Feedback, Bug Report or
+            Event RSVP, or a blank one, and build it in place. Share its link and anyone can fill it
+            in without an account; every response lands as a card on a board or a row in a Sheet, so
             the answers turn straight into work. See{' '}
             <a href="/help/canvas/plan-tabs/forms/">forms</a>.
           </>
         ),
         aText:
-          'Yes. In Plan mode, start a form from a starter such as Feedback, Bug Report or Event RSVP, or a blank one, and build it in place. Share its link and anyone can fill it in without an account; every response lands as a card on a board or a row in a Sheet, so the answers turn straight into work. See forms.',
+          'Yes. Choose Forms on a Plan tab’s start, then a starter such as Feedback, Bug Report or Event RSVP, or a blank one, and build it in place. Share its link and anyone can fill it in without an account; every response lands as a card on a board or a row in a Sheet, so the answers turn straight into work. See forms.',
       },
       {
         q: 'Can I present from it?',
@@ -437,16 +437,16 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         q: 'Is it good for running workshops and retros?',
         a: (
           <>
-            Very. Switch a tab to Workshop, the mode for running a session, or start from a
-            retrospective, Lean Coffee or town hall Q&amp;A template, which opens there. Whoever
-            holds the facilitator role runs the room’s timer, votes, polls and reveals. Estimate
-            cards run planning poker, a temperature check shows how the room feels, a quiz asks what
-            it knows, and an idea box collects anonymous ideas. See{' '}
-            <a href="/help/canvas/workshop/">Workshop mode</a>.
+            Very. Turn on the Workshop control at the top right to bring a session’s kit into any
+            tab, or start from a retrospective, Lean Coffee or town hall Q&amp;A template, which
+            opens with it on. Whoever holds the facilitator role runs the room’s timer, votes, polls
+            and reveals. Estimate cards run planning poker, a temperature check shows how the room
+            feels, a quiz asks what it knows, and an idea box collects anonymous ideas. See{' '}
+            <a href="/help/canvas/workshop/">the Workshop control</a>.
           </>
         ),
         aText:
-          'Very. Switch a tab to Workshop, the mode for running a session, or start from a retrospective, Lean Coffee or town hall Q&A template, which opens there. Whoever holds the facilitator role runs the room’s timer, votes, polls and reveals. Estimate cards run planning poker, a temperature check shows how the room feels, a quiz asks what it knows, and an idea box collects anonymous ideas. See Workshop mode.',
+          'Very. Turn on the Workshop control at the top right to bring a session’s kit into any tab, or start from a retrospective, Lean Coffee or town hall Q&A template, which opens with it on. Whoever holds the facilitator role runs the room’s timer, votes, polls and reveals. Estimate cards run planning poker, a temperature check shows how the room feels, a quiz asks what it knows, and an idea box collects anonymous ideas. See the Workshop control.',
       },
     ],
   },
