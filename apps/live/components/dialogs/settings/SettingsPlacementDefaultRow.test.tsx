@@ -58,10 +58,10 @@ describe('SettingsPlacementDefaultRow', () => {
   it('lists the eight entries in title case under Default Folders', () => {
     const rows = SETTINGS_CATEGORIES.find((c) => c.id === 'documents')!.rows;
     expect(rows.filter((r) => r.kind === 'placementDefault').map((r) => r.label)).toEqual([
-      'Diagrams',
       'Whiteboards',
-      'Sessions',
+      'Diagrams',
       'Pages Documents',
+      'Sessions',
       'Plan Boards',
       'Event Storming Boards',
       'Retrospectives',

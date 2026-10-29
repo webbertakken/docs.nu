@@ -10,7 +10,14 @@ import { BrandGroup } from './BrandGroup';
 
 afterEach(cleanup);
 
-const modes = { mode: 'draw' as const, setMode: vi.fn(), canSwitch: true, canEdit: true };
+const modes = {
+  mode: 'draw' as const,
+  setMode: vi.fn(),
+  canSwitch: true,
+  canEdit: true,
+  workshop: false,
+  setWorkshop: vi.fn(),
+};
 
 function renderGroup(props: Partial<Parameters<typeof BrandGroup>[0]> = {}, editor = modes) {
   return render(

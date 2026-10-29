@@ -5,16 +5,16 @@
 // saying where it leads ("Opens in Workshop"). At most OTHER_MODE_CARDS_MAX a mode, then Show All. Choosing one lands
 // it on the tab, which switches to the template's mode. The host keys it on the search, so a new search starts folded.
 import { useState, type CSSProperties } from 'react';
-import { CountBadge, EDITOR_MODE_ICONS } from '@livedoc/ui';
-import { editorModeLabel, type EditorMode } from '@livedoc/document';
+import { CountBadge, TAB_OPENING_ICONS } from '@livedoc/ui';
+import { tabOpeningLabel, type TabOpening } from '@livedoc/document';
 import type { PlanPalette } from '@/components/plan/plan-palette';
 import { StartCardGrid, startTint, type StartPanelCard } from './StartCard';
 import { OTHER_MODE_CARDS_MAX } from './other-mode-matches';
 
-export type StartPanelElsewhere = { mode: EditorMode; cards: readonly StartPanelCard[] };
+export type StartPanelElsewhere = { mode: TabOpening; cards: readonly StartPanelCard[] };
 
-function OpensIn({ mode, palette }: { mode: EditorMode; palette: PlanPalette }) {
-  const Icon = EDITOR_MODE_ICONS[mode];
+function OpensIn({ mode, palette }: { mode: TabOpening; palette: PlanPalette }) {
+  const Icon = TAB_OPENING_ICONS[mode];
   return (
     <span
       aria-hidden
@@ -22,7 +22,7 @@ function OpensIn({ mode, palette }: { mode: EditorMode; palette: PlanPalette }) 
       style={{ backgroundColor: startTint(palette, 10), color: palette.focus }}
     >
       <Icon size={11} />
-      Opens in {editorModeLabel(mode)}
+      Opens in {tabOpeningLabel(mode)}
     </span>
   );
 }
@@ -39,9 +39,9 @@ export function StartOtherModes({
   // Below the mode's own results: a hairline above it. Alone (nothing of this mode matched), none.
   divided: boolean;
   cascade: boolean;
-  onChoose: (mode: EditorMode, cardId: string) => void;
+  onChoose: (mode: TabOpening, cardId: string) => void;
 }) {
-  const [open, setOpen] = useState<ReadonlySet<EditorMode>>(() => new Set());
+  const [open, setOpen] = useState<ReadonlySet<TabOpening>>(() => new Set());
   return (
     <section
       aria-labelledby="start-other-modes"
@@ -49,14 +49,14 @@ export function StartOtherModes({
       style={{ borderColor: palette.border }}
     >
       <h3 id="start-other-modes" className="text-[16px] font-semibold">
-        In Other Modes
+        Elsewhere
       </h3>
       <p className="mb-4 mt-0.5 text-[13px] max-sm:mb-3" style={{ color: palette.muted }}>
-        Choosing one switches this tab to its mode.
+        Choosing one changes this tab to match.
       </p>
       {groups.map(({ mode, cards }) => {
-        const Icon = EDITOR_MODE_ICONS[mode];
-        const label = editorModeLabel(mode);
+        const Icon = TAB_OPENING_ICONS[mode];
+        const label = tabOpeningLabel(mode);
         const all = open.has(mode);
         const shown = all ? cards : cards.slice(0, OTHER_MODE_CARDS_MAX);
         return (

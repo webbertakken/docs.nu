@@ -8,7 +8,8 @@ const base = {
   embed: false,
   readOnly: false,
   drawToolArmed: false,
-  mode: 'diagram' as const,
+  mode: 'diagram' as 'diagram' | 'draw' | 'pages' | 'plan',
+  workshop: false,
   elementCount: 0,
   pages: [],
 };
@@ -16,11 +17,18 @@ const base = {
 describe('templateStartMode', () => {
   it('offers each mode with templates its own start on an empty tab', () => {
     expect(templateStartMode(base)).toBe('diagram');
-    expect(templateStartMode({ ...base, mode: 'workshop' })).toBe('workshop');
+    expect(templateStartMode({ ...base, workshop: true })).toBe('workshop');
     expect(templateStartMode({ ...base, mode: 'pages', pages: [{}] })).toBe('pages');
   });
 
-  it('offers Start Drawing with the pen in hand, and none in Plan (Start Planning is its own)', () => {
+  it('keeps Sketch and Pages their own starts with the Workshop control on', () => {
+    expect(templateStartMode({ ...base, mode: 'draw', workshop: true })).toBe('draw');
+    expect(templateStartMode({ ...base, mode: 'pages', pages: [{}], workshop: true })).toBe(
+      'pages',
+    );
+  });
+
+  it('offers Start Sketching with the pen in hand, and none on a Plan start (Start Planning is its own)', () => {
     expect(templateStartMode({ ...base, mode: 'draw', drawToolArmed: true })).toBe('draw');
     expect(templateStartMode({ ...base, mode: 'plan' })).toBeNull();
   });

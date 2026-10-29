@@ -113,7 +113,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: 'tabs',
     title: 'Tabs',
-    body: 'Each tab holds its own work, in its own mode. + adds a tab, and a tab’s ⋯ menu renames, duplicates, locks or exports it, or opens it side by side.',
+    body: 'Each tab holds its own work, in its own mode. + adds a tab, or a board, sheet or dashboard, and a tab’s ⋯ menu renames, duplicates, locks or exports it, or opens it side by side.',
     // The tab's own ⋯ menu, opened for the step and closed again after, ringed with the tab it belongs to.
     target: 'tab-menu',
     alsoHighlight: 'active-tab',

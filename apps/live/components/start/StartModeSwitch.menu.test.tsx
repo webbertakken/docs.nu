@@ -36,7 +36,15 @@ function renderSwitch(mode: EditorMode, over: Partial<EditorModeState> = {}) {
   const onChange = vi.fn<(mode: EditorMode) => void>();
   const view = render(
     <EditorModeProvider
-      value={{ mode, setMode: onChange, canSwitch: true, canEdit: true, ...over }}
+      value={{
+        mode,
+        setMode: onChange,
+        canSwitch: true,
+        canEdit: true,
+        workshop: false,
+        setWorkshop: vi.fn(),
+        ...over,
+      }}
     >
       <StartModeSwitch />
     </EditorModeProvider>,

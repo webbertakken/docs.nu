@@ -5,7 +5,7 @@
 // the mode, and flags the root element so the page shows it is working. The wizard's first layout effect turns the
 // script off and creates the remembered mode, so the choice is kept and nothing is created twice.
 
-import { EDITOR_MODES, type EditorMode } from '@livedoc/document';
+import { TAB_OPENINGS, type TabOpening } from '@livedoc/document';
 
 // The window property the script and the wizard share: undefined before the script runs, null while it listens with
 // nothing chosen, a mode once one was chosen, and false once the wizard took over.
@@ -33,13 +33,13 @@ export const EARLY_MODE_SCRIPT =
 export const EARLY_MODE_STYLE = `html[${EARLY_MODE_ATTRIBUTE}],html[${EARLY_MODE_ATTRIBUTE}] *{cursor:progress}`;
 
 /** Turns the script off and answers the mode chosen before hydration, once; null when none was. */
-export function takeEarlyModeChoice(): EditorMode | null {
+export function takeEarlyModeChoice(): TabOpening | null {
   if (typeof window === 'undefined') return null;
   const w = window as unknown as EarlyWindow;
   const chosen = w[EARLY_MODE_KEY];
   w[EARLY_MODE_KEY] = false;
   document.documentElement.removeAttribute(EARLY_MODE_ATTRIBUTE);
-  return typeof chosen === 'string' && (EDITOR_MODES as readonly string[]).includes(chosen)
-    ? (chosen as EditorMode)
+  return typeof chosen === 'string' && (TAB_OPENINGS as readonly string[]).includes(chosen)
+    ? (chosen as TabOpening)
     : null;
 }

@@ -252,10 +252,11 @@ export const TABS_LOADED: Metric = {
     "A tab's content was fetched for viewing, counted each time (the first tab when a document opens, then each tab switched to).",
 };
 
+// Every tab added, a Board, Sheet or Dashboard from the + menu included (docs/specs/007-editor/editor-modes.md).
 export const TABS_CREATED: Metric = {
   category: 'Tab',
   action: 'Created',
-  type: null,
+  allTypes: true,
   title: 'Tabs Created',
 };
 

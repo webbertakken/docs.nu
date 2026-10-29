@@ -109,7 +109,10 @@ export function usePaletteCatalogue({
   // mount reads it synchronously, so there's no flicker.
   const { libraries } = useShapeLibraries();
   // The viewer's editor mode picks the palette layout (palette-layouts).
-  const editorMode = useEditorModeState()?.mode ?? DEFAULT_EDITOR_MODE;
+  const editorModeState = useEditorModeState();
+  const editorMode = editorModeState?.mode ?? DEFAULT_EDITOR_MODE;
+  // The Workshop control adds the session kit to the mode's palette (docs/specs/012-collaboration/workshop-mode.md).
+  const workshop = editorModeState?.workshop === true;
   const isMobile = useIsMobileViewport();
   // If the viewport shrinks into mobile while Spotlight is active (desktop ->
   // resize / rotate), revert to Select: the option has just left the picker,
@@ -273,6 +276,7 @@ export function usePaletteCatalogue({
           )
         : paletteCategoriesFor(editorMode, {
             esBoard: !!esBoard,
+            workshop,
             ...(pages ? { pagesKind: paletteKind } : {}),
           })
             .filter((c) => hasLibraryShapes || c.id !== 'my-shapes')
@@ -325,6 +329,7 @@ export function usePaletteCatalogue({
     tileActions,
     tabs,
     editorMode,
+    workshop,
     canvasToolOptions,
     onCanvasToolChange,
     iconCatalogsLoaded,

@@ -2,7 +2,7 @@
 // from"): per tab, what the Explorer's Details view sums over a document, kept in `tab_stats`
 // (migration 0084) beside each tab so a document list reads them without reading any tab body.
 import type { DocumentStats } from '@livedoc/api-schema';
-import { parseEditorMode, tabStatsOf, type TabStats } from '@livedoc/document';
+import { parseTabOpening, tabStatsOf, type TabStats } from '@livedoc/document';
 import type { DocumentEnv } from '../types';
 
 // The counting itself is the document model's, shared with the browser's own documents.
@@ -83,7 +83,7 @@ export function readDocumentStats(raw: string | null | undefined): DocumentStats
   if (raw == null) return null;
   try {
     const v = JSON.parse(raw) as Record<string, unknown>;
-    const mode = parseEditorMode(v.mode);
+    const mode = parseTabOpening(v.mode);
     if (mode && isCount(v.elements) && isCount(v.comments) && isCount(v.bytes)) {
       return { mode, elements: v.elements, comments: v.comments, bytes: v.bytes };
     }

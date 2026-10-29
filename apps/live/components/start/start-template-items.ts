@@ -5,13 +5,13 @@
 // (OWN_GROUPS). Drawn from the template
 // catalogue, so a new template joins its mode's panel with no change here. Pure: the panel draws what these return.
 import {
-  BLANK_TEMPLATE_FOR_MODE,
+  BLANK_TEMPLATE_FOR_OPENING,
   TEMPLATES,
   TEMPLATE_CATEGORIES,
   isInTemplateCategory,
   popularKindsFor,
   templateCategory,
-  templateEditorMode,
+  templateOpening,
   templateMatchesQuery,
   type TemplateDescriptor,
   type TemplateKind,
@@ -230,9 +230,9 @@ const byKind = new Map(TEMPLATES.map((t) => [t.kind, t]));
 export const templateOf = (kind: TemplateKind): TemplateDescriptor => byKind.get(kind)!;
 
 function build(mode: TemplateStartMode): TemplateStart {
-  const blank = BLANK_TEMPLATE_FOR_MODE[mode];
+  const blank = BLANK_TEMPLATE_FOR_OPENING[mode];
   const listed = TEMPLATES.filter(
-    (t) => !t.hidden && t.kind !== blank && templateEditorMode(t.kind) === mode,
+    (t) => !t.hidden && t.kind !== blank && templateOpening(t.kind) === mode,
   ).map((t) => t.kind);
   const recommended: TemplateStartGroup = {
     id: 'recommended',

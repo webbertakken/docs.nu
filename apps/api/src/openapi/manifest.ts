@@ -358,7 +358,7 @@ export const ROUTE_MANIFEST: RouteSpec[] = [
             'the tab kind default, else the template family default, else the mode default, else ' +
             'the root of My documents. Malformed: intent_invalid (400).',
           properties: {
-            mode: ref('EditorMode'),
+            mode: ref('TabOpening'),
             tabKind: { anyOf: [ref('CreationTabKind'), { type: 'null' }] },
             templateFamily: { anyOf: [ref('TemplateFamily'), { type: 'null' }] },
           },

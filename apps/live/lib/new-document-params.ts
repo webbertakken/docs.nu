@@ -1,4 +1,4 @@
-import { parseEditorMode, type EditorMode } from '@livedoc/document';
+import { parseTabOpening, type TabOpening } from '@livedoc/document';
 import { templateKindOf, type TemplateKind } from '@livedoc/templates';
 
 // The /new query params that skip the wizard (docs/specs/007-editor/new-document-route.md): `?blank=1` commits
@@ -28,9 +28,9 @@ export function wizardBypassKind(search: string): TemplateKind | null {
 // An unknown mode, or empty words, is ignored; a mode's old name (`?mode=illustrate`) reads as today's.
 export const SEARCH_PRESET_MAX = 60;
 
-export function wizardPresetMode(search: string): EditorMode | null {
+export function wizardPresetMode(search: string): TabOpening | null {
   const mode = new URLSearchParams(search).get('mode');
-  return parseEditorMode(mode) ?? null;
+  return parseTabOpening(mode) ?? null;
 }
 
 export function wizardPresetQuery(search: string): string | null {

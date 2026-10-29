@@ -2,11 +2,11 @@
 // "The palette per mode", toolbar-layout.md "The category bar"): the mode's glyph and name for its
 // switch, then Diagram's, Workshop's and Pages mode's category bars (each category's glyph and its
 // one-word name, in bands), Draw's dock in place of the palette, and none for Plan, whose tab brings
-// its own bar (hero-plan-bars.tsx). Keyed by the editor's own EditorMode, so a new mode fails typecheck here. At the mock's
+// its own bar (hero-plan-bars.tsx). Keyed by the editor's own TabOpening, so a new opening fails typecheck here. At the mock's
 // scale, drawn from the editor's own glyphs where it has them. The strip is ToolbarStrip
 // (hero-editor-chrome.tsx).
 
-import type { EditorMode } from '@livedoc/document';
+import type { TabOpening } from '@livedoc/document';
 import { MODE_GLYPHS } from '@livedoc/icons/mode-glyphs';
 import {
   AskGroupIcon,
@@ -33,14 +33,17 @@ import {
 import type { ComponentType, ReactNode } from 'react';
 import { Shape } from './hero-illustration-glyphs';
 
-export type HeroMode = EditorMode;
+// What a scene's tab is made as (TabOpening): one of the three modes, a Workshop (Structured with the Workshop control
+// on) or a Plan tab.
+export type HeroMode = TabOpening;
 
-// Each mode's name and its glyph, the editor's own (EDITOR_MODE_ICONS).
+// The mode switch's name and glyph for each scene, the editor's own (EDITOR_MODE_ICONS): a Workshop is in Structured.
+// A Plan tab shows no switch (ToolbarMenuButton leaves it out).
 export const HERO_MODE: Record<HeroMode, { label: string; Icon: ComponentType<IconProps> }> = {
-  diagram: { label: 'Diagram', Icon: EDITOR_MODE_ICONS.diagram },
-  draw: { label: 'Draw', Icon: EDITOR_MODE_ICONS.draw },
-  workshop: { label: 'Workshop', Icon: EDITOR_MODE_ICONS.workshop },
+  draw: { label: 'Sketch', Icon: EDITOR_MODE_ICONS.draw },
+  diagram: { label: 'Structured', Icon: EDITOR_MODE_ICONS.diagram },
   pages: { label: 'Pages', Icon: EDITOR_MODE_ICONS.pages },
+  workshop: { label: 'Structured', Icon: EDITOR_MODE_ICONS.diagram },
   plan: { label: 'Plan', Icon: EDITOR_MODE_ICONS.plan },
 };
 

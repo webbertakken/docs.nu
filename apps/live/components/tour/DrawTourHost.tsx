@@ -84,7 +84,7 @@ export function DrawTourHost() {
     'draw',
     inDraw && canWork
       ? {
-          name: 'Draw',
+          name: 'Sketch',
           rank: TOUR_OFFER_RANK.mode,
           start,
           onShown: () => track('UI', 'Opened', 'DrawTourOffer'),

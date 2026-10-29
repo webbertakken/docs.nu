@@ -78,7 +78,7 @@ describe('TourHost offer', () => {
   it('offers the Diagram tour on the Start Tour button once the editor is ready', () => {
     editor();
     render(<TourHost />);
-    expect(tourOffer()?.name).toBe('Diagram');
+    expect(tourOffer()?.name).toBe('Structured');
   });
 
   it('never starts on its own', () => {
@@ -101,7 +101,7 @@ describe('TourHost offer', () => {
   it('stays on offer once the tour has been taken, so it can be taken again', () => {
     editor({ userPreferences: { tourSeen: true } });
     render(<TourHost />);
-    expect(tourOffer()?.name).toBe('Diagram');
+    expect(tourOffer()?.name).toBe('Structured');
   });
 
   it.each([

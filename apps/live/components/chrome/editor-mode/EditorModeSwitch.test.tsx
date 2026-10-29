@@ -33,7 +33,17 @@ function renderSwitch(
 ) {
   const setMode = vi.fn<(mode: EditorMode) => void>();
   const view = render(
-    <EditorModeProvider value={{ mode, setMode, canSwitch: true, canEdit: true, ...over }}>
+    <EditorModeProvider
+      value={{
+        mode,
+        setMode,
+        canSwitch: true,
+        canEdit: true,
+        workshop: false,
+        setWorkshop: vi.fn(),
+        ...over,
+      }}
+    >
       <EditorModeSwitch {...props} />
     </EditorModeProvider>,
   );
@@ -102,7 +112,16 @@ describe('EditorModeSwitch beside the start switch', () => {
   function Both() {
     const [mode, setMode] = useState<EditorMode>('diagram');
     return (
-      <EditorModeProvider value={{ mode, setMode, canSwitch: true, canEdit: true }}>
+      <EditorModeProvider
+        value={{
+          mode,
+          setMode,
+          canSwitch: true,
+          canEdit: true,
+          workshop: false,
+          setWorkshop: vi.fn(),
+        }}
+      >
         <EditorModeSwitch />
         <StartModeSwitch />
       </EditorModeProvider>

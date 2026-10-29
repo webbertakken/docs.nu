@@ -1,3 +1,4 @@
+import { SOLID_BRAND_DARK_CONTROL } from '@livedoc/ui';
 // The look every floating toolbar card shares (docs/specs/007-editor/toolbar-layout.md): the Toolbar
 // layout's strip, and the page toolbar of an article page, so a bar of controls reads as one
 // product wherever it sits.
@@ -54,3 +55,7 @@ export const TOOLBAR_BUTTON = `relative flex h-9 shrink-0 items-center justify-c
 
 /** The same button holding an icon alone: 36px square. */
 export const TOOLBAR_ICON_BUTTON = `${TOOLBAR_BUTTON} w-9 px-0 touch-target`;
+
+// A toggle in the actions group while on (a shared document's Share, the Workshop control): the brand fill, so the state
+// reads at a glance.
+export const TOOLBAR_BUTTON_ON = `bg-brand-700 text-white hover:bg-brand-800 hover:text-white dark:hover:text-white ${SOLID_BRAND_DARK_CONTROL}`;

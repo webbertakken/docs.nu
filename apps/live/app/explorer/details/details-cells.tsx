@@ -1,9 +1,9 @@
 'use client';
 
 import type { AccessLevel, DocumentStats } from '@livedoc/api-schema';
-import { editorModeLabel } from '@livedoc/document';
+import { tabOpeningLabel } from '@livedoc/document';
 import { lucideKey, lucideMessageSquare, lucideShapes } from '@livedoc/icons/lucide';
-import { EDITOR_MODE_ICONS, Glyph, Prims, Tooltip, lucideGlyph } from '@livedoc/ui';
+import { TAB_OPENING_ICONS, Glyph, Prims, Tooltip, lucideGlyph } from '@livedoc/ui';
 import { ROLE_PASS } from '@/components/dialogs/share-dialog-parts';
 import { FolderSolidIcon } from '@/components/primitives/explorer-icons';
 import { isPowerUserMode } from '@/lib/power-user-mode';
@@ -70,9 +70,9 @@ export const NOT_COUNTED = 'Not counted yet';
 
 export function TypeCell({ stats }: { stats: DocumentStats | null | undefined }) {
   if (!stats) return <NoValue label={NOT_COUNTED} />;
-  const Icon = EDITOR_MODE_ICONS[stats.mode];
+  const Icon = TAB_OPENING_ICONS[stats.mode];
   return (
-    <NamedIcon label={editorModeLabel(stats.mode)}>
+    <NamedIcon label={tabOpeningLabel(stats.mode)}>
       <Icon aria-hidden size={14} className="text-slate-500 dark:text-slate-400" />
     </NamedIcon>
   );

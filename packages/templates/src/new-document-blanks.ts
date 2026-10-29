@@ -1,7 +1,7 @@
 // The Explorer's New Document menu (docs/specs/013-workspace/new-document-menu.md "The blanks"): what a new document
 // starts as, each a blank template and where its templates come from, which the menu lists in its pane. Pure data, in
 // the menu's order; the number key of each is its place.
-import type { EditorMode } from '@livedoc/document';
+import type { TabOpening } from '@livedoc/document';
 import type { TemplateKind } from './templates';
 
 export const NEW_DOCUMENT_BLANK_IDS = [
@@ -22,7 +22,7 @@ export type NewDocumentBlankId = (typeof NEW_DOCUMENT_BLANK_IDS)[number];
  * (Sheet, Board and Form templates are Plan templates, listed by their family).
  */
 export type NewDocumentTemplateSource =
-  { start: Exclude<EditorMode, 'plan'>; group?: string } | { plan: 'sheets' | 'boards' | 'forms' };
+  { start: Exclude<TabOpening, 'plan'>; group?: string } | { plan: 'sheets' | 'boards' | 'forms' };
 
 export type NewDocumentBlank = {
   id: NewDocumentBlankId;
@@ -90,7 +90,7 @@ export function newDocumentBlankOf(id: string | null | undefined): NewDocumentBl
   return NEW_DOCUMENT_BLANKS.find((b) => b.id === id) ?? null;
 }
 
-/** The editor mode a blank's templates open in. */
-export function newDocumentTemplateMode(source: NewDocumentTemplateSource): EditorMode {
+/** What a blank's templates open as. */
+export function newDocumentTemplateMode(source: NewDocumentTemplateSource): TabOpening {
   return 'plan' in source ? 'plan' : source.start;
 }

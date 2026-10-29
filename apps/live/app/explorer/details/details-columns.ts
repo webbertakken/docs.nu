@@ -1,7 +1,7 @@
 // The Details view's columns and their sort (docs/specs/013-workspace/explorer-details-view.md
 // "Columns", "Sorting"). Pure: the table and its header read these, the tests pin them.
 import type { AccessLevel } from '@livedoc/api-schema';
-import { editorModeLabel } from '@livedoc/document';
+import { tabOpeningLabel } from '@livedoc/document';
 import type { Folder } from '@/lib/api-client';
 import { readerAccessOf } from '@/lib/document-space';
 import type { PaneDocument } from '../views';
@@ -105,7 +105,7 @@ function documentKey(d: PaneDocument, column: DetailsColumnId): Key {
     case 'name':
       return d.name;
     case 'type':
-      return d.stats ? editorModeLabel(d.stats.mode) : undefined;
+      return d.stats ? tabOpeningLabel(d.stats.mode) : undefined;
     case 'comments':
       return d.stats?.comments;
     case 'access':

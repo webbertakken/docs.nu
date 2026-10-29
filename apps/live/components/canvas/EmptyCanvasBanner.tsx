@@ -30,8 +30,8 @@ export function EmptyCanvasBanner({
   // A Participant (docs/specs/013-workspace/share-roles.md): read-only, yet it adds stickies, text and images.
   participant?: boolean;
 }) {
-  // The picture is of what the tab's mode makes (Diagram when no mode is known).
-  const mode = useEditorModeState()?.mode ?? 'diagram';
+  // The picture is of what the tab makes: a Workshop with the Workshop control on, else Structured.
+  const workshop = useEditorModeState()?.workshop === true;
   // Read once: the card is keyed by its tab, so another tab reads afresh.
   const [closed, setClosed] = useState(() => emptyCardDismissed(tabId));
   if (closed) return null;
@@ -60,7 +60,7 @@ export function EmptyCanvasBanner({
         {/* A short screen (a phone on its side, 390px tall) drops the art, so the card clears the
             toolbars above and below it instead of sliding under the Palette strip. */}
         <div className="[@media(max-height:480px)]:hidden">
-          <EmptyCanvasArt mode={mode} />
+          <EmptyCanvasArt workshop={workshop} />
         </div>
         <div className="flex flex-col gap-1">
           <p className="text-[15px] font-semibold text-slate-800 dark:text-slate-100">

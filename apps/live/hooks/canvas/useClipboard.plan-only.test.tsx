@@ -90,7 +90,7 @@ describe('pasting a board or a Sheet', () => {
 
   it('leaves a board out too, naming both', () => {
     vi.spyOn(console, 'info').mockImplementation(() => {});
-    const h = harness({ opensIn: 'workshop' });
+    const h = harness({ workshop: true });
     act(() => h.result.current.pasteFromClipboard([note, board, sheet]));
     expect(h.shapes()).toEqual(['sticky']);
     expect(h.toast.info).toHaveBeenCalledWith(

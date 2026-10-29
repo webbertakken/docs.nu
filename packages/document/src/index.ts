@@ -353,8 +353,12 @@ export type Tab = {
   form?: FormDefinition;
   // The tab's editor mode, the same for everyone on it and the mode it opens in
   // (docs/specs/007-editor/editor-modes.md "Where the mode lives"). Absent = 'diagram' (read via
-  // `opensInOf`); a switch sets it as one tab edit (withEditorModeSwitched).
+  // `opensInOf`); a switch sets it as one tab edit (withEditorModeSwitched). A tab stored in Workshop mode keeps
+  // 'workshop' (or 'facilitate') here until next written: read as Structured with the Workshop control on.
   opensIn?: EditorMode;
+  // The Workshop control (docs/specs/012-collaboration/workshop-mode.md): true while on, absent while off, the same for
+  // everyone on the tab. Read via `workshopOf`; turned as one tab edit (setTabWorkshop).
+  workshop?: true;
   // Pages mode's pages (docs/specs/007-editor/editor-modes.md "The pages"): the A4 sheets,
   // in row order, each portrait or landscape, that everyone lays the tab out on. Absent = one page
   // (read via `pagesOf`).
@@ -480,6 +484,7 @@ export * from './concept-ramp';
 export * from './shape-variants';
 export * from './title-caption';
 export * from './editor-mode';
+export * from './tab-opening';
 export * from './tab-stats';
 export * from './page';
 export * from './wireframe-device';

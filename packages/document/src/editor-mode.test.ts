@@ -15,13 +15,16 @@ import {
   nextEditorMode,
   opensInOf,
   parseEditorMode,
+  isLegacyWorkshopOpensIn,
+  setTabWorkshop,
+  workshopOf,
 } from './editor-mode';
 import type { Tab } from './index';
 
 // Editor modes (docs/specs/007-editor/editor-modes.md): how a general tab is worked on.
 describe('editor modes', () => {
-  it('are Sketch, Structured, Pages, Workshop and Plan, Structured by default', () => {
-    expect(EDITOR_MODES).toEqual(['draw', 'diagram', 'pages', 'workshop', 'plan']);
+  it('are Sketch, Structured, Pages and Plan (never switched to), Structured by default', () => {
+    expect(EDITOR_MODES).toEqual(['draw', 'diagram', 'pages', 'plan']);
     expect(DEFAULT_EDITOR_MODE).toBe('diagram');
   });
 
@@ -29,7 +32,8 @@ describe('editor modes', () => {
     expect(isEditorMode('diagram')).toBe(true);
     expect(isEditorMode('draw')).toBe(true);
     expect(isEditorMode('pages')).toBe(true);
-    expect(isEditorMode('workshop')).toBe(true);
+    expect(isEditorMode('plan')).toBe(true);
+    expect(isEditorMode('workshop')).toBe(false);
     expect(isEditorMode('whiteboard')).toBe(false);
     expect(isEditorMode(undefined)).toBe(false);
     expect(isEditorMode(1)).toBe(false);
@@ -58,11 +62,13 @@ describe('opensInOf', () => {
     expect(parseEditorMode('Illustrate')).toBeUndefined();
   });
 
-  // docs/specs/007-editor/editor-modes.md "Naming in the interface": Workshop was Facilitate.
-  it('reads the old name of Workshop mode as Workshop', () => {
-    expect(opensInOf({ opensIn: 'facilitate' })).toBe('workshop');
-    expect(parseEditorMode('facilitate')).toBe('workshop');
-    expect(parseEditorMode('workshop')).toBe('workshop');
+  // docs/specs/007-editor/editor-modes.md "Stored modes that are no longer modes": Workshop (and Facilitate before it)
+  // reads as Structured, with the Workshop control on.
+  it('reads Workshop mode, by either name, as Structured', () => {
+    expect(opensInOf({ opensIn: 'workshop' })).toBe('diagram');
+    expect(opensInOf({ opensIn: 'facilitate' })).toBe('diagram');
+    expect(parseEditorMode('workshop')).toBe('diagram');
+    expect(parseEditorMode('facilitate')).toBe('diagram');
   });
 
   it('reads an unknown opening mode as Diagram', () => {
@@ -111,13 +117,7 @@ describe('hasBoardLook', () => {
 describe('the editor mode catalogue', () => {
   it('lists every mode once, in order, with the words the interface shows', () => {
     expect(EDITOR_MODE_CATALOGUE.map((m) => m.id)).toEqual(EDITOR_MODES);
-    expect(EDITOR_MODES.map(editorModeLabel)).toEqual([
-      'Sketch',
-      'Structured',
-      'Pages',
-      'Workshop',
-      'Plan',
-    ]);
+    expect(EDITOR_MODES.map(editorModeLabel)).toEqual(['Sketch', 'Structured', 'Pages', 'Plan']);
   });
 
   it('offers Sketch, Structured and Pages to switch between, in that order', () => {
@@ -173,5 +173,72 @@ describe('hasPageLook', () => {
     expect(EDITOR_MODES.filter(hasPageLook)).toEqual(['pages']);
     // Plan mode (docs/specs/026-plan/plan-mode.md) takes input the Plan way; nothing else does.
     expect(EDITOR_MODES.filter(hasPlanInput)).toEqual(['plan']);
+  });
+});
+
+// docs/specs/012-collaboration/workshop-mode.md: the Workshop control is the tab's, independent of its mode.
+describe('workshopOf', () => {
+  it('is off unless the tab says so', () => {
+    expect(workshopOf({})).toBe(false);
+    expect(workshopOf({ workshop: true })).toBe(true);
+    expect(workshopOf({ workshop: 'yes' })).toBe(false);
+    expect(workshopOf(undefined)).toBe(false);
+  });
+
+  it('is on for a tab stored in Workshop mode, by either name', () => {
+    expect(workshopOf({ opensIn: 'workshop' })).toBe(true);
+    expect(workshopOf({ opensIn: 'facilitate' })).toBe(true);
+    expect(isLegacyWorkshopOpensIn('workshop')).toBe(true);
+    expect(isLegacyWorkshopOpensIn('diagram')).toBe(false);
+  });
+
+  it('is on in any of the three modes', () => {
+    for (const opensIn of ['draw', 'diagram', 'pages'] as const)
+      expect(workshopOf({ opensIn, workshop: true })).toBe(true);
+  });
+
+  it('is never on for an event-storming board or a Plan tab', () => {
+    expect(workshopOf({ kind: 'event-storming', workshop: true })).toBe(false);
+    expect(workshopOf({ kind: 'board', workshop: true })).toBe(false);
+    expect(workshopOf({ opensIn: 'plan', workshop: true })).toBe(false);
+  });
+});
+
+describe('setTabWorkshop', () => {
+  const general: Tab = { id: 't', name: 'T', elements: [] };
+
+  it('turns it on and off, leaving the mode alone', () => {
+    const on = setTabWorkshop({ ...general, opensIn: 'pages' }, true);
+    expect(on).toMatchObject({ opensIn: 'pages', workshop: true });
+    const off = setTabWorkshop(on, false);
+    expect(off.opensIn).toBe('pages');
+    expect('workshop' in off).toBe(false);
+  });
+
+  it('returns the same tab when nothing changes', () => {
+    expect(setTabWorkshop(general, false)).toBe(general);
+    const on = { ...general, workshop: true as const };
+    expect(setTabWorkshop(on, true)).toBe(on);
+  });
+
+  it('writes a legacy Workshop-mode tab as it now is: Structured, the control as asked', () => {
+    const legacy = { ...general, opensIn: 'workshop' } as unknown as Tab;
+    const off = setTabWorkshop(legacy, false);
+    expect(off.opensIn).toBeUndefined();
+    expect(workshopOf(off)).toBe(false);
+  });
+
+  it('never on an event-storming board or a Plan tab', () => {
+    const es = { ...general, kind: 'event-storming' as const };
+    expect(setTabWorkshop(es, true)).toBe(es);
+    const start = { ...general, opensIn: 'plan' as const };
+    expect(setTabWorkshop(start, true)).toBe(start);
+  });
+
+  it('keeps the control across a mode switch, and writes it on for a legacy Workshop-mode tab', () => {
+    const on = { ...general, workshop: true as const };
+    expect(setTabOpensIn(on, 'draw')).toMatchObject({ opensIn: 'draw', workshop: true });
+    const legacy = { ...general, opensIn: 'workshop' } as unknown as Tab;
+    expect(setTabOpensIn(legacy, 'pages')).toMatchObject({ opensIn: 'pages', workshop: true });
   });
 });

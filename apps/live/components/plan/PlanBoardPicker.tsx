@@ -21,7 +21,7 @@ import { accentOn, type PlanPalette } from './plan-palette';
 import { BOARD_PREVIEWS } from './board-previews';
 import { StartPlanning } from './start/StartPlanning';
 import type { PlanTemplateKind, TemplateKind } from '@livedoc/templates';
-import type { EditorMode, Tab } from '@livedoc/document';
+import type { TabOpening, Tab } from '@livedoc/document';
 import type { SuggestedDashboard } from '@/lib/suggested-dashboards';
 import type { PlanVisualisation } from '@livedoc/items';
 
@@ -152,7 +152,7 @@ export function PlanBoardPicker({
   // An empty sheet, or one of Start Planning's sheet types (Setup Sheet then opens on it).
   onPickSheet?: (start?: PlacedSheetStart) => void;
   // A template found in another mode (start-diagramming.md "Found in other modes"): it lands, switching the tab there.
-  onOtherModeTemplate?: (mode: EditorMode, kind: TemplateKind) => void;
+  onOtherModeTemplate?: (mode: TabOpening, kind: TemplateKind) => void;
 }) {
   // What Start Planning makes fills the tab: its view's chunk is fetched while the panel is read, so the choice
   // opens on the view rather than its loading cover (FillTabPending). Idle, so the panel's own paint is first.

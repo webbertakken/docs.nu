@@ -113,7 +113,7 @@ describe('sortDetailsEntries', () => {
     expect(sort('comments', 'desc', docs)).toEqual(['many', 'few', 'none']);
     expect(sort('comments', 'asc', docs)).toEqual(['few', 'many', 'none']);
     expect(sort('size', 'desc', docs)).toEqual(['many', 'few', 'none']);
-    expect(sort('type', 'asc', docs)).toEqual(['few', 'many', 'none']);
+    expect(sort('type', 'asc', docs)).toEqual(['many', 'few', 'none']);
   });
 
   it('ranks access Editor first', () => {

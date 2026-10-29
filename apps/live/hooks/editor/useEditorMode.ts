@@ -8,6 +8,9 @@
 // - `mode` is the tab's own mode (resolveEditorMode), the same for everyone on it.
 // - `canSwitch` is true only for an editor on a general, unlocked tab; the mode switch shows only
 //   then.
+// - `workshop` is the tab's Workshop control (workshopOf), and `setWorkshop(on)` turns it as one tab edit, fired as
+//   `Editor · Toggled · WorkshopOn | WorkshopOff` first, under the same gate as a switch
+//   (docs/specs/012-collaboration/workshop-mode.md).
 // - `setMode(next, alsoChange?)` fires `Editor · Changed · Mode<Next>` and then commits ONE tab edit:
 //   `alsoChange` (what leaving a mode brings, such as articles turned into pages), then the mode
 //   with what entering it brings (withEditorModeSwitched). One undo puts the tab back in the mode
@@ -16,8 +19,11 @@ import { useCallback } from 'react';
 import { useLatest } from '@/hooks/ui/useLatest';
 import {
   editorModeLabel,
+  setTabWorkshop,
   withEditorModeSwitched,
+  workshopOf,
   type EditorMode,
+  type SwitchableEditorMode,
   type Tab,
 } from '@livedoc/document';
 import { resolveEditorMode } from '@/lib/editor-mode-store';
@@ -29,20 +35,22 @@ export type EditorModeState = {
   setMode: (next: EditorMode, alsoChange?: (tab: Tab) => Tab) => void;
   canSwitch: boolean;
   canEdit: boolean;
+  // The Workshop control (docs/specs/012-collaboration/workshop-mode.md): on or off for the tab, turned by an Editor
+  // wherever the switch is offered.
+  workshop: boolean;
+  setWorkshop: (on: boolean) => void;
 };
 
-// The telemetry type a switch into each mode fires.
-const MODE_EVENT: Record<EditorMode, string> = {
-  diagram: 'ModeDiagram',
+// The telemetry type a switch into each mode fires (the stored tokens keep the modes' stored names).
+const MODE_EVENT: Record<SwitchableEditorMode, string> = {
   draw: 'ModeDraw',
+  diagram: 'ModeDiagram',
   pages: 'ModePages',
-  plan: 'ModePlan',
-  workshop: 'ModeWorkshop',
 };
 
 /** Reports a switch into `next`, before it applies (docs/specs/007-editor/editor-modes.md
  *  "Telemetry"): the switch, Shift+D and the tab menu's Mode all send it. */
-export function trackModeSwitch(next: EditorMode): void {
+export function trackModeSwitch(next: SwitchableEditorMode): void {
   track('Editor', 'Changed', MODE_EVENT[next]);
 }
 
@@ -93,5 +101,15 @@ export function useEditorMode(
     },
     [canSwitch, tabRef, tabId, mode, commitTabs, toastInfo],
   );
-  return { mode, setMode, canSwitch, canEdit };
+  const workshop = workshopOf(tab);
+  const setWorkshop = useCallback(
+    (on: boolean) => {
+      if (!canSwitch || !tabId || on === workshop) return;
+      track('Editor', 'Toggled', on ? 'WorkshopOn' : 'WorkshopOff');
+      commitTabs((ts) => ts.map((t) => (t.id === tabId ? setTabWorkshop(t, on) : t)));
+      debugLog('[workshop] control turned', { tabId, on });
+    },
+    [canSwitch, tabId, workshop, commitTabs],
+  );
+  return { mode, setMode, canSwitch, canEdit, workshop, setWorkshop };
 }

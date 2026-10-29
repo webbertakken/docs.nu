@@ -4,7 +4,6 @@
 // the ranking are tested without a strip.
 import {
   componentShapeKind,
-  editorModeLabel,
   type EditorMode,
   type Element,
 } from '@livedoc/document';
@@ -25,19 +24,21 @@ export type ElementTileSearch = {
   unavailable: PaletteTileDef[];
 };
 
-// The categories whose tiles only their own mode adds: too specific to that mode's UI to place
-// anywhere else (docs/specs/007-editor/toolbar-layout.md "Search: every element type").
-const MODE_BOUND_SECTIONS: Partial<Record<PaletteTileSection, EditorMode>> = {
-  'plan-cards': 'plan',
-  'plan-boards': 'plan',
-  'plan-metrics': 'plan',
-  'plan-visualisations': 'plan',
-  'plan-sheets': 'plan',
+// The categories whose tiles only a Plan tab adds: too specific to its UI to place anywhere else
+// (docs/specs/007-editor/toolbar-layout.md "Search: every element type", docs/specs/026-plan/plan-tabs.md "Only in
+// Plan"), each with the reason its greyed tile gives.
+const PLAN_ONLY = 'Only on Plan tabs';
+const MODE_BOUND_SECTIONS: Partial<Record<PaletteTileSection, string>> = {
+  'plan-cards': PLAN_ONLY,
+  'plan-boards': PLAN_ONLY,
+  'plan-metrics': PLAN_ONLY,
+  'plan-visualisations': PLAN_ONLY,
+  'plan-sheets': PLAN_ONLY,
 };
 
-/** The tile greyed out, its hover card naming the one mode that adds it. */
-function boundToMode(tile: PaletteTileDef, mode: EditorMode): PaletteTileDef {
-  return { ...tile, disabled: { reason: `Only in ${editorModeLabel(mode)} Mode` } };
+/** The tile greyed out, its hover card saying where it can be added. */
+function boundToMode(tile: PaletteTileDef, reason: string): PaletteTileDef {
+  return { ...tile, disabled: { reason } };
 }
 
 // --- The element types on the tab --------------------------------------------------------------
@@ -147,20 +148,21 @@ function unique(tiles: Iterable<PaletteTileDef>): PaletteTileDef[] {
 export function modeElementTiles(
   mode: EditorMode,
   planCardTiles?: readonly PaletteTileDef[],
+  workshop = false,
 ): PaletteTileDef[] {
   return unique(
-    paletteCategoriesFor(mode).flatMap((c) =>
+    paletteCategoriesFor(mode, { workshop }).flatMap((c) =>
       c.id === 'plan-cards' && planCardTiles ? planCardTiles : (c.tiles ?? []),
     ),
   );
 }
 
-// Every mode's tiles, the event-storming notation included: a fixed set, so built once.
+// Every mode's tiles, with the Workshop control's kit and the event-storming notation: a fixed set, so built once.
 let everyModeTiles: PaletteTileDef[] | null = null;
 function allElementTiles(): PaletteTileDef[] {
   everyModeTiles ??= unique(
     (Object.keys(PALETTE_LAYOUTS) as EditorMode[]).flatMap((mode) =>
-      paletteCategoriesFor(mode, { esBoard: true }).flatMap((c) => c.tiles ?? []),
+      paletteCategoriesFor(mode, { esBoard: true, workshop: true }).flatMap((c) => c.tiles ?? []),
     ),
   );
   return everyModeTiles;
@@ -213,16 +215,19 @@ export function elementTileSections({
   hasImage,
   planCardTiles,
   drawTiles = [],
+  workshop = false,
 }: {
   mode: EditorMode;
   hasImage: boolean;
+  // The Workshop control is on: its kit counts as the mode's own.
+  workshop?: boolean;
   planCardTiles?: readonly PaletteTileDef[];
   // Draw mode's markers (palette-marker-tiles): Draw has no palette layout, and the strip that
   // searches is never shown in Draw, so they are always another mode's.
   drawTiles?: readonly PaletteTileDef[];
 }): ElementTileSearch {
   const visible = (t: PaletteTileDef) => hasImage || !t.needsImage;
-  const here = modeElementTiles(mode, planCardTiles).filter(visible);
+  const here = modeElementTiles(mode, planCardTiles, workshop).filter(visible);
   const hereIds = new Set(here.map((t) => t.id));
   const elsewhere: PaletteTileDef[] = [];
   const unavailable: PaletteTileDef[] = [];
@@ -252,6 +257,7 @@ export function searchElementTiles({
   hasImage: boolean;
   planCardTiles?: readonly PaletteTileDef[];
   drawTiles?: readonly PaletteTileDef[];
+  workshop?: boolean;
 }): ElementTileSearch {
   const { here, elsewhere, unavailable } = elementTileSections(sections);
   if (!query.trim()) {

@@ -10,6 +10,8 @@ describe('editorModeShortcut', () => {
     canSwitch,
     canEdit: true,
     setMode: vi.fn(),
+    workshop: false,
+    setWorkshop: vi.fn(),
   });
 
   it('offers nothing where the switch is not offered (a Plan tab among them)', () => {

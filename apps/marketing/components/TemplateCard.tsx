@@ -1,7 +1,7 @@
 import { TemplatePreview } from '@livedoc/template-previews';
 import { ctaHref, type CtaSource } from '@livedoc/api-schema';
 import { templateCreateHref } from '@livedoc/templates';
-import { EDITOR_MODE_ICONS } from '@livedoc/ui';
+import { TAB_OPENING_ICONS } from '@livedoc/ui';
 import type { GalleryTemplate } from '@/lib/template-gallery';
 import { BAND_CARD, BAND_CONTROL_HOVER } from '@/components/band-classes';
 import { createLabelPrefix } from '@/lib/create-label';
@@ -18,7 +18,7 @@ export function TemplateCard({
   template: GalleryTemplate;
   source: CtaSource;
 }) {
-  const ModeIcon = EDITOR_MODE_ICONS[template.mode];
+  const ModeIcon = TAB_OPENING_ICONS[template.mode];
   return (
     <a
       href={ctaHref(templateCreateHref(template.kind), source)}

@@ -3,7 +3,7 @@ import {
   TEMPLATES,
   isSpreadsheetPlanTemplate,
   planTemplateTabCount,
-  templateEditorMode,
+  templateOpening,
   type PlanTemplateKind,
   isFormTemplateKind,
   formTemplateStarter,
@@ -128,7 +128,7 @@ describe('Inspiration and the template pickers show the same Plan templates', ()
   it('lists every Plan template the Quick Start and /new offer, Blank Plan and the one-tab spreadsheets aside', () => {
     const planTemplates = TEMPLATES.filter(
       (t) =>
-        templateEditorMode(t.kind) === 'plan' &&
+        templateOpening(t.kind) === 'plan' &&
         t.kind !== 'blank-plan' &&
         // Forms are Start Planning's own Forms category, as their starters.
         !isFormTemplateKind(t.kind) &&
@@ -178,7 +178,7 @@ describe('every Plan template on Start Planning', () => {
     const missing = TEMPLATES.filter(
       (t) =>
         !t.hidden &&
-        templateEditorMode(t.kind) === 'plan' &&
+        templateOpening(t.kind) === 'plan' &&
         !['blank-plan', 'blank-spreadsheet'].includes(t.kind) &&
         !reached(t.kind as PlanTemplateKind),
     ).map((t) => t.kind);

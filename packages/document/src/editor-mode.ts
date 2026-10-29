@@ -11,7 +11,7 @@ export const EDITOR_MODE_CATALOGUE = [
   { id: 'draw', label: 'Sketch' },
   { id: 'diagram', label: 'Structured' },
   { id: 'pages', label: 'Pages' },
-  { id: 'workshop', label: 'Workshop' },
+  // How a Plan tab is worked (docs/specs/026-plan/plan-mode.md): never switched to, never in the mode menu.
   { id: 'plan', label: 'Plan' },
 ] as const satisfies readonly { id: string; label: string }[];
 
@@ -49,14 +49,20 @@ export function isEditorMode(v: unknown): v is EditorMode {
   return EDITOR_MODES.includes(v as EditorMode);
 }
 
-// Pages mode was called Illustrate mode, and Infographic mode before that, and Workshop mode was
-// Facilitate mode; each was stored under its old id wherever a mode is kept (a tab's opensIn, a
-// remembered mode, a placement-default key, a `/new?mode=` link, an `opens-in:` filter).
+// Pages mode was called Illustrate mode, and Infographic mode before that; each was stored under its old id wherever a
+// mode is kept (a tab's opensIn, a remembered mode, a `/new?mode=` link). Workshop mode (Facilitate before it) is no
+// longer a mode: it reads as Structured, with the Workshop control on (workshopOf).
 const LEGACY_EDITOR_MODES: Readonly<Record<string, EditorMode>> = {
   illustrate: 'pages',
   infographic: 'pages',
-  facilitate: 'workshop',
+  workshop: 'diagram',
+  facilitate: 'diagram',
 };
+
+/** A stored `opensIn` from when Workshop was a mode (`'workshop'`, or `'facilitate'` before it). */
+export function isLegacyWorkshopOpensIn(v: unknown): boolean {
+  return v === 'workshop' || v === 'facilitate';
+}
 
 /** A stored mode as today's id: a current id as it is, a legacy one renamed, anything else
  *  undefined. Read every stored mode through this. */
@@ -65,7 +71,7 @@ export function parseEditorMode(v: unknown): EditorMode | undefined {
   return typeof v === 'string' ? LEGACY_EDITOR_MODES[v] : undefined;
 }
 
-type ModeTab = { kind?: string; opensIn?: string; layers?: Layer[] };
+type ModeTab = { kind?: string; opensIn?: string; workshop?: unknown; layers?: Layer[] };
 
 // Whether anything may write the tab's mode: never on an event-storming board, which keeps its own tools and notation
 // (always Structured), nor on a Board, Sheet, Dashboard or Form tab, always in Plan (docs/specs/026-plan/plan-tabs.md),
@@ -93,8 +99,30 @@ export function opensInOf(tab: ModeTab | undefined): EditorMode {
 // The same tab when nothing changes; an event-storming board is always Diagram and is never given
 // a mode. A switch also brings what the mode brings: withEditorModeSwitched (editor-mode-switch.ts).
 export function setTabOpensIn<T extends ModeTab & { id: string }>(tab: T, mode: EditorMode): T {
-  if (!tabModeWritable(tab) || opensInOf(tab) === mode) return tab;
-  return { ...tab, opensIn: mode };
+  const legacyWorkshop = isLegacyWorkshopOpensIn(tab.opensIn);
+  if (!tabModeWritable(tab) || (opensInOf(tab) === mode && !legacyWorkshop)) return tab;
+  // A tab stored in Workshop mode is written as it now is: the mode, and the Workshop control on.
+  return { ...tab, opensIn: mode, ...(legacyWorkshop ? { workshop: true } : {}) };
+}
+
+/** Whether the Workshop control is on for the tab (docs/specs/012-collaboration/workshop-mode.md), the same for
+ *  everyone on it: `workshop: true`, or a tab stored in Workshop mode. Never on an event-storming board, which brings
+ *  the session kit itself, nor on a Plan tab, whose tools are its own. */
+export function workshopOf(tab: ModeTab | undefined): boolean {
+  if (!tab || !editorModeSwitchable(tab)) return false;
+  return tab.workshop === true || isLegacyWorkshopOpensIn(tab.opensIn);
+}
+
+/** The tab with the Workshop control turned `on` or off: `workshop: true`, or no key. A tab stored in Workshop mode is
+ *  written as Structured (its `opensIn` dropped). The same tab when nothing changes, and on a tab that offers no
+ *  control (an event-storming board, a Plan tab). One tab edit, like a mode switch. */
+export function setTabWorkshop<T extends ModeTab & { id: string }>(tab: T, on: boolean): T {
+  if (!editorModeSwitchable(tab) || workshopOf(tab) === on) return tab;
+  const next: T = { ...tab };
+  if (isLegacyWorkshopOpensIn(next.opensIn)) delete next.opensIn;
+  if (on) next.workshop = true;
+  else delete next.workshop;
+  return next;
 }
 
 // The one gate the look reads, keyed on the viewer's effective editor mode: in Draw mode the

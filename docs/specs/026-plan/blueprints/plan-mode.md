@@ -119,19 +119,19 @@ elements)` to the create (cloud and Offline Mode), so a template's document has 
 
 ## Testing
 
-| Rule                              | Test                                                                                           |
-| --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Plan never switchable             | `editor-mode.test.ts`                                                                          |
-| Plan palette layout               | `palette-layouts.test.ts`                                                                      |
-| Card tiles no board takes         | `board-card-types.test.ts`, `PaletteTile.disabled.test.tsx`                                    |
-| Templates open in Plan            | `apps/live/lib/templates.test.ts`, `template-tab.test.ts`                                      |
-| Template set-ups validate, fit    | `template-builders-plan.test.ts`                                                               |
-| Hand-offs, tab layout             | `template-builders-plan.test.ts`                                                               |
-| Template tabs on create           | `document-create-seeded.test.ts`, `create-document-placement.test.ts`, `template-tab.test.ts`  |
-| A start's pick adds the tabs      | `template-tab-set.test.ts`                                                                     |
-| Document-wide statuses, sweep     | `usePlanStatusNames.test.ts`, `usePlanTabSweep.test.ts`                                        |
-| The add menu lands Start Planning | `lib/plan-start-landing.test.ts`, `StartPlanning.landing.test.tsx`, `e2e/add-tab-menu.spec.ts` |
-| A Plan tab shows no switch        | `e2e/editor-modes.spec.ts` "a Plan tab offers no mode switch"                                  |
+| Rule                              | Test                                                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Plan never switchable             | `editor-mode.test.ts`                                                                                    |
+| Plan palette layout               | `palette-layouts.test.ts`                                                                                |
+| Card tiles no board takes         | `board-card-types.test.ts`, `PaletteTile.disabled.test.tsx`                                              |
+| Templates open in Plan            | `apps/live/lib/templates.test.ts`, `template-tab.test.ts`                                                |
+| Template set-ups validate, fit    | `template-builders-plan.test.ts`                                                                         |
+| Hand-offs, tab layout             | `template-builders-plan.test.ts`                                                                         |
+| Template tabs on create           | `document-create-seeded.test.ts`, `create-document-placement.test.ts`, `template-tab.test.ts`            |
+| A start's pick adds the tabs      | `template-tab-set.test.ts`                                                                               |
+| Document-wide statuses, sweep     | `usePlanStatusNames.test.ts`, `usePlanTabSweep.test.ts`                                                  |
+| The add menu lands Start Planning | `lib/plan-start-landing.test.ts`, `components/plan/PlanBoardPicker.test.tsx`, `e2e/editor-modes.spec.ts` |
+| A Plan tab shows no switch        | `e2e/editor-modes.spec.ts` "a Plan tab offers no mode switch"                                            |
 
 ## Tabs and tools
 

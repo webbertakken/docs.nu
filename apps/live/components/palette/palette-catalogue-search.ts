@@ -95,11 +95,14 @@ function onTab<T>(cat: Catalogue<T>, ids: Set<string>): PaletteTileDef[] {
 export function searchCatalogueTiles({
   query,
   mode,
+  workshop = false,
   tabElements = [],
   loaded = true,
 }: {
   query: string;
   mode: EditorMode;
+  // The Workshop control is on: Stickers count as the mode's own.
+  workshop?: boolean;
   tabElements?: readonly Element[];
   // Whether the catalogues have loaded (useIconCatalogs): a component passes the subscription's value so the React
   // Compiler re-runs this when they land. Before then they hold nothing to list.
@@ -112,7 +115,9 @@ export function searchCatalogueTiles({
   const out: Omit<ElementTileSearch, 'unavailable'> = { here: [], elsewhere: [] };
   const add = <T>(cat: Catalogue<T>, onTabIds: Set<string> | undefined) => {
     const tiles = ids ? onTab(cat, onTabIds!) : matchesIn(cat, query);
-    (paletteCategoryOffered(mode, cat.category) ? out.here : out.elsewhere).push(...tiles);
+    (paletteCategoryOffered(mode, cat.category, workshop) ? out.here : out.elsewhere).push(
+      ...tiles,
+    );
   };
   add(ICONS, ids?.icons);
   add(STICKERS, ids?.stickers);

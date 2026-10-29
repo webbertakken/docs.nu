@@ -100,8 +100,11 @@ test.describe('the two lines', () => {
   }) => {
     await openStartBlank(page);
     const add = documentGroup(page).getByRole('button', { name: 'Add tab' });
-    await add.click();
-    await add.click();
+    // + opens the add menu (docs/specs/007-editor/editor-modes.md "+ adds a tab or a Plan tab"); its Tab adds one.
+    for (let i = 0; i < 2; i += 1) {
+      await add.click();
+      await page.getByRole('menuitem', { name: 'Tab', exact: true }).click();
+    }
     const stack = documentGroup(page).locator('[data-tab-stack]');
     await expect(stack).toHaveAccessibleName('All tabs (3)');
     await stack.click();

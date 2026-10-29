@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { isPlanTabKind, pagesOf, readDashboard, type EditorMode } from '@livedoc/document';
+import { isPlanTabKind, pagesOf, readDashboard, type TabOpening } from '@livedoc/document';
 import type { TemplateKind } from '@livedoc/templates';
 import { useEditorContext } from '@/app/document/[id]/EditorContext';
 import { useSelectTab } from '@/app/document/[id]/useSelectTab';
@@ -67,7 +67,7 @@ export function EditorStartPanels() {
     mode: ctx.editorMode.mode,
     elementCount: activeTab.elements.length,
   });
-  // An editor's empty Diagram, Workshop or Pages tab: its template start (docs/specs/007-editor/start-diagramming.md).
+  // An editor's empty Sketch, Structured or Pages tab: its template start (docs/specs/007-editor/start-diagramming.md).
   // A template picked from a start screen on a document /new just made goes to its default folder
   // (docs/specs/013-workspace/default-folders.md "A template picked after creation").
   const moveOnTemplatePick = useTemplatePickMove({
@@ -84,6 +84,7 @@ export function EditorStartPanels() {
     readOnly: isReadOnly,
     drawToolArmed: !!pendingDraw,
     mode: ctx.editorMode.mode,
+    workshop: ctx.editorMode.workshop,
     elementCount: activeTab.elements.length,
     // Read only for an empty Pages tab: EditorView renders often, and a tab with content shows no start.
     pages:
@@ -112,7 +113,7 @@ export function EditorStartPanels() {
   // the empty canvas asked for. Imported at the pick: the template catalogue it reads stays out of the editor's first
   // load (it is in the start's own chunk, already loaded behind the panel).
   const tabId = activeTab.id;
-  const chooseFromOtherMode = (_mode: EditorMode, kind: TemplateKind) => {
+  const chooseFromOtherMode = (_mode: TabOpening, kind: TemplateKind) => {
     track('UI', 'Used', 'StartOtherMode');
     moveOnTemplatePick(kind);
     void import('@/components/start/close-start-for-blank').then(({ closeStartForBlank }) => {

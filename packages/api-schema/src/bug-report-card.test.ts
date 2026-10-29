@@ -80,7 +80,7 @@ describe('bugReportCard', () => {
       title: 'Save fails',
       description: 'It spins forever.',
       'f-ctx':
-        'Page: /document\nMode: Draw\nApp version: abc1234\nScreen: 1280 × 800 at 1x\nOnline: Yes\nRecent errors: None',
+        'Page: /document\nMode: Sketch\nApp version: abc1234\nScreen: 1280 × 800 at 1x\nOnline: Yes\nRecent errors: None',
       'f-shot': 'https://docs.nu/report-a-bug/screenshot?key=k',
       'f-rep': 'Guest `g-123`',
       'f-rel': 'abc1234',
@@ -100,7 +100,7 @@ describe('bugReportCard', () => {
         'It spins forever.',
         '',
         'Context:',
-        'Page: /document\nMode: Draw\nApp version: abc1234\nScreen: 1280 × 800 at 1x\nOnline: Yes\nRecent errors: None',
+        'Page: /document\nMode: Sketch\nApp version: abc1234\nScreen: 1280 × 800 at 1x\nOnline: Yes\nRecent errors: None',
         '',
         'Screenshot:',
         'https://docs.nu/report-a-bug/screenshot?key=k',

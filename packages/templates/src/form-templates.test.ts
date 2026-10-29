@@ -8,7 +8,7 @@ import {
   isFormTemplateKind,
 } from './form-templates';
 import { templateCategory } from './template-categories';
-import { isBlankTemplate, templateEditorMode } from './template-modes';
+import { isBlankTemplate, templateOpening } from './template-modes';
 import { TEMPLATES, isTemplateKind } from './templates';
 
 // The form templates (docs/specs/030-forms/forms.md "Starting a form"): one a starter, made in the editor.
@@ -19,7 +19,7 @@ describe('form templates', () => {
     for (const kind of FORM_TEMPLATE_KINDS) {
       expect(isTemplateKind(kind)).toBe(true);
       expect(isFormTemplateKind(kind)).toBe(true);
-      expect(templateEditorMode(kind)).toBe('plan');
+      expect(templateOpening(kind)).toBe('plan');
       expect(FORM_STARTERS.some((s) => s.id === formTemplateStarter(kind))).toBe(true);
     }
     expect(FORM_TEMPLATES.map((t) => t.title)).toEqual([

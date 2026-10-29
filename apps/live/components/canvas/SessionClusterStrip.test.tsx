@@ -135,10 +135,24 @@ describe('Pages: a running Vote or Poll only', () => {
   });
 });
 
+// docs/specs/012-collaboration/workshop-mode.md "The Session strip".
 describe('sessionStripTools', () => {
-  it('offers all three in Workshop, Timer and Vote in Plan, none in Diagram or Draw', () => {
-    expect(sessionStripTools('workshop')).toEqual({ timer: true, vote: true, poll: true });
+  it('offers all three in any mode with the Workshop control on', () => {
+    for (const mode of ['draw', 'diagram', 'pages'] as const)
+      expect(sessionStripTools(mode, { workshop: true })).toEqual({
+        timer: true,
+        vote: true,
+        poll: true,
+      });
+  });
+
+  it('offers Timer and Vote on a Plan tab, none in Structured or Sketch with the control off', () => {
     expect(sessionStripTools('plan')).toEqual({ timer: true, vote: true, poll: false });
+    expect(sessionStripTools('plan', { workshop: true })).toEqual({
+      timer: true,
+      vote: true,
+      poll: false,
+    });
     expect(sessionStripTools(undefined)).toBeNull();
     expect(sessionStripTools('diagram')).toBeNull();
     expect(sessionStripTools('draw')).toBeNull();
@@ -153,15 +167,19 @@ describe('sessionStripTools', () => {
     });
   });
 
-  it('keeps all three on an event-storming board, a workshop that is always Diagram', () => {
-    expect(sessionStripTools('diagram', true)).toEqual({ timer: true, vote: true, poll: true });
+  it('keeps all three on an event-storming board, a workshop that is always Structured', () => {
+    expect(sessionStripTools('diagram', { esBoard: true })).toEqual({
+      timer: true,
+      vote: true,
+      poll: true,
+    });
   });
 });
 
 describe('stripCanStart', () => {
   it('offers the idle tools to an editor, never in a running-only strip or to a view role', () => {
-    expect(stripCanStart(sessionStripTools('workshop')!, false)).toBe(true);
-    expect(stripCanStart(sessionStripTools('workshop')!, true)).toBe(false);
+    expect(stripCanStart(sessionStripTools('diagram', { workshop: true })!, false)).toBe(true);
+    expect(stripCanStart(sessionStripTools('diagram', { workshop: true })!, true)).toBe(false);
     expect(stripCanStart(sessionStripTools('pages')!, false)).toBe(false);
   });
 });
@@ -170,7 +188,7 @@ describe('stripSegmentGone', () => {
   const idle = { timer: false, vote: false, poll: false };
   const all = { timer: true, vote: true, poll: true };
   const pages = sessionStripTools('pages');
-  const workshop = sessionStripTools('workshop');
+  const workshop = sessionStripTools('diagram', { workshop: true });
 
   it('keeps nothing open when no popover is', () => {
     expect(stripSegmentGone({ segment: null, tools: null, readOnly: false, running: idle })).toBe(

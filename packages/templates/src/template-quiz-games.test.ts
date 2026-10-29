@@ -4,7 +4,7 @@ import { STICKY_PRESETS } from '@livedoc/document';
 import { quizPhase, sessionButtonPlan, type Element, type ShapeElement } from '@livedoc/document';
 import { buildTemplate } from './build-template';
 import { templateCategory } from './template-categories';
-import { templateEditorMode } from './template-modes';
+import { templateOpening } from './template-modes';
 import {
   BINGO_PROMPTS,
   ICEBREAKER_QUESTIONS,
@@ -28,7 +28,7 @@ const shapes = (els: Element[], shape: string): ShapeElement[] =>
 
 describe('quiz and game templates', () => {
   it.each(GAMES)('%s opens in Workshop, files under Quizzes & Games and builds', (kind) => {
-    expect(templateEditorMode(kind)).toBe('workshop');
+    expect(templateOpening(kind)).toBe('workshop');
     expect(templateCategory(kind)).toBe('games');
     expect(buildTemplate(kind, 0, 0).length).toBeGreaterThan(5);
   });

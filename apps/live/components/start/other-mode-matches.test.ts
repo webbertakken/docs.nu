@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { EDITOR_MODES } from '@livedoc/document';
-import {
-  TEMPLATES,
-  isBlankTemplate,
-  popularKindsFor,
-  templateEditorMode,
-} from '@livedoc/templates';
+import { TAB_OPENINGS } from '@livedoc/document';
+import { TEMPLATES, isBlankTemplate, popularKindsFor, templateOpening } from '@livedoc/templates';
 import { otherModeMatches } from './other-mode-matches';
 
 // docs/specs/007-editor/start-diagramming.md "Found in other modes".
@@ -17,7 +12,7 @@ describe('otherModeMatches', () => {
   });
 
   it("never offers the tab's own mode", () => {
-    for (const mode of EDITOR_MODES) {
+    for (const mode of TAB_OPENINGS) {
       for (const query of ['board', 'blank', 'map', 'retro'])
         expect(otherModeMatches(mode, query).some((m) => m.mode === mode)).toBe(false);
     }
@@ -27,12 +22,12 @@ describe('otherModeMatches', () => {
     const found = otherModeMatches('diagram', 'a');
     const kinds = found.flatMap((m) => m.kinds);
     expect(new Set(kinds).size).toBe(kinds.length);
-    for (const m of found) for (const k of m.kinds) expect(templateEditorMode(k)).toBe(m.mode);
+    for (const m of found) for (const k of m.kinds) expect(templateOpening(k)).toBe(m.mode);
   });
 
   it("keeps the modes' order and drops a mode with nothing found", () => {
     const order = otherModeMatches('diagram', 'blank').map((m) => m.mode);
-    expect(order).toEqual(EDITOR_MODES.filter((m) => order.includes(m)));
+    expect(order).toEqual(TAB_OPENINGS.filter((m) => order.includes(m)));
     expect(otherModeMatches('diagram', 'zzzz-nothing')).toEqual([]);
   });
 
@@ -62,7 +57,7 @@ describe('otherModeMatches', () => {
 
   it('never offers a hidden template', () => {
     const hidden = TEMPLATES.filter((t) => t.hidden).map((t) => t.kind);
-    for (const mode of EDITOR_MODES) {
+    for (const mode of TAB_OPENINGS) {
       const kinds = otherModeMatches(mode, 'e').flatMap((m) => m.kinds);
       for (const k of hidden) expect(kinds).not.toContain(k);
     }

@@ -307,13 +307,13 @@ A strip shows one category at a time, so finding an element means knowing which 
     the event-storming notation. **Closed by default** each time the popover opens: modes are
     tailored on purpose, so the rest is one deliberate click away, never hidden. Opened, it stays
     open while typing. It is absent when nothing outside the mode matches.
-  - **Another mode's own elements**, last, as an accordion titled **"Not Available in Structured
+  - **Plan's own elements**, last, as an accordion titled **"Not Available in Structured
     Mode"** (the current mode's name), with a count, closed by default and absent when empty like
     the one above. These are the tiles of Plan's own categories (Cards, Boards, Metrics,
-    Visualisations, Sheet): made for Plan's boards and views, so only Plan adds them. They are
+    Visualisations, Sheet): made for Plan's boards and views, so only a Plan tab adds them. They are
     listed so a search for one still finds it and says where it lives, but each is greyed out
-    (`aria-disabled`, no press, no drag) with "Only in Plan Mode" in its hover card. Plan itself
-    has none here. Its line: "Made for another mode's own tools, so only that mode adds them."
+    (`aria-disabled`, no press, no drag) with "Only on Plan tabs" in its hover card. A Plan tab
+    itself has none here. Its line: "Made for another mode's own tools, so only that mode adds them."
 - **Before anything is typed** it lists only the element types **already on the tab**, under a
   small "On This Tab" label, each once, in layout order (other modes' ones in their accordions, as
   ever): the popover stays short, and the tools a tab is actually built from are one click away.

@@ -65,15 +65,23 @@ describe('elementTileSections', () => {
 
   it("keeps Plan's own tiles out of other modes, greyed out with the reason", () => {
     const planOwn = (t: { section: string }) => t.section.startsWith('plan-');
-    for (const mode of ['diagram', 'pages', 'workshop'] as const) {
-      const { here, elsewhere, unavailable } = elementTileSections({ mode, hasImage: true });
+    for (const [mode, workshop] of [
+      ['diagram', false],
+      ['pages', false],
+      ['diagram', true],
+    ] as const) {
+      const { here, elsewhere, unavailable } = elementTileSections({
+        mode,
+        hasImage: true,
+        workshop,
+      });
       expect([...here, ...elsewhere].filter(planOwn), mode).toEqual([]);
       expect(ids(unavailable), mode).toEqual(
         expect.arrayContaining(['plan:board-kanban', 'plan:view-gantt', 'plan:sheet']),
       );
       for (const t of unavailable) {
         expect(planOwn(t), t.id).toBe(true);
-        expect(t.disabled, t.id).toEqual({ reason: 'Only in Plan Mode' });
+        expect(t.disabled, t.id).toEqual({ reason: 'Only on Plan tabs' });
       }
     }
   });
@@ -262,13 +270,13 @@ describe('a worst-case query', () => {
 
 // Workshop mode (docs/specs/012-collaboration/workshop-mode.md "What Diagram gives up"): the
 // Collaborate tiles leave Diagram's palette but Search still finds them, with the other modes'.
-describe('the session kit from Diagram', () => {
-  it("lists Collaborate tiles in Diagram's other-modes section and Workshop's own", () => {
+describe('the session kit from Structured', () => {
+  it("lists Collaborate tiles in Structured's other section, and as its own with the Workshop control on", () => {
     const diagram = elementTileSections({ mode: 'diagram', hasImage: true });
     expect(ids(diagram.here)).not.toContain('tools:session-timer');
     expect(ids(diagram.elsewhere)).toContain('tools:session-timer');
     expect(ids(diagram.elsewhere)).toContain('collab:quiz');
-    const workshop = elementTileSections({ mode: 'workshop', hasImage: true });
+    const workshop = elementTileSections({ mode: 'diagram', hasImage: true, workshop: true });
     expect(ids(workshop.here)).toContain('tools:session-timer');
     expect(ids(workshop.here)).toContain('collab:quiz');
   });

@@ -1,0 +1,40 @@
+'use client';
+
+import { FlipchartIcon, HoverCard } from '@livedoc/ui';
+import { TOOLBAR_BUTTON, TOOLBAR_BUTTON_ON } from '@/components/chrome/toolbar-surface';
+
+// The Workshop control (docs/specs/012-collaboration/workshop-mode.md "The control"): the actions group's flat button,
+// a toggle that brings the session kit (the Session strip, the Collaborate categories and Stickers) into the tab's
+// mode. Its label never changes, so turning it moves nothing; the brand fill (Share's, for a shared document) and
+// aria-pressed carry the state. The name is read out only on a phone, whose top line has no room for it. Shown only
+// where an Editor may turn it (the caller gates on the mode switch's own gate).
+export function WorkshopControl({
+  on,
+  onToggle,
+}: {
+  on: boolean;
+  onToggle: (on: boolean) => void;
+}) {
+  return (
+    <HoverCard
+      title="Workshop"
+      description={
+        on
+          ? 'Put the session kit away. Anything on the canvas stays.'
+          : 'Bring the session kit to this tab: timers, votes, polls and the Collaborate tiles.'
+      }
+    >
+      <button
+        type="button"
+        data-workshop-control=""
+        data-tour-id="workshop-control"
+        aria-pressed={on}
+        onClick={() => onToggle(!on)}
+        className={`${TOOLBAR_BUTTON} ${on ? TOOLBAR_BUTTON_ON : ''}`}
+      >
+        <FlipchartIcon size={14} aria-hidden />
+        <span className="text-optical-centre phone:sr-only">Workshop</span>
+      </button>
+    </HoverCard>
+  );
+}

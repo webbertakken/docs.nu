@@ -64,7 +64,7 @@ import {
 } from '@/hooks/plan/plan-cover-store';
 import { BoardCardsStrip } from './BoardCardsStrip';
 import { BrowseMemoryContext, useBrowseMemory } from './PaletteCategoryBrowser';
-import { CATEGORY_BAR_MODES } from './category-flyout-groups';
+import { showsCategoryBar } from './category-flyout-groups';
 import { setPalettePopoverOpen } from '@/lib/palette-popover-open';
 import { useBarLabels } from './useBarLabels';
 import { useStripPlacement } from './useStripPlacement';
@@ -191,7 +191,7 @@ export function ToolbarPalette(props: Props) {
     return () => setPalettePopoverOpen(false);
   }, [popoverOpen]);
   const setMoreOpen = more.setOpen;
-  const { tabs, tileActions, canvasToolOptions, onCanvasToolChange, editorMode } =
+  const { tabs, tileActions, canvasToolOptions, onCanvasToolChange, editorMode, workshop } =
     usePaletteCatalogue({
       ...props,
       // A tile used from the More or Search popover closes it, so the canvas is clear to draw on.
@@ -215,7 +215,7 @@ export function ToolbarPalette(props: Props) {
   // category's tiles (docs/specs/007-editor/toolbar-layout.md "The category bar"). Not on an event-storming board, whose
   // notation is the palette, nor for a Participant, whose palette is one category.
   const categoryBar =
-    CATEGORY_BAR_MODES.has(editorMode) && !esBoard && !participant && !dashboardTab;
+    showsCategoryBar(editorMode, workshop) && !esBoard && !participant && !dashboardTab;
   // In Pages mode with the palette's kind Article, the strip holds the article's formatting in place of the bar.
   const paletteKind = usePaletteKind();
   const articleDock = categoryBar && editorMode === 'pages' && paletteKind === 'article';
@@ -655,7 +655,6 @@ export function ToolbarPalette(props: Props) {
               <CategoryBarFlyout
                 bar={bar}
                 categories={barCategories}
-                mode={editorMode}
                 actions={tileActions}
                 pendingDraw={pendingDraw ?? null}
                 isMobile={isMobile}

@@ -5,17 +5,18 @@
 //
 // Three honest dimensions, most specific first: the first tab's kind (a specific kind such as an
 // event-storming board), the template family it was made from (a retrospective, a Kanban board),
-// and the editor mode it opens in. Each comes from one closed list, and the keys are generated from
-// them, so a new editor mode adds its key here unasked.
+// and what it opens as (a mode, a Workshop or Plan: TabOpening). Each comes from one closed list, and the keys are
+// generated from them, so a new opening adds its key here unasked.
 
 import {
   DEFAULT_TAB_KIND,
-  EDITOR_MODES,
+  TAB_OPENINGS,
   isEventStormingTab,
-  parseEditorMode,
-  type EditorMode,
+  parseTabOpening,
+  tabOpeningOf,
   type Layer,
   type TabKind,
+  type TabOpening,
 } from '@livedoc/document';
 
 /** The dimensions of a default key, most specific first: the order a create's keys are tried in. */
@@ -43,18 +44,19 @@ export type TemplateFamily = (typeof TEMPLATE_FAMILIES)[number];
 
 /** What a new document is made as, captured once when it is created: the create body's `intent`. */
 export type CreationIntent = {
-  mode: EditorMode;
+  // What the first tab opens as: a mode, a Workshop or Plan (the key's `mode:` dimension keeps its stored name).
+  mode: TabOpening;
   tabKind: CreationTabKind;
   templateFamily?: TemplateFamily;
 };
 
 export type PlacementDefaultKey =
-  `mode:${EditorMode}` | `kind:${SpecificTabKind}` | `template:${TemplateFamily}`;
+  `mode:${TabOpening}` | `kind:${SpecificTabKind}` | `template:${TemplateFamily}`;
 
 /** The default keys, `<dimension>:<value>`, in the order the "New documents that open as" list
- *  shows them: one per editor mode, per specific tab kind, per template family, all generated. */
+ *  shows them: one per opening, per specific tab kind, per template family, all generated. */
 export const PLACEMENT_DEFAULT_KEYS: readonly PlacementDefaultKey[] = [
-  ...EDITOR_MODES.map((mode) => `mode:${mode}` as const),
+  ...TAB_OPENINGS.map((mode) => `mode:${mode}` as const),
   ...SPECIFIC_TAB_KINDS.map((kind) => `kind:${kind}` as const),
   ...TEMPLATE_FAMILIES.map((family) => `template:${family}` as const),
 ];
@@ -128,11 +130,11 @@ export function placementDefaultTelemetryType(key: PlacementDefaultKey): string 
  * reads it, legacy event-storming boards included.
  */
 export function creationIntentOf(
-  tab: { kind?: string; opensIn?: string; layers?: Layer[] } | undefined,
+  tab: { kind?: string; opensIn?: string; workshop?: unknown; layers?: Layer[] } | undefined,
   templateFamily: TemplateFamily | null = null,
 ): CreationIntent {
   const intent: CreationIntent = {
-    mode: parseEditorMode(tab?.opensIn) ?? (tab?.kind === 'whiteboard' ? 'draw' : 'diagram'),
+    mode: tab?.kind === 'whiteboard' && !tab.opensIn ? 'draw' : tab ? tabOpeningOf(tab) : 'diagram',
     tabKind: isEventStormingTab(tab) ? 'event-storming' : 'diagram',
   };
   return templateFamily ? { ...intent, templateFamily } : intent;
@@ -151,7 +153,7 @@ export function readCreationIntent(
     templateFamily?: unknown;
   };
   // A create from a client from before a mode's rename still names it `illustrate`, `infographic` or `facilitate`.
-  const parsedMode = parseEditorMode(mode);
+  const parsedMode = parseTabOpening(mode);
   if (!parsedMode) return { ok: false };
   const kind = tabKind ?? DEFAULT_TAB_KIND;
   if (!isCreationTabKind(kind)) return { ok: false };

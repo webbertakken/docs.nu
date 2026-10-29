@@ -8,9 +8,12 @@ import type { EditorMode } from '@livedoc/document';
 
 // What the category bar offers (docs/specs/007-editor/toolbar-layout.md "The category bar").
 
-const bar = (mode: EditorMode) =>
+// 'workshop': Structured with the Workshop control on (docs/specs/012-collaboration/workshop-mode.md "The palette").
+const bar = (at: EditorMode | 'workshop') =>
   barCategoriesFor(
-    paletteCategoriesFor(mode).map((c) => ({ ...c, content: null })),
+    paletteCategoriesFor(at === 'workshop' ? 'diagram' : at, { workshop: at === 'workshop' }).map(
+      (c) => ({ ...c, content: null }),
+    ),
     (groups) => groups.map((g) => g.id).join(','),
   );
 
@@ -64,20 +67,22 @@ describe('the category bar’s categories', () => {
     expect(groups('layout')).toEqual(['Containers', 'Parts']);
   });
 
-  it('gathers Workshop’s session tools into Session, Ask keeping its own button', () => {
+  it('gathers the Workshop control’s session tools into Session, Ask keeping its own button', () => {
     const cats = bar('workshop');
     expect(cats.map((c) => c.id)).toEqual([
       'shapes',
       'my-shapes',
       'write',
       'draw',
+      'diagrams',
+      'concepts',
       'layout',
       'collab-ask',
       SESSION_CATEGORY_ID,
       'icons',
       'stickers',
+      'technology',
       'media',
-      'data',
     ]);
     const session = cats.find((c) => c.id === SESSION_CATEGORY_ID)!;
     expect(session.tiles).toBeNull();
@@ -89,6 +94,7 @@ describe('the category bar’s categories', () => {
     const cats = bar('pages');
     expect(cats.map((c) => c.id)).not.toContain('draw');
     expect(cats.map((c) => c.id)).not.toContain(SESSION_CATEGORY_ID);
+    expect(cats.map((c) => c.id)).not.toContain('collab-ask');
     expect(cats.find((c) => c.id === 'write')?.label).toBe('Write');
   });
 

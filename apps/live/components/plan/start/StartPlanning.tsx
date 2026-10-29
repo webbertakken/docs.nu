@@ -18,7 +18,7 @@ import {
 } from '@livedoc/icons/lucide';
 import { StartPanel, type StartPanelCard } from '@/components/start/StartPanel';
 import type { PlanTemplateKind, TemplateKind } from '@livedoc/templates';
-import type { EditorMode, Tab } from '@livedoc/document';
+import type { TabOpening, Tab } from '@livedoc/document';
 import { otherModeMatches } from '@/components/start/other-mode-matches';
 import { TemplatePicture, templateCard } from '@/components/start/template-card';
 import { suggestedDashboards, type SuggestedDashboard } from '@/lib/suggested-dashboards';
@@ -158,7 +158,7 @@ export function StartPlanning({
   onDashboard?: ((presetId: string) => void) | undefined;
   // A template found under another start (start-diagramming.md "Found in other modes"): it lands, changing the tab to
   // match. Absent (a Plan kind's tab, which keeps its kind), the search keeps to Plan.
-  onOtherModeTemplate?: ((mode: EditorMode, kind: TemplateKind) => void) | undefined;
+  onOtherModeTemplate?: ((mode: TabOpening, kind: TemplateKind) => void) | undefined;
   // Applies a Plan template to this tab (Inspiration); absent, Inspiration is left out.
   onTemplate?: ((kind: PlanTemplateKind) => void) | undefined;
   // The document's tabs, read for Dashboards built from its own work (suggested-dashboards.ts), and the fetch of

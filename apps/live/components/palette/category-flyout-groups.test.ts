@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   barLabel,
-  CATEGORY_BAR_MODES,
   flyoutCardColumns,
   flyoutColumns,
   flyoutGroups,
@@ -9,13 +8,14 @@ import {
   flyoutLayout,
   flyoutTagline,
   SHORT_CARD_LIST,
+  showsCategoryBar,
 } from './category-flyout-groups';
 import { paletteCategoriesFor } from './palette-layouts';
 import type { PaletteTileDef } from './palette-tile-defs';
 
 // The category flyout's arrangement (docs/specs/007-editor/toolbar-layout.md "The category bar").
 
-const tiles = (mode: 'diagram' | 'workshop' | 'pages', id: string): PaletteTileDef[] =>
+const tiles = (mode: 'diagram' | 'pages', id: string): PaletteTileDef[] =>
   paletteCategoriesFor(mode).find((c) => c.id === id)?.tiles ?? [];
 
 const tile = (id: string, dividerAfter = false): PaletteTileDef => ({
@@ -29,8 +29,12 @@ const tile = (id: string, dividerAfter = false): PaletteTileDef => ({
 });
 
 describe('the category bar', () => {
-  it('is Workshop’s and Pages’s strip, not Diagram’s, Plan’s or Draw’s', () => {
-    expect([...CATEGORY_BAR_MODES].sort()).toEqual(['pages', 'workshop']);
+  it('is Pages’s strip, and Structured’s with the Workshop control on, never a Plan tab’s or Sketch’s', () => {
+    expect(showsCategoryBar('pages', false)).toBe(true);
+    expect(showsCategoryBar('diagram', true)).toBe(true);
+    expect(showsCategoryBar('diagram', false)).toBe(false);
+    expect(showsCategoryBar('plan', true)).toBe(false);
+    expect(showsCategoryBar('draw', true)).toBe(false);
   });
 
   it('names every category in one word', () => {
@@ -56,11 +60,8 @@ describe('a flyout’s layout', () => {
     expect(flyoutCardColumns(SHORT_CARD_LIST + 1)).toBe(2);
   });
 
-  it('words a line its own way where a mode fills the category differently', () => {
-    expect(flyoutTagline('write', 'fallback', 'workshop')).toBe(
-      'Words, notes, tables and checklists.',
-    );
-    expect(flyoutTagline('write', 'fallback', 'diagram')).toBe(
+  it('words each category its own line, else the fallback', () => {
+    expect(flyoutTagline('write', 'fallback')).toBe(
       'Words on the canvas: text, notes and comments.',
     );
     expect(flyoutTagline('unknown', 'fallback')).toBe('fallback');
@@ -93,17 +94,14 @@ describe('a flyout’s groups', () => {
       'Page Blocks',
       'Code and Lists',
     ]);
-    expect(flyoutGroups('data', tiles('workshop', 'data')).map((g) => g.title)).toEqual([
+    expect(flyoutGroups('data', tiles('pages', 'data')).map((g) => g.title)).toEqual([
       'Charts',
       'Meters',
+      'Tables',
     ]);
   });
 
   it('shows one block, unheaded, when not every group has a name', () => {
-    const groups = flyoutGroups('write', tiles('workshop', 'write'));
-    expect(groups).toHaveLength(1);
-    expect(groups[0]!.title).toBeNull();
-    expect(groups[0]!.tiles).toHaveLength(tiles('workshop', 'write').length);
     expect(flyoutGroups('x', [tile('a', true), tile('b')])).toEqual([
       {
         id: 'a',

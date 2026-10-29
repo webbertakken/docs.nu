@@ -1,10 +1,10 @@
 'use client';
 
 import { ctaHref } from '@livedoc/api-schema';
-import { editorModeLabel } from '@livedoc/document';
+import { tabOpeningLabel } from '@livedoc/document';
 import { TemplatePreview } from '@livedoc/template-previews';
 import { templateCreateHref, type TemplateKind } from '@livedoc/templates';
-import { EDITOR_MODE_ICONS, Glyph, START_BLANK_HREF } from '@livedoc/ui';
+import { TAB_OPENING_ICONS, Glyph, START_BLANK_HREF } from '@livedoc/ui';
 import { useDeferredValue, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { heroSearch } from '@/lib/hero-starts';
 
@@ -132,7 +132,7 @@ export function HeroSearch() {
         {matches.length > 0 ? (
           <ul aria-label="Matching templates" className="flex flex-col">
             {matches.map((t) => {
-              const ModeIcon = EDITOR_MODE_ICONS[t.mode];
+              const ModeIcon = TAB_OPENING_ICONS[t.mode];
               return (
                 <li key={t.kind}>
                   <a
@@ -149,7 +149,7 @@ export function HeroSearch() {
                     </span>
                     <span className="hidden shrink-0 items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 sm:inline-flex">
                       <ModeIcon size={13} aria-hidden />
-                      {editorModeLabel(t.mode)}
+                      {tabOpeningLabel(t.mode)}
                     </span>
                   </a>
                 </li>

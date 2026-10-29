@@ -7,13 +7,13 @@ import {
   type SpecificTabKind,
   type TemplateFamily,
 } from '@livedoc/api-schema';
-import type { EditorMode } from '@livedoc/document';
+import type { TabOpening } from '@livedoc/document';
 
 type DefaultKeyEntry = { key: PlacementDefaultKey; label: string; noun: string };
 
 type Words = { label: string; noun: string };
 
-const MODE_WORDS: Record<EditorMode, Words> = {
+const MODE_WORDS: Record<TabOpening, Words> = {
   diagram: { label: 'Diagrams', noun: 'diagrams' },
   draw: { label: 'Whiteboards', noun: 'whiteboards' },
   pages: { label: 'Pages documents', noun: 'Pages documents' },
@@ -32,7 +32,7 @@ const FAMILY_WORDS: Record<TemplateFamily, Words> = {
 
 function wordsOf(key: PlacementDefaultKey): Words {
   const [dimension, value] = key.split(':') as [string, string];
-  if (dimension === 'mode') return MODE_WORDS[value as EditorMode];
+  if (dimension === 'mode') return MODE_WORDS[value as TabOpening];
   if (dimension === 'kind') return KIND_WORDS[value as SpecificTabKind];
   return FAMILY_WORDS[value as TemplateFamily];
 }

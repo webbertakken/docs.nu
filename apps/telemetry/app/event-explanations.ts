@@ -15,16 +15,21 @@
 
 export const EXACT: Readonly<Record<string, string>> = {
   'Editor|Changed|LeavePagesConfirmed':
-    'Someone confirmed leaving Pages on a tab with pages, after the warning that its pages do not show in Diagram or Draw.',
+    'Someone confirmed leaving Pages on a tab with pages, after the warning that its pages do not show in Structured or Sketch.',
   'Editor|Changed|ModeDiagram':
-    'Someone switched a tab to Diagram mode, for shapes, arrows and the palette.',
-  'Editor|Changed|ModeDraw': 'Someone switched a tab to Draw mode, to draw freehand with pens.',
+    'Someone switched a tab to Structured mode (once called Diagram), for shapes, arrows and the palette.',
+  'Editor|Changed|ModeDraw':
+    'Someone switched a tab to Sketch mode (once called Draw), to draw freehand with pens.',
   'Editor|Changed|ModePages':
     'Someone switched a tab to Pages mode, to lay out a page of icons, stickers, components and media.',
   'Editor|Changed|ModePlan':
-    'Someone switched a tab to Plan mode, to work on boards of items: drag cards through columns, add and open items.',
+    'Someone switched a tab to Plan mode, when Plan was a mode: Board, Sheet and Dashboard tabs are now added from +.',
   'Editor|Changed|ModeWorkshop':
-    'Someone switched a tab to Workshop mode, to run a session with their team: timers, votes, polls and reveals.',
+    'Someone switched a tab to Workshop mode, when Workshop was a mode: it is now the Workshop control.',
+  'Editor|Toggled|WorkshopOn':
+    'Someone turned the Workshop control on for a tab, bringing the session kit: timers, votes, polls and the Collaborate tiles.',
+  'Editor|Toggled|WorkshopOff':
+    'Someone turned the Workshop control off for a tab, putting the session kit away.',
   'Draw|Created|Template':
     'Someone started a new document as a whiteboard, a plain board drawn on with pens, from the New Document wizard.',
   'Draw|Created|NewTab':
@@ -1014,6 +1019,12 @@ export const EXACT: Readonly<Record<string, string>> = {
   'Tab|Cleared|': "A tab's content was wiped.",
   'Tab|Cleared|Vote': "A tab's content was wiped.",
   'Tab|Created|': 'A new tab was added to a document.',
+  'Tab|Created|Board':
+    'Someone added a Board tab from the + menu, opening Start Planning on its boards.',
+  'Tab|Created|Sheet':
+    'Someone added a Sheet tab from the + menu, opening Start Planning on its spreadsheets.',
+  'Tab|Created|Dashboard':
+    'Someone added a Dashboard tab from the + menu, opening Start Planning on its dashboards.',
   'Tab|Deleted|': 'A tab was removed from a document.',
   'Tab|Duplicated|': 'A tab was duplicated.',
   'Tab|Ended|CountdownTimer':
@@ -1502,6 +1513,8 @@ export const EXACT: Readonly<Record<string, string>> = {
     'An open editor learned the server now serves a newer document format and offered "A new version of LiveDoc is ready".',
   'UI|Used|NewVersionPrompt':
     'Someone pressed Reload on the new version prompt; the editor reloads once their changes are saved.',
+  'UI|Opened|AddTabMenu':
+    'Someone opened the + menu to add a tab, a board, a sheet or a dashboard.',
   'UI|Opened|TourOffer':
     'The Diagram tour\'s offer card was shown on a Diagram tab, either automatically on a first document or replayed from Settings\' Tours › "Diagram Tour" ("Welcome", when it was the welcome tour, until October 2026). Since 28 October 2026 this counts the Start Tour button in the bottom bar showing it, once per page load: tours no longer offer themselves.',
   'UI|Opened|PagesTourOffer':
@@ -2416,7 +2429,8 @@ export const BY_ACTION: Readonly<Record<string, string>> = {
   'Feedback|Completed': 'Someone sent a bug report.',
   'Timing|Measured':
     'A key moment was timed: a document opening, a tab switch, a save, the live room connecting, or a page loading. Only the range it fell in is recorded, never the exact time.',
-  'Editor|Changed': 'Someone switched a tab between Diagram mode and Draw mode.',
+  'Editor|Changed': 'Someone switched a tab between Sketch, Structured and Pages.',
+  'Editor|Toggled': 'Someone turned the Workshop control on or off for a tab.',
   'Element|Created': 'Someone made an element in a way other than placing it from the palette.',
   'Draw|Created': 'Someone made a whiteboard tab, a plain board drawn on with pens.',
   'Draw|Selected':

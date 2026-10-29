@@ -130,7 +130,7 @@ export function TourHost() {
     'diagram',
     ready
       ? {
-          name: 'Diagram',
+          name: 'Structured',
           rank: TOUR_OFFER_RANK.mode,
           start,
           onShown: () => track('UI', 'Opened', 'TourOffer'),

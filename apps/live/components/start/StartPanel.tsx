@@ -26,7 +26,7 @@ import {
 } from '@livedoc/ui';
 import { lucideSearch, lucideX } from '@livedoc/icons/lucide';
 import { useChromeFloor } from '@/components/toast/useToastFloor';
-import type { EditorMode } from '@livedoc/document';
+import type { TabOpening } from '@livedoc/document';
 import { HelpArticleLink } from '@/components/primitives/HelpArticleLink';
 import type { HelpArticleKey } from '@/lib/help-articles';
 import type { PlanPalette } from '@/components/plan/plan-palette';
@@ -96,7 +96,7 @@ export function StartPanel<C extends string>({
   // Found in other modes (start-diagramming.md): the other modes' matches for a search, and choosing one, which
   // switches the tab to that mode. Absent where the tab's mode may not change: the search keeps to its own mode.
   elsewhere?: ((query: string) => readonly StartPanelElsewhere[]) | undefined;
-  onChooseElsewhere?: ((mode: EditorMode, cardId: string) => void) | undefined;
+  onChooseElsewhere?: ((mode: TabOpening, cardId: string) => void) | undefined;
   // Absent where the panel cannot be closed: no × in its header.
   onClose?: (() => void) | undefined;
   // Leading the rail, over a hairline: the mode switch.
@@ -444,7 +444,7 @@ export function StartPanel<C extends string>({
                       </span>
                       <span>
                         <span className="font-semibold">{noMatchTitle(noMatchNoun, query)}.</span>{' '}
-                        <span style={{ color: palette.muted }}>Found in other modes.</span>
+                        <span style={{ color: palette.muted }}>Found elsewhere.</span>
                       </span>
                     </p>
                   ) : (

@@ -8,19 +8,19 @@
 // that mode's own start (Start Diagramming, Start Planning, ...), where the templates are. Arrow keys move between the
 // cards, and 1 to 5 (printed on each card) choose one straight away.
 import { useEffect, useRef, type KeyboardEvent } from 'react';
-import { EDITOR_MODE_ICONS } from '@livedoc/ui';
-import { EDITOR_MODES, editorModeLabel, type EditorMode } from '@livedoc/document';
+import { TAB_OPENING_ICONS } from '@livedoc/ui';
+import { TAB_OPENINGS, tabOpeningLabel, type TabOpening } from '@livedoc/document';
 import { PreviewFan } from '@livedoc/template-previews';
 import { isBlankTemplate, popularKindsFor, type TemplateKind } from '@livedoc/templates';
 import { useLatest } from '@/hooks/ui/useLatest';
 import { isTypingTarget } from '@/lib/typing-target';
 import { Spinner } from './template-picker-icons';
 
-// The modes in the order every mode list shows them (the mode switch's dropdown, Opens in): the catalogue's.
-export const NEW_DOCUMENT_MODES: readonly EditorMode[] = EDITOR_MODES;
+// The choices in the order every list of what to make shows them (TAB_OPENINGS): Sketch, Structured, Pages, Workshop, Plan.
+export const NEW_DOCUMENT_MODES: readonly TabOpening[] = TAB_OPENINGS;
 
-// What each mode makes, in the words of the work rather than the tools.
-const PITCH: Record<EditorMode, string> = {
+// What each choice makes, in the words of the work rather than the tools.
+const PITCH: Record<TabOpening, string> = {
   diagram: 'Flowcharts, mind maps, org charts and architecture, snapped neatly into place.',
   draw: 'A freehand whiteboard: pens, highlighters and shapes that tidy themselves.',
   pages: 'Infographics, slides, articles and logos, laid out to print, post or present.',
@@ -29,7 +29,7 @@ const PITCH: Record<EditorMode, string> = {
 };
 
 // A mode's own templates, its Popular shelf without the blanks (its own, and Blank Spreadsheet): the fan's previews.
-function examplesOf(mode: EditorMode): TemplateKind[] {
+function examplesOf(mode: TabOpening): TemplateKind[] {
   return popularKindsFor(mode).filter((k) => !isBlankTemplate(k));
 }
 
@@ -48,7 +48,7 @@ function ModeCard({
   onChoose,
   register,
 }: {
-  mode: EditorMode;
+  mode: TabOpening;
   index: number;
   selected: boolean;
   // This card's document is being made: its key gives way to a spinner.
@@ -56,9 +56,9 @@ function ModeCard({
   onChoose: () => void;
   register: (el: HTMLButtonElement | null) => void;
 }) {
-  const Icon = EDITOR_MODE_ICONS[mode];
+  const Icon = TAB_OPENING_ICONS[mode];
   const examples = examplesOf(mode);
-  const label = editorModeLabel(mode);
+  const label = tabOpeningLabel(mode);
   return (
     <button
       ref={register}
@@ -126,10 +126,10 @@ export function NewDocumentModeStep({
   onChoose,
 }: {
   // The mode picked so far: a `?mode=` preset, or the one being created.
-  selected: EditorMode | null;
+  selected: TabOpening | null;
   // The chosen mode's document is being made.
   creating?: boolean;
-  onChoose: (mode: EditorMode) => void;
+  onChoose: (mode: TabOpening) => void;
 }) {
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
   // The chosen (else the first) mode's card is focused on a desktop, so Enter or the arrows work at once.

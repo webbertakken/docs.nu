@@ -6,9 +6,12 @@ import type { PaletteTileDef } from './palette-tile-defs';
 
 import type { EditorMode } from '@livedoc/document';
 
-/** The modes whose strip is a category bar: Workshop and Pages. Diagram and Plan keep the category picker and
- *  its tiles (docs/specs/007-editor/toolbar-layout.md "Decided in review"). */
-export const CATEGORY_BAR_MODES: ReadonlySet<EditorMode> = new Set(['workshop', 'pages']);
+/** Whether the strip is a category bar: in Pages, and in Structured while the Workshop control is on, as Workshop
+ *  mode's was. Structured with the control off and a Plan tab keep the category picker and its tiles
+ *  (docs/specs/007-editor/toolbar-layout.md "The category bar", docs/specs/012-collaboration/workshop-mode.md). */
+export function showsCategoryBar(mode: EditorMode, workshop: boolean): boolean {
+  return mode === 'pages' || (mode === 'diagram' && workshop);
+}
 
 // The bar names every category in one word, so a name never wraps or crowds its neighbours: a layout's longer
 // name gives way to its short one here (the flyout's header uses the same, so the two never disagree).
@@ -76,19 +79,14 @@ const TAGLINES: Readonly<Record<string, string>> = {
   devices: 'Frames to set a screen design in.',
 };
 
-// Where a mode fills a category differently enough that its default line would mislead.
-const MODE_TAGLINES: Readonly<Partial<Record<EditorMode, Readonly<Record<string, string>>>>> = {
-  workshop: { write: 'Words, notes, tables and checklists.' },
-};
-
-export function flyoutTagline(categoryId: string, fallback: string, mode?: EditorMode): string {
-  return (mode && MODE_TAGLINES[mode]?.[categoryId]) ?? TAGLINES[categoryId] ?? fallback;
+export function flyoutTagline(categoryId: string, fallback: string): string {
+  return TAGLINES[categoryId] ?? fallback;
 }
 
 // A group's name, by the tile that starts it: a category splits into groups where a tile ends one (`dividerAfter`,
 // the strip's fixed dividers), and the same tile starts the same kind of group whichever mode's layout it is in.
 // A category shows its groups only when every one is named; otherwise it is one block, so a layout whose dividers
-// fall elsewhere (Workshop's Write) never shows half its groups headed and half bare.
+// fall elsewhere never shows half its groups headed and half bare.
 const GROUP_NAMES: Readonly<Record<string, string>> = {
   'shapes:square': 'Basics',
   'shapes:cylinder': 'Flowchart',

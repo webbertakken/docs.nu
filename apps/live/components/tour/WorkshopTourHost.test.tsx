@@ -54,7 +54,7 @@ const editor = (over: Record<string, unknown> = {}) => {
     anyWelcomeOpen: false,
     isReadOnly: false,
     embedMode: false,
-    editorMode: { mode: 'workshop' },
+    editorMode: { mode: 'diagram', workshop: true },
     activeTab: { id: 'tab1', locked: false },
     userPreferences: { tourSeen: true },
     setUserPreferences,
@@ -117,9 +117,12 @@ describe('WorkshopTourHost offer', () => {
     ['locked', { activeTab: { id: 'tab1', locked: true } }],
     ['not hydrated', { hydrated: false }],
     ['embedded', { embedMode: true }],
-    ['in Diagram', { editorMode: { mode: 'diagram' } }],
-    ['in Plan', { editorMode: { mode: 'plan' } }],
-    ['in Draw', { editorMode: { mode: 'draw' } }],
+    [
+      'in Structured with the Workshop control off',
+      { editorMode: { mode: 'diagram', workshop: false } },
+    ],
+    ['on a Plan tab', { editorMode: { mode: 'plan', workshop: false } }],
+    ['in Sketch with the Workshop control off', { editorMode: { mode: 'draw', workshop: false } }],
   ])('offers nothing when %s', (_why, over) => {
     editor(over);
     render(<WorkshopTourHost />);
@@ -141,8 +144,8 @@ describe('WorkshopTourHost offer', () => {
     expect(startedTour()).toBe(true);
   });
 
-  it('ignores a rerun outside Workshop', () => {
-    editor({ editorMode: { mode: 'diagram' } });
+  it('ignores a rerun with the Workshop control off', () => {
+    editor({ editorMode: { mode: 'diagram', workshop: false } });
     render(<WorkshopTourHost />);
     act(() => requestWorkshopTourRelaunch());
     expect(startedTour()).toBe(false);
@@ -187,9 +190,9 @@ describe('WorkshopTourHost end', () => {
     expect(stage.engine!.countableSteps).toBe(6);
   });
 
-  it('ends as skipped when the person leaves Workshop or the tab', () => {
+  it('ends as skipped when the Workshop control goes off, or the person leaves the tab', () => {
     const r = start();
-    editor({ editorMode: { mode: 'diagram' } });
+    editor({ editorMode: { mode: 'diagram', workshop: false } });
     r.rerender(<WorkshopTourHost />);
     expect(track).toHaveBeenCalledWith('UI', 'Ended', 'WorkshopTourSkipped');
     expect(stage.engine?.active).toBe(false);

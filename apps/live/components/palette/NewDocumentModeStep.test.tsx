@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
 // The New Document wizard's mode step (docs/specs/007-editor/new-document-route.md "Choosing a mode"): five cards of
-// one build, three then two, each printing its number key, with no template badges; 1 to 5 choose a card.
+// one build (Sketch, Structured, Pages, Workshop, Plan), three then two, each printing its number key, with no template
+// badges; 1 to 5 choose a card.
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EDITOR_MODES, editorModeLabel } from '@livedoc/document';
+import { TAB_OPENINGS, tabOpeningLabel } from '@livedoc/document';
 import { popularKindsFor, TEMPLATES } from '@livedoc/templates';
 import { NEW_DOCUMENT_MODES, NewDocumentModeStep, modeCardSpan } from './NewDocumentModeStep';
 
@@ -14,10 +15,10 @@ afterEach(cleanup);
 const cards = () => Array.from(document.querySelectorAll<HTMLButtonElement>('[data-new-mode]'));
 
 describe('NewDocumentModeStep', () => {
-  it('shows the five modes in the catalogue order, Diagram first', () => {
+  it('shows the five choices in order: Sketch, Structured, Pages, Workshop, Plan', () => {
     render(<NewDocumentModeStep selected={null} onChoose={vi.fn()} />);
-    expect(cards().map((c) => c.dataset.newMode)).toEqual([...EDITOR_MODES]);
-    expect(NEW_DOCUMENT_MODES[0]).toBe('diagram');
+    expect(cards().map((c) => c.dataset.newMode)).toEqual([...TAB_OPENINGS]);
+    expect(NEW_DOCUMENT_MODES).toEqual(['draw', 'diagram', 'pages', 'workshop', 'plan']);
   });
 
   it('prints each card’s number key, 1 to 5, and names it as a shortcut', () => {
@@ -43,7 +44,7 @@ describe('NewDocumentModeStep', () => {
     }
   });
 
-  it('builds every card alike, Diagram included: three then two at one height', () => {
+  it('builds every card alike: three then two at one height', () => {
     render(<NewDocumentModeStep selected={null} onChoose={vi.fn()} />);
     const [diagram, ...rest] = cards();
     for (const card of rest) expect(card.className).toContain('flex-col');
@@ -63,7 +64,7 @@ describe('NewDocumentModeStep', () => {
     expect(diagram!.parentElement!.className).toMatch(/sm:auto-rows-fr/);
   });
 
-  it.each(EDITOR_MODES.map((mode, i) => [String(i + 1), mode] as const))(
+  it.each(TAB_OPENINGS.map((mode, i) => [String(i + 1), mode] as const))(
     'chooses with its number key: %s picks %s',
     (key, mode) => {
       const onChoose = vi.fn();
@@ -85,8 +86,8 @@ describe('NewDocumentModeStep', () => {
     const onChoose = vi.fn();
     render(<NewDocumentModeStep selected={null} onChoose={onChoose} />);
     fireEvent.keyDown(document.body, { key: '2' });
-    expect(onChoose).toHaveBeenCalledExactlyOnceWith('draw');
-    fireEvent.keyDown(cards()[0]!, { key: '3' });
+    expect(onChoose).toHaveBeenCalledExactlyOnceWith('diagram');
+    fireEvent.keyDown(cards()[0]!, { key: '4' });
     expect(onChoose).toHaveBeenCalledTimes(2);
     expect(onChoose).toHaveBeenLastCalledWith('workshop');
   });
@@ -108,16 +109,16 @@ describe('NewDocumentModeStep', () => {
   it('chooses on a click and moves focus with the arrows, wrapping', () => {
     const onChoose = vi.fn();
     render(<NewDocumentModeStep selected="draw" onChoose={onChoose} />);
-    const [diagram, draw] = cards();
-    expect(draw!.getAttribute('aria-pressed')).toBe('true');
+    const [sketch] = cards();
+    expect(sketch!.getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(
-      screen.getByRole('button', { name: new RegExp(`^${editorModeLabel('plan')}:`) }),
+      screen.getByRole('button', { name: new RegExp(`^${tabOpeningLabel('plan')}:`) }),
     );
     expect(onChoose).toHaveBeenCalledWith('plan');
-    diagram!.focus();
+    sketch!.focus();
     fireEvent.keyDown(screen.getByRole('group'), { key: 'ArrowLeft' });
     expect(document.activeElement).toBe(cards()[4]);
     fireEvent.keyDown(screen.getByRole('group'), { key: 'ArrowRight' });
-    expect(document.activeElement).toBe(diagram);
+    expect(document.activeElement).toBe(sketch);
   });
 });

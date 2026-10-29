@@ -5,8 +5,8 @@ import {
   type SpecificTabKind,
   type TemplateFamily,
 } from '@livedoc/api-schema';
-import type { EditorMode } from '@livedoc/document';
-import { lucideGlyph, type IconProps, EDITOR_MODE_ICONS } from '@livedoc/ui';
+import type { TabOpening } from '@livedoc/document';
+import { lucideGlyph, type IconProps, TAB_OPENING_ICONS } from '@livedoc/ui';
 import {
   lucideFolderCheck,
   lucideHistory,
@@ -30,7 +30,7 @@ const FAMILY_ICON: Record<TemplateFamily, ComponentType<IconProps>> = {
 
 function iconOf(key: PlacementDefaultKey): ComponentType<IconProps> {
   const [dimension, value] = key.split(':') as [string, string];
-  if (dimension === 'mode') return EDITOR_MODE_ICONS[value as EditorMode];
+  if (dimension === 'mode') return TAB_OPENING_ICONS[value as TabOpening];
   if (dimension === 'kind') return KIND_ICON[value as SpecificTabKind];
   return FAMILY_ICON[value as TemplateFamily];
 }

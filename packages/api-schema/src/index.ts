@@ -15,7 +15,7 @@
 import type { AccessLevel } from './access-levels';
 import type { DocumentSource } from './document-source';
 import type { DriveMode } from './drive';
-import type { BackgroundPattern, EditorMode, ShapeKind, Tab } from '@livedoc/document';
+import type { BackgroundPattern, ShapeKind, Tab, TabOpening } from '@livedoc/document';
 import type { CreationTabKind, TemplateFamily } from './placement-defaults';
 import type { ItemTypeCatalogue } from '@livedoc/items';
 
@@ -81,7 +81,7 @@ export type LiveDoc = {
 // the other two are then unknown too; with a known `opensIn`, `tabKind` is known and a null
 // `templateFamily` means made from no family.
 export type RecordedIntent = {
-  opensIn: EditorMode | null;
+  opensIn: TabOpening | null;
   tabKind: CreationTabKind | null;
   templateFamily: TemplateFamily | null;
 };
@@ -112,7 +112,7 @@ export type DocumentSummary = {
 // A document's tab stats (docs/specs/013-workspace/explorer-details-view.md "Where the numbers come
 // from"): the mode of the tab written last, and elements, comments and stored bytes over every tab.
 export type DocumentStats = {
-  mode: EditorMode;
+  mode: TabOpening;
   elements: number;
   comments: number;
   bytes: number;

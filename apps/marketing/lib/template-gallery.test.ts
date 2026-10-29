@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TEMPLATES, isBlankTemplate, templateEditorMode } from '@livedoc/templates';
+import { TEMPLATES, isBlankTemplate, templateOpening } from '@livedoc/templates';
 import {
   filterGallery,
   galleryShelves,
@@ -22,7 +22,7 @@ describe('galleryTemplates (docs/specs/019-marketing/marketing-site.md)', () => 
   });
 
   it('carries the mode each template opens in', () => {
-    for (const t of galleryTemplates()) expect(t.mode, t.kind).toBe(templateEditorMode(t.kind));
+    for (const t of galleryTemplates()) expect(t.mode, t.kind).toBe(templateOpening(t.kind));
   });
 
   it('labels every card with its category', () => {
@@ -87,18 +87,18 @@ describe('groupGallery', () => {
 // docs/specs/019-marketing/marketing-site.md "Template gallery": the editor's template step's
 // structure, Popular first.
 describe('the shelves, as the template step lays them out', () => {
-  it('opens on Blank Slate, only the blanks in mode order, then every category in catalogue order', () => {
+  it('opens on Blank Slate, only the blanks in the openings order, then every category in catalogue order', () => {
     const shelves = galleryShelves();
     expect(shelves[0]?.id).toBe('popular');
     expect(shelves[0]?.templates.map((t) => t.kind)).toEqual([
-      'blank',
       'whiteboard',
-      'blank-session',
+      'blank',
       'blank-illustration',
       'blank-slide-deck',
       'blank-article',
       'blank-logo',
       'blank-wireframe-phone',
+      'blank-session',
       'blank-plan',
       'blank-spreadsheet',
       'blank-board',

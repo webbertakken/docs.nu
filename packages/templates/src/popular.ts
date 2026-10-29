@@ -2,18 +2,18 @@
 // templates-by-mode.md "The mode filter"): where most people start, a short curated list per mode filter, each
 // opening with its blank(s). Shared by the editor's template step and the marketing gallery, so the two shelves can
 // never disagree.
-import type { EditorMode } from '@livedoc/document';
+import type { TabOpening } from '@livedoc/document';
 import { TEMPLATES, type TemplateKind } from './templates';
 
-type PopularChoice = 'all' | EditorMode;
+type PopularChoice = 'all' | TabOpening;
 
 export const POPULAR_BY_MODE: Readonly<Record<PopularChoice, readonly TemplateKind[]>> = {
-  // The five blanks lead, one per mode in mode order (EDITOR_MODES), so the picker needs no separate blank card.
+  // The five blanks lead, one per opening in order (TAB_OPENINGS), so the picker needs no separate blank card.
   all: [
-    'blank',
     'whiteboard',
-    'blank-session',
+    'blank',
     'blank-illustration',
+    'blank-session',
     'blank-plan',
     'mindmap',
     'flowchart',

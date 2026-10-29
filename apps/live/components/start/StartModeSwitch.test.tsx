@@ -15,7 +15,9 @@ afterEach(cleanup);
 const mount = (mode: EditorMode, canEdit = true) => {
   const setMode = vi.fn();
   render(
-    <EditorModeProvider value={{ mode, setMode, canSwitch: true, canEdit }}>
+    <EditorModeProvider
+      value={{ mode, setMode, canSwitch: true, canEdit, workshop: false, setWorkshop: vi.fn() }}
+    >
       <StartModeSwitch />
     </EditorModeProvider>,
   );

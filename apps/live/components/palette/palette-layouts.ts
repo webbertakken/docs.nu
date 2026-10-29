@@ -104,22 +104,14 @@ const LAYOUT_TILES = [
   'components:step',
 ];
 
-// Workshop's Layout: the same, with the Timeline after the containers, as Workshop has no Concepts (where the
-// Timeline lives, docs/specs/009-elements/concept-graphics.md "Timeline") and a session plans along one as often.
-const WORKSHOP_LAYOUT_TILES = [
-  ...LAYOUT_TILES.slice(0, LAYOUT_TILES.indexOf(DIVIDE)),
-  'tools:timeline',
-  ...LAYOUT_TILES.slice(LAYOUT_TILES.indexOf(DIVIDE)),
-];
-
 // The concept graphics, then the Sankey (Diagram's and Pages mode's Concepts).
 const CONCEPTS_WITH_SANKEY = [...tilesForCategory('concepts').map((t) => t.id), 'tools:sankey'];
 
 // Image and Avatar; no embedded pages, and no Tab Window (a Pages element, docs/specs/009-elements/tab-window.md).
 const MEDIA_WITHOUT_EMBEDS = tilesExcept('media', ...EMBED_TILES, 'media:tab-window');
 
-// Diagram mode: Popular, then every category but the mock-up kit (Components, Devices), the charts
-// (Data) and the session kit (Stickers, Collaborate: Workshop's, docs/specs/012-collaboration/
+// Structured mode: Popular, then every category but the mock-up kit (Components, Devices), the charts
+// (Data) and the session kit (Stickers, Collaborate: the Workshop control's, docs/specs/012-collaboration/
 // workshop-mode.md), each with its own tiles but Media's embeds.
 const DIAGRAM: PaletteLayout = {
   landing: 'popular',
@@ -371,67 +363,46 @@ const PAGES_BY_KIND: Readonly<Record<PaletteKind, PaletteLayout>> = {
   logo: PAGES_LOGO,
 };
 
-// Workshop mode (docs/specs/012-collaboration/workshop-mode.md "The palette"): running a session
-// with a team. Popular, the drawing basics a session uses (no Page or Annotation, no Shape Pen or
-// Polygon), Diagram's Layout, the Collaborate elements as six categories, one per group, ahead of the
-// decorations a room reaches for and the charts; no tech icons, mock-up kit or workshop notation.
-const WORKSHOP: PaletteLayout = {
-  landing: 'popular',
-  categories: [
-    {
-      // What a session is most often run with: a square, notes and words, a frame and an arrow to arrange them,
-      // then, behind a divider, the session kit as four openers (palette-openers), each its Collaborate category in
-      // a popover.
-      id: 'popular',
-      tiles: [
-        'shapes:square',
-        'tools:sticky',
-        'tools:text',
-        'tools:frame',
-        'tools:arrow',
-        'tools:image',
-        DIVIDE,
-        'open:collab-ask',
-        'open:collab-tools',
-        'open:collab-record',
-        'open:collab-react',
-      ],
-    },
-    { id: 'shapes' },
-    { id: 'my-shapes' },
-    // Words and notes, then a table and a checklist to keep them in. No Page or Annotation; and a Sankey reports on a
-    // flow, mind maps and flowcharts build a diagram: a session does not stop for them.
-    {
-      id: 'write',
-      description: 'Text, sticky notes, tables and checklists.',
-      tiles: [
-        ...tilesExcept('write', 'tools:page', 'tools:annotation'),
-        DIVIDE,
-        'tools:table',
-        'tools:checklist',
-      ],
-    },
-    { id: 'draw', tiles: tilesExcept('draw', 'tools:shape-pen', 'tools:polygon') },
-    // Diagram's Layout (docs/specs/010-palette/build-category.md): a board is laid out in frames and lanes and its
-    // notes labelled with badges and step numbers, as a diagram is, with the Timeline (Workshop has no Concepts).
-    { id: 'layout', tiles: WORKSHOP_LAYOUT_TILES },
-    // The session kit next, before the decorations: running the room is what the mode is for, so Ask and Session
-    // (the other five, gathered on the bar) come right after the board's structure.
-    { id: 'collab-ask' },
-    { id: 'collab-tools' },
-    { id: 'collab-record' },
-    { id: 'collab-react' },
-    { id: 'collab-mode' },
-    { id: 'collab-navigate' },
-    // No Concepts: concept graphics lay out an idea for a diagram (docs/specs/009-elements/concept-graphics.md),
-    // which a session does not stop to draw.
-    { id: 'icons' },
-    { id: 'stickers' },
-    { id: 'media', tiles: MEDIA_WITHOUT_EMBEDS },
-    // The charts and meters: a session reads results and sets targets as often as a page reports them.
-    { id: 'data' },
-  ],
-};
+// The Workshop control's session kit (docs/specs/012-collaboration/workshop-mode.md "The palette"): the six
+// Collaborate categories, in the room-first order, as a Collaborate band before the layout's Icons, and Stickers right
+// after Icons where the layout has none. Popular and everything else the mode offers stay as they are.
+export const WORKSHOP_KIT_CATEGORIES = [
+  'collab-ask',
+  'collab-tools',
+  'collab-record',
+  'collab-react',
+  'collab-mode',
+  'collab-navigate',
+] as const;
+
+const withKit = new WeakMap<PaletteLayout, PaletteLayout>();
+
+/** `layout` with the session kit added (WORKSHOP_KIT_CATEGORIES, and Stickers), each category once. */
+export function withWorkshopKit(layout: PaletteLayout): PaletteLayout {
+  const known = withKit.get(layout);
+  if (known) return known;
+  const has = new Set(layout.categories.map((e) => e.id));
+  const kit: PaletteLayoutEntry[] = WORKSHOP_KIT_CATEGORIES.filter((id) => !has.has(id)).map(
+    (id) => ({
+      id,
+    }),
+  );
+  const stickers: PaletteLayoutEntry[] = has.has('stickers') ? [] : [{ id: 'stickers' }];
+  const at = layout.categories.findIndex((e) => e.id === 'icons');
+  const categories =
+    at < 0
+      ? [...layout.categories, ...kit, ...stickers]
+      : [
+          ...layout.categories.slice(0, at),
+          ...kit,
+          layout.categories[at]!,
+          ...stickers,
+          ...layout.categories.slice(at + 1),
+        ];
+  const out = { ...layout, categories };
+  withKit.set(layout, out);
+  return out;
+}
 
 // Plan mode (docs/specs/026-plan/plan-mode.md "The palette"): cards, boards and their widgets first, then the
 // plan views that read every card (docs/specs/026-plan/plan-views.md), then the few other elements a team
@@ -465,13 +436,18 @@ export const PALETTE_LAYOUTS = {
   diagram: DIAGRAM,
   pages: PAGES,
   plan: PLAN,
-  workshop: WORKSHOP,
 } as const;
 
-/** The layout a mode's palette shows. Draw mode shows its own tools, so it borrows Diagram's. */
-function paletteLayoutFor(mode: EditorMode, pagesKind: PaletteKind = 'design'): PaletteLayout {
-  if (mode === 'pages') return PAGES_BY_KIND[pagesKind];
-  return mode === 'draw' ? DIAGRAM : PALETTE_LAYOUTS[mode];
+/** The layout a mode's palette shows, with the session kit while the Workshop control is on (never on a Plan tab).
+ *  Sketch mode shows its own tools, so it borrows Structured's. */
+function paletteLayoutFor(
+  mode: EditorMode,
+  pagesKind: PaletteKind = 'design',
+  workshop = false,
+): PaletteLayout {
+  const layout =
+    mode === 'pages' ? PAGES_BY_KIND[pagesKind] : mode === 'draw' ? DIAGRAM : PALETTE_LAYOUTS[mode];
+  return workshop && mode !== 'plan' ? withWorkshopKit(layout) : layout;
 }
 
 export type ResolvedPaletteCategory = (typeof PALETTE_CATEGORIES)[number] & {
@@ -514,12 +490,17 @@ function resolve(entry: PaletteLayoutEntry): ResolvedPaletteCategory {
 }
 
 /** The categories a mode's palette offers, in order, with their tiles. A board-only category is
- *  left out unless the tab is an event-storming board; Pages mode offers its kind's (`pagesKind`). */
+ *  left out unless the tab is an event-storming board; Pages mode offers its kind's (`pagesKind`); the Workshop
+ *  control adds the session kit (`workshop`). */
 export function paletteCategoriesFor(
   mode: EditorMode,
-  { esBoard = false, pagesKind }: { esBoard?: boolean; pagesKind?: PaletteKind } = {},
+  {
+    esBoard = false,
+    pagesKind,
+    workshop = false,
+  }: { esBoard?: boolean; pagesKind?: PaletteKind; workshop?: boolean } = {},
 ): ResolvedPaletteCategory[] {
-  return paletteLayoutFor(mode, pagesKind)
+  return paletteLayoutFor(mode, pagesKind, workshop)
     .categories.filter((e) => esBoard || !e.boardOnly)
     .map(resolve);
 }
@@ -589,9 +570,11 @@ export function dashboardPaletteCategories(): ResolvedPaletteCategory[] {
 }
 export const DASHBOARD_PALETTE_LANDING = DASHBOARD.landing;
 
-/** Whether a mode's palette offers category `id` (on an ordinary tab). */
-export function paletteCategoryOffered(mode: EditorMode, id: string): boolean {
-  return paletteLayoutFor(mode).categories.some((e) => e.id === id && !e.boardOnly);
+/** Whether a mode's palette offers category `id` (on an ordinary tab), the Workshop control's kit included while on. */
+export function paletteCategoryOffered(mode: EditorMode, id: string, workshop = false): boolean {
+  return paletteLayoutFor(mode, 'design', workshop).categories.some(
+    (e) => e.id === id && !e.boardOnly,
+  );
 }
 
 // Plan's landing while its tab has no board (docs/specs/026-plan/plan-mode.md "The palette"): a card lands on a
