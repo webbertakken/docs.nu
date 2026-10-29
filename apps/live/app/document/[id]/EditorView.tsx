@@ -45,7 +45,6 @@ const workbenchDocumentHref = (documentId: string, shareCode: string | null) =>
 import { LandscapeBarFold, LandscapeBarsHandle } from '@/components/chrome/LandscapeBars';
 import { useLandscapeBars } from '@/hooks/ui/useLandscapeBars';
 import { SplitViewFrame } from '@/components/split/SplitViewFrame';
-import { SignInBanner, SIGNIN_BANNER_DISMISS_KEY } from '@/components/chrome/SignInBanner';
 import { BoardSceneNotice } from '@/components/canvas/BoardSceneNotice';
 import { EditorModals } from '@/components/dialogs/EditorModals';
 import { PollPromptSheet } from '@/components/panels/PollPromptSheet';
@@ -60,10 +59,7 @@ import { EditorAnchoredPopovers } from '@/components/panels/EditorAnchoredPopove
 import { ModifierHint } from '@/components/chrome/ModifierHintBanner';
 import { loadEditorSearchPanel } from '@/lib/editor-deferred-code';
 import { EditorPhotoImport } from '@/components/chrome/EditorPhotoImport';
-import { useSignInAvailable } from '@/lib/auth-config';
-import { useDismissibleBanner } from '@/hooks/ui/useDismissibleBanner';
 import { useIsOfflineDocument } from '@/hooks/persistence/useIsOfflineDocument';
-import { useDelayedReveal } from '@/hooks/ui/useDelayedReveal';
 import { useEditorAccent } from '@/hooks/ui/useEditorAccent';
 import { useAppearance } from '@/hooks/ui/useAppearance';
 import { useEditorContext } from './EditorContext';
@@ -91,18 +87,12 @@ const PlanSheetsHost = dynamic(
   { ssr: false },
 );
 
-// How long a guest edits before the sign-in nudge appears (docs/specs/014-identity/sign-in-encouragement.md).
-// Long enough that it never greets someone the instant they open a
-// document; short enough to catch an invested session.
-const SIGNIN_BANNER_DELAY_MS = 5 * 60_000;
-
 // The editor's full view (header + canvas + tab bar + all dialogs),
 // lifted out of editor-page.tsx. Every value/handler it needs is read
 // from EditorContext (provided by the page), so the page no longer
 // threads ~150 props through this JSX. The JSX is verbatim; only its
 // scope changed from the page's locals to the destructured context.
 export function EditorView() {
-  const signInAvailable = useSignInAvailable();
   const ctx = useEditorContext();
   // Offline Mode (docs/specs/006-document/offline-mode.md): a document saved only in this browser. Drives the
   // "This Browser" header badge and hides server-only actions (Share).
@@ -136,7 +126,6 @@ export function EditorView() {
     drag,
     esBoard,
     clearTabContent,
-    accountId,
     closeContextMenu,
     contextMenu,
     copying,
@@ -227,17 +216,6 @@ export function EditorView() {
   // The viewer's own light / dark chrome (docs/specs/007-editor/live-app.md). Read here because the
   // Default theme resolves through it — see the canvas surface below.
   const { appearance } = useAppearance();
-  // Guest sign-in nudge (docs/specs/014-identity/sign-in-encouragement.md): the same banner the Explorer shows,
-  // but on the editor it waits ~5 minutes into the session before
-  // appearing so it never interrupts someone the moment they open a
-  // document. Hidden in embed (read-only iframe) and zen mode. zenMode
-  // is deliberately kept OUT of the timer's `enabled` so toggling zen
-  // doesn't restart the countdown; it only hides the card at render.
-  const { dismissed: signInDismissed, dismiss: dismissSignIn } =
-    useDismissibleBanner(SIGNIN_BANNER_DISMISS_KEY);
-  const signInTimerEnabled = signInAvailable && !accountId && appChrome && !signInDismissed;
-  const signInDelayElapsed = useDelayedReveal(SIGNIN_BANNER_DELAY_MS, signInTimerEnabled);
-  const showSignInBanner = signInTimerEnabled && !zenMode && signInDelayElapsed;
   const backdrop = resolveViewBackdrop(
     activeTab,
     { mode: ctx.editorMode.mode, drawPattern: readDrawPattern(userPreferences) },
@@ -659,17 +637,6 @@ export function EditorView() {
                                       <EditorTours />
                                     </AreaErrorBoundary>
 
-                                    {/* Guest sign-in nudge (docs/specs/014-identity/sign-in-encouragement.md), delayed ~5 min. Stands on
-          the bottom chrome (the tab bar, the Undo / session cluster, the dock) rather than over it, above the canvas
-          (z-[var(--z-overlay)]). */}
-                                    {showSignInBanner ? (
-                                      <SignInBanner
-                                        surface="Editor"
-                                        onDismiss={dismissSignIn}
-                                        placementClassName="z-[var(--z-overlay)]"
-                                        standOnChrome
-                                      />
-                                    ) : null}
                                     {/* What a pasted board brought across (docs/specs/020-import-export/board-scene.md). */}
                                     <BoardSceneNotice
                                       notice={boardSceneInsert.notice}

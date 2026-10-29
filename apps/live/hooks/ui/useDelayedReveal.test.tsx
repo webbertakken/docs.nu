@@ -6,7 +6,7 @@ import { useDelayedReveal } from './useDelayedReveal';
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
-// The sign-in nudge's delay (docs/specs/014-identity/sign-in-encouragement.md).
+// A reveal that waits for its delay (a sheet cell's comment preview).
 describe('useDelayedReveal', () => {
   it('reveals after the delay while enabled', () => {
     const { result } = renderHook(() => useDelayedReveal(1000, true));

@@ -69,6 +69,17 @@ const LOCATION_STEP_AND_QUICK_START_UI = new Set([
 // its popover's opening. The tidiers it ran live in the command palette, and their Tab·Aligned events carry on.
 const TIDY_UP_UI = new Set(['Opened|TidyUp']);
 
+// The guest sign-in banner and its Learn More reasons (removed 2026-10-29, docs/specs/014-identity/
+// sign-in-encouragement.md "No banner"): its Sign in, its dismissal and the reasons opening, from the Explorer and the
+// editor, and their spellings from before they named the surface. The Assign Action dialog's own nudge carries on.
+const SIGN_IN_BANNER_UI = new Set(
+  ['', 'Explorer', 'Editor'].flatMap((surface) => [
+    `Selected|SignInBanner${surface}`,
+    `Closed|SignInBanner${surface}`,
+    `Opened|SignInReasons${surface}`,
+  ]),
+);
+
 export function isRetiredEvent(category: string, action: string, type: string | null): boolean {
   if (category === 'Document' && action === 'Reverted') return true;
   if (category === 'UI' && PALETTE_FAVOURITES_UI.has(`${action}|${type ?? ''}`)) return true;
@@ -76,6 +87,7 @@ export function isRetiredEvent(category: string, action: string, type: string | 
   if (category === 'UI' && LOCATION_STEP_AND_QUICK_START_UI.has(`${action}|${type ?? ''}`))
     return true;
   if (category === 'UI' && TIDY_UP_UI.has(`${action}|${type ?? ''}`)) return true;
+  if (category === 'UI' && SIGN_IN_BANNER_UI.has(`${action}|${type ?? ''}`)) return true;
   if (category === 'Help') {
     return ACTIVITY_PANEL_HELP_IDS.has(type ?? '') || type === PALETTE_FAVOURITES_HELP_ID;
   }

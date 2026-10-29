@@ -11,13 +11,10 @@ import { LensField } from './lens/LensField';
 import { LensAnnouncer } from './lens/LensStates';
 import { ChromeControls } from '@/components/chrome/ChromeControls';
 import { TeamFormModal } from '@/components/dialogs/TeamFormModal';
-import { SignInBanner, SIGNIN_BANNER_DISMISS_KEY } from '@/components/chrome/SignInBanner';
 import { useAccessEndedToast } from './useAccessEndedToast';
-import { useSignInAvailable } from '@/lib/auth-config';
 import { HELP_SEARCH_ITEMS } from '@/lib/help-search';
 import { SETTINGS_SEARCH_ITEMS } from '@/lib/settings-search-items';
 import { commitUserPreferences } from '@/lib/user-preferences';
-import { useDismissibleBanner } from '@/hooks/ui/useDismissibleBanner';
 import { useSearchShortcut } from '@/hooks/ui/useSearchShortcut';
 import { CustomThemeProvider } from '@/components/primitives/CustomThemeProvider';
 import { ShapeLibraryProvider } from '@/components/primitives/ShapeLibraryProvider';
@@ -103,7 +100,6 @@ export function ExplorerShell({ children }: { children: ReactNode }) {
 }
 
 function ShellChrome({ children }: { children: ReactNode }) {
-  const signInAvailable = useSignInAvailable();
   const {
     documents: liveDocs,
     folders,
@@ -136,7 +132,6 @@ function ShellChrome({ children }: { children: ReactNode }) {
     teamModalOpen,
     setTeamModalOpen,
     hookCreateTeam,
-    accountId,
     ownerId,
     prefs,
     lens,
@@ -156,15 +151,6 @@ function ShellChrome({ children }: { children: ReactNode }) {
   // hidden-from-Recent list, docs/specs/013-workspace/hide-from-recent.md), and a second useState here would
   // drift the moment either wrote.
 
-  // Guest sign-in nudge (docs/specs/014-identity/sign-in-encouragement.md): only when the host offers sign-in
-  // up for this deployment, the visitor isn't signed in (a guest owner
-  // id doesn't count), and they haven't dismissed it. When shown, the
-  // pane reserves extra bottom space so the last row clears the
-  // floating card.
-  const { dismissed: bannerDismissed, dismiss: dismissBanner } =
-    useDismissibleBanner(SIGNIN_BANNER_DISMISS_KEY);
-  const showSignInBanner =
-    surface.guestPrompts && signInAvailable && !accountId && !bannerDismissed;
   // Arrived here because a pass was revoked under an open document: say so (lib/access-notice.ts).
   useAccessEndedToast();
 
@@ -212,11 +198,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <main
-        className={`mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 pt-6 sm:px-6 ${
-          showSignInBanner ? 'pb-44 sm:pb-28' : 'pb-16'
-        }`}
-      >
+      <main className="mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 pb-16 pt-6 sm:px-6">
         {/* ---------- Sidebar tree ---------- */}
         {/* Hidden on mobile: at 375px the 256px sidebar swallows
             the right pane entirely. Users on a phone navigate via
@@ -257,7 +239,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
       {/* Bottom bar (docs/specs/007-editor/live-app.md): the same strip as the editor's tab bar, minus
           the tabs — the shared right-hand control cluster (search / GitHub /
           settings / dark-mode). Sticky so it stays in view while the dashboard
-          scrolls; the sign-in banner is nudged up to clear it. */}
+          scrolls. */}
       <div
         // The toasts stand on it (docs/specs/004-interface-design/toasts.md "Placement").
         data-toast-floor=""
@@ -410,10 +392,6 @@ function ShellChrome({ children }: { children: ReactNode }) {
           initialSectionId={settingsSection}
         />
       ) : null}
-
-      {/* Guest sign-in encouragement (docs/specs/014-identity/sign-in-encouragement.md): Explorer only, never
-          the editor. Dismissal persists per device. */}
-      {showSignInBanner ? <SignInBanner surface="Explorer" onDismiss={dismissBanner} /> : null}
     </div>
   );
 }

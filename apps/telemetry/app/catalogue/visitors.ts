@@ -1,12 +1,9 @@
-// Who arrives: visitors, accounts, page views, the sign-in prompts and the first-visit welcome and tour (docs/specs/017-telemetry/telemetry.md).
+// Who arrives: visitors, accounts, page views and the first-visit welcome and tour (docs/specs/017-telemetry/telemetry.md).
 // Part of the metric catalogue: import from ../metric-catalogue.
 
 import { pageViewApp, type PageViewApp } from '@livedoc/api-schema';
 import type { Metric, MetricStack } from '../metric-series';
 import {
-  ACTION_SIGN_IN_NUDGE,
-  EDITOR_REASONS_OPENED,
-  EXPLORER_REASONS_OPENED,
   TOUR_OFFERED,
   PLAN_TOUR_OFFERED,
   WORKSHOP_TOUR_OFFERED,
@@ -761,59 +758,6 @@ export const NEW_VERSION_PROMPT: MetricStack = {
     'Editors left open across a deploy that changed the document format: offered a reload, then reloaded.',
   members: [NEW_VERSION_OFFERED, NEW_VERSION_RELOADED],
   headline: NEW_VERSION_RELOADED,
-};
-
-// Sign-in prompts, by where each one happens (docs/specs/014-identity/sign-in-encouragement.md). The same bottom
-// banner runs in the Explorer and the editor, so every banner event names its
-// surface; the Assign Action dialog has its own nudge.
-export const EXPLORER_BANNER_SIGN_INS = chart(
-  'UI',
-  'Selected',
-  'Explorer Banner: Sign In',
-  'The Explorer\u2019s sign-in banner, or the reasons it opened: Sign in clicked.',
-  { types: ['SignInBannerExplorer'] },
-);
-
-export const EXPLORER_BANNER_DISMISSED = chart(
-  'UI',
-  'Closed',
-  'Explorer Banner: Dismissed',
-  'The Explorer\u2019s sign-in banner closed. Dismissing it hides it in the editor too.',
-  { types: ['SignInBannerExplorer'], rising: 'neutral' },
-);
-
-export const EDITOR_BANNER_SIGN_INS = chart(
-  'UI',
-  'Selected',
-  'Editor Banner: Sign In',
-  'The editor\u2019s sign-in banner, or the reasons it opened: Sign in clicked.',
-  { types: ['SignInBannerEditor'] },
-);
-
-export const EDITOR_BANNER_DISMISSED = chart(
-  'UI',
-  'Closed',
-  'Editor Banner: Dismissed',
-  'The editor\u2019s sign-in banner closed. Dismissing it hides it in the Explorer too.',
-  { types: ['SignInBannerEditor'], rising: 'neutral' },
-);
-
-export const SIGN_IN_PROMPTS: MetricStack = {
-  stack: true,
-  title: 'Sign-In Prompts',
-  blurb:
-    'The nudges to make an account, by where they appear: the Explorer banner, the editor banner, and the Assign Action dialog.',
-  members: [
-    EXPLORER_BANNER_SIGN_INS,
-    EXPLORER_REASONS_OPENED,
-    EXPLORER_BANNER_DISMISSED,
-    EDITOR_BANNER_SIGN_INS,
-    EDITOR_REASONS_OPENED,
-    EDITOR_BANNER_DISMISSED,
-    ACTION_SIGN_IN_NUDGE,
-  ],
-  // Sign-ins started from either banner: the prompts that worked.
-  headline: [EXPLORER_BANNER_SIGN_INS, EDITOR_BANNER_SIGN_INS],
 };
 
 // Visitors and page views, for the Dashboard.

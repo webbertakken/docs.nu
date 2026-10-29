@@ -66,6 +66,16 @@ describe('isRetiredEvent', () => {
     expect(isRetiredEvent('UI', 'Opened', 'Layers')).toBe(false);
   });
 
+  it("retires the guest sign-in banner and its reasons, not the Assign Action dialog's nudge", () => {
+    for (const surface of ['', 'Explorer', 'Editor']) {
+      expect(isRetiredEvent('UI', 'Selected', `SignInBanner${surface}`)).toBe(true);
+      expect(isRetiredEvent('UI', 'Closed', `SignInBanner${surface}`)).toBe(true);
+      expect(isRetiredEvent('UI', 'Opened', `SignInReasons${surface}`)).toBe(true);
+    }
+    expect(isRetiredEvent('UI', 'Opened', 'ActionSignInNudge')).toBe(false);
+    expect(isRetiredEvent('Home', 'Selected', 'Welcome.SignIn')).toBe(false);
+  });
+
   it('keeps everything that still exists', () => {
     expect(isRetiredEvent('Document', 'Undone', null)).toBe(false);
     expect(isRetiredEvent('Help', 'View', 'undo')).toBe(false);

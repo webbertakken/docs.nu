@@ -1255,9 +1255,10 @@ export const EXACT: Readonly<Record<string, string>> = {
   'UI|Closed|Presentation': 'Someone exited presentation mode.',
   'UI|Closed|SignInBanner':
     'Someone dismissed the guest sign-in banner. An earlier version of this event, before it recorded which surface (the editor or the Explorer) showed the banner. No longer recorded.',
-  'UI|Closed|SignInBannerEditor': 'Someone dismissed the guest sign-in banner shown in the editor.',
+  'UI|Closed|SignInBannerEditor':
+    'Someone dismissed the guest sign-in banner shown in the editor. No longer recorded: the banner was removed.',
   'UI|Closed|SignInBannerExplorer':
-    'Someone dismissed the guest sign-in banner shown in the Explorer.',
+    'Someone dismissed the guest sign-in banner shown in the Explorer. No longer recorded: the banner was removed.',
   'UI|Closed|TourOffer':
     "Someone dismissed the Diagram tour's offer card (the welcome tour's, until October 2026) without starting it.",
   'UI|Closed|PagesTourOffer': 'Someone turned the Pages tour down with No on its own card.',
@@ -1474,9 +1475,9 @@ export const EXACT: Readonly<Record<string, string>> = {
   'UI|Opened|SignInReasons':
     'Someone clicked "Learn more" on the guest sign-in banner to read why they should sign in. An earlier version of this event, before it recorded which surface (the editor or the Explorer) showed the banner. No longer recorded.',
   'UI|Opened|SignInReasonsEditor':
-    'Someone clicked "Learn more" on the guest sign-in banner shown in the editor, opening the reasons-to-sign-in card.',
+    'Someone clicked "Learn more" on the guest sign-in banner shown in the editor, opening the reasons-to-sign-in card. No longer recorded: the banner was removed.',
   'UI|Opened|SignInReasonsExplorer':
-    'Someone clicked "Learn more" on the guest sign-in banner shown in the Explorer, opening the reasons-to-sign-in card.',
+    'Someone clicked "Learn more" on the guest sign-in banner shown in the Explorer, opening the reasons-to-sign-in card. No longer recorded: the banner was removed.',
   'UI|Opened|NewDocumentMenu':
     "Someone opened the Explorer's New Document menu to choose what to start.",
   'UI|Opened|PageContents':
@@ -1621,9 +1622,9 @@ export const EXACT: Readonly<Record<string, string>> = {
   'UI|Selected|SignInBanner':
     'Someone clicked "Sign in" on the guest sign-in banner. An earlier version of this event, before it recorded which surface (the editor or the Explorer) showed the banner. No longer recorded.',
   'UI|Selected|SignInBannerEditor':
-    'Someone clicked "Sign in" on the guest sign-in banner shown in the editor.',
+    'Someone clicked "Sign in" on the guest sign-in banner shown in the editor. No longer recorded: the banner was removed.',
   'UI|Selected|SignInBannerExplorer':
-    'Someone clicked "Sign in" on the guest sign-in banner shown in the Explorer.',
+    'Someone clicked "Sign in" on the guest sign-in banner shown in the Explorer. No longer recorded: the banner was removed.',
   'UI|Started|Presentation': 'Someone started presenting: entering full-screen slideshow mode.',
   'UI|Started|Tour':
     "Someone clicked past the Diagram tour's first card (the welcome tour's, until October 2026), beginning the step-by-step walkthrough.",

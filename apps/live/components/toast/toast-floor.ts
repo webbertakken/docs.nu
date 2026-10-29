@@ -1,12 +1,11 @@
 // Where the toast stack stands (docs/specs/004-interface-design/toasts.md "Placement"): 16px off the
 // bottom edge, or 8px above the highest bottom chrome that overlaps its column (the editor's bottom line: its tools
-// group, document group and whiteboard dock; the Explorer's bottom bar, the sign-in banner). Pure: the
+// group, document group and whiteboard dock; the Explorer's bottom bar). Pure: the
 // hook measures, this decides.
 
 /**
  * The editor's own bottom chrome, the bottom line: the tools group (Undo / Redo, the Session strip's Timer, Vote and
- * Poll, Layers, Zoom), the document group and the whiteboard dock. The sign-in banner stands on it, so it never covers them
- * (docs/specs/014-identity/sign-in-encouragement.md "Where it shows").
+ * Poll, Layers, Zoom), the document group and the whiteboard dock.
  */
 export const BOTTOM_CHROME_SELECTOR =
   '[data-document-group], [data-zoom-cluster], [data-whiteboard-dock]';
@@ -24,8 +23,8 @@ export const TOAST_MAX_WIDTH_PX = 576;
 export const TOAST_PHONE_MAX_PX = 639;
 
 /**
- * Said on `window` by bottom chrome that comes or goes without resizing anything the stack watches (the sign-in
- * banner, the whiteboard dock), so a toast already up moves to stand on it, or back down.
+ * Said on `window` by bottom chrome that comes or goes without resizing anything the stack watches (the whiteboard
+ * dock), so a toast already up moves to stand on it, or back down.
  */
 export const TOAST_FLOOR_CHANGED_EVENT = 'lvd:toast-floor-changed';
 
@@ -36,21 +35,16 @@ export function announceToastFloorChange(): void {
 export type FloorRect = { top: number; left: number; right: number; width: number; height: number };
 
 /**
- * The CSS `bottom`, in px, of a centred column (the toast stack, or the sign-in banner with its own `columnWidth`)
- * that stands on whatever bottom chrome sits beneath it.
+ * The CSS `bottom`, in px, of a centred, toast-wide column that stands on whatever bottom chrome sits beneath it.
  */
 export function toastFloor(input: {
   viewportWidth: number;
   viewportHeight: number;
   obstacles: readonly FloorRect[];
-  // The column's widest from 640px up; a toast's by default.
-  columnWidth?: number;
 }): number {
   const { viewportWidth: w, viewportHeight: h } = input;
   const phone = w <= TOAST_PHONE_MAX_PX;
-  const half = phone
-    ? w / 2 - TOAST_EDGE_PX
-    : Math.min(input.columnWidth ?? TOAST_MAX_WIDTH_PX, w) / 2;
+  const half = phone ? w / 2 - TOAST_EDGE_PX : Math.min(TOAST_MAX_WIDTH_PX, w) / 2;
   const left = w / 2 - half;
   const right = w / 2 + half;
   let floor = TOAST_EDGE_PX;
