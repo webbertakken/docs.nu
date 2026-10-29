@@ -138,7 +138,7 @@ const POPULAR: { label: string; glyph: ReactNode }[] = [
   },
 ];
 
-/** Popular in Diagram mode: twelve tiles, four across. */
+/** Popular in Structured mode: twelve tiles, four across. */
 export function PopularGrid() {
   return (
     <Scene w={420} h={250} bg="plain">

@@ -134,7 +134,7 @@ function AccentBar({
 
 // --- Scenes ------------------------------------------------------------------
 
-/** Workshop mode's Collaborate band in the category picker: the six Collaborate
+/** The Workshop control's Collaborate band in the category picker: the six Collaborate
  *  categories. Ask and Record hold the elements that collect what the room thinks,
  *  so they are the two drawn lit. */
 export function CollaborateCategories() {
