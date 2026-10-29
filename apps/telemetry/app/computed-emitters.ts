@@ -419,7 +419,7 @@ export const COMPUTED_EMITTERS: Record<string, ComputedValues> = {
   ),
   // Agent presence (docs/specs/024-agents/agent-presence.md), typed by the same front door.
   'apps/api/src/routes/agent-presence-routes.ts Agent·Present': { values: AGENT_FRONT_DOORS },
-  'apps/api/src/index.ts Error·Api': {
+  'apps/api/src/request-failure.ts Error·Api': {
     values: ['Internal.Put.Documents.Tabs', 'Internal.Get.Documents'],
     open: 'Internal.<Method>.<Route>, the route the worker was serving',
   },

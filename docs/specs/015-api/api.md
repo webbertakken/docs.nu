@@ -360,6 +360,21 @@ mail, Timeline backfills) never fails silently, and never fails the request it c
   stage (welcome, activation, week 1, week 2, win-back) is a step too: a failure logs
   `[lifecycle] stage failed stage=<name>`, and the next stage still runs.
 
+## When a request fails
+
+A request that throws, at any step from resolving who is calling to the route's own work, is
+answered by the worker, never left to the runtime's bare error page.
+
+- **The database is unavailable: `503 storage_unavailable`** with `Retry-After: 5`, logged as
+  `[d1] unavailable route=<route words>` with the error. It is D1 failing on its side (an internal
+  error, a lost connection, an overloaded or reset database, a storage timeout), not the request:
+  the same call succeeds once D1 recovers, so the caller retries.
+- **Anything else: `500 internal_error`**, logged as `api error route=<route words>` with the
+  error, and counted as an `Error·Api·Internal.<Route words>` telemetry row when
+  `TELEMETRY_ENABLED` is on. A D1 error that names the query (a constraint, a type, SQL) is a
+  bug, so it lands here too.
+- Neither body echoes the error's text. The route words never carry an id.
+
 ## Rate limiting
 
 The limiters, each a Cloudflare Workers Rate Limiting binding declared under `[[unsafe.bindings]]` in `apps/api/wrangler.toml` (where the ceilings live). Over-limit requests get `429` with `{ "error": "rate_limited" }`, except the telemetry ingest, which answers with its usual no-op `204` so a throttled beacon never surfaces as an error.
