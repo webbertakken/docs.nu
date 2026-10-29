@@ -1,5 +1,11 @@
 import { DARK_CANVAS_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR } from '@livedoc/document';
-import { expect, test, expectNoPageErrors, paletteTile } from './fixtures';
+import {
+  expect,
+  test,
+  expectNoPageErrors,
+  openContextMenuFromKeyboard,
+  paletteTile,
+} from './fixtures';
 
 // Appearance (docs/specs/007-editor/live-app.md) end to end: the three settings on the real control, and
 // the thing the merge was for — a tab on the Default theme repainting
@@ -151,5 +157,29 @@ test.describe('Appearance', () => {
     // pre-hydration script, so it is there before React mounts.
     await expect(page.locator('html')).toHaveClass(/dark/);
     expect(await setting(page)).toBe('Dark');
+  });
+
+  // docs/specs/004-interface-design/appearance.md "The control": a right-click sets System, power user mode or not.
+  test('a right-click follows the device, with no browser menu', async ({ page, pageErrors }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await startBlank(page);
+    const control = appearanceButton(page);
+    await control.click(); // System -> Light
+    await expect(control).toHaveAccessibleName(
+      'Appearance: Light. Switch to Dark. Right-click to follow your device.',
+    );
+    await expect(page.locator('html')).not.toHaveClass(/dark/);
+
+    await control.click({ button: 'right' });
+    await expect(control).toHaveAccessibleName('Appearance: System. Switch to Light.');
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    expect(await page.evaluate(() => localStorage.getItem('livedoc:v2:ui-mode'))).toBe('system');
+    await expect(page.getByRole('menu')).toHaveCount(0);
+
+    // The keyboard reaches it too: the context menu key on the focused control.
+    await control.click(); // System -> Light
+    await openContextMenuFromKeyboard(control);
+    await expect(control).toHaveAccessibleName(/^Appearance: System\./);
+    expectNoPageErrors(pageErrors);
   });
 });

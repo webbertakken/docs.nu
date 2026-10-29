@@ -14,7 +14,6 @@ import { DocumentActions, type DocumentActionsProps } from './DocumentActions';
 export type ActionsGroupProps = DocumentActionsProps & {
   onOpenSearch?: () => void;
   onOpenSettings?: () => void;
-  powerUser?: boolean;
   // Button Labels (docs/specs/007-editor/user-preferences.md): Search, Settings and the appearance by name.
   labelled?: boolean;
   // The document's actions (Start Tour, Copy, Present, Share) and the chrome trio; false through the welcome flow,
@@ -36,7 +35,6 @@ export type ActionsGroupProps = DocumentActionsProps & {
 export function ActionsGroup({
   onOpenSearch,
   onOpenSettings,
-  powerUser = false,
   labelled = false,
   documentActions,
   workbenchOpenHref,
@@ -73,7 +71,6 @@ export function ActionsGroup({
               settingsDescription="Your editor preferences. They follow your account, not this document."
               labelled={labelled}
               github={false}
-              powerUser={powerUser}
               appearance={!workbenchOpenHref}
               tourOffer={false}
             />
