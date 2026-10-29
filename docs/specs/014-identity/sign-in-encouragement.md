@@ -59,7 +59,7 @@ dismiss it to reach the timer or the vote. It is drawn over the canvas, and is a
 
 Until 28 October 2026 it also stepped aside while a tour's offer or last card was up, since those were banners in
 the same place at the bottom (`data-tour-card-open` on the body). Tours now start from the actions group's Start Tour
-button and every card is drawn in the tour's popover ([Diagram tour](../007-editor/editor-tour.md) "Where it
+button and every card is drawn in the tour's popover ([Structured tour](../007-editor/editor-tour.md) "Where it
 appears"), so there is nothing to step aside for.
 
 The delay is per editor session (per page load); it isn't persisted

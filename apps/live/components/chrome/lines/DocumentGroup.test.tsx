@@ -140,10 +140,14 @@ describe('DocumentGroup', () => {
     expect(screen.getByRole('button', { name: 'All tabs (2)' })).toBeTruthy();
   });
 
-  it('adds a tab', () => {
+  it('adds a tab, or a Board, from the add menu', () => {
     const { props } = renderGroup();
     fireEvent.click(screen.getByRole('button', { name: 'Add tab' }));
-    expect(props.tabs.onAdd).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Tab' }));
+    expect(props.tabs.onAdd).toHaveBeenCalledWith('tab');
+    fireEvent.click(screen.getByRole('button', { name: 'Add tab' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Board' }));
+    expect(props.tabs.onAdd).toHaveBeenLastCalledWith('board');
   });
 
   it('draws no contributors while nobody else is here', () => {

@@ -7,7 +7,7 @@ import {
   type SpecificTabKind,
   type TemplateFamily,
 } from '@livedoc/api-schema';
-import { EDITOR_MODES, type EditorMode } from '@livedoc/document';
+import { TAB_OPENINGS, type TabOpening } from '@livedoc/document';
 
 /** The dimensions in canonical order: the order tokens are written in and chips are shown in. */
 export const LENS_DIMENSIONS = [
@@ -22,8 +22,8 @@ export const LENS_DIMENSIONS = [
 export type LensDimension = (typeof LENS_DIMENSIONS)[number];
 
 /** The editor modes a document can be created to open in: the one list of modes. */
-export const OPENS_IN_VALUES = EDITOR_MODES;
-export type OpensInValue = EditorMode;
+export const OPENS_IN_VALUES = TAB_OPENINGS;
+export type OpensInValue = TabOpening;
 
 /** The specific tab kinds: every creatable tab kind but the general diagram tab. */
 export const KIND_VALUES = SPECIFIC_TAB_KINDS;
@@ -70,10 +70,10 @@ export const DIMENSION_LABELS: Record<LensDimension, string> = {
 /** The label of every fixed value. A team's label is its name. */
 export const VALUE_LABELS = {
   'opens-in': {
-    diagram: 'Diagram',
-    draw: 'Draw',
-    workshop: 'Workshop',
+    draw: 'Sketch',
+    diagram: 'Structured',
     pages: 'Pages',
+    workshop: 'Workshop',
     plan: 'Plan',
   },
   kind: { 'event-storming': 'Event Storming' },

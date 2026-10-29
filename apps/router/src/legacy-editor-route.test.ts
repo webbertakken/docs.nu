@@ -80,19 +80,26 @@ describe('legacyHelpRedirect', () => {
         '/help/getting-started/sharing-your-document/',
       ],
       ['/help/developers/working-with-diagrams', '/help/developers/working-with-documents'],
-      // Whiteboarding became Draw mode (docs/specs/007-editor/editor-modes.md "Naming in the interface").
-      ['/help/canvas/whiteboards/', '/help/canvas/draw-mode/'],
+      // Whiteboarding became Draw mode, then Sketch mode (docs/specs/007-editor/editor-modes.md "Naming in the interface").
+      ['/help/canvas/whiteboards/', '/help/canvas/sketch-mode/'],
+      ['/help/canvas/draw-mode/', '/help/canvas/sketch-mode/'],
+      ['/help/canvas/draw-mode/draw-tour/', '/help/canvas/sketch-mode/sketch-tour/'],
       // Illustrate mode became Pages mode (docs/specs/007-editor/editor-modes.md "Naming in the interface").
       ['/help/canvas/illustrate/', '/help/canvas/pages-mode/'],
       ['/help/canvas/illustrate/illustrate-tour/', '/help/canvas/pages-mode/pages-tour/'],
       ['/help/canvas/illustrate/slide-pages', '/help/canvas/pages-mode/slide-pages'],
       ['/help/canvas/infographics/', '/help/canvas/pages-mode/'],
-      // Facilitate mode became Workshop mode (docs/specs/007-editor/editor-modes.md "Naming in the interface").
-      ['/help/canvas/facilitate-mode/', '/help/canvas/workshop-mode/'],
-      [
-        '/help/canvas/facilitate-mode/facilitate-tour/',
-        '/help/canvas/workshop-mode/workshop-tour/',
-      ],
+      // Facilitate mode became Workshop mode, then the Workshop control (docs/specs/007-editor/editor-modes.md
+      // "Naming in the interface").
+      ['/help/canvas/facilitate-mode/', '/help/canvas/workshop/'],
+      ['/help/canvas/facilitate-mode/facilitate-tour/', '/help/canvas/workshop/workshop-tour/'],
+      ['/help/canvas/workshop-mode/', '/help/canvas/workshop/'],
+      ['/help/canvas/workshop-mode/workshop-tour/', '/help/canvas/workshop/workshop-tour/'],
+      // Plan mode became Plan tabs (docs/specs/007-editor/editor-modes.md "Naming in the interface").
+      ['/help/canvas/plan-mode/', '/help/canvas/plan-tabs/'],
+      ['/help/canvas/plan-mode/boards/', '/help/canvas/plan-tabs/boards/'],
+      ['/help/canvas/plan-mode/sheets', '/help/canvas/plan-tabs/sheets'],
+      ['/help/canvas/plan-mode/plan-tour/', '/help/canvas/plan-tabs/plan-tour/'],
       // The Highlighter became a Draw tile again (docs/specs/008-canvas/highlighter.md "History").
       ['/help/selection-modes/highlighter/', '/help/palette/tools/highlighter/'],
       // The Activity Panel was removed (docs/specs/012-collaboration/README.md); Undo / Redo moved to Canvas.
@@ -117,7 +124,9 @@ describe('legacyHelpRedirect', () => {
       '/help/getting-started/your-first-diagram/',
       '/help/account-and-data/exporting-diagrams/',
       '/help/tabs/add-to-document/',
-      '/help/canvas/draw-mode/',
+      '/help/canvas/sketch-mode/',
+      '/help/canvas/workshop/',
+      '/help/canvas/plan-tabs/',
     ]) {
       expect(legacyHelpRedirect(new URL(`https://docs.nu${path}`)), path).toBeNull();
     }

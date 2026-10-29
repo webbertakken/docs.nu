@@ -1,14 +1,14 @@
-import type { EditorMode } from '@livedoc/document';
-import { EDITOR_MODES, seededRandom } from '@livedoc/document';
+import type { TabOpening } from '@livedoc/document';
+import { TAB_OPENINGS, seededRandom } from '@livedoc/document';
 import {
-  BLANK_TEMPLATE_FOR_MODE,
+  BLANK_TEMPLATE_FOR_OPENING,
   EXTRA_BLANK_TEMPLATES,
   TEMPLATES,
   TEMPLATE_CATEGORIES,
   isBlankTemplate,
   templateCategories,
   templateCategoryLabel,
-  templateEditorMode,
+  templateOpening,
   templateMatchesQuery,
   templateQueryWords,
   type TemplateCategory,
@@ -29,7 +29,7 @@ export type GalleryTemplate = TemplateDescriptor & {
   categories: readonly TemplateCategory[];
   categoryLabel: string;
   // The editor mode the template opens in (docs/specs/007-editor/templates-by-mode.md).
-  mode: EditorMode;
+  mode: TabOpening;
 };
 
 // The open shelf: Blank Slate (its id `popular`, the shelf it replaced), or a category.
@@ -49,7 +49,7 @@ export function toGallery(t: TemplateDescriptor): GalleryTemplate {
     category,
     categories,
     categoryLabel: category ? templateCategoryLabel(category) : '',
-    mode: templateEditorMode(t.kind),
+    mode: templateOpening(t.kind),
   };
 }
 
@@ -71,11 +71,12 @@ const SHOWN_AS_ANOTHER_BLANK: readonly string[] = [
   'blank-wireframe-watch',
 ];
 
-// Blank Slate's blanks in mode order (the mode switch's), Blank Spreadsheet beside Blank Plan.
-const BLANK_SLATE_KINDS = EDITOR_MODES.flatMap((mode) => [
-  BLANK_TEMPLATE_FOR_MODE[mode],
+// Blank Slate's blanks in the openings' order (Sketch, Structured, Pages, Workshop, Plan), Blank Spreadsheet beside
+// Blank Plan.
+const BLANK_SLATE_KINDS = TAB_OPENINGS.flatMap((mode) => [
+  BLANK_TEMPLATE_FOR_OPENING[mode],
   ...EXTRA_BLANK_TEMPLATES.filter(
-    (k) => templateEditorMode(k) === mode && !SHOWN_AS_ANOTHER_BLANK.includes(k),
+    (k) => templateOpening(k) === mode && !SHOWN_AS_ANOTHER_BLANK.includes(k),
   ),
 ]);
 

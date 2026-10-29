@@ -8,6 +8,9 @@
 // - `mode` is the tab's own mode (resolveEditorMode), the same for everyone on it.
 // - `canSwitch` is true only for an editor on a general, unlocked tab; the mode switch shows only
 //   then.
+// - `workshop` is the tab's Workshop control (workshopOf), and `setWorkshop(on)` turns it as one tab edit, fired as
+//   `Editor · Toggled · WorkshopOn | WorkshopOff` first, under the same gate as a switch
+//   (docs/specs/012-collaboration/workshop-mode.md).
 // - `setMode(next, alsoChange?)` fires `Editor · Changed · Mode<Next>` and then commits ONE tab edit:
 //   `alsoChange` (what leaving a mode brings, such as articles turned into pages), then the mode
 //   with what entering it brings (withEditorModeSwitched). One undo puts the tab back in the mode
@@ -15,10 +18,12 @@
 import { useCallback } from 'react';
 import { useLatest } from '@/hooks/ui/useLatest';
 import {
-  crossesPlan,
   editorModeLabel,
+  setTabWorkshop,
   withEditorModeSwitched,
+  workshopOf,
   type EditorMode,
+  type SwitchableEditorMode,
   type Tab,
 } from '@livedoc/document';
 import { resolveEditorMode } from '@/lib/editor-mode-store';
@@ -30,26 +35,22 @@ export type EditorModeState = {
   setMode: (next: EditorMode, alsoChange?: (tab: Tab) => Tab) => void;
   canSwitch: boolean;
   canEdit: boolean;
-  // The tab keeps its mode, for this reason (resolveEditorMode): picking another offers a new tab in it instead.
-  lockedReason?: string;
-  newTabIn?: (mode: EditorMode) => void;
-  // The tab is empty, so it may cross into or out of Plan: with nothing on it there is nothing either side's tools
-  // could not hold (docs/specs/007-editor/editor-modes.md "Plan stands apart").
-  crossPlan?: boolean;
+  // The Workshop control (docs/specs/012-collaboration/workshop-mode.md): on or off for the tab, turned by an Editor
+  // wherever the switch is offered.
+  workshop: boolean;
+  setWorkshop: (on: boolean) => void;
 };
 
-// The telemetry type a switch into each mode fires.
-const MODE_EVENT: Record<EditorMode, string> = {
-  diagram: 'ModeDiagram',
+// The telemetry type a switch into each mode fires (the stored tokens keep the modes' stored names).
+const MODE_EVENT: Record<SwitchableEditorMode, string> = {
   draw: 'ModeDraw',
+  diagram: 'ModeDiagram',
   pages: 'ModePages',
-  plan: 'ModePlan',
-  workshop: 'ModeWorkshop',
 };
 
 /** Reports a switch into `next`, before it applies (docs/specs/007-editor/editor-modes.md
  *  "Telemetry"): the switch, Shift+D and the tab menu's Mode all send it. */
-export function trackModeSwitch(next: EditorMode): void {
+export function trackModeSwitch(next: SwitchableEditorMode): void {
   track('Editor', 'Changed', MODE_EVENT[next]);
 }
 
@@ -69,20 +70,17 @@ export function useEditorMode(
     canEdit: boolean;
     commitTabs: (map: (ts: Tab[]) => Tab[]) => void;
     toastInfo: (message: string) => void;
-    // A new tab in a mode: what a mode picked on a tab that cannot switch offers instead (plan-tabs.md).
-    newTabIn?: (mode: EditorMode) => void;
   },
 ): EditorModeState {
   const { canEdit, commitTabs, toastInfo } = deps;
   const tabId = tab?.id;
-  const { mode, canSwitch, lockedReason } = resolveEditorMode({ tab, canEdit });
-  const crossPlan = canSwitch && (tab?.elements.length ?? 0) === 0;
+  const { mode, canSwitch } = resolveEditorMode({ tab, canEdit });
   // The tab as it is now, read when a switch is asked for: a stable setter rather than a new one per edit of the tab.
   const tabRef = useLatest(tab);
   const setMode = useCallback(
     (next: EditorMode, alsoChange?: (tab: Tab) => Tab) => {
-      // Never into or out of Plan (crossesPlan) unless the tab is empty: the mode menu offers a new tab in it instead.
-      if (!canSwitch || !tabId || next === mode || (crossesPlan(mode, next) && !crossPlan)) return;
+      // Never into Plan: a Plan tab is added from +, never switched to (docs/specs/007-editor/editor-modes.md).
+      if (!canSwitch || !tabId || next === mode || next === 'plan') return;
       trackModeSwitch(next);
       // Whether the board goes onto a page is read from the tab as it is, not from inside the commit's updater,
       // which React may run after this returns (the toast and its event would be lost). The switch worked out
@@ -101,15 +99,17 @@ export function useEditorMode(
       }
       debugLog('[editor-mode] switched', { tabId, from: mode, to: next, paged });
     },
-    [canSwitch, crossPlan, tabRef, tabId, mode, commitTabs, toastInfo],
+    [canSwitch, tabRef, tabId, mode, commitTabs, toastInfo],
   );
-  return {
-    mode,
-    setMode,
-    canSwitch,
-    canEdit,
-    ...(lockedReason ? { lockedReason } : {}),
-    ...(crossPlan ? { crossPlan } : {}),
-    ...(deps.newTabIn ? { newTabIn: deps.newTabIn } : {}),
-  };
+  const workshop = workshopOf(tab);
+  const setWorkshop = useCallback(
+    (on: boolean) => {
+      if (!canSwitch || !tabId || on === workshop) return;
+      track('Editor', 'Toggled', on ? 'WorkshopOn' : 'WorkshopOff');
+      commitTabs((ts) => ts.map((t) => (t.id === tabId ? setTabWorkshop(t, on) : t)));
+      debugLog('[workshop] control turned', { tabId, on });
+    },
+    [canSwitch, tabId, workshop, commitTabs],
+  );
+  return { mode, setMode, canSwitch, canEdit, workshop, setWorkshop };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EDITOR_MODES, ES_BOARD_LAYER_ID } from '@livedoc/document';
+import { TAB_OPENINGS, ES_BOARD_LAYER_ID } from '@livedoc/document';
 import {
   PLACEMENT_DEFAULT_KEYS,
   SPECIFIC_TAB_KINDS,
@@ -20,10 +20,10 @@ import {
 describe('PLACEMENT_DEFAULT_KEYS', () => {
   it('holds the eight keys in the order the list shows them', () => {
     expect(PLACEMENT_DEFAULT_KEYS).toEqual([
-      'mode:diagram',
       'mode:draw',
-      'mode:workshop',
+      'mode:diagram',
       'mode:pages',
+      'mode:workshop',
       'mode:plan',
       'kind:event-storming',
       'template:retrospective',
@@ -33,7 +33,7 @@ describe('PLACEMENT_DEFAULT_KEYS', () => {
 
   it('has one mode key per editor mode, in their order', () => {
     expect(PLACEMENT_DEFAULT_KEYS.filter((k) => k.startsWith('mode:'))).toEqual(
-      EDITOR_MODES.map((mode) => `mode:${mode}`),
+      TAB_OPENINGS.map((mode) => `mode:${mode}`),
     );
   });
 
@@ -230,10 +230,10 @@ describe('defaultKeysFor', () => {
 describe('placementDefaultTelemetryType', () => {
   it('names one closed value per key', () => {
     expect(PLACEMENT_DEFAULT_KEYS.map(placementDefaultTelemetryType)).toEqual([
-      'DefaultModeDiagram',
       'DefaultModeDraw',
-      'DefaultModeWorkshop',
+      'DefaultModeDiagram',
       'DefaultModePages',
+      'DefaultModeWorkshop',
       'DefaultModePlan',
       'DefaultKindEventStorming',
       'DefaultTemplateRetrospective',

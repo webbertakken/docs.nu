@@ -42,7 +42,7 @@ describe('parseLens', () => {
   it("reads a mode's old name as today's mode", () => {
     const { lens, issues } = parseLens('opens-in:facilitate,illustrate', aggregate);
     expect(issues).toEqual([]);
-    expect(lens.filters['opens-in']).toEqual(['workshop', 'pages']);
+    expect(lens.filters['opens-in']).toEqual(['pages', 'workshop']);
   });
 
   it('keeps free words as text, in order, as typed', () => {

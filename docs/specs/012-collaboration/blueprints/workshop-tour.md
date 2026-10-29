@@ -13,18 +13,18 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
 | The rerun signal    | `WORKSHOP_TOUR_RELAUNCH_EVENT`, `requestWorkshopTourRelaunch` in `apps/live/lib/workshop-tour.ts` |
 | The one-tour slot   | `ActiveTour` `'workshop'` in `apps/live/lib/tour-active.ts`                                       |
 | The Settings switch | `workshopTourSeen`, "Workshop Tour", third toggle row in the Tours category                       |
-| The help article    | `canvas/workshop-mode/workshop-tour` (`helpArticle: 'workshopTour'`)                              |
+| The help article    | `canvas/workshop/workshop-tour` (`helpArticle: 'workshopTour'`)                                   |
 
 ## Behaviour and state
 
 - **Mount:** `EditorView` mounts the host the first time the tab's mode is `workshop`
   (`useEverTrue`), and keeps it mounted.
 - **Offer:** `useOfferTour('workshop', …)` publishes `{ name: 'Workshop', rank: TOUR_OFFER_RANK.mode, start }` to
-  the actions group's Start Tour button while in Workshop and `canWork` (hydrated, no start panel open, no welcome
+  the actions group's Start Tour button while the Workshop control is on and `canWork` (hydrated, no start panel open, no welcome
   overlay, not read-only, not embedded, tab not locked), seen or not. `start` does nothing while this tour or
   another (`useActiveTour()`) is active. The tour never starts on its own.
 - **Rerun:** `WORKSHOP_TOUR_RELAUNCH_EVENT` starts it when it is on offer; elsewhere it is ignored.
-- **One tour at a time:** each of `TourHost` (the Diagram tour), `PlanTourHost`, `WorkshopTourHost` treats any other
+- **One tour at a time:** each of `TourHost` (the Structured tour), `PlanTourHost`, `WorkshopTourHost` treats any other
   active tour as blocking and publishes itself with `setActiveTour` while active.
 - **Steps:** `collaborate` (`band-collaborate` with `alsoHighlight`
   `option-collab-navigate`: the band's heading to its last tile; opens the picker, closes it on cleanup) → `session-strip` (`session-tools`) → `share` (`share`, the
@@ -32,13 +32,13 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
   when `findTour('share')` is null as the tour starts.
 - **End** (any outcome) writes `workshopTourSeen: true` through `rebaseUserPreferences`, then
   `setUserPreferences` and `writeUserPreferences`.
-- **Abandon:** while active, losing `canWork`, leaving Workshop or a different `activeTab.id` stops
+- **Abandon:** while active, losing `canWork`, the Workshop control turned off or a different `activeTab.id` stops
   the engine and ends as `skipped`.
 
 ## Interfaces and contracts
 
 - `WorkshopTourApi = Record<string, never>`: the steps drive only the DOM.
-- `TourStage` gets `ariaPrefix="Workshop tour"`, copy `{ helpHref: '/help/canvas/workshop-mode/' }`; there is no
+- `TourStage` gets `ariaPrefix="Workshop tour"`, copy `{ helpHref: '/help/canvas/workshop/' }`; there is no
   welcome card.
 
 ## Data and persistence
@@ -49,7 +49,7 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
 ## Errors and edge cases
 
 - A missing anchor mid-tour is skipped by the engine, as in every tour.
-- A rerun outside Workshop is ignored; the button offers the tour on the next entry.
+- A rerun with the Workshop control off is ignored; the button offers the tour the next time it is on.
 
 ## Security and trust
 
@@ -58,7 +58,7 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
 
 ## Performance and limits
 
-- The host's chunk loads only after the first entry to Workshop. Beyond publishing its offer it does no work until
+- The host's chunk loads only after the Workshop control is first on. Beyond publishing its offer it does no work until
   the button is pressed.
 
 ## Presentation and UX
@@ -77,17 +77,17 @@ Derived from [Workshop tour](../workshop-tour.md). Where this is silent, the
 
 ## Testing
 
-| Rule                                                                           | Test                                                                         |
-| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| On the button in Workshop, never starting on its own; stays on offer once seen | `WorkshopTourHost.test.tsx`                                                  |
-| Never starts beside another tour on screen                                     | `WorkshopTourHost.test.tsx`                                                  |
-| Rerun in Workshop only                                                         | `WorkshopTourHost.test.tsx`                                                  |
-| Skip and completion mark it seen and send telemetry; leaving ends as skipped   | `WorkshopTourHost.test.tsx`                                                  |
-| The Diagram tour is never offered in Workshop                                  | `TourHost.test.tsx`                                                          |
-| Step order, anchors, Share filter, telemetry tokens                            | `workshop-tour-steps.test.ts`                                                |
-| Settings switch inverted, third in Tours                                       | `settings-catalogue.test.ts`                                                 |
-| Power user mode marks it seen                                                  | `power-user-preset-rows.test.ts`, `SettingsCategoryPane.power-user.test.tsx` |
-| The slot holds `'workshop'`                                                    | `lib/tour-active.test.ts`                                                    |
+| Rule                                                                                | Test                                                                         |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| On the button with Workshop on, never starting on its own; stays on offer once seen | `WorkshopTourHost.test.tsx`                                                  |
+| Never starts beside another tour on screen                                          | `WorkshopTourHost.test.tsx`                                                  |
+| Rerun with Workshop on only                                                         | `WorkshopTourHost.test.tsx`                                                  |
+| Skip and completion mark it seen and send telemetry; leaving ends as skipped        | `WorkshopTourHost.test.tsx`                                                  |
+| The Structured tour is never offered with Workshop on                               | `TourHost.test.tsx`                                                          |
+| Step order, anchors, Share filter, telemetry tokens                                 | `workshop-tour-steps.test.ts`                                                |
+| Settings switch inverted, third in Tours                                            | `settings-catalogue.test.ts`                                                 |
+| Power user mode marks it seen                                                       | `power-user-preset-rows.test.ts`, `SettingsCategoryPane.power-user.test.tsx` |
+| The slot holds `'workshop'`                                                         | `lib/tour-active.test.ts`                                                    |
 
 ## Constants and configuration
 

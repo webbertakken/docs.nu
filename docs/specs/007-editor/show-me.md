@@ -1,7 +1,7 @@
 # Show Me
 
 **Show Me** is a guided tour of one surface, run there and then on the surface itself, when the person presses
-the **Show Me** button. It is the on-demand cousin of the mode tours (the [Diagram tour](editor-tour.md), the
+the **Show Me** button. It is the on-demand cousin of the mode tours (the [Structured tour](editor-tour.md), the
 [Plan tour](../026-plan/plan-tour.md) and the [Workshop tour](../012-collaboration/workshop-tour.md)), which
 start from the actions group's Start Tour button; Show Me starts from its own button on the surface. It exists for
 surfaces where people make something real in several steps whose ideas are not visible at a glance. An

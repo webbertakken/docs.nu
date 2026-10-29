@@ -10,12 +10,14 @@ import { createListeners } from '@/lib/listeners';
 
 /** How specific a tour's moment is: the most specific on offer wins the button. */
 export const TOUR_OFFER_RANK = {
-  // A mode's or a tab's own tour (Diagram, Draw, Workshop, Plan, Forms, Pages, ...).
+  // A mode's or a tab's own tour (Structured, Sketch, Plan, Forms, Pages, ...).
   mode: 1,
+  // The Workshop control's tour, ahead of the mode's while the control is on: the kit is what was just brought in.
+  session: 2,
   // A tool in hand (Avatar mode), or a surface on the tab (a dashboard).
-  tool: 2,
+  tool: 3,
   // The selected element's own tour (an element tour).
-  element: 3,
+  element: 4,
 } as const;
 
 // Words the button keeps small in a tour's name.
@@ -33,7 +35,7 @@ export function tourNameOf(eyebrow: string): string {
 export type TourOffer = {
   /** The host's own key: one offer per host. */
   id: string;
-  /** The tour's name as the button says it: "Draw" reads "Start Draw Tour". */
+  /** The tour's name as the button says it: "Sketch" reads "Start Sketch Tour". */
   name: string;
   rank: number;
   /** Starts the tour (a press on the button). */

@@ -90,7 +90,7 @@ describe('bugReportContextLines', () => {
     expect(lines).toEqual([
       { label: 'Page', value: '/document' },
       { label: 'From', value: '/help/contact' },
-      { label: 'Mode', value: 'Draw' },
+      { label: 'Mode', value: 'Sketch' },
       { label: 'Tab kind', value: 'Event Storming' },
       { label: 'Share role', value: 'Participant' },
       { label: 'App version', value: 'abc1234' },

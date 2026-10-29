@@ -249,7 +249,7 @@ the same surface recurs rather than redrawn.
 
 ## Renamed articles
 
-Six articles about the container moved when it became a document ([Document](../006-document/document.md)), **Whiteboards** became **Draw mode** when whiteboarding became an editor mode ([Editor modes](../007-editor/editor-modes.md#naming-in-the-interface)), the **Highlighter** moved from Selection Modes to the palette's Tools when it became a Draw tile ([Highlighter](../008-canvas/highlighter.md)), the **Activity Panel** category went with the panel on 2026-10-03 (Undo and Redo moved to Canvas; its other articles and the category page land on Undo), **The Welcome Tour** became **The Diagram Tour** when the tour became Diagram mode's alone ([Diagram tour](../007-editor/editor-tour.md)), and **Infographics**, then **Illustrate Mode**, became **Pages Mode**, its section moving to `/help/canvas/pages-mode/` and **The Illustrate Tour** becoming **The Pages Tour** ([Editor modes](../007-editor/editor-modes.md#naming-in-the-interface)), and **Facilitate Mode** became **Workshop Mode**, its section moving to `/help/canvas/workshop-mode/` and **The Facilitate Tour** becoming **The Workshop Tour**; each old address answers a permanent `308` from the router ([Router app, Legacy editor route](../016-platform/router-app.md#legacy-editor-route)):
+Six articles about the container moved when it became a document ([Document](../006-document/document.md)), **Whiteboards** became **Draw Mode** when whiteboarding became an editor mode and then **Sketch Mode**, its section moving to `/help/canvas/sketch-mode/` and **The Draw Tour** becoming **The Sketch Tour** ([Editor modes](../007-editor/editor-modes.md#naming-in-the-interface)), the **Highlighter** moved from Selection Modes to the palette's Tools when it became a Draw tile ([Highlighter](../008-canvas/highlighter.md)), the **Activity Panel** category went with the panel on 2026-10-03 (Undo and Redo moved to Canvas; its other articles and the category page land on Undo), **The Welcome Tour** became **The Diagram Tour** when the tour became Structured mode's alone, and then **The Structured Tour**, keeping its address ([Structured tour](../007-editor/editor-tour.md)), and **Infographics**, then **Illustrate Mode**, became **Pages Mode**, its section moving to `/help/canvas/pages-mode/` and **The Illustrate Tour** becoming **The Pages Tour** ([Editor modes](../007-editor/editor-modes.md#naming-in-the-interface)), **Facilitate Mode** became **Workshop Mode** and then **The Workshop Control**, its section moving to `/help/canvas/workshop/` and **The Facilitate Tour** becoming **The Workshop Tour**, and **Plan Mode** became **Plan Tabs**, its section moving to `/help/canvas/plan-tabs/` ([Plan tabs](../026-plan/plan-tabs.md)); each old address answers a permanent `308` from the router ([Router app, Legacy editor route](../016-platform/router-app.md#legacy-editor-route)):
 
 | Old address                                            | New address                                             |
 | ------------------------------------------------------ | ------------------------------------------------------- |
@@ -259,7 +259,9 @@ Six articles about the container moved when it became a document ([Document](../
 | `/help/search-panel/the-search-panel/search-diagrams/` | `/help/search-panel/the-search-panel/search-documents/` |
 | `/help/getting-started/sharing-your-diagram/`          | `/help/getting-started/sharing-your-document/`          |
 | `/help/developers/working-with-diagrams/`              | `/help/developers/working-with-documents/`              |
-| `/help/canvas/whiteboards/`                            | `/help/canvas/draw-mode/`                               |
+| `/help/canvas/whiteboards/`                            | `/help/canvas/sketch-mode/`                             |
+| `/help/canvas/draw-mode/`                              | `/help/canvas/sketch-mode/`                             |
+| `/help/canvas/draw-mode/draw-tour/`                    | `/help/canvas/sketch-mode/sketch-tour/`                 |
 | `/help/selection-modes/highlighter/`                   | `/help/palette/tools/highlighter/`                      |
 | `/help/activity-panel/`                                | `/help/canvas/undo/`                                    |
 | `/help/activity-panel/what-it-is/`                     | `/help/canvas/undo/`                                    |
@@ -274,8 +276,12 @@ Six articles about the container moved when it became a document ([Document](../
 | `/help/canvas/illustrate/`                             | `/help/canvas/pages-mode/`                              |
 | `/help/canvas/illustrate/<article>/`                   | `/help/canvas/pages-mode/<article>/`                    |
 | `/help/canvas/illustrate/illustrate-tour/`             | `/help/canvas/pages-mode/pages-tour/`                   |
-| `/help/canvas/facilitate-mode/`                        | `/help/canvas/workshop-mode/`                           |
-| `/help/canvas/facilitate-mode/facilitate-tour/`        | `/help/canvas/workshop-mode/workshop-tour/`             |
+| `/help/canvas/facilitate-mode/`                        | `/help/canvas/workshop/`                                |
+| `/help/canvas/facilitate-mode/facilitate-tour/`        | `/help/canvas/workshop/workshop-tour/`                  |
+| `/help/canvas/workshop-mode/`                          | `/help/canvas/workshop/`                                |
+| `/help/canvas/workshop-mode/workshop-tour/`            | `/help/canvas/workshop/workshop-tour/`                  |
+| `/help/canvas/plan-mode/`                              | `/help/canvas/plan-tabs/`                               |
+| `/help/canvas/plan-mode/<article>/`                    | `/help/canvas/plan-tabs/<article>/`                     |
 
 "Your First Diagram" and "Exporting Diagrams" keep their addresses: they are about drawing a diagram and getting the drawing out, not about the container.
 

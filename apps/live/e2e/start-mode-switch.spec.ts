@@ -36,7 +36,7 @@ async function switchToPages(page: import('@playwright/test').Page) {
   await createInMode(page, 'diagram');
   const chip = page
     .locator('[data-start-mode-switch]')
-    .getByRole('button', { name: /^Tab mode: Diagram/ });
+    .getByRole('button', { name: /^Tab mode: Structured/ });
   await chip.click();
   await page.getByRole('menuitemradio', { name: /Pages/ }).click();
   await expect(

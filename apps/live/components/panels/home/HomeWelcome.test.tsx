@@ -32,13 +32,13 @@ describe('HomeWelcome', () => {
     render(<HomeWelcome offerSignIn={false} />);
     const links = within(section('Start Blank')).getAllByRole('link');
     expect(links.map((l) => l.getAttribute('href'))).toEqual([
-      '/new?template=blank',
       '/new?template=whiteboard',
-      '/new?template=blank-session',
+      '/new?template=blank',
       '/new?template=blank-illustration',
+      '/new?template=blank-session',
       '/new?template=blank-plan',
     ]);
-    expect(links[0]!.textContent).toContain('Blank Diagram');
+    expect(links[0]!.textContent).toContain('Blank Whiteboard');
     fireEvent.click(links[0]!);
     expect(track).toHaveBeenLastCalledWith('Home', 'Selected', 'Welcome.Blank');
   });

@@ -24,7 +24,7 @@ import { TOUR_OFFER_RANK, useOfferTour } from './tour-offer';
 import { useStartPanelOpen } from '@/components/start/start-panel-open';
 
 const WORKSHOP_TOUR_COPY = {
-  helpHref: '/help/canvas/workshop-mode/',
+  helpHref: '/help/canvas/workshop/',
 };
 
 // The demo elements' row: a Timer, a Dot Vote and a Poll, at their palette sizes, this far apart.
@@ -36,7 +36,7 @@ const DEMOS: readonly { which: WorkshopDemo; width: number; height: number }[] =
 ];
 
 // Orchestrates the Workshop tour (docs/specs/012-collaboration/workshop-tour.md). Mounted once in EditorView beside
-// TourHost. While the person is in Workshop mode with an editor they can use, it offers the tour on the bottom bar's Start
+// TourHost. While the tab's Workshop control is on, for an editor they can use, it offers the tour on the bottom bar's Start
 // Tour button ("Start Workshop Tour"); a press there, or the Settings row, starts it. Its demo session elements are
 // the tour's own, taken away as it ends.
 export function WorkshopTourHost() {
@@ -95,7 +95,8 @@ export function WorkshopTourHost() {
     setActiveTour('workshop', active);
   }, [active]);
 
-  const inWorkshop = ctx.editorMode.mode === 'workshop';
+  // Offered while the tab's Workshop control is on (docs/specs/012-collaboration/workshop-tour.md).
+  const inWorkshop = ctx.editorMode.workshop;
   // Start a Workshop on screen holds the offer until a template is picked or the panel closed
   // (docs/specs/007-editor/start-diagramming.md "The tours wait").
   const startPanelOpen = useStartPanelOpen();
@@ -137,7 +138,7 @@ export function WorkshopTourHost() {
     inWorkshop && canWork
       ? {
           name: 'Workshop',
-          rank: TOUR_OFFER_RANK.mode,
+          rank: TOUR_OFFER_RANK.session,
           start,
           onShown: () => track('UI', 'Opened', 'WorkshopTourOffer'),
         }

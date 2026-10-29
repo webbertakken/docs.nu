@@ -17,10 +17,10 @@ describe('DEFAULT_KEY_ENTRIES', () => {
 
   it('names each entry as the list shows it', () => {
     expect(DEFAULT_KEY_ENTRIES.map((e) => e.label)).toEqual([
-      'Diagrams',
       'Whiteboards',
-      'Sessions',
+      'Diagrams',
       'Pages documents',
+      'Sessions',
       'Plan boards',
       'Event Storming boards',
       'Retrospectives',

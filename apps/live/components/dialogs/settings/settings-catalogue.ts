@@ -720,12 +720,12 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
     ],
   },
   {
-    // Settings that apply only in Draw mode (docs/specs/007-editor/user-preferences.md):
-    // a setting that acts in both modes stays on Editor itself. Named Draw, as the mode
-    // switch names it (docs/specs/007-editor/editor-modes.md "Naming in the interface").
-    // There is no Diagram sibling while no setting applies only to Diagram mode.
+    // Settings that apply only in Sketch mode (docs/specs/007-editor/user-preferences.md):
+    // a setting that acts in every mode stays on Editor itself. Named Sketch, as the mode
+    // switch names it (docs/specs/007-editor/editor-modes.md "Naming in the interface"); the id keeps the stored name.
+    // There is no Structured sibling while no setting applies only to Structured mode.
     id: 'draw',
-    label: 'Draw',
+    label: 'Sketch',
     parent: 'editor',
     rows: [
       {
@@ -1236,12 +1236,12 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
     },
     rows: [
       tourSwitch('tourSeen', {
-        // The Diagram tour (docs/specs/007-editor/editor-tour.md; the welcome tour until October 2026).
-        label: 'Diagram Tour',
+        // The Structured tour (docs/specs/007-editor/editor-tour.md; the welcome tour until October 2026).
+        label: 'Structured Tour',
         event: { category: 'UI', on: 'TourSeenOff', off: 'TourSeenOn' },
         keywords:
           'tour walkthrough onboarding tutorial intro welcome getting started diagram shapes arrows palette replay',
-        description: 'On a Diagram tab: the palette, selecting, the element menu and tabs.',
+        description: 'On a Structured tab: the palette, selecting, the element menu and tabs.',
         helpArticle: 'diagramTour',
       }),
       // The Plan tour: one switch over both tracks, then each track's own row beneath it (docs/specs/026-plan/plan-tour.md).
@@ -1292,14 +1292,14 @@ export const SETTINGS_CATEGORIES: SettingsCategorySpec[] = [
         label: 'Workshop Tour',
         event: { category: 'UI', on: 'WorkshopTourSeenOff', off: 'WorkshopTourSeenOn' },
         keywords: 'tour walkthrough onboarding tutorial workshop facilitate session retro replay',
-        description: 'In Workshop.',
+        description: 'With the Workshop control on.',
         helpArticle: 'workshopTour',
       }),
       tourSwitch('drawTourSeen', {
-        label: 'Draw Tour',
+        label: 'Sketch Tour',
         event: { category: 'UI', on: 'DrawTourSeenOff', off: 'DrawTourSeenOn' },
         keywords: 'tour walkthrough onboarding tutorial draw whiteboard pen sketch replay',
-        description: 'In Draw.',
+        description: 'In Sketch.',
         helpArticle: 'drawTour',
       }),
       tourSwitch('formTourSeen', {

@@ -207,9 +207,9 @@ export async function openStartBlank(page: Page): Promise<void> {
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
 }
 
-// A blank tab in Workshop mode straight away: /new?template=blank-session creates it with no wizard
-// (docs/specs/012-collaboration/workshop-mode.md "Templates"). Where the session kit lives: the
-// Collaborate and Stickers categories and the Session strip.
+// A blank Structured tab with the Workshop control on, straight away: /new?template=blank-session creates it with no
+// wizard (docs/specs/012-collaboration/workshop-mode.md "Templates"). Where the session kit is: the Collaborate and
+// Stickers categories and the Session strip.
 export async function openBlankSession(page: Page): Promise<void> {
   await page.goto('/new?template=blank-session');
   await page.locator('[data-canvas-a11y-root]').waitFor({ timeout: 30_000 });
@@ -330,9 +330,9 @@ export async function settledBox(
   return box!;
 }
 
-/** A palette tile (docs/specs/007-editor/toolbar-layout.md). On the category bar (Workshop, Pages): from its
+/** A palette tile (docs/specs/007-editor/toolbar-layout.md). On the category bar (Pages, Workshop control on): from its
  *  category's flyout, opened by a press (so it stays open whatever the pointer does next) unless already showing. On
- *  the category picker's strip (Diagram, Plan): the tile on the strip when the current category shows it, else the
+ *  the category picker's strip (Structured, Plan): the tile on the strip when the current category shows it, else the
  *  category picked first, then More when the strip has no room for it. */
 export async function paletteTile(page: Page, name: string, category = 'Shapes'): Promise<Locator> {
   await page.locator('[data-toolbar-palette]').waitFor();

@@ -322,6 +322,13 @@ export function EditorView() {
                 : undefined
             }
             copying={copying}
+            // The Workshop control (docs/specs/012-collaboration/workshop-mode.md): an Editor's, wherever the mode switch
+            // is offered (a general unlocked tab that is not a Plan tab), once the document is up.
+            workshop={
+              hydrated && ctx.editorMode.canSwitch
+                ? { on: ctx.editorMode.workshop, onToggle: ctx.editorMode.setWorkshop }
+                : undefined
+            }
             // docs/specs/012-collaboration/presentation-mode.md "The header's Present button": only while the deck
             // has a slide to show, on a desktop, once the document is up. Every role.
             present={
@@ -387,7 +394,7 @@ export function EditorView() {
               onRenameFolder: renameTabFolder,
               activeTabHasContent: activeTab.elements.length > 0,
               onSelect: selectTab,
-              onAdd: () => addTab(),
+              onAdd: (choice) => addTab(choice),
               onRename: renameTab,
               onDuplicate: duplicateTab,
               onDelete: deleteTab,
@@ -488,6 +495,7 @@ export function EditorView() {
                                   <div
                                     // The open tab's editor mode, for the e2e helpers (e2e/fixtures.ts).
                                     data-editor-mode={ctx.editorMode.mode}
+                                    data-workshop={ctx.editorMode.workshop ? 'on' : undefined}
                                     className="flex h-dvh flex-col"
                                   >
                                     {/* Arrow click-to-connect hint (docs/specs/008-canvas/canvas-and-palette.md): shown while the gesture

@@ -50,8 +50,8 @@ kind"; a logo page's own), the palette is made for drawing a mark. There is no L
 tools are where they belong.
 
 - **Draw**, which the palette opens on: **Pens** (the **Pen**, the Path tool, click for corners
-  and drag for curves, the same tool Draw mode's dock holds; the **Freehand Pencil**; the **Shape
-  Pen**), **Outlines** (the **Polygon**) and **Markers** (Draw mode's three, **Marker 1**,
+  and drag for curves, the same tool Sketch mode's dock holds; the **Freehand Pencil**; the **Shape
+  Pen**), **Outlines** (the **Polygon**) and **Markers** (Sketch mode's three, **Marker 1**,
   **Marker 2**, **Marker 3**, each in the colour and width the person gave it).
 - **Shapes**, every one; **Write**, **Text** for a wordmark and a **Sticky Note** for a comment on
   the design; **Icons**, a glyph to start from; **Library**; and **Media**, an **Image** to trace
@@ -60,10 +60,10 @@ tools are where they belong.
 
 Each tool puts itself down after one use and selects what it drew, as the pencil does, a marker
 included (a marker picked up
-in Draw mode, or from the Toolbar strip's Search elsewhere, stays in hand as before). Off a
+in Sketch mode, or from the Toolbar strip's Search elsewhere, stays in hand as before). Off a
 whiteboard a marker lines up as the pencil does: its first point snaps to nearby alignments (the
 dot shows before the press) and its stroke shows alignment guides as it grows. In the palette a
-held marker pressed again opens Draw mode's own flyout for it below its tile (colour and width); its changes are the marker's everywhere and re-arm it at once.
+held marker pressed again opens Sketch mode's own flyout for it below its tile (colour and width); its changes are the marker's everywhere and re-arm it at once.
 
 The palette follows the page someone moves to: its kind is Logo on a logo page, opening on **Draw**, and **Popular** on any other.
 They move to a page by going to it with its label or the page navigator, by a view that comes to rest on it, or by pressing on a page

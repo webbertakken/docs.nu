@@ -2,7 +2,7 @@
 
 A Plan template sets up a **way of working**, not one board: a project planner with its roadmap, backlog,
 sprint and daily standup; a retro with its actions and archive. Each makes several tabs, every tab opening in
-[Plan mode](plan-mode.md), and the boards on those tabs share their statuses, so a card moved on one tab turns
+[Working in Plan](plan-mode.md), and the boards on those tabs share their statuses, so a card moved on one tab turns
 up on the next. A template opens on a **worked example**: the columns, swimlanes, card fields, card types, widgets,
 views and facilitation tools are ready, and every board already holds a small team's believable work, so a person
 sees what the template is for before they add their own (see [Example cards](#example-cards)).
@@ -116,7 +116,7 @@ The catalogue below still lists, per tab, the metrics, charts and rail it brings
 
 - **Every board takes only the card types its work is made of.** A board of a template names its card types
   (its **Card Types**), never "every type": a Pipeline takes Candidates, a Retro Notes and Ideas. A board's Add card
-  offers only those types ([Plan mode](plan-mode.md#no-palette)).
+  offers only those types ([Working in Plan](plan-mode.md#no-palette)).
 - **A template uses only the card types its work is made of.** Where none of the five default types fits the
   work, the template uses a card type of its own, with the fields that work needs: a Role, a Candidate, an
   Objective. Every card type a board can bring is a **ready-made type**: one catalogue in code
@@ -130,7 +130,7 @@ The catalogue below still lists, per tab, the metrics, charts and rail it brings
   Either way it is one change, on every path that makes the tabs: the New Document wizard (the document is created
   with them), a start screen (every tab it adds, not only the one it lands on), and agents (the MCP's
   `create_document` and `add_tab`, the api's seeded create). A document that already has a type of that id keeps
-  its own. The [Plan mode](plan-mode.md#no-palette) rule holds: only a board being made brings types, so a type
+  its own. The [Working in Plan](plan-mode.md#no-palette) rule holds: only a board being made brings types, so a type
   someone deleted stays deleted.
 - **Hand-offs carry the type**: a board receiving a hand-off takes every type the board handing off takes, so a
   card moved on is shown where it lands.
@@ -171,7 +171,7 @@ each a [ready-made type](#ready-made-card-types); the document has those and no 
 ### Blank Plan
 
 One tab (named as any new tab is), empty: no board, so the tab shows Plan's **Start Planning** picker
-([Plan mode](plan-mode.md#starting-a-board)), where the person picks the board that fits (or searches for a template).
+([Working in Plan](plan-mode.md#starting-a-board)), where the person picks the board that fits (or searches for a template).
 The mode's blank, as Blank Diagram is Diagram's.
 
 ### Project Planner
@@ -345,7 +345,7 @@ templates, and bring no card types. Whether the Sheet fills its tab is decided p
 - Start Planning's **Inspiration** leaves out the spreadsheet templates that make one tab: each is one Sheet that
   Start Planning's **Spreadsheets** already offers as a sheet template, so it would show the same thing twice. One
   that sets up more tabs (Task Tracker, its Sheet and an Overview) stays in it
-  ([Plan mode](plan-mode.md#starting-a-board)).
+  ([Working in Plan](plan-mode.md#starting-a-board)).
 - Telemetry as any template: `Template` · `Used` with its kind.
 
 ## Telemetry

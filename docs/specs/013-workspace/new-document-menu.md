@@ -22,7 +22,7 @@ closed: whoever asked for a blank gets a blank.
 | **last blank**        | The blank this browser made last; the face makes it                               | default blank, favourite          |
 | **template group**    | One heading of a blank's templates in the pane, a group of its template start     | category (the catalogue's), shelf |
 
-- A blank is never called a kind: a kind is what a tab is, and Diagram and Whiteboard are modes of one kind
+- A blank is never called a kind: a kind is what a tab is, and Structured and Sketch (the Diagram and Whiteboard blanks) are modes of one kind
   ([Domain language](../003-system-architecture/domain-language.md#mode-kind-and-template)). The blanks name what
   people make, whatever mode or kind makes it.
 
@@ -33,7 +33,7 @@ In this order, each with its glyph and number key:
 | #   | Blank      | Makes (its blank template)              | Its templates, in the pane                                      |
 | --- | ---------- | --------------------------------------- | --------------------------------------------------------------- |
 | 1   | Diagram    | Blank Diagram (`blank`)                 | Start Diagramming's, in its groups, Recommended first           |
-| 2   | Whiteboard | Blank Whiteboard (`whiteboard`)         | Start Drawing's, in its groups, Recommended first               |
+| 2   | Whiteboard | Blank Whiteboard (`whiteboard`)         | Start Sketching's, in its groups, Recommended first             |
 | 3   | Page       | Blank Article (`blank-article`)         | Start Making Pages' Articles                                    |
 | 4   | Sheet      | Blank Spreadsheet (`blank-spreadsheet`) | The spreadsheet templates (Budget, Timesheet, Invoice, ...)     |
 | 5   | Board      | Blank Board (`blank-board`)             | The Plan templates that set up boards (Kanban, Bug Triage, ...) |

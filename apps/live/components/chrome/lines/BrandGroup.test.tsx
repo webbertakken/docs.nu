@@ -10,7 +10,14 @@ import { BrandGroup } from './BrandGroup';
 
 afterEach(cleanup);
 
-const modes = { mode: 'draw' as const, setMode: vi.fn(), canSwitch: true, canEdit: true };
+const modes = {
+  mode: 'draw' as const,
+  setMode: vi.fn(),
+  canSwitch: true,
+  canEdit: true,
+  workshop: false,
+  setWorkshop: vi.fn(),
+};
 
 function renderGroup(props: Partial<Parameters<typeof BrandGroup>[0]> = {}, editor = modes) {
   return render(
@@ -32,12 +39,14 @@ describe('BrandGroup', () => {
     const parts = [...group.querySelectorAll('[data-toolbar-part]')].map((part) =>
       [...part.querySelectorAll('a, button')].map((el) => el.getAttribute('aria-label')),
     );
-    expect(parts).toEqual([['Back to the Explorer'], ['Explorer', 'Editor mode: Draw']]);
+    expect(parts).toEqual([['Back to the Explorer'], ['Explorer', 'Editor mode: Sketch']]);
   });
 
   it('names the mode on a computer, its icon alone on a phone', () => {
     const { rerender } = renderGroup();
-    expect(screen.getByRole('button', { name: 'Editor mode: Draw' }).textContent).toContain('Draw');
+    expect(screen.getByRole('button', { name: 'Editor mode: Sketch' }).textContent).toContain(
+      'Sketch',
+    );
     rerender(
       <EditorModeProvider value={modes}>
         <BrandGroup
@@ -47,8 +56,8 @@ describe('BrandGroup', () => {
         />
       </EditorModeProvider>,
     );
-    expect(screen.getByRole('button', { name: 'Editor mode: Draw' }).textContent).not.toContain(
-      'Draw',
+    expect(screen.getByRole('button', { name: 'Editor mode: Sketch' }).textContent).not.toContain(
+      'Sketch',
     );
   });
 

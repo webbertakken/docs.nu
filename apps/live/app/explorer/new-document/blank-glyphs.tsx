@@ -11,18 +11,18 @@ import {
   lucidePresentation,
   lucideSquareKanban,
 } from '@livedoc/icons/lucide';
-import { EDITOR_MODE_ICONS, lucideGlyph } from '@livedoc/ui';
+import { TAB_OPENING_ICONS, lucideGlyph } from '@livedoc/ui';
 import type { NewDocumentBlankId } from '@livedoc/templates';
 
 export const BLANK_GLYPHS: Readonly<Record<NewDocumentBlankId, ComponentType>> = {
-  diagram: EDITOR_MODE_ICONS.diagram,
-  whiteboard: EDITOR_MODE_ICONS.draw,
+  diagram: TAB_OPENING_ICONS.diagram,
+  whiteboard: TAB_OPENING_ICONS.draw,
   page: lucideGlyph(lucideFileText, 16),
   sheet: lucideGlyph(lucideGrid3x3, 16),
   board: lucideGlyph(lucideSquareKanban, 16),
   slides: lucideGlyph(lucidePresentation, 16),
   form: lucideGlyph(lucideClipboardList, 16),
-  workshop: EDITOR_MODE_ICONS.workshop,
+  workshop: TAB_OPENING_ICONS.workshop,
 };
 
 // Each glyph's colour: 600 on the light surface, 400 on the dark, so each holds 3:1 against its row.

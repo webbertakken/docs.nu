@@ -55,9 +55,19 @@ function handlers(): PaletteAddHandlers {
   ) as unknown as PaletteAddHandlers;
 }
 
-// The palette reads the editor mode from the editor's provider; Diagram outside one.
-const inMode = (mode: EditorMode, node: ReactNode) => (
-  <EditorModeProvider value={{ mode, setMode: vi.fn(), canSwitch: true, canEdit: true }}>
+// The palette reads the editor mode from the editor's provider; Structured outside one. 'workshop' is Structured with
+// the Workshop control on (docs/specs/012-collaboration/workshop-mode.md).
+const inMode = (at: EditorMode | 'workshop', node: ReactNode) => (
+  <EditorModeProvider
+    value={{
+      mode: at === 'workshop' ? 'diagram' : at,
+      setMode: vi.fn(),
+      canSwitch: true,
+      canEdit: true,
+      workshop: at === 'workshop',
+      setWorkshop: vi.fn(),
+    }}
+  >
     {node}
   </EditorModeProvider>
 );
@@ -69,7 +79,7 @@ function show({
   esBoard?: boolean;
   hidden?: boolean;
   esBoardControls?: EsBoardControls;
-  mode?: EditorMode;
+  mode?: EditorMode | 'workshop';
   tabElements?: Element[];
 } = {}) {
   const h = handlers();
@@ -349,8 +359,8 @@ describe('ToolbarPalette', () => {
     ]);
   });
 
-  // Workshop mode (docs/specs/012-collaboration/workshop-mode.md "The palette").
-  it('offers Stickers, Data, Ask and Session in Workshop, not in Diagram, and Icons in both', () => {
+  // The Workshop control (docs/specs/012-collaboration/workshop-mode.md "The palette").
+  it('offers Stickers, Ask and Session with the Workshop control on, not off, and Icons in both', () => {
     show();
     fireEvent.click(screen.getByRole('button', { name: 'Palette category' }));
     const offered = (id: string) => document.querySelector(`[data-option-id="${id}"]`) !== null;
@@ -363,13 +373,15 @@ describe('ToolbarPalette', () => {
       'Shapes',
       'Write',
       'Draw',
+      'Diagrams',
+      'Concepts',
       'Layout',
       'Ask',
       'Session',
       'Icons',
       'Stickers',
+      'Tech',
       'Media',
-      'Data',
     ]);
     // The other Collaborate categories are Session's groups, not buttons of their own.
     expect(COLLAB_IDS.length).toBeGreaterThan(0);
@@ -540,7 +552,7 @@ describe('ToolbarPalette', () => {
       // A pie chart's other name: the Diagram icons include a pie chart glyph, which `pie chart` finds here.
       type(popover, 'doughnut');
       expect(within(popover).queryByRole('button', { name: 'Add Pie Chart' })).toBeNull();
-      expect(popover.textContent).toContain('No Diagram elements match “doughnut”');
+      expect(popover.textContent).toContain('No Structured elements match “doughnut”');
       expect(popover.textContent).toContain('Other modes have');
       const accordion = within(popover).getByRole('button', { name: /Elements From Other Modes/ });
       expect(accordion.getAttribute('aria-expanded')).toBe('false');
@@ -557,7 +569,7 @@ describe('ToolbarPalette', () => {
         within(popover).queryByRole('button', { name: /Elements From Other Modes/ }),
       ).toBeNull();
       const accordion = within(popover).getByRole('button', {
-        name: /Not Available in Diagram Mode/,
+        name: /Not Available in Structured Mode/,
       });
       expect(accordion.getAttribute('aria-expanded')).toBe('false');
       fireEvent.click(accordion);

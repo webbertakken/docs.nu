@@ -29,7 +29,7 @@ exported and clicked always agree.
 
 ## Where it is set
 
-- **Diagram tabs:** the context menu's Border category, as before.
+- **Structured tabs:** the context menu's Border category, as before.
 - **Whiteboards:** the quick style panel's **Corners** row (None, Small, Medium, Large), see
   [Quick style panel](quick-style-panel.md); a whiteboard's menu does not offer corners.
 - **Imports:** Excalidraw's rounded rectangles land as **Large**, which through the quarter rule

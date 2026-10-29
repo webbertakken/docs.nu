@@ -87,7 +87,7 @@ describe('DrawTourHost offer', () => {
   it('offers "Draw" on the Start Tour button in Draw, and never starts on its own', () => {
     editor();
     render(<DrawTourHost />);
-    expect(tourOffer()?.name).toBe('Draw');
+    expect(tourOffer()?.name).toBe('Sketch');
     act(() => {
       vi.advanceTimersByTime(5000);
     });
@@ -101,13 +101,13 @@ describe('DrawTourHost offer', () => {
     act(() => tourOffer()!.start());
     expect(startedTour()).toBe(true);
     expect(stage.engine?.active).toBe(true);
-    expect(stage.helpHref).toBe('/help/canvas/draw-mode/');
+    expect(stage.helpHref).toBe('/help/canvas/sketch-mode/');
   });
 
   it('stays on offer once seen, so it can be taken again', () => {
     editor({ userPreferences: { tourSeen: true, drawTourSeen: true } });
     render(<DrawTourHost />);
-    expect(tourOffer()?.name).toBe('Draw');
+    expect(tourOffer()?.name).toBe('Sketch');
   });
 
   it.each([
@@ -130,7 +130,7 @@ describe('DrawTourHost offer', () => {
     render(<DrawTourHost />);
     expect(tourOffer()).toBeNull();
     act(() => setStartPanelOpen(false));
-    expect(tourOffer()?.name).toBe('Draw');
+    expect(tourOffer()?.name).toBe('Sketch');
   });
 
   it('never starts beside another tour', () => {

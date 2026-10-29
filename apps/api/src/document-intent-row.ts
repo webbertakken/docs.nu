@@ -4,7 +4,7 @@
 // opens-in decides whether anything was recorded: when it reads null, so does everything else.
 
 import { isCreationTabKind, isTemplateFamily, type RecordedIntent } from '@livedoc/api-schema';
-import { parseEditorMode } from '@livedoc/document';
+import { parseTabOpening } from '@livedoc/document';
 
 export type RecordedIntentRow = {
   opens_in: string | null;
@@ -16,7 +16,7 @@ const UNKNOWN: RecordedIntent = { opensIn: null, tabKind: null, templateFamily: 
 
 export function readRecordedIntent(row: RecordedIntentRow): RecordedIntent {
   // A row recorded before Pages mode's rename says `infographic`.
-  const opensIn = parseEditorMode(row.opens_in);
+  const opensIn = parseTabOpening(row.opens_in);
   if (!opensIn) return UNKNOWN;
   return {
     opensIn,

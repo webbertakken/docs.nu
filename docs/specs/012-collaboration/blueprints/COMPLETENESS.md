@@ -28,6 +28,7 @@
 - [x] Presentation and UX
 - [x] Accessibility
 - [x] Observability
+- [x] Web Experience
 - [x] Testing
 - [x] Constants and configuration
 - [x] Assets and external resources

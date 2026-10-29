@@ -42,7 +42,7 @@ test.describe('whiteboard dock position', () => {
     await dialog.getByRole('button', { name: 'Editor', exact: true }).click();
     await dialog
       .getByRole('group', { name: 'Editor' })
-      .getByRole('button', { name: 'Draw', exact: true })
+      .getByRole('button', { name: 'Sketch', exact: true })
       .click();
     await dialog.getByText('Dock Position', { exact: true }).scrollIntoViewIfNeeded();
     await dialog.getByRole('radio', { name: 'Bottom' }).click();

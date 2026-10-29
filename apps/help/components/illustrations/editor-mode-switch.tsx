@@ -1,34 +1,27 @@
-// Editor-mode illustrations for the Canvas articles on Draw mode and Pages Mode
-// (docs/specs/018-help/help-app.md): the mode switch at the top of an empty tab's start with its menu open,
-// the list of modes and the preview of one (chrome/editor-mode/ModeMenu.tsx), and Draw mode's dock
-// across the top of the canvas (canvas/whiteboard/WhiteboardDock.tsx). Real labels throughout: the
-// five modes, a mode's description and tools, ⇧D in the preview, the dock's tools and their keys.
+// Editor-mode illustrations for the Canvas articles on the editor modes, Sketch mode and Pages Mode
+// (docs/specs/018-help/help-app.md): the mode switch at the top of an empty tab's start with its menu open
+// (chrome/editor-mode/ModeMenu.tsx), and Sketch mode's dock across the top of the canvas
+// (canvas/whiteboard/WhiteboardDock.tsx). Real labels throughout: the three modes, the dock's tools and their keys.
 
 import type { ReactNode } from 'react';
 import { Scene, Label } from './primitives';
 import { ModeMark, type Mode } from './mode-mark';
 
-// The modes in the switch's order (the catalogue's), each with its tint in the menu.
-const MODES: { mode: Mode; tile: string; mark: string }[] = [
-  { mode: 'Diagram', tile: 'fill-sky-100', mark: 'stroke-sky-700' },
-  { mode: 'Draw', tile: 'fill-orange-100', mark: 'stroke-orange-700' },
-  { mode: 'Workshop', tile: 'fill-violet-100', mark: 'stroke-violet-700' },
-  { mode: 'Pages', tile: 'fill-pink-100', mark: 'stroke-pink-700' },
-  { mode: 'Plan', tile: 'fill-emerald-100', mark: 'stroke-emerald-700' },
-];
+// The modes in the switch's order.
+const MODES: Mode[] = ['Sketch', 'Structured', 'Pages'];
 
-/** The mode switch leading Start Diagramming's rail (start/StartModeSwitch.tsx), its menu open: the
- *  list of the five modes (the current one checked; the tab is empty, so Plan is a plain switch) and
- *  the preview of the one under the pointer, Draw: its picture, name with ⇧D, description and tools. */
+/** The mode switch leading Start Diagramming's rail (start/StartModeSwitch.tsx), its menu open: a plain
+ *  dropdown of the three modes, each its mark and name, the current one, Structured, checked, and the
+ *  row under the pointer, Sketch, highlighted. */
 export function ModeSwitchScene() {
   const mx = 13;
   const my = 54;
-  const listW = 118;
-  const pw = 210;
-  const rowH = 28;
-  const menuH = MODES.length * rowH + 12;
-  const shown = 1;
-  const px = mx + listW;
+  const listW = 130;
+  const menuW = 220;
+  const rowH = 36;
+  const menuH = MODES.length * rowH + 8;
+  const current = 1;
+  const hovered = 0;
   return (
     <Scene w={420} h={my + menuH + 14}>
       {/* The start's top edge: the rail's named switch, then the panel's title */}
@@ -43,10 +36,10 @@ export function ModeSwitchScene() {
       />
       <rect x={13} y={9} width={listW + 12} height={38} rx={9} className="fill-slate-50" />
       <g transform="translate(29 28)">
-        <ModeMark mode="Diagram" className="stroke-brand-600" scale={0.5} />
+        <ModeMark mode="Structured" className="stroke-brand-600" scale={0.5} />
       </g>
       <Label x={42} y={28} size={11} weight={500} tone="strong">
-        Diagram
+        Structured
       </Label>
       <path
         d={`M${listW - 2} 26 l3.5 3.5 l3.5 -3.5`}
@@ -62,47 +55,42 @@ export function ModeSwitchScene() {
       <Label x={listW + 40} y={37} size={9} tone="muted">
         Pick a template, or close this to start blank.
       </Label>
-      {/* The menu, hanging below the switch */}
+      {/* The menu, hanging below the switch from its left edge */}
       <rect
         x={mx}
         y={my}
-        width={listW + pw}
+        width={menuW}
         height={menuH}
-        rx={9}
+        rx={12}
         className="fill-white stroke-slate-200"
         strokeWidth={1.5}
       />
-      <line
-        x1={px}
-        y1={my}
-        x2={px}
-        y2={my + menuH}
-        className="stroke-slate-200"
-        strokeWidth={1.5}
-      />
-      {MODES.map(({ mode, tile, mark }, i) => {
-        const ry = my + 6 + i * rowH;
-        const on = i === 0;
+      {MODES.map((mode, i) => {
+        const ry = my + 4 + i * rowH;
+        const on = i === current;
         return (
           <g key={mode}>
-            {i === shown && (
+            {i === hovered && (
               <rect
                 x={mx + 4}
                 y={ry}
-                width={listW - 8}
-                height={rowH - 2}
+                width={menuW - 8}
+                height={rowH}
                 rx={6}
                 className="fill-slate-100"
               />
             )}
-            <rect x={mx + 9} y={ry + 4} width={18} height={18} rx={5} className={tile} />
-            <g transform={`translate(${mx + 18} ${ry + 13})`}>
-              <ModeMark mode={mode} className={mark} scale={0.5} />
+            <g transform={`translate(${mx + 22} ${ry + rowH / 2})`}>
+              <ModeMark
+                mode={mode}
+                className={on ? 'stroke-brand-600' : 'stroke-slate-600'}
+                scale={0.66}
+              />
             </g>
             <Label
-              x={mx + 34}
-              y={ry + 13}
-              size={11}
+              x={mx + 40}
+              y={ry + rowH / 2}
+              size={11.5}
               weight={on ? 600 : 500}
               tone={on ? 'strong' : 'body'}
             >
@@ -110,10 +98,10 @@ export function ModeSwitchScene() {
             </Label>
             {on && (
               <path
-                d={`M${mx + listW - 22} ${ry + 13} l3.5 3.5 l6 -7`}
+                d={`M${mx + menuW - 28} ${ry + rowH / 2} l4 4 l7 -8`}
                 fill="none"
                 className="stroke-brand-600"
-                strokeWidth={1.6}
+                strokeWidth={1.8}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -121,59 +109,11 @@ export function ModeSwitchScene() {
           </g>
         );
       })}
-      {/* The preview of Draw */}
-      <rect
-        x={px + 10}
-        y={my + 10}
-        width={pw - 20}
-        height={50}
-        rx={7}
-        className="fill-orange-100"
-      />
-      <path
-        d={`M${px + 30} ${my + 46} c10 -22 18 -26 24 -14 s10 14 18 -2 s16 -18 22 -4 s12 16 20 6 s10 -12 16 -10`}
-        fill="none"
-        className="stroke-orange-700"
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-      <Label x={px + 10} y={my + 76} size={12} weight={600} tone="strong">
-        Draw
-      </Label>
-      <rect
-        x={px + pw - 34}
-        y={my + 69}
-        width={24}
-        height={15}
-        rx={3}
-        className="fill-slate-50 stroke-slate-300"
-        strokeWidth={1}
-      />
-      <Label x={px + pw - 22} y={my + 77} anchor="middle" size={10} weight={600} tone="body">
-        ⇧D
-      </Label>
-      <Label x={px + 10} y={my + 94} size={9.5} tone="body">
-        Sketch freehand with pens, tidied into
-      </Label>
-      <Label x={px + 10} y={my + 106} size={9.5} tone="body">
-        shapes as you go.
-      </Label>
-      {['Pens', 'Highlighter', 'Eraser'].map((tool, i) => {
-        const tx = px + 10 + [0, 34, 94][i]!;
-        const tw = [30, 56, 40][i]!;
-        return (
-          <g key={tool}>
-            <rect x={tx} y={my + 115} width={tw} height={14} rx={7} className="fill-slate-100" />
-            <Label x={tx + tw / 2} y={my + 122} anchor="middle" size={8.5} weight={500} tone="body">
-              {tool}
-            </Label>
-          </g>
-        );
-      })}
     </Scene>
   );
 }
-// --- Draw mode's dock --------------------------------------------------------------------------
+
+// --- Sketch mode's dock--------------------------------------------------------------------------
 
 /** One dock button: a glyph, with its key in the corner. */
 function DockTool({
@@ -234,7 +174,7 @@ function Marker({ cls }: { cls: string }) {
   );
 }
 
-/** Draw mode's dock across the top of the canvas: the drawing tools, the pinned shapes and Shapes, and
+/** Sketch mode's dock across the top of the canvas: the drawing tools, the pinned shapes and Shapes, and
  *  Settings, each with its key, over a board with a pen stroke on it. */
 export function DrawDockScene() {
   const y = 22;

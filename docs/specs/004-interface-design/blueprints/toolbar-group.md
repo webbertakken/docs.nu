@@ -23,7 +23,7 @@ Derived from [Toolbar group](../toolbar-group.md). Where the groups sit and what
   that renders draws a `ToolbarDivider` before it, by CSS: `[[data-toolbar-part]~&]:before` draws the 1 px rule, so
   a part that renders nothing (`null`, or an empty run, `empty:hidden`) leaves no doubled or dangling divider.
 - `ToolbarDivider` is the 1 px, 24 px tall rule with 2 px either side (`mx-0.5 h-6 w-px shrink-0 bg-slate-200
-dark:bg-slate-700`, `aria-hidden`); the strip's `Divider` uses its class and Draw's dock draws `ToolbarDivider` itself (the strip's keeps its
+dark:bg-slate-700`, `aria-hidden`); the strip's `Divider` uses its class and Sketch's dock draws `ToolbarDivider` itself (the strip's keeps its
   `STRIP_DIVIDER_ATTR` and its phone hairline margins).
 - `TOOLBAR_BUTTON`: `flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium
 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800

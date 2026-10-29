@@ -221,7 +221,7 @@ pageNumbers? }`, behaviour `destructive`, output as `change_pages` plus `article
 
 | Case                                                          | Handling                                                               |
 | ------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Diagram tab                                                   | switched, `switched: true`, line "Switched the tab to Pages"           |
+| Structured tab                                                | switched, `switched: true`, line "Switched the tab to Pages"           |
 | Fresh tab whose only page is unchosen and empty               | first `add` / new article takes that page                              |
 | Only page already of the kind added, unnamed and empty        | first `add` of that kind takes that page (its fields and layout set)   |
 | `add` article                                                 | `article_by_write`                                                     |

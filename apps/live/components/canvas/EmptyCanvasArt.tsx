@@ -1,20 +1,19 @@
 'use client';
 
 // The empty-canvas card's picture (docs/specs/007-editor/new-document-route.md "The empty-canvas hint"): a small scene
-// of what the tab's mode makes, in the brand's tints, as Start Planning's cards draw theirs. Diagram: two shapes joined
-// by an arrow to a decision; Workshop: a board of stickies with a vote. Decorative. (The card never shows in Draw,
-// whose dock is its own hint, nor in Pages or Plan, which have starts of their own.)
-import type { EditorMode } from '@livedoc/document';
+// of what the tab makes, in the brand's tints, as Start Planning's cards draw theirs. Structured: two shapes joined
+// by an arrow to a decision; with the Workshop control on, a board of stickies with a vote. Decorative. (The card
+// never shows in Sketch, whose dock is its own hint, nor in Pages or on a Plan tab, which have starts of their own.)
 
 const BRAND = 'var(--color-brand-500)';
 const SOFT = 'color-mix(in srgb, var(--color-brand-500) 14%, transparent)';
 const LINE = 'color-mix(in srgb, var(--color-brand-500) 55%, transparent)';
 
-export function EmptyCanvasArt({ mode }: { mode: EditorMode }) {
+export function EmptyCanvasArt({ workshop }: { workshop: boolean }) {
   return (
     <svg aria-hidden viewBox="0 0 120 72" className="h-[72px] w-[120px]" fill="none">
       <rect x="1" y="1" width="118" height="70" rx="12" fill={SOFT} />
-      {mode === 'workshop' ? <WorkshopScene /> : <DiagramScene />}
+      {workshop ? <WorkshopScene /> : <DiagramScene />}
     </svg>
   );
 }

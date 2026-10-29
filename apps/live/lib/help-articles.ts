@@ -74,17 +74,17 @@ export const HELP_ARTICLES = {
   choosingFonts: 'canvas/text-and-fonts/choosing-fonts',
   // Links / activity / comments
   // Plan mode's card types (docs/specs/026-plan/item-types.md).
-  planCardTypes: 'canvas/plan-mode/card-types',
-  planBoards: 'canvas/plan-mode/boards',
-  planCards: 'canvas/plan-mode/cards',
-  planSheets: 'canvas/plan-mode/sheets',
-  planDashboards: 'canvas/plan-mode/dashboards',
-  planForms: 'canvas/plan-mode/forms',
-  planTour: 'canvas/plan-mode/plan-tour',
-  workshopTour: 'canvas/workshop-mode/workshop-tour',
+  planCardTypes: 'canvas/plan-tabs/card-types',
+  planBoards: 'canvas/plan-tabs/boards',
+  planCards: 'canvas/plan-tabs/cards',
+  planSheets: 'canvas/plan-tabs/sheets',
+  planDashboards: 'canvas/plan-tabs/dashboards',
+  planForms: 'canvas/plan-tabs/forms',
+  planTour: 'canvas/plan-tabs/plan-tour',
+  workshopTour: 'canvas/workshop/workshop-tour',
   // The event-storming board, its photo import review included (docs/specs/021-event-storming/event-storming.md).
   eventStormingBoards: 'canvas/event-storming-boards',
-  drawTour: 'canvas/draw-mode/draw-tour',
+  drawTour: 'canvas/sketch-mode/sketch-tour',
   avatarTour: 'selection-modes/avatar-mode/avatar-tour',
   pagesTour: 'canvas/pages-mode/pages-tour',
   links: 'canvas/links',
@@ -129,7 +129,7 @@ export const HELP_ARTICLES = {
   // Onboarding / empty states
   yourFirstDiagram: 'getting-started/your-first-diagram',
   templates: 'canvas/templates',
-  drawMode: 'canvas/draw-mode',
+  drawMode: 'canvas/sketch-mode',
   logoPages: 'canvas/pages-mode/logo-pages',
   wireframePages: 'canvas/pages-mode/wireframe-pages',
   // Each page kind's Show Me links its own article (docs/specs/007-editor/pages-tour.md).

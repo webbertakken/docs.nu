@@ -180,7 +180,7 @@ All parameters are in **screen px and milliseconds**. The stroke is processed in
 ## Decision
 
 **The whiteboard pen draws with perfect-freehand, with pressure, the way Excalidraw draws freedraw.**
-The spec is [Draw mode](../specs/023-draw-mode/draw-mode.md#pens); the detail is the blueprint's
+The spec is [Sketch mode](../specs/023-draw-mode/draw-mode.md#pens); the detail is the blueprint's
 "Pen ink" ([whiteboard-round-one](../specs/023-draw-mode/blueprints/whiteboard-round-one.md)).
 
 Why, over the centred smoother recommended above:

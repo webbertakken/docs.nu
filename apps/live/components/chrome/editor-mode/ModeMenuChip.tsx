@@ -1,10 +1,5 @@
 import { useRef, useState } from 'react';
-import {
-  EDITOR_MODES,
-  editorModeLabel,
-  modesBesidePlanRule,
-  nextEditorMode,
-} from '@livedoc/document';
+import { editorModeLabel } from '@livedoc/document';
 import { ChevronDownIcon, useClickOutside, useMenuButton, EDITOR_MODE_ICONS } from '@livedoc/ui';
 import { TOOLBAR_TRIGGER_TONE } from '@/components/palette/PaletteDropdown';
 import {
@@ -13,11 +8,10 @@ import {
   type EditorModeSwitchProps,
 } from './editor-mode-copy';
 import { ModeMenu } from './ModeMenu';
-import { useLockedModePick } from './useLockedModePick';
 
 // The mode switch (docs/specs/007-editor/editor-modes.md "The mode switch"): a dropdown chip showing the current
 // mode's glyph, its name and a chevron, that opens the mode menu (ModeMenu) DOWNWARD, hanging from the chip's left edge:
-// a list of the modes and a preview of one. No hover card, which would cover the menu. The chip
+// a plain list of the three modes. No hover card, which would cover the menu. The chip
 // wears the strip's faint dropdown tint (docs/specs/007-editor/toolbar-layout.md "Look"), so it
 // reads as a menu.
 //
@@ -31,14 +25,9 @@ import { useLockedModePick } from './useLockedModePick';
 export function ModeMenuChip({
   mode,
   onChange,
-  lockedReason,
-  newTabIn,
-  crossPlan = false,
   compact = false,
   iconOnly = false,
 }: EditorModeSwitchProps & { compact?: boolean; iconOnly?: boolean }) {
-  // On a tab that keeps its mode, another mode is a new tab in it, asked first (docs/specs/026-plan/plan-tabs.md).
-  const pickLocked = useLockedModePick({ mode, lockedReason, newTabIn });
   const {
     open,
     close,
@@ -51,9 +40,6 @@ export function ModeMenuChip({
   const root = useRef<HTMLDivElement>(null);
   const Icon = EDITOR_MODE_ICONS[mode];
   const label = editorModeLabel(mode);
-  const modes = EDITOR_MODES;
-  const besides = crossPlan ? modes : modesBesidePlanRule(mode);
-  const keyLeadsTo = besides.length > 1 ? nextEditorMode(mode, 1, besides) : null;
 
   // The zoom the chip's host draws at (the toolbar or panel UI scale, docs/specs/007-editor/ui-scale.md),
   // read when the menu opens; the menu undoes it, so it opens at design size like every menu
@@ -68,8 +54,8 @@ export function ModeMenuChip({
 
   return (
     <div ref={root} className={compact ? 'relative' : 'relative w-full'}>
-      {/* No hover card: it would sit over the menu the chip opens. The menu itself names the
-          modes and shows Shift+D, and the chip keeps its accessible name. */}
+      {/* No hover card: it would sit over the menu the chip opens. The chip keeps its accessible name and says
+          Shift+D (aria-keyshortcuts). */}
       <button
         ref={setTrigger}
         type="button"
@@ -97,7 +83,14 @@ export function ModeMenuChip({
         } ${TOOLBAR_TRIGGER_TONE}`}
       >
         <Icon aria-hidden />
-        {iconOnly ? null : <span className="text-optical-line flex-1 text-left">{label}</span>}
+        {/* The top chrome's chip names the mode from 1280px wide; narrower it is the mark alone (its accessible name
+            still says the mode), so the top line keeps its room for the Palette strip
+            (docs/specs/007-editor/editor-modes.md "The mode switch"). */}
+        {iconOnly ? null : (
+          <span className={`text-optical-line flex-1 text-left ${compact ? 'max-xl:hidden' : ''}`}>
+            {label}
+          </span>
+        )}
         <ChevronDownIcon
           aria-hidden
           className={`transition-transform duration-micro motion-reduce:transition-none ${
@@ -108,22 +101,13 @@ export function ModeMenuChip({
       {open ? (
         <ModeMenu
           mode={mode}
-          modes={modes}
-          keyLeadsTo={keyLeadsTo}
           chip={chip}
           initialFocus={initialFocus}
           hostZoom={hostZoom}
           onChange={onChange}
           onClose={close}
-          crossPlan={crossPlan}
-          lockedReason={lockedReason}
-          // The rail's menu spans its row on a phone; the top chrome's floats, clamped to the viewport.
+          // The rail's menu hangs from its row; the top chrome's floats, clamped to the viewport.
           fill={!compact}
-          // No new tab to offer (a session that cannot add tabs, such as a tab-scoped link): the
-          // locked rows are inert.
-          {...(newTabIn
-            ? { onLockedPick: (next: EditorModeSwitchProps['mode']) => void pickLocked(next) }
-            : {})}
         />
       ) : null}
     </div>

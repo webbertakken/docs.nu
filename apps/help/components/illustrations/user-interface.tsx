@@ -137,8 +137,8 @@ export function QuickControls() {
 }
 
 const TAB_LIST_ROWS: TabListRow[] = [
-  { kind: 'tab', name: 'Overview', mode: 'Diagram', active: true, people: [SAMPLE_PEOPLE[0]!] },
-  { kind: 'tab', name: 'Sketches', mode: 'Draw' },
+  { kind: 'tab', name: 'Overview', mode: 'Structured', active: true, people: [SAMPLE_PEOPLE[0]!] },
+  { kind: 'tab', name: 'Sketches', mode: 'Sketch' },
   { kind: 'folder', name: 'Planning', count: 2 },
   {
     kind: 'tab',
@@ -147,7 +147,7 @@ const TAB_LIST_ROWS: TabListRow[] = [
     indent: true,
     people: [SAMPLE_PEOPLE[1]!, SAMPLE_PEOPLE[2]!],
   },
-  { kind: 'tab', name: 'Retro', mode: 'Workshop', indent: true },
+  { kind: 'tab', name: 'Retro', mode: 'Structured', indent: true },
   { kind: 'tab', name: 'Launch Deck', mode: 'Pages' },
 ];
 

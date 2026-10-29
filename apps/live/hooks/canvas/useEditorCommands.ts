@@ -250,7 +250,7 @@ export function useEditorCommands(open: boolean): {
     editNote: () => {
       if (selectedId && singleTakesAttachments) openNote(selectedId);
     },
-    createTab: addTab,
+    createTab: () => addTab('tab'),
     renameDocument: requestRenameDocument,
     // deleteDocument confirms internally and (for the current document)
     // redirects to /explorer; it needs the document's own id.

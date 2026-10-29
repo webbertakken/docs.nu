@@ -43,7 +43,7 @@ describe('Show Me section (element tours)', () => {
     expect(header().getAttribute('aria-expanded')).toBe('false');
     expect(header().textContent).toContain('0 of 21 On');
     // The mode tours stay open above it.
-    expect(screen.getByRole('switch', { name: 'Draw Tour' })).toBeTruthy();
+    expect(screen.getByRole('switch', { name: 'Sketch Tour' })).toBeTruthy();
   });
 
   it('opens from its heading, the master switch over each element', () => {

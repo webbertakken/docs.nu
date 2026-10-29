@@ -171,7 +171,7 @@ function StopwatchGlyph() {
 
 // --- Scenes ----------------------------------------------------------------
 
-/** The Collaborate elements on Workshop's palette strip: **Ask** on its own, then **Session**, open, with its five
+/** The Collaborate elements on the palette strip with the Workshop control on: **Ask** on its own, then **Session**, open, with its five
  *  groups down the side, room-first, and the open group's elements beside them. `lit` picks out what an article is
  *  about (Ask, and any of Session's groups; the first lit group is the one shown open). */
 export function CollaborateCategories({ lit = [] }: { lit?: readonly string[] }) {

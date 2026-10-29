@@ -28,13 +28,28 @@ afterEach(() => {
   cleanup();
 });
 
-function show(mode: EditorMode = 'workshop', { minimal = false }: { minimal?: boolean } = {}) {
+// 'workshop': Structured with the Workshop control on (docs/specs/012-collaboration/workshop-mode.md), the bar it had.
+function show(
+  at: EditorMode | 'workshop' = 'workshop',
+  { minimal = false }: { minimal?: boolean } = {},
+) {
+  const mode: EditorMode = at === 'workshop' ? 'diagram' : at;
+  const workshop = at === 'workshop';
   const h = Object.fromEntries(
     PALETTE_ADD_HANDLER_KEYS.map((k) => [k, vi.fn()]),
   ) as unknown as PaletteAddHandlers;
   render(
     <MinimalChromeProvider value={minimal}>
-      <EditorModeProvider value={{ mode, setMode: vi.fn(), canSwitch: true, canEdit: true }}>
+      <EditorModeProvider
+        value={{
+          mode,
+          setMode: vi.fn(),
+          canSwitch: true,
+          canEdit: true,
+          workshop,
+          setWorkshop: vi.fn(),
+        }}
+      >
         <ToolbarPalette
           canvasTool="select"
           onSetCanvasTool={vi.fn()}
@@ -221,9 +236,9 @@ describe('the keyboard', () => {
     fireEvent.keyDown(button('Write'), { key: 'ArrowLeft' });
     fireEvent.keyDown(button('Shapes'), { key: 'ArrowLeft' });
     // Wraps round to the last.
-    expect(document.activeElement).toBe(button('Data'));
-    fireEvent.keyDown(button('Data'), { key: 'ArrowDown' });
-    expect(heading()).toBe('Data');
+    expect(document.activeElement).toBe(button('Media'));
+    fireEvent.keyDown(button('Media'), { key: 'ArrowDown' });
+    expect(heading()).toBe('Media');
     expect(document.activeElement?.hasAttribute('data-flyout-item')).toBe(true);
   });
 

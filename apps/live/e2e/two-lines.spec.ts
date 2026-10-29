@@ -31,6 +31,13 @@ test.describe('the two lines', () => {
     const view = page.viewportSize()!;
     const b = await box(brand(page));
     const a = await box(actions(page));
+    // The strip settles once it has measured its room (useStripTileLimit): it sheds tiles to fit between the groups.
+    await expect
+      .poll(async () => {
+        const at = await box(strip(page));
+        return at.x > b.x + b.width && at.x + at.width < a.x;
+      })
+      .toBe(true);
     const s = await box(strip(page));
     const t = await box(tools(page));
     const d = await box(documentGroup(page));
@@ -100,8 +107,11 @@ test.describe('the two lines', () => {
   }) => {
     await openStartBlank(page);
     const add = documentGroup(page).getByRole('button', { name: 'Add tab' });
-    await add.click();
-    await add.click();
+    // + opens the add menu (docs/specs/007-editor/editor-modes.md "+ adds a tab or a Plan tab"); its Tab adds one.
+    for (let i = 0; i < 2; i += 1) {
+      await add.click();
+      await page.getByRole('menuitem', { name: 'Tab', exact: true }).click();
+    }
     const stack = documentGroup(page).locator('[data-tab-stack]');
     await expect(stack).toHaveAccessibleName('All tabs (3)');
     await stack.click();

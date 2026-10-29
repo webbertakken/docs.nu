@@ -7,7 +7,8 @@ import { articleTemplateOverrides } from './article-template';
 import { workingBackwardsOverrides } from './template-working-backwards';
 import { blankPageTemplateOverrides } from './blank-page-templates';
 import { templateLayers } from './template-layers';
-import { templateEditorMode } from './template-modes';
+import { openingEditorMode, openingWorkshop } from '@livedoc/document';
+import { templateOpening } from './template-modes';
 import { templatePages } from './template-pages';
 import type { TemplateKind } from './templates';
 
@@ -237,7 +238,8 @@ export function templateCanvasOverrides(kind: TemplateKind): Partial<Tab> {
   // two wins.
   // A whiteboard draws its own quiet board pattern (docs/specs/023-draw-mode/draw-mode.md "Board
   // background"), so it never takes a template's dimming.
-  const mode = templateEditorMode(kind);
+  const opening = templateOpening(kind);
+  const mode = openingEditorMode(opening);
   const quiet = pattern && mode !== 'draw' ? TEMPLATE_PATTERN_OPACITY[pattern] : undefined;
   const soft =
     kind === 'mindmap' ||
@@ -256,8 +258,10 @@ export function templateCanvasOverrides(kind: TemplateKind): Partial<Tab> {
   // /new, and the MCP worker all go through here.
   // A template's mode (docs/specs/007-editor/templates-by-mode.md): the Draw templates are general
   // tabs that OPEN in Draw mode (docs/specs/007-editor/editor-modes.md "Where the mode lives";
-  // whiteboarding is no kind), the Pages ones open in Pages (their pages below).
+  // whiteboarding is no kind), the Pages ones open in Pages (their pages below), and a session template opens in
+  // Structured with the Workshop control on (docs/specs/012-collaboration/workshop-mode.md "Templates").
   if (mode !== 'diagram') overrides.opensIn = mode;
+  if (openingWorkshop(opening)) overrides.workshop = true;
   // The Article opens in Pages on its one article page (docs/specs/007-editor/article-pages.md).
   if (kind === 'article') Object.assign(overrides, articleTemplateOverrides());
   // Working Backwards is an article too: its PR/FAQ flows onto pages in the Report look (template-working-backwards.ts).

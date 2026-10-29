@@ -32,7 +32,11 @@ describe('searchCatalogueTiles', () => {
     const diagram = searchCatalogueTiles({ query: sticker.label, mode: 'diagram' });
     expect(from(diagram.here, 'sticker:')).toEqual([]);
     expect(ids(diagram.elsewhere)).toContain(`sticker:${sticker.id}`);
-    const workshop = searchCatalogueTiles({ query: sticker.label, mode: 'workshop' });
+    const workshop = searchCatalogueTiles({
+      query: sticker.label,
+      mode: 'diagram',
+      workshop: true,
+    });
     expect(ids(workshop.here)).toContain(`sticker:${sticker.id}`);
   });
 

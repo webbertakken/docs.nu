@@ -73,7 +73,7 @@ export const HERO_SCENE_DATA: HeroSceneData[] = [
     key: 'draw',
     word: 'Whiteboard',
     build: '/new?mode=draw',
-    short: 'Draw',
+    short: 'Sketch',
     title: 'Sprint retro',
     label: 'Draw: sketch on a whiteboard together, markers, stickies and all',
     mode: 'draw',

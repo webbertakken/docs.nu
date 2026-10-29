@@ -40,12 +40,12 @@ describe('isFirstRun', () => {
 });
 
 describe('the starts', () => {
-  it('offers each mode its blank, in mode order', () => {
+  it('offers each opening its blank, in order', () => {
     expect(WELCOME_BLANKS).toEqual([
-      'blank',
       'whiteboard',
-      'blank-session',
+      'blank',
       'blank-illustration',
+      'blank-session',
       'blank-plan',
     ]);
   });

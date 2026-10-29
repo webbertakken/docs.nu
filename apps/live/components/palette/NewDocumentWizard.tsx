@@ -2,8 +2,8 @@
 
 import { useLayoutEffect, useState } from 'react';
 import { Button, CloseIcon, useEscape } from '@livedoc/ui';
-import type { EditorMode } from '@livedoc/document';
-import { BLANK_TEMPLATE_FOR_MODE, type TemplateKind } from '@livedoc/templates';
+import type { TabOpening } from '@livedoc/document';
+import { BLANK_TEMPLATE_FOR_OPENING, type TemplateKind } from '@livedoc/templates';
 import { HelpArticleLink } from '@/components/primitives/HelpArticleLink';
 import { useModalGuard } from '@/hooks/ui/useModalGuard';
 import { takeEarlyModeChoice } from '@/app/new/early-mode-choice';
@@ -26,7 +26,7 @@ export function NewDocumentWizard({
   // The create is in flight: Create shows its spinner and nothing else creates.
   busy?: boolean;
   // A `/new?mode=` preset: its card is chosen, and Create makes its blank.
-  initialMode?: EditorMode | null;
+  initialMode?: TabOpening | null;
   // Make the document from a mode's blank.
   onCreate: (kind: TemplateKind) => void;
   // Make a Blank Diagram with its start closed (the documented Skip defaults).
@@ -37,12 +37,12 @@ export function NewDocumentWizard({
   onOpenExisting?: () => void;
 }) {
   useModalGuard(true);
-  const [chosen, setChosen] = useState<EditorMode | null>(null);
+  const [chosen, setChosen] = useState<TabOpening | null>(null);
   const mode = chosen ?? initialMode;
-  const create = (next: EditorMode | null) => {
+  const create = (next: TabOpening | null) => {
     if (busy) return;
     if (next) setChosen(next);
-    onCreate(BLANK_TEMPLATE_FOR_MODE[next ?? 'diagram']);
+    onCreate(BLANK_TEMPLATE_FOR_OPENING[next ?? 'diagram']);
   };
   // A card clicked before hydration is chosen now, before the browser can hand React another event.
   useLayoutEffect(() => {

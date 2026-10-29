@@ -1,0 +1,50 @@
+import { ArticleLayout } from '@/components/ArticleLayout';
+import { helpMetadata } from '@/lib/seo';
+
+export const metadata = helpMetadata({
+  title: 'The Workshop Tour',
+  description:
+    'The Workshop tour shows the Collaborate categories, a timer, a dot vote, a poll, the Session strip and Share, from Start Workshop Tour at the top right.',
+  path: '/help/canvas/workshop/workshop-tour/',
+});
+
+<ArticleLayout
+  title="The Workshop Tour"
+  description="A short, optional walkthrough of the session kit with the Workshop control on, started from the Start Workshop Tour button at the top right."
+  categoryTitle="Canvas"
+  categorySlug="canvas/workshop"
+>
+
+The Workshop tour shows you where everything for running a session lives. Like the [Structured Tour](/help/getting-started/diagram-tour/), it works on the real editor rather than screenshots: it spotlights each part with a highlight ring and a short explanation. It places a timer, a vote and a poll to show them and takes them away when it ends, takes under a minute, and you can leave at any point.
+
+## Starting the Tour
+
+The tour never starts or pops up on its own. When the [Workshop control](/help/canvas/workshop/) is on for a tab you can edit, press Start Workshop Tour at the top right of the editor, just after the appearance switch. On a phone the button shows only its play icon.
+
+The button doesn't appear on a locked tab, in an embed, or for someone who can only view or take part. If you have a complex element selected, the button offers that element's tour instead; select nothing to get the Workshop tour back. It stays there after you've taken the tour, so you can press it again whenever you like.
+
+## What It Covers
+
+1. **Collaborate**: **Ask** and **Session** on the palette's bar, the session kit: Ask puts a question to the room, and Session holds the timers, reveals, records, reactions, selection modes and places to go. In Sketch, which has no palette, this step is left out. See [Collaborate](/help/palette/behaviour/). The rest of the palette is the [Structured Tour](/help/getting-started/diagram-tour/)'s.
+2. **A Timer for the Room**: a Timer on the canvas, counting down for everyone, with pause, reset and more time on it.
+3. **Dot Voting**: a Vote, which gives everyone dots to put on the notes they back; the counts show when it ends.
+4. **A Live Poll**: a Poll, a question to the room answered live, as yes or no, choices, a rating or open.
+5. **Run the Room**: the **Timer**, **Vote** and **Poll** buttons in the Session strip, which run for everyone without placing anything. See [Session Tools](/help/collaboration/session-tools/).
+6. **Bring People In**: the **Share** button, where a Participant link lets people add notes, vote and answer without changing the rest. Left out where there is no Share button.
+
+Each step has **Next**, **Back** and **Skip tour**. The last card, **You're ready to run a workshop**, links to the [Workshop control](/help/canvas/workshop/) article and ends the tour with **Start**. If the control is turned off or you switch tab mid-tour, it ends as skipped.
+
+## Replaying the Tour
+
+Press Start Workshop Tour again, or start it from Settings:
+
+<Step n={1}>Open **Settings** from the editor and go to **Tours**.</Step>
+
+<Step n={2}>Switch **Workshop Tour** back on.</Step>
+
+<Step n={3}>
+  Close Settings. If the Workshop control is on, the tour starts straight away; otherwise the Start
+  Workshop Tour button is there the next time you turn it on.
+</Step>
+
+</ArticleLayout>

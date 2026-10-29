@@ -1,4 +1,4 @@
-import { TEMPLATES, templateEditorMode } from '@livedoc/templates';
+import { TEMPLATES, templateOpening } from '@livedoc/templates';
 import { describe, expect, it } from 'vitest';
 import { HERO_SCENES } from './hero-scenes';
 
@@ -24,7 +24,7 @@ describe('hero scenes', () => {
     const q = new URL(scene.build, 'https://docs.nu').searchParams.get('q')!.toLowerCase();
     const match = TEMPLATES.filter(
       (t) =>
-        !t.hidden && t.title.toLowerCase().includes(q) && templateEditorMode(t.kind) === scene.mode,
+        !t.hidden && t.title.toLowerCase().includes(q) && templateOpening(t.kind) === scene.mode,
     );
     expect(match.length, `a "${q}" template in ${scene.mode}`).toBeGreaterThan(0);
   });

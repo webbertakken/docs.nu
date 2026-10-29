@@ -27,7 +27,7 @@ floor at 24px; the editor aims past it, because a diagram editor is used with a 
   (`DialogCloseButton`), search clear and dismiss buttons, and Add tab. Resize handles have their
   own 16px pad on a coarse pointer (canvas element parts).
 - **Every canvas toolbar pads its items.** The Palette strip, the Draw dock's pills (`DockToolbar`)
-  and the menu button's own card in Draw (`ToolbarExplorerButton`) all carry `PHONE_TOOLBAR_ITEMS`;
+  and the menu button's own card in Sketch (`ToolbarExplorerButton`) all carry `PHONE_TOOLBAR_ITEMS`;
   the selection toolbar's 32px buttons (`SelectionPopover`) get `touch-target-y`, as do the tab pill,
   the role pill (Editing / Viewing), the tour card's buttons and a page's lock and cog.
   The Plan cogs (a column's, Board Settings, a Sheet's) and the empty-tab card's close take the

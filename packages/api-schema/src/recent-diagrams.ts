@@ -3,7 +3,7 @@
 // the static marketing site loading sign-in or calling the api. One contract, written by apps/live and read
 // by apps/marketing on the same origin.
 
-import { parseEditorMode, type EditorMode } from '@livedoc/document';
+import { parseTabOpening, type TabOpening } from '@livedoc/document';
 import type { DocumentSummary } from './index';
 
 // The localStorage key the note lives under. Versioned: a change to the shape takes a new key.
@@ -34,7 +34,7 @@ export type RecentDiagram = {
   name: string;
   savedAt: number;
   // The mode it opens in (its glyph on a tile without a thumbnail); null when unknown.
-  mode: EditorMode | null;
+  mode: TabOpening | null;
   // The team whose library holds it, for the tile's team mark; null for your own.
   teamName: string | null;
 };
@@ -90,7 +90,7 @@ export function parseRecentDiagrams(raw: string | null): RecentDiagram[] {
         name: d.name,
         savedAt: d.savedAt,
         // A note written before a mode's rename keeps its old id (`facilitate`): read as today's.
-        mode: parseEditorMode(d.mode) ?? null,
+        mode: parseTabOpening(d.mode) ?? null,
         // A note written before teams joined it has none: your own.
         teamName: typeof d.teamName === 'string' && d.teamName.length > 0 ? d.teamName : null,
       }));

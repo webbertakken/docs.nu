@@ -2,9 +2,10 @@ import type { Page } from '@playwright/test';
 import { createInMode, expect, expectNoPageErrors, test, pageOwnerHeaders } from './fixtures';
 
 // Editor modes end to end (docs/specs/007-editor/editor-modes.md), in dark mode: the switch beside the menu button and
-// an empty tab's start always agree, the tab menu offers none; a tab with content switches beside the menu button
-// (Shift+D included) and keeps its strokes across a reload; a new tab opens in its maker's mode; and a switch reaches
-// everyone at once, with Undo switching it back. Synthesised content only.
+// an empty tab's start always agree on Sketch, Structured or Pages, the tab menu offers none; a tab with content
+// switches beside the menu button (Shift+D included) and keeps its strokes across a reload; a Plan tab offers no
+// switch; the add menu's Tab opens in its maker's mode and its Board, Sheet and Dashboard open Start Planning there;
+// and a switch reaches everyone at once, with Undo switching it back. Synthesised content only.
 
 const CANVAS = '[data-canvas-a11y-root]';
 const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? '/api';
@@ -38,28 +39,28 @@ const topSwitch = (page: Page) => page.getByRole('button', { name: /^Editor mode
 const boards = (page: Page) => page.locator('[data-plan-board]');
 const sketches = (page: Page) => page.locator(CANVAS).getByRole('img', { name: /^Sketch/ });
 
-// A new document in a mode, on its start, in dark mode at a desktop size.
+// A new document as one of the New Document wizard's choices, on its start, in dark mode at a desktop size.
 async function openInMode(page: Page, name: 'diagram' | 'draw' | 'plan') {
   await page.setViewportSize({ width: 1600, height: 900 });
   await page.emulateMedia({ colorScheme: 'dark' });
   await createInMode(page, name);
 }
 
-async function chooseOnStart(page: Page, name: 'Diagram' | 'Draw' | 'Plan') {
+async function chooseOnStart(page: Page, name: 'Sketch' | 'Structured' | 'Pages') {
   await startSwitch(page).click();
-  await page.getByRole('menuitemradio', { name: new RegExp(`^${name}`) }).click();
+  await page.getByRole('menuitemradio', { name }).click();
 }
 
-async function chooseBesideMenu(page: Page, name: 'Diagram' | 'Draw' | 'Workshop') {
+async function chooseBesideMenu(page: Page, name: 'Sketch' | 'Structured' | 'Pages') {
   await topSwitch(page).click();
-  await page.getByRole('menuitemradio', { name: new RegExp(`^${name}`) }).click();
+  await page.getByRole('menuitemradio', { name }).click();
 }
 
 // An empty tab offers each mode's start screen (docs/specs/007-editor/start-diagramming.md); its × starts from a
 // blank canvas, as a person drawing straight away would close it.
 async function closeStart(page: Page) {
   const start = page.getByRole('region', {
-    name: /^Start (Diagramming|Drawing|Facilitating|Making Pages)$/,
+    name: /^Start (Diagramming|Sketching|Making Pages|a Workshop)$/,
   });
   await start.waitFor();
   await start.getByRole('button', { name: 'Close' }).click();
@@ -77,23 +78,29 @@ async function drawWave(page: Page, from: { x: number; y: number }) {
 
 test.describe('editor modes', () => {
   // docs/specs/007-editor/editor-modes.md "The mode switch": beside the menu button and on an empty tab's start, the
-  // two always agreeing; none in the tab menu.
+  // two always agreeing; a plain menu of Sketch, Structured and Pages; none in the tab menu.
   test("the switch beside the menu button agrees with the start's, and the tab menu offers none", async ({
     page,
     pageErrors,
   }) => {
     await openInMode(page, 'diagram');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
-    await expect(startSwitch(page)).toHaveAccessibleName('Tab mode: Diagram');
-    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Diagram');
+    await expect(startSwitch(page)).toHaveAccessibleName('Tab mode: Structured');
+    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Structured');
 
-    await chooseBesideMenu(page, 'Workshop');
-    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'workshop');
-    await expect(startSwitch(page)).toHaveAccessibleName('Tab mode: Workshop');
-    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Workshop');
+    await topSwitch(page).click();
+    await expect(page.getByRole('menuitemradio')).toHaveText(['Sketch', 'Structured', 'Pages']);
+    await expect(page.getByRole('menuitemradio', { name: 'Structured' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await page.getByRole('menuitemradio', { name: 'Pages' }).click();
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'pages');
+    await expect(startSwitch(page)).toHaveAccessibleName('Tab mode: Pages');
+    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Pages');
 
-    await chooseOnStart(page, 'Draw');
-    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Draw');
+    await chooseOnStart(page, 'Sketch');
+    await expect(topSwitch(page)).toHaveAccessibleName('Editor mode: Sketch');
 
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Tab menu' }).click();
@@ -107,7 +114,7 @@ test.describe('editor modes', () => {
     pageErrors,
   }) => {
     await openInMode(page, 'diagram');
-    await chooseOnStart(page, 'Draw');
+    await chooseOnStart(page, 'Sketch');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
     await expect(dock(page)).toBeVisible();
     await closeStart(page);
@@ -116,12 +123,16 @@ test.describe('editor modes', () => {
     await drawWave(page, { x: 500, y: 600 });
     await expect(sketches(page)).toHaveCount(1);
 
-    // Shift+D works on a tab with content: Draw steps to Workshop.
+    // Shift+D works on a tab with content: Sketch steps to Structured.
     await page.keyboard.press('Escape');
     await page.keyboard.press('Shift+D');
-    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'workshop');
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
 
-    await chooseBesideMenu(page, 'Diagram');
+    await chooseBesideMenu(page, 'Pages');
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'pages');
+    // Leaving Pages with something on the tab asks first (editor-modes.md "Leaving Pages").
+    await chooseBesideMenu(page, 'Structured');
+    await page.getByRole('button', { name: 'Switch', exact: true }).click();
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
     await expect(sketches(page)).toHaveCount(1);
 
@@ -133,37 +144,72 @@ test.describe('editor modes', () => {
     expectNoPageErrors(pageErrors);
   });
 
-  // docs/specs/007-editor/editor-modes.md "Plan stands apart": an empty tab crosses Plan's line freely.
-  test('Shift+D moves an empty tab to the next mode', async ({ page, pageErrors }) => {
+  test('Shift+D steps Structured, Pages, Sketch and round again', async ({ page, pageErrors }) => {
     await openInMode(page, 'diagram');
     await closeStart(page);
     await page.locator(CANVAS).click({ position: { x: 800, y: 500 } });
+    await page.keyboard.press('Shift+D');
+    await expect(mode(page)).toHaveAttribute('data-editor-mode', 'pages');
+    // Start Making Pages takes the keys (its search is focused): close it, then the canvas has them again.
+    await closeStart(page);
+    await page.locator(CANVAS).click({ position: { x: 1500, y: 500 } });
     await page.keyboard.press('Shift+D');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
     expectNoPageErrors(pageErrors);
   });
 
-  test('a Plan tab with a board keeps its mode', async ({ page, pageErrors }) => {
+  // docs/specs/026-plan/plan-tabs.md "The kinds": a Plan tab is never switched, so it shows no switch.
+  test('a Plan tab offers no mode switch, and Shift+D does nothing there', async ({
+    page,
+    pageErrors,
+  }) => {
     await openInMode(page, 'plan');
     await expect(page.getByRole('heading', { name: 'Start Planning' })).toBeVisible();
+    await expect(topSwitch(page)).toHaveCount(0);
+    await expect(startSwitch(page)).toHaveCount(0);
     await page.getByRole('button', { name: /^Kanban Board/ }).click();
     await expect(boards(page)).toHaveCount(1);
     await page.keyboard.press('Escape');
     await page.keyboard.press('Shift+D');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'plan');
+    await expect(topSwitch(page)).toHaveCount(0);
     await expect(boards(page)).toHaveCount(1);
     expectNoPageErrors(pageErrors);
   });
 
-  // docs/specs/007-editor/editor-modes.md "A new tab opens in the mode it was made from".
-  test('a new tab opens in the mode it was made from', async ({ page, pageErrors }) => {
+  // docs/specs/007-editor/editor-modes.md "+ adds a tab or a Plan tab".
+  test("the add menu's Tab opens in the mode it was made from", async ({ page, pageErrors }) => {
     await openInMode(page, 'diagram');
-    await chooseOnStart(page, 'Draw');
+    await chooseOnStart(page, 'Sketch');
     await page.getByRole('button', { name: 'Add tab', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Tab', exact: true }).click();
     await expect(page.locator('[data-document-group]').getByText('Tab 2')).toBeVisible();
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
     // On its mode's own start, with no Quick Start over it.
-    await expect(page.getByRole('region', { name: 'Start Drawing' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Start Sketching' })).toBeVisible();
+    expectNoPageErrors(pageErrors);
+  });
+
+  test("the add menu's Board, Sheet and Dashboard open Start Planning there", async ({
+    page,
+    pageErrors,
+  }) => {
+    await openInMode(page, 'diagram');
+    const add = async (name: string) => {
+      await page.getByRole('button', { name: 'Add tab', exact: true }).click();
+      await page.getByRole('menuitem', { name, exact: true }).click();
+      await expect(mode(page)).toHaveAttribute('data-editor-mode', 'plan');
+      await expect(page.getByRole('heading', { name: 'Start Planning' })).toBeVisible();
+    };
+    const rail = (name: RegExp) =>
+      page.getByRole('navigation', { name: 'Categories' }).getByRole('button', { name });
+    await add('Board');
+    await expect(rail(/^Boards/)).toHaveAttribute('aria-current', 'true');
+    await add('Sheet');
+    await expect(rail(/^Spreadsheets/)).toHaveAttribute('aria-current', 'true');
+    await add('Dashboard');
+    await expect(rail(/^Dashboards/)).toHaveAttribute('aria-current', 'true');
+    await expect(topSwitch(page)).toHaveCount(0);
     expectNoPageErrors(pageErrors);
   });
 
@@ -182,7 +228,7 @@ test.describe('editor modes', () => {
     await other.locator(CANVAS).waitFor({ timeout: 30_000 });
     await expect(mode(other)).toHaveAttribute('data-editor-mode', 'diagram');
 
-    await chooseOnStart(page, 'Draw');
+    await chooseOnStart(page, 'Sketch');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
     await expect.poll(() => savedOpensIn(page), { timeout: 15_000 }).toBe('draw');
     // The other window follows the tab, live.

@@ -43,9 +43,9 @@ describe('UseAsDefaultMenu', () => {
     const sub = screen.getByRole('menu', { name: 'New documents that open as' });
     const trigger = screen.getByRole('menuitem', { name: /use as default for/i });
     expect(trigger.getAttribute('aria-controls')).toBe(sub.id);
-    expect(document.activeElement?.textContent).toBe('Diagrams');
-    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
     expect(document.activeElement?.textContent).toBe('Whiteboards');
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+    expect(document.activeElement?.textContent).toBe('Diagrams');
     fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' });
     expect(screen.queryByRole('menu', { name: 'New documents that open as' })).toBeNull();
     expect(document.activeElement).toBe(trigger);
@@ -60,19 +60,19 @@ describe('UseAsDefaultMenu', () => {
     expect(screen.getByText('New documents that open as')).toBeTruthy();
     const items = screen.getAllByRole('menuitemcheckbox');
     expect(items.map((i) => i.textContent)).toEqual([
-      // The modes in mode order (EDITOR_MODES), then the kinds and template families.
-      'Diagrams',
+      // The openings in order (TAB_OPENINGS), then the kinds and template families.
       'Whiteboards',
-      'Sessions',
+      'Diagrams',
       'Pages documents',
+      'Sessions',
       'Plan boards',
       'Event Storming boards',
       'Retrospectives',
       'Kanban boards',
     ]);
     expect(items.map((i) => i.getAttribute('aria-checked'))).toEqual([
-      'false',
       'true',
+      'false',
       'false',
       'false',
       'false',

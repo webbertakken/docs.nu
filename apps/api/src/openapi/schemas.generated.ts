@@ -4566,7 +4566,7 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       opensIn: {
         anyOf: [
           {
-            $ref: '#/components/schemas/EditorMode',
+            $ref: '#/components/schemas/TabOpening',
           },
           {
             type: 'null',
@@ -4740,7 +4740,7 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
         type: 'number',
       },
       mode: {
-        $ref: '#/components/schemas/EditorMode',
+        $ref: '#/components/schemas/TabOpening',
       },
     },
     required: ['mode', 'elements', 'comments', 'bytes'],
@@ -4767,7 +4767,7 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       opensIn: {
         anyOf: [
           {
-            $ref: '#/components/schemas/EditorMode',
+            $ref: '#/components/schemas/TabOpening',
           },
           {
             type: 'null',
@@ -5052,7 +5052,7 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
     type: 'string',
   },
   EditorMode: {
-    enum: ['diagram', 'draw', 'workshop', 'pages', 'plan'],
+    enum: ['draw', 'diagram', 'pages', 'plan'],
     type: 'string',
   },
   Element: {
@@ -12815,6 +12815,10 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       vote: {
         $ref: '#/components/schemas/TabVote',
       },
+      workshop: {
+        const: true,
+        type: 'boolean',
+      },
     },
     required: ['id', 'name', 'elements'],
     type: 'object',
@@ -12824,6 +12828,10 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
   },
   TabKind: {
     enum: ['diagram', 'event-storming', 'board', 'sheet', 'dashboard', 'form'],
+    type: 'string',
+  },
+  TabOpening: {
+    enum: ['draw', 'diagram', 'pages', 'workshop', 'plan'],
     type: 'string',
   },
   TabRecord: {
@@ -12945,6 +12953,10 @@ export const COMPONENT_SCHEMAS: ComponentSchemas = {
       },
       vote: {
         $ref: '#/components/schemas/TabVote',
+      },
+      workshop: {
+        const: true,
+        type: 'boolean',
       },
     },
     required: ['documentId', 'elements', 'id', 'name', 'orderIndex', 'rev', 'updatedAt'],

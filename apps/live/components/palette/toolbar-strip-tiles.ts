@@ -16,6 +16,9 @@ import { visibleTiles } from './PaletteTileGrid';
 // for More, which is where their loading note lives.
 
 export const STRIP_TILE_LIMIT = 12;
+// The most room the limits report, in tiles: one more than the tiles shown, so the slack an opener or a divider costs
+// on a full strip is still seen (stripTilesFor never shows more than STRIP_TILE_LIMIT tiles).
+const STRIP_ROOM_LIMIT = STRIP_TILE_LIMIT + 1;
 const STRIP_TILE_PX = 38;
 // Two, not three: a 360px phone has room for two beside the menu card, and a
 // third would run the strip off the screen.
@@ -38,7 +41,7 @@ const DESKTOP_MENU_CLEARANCE_PX = 116;
 const DESKTOP_STRIP_CHROME_PX = 280;
 
 function fitTiles(roomPx: number, pitch = STRIP_TILE_PX): number {
-  return Math.min(STRIP_TILE_LIMIT, Math.max(MIN_STRIP_TILES, Math.floor(roomPx / pitch)));
+  return Math.min(STRIP_ROOM_LIMIT, Math.max(MIN_STRIP_TILES, Math.floor(roomPx / pitch)));
 }
 
 export function phoneStripTileLimit(viewportWidth: number): number {
@@ -64,7 +67,7 @@ export function fitStripTiles({
   pitch: number;
 }): number {
   if (!(pitch > 0)) return MIN_STRIP_TILES;
-  return Math.min(STRIP_TILE_LIMIT, Math.max(MIN_STRIP_TILES, (available - chrome) / pitch));
+  return Math.min(STRIP_ROOM_LIMIT, Math.max(MIN_STRIP_TILES, (available - chrome) / pitch));
 }
 
 // Whether the strip reaches into a top-corner panel stack, horizontally, with
@@ -115,6 +118,10 @@ function allTilesFor(
 // dividers between them, so a divider costs a tile only when the slack
 // can't hold it.
 const DIVIDER_TILES = 0.2;
+// An opener (palette-openers) draws its glyph with a chevron, about a quarter of a tile wider than a plain tile, which
+// the measured pitch (the narrowest tile's) does not see: counted here, a strip with one never runs a few px past its
+// room and off the line.
+const OPENER_TILES = 0.3;
 export function stripTilesFor(
   categoryId: string,
   {
@@ -130,9 +137,12 @@ export function stripTilesFor(
 ): { tiles: PaletteTileDef[]; hasMore: boolean; dividersAfter: ReadonlySet<string> } {
   const all = visibleTiles(allTilesFor(categoryId, tiles), hasImage);
   const between = (tiles: PaletteTileDef[]) => tiles.slice(0, -1).filter((t) => t.dividerAfter);
-  const cost = (tiles: PaletteTileDef[]) => tiles.length + DIVIDER_TILES * between(tiles).length;
+  const bare = (tiles: PaletteTileDef[]) =>
+    tiles.length + OPENER_TILES * tiles.filter((t) => t.action.type === 'open').length;
+  const cost = (tiles: PaletteTileDef[]) => bare(tiles) + DIVIDER_TILES * between(tiles).length;
+  const fitsCount = all.length <= STRIP_TILE_LIMIT;
   // The whole category with its dividers, when it all fits.
-  if (cost(all) <= limit) {
+  if (fitsCount && cost(all) <= limit) {
     return {
       tiles: all,
       hasMore: ALWAYS_MORE.has(categoryId),
@@ -140,12 +150,12 @@ export function stripTilesFor(
     };
   }
   // The whole category without them, when only the tiles fit.
-  if (all.length <= limit) {
+  if (fitsCount && bare(all) <= limit) {
     return { tiles: all, hasMore: ALWAYS_MORE.has(categoryId), dividersAfter: NO_DIVIDERS };
   }
   // Overflowing: the first tiles with their dividers, a tile fewer only while
   // the dividers don't fit in the slack.
-  let count = Math.floor(limit);
+  let count = Math.min(STRIP_TILE_LIMIT, Math.floor(limit));
   while (count > 1 && cost(all.slice(0, count)) > limit) count -= 1;
   const shown = all.slice(0, count);
   return {

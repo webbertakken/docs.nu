@@ -3,13 +3,13 @@
 // someone who asked for nothing gets nothing over the canvas. Choosing a mode on the wizard's Mode step makes the same
 // blank but keeps the start, since it asked for templates next, unless the visit came from a Start Blank link
 // (`/new?start=blank`), which already said no templates. Plan's start cannot be closed, so a Plan blank keeps it.
-import { isBlankTemplate, templateEditorMode, type TemplateKind } from '@livedoc/templates';
+import { isBlankTemplate, templateOpening, type TemplateKind } from '@livedoc/templates';
 import { dismissEmptyCard } from '@/components/canvas/empty-card-dismissed';
 import { startClosedKey } from './start-closed-key';
 
 export function closeStartForBlank(tabId: string, kind: TemplateKind | null): boolean {
   if (!kind || !isBlankTemplate(kind)) return false;
-  const mode = templateEditorMode(kind);
+  const mode = templateOpening(kind);
   if (mode === 'plan') return false;
   dismissEmptyCard(startClosedKey(tabId, mode));
   return true;

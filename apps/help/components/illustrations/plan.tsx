@@ -1,5 +1,5 @@
-// Plan mode illustrations (docs/specs/026-plan/): a board with its header widgets and columns, the
-// tools group Plan mode brings, a column's cog, the board picker, the card panel, the card menu,
+// Plan tab illustrations (docs/specs/026-plan/): a board with its header widgets and columns, the
+// tools group a Plan tab brings, a column's cog, the board picker, the card panel, the card menu,
 // the Card Types panel and one item on two boards. Composed from the shared primitives so the house style
 // holds; the labels are the editor's own (PlanColumnPopover, ItemPanel, PlanCardMenu, CardTypesPanel...).
 
@@ -147,7 +147,7 @@ function Column({
   );
 }
 
-/** A Kanban board in Plan mode: header widgets, a column over its WIP limit (the preset's 3) with its
+/** A Kanban board on a Plan tab: header widgets, a column over its WIP limit (the preset's 3) with its
  *  cog, Task and Action cards (the types Kanban takes) with their type stripes, a card being dragged into the gap it opens, and + Add card. */
 export function PlanBoardScene() {
   const colW = 124;
@@ -265,7 +265,7 @@ function StripSegment({ x, label, children }: { x: number; label: string; childr
   );
 }
 
-/** Plan mode's tools group, bottom left, as CanvasChrome lays it out: Undo and Redo, then the Plan strip
+/** A Plan tab's tools group, bottom left, as CanvasChrome lays it out: Undo and Redo, then the Plan strip
  *  where Layers sits in the other modes (the Trash with its grey count, New Card, Cards and Card
  *  Types), then the Theme paintbrush and the zoom controls, each part after a divider. */
 export function PlanClusterScene() {
@@ -419,7 +419,7 @@ export function PlanClusterScene() {
       </Label>
 
       <Label x={14} y={20} size={11} weight={600} tone="body">
-        In Plan mode, the tools group (bottom left)
+        On a Plan tab, the tools group (bottom left)
       </Label>
     </Scene>
   );

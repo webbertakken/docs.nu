@@ -376,11 +376,11 @@ export const articles: Article[] = [
   },
   {
     slug: 'diagram-tour',
-    title: 'The Diagram Tour',
+    title: 'The Structured Tour',
     description:
-      'The interactive Diagram mode walkthrough, started from Start Diagram Tour at the top right.',
+      'The interactive Structured mode walkthrough, started from Start Structured Tour at the top right.',
     keywords:
-      'tour walkthrough guide onboarding show me around intro tutorial replay rerun steps welcome start tour button diagram mode palette',
+      'tour walkthrough guide onboarding show me around intro tutorial replay rerun steps welcome start tour button structured tour start structured tour diagram tour structured mode diagram mode palette',
     category: 'Getting Started',
     categorySlug: 'getting-started',
   },
@@ -1371,7 +1371,7 @@ export const articles: Article[] = [
     slug: 'behaviour',
     title: 'Collaborate',
     description:
-      'Every element that comes alive with the room, as six palette categories in Workshop mode: comment and action panels, estimates, quizzes, temperature checks, idea boxes, Q&A boards, Done checks, pickers, session buttons (timer, stopwatch, vote, poll), agendas, decisions, roll calls, reactions, mode buttons, portals and Bring Focus.',
+      'Every element that comes alive with the room, as six palette categories with the Workshop control on: comment and action panels, estimates, quizzes, temperature checks, idea boxes, Q&A boards, Done checks, pickers, session buttons (timer, stopwatch, vote, poll), agendas, decisions, roll calls, reactions, mode buttons, portals and Bring Focus.',
     keywords:
       'behaviour behavior behaviours behaviors interactive button portal session timer stopwatch countdown count up elapsed vote poll reveal hide cover picker random spinner control mode switch chair seat desk sofa couch fence barrier link card bookmark preview url bring focus look here attention gather reaction pad confetti celebrate sparkles hearts applause fireworks emoji burst done check finished ready waiting who progress everyone mark complete collaborate collaboration estimate quiz trivia question temperature idea box agenda decision roll call ask the room keep a record run the room workshop facilitation runtime live tools record react navigate selection mode',
     category: 'Palette',
@@ -1459,7 +1459,7 @@ export const articles: Article[] = [
   {
     slug: 'popular',
     title: 'Popular',
-    description: "The twelve tiles Diagram mode's palette opens on, right on the strip.",
+    description: "The twelve tiles Structured mode's palette opens on, right on the strip.",
     keywords: 'popular common default quick tiles landing everyday shapes strip diagram first',
     category: 'Palette',
     categorySlug: 'palette',
@@ -1526,42 +1526,42 @@ export const articles: Article[] = [
     slug: 'editor-modes',
     title: 'Editor Modes',
     description:
-      'Diagram, Draw, Workshop, Pages and Plan: what each mode is for, choosing one on an empty tab, and Opens in.',
+      'Sketch, Structured and Pages: what each mode is for, the mode switch, the add menu for Plan tabs, and the Workshop control.',
     keywords:
-      'editor mode editor modes mode switch switch mode change mode choose mode new tab tab window modes diagram draw pages plan workshop session shift+d shift d cycle next mode opens in open in default mode per tab per person tab pill mode icon whiteboard sketch pages infographic boards kanban phone mobile view only read only kind template leave pages switch to diagram confirm convert pages workflow way of working',
+      'editor mode editor modes mode switch mode menu dropdown switch mode change mode choose mode new tab add menu add tab new board new sheet new dashboard plus tab window modes sketch structured diagram draw diagram mode draw mode pages plan plan mode plan tabs workshop workshop mode workshop control session shift+d shift d cycle next mode opens in open in default mode per tab per person tab pill mode icon whiteboard sketch pages infographic boards kanban phone mobile view only read only kind template leave pages switch to diagram confirm convert pages workflow way of working',
     category: 'Canvas',
     categorySlug: 'canvas',
     group: 'Modes and Boards',
   },
   {
-    slug: 'draw-mode',
-    title: 'Draw Mode',
+    slug: 'sketch-mode',
+    title: 'Sketch Mode',
     description:
-      'Freehand drawing on any tab: switch modes, then a dock of pens, a Path tool, erasers and shapes.',
+      'Freehand sketching on any tab: switch to Sketch, then a dock of pens, a Path tool, erasers and shapes.',
     keywords:
-      'draw mode drawing mode diagram mode editor mode switch modes mode switch toggle shift+d shift d opens in open in default mode per tab whiteboards whiteboard white board chalkboard blackboard sketch draw drawing freehand hand drawn ink pen pens marker stylus apple pencil surface pen touch finger palm rejection pinch zoom dock toolbar eraser rubber partial erase stroke erase sticky text shapes shape recognition recognise recognize snap clean up background plain dots dotted grid graph microsoft whiteboard dark mode chalk colour color width thickness path tool vector pen tool bezier curve curves anchor point points node nodes handle handles edit points corner smooth mirrored aligned illustrator figma undo redo settings cog more shapes shape search find a shape flowchart pin pinned unpin favourite shapes frequent most used simple mode dock mode colour picker color picker custom colour hex eyedropper eye dropper your colours remove colour contrast dock position top bottom move the dock tablet ipad snap colours snap to stock colours stock colors custom colors convert colours adaptive nearest colour',
+      'sketch mode sketching start sketching draw mode drawing mode start drawing structured mode diagram mode editor mode switch modes mode switch toggle shift+d shift d opens in open in default mode per tab whiteboards whiteboard white board chalkboard blackboard sketch draw drawing freehand hand drawn ink pen pens marker stylus apple pencil surface pen touch finger palm rejection pinch zoom dock toolbar eraser rubber partial erase stroke erase sticky text shapes shape recognition recognise recognize snap clean up background plain dots dotted grid graph microsoft whiteboard dark mode chalk colour color width thickness path tool vector pen tool bezier curve curves anchor point points node nodes handle handles edit points corner smooth mirrored aligned illustrator figma undo redo settings cog more shapes shape search find a shape flowchart pin pinned unpin favourite shapes frequent most used simple mode dock mode colour picker color picker custom colour hex eyedropper eye dropper your colours remove colour contrast dock position top bottom move the dock tablet ipad snap colours snap to stock colours stock colors custom colors convert colours adaptive nearest colour',
     category: 'Canvas',
     categorySlug: 'canvas',
     group: 'Modes and Boards',
   },
   {
-    slug: 'plan-mode',
-    title: 'Plan Mode',
+    slug: 'plan-tabs',
+    title: 'Plan Tabs',
     description:
-      'Boards of items on any tab: Kanban, sprints, triage, retros and roadmaps, with cards you drag together.',
+      'Board, Sheet and Dashboard tabs from the add menu: Kanban, sprints, triage, retros and roadmaps, with cards you drag together.',
     keywords:
-      'plan mode planning board boards kanban scrum sprint agile retro retrospective roadmap now next later bug triage weekly planner jira trello asana linear backlog to do in progress done column columns swimlane swimlanes rows wip limit work in progress card cards ticket tickets task tasks story stories issue issues drag drop move card assign label priority estimate story points vote voting dot vote hide writing private reveal facilitator set up board settings plan card keyboard shift arrow undo editor mode switch shift+d opens in plan templates project planner gantt daily standup bug tracker okrs key results product launch feedback board budget planner timesheet contact list task tracker spreadsheet templates hiring onboarding tabs dashboard trash archive flag finder types hand tool view only phone',
+      'plan tabs plan tab plan mode planning add menu new board new sheet new dashboard board tab sheet tab dashboard tab start planning board boards kanban scrum sprint agile retro retrospective roadmap now next later bug triage weekly planner jira trello asana linear backlog to do in progress done column columns swimlane swimlanes rows wip limit work in progress card cards ticket tickets task tasks story stories issue issues drag drop move card assign label priority estimate story points vote voting dot vote hide writing private reveal facilitator set up board settings plan card keyboard shift arrow undo opens in plan templates project planner gantt daily standup bug tracker okrs key results product launch feedback board budget planner timesheet contact list task tracker spreadsheet templates hiring onboarding tabs dashboard trash archive flag finder types hand tool view only phone',
     category: 'Canvas',
     categorySlug: 'canvas',
     group: 'Modes and Boards',
   },
   {
-    slug: 'workshop-mode',
-    title: 'Workshop Mode',
+    slug: 'workshop',
+    title: 'The Workshop Control',
     description:
       'Run a session on any tab: retros, town halls and workshops, with timers, votes, polls and reveals.',
     keywords:
-      'pub quiz trivia icebreaker questions two truths and a lie would you rather people bingo games workshop mode facilitate facilitate mode facilitation facilitator session sessions run a session workshop meeting team meeting retro retrospective town hall all hands lean coffee crazy eights brainstorm board workshop board kickoff ground rules icebreaker q&a questions agenda timer countdown stopwatch vote dot vote voting poll survey pulse check reveal hide estimate planning poker quiz temperature check fist of five idea box anonymous picker random spin reactions confetti stickers emoji sticker badge collaborate category session strip blank session editor mode switch shift+d where did the timer go where are stickers missing tools moved',
+      'pub quiz trivia icebreaker questions two truths and a lie would you rather people bingo games workshop workshop control workshop button workshop toggle turn on workshop workshop mode facilitate facilitate mode facilitation facilitator session sessions run a session workshop meeting team meeting retro retrospective town hall all hands lean coffee crazy eights brainstorm board workshop board kickoff ground rules icebreaker q&a questions agenda timer countdown stopwatch vote dot vote voting poll survey pulse check reveal hide estimate planning poker quiz temperature check fist of five idea box anonymous picker random spin reactions confetti stickers emoji sticker badge collaborate category session strip start a workshop blank session flipchart sketch structured pages where did the timer go where are stickers missing tools moved',
     category: 'Canvas',
     categorySlug: 'canvas',
     group: 'Modes and Boards',
@@ -1574,8 +1574,8 @@ export const articles: Article[] = [
     keywords:
       'item items ticket tickets task story bug epic note idea action risk issue record records field fields custom field status assignee owner priority label labels tag tags estimate points due date deadline checklist subtasks parent epic votes number key id #12 database store offline sync duplicate copy export drive api mcp agent automation script limit 2000',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'boards',
@@ -1585,8 +1585,8 @@ export const articles: Article[] = [
     keywords:
       'board boards plan board kanban sprint retro roadmap bug triage week weekly all cards archive blank column columns swimlane swimlanes rows wip limit width done counts as done widget widgets completion filter people points priorities unassigned top voted stale card size minimal compact detailed new cards card types move handle grip start with a board reveal hide writing votes left vote budget planner csv import csv download csv spreadsheet export cards',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'cards',
@@ -1596,8 +1596,8 @@ export const articles: Article[] = [
     keywords:
       'card cards ticket tickets plan card add card open card panel modal details tab tabs description rich text bullet list numbered list labels checklist steps parent open parent assignee team members comments comment thread resolve mention trash restore empty trash archive duplicate slide slides present presentation card size flag flagged child breadcrumb trail find search finder not on a board',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'card-types',
@@ -1606,41 +1606,41 @@ export const articles: Article[] = [
     keywords:
       'card type types item type types custom type kind kinds category ticket type issue type template fields custom field fields property properties attribute column choice dropdown select option options checkbox tick link url number date text long text show on card colour color glyph icon reorder delete restore built-in tabs details new cards can be limits',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
-    slug: 'draw-tour',
-    title: 'The Draw Tour',
+    slug: 'sketch-tour',
+    title: 'The Sketch Tour',
     description:
-      "A short, optional walkthrough of Draw mode's dock, started from Start Draw Tour at the top right.",
+      "A short, optional walkthrough of Sketch mode's dock, started from Start Sketch Tour at the top right.",
     keywords:
-      'draw tour tour walkthrough onboarding intro introduction getting started guide tutorial first time learn draw mode whiteboard sketch pen pens marker markers highlighter eraser path tool shapes sticky dock settings background cursor shape recognition replay rerun settings accessibility',
+      'sketch tour start sketch tour draw tour tour walkthrough onboarding intro introduction getting started guide tutorial first time learn draw mode whiteboard sketch pen pens marker markers highlighter eraser path tool shapes sticky dock settings background cursor shape recognition replay rerun settings accessibility',
     category: 'Canvas',
-    categorySlug: 'canvas/draw-mode',
-    parentSlug: 'draw-mode',
+    categorySlug: 'canvas/sketch-mode',
+    parentSlug: 'sketch-mode',
   },
   {
     slug: 'workshop-tour',
     title: 'The Workshop Tour',
     description:
-      'A short, optional walkthrough of Workshop mode, started from Start Workshop Tour at the top right.',
+      'A short, optional walkthrough of the session kit with the Workshop control on, started from Start Workshop Tour at the top right.',
     keywords:
-      'workshop tour facilitate tour tour walkthrough onboarding intro introduction show me around getting started guide tutorial first time learn workshop mode session retro workshop timer vote poll session strip collaborate share participant replay rerun settings accessibility',
+      'workshop tour facilitate tour tour walkthrough onboarding intro introduction show me around getting started guide tutorial first time learn workshop control workshop mode session retro workshop timer vote poll session strip collaborate share participant replay rerun settings accessibility',
     category: 'Canvas',
-    categorySlug: 'canvas/workshop-mode',
-    parentSlug: 'workshop-mode',
+    categorySlug: 'canvas/workshop',
+    parentSlug: 'workshop',
   },
   {
     slug: 'plan-tour',
     title: 'The Plan Tour',
     description:
-      'A guided walkthrough of Plan mode on your own board or sheet, started from Start Boards Tour or Start Sheets Tour at the top right.',
+      'A guided walkthrough of Plan tabs on your own board or sheet, started from Start Boards Tour or Start Sheets Tour at the top right.',
     keywords:
       'plan tour tour walkthrough onboarding intro introduction show me around getting started guide tutorial example board example cards example sheet first time learn plan mode kanban board cards spreadsheet spreadsheets sheet sheets formulas replay rerun settings accessibility',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'forms',
@@ -1650,8 +1650,8 @@ export const articles: Article[] = [
     keywords:
       'form forms survey surveys questionnaire google forms typeform intake submission submissions responses response respondents rsvp feedback bug report contact job application public link share link publish questions question answers mapping fields card type board column close limit report anonymous',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'dashboards',
@@ -1661,8 +1661,8 @@ export const articles: Article[] = [
     keywords:
       'dashboard dashboards overview report summary page layout rows row slots slot grid tiles widgets metrics metric kpi kpis chart charts board boards sheet sheets tabs at a glance status home portal add to slot settings cog background tint clear dashboard start over sheet chart change chart sheet figure column summary trend move swap resize arrange drag rearrange',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'sheets',
@@ -1672,8 +1672,8 @@ export const articles: Article[] = [
     keywords:
       'sheet sheets spreadsheet spreadsheets excel google sheets workbook table grid cell cells row rows column columns formula formulas function functions sum average reference references a1 range ranges number format currency percent date bold italic border borders merge merged freeze frozen sort sorting filter filtering find replace csv tsv import export download upload paste copy fill handle series autofill maximise maximize full screen restore spill setup chart charts bar line pie card table cards linked save focus fill tab templates template budget invoice expense report expenses loan calculator mortgage sales pipeline inventory stock guest list rsvp grade book habit tracker timesheet contacts tracker cell size compact roomy dropdown drop down select picklist pick list list chip chips checkbox check box tick box tickbox validation data validation rule rules conditional formatting conditional format highlight colour scale color scale heat map paint format format painter custom number format format code',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'sheet-functions',
@@ -1682,8 +1682,8 @@ export const articles: Article[] = [
     keywords:
       'sheet functions function list formulas formula reference spreadsheet functions excel functions sum average count countif sumif vlookup xlookup index match if iferror concat text date today now round filter sort unique sequence pmt npv cardcount cardsum cards plan cards errors div/0 n/a name ref value spill',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'visualisations',
@@ -1692,8 +1692,8 @@ export const articles: Article[] = [
     keywords:
       'visualisation visualisations visualization chart charts graph gantt gantt chart timeline roadmap due calendar start calendar calendar cards by field workload priority by status priority matrix card search filter filters swimlanes swimlane lanes row order reorder drag to reorder sort by date chart settings cog card types group by statuses maximise maximize view restore view dashboard slot status breakdown',
     category: 'Canvas',
-    categorySlug: 'canvas/plan-mode',
-    parentSlug: 'plan-mode',
+    categorySlug: 'canvas/plan-tabs',
+    parentSlug: 'plan-tabs',
   },
   {
     slug: 'pages-mode',

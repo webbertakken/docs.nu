@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useEditorModeState } from '@/components/chrome/editor-mode/editor-mode-context';
 import { editorModeLabel, type EditorMode, type Element } from '@livedoc/document';
 import { CompactEmptyState, HoverCard, NoMatches, SearchIcon } from '@livedoc/ui';
 import type { PendingDraw } from '@/lib/draw-mode';
@@ -78,6 +79,8 @@ export function ToolbarSearchPanel({
   // Plan's Cards, from the document's item types (as on the strip).
   planCardTiles?: readonly PaletteTileDef[];
 }) {
+  // The Workshop control's kit counts as this tab's own while it is on (docs/specs/012-collaboration/workshop-mode.md).
+  const workshop = useEditorModeState()?.workshop === true;
   // Mounted only while the popover is open, so both reset each time it opens.
   const [query, setQuery] = useState('');
   const [othersOpen, setOthersOpen] = useState(false);
@@ -93,9 +96,16 @@ export function ToolbarSearchPanel({
     hasImage: actions.hasImage,
     planCardTiles,
     tabElements,
+    workshop,
     drawTiles: markerTiles(pens, surface),
   });
-  const catalogues = searchCatalogueTiles({ query, mode, tabElements, loaded: cataloguesLoaded });
+  const catalogues = searchCatalogueTiles({
+    query,
+    mode,
+    workshop,
+    tabElements,
+    loaded: cataloguesLoaded,
+  });
   // One ranking per section across element types and catalogue entries: name matches first.
   const here = mergeByName(query, elements.here, catalogues.here);
   const elsewhere = mergeByName(query, elements.elsewhere, catalogues.elsewhere);

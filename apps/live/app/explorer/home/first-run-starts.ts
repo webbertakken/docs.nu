@@ -3,20 +3,20 @@
 // so the catalogue never weighs on any other Home.
 
 import {
-  BLANK_TEMPLATE_FOR_MODE,
+  BLANK_TEMPLATE_FOR_OPENING,
   POPULAR_TEMPLATE_KINDS,
   isBlankTemplate,
   templateCreateHref,
   type TemplateKind,
 } from '@livedoc/templates';
-import { EDITOR_MODES } from '@livedoc/document';
+import { TAB_OPENINGS } from '@livedoc/document';
 
 /** How many Popular templates the welcome shows. */
 export const WELCOME_TEMPLATES_MAX = 4;
 
-/** Start Blank: each mode's blank, in mode order. */
-export const WELCOME_BLANKS: readonly TemplateKind[] = EDITOR_MODES.map(
-  (mode) => BLANK_TEMPLATE_FOR_MODE[mode],
+/** Start Blank: each opening's blank, in order (Sketch, Structured, Pages, Workshop, Plan). */
+export const WELCOME_BLANKS: readonly TemplateKind[] = TAB_OPENINGS.map(
+  (mode) => BLANK_TEMPLATE_FOR_OPENING[mode],
 );
 
 /** Popular Templates: the shared Popular list without its blanks, cut to WELCOME_TEMPLATES_MAX. */

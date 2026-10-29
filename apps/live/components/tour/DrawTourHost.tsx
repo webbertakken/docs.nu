@@ -16,7 +16,7 @@ import { TOUR_OFFER_RANK, useOfferTour } from './tour-offer';
 import { useStartPanelOpen } from '@/components/start/start-panel-open';
 
 const DRAW_TOUR_COPY = {
-  helpHref: '/help/canvas/draw-mode/',
+  helpHref: '/help/canvas/sketch-mode/',
 };
 
 const NO_API: DrawTourApi = {};
@@ -84,7 +84,7 @@ export function DrawTourHost() {
     'draw',
     inDraw && canWork
       ? {
-          name: 'Draw',
+          name: 'Sketch',
           rank: TOUR_OFFER_RANK.mode,
           start,
           onShown: () => track('UI', 'Opened', 'DrawTourOffer'),

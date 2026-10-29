@@ -72,6 +72,18 @@ describe('ActionsGroup', () => {
     expect(account).toEqual(['Account menu']);
   });
 
+  // docs/specs/012-collaboration/workshop-mode.md "The control": first among the document actions, only when offered.
+  it('leads the document actions with the Workshop control when it is offered', () => {
+    const onToggle = vi.fn();
+    renderGroup({ workshop: { on: false, onToggle } });
+    expect(parts()[1]).toEqual(['Workshop', 'Share']);
+    fireEvent.click(screen.getByRole('button', { name: 'Workshop' }));
+    expect(onToggle).toHaveBeenCalledWith(true);
+    cleanup();
+    renderGroup();
+    expect(screen.queryByRole('button', { name: 'Workshop' })).toBeNull();
+  });
+
   it('is a named toolbar at the top right the strip keeps clear of', () => {
     renderGroup();
     const group = screen.getByRole('toolbar', { name: 'Actions' });

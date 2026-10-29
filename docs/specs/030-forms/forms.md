@@ -31,14 +31,12 @@ document.
 | **response number** | The form's own running count, 1, 2, 3, never reused (`Bug Report #14`)                        | key (that is the card's)      |
 
 A Form tab is a tab **Kind** ([Domain language](../003-system-architecture/domain-language.md)), as a Board tab is:
-it is what the tab is and it brings its own behaviour. It is always in Plan mode.
+it is what the tab is and it brings its own behaviour. It is always on a Plan tab.
 
 ## The Form tab
 
 - A Form tab follows the Plan tab kinds' rules ([Plan tabs](../026-plan/plan-tabs.md#the-kinds)): always in Plan,
-  its mode switch reading Plan, picking another mode asks **Open a New <Mode> Tab?** ("A Form tab is always in Plan.
-  Its mode can’t change, but you can carry on in a new <Mode> tab."), no palette, Shift+D does nothing, its tab
-  menu lists no modes. Its pill leads with a clipboard-list glyph.
+  no mode switch, no palette, Shift+D does nothing, its tab menu lists no modes. Its pill leads with a clipboard-list glyph.
 - The tab and its form share one name ([Names](../026-plan/plan-tabs.md#names)): the form's **heading** is the tab's
   name. Renaming either renames both in one undo step. A Form tab still on its default name takes its starter's name
   ("Bug Report"); a tab with a name of its own gives it to the form.
@@ -47,7 +45,7 @@ it is what the tab is and it brings its own behaviour. It is always in Plan mode
 
 ### Starting a form
 
-Start Planning ([Plan mode](../026-plan/plan-mode.md#starting-a-board)) gains a **Forms** category after
+Start Planning ([Working in Plan](../026-plan/plan-mode.md#starting-a-board)) gains a **Forms** category after
 Spreadsheets ("A form anyone can fill in from a link. Each response becomes a card on a board or a row in a
 sheet."), its cards each a picture of the form over its name and line. Each starter's responses go to a board (cards
 to work through) or a sheet (rows to count and read across), and its picture carries a badge in its top right corner
@@ -359,7 +357,7 @@ number).
 
 A guided tour, as [Plan's](../026-plan/plan-tour.md) is (`components/tour/FormTourHost.tsx`, its steps in
 `form-tour-steps.ts`), started from the actions group's **Start Forms Tour** button, leading the document actions
-([Diagram tour](../007-editor/editor-tour.md) "Where it appears"). It is on offer while an Editor has a Form tab open
+([Structured tour](../007-editor/editor-tour.md) "Where it appears"). It is on offer while an Editor has a Form tab open
 and the editor is ready (hydrated, no start panel, not read-only, not locked, not embedded); it stays on offer once
 taken, and a press while another tour is on screen does nothing. It never starts or offers itself: until 25 October
 2026 it offered itself once, on a banner asking "Getting started with Forms?", 800 ms after a Form tab first opened.
@@ -384,7 +382,7 @@ A run ending (completed or skipped) writes `formTourSeen` (synced preferences), 
 **Forms Tour** row; it never hides the button. **Show Me Around** at the foot of the cog's panel starts it at once,
 taken or not, as Settings' row does, when it is on offer. Its events are `UI` `Opened` `FormTourOffer` (the first
 time the button shows it in a page load), `Started` `FormTour` (a press), `View` `FormTourStep<Step>` and `Ended`
-`FormTourCompleted`/`FormTourSkipped`, charted as the **Forms Tour** stack beside the Draw tour's. `Closed` `FormTourOffer` (No on the old
+`FormTourCompleted`/`FormTourSkipped`, charted as the **Forms Tour** stack beside the Sketch tour's. `Closed` `FormTourOffer` (No on the old
 banner) is no longer sent.
 
 ## Publishing and the form link

@@ -81,8 +81,8 @@ describe('product claims in marketing copy', () => {
   }
 });
 
-// A sentence that walks through the modes lists them in the editor's own order (Workshop after
-// Draw since #548), the order the mode switch shows.
+// A sentence that walks through the modes and their companions names them in the editor's own order,
+// the New Document wizard's: Sketch, Structured, Pages, Workshop, Plan.
 describe('mode lists in marketing copy', () => {
   const labels = EDITOR_MODES.map(editorModeLabel);
   // Every string on its own, so one field's sentence never runs into the next field's.

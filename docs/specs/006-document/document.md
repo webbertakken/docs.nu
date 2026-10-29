@@ -3,8 +3,8 @@
 A **document** is the top-level container a person creates, names, shares,
 files in a folder and deletes. It holds an ordered set of tabs, optionally
 grouped into [tab folders](tab-folders.md). Every tab has a **tab kind**,
-which fixes what that tab is. A general tab is worked on in one of two
-[editor modes](../007-editor/editor-modes.md), Diagram or Draw.
+which fixes what that tab is. A general tab is worked on in one of three
+[editor modes](../007-editor/editor-modes.md), Sketch, Structured or Pages.
 
 **Every file is a document.** A markdown file is a document with one
 [markdown tab](../031-markdown/markdown-tab.md); any other file is a document
@@ -14,20 +14,20 @@ changing what the document is.
 
 ## Domain language
 
-| Term                     | Means                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| **document**             | The top-level container: its name, owner, location, share links and tabs.                        |
-| **tab**                  | One page of a document, with its own canvas, layers and elements.                                |
-| **tab kind**             | What a tab is for (`TabKind`, `packages/document/src/tab-kind.ts`).                              |
-| **diagram**              | The general tab kind: every element type, worked on in Diagram or Draw mode.                     |
-| **event-storming board** | The tab kind for event storming ([Event storming](../021-event-storming/event-storming.md)).     |
-| **markdown**             | The tab kind holding one markdown text ([Markdown tab](../031-markdown/markdown-tab.md)).        |
-| **file**                 | The tab kind holding one file's bytes ([File tab](file-tab.md)).                                 |
-| **page**                 | A document whose single tab is a markdown tab, as people speak of it.                            |
-| **document branch**      | A named, live copy of a document beside its main ([Document branches](document-branches.md)).    |
-| **main**                 | The document itself, as its branches see it.                                                     |
-| **editor mode**          | How a general tab is worked on: Diagram or Draw ([Editor modes](../007-editor/editor-modes.md)). |
-| **whiteboard**           | The activity of Draw mode ([Draw mode](../023-draw-mode/draw-mode.md)); not a tab kind.          |
+| Term                     | Means                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| **document**             | The top-level container: its name, owner, location, share links and tabs.                                    |
+| **tab**                  | One page of a document, with its own canvas, layers and elements.                                            |
+| **tab kind**             | What a tab is for (`TabKind`, `packages/document/src/tab-kind.ts`).                                          |
+| **diagram**              | The general tab kind: every element type, worked on in Sketch, Structured or Pages mode.                     |
+| **event-storming board** | The tab kind for event storming ([Event storming](../021-event-storming/event-storming.md)).                 |
+| **markdown**             | The tab kind holding one markdown text ([Markdown tab](../031-markdown/markdown-tab.md)).                    |
+| **file**                 | The tab kind holding one file's bytes ([File tab](file-tab.md)).                                             |
+| **page**                 | A document whose single tab is a markdown tab, as people speak of it.                                        |
+| **document branch**      | A named, live copy of a document beside its main ([Document branches](document-branches.md)).                |
+| **main**                 | The document itself, as its branches see it.                                                                 |
+| **editor mode**          | How a general tab is worked on: Sketch, Structured or Pages ([Editor modes](../007-editor/editor-modes.md)). |
+| **whiteboard**           | The activity of Sketch mode ([Sketch mode](../023-draw-mode/draw-mode.md)); not a tab kind.                  |
 
 - As a term, "diagram" names the tab kind, never the container. Prose may still say diagram
   where the text is about drawing ([Choosing the word in prose](#choosing-the-word-in-prose)).

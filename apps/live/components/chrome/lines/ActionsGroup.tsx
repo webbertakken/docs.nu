@@ -77,7 +77,7 @@ export function ActionsGroup({
           </ToolbarPart>
           <ToolbarPart>
             <TourOfferButton labelled={labelled} />
-            {appSurroundings ? <DocumentActions {...actions} /> : null}
+            {appSurroundings ? <DocumentActions {...actions} labelled={labelled} /> : null}
             {workbenchOpenHref ? (
               <WorkbenchOpenLink href={workbenchOpenHref} labelled={labelled} />
             ) : null}

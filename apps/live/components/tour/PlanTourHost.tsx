@@ -33,8 +33,8 @@ import { TOUR_OFFER_RANK, useOfferTour } from './tour-offer';
 const TOUR_CARD_TITLE = 'Your First Card';
 
 // Each track's cards name it, never the mode (docs/specs/026-plan/plan-tour.md "The steps").
-const BOARDS_TOUR_COPY = { helpHref: '/help/canvas/plan-mode/' };
-const SHEETS_TOUR_COPY = { helpHref: '/help/canvas/plan-mode/sheets/' };
+const BOARDS_TOUR_COPY = { helpHref: '/help/canvas/plan-tabs/' };
+const SHEETS_TOUR_COPY = { helpHref: '/help/canvas/plan-tabs/sheets/' };
 const TRACK_NAME: Record<BoardSheetTrack, string> = {
   boards: 'Boards tour',
   sheets: 'Sheets tour',

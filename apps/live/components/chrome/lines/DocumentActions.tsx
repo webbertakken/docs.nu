@@ -1,14 +1,19 @@
 'use client';
 
-import { Glyph, HoverCard, SOLID_BRAND_DARK_CONTROL } from '@livedoc/ui';
+import { Glyph, HoverCard } from '@livedoc/ui';
 import { useFormShareHost } from '@/lib/form-share-store';
-import { TOOLBAR_BUTTON } from '@/components/chrome/toolbar-surface';
+import { TOOLBAR_BUTTON, TOOLBAR_BUTTON_ON } from '@/components/chrome/toolbar-surface';
+import { WorkshopControl } from './WorkshopControl';
 
 // The present button's deck (docs/specs/012-collaboration/presentation-mode.md "The header's Present button"): given
 // only while the deck has a presentable slide, so absent means no button.
 export type PresentAction = { slideCount: number; starting: boolean; onPresent: () => void };
 
 export type DocumentActionsProps = {
+  // The Workshop control (docs/specs/012-collaboration/workshop-mode.md), given only where an Editor may turn it.
+  workshop?: { on: boolean; onToggle: (on: boolean) => void } | undefined;
+  // Button Labels (docs/specs/007-editor/user-preferences.md): the Workshop control shows its name beside its mark.
+  labelled?: boolean;
   // Make a Copy, for a visitor (someone who may not share): the same slot as Share, a different action.
   onMakeCopy?: () => void;
   copying?: boolean;
@@ -20,14 +25,16 @@ export type DocumentActionsProps = {
 };
 
 // A shared document's Share, and a published form's Share Form: the brand fill, so the state reads at a glance.
-const SHARED = `bg-brand-700 text-white hover:bg-brand-800 hover:text-white dark:hover:text-white ${SOLID_BRAND_DARK_CONTROL}`;
+const SHARED = TOOLBAR_BUTTON_ON;
 
 // A label: the name beside the icon, read out only on a phone, whose top line has no room for it.
 const LABEL = 'text-optical-centre phone:sr-only';
 
-// The document actions in the actions group (docs/specs/007-editor/toolbar-layout.md "The top line"): Make a Copy,
-// Present, then Share or Share Form, each the group's flat button with its name.
+// The document actions in the actions group (docs/specs/007-editor/toolbar-layout.md "The top line"): the Workshop
+// control, Make a Copy, Present, then Share or Share Form, each the group's flat button with its name.
 export function DocumentActions({
+  workshop,
+  labelled = false,
   onMakeCopy,
   copying = false,
   present,
@@ -38,6 +45,9 @@ export function DocumentActions({
   const formShare = useFormShareHost();
   return (
     <>
+      {workshop ? (
+        <WorkshopControl on={workshop.on} onToggle={workshop.onToggle} labelled={labelled} />
+      ) : null}
       {onMakeCopy ? (
         <HoverCard title="Make a copy" description="Duplicate this document into your own files.">
           <button

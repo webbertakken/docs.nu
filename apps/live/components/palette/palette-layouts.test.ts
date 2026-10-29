@@ -12,13 +12,14 @@ import {
   paletteCategoryOffered,
   paletteLandingCategory,
   participantTiles,
+  WORKSHOP_KIT_CATEGORIES,
 } from './palette-layouts';
 import { tileById, tilesForCategory } from './palette-tile-defs';
 
 // The palette per mode (docs/specs/007-editor/editor-modes.md "The palette per mode").
-const ids = (mode: 'diagram' | 'pages' | 'plan' | 'workshop', esBoard = false) =>
-  paletteCategoriesFor(mode, { esBoard }).map((c) => c.id);
-const tileIds = (mode: 'diagram' | 'pages' | 'plan' | 'workshop', category: string) =>
+const ids = (mode: 'diagram' | 'pages' | 'plan', esBoard = false, workshop = false) =>
+  paletteCategoriesFor(mode, { esBoard, workshop }).map((c) => c.id);
+const tileIds = (mode: 'diagram' | 'pages' | 'plan', category: string) =>
   paletteCategoriesFor(mode)
     .find((c) => c.id === category)!
     .tiles!.map((t) => t.id);
@@ -61,9 +62,8 @@ describe('palette layouts', () => {
     expect(write.tiles!.slice(-3)[0]!.id).toBe('components:callout');
   });
 
-  it('offers every Data tile in Workshop and Pages, Pages adding the Table', () => {
+  it('offers every Data tile in Pages, adding the Table', () => {
     const data = tilesForCategory('data').map((t) => t.id);
-    expect(tileIds('workshop', 'data')).toEqual(data);
     expect(tileIds('pages', 'data')).toEqual([...data, 'tools:table']);
     // The Timeline is a concept graphic (docs/specs/009-elements/concept-graphics.md "Timeline"), in Concepts.
     expect(tileIds('pages', 'concepts')).toContain('tools:timeline');
@@ -79,66 +79,48 @@ describe('palette layouts', () => {
     ]);
   });
 
-  // Workshop mode (docs/specs/012-collaboration/workshop-mode.md "The palette").
-  it('gives Workshop Popular, the drawing basics, Layout, the six Collaborate categories, the decorations and the charts', () => {
-    expect(ids('workshop')).toEqual([
+  // The Workshop control (docs/specs/012-collaboration/workshop-mode.md "The palette"): the mode's own layout, the
+  // six Collaborate categories before Icons, Stickers right after Icons where the layout has none.
+  it('adds the session kit to Structured: the Collaborate band before Icons, Stickers after', () => {
+    expect(ids('diagram', false, true)).toEqual([
       'popular',
       'shapes',
       'my-shapes',
       'write',
       'draw',
+      'diagrams',
+      'concepts',
       'layout',
-      'collab-ask',
-      'collab-tools',
-      'collab-record',
-      'collab-react',
-      'collab-mode',
-      'collab-navigate',
+      ...WORKSHOP_KIT_CATEGORIES,
       'icons',
       'stickers',
+      'technology',
       'media',
-      'data',
     ]);
-    expect(paletteLandingCategory('workshop', false)).toBe('popular');
+    expect(paletteLandingCategory('diagram', false)).toBe('popular');
   });
 
-  it("puts the session kit on Workshop's Popular as four openers", () => {
-    const popular = paletteCategoriesFor('workshop').find((c) => c.id === 'popular')!;
-    expect(popular.tiles!.map((t) => t.id)).toEqual([
-      'shapes:square',
-      'tools:sticky',
-      'tools:text',
-      'tools:frame',
-      'tools:arrow',
-      'tools:image',
-      'open:collab-ask',
-      'open:collab-tools',
-      'open:collab-record',
-      'open:collab-react',
+  it('adds only the Collaborate band to Pages, which has Stickers already, and nothing to a Plan tab', () => {
+    const pages = ids('pages', false, true);
+    expect(pages.filter((id) => id === 'stickers')).toHaveLength(1);
+    expect(pages.slice(pages.indexOf('icons') - 6, pages.indexOf('icons'))).toEqual([
+      ...WORKSHOP_KIT_CATEGORIES,
     ]);
-    // A divider of its own between the tiles and the openers, here only.
-    expect(popular.tiles!.filter((t) => t.dividerAfter).map((t) => t.id)).toContain('tools:image');
-    // Each opens a category Workshop offers.
-    const offered = new Set(paletteCategoriesFor('workshop').map((c) => c.id));
-    for (const t of popular.tiles!)
-      if (t.action.type === 'open') expect(offered.has(t.action.category), t.id).toBe(true);
+    expect(ids('plan', false, true)).toEqual(ids('plan'));
   });
 
-  // A layout that drops a group's last tile keeps the group's end: Diagram and Workshop leave out the Tab Window,
-  // which ends Media's first group, and Image ends it there instead.
-  it("keeps Media's divider after Image where the Tab Window is left out", () => {
-    for (const mode of ['diagram', 'workshop'] as const) {
-      const media = paletteCategoriesFor(mode).find((c) => c.id === 'media')!;
-      const ids = media.tiles!.map((t) => t.id);
-      expect(ids, mode).not.toContain('media:tab-window');
-      expect(media.tiles!.find((t) => t.id === 'tools:image')?.dividerAfter, mode).toBe(true);
-      // Never one at the very end.
-      expect(media.tiles!.at(-1)?.dividerAfter, mode).toBeFalsy();
+  it('keeps each mode its own Popular with the control on', () => {
+    for (const mode of ['diagram', 'pages'] as const) {
+      const popular = (workshop: boolean) =>
+        paletteCategoriesFor(mode, { workshop })
+          .find((c) => c.id === 'popular')!
+          .tiles!.map((t) => t.id);
+      expect(popular(true), mode).toEqual(popular(false));
     }
   });
 
-  it('holds every Collaborate tile in Workshop, across its six categories', () => {
-    const held = paletteCategoriesFor('workshop')
+  it('holds every Collaborate tile with the control on, across its six categories', () => {
+    const held = paletteCategoriesFor('diagram', { workshop: true })
       .filter((c) => c.id.startsWith('collab-'))
       .flatMap((c) => c.tiles!.map((t) => t.id));
     expect(held.sort()).toEqual(
@@ -148,38 +130,26 @@ describe('palette layouts', () => {
     );
   });
 
-  it("leaves Page, Annotation, Shape Pen and Polygon out of Workshop's Write and Draw, and gives it Diagram's Layout", () => {
-    const tilesOf = (id: string) =>
-      paletteCategoriesFor('workshop')
-        .find((c) => c.id === id)!
-        .tiles!.map((t) => t.id);
-    const write = paletteCategoriesFor('workshop').find((c) => c.id === 'write')!;
-    expect(write.label).toBe('Write');
-    expect(tilesOf('write')).toEqual([
-      'tools:text',
-      'tools:sticky',
-      'tools:pointer-note',
-      'tools:table',
-      'tools:checklist',
-    ]);
-    // Diagram's Layout, with the Timeline after the containers: Workshop has no Concepts to find it in.
-    const layout = tileIds('diagram', 'layout');
-    expect(layout).not.toContain('tools:timeline');
-    expect(tilesOf('layout')).toEqual([
-      ...layout.slice(0, layout.indexOf('tools:boundary') + 1),
-      'tools:timeline',
-      ...layout.slice(layout.indexOf('tools:boundary') + 1),
-    ]);
-    expect(tilesOf('draw')).toEqual([
-      'tools:pencil',
-      'tools:highlighter',
-      'tools:arrow',
-      'tools:line',
-    ]);
+  it('offers the kit only while the control is on', () => {
+    expect(paletteCategoryOffered('diagram', 'collab-ask')).toBe(false);
+    expect(paletteCategoryOffered('diagram', 'collab-ask', true)).toBe(true);
+    expect(paletteCategoryOffered('diagram', 'stickers', true)).toBe(true);
+    expect(paletteCategoryOffered('plan', 'collab-ask', true)).toBe(false);
   });
 
-  it('gives a Workshop Participant Sticky and Text, and an image', () => {
-    expect(participantTiles('workshop', false).map((t) => t.id)).toEqual([
+  // A layout that drops a group's last tile keeps the group's end: Structured leaves out the Tab Window, which ends
+  // Media's first group, and Image ends it there instead.
+  it("keeps Media's divider after Image where the Tab Window is left out", () => {
+    const media = paletteCategoriesFor('diagram').find((c) => c.id === 'media')!;
+    const ids = media.tiles!.map((t) => t.id);
+    expect(ids).not.toContain('media:tab-window');
+    expect(media.tiles!.find((t) => t.id === 'tools:image')?.dividerAfter).toBe(true);
+    // Never one at the very end.
+    expect(media.tiles!.at(-1)?.dividerAfter).toBeFalsy();
+  });
+
+  it('gives a Participant Sticky and Text, and an image, the control on or off', () => {
+    expect(participantTiles('diagram', false).map((t) => t.id)).toEqual([
       'tools:sticky',
       'tools:text',
       'tools:image',
@@ -221,7 +191,7 @@ describe('palette layouts', () => {
 
   // Every Popular tile is in another category of its mode too: the category bar has no Popular.
   it('offers every Popular tile in another category of its mode', () => {
-    for (const mode of ['diagram', 'workshop', 'pages'] as const) {
+    for (const mode of ['diagram', 'pages'] as const) {
       const cats = paletteCategoriesFor(mode);
       const elsewhere = new Set(
         cats.filter((c) => c.id !== 'popular').flatMap((c) => (c.tiles ?? []).map((t) => t.id)),

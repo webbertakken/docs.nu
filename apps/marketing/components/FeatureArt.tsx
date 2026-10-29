@@ -33,8 +33,8 @@ export * from './feature-art/infographics';
 export * from './feature-art/infographics-export';
 export * from './feature-art/logo';
 export * from './feature-art/article';
-// The mode categories (docs/specs/019-marketing/marketing-site.md "Story beats"): Draw's markers and
-// erasers, Plan's boards, and the writing and slides of Pages mode's articles and slide pages.
+// The mode categories (docs/specs/019-marketing/marketing-site.md "Story beats"): Sketch's markers and
+// erasers, the Plan tabs' boards, and the writing and slides of Pages mode's articles and slide pages.
 export * from './feature-art/whiteboard';
 export * from './feature-art/whiteboard-pen';
 export * from './feature-art/plan';

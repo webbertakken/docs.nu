@@ -52,7 +52,7 @@ Scope, by file:
 | `apps/live/components/canvas/whiteboard/WhiteboardDock.tsx` | The Path tool button (`ShapePenIcon`); Select's edit-mode glyph (`EditPointsIcon`)                                                |
 | `apps/live/components/palette/palette-icons.tsx`            | `ShapePenIcon` (the Shape Pen tile's icon, shared with the dock), `EditPointsIcon`                                                |
 | `apps/telemetry/app/event-explanations.ts`                  | Sentences for the four events                                                                                                     |
-| `apps/help/app/canvas/draw-mode/page.mdx`                   | The Path tool section                                                                                                             |
+| `apps/help/app/canvas/sketch-mode/page.mdx`                 | The Path tool section                                                                                                             |
 
 ## Domain and naming
 
@@ -193,7 +193,7 @@ instead; releasing Space resumes shaping from the node's new place. Release ends
   draft ending, empties the redo list. `usePathDrawGesture.history`
   (`{ canUndo: true, canRedo, undo, redo }`, null without a draft) replaces `canUndo` / `canRedo` /
   `onUndo` / `onRedo` on `CanvasChrome`, so the corner cluster (the only Undo and Redo buttons, in
-  Draw mode too) steps through the draft too.
+  Sketch mode too) steps through the draft too.
 - Space, Alt, Shift: read from the pointer events and a Space key flag.
 
 **Rubber band**: while not dragging, the last node to `cursor` (Shift: constrained) as a cubic
@@ -317,7 +317,7 @@ With the Path tool in hand, the draft is editable (as in Figma):
 - `pathEditing` (the edited element is a path): the Select button is pressed, labelled "Select,
   editing a path", icon `EditPointsIcon` (the selection toolbar's Edit points glyph); pressing it
   calls `leavePathEdit`.
-- `WHITEBOARD_EDIT_KEYS.p` → `pickPath`; `WHITEBOARD_TOOL_KEYS.path = 'P'`. Diagram tabs keep `P` as
+- `WHITEBOARD_EDIT_KEYS.p` → `pickPath`; `WHITEBOARD_TOOL_KEYS.path = 'P'`. Structured tabs keep `P` as
   the pencil.
 - `typeIntoSelected` returns false for a path (no typed label, P1).
 
@@ -342,8 +342,8 @@ With the Path tool in hand, the draft is editable (as in Figma):
 ### Style
 
 - Created in Ink by name, unfilled: `boardShape(createPath(...))` writes `penColour: 'ink'` and
-  `fillColor: 'transparent'` (the Path tool is a Draw mode tool), then the remembered Draw style; it
-  looks the same in Diagram mode ([One look](../../007-editor/editor-modes.md#one-look)).
+  `fillColor: 'transparent'` (the Path tool is a Sketch mode tool), then the remembered Draw style; it
+  looks the same in Structured mode ([One look](../../007-editor/editor-modes.md#one-look)).
 - Quick style: `isQuickStyleTarget` includes an unlocked path. Sections: stroke, width, style (solid,
   dashed, dotted) always; background when `closed`. Apply and clear as for a shape.
 - Style memory kind `path` (`board:path` on a whiteboard), fields `strokeColor`, `strokeSwatch`,
@@ -398,7 +398,7 @@ export function openPathAt(anchors: readonly PathAnchor[], i: number): PathAncho
 export function dragNodes(base, moving, pressed, delta: Point, shift: boolean, snapRadius: number): { anchors: PathAnchor[]; guides: PathGuides | null };
 export function pathEditKey(key: { key: string; shiftKey: boolean; mod: boolean }, anchors, closed, selected): PathKeyOutcome;
 export function toLocal(el, p: Point): Point; export function toWorld(el, p: Point): Point;
-export function tabAsSeen(tab: Tab, appearance?: Appearance): Tab; // the tab's Diagram backdrop, stock colours resolved
+export function tabAsSeen(tab: Tab, appearance?: Appearance): Tab; // the tab's Structured backdrop, stock colours resolved
 export function editingLook(element: { type: string }, isEditing: boolean): { raise: boolean; textCursor: boolean };
 // CanvasProps
 onCommitPath: (draft: { anchors: PathAnchor[]; closed: boolean; continuing: { id: string } | null }) => void;

@@ -36,8 +36,8 @@ describe('placement defaults store', () => {
     await setPlacementDefault(db.env, 'user_a', 'mode:draw', 'f-sketch');
     await setPlacementDefault(db.env, 'user_a', 'mode:diagram', 'f-diagram');
     expect(await listPlacementDefaults(db.env, 'user_a')).toEqual([
-      { key: 'mode:diagram', folderId: 'f-diagram' },
       { key: 'mode:draw', folderId: 'f-sketch' },
+      { key: 'mode:diagram', folderId: 'f-diagram' },
     ]);
   });
 

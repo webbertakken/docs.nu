@@ -1,5 +1,5 @@
 import { lucideWorkflow } from '@livedoc/icons/lucide';
-import type { EditorMode } from '@livedoc/document';
+import type { EditorMode, TabOpening } from '@livedoc/document';
 import type { ComponentType } from 'react';
 
 import { Glyph, type IconProps } from './Glyph';
@@ -79,9 +79,16 @@ export function PlanCardsIcon({ size = 16, ...rest }: IconProps) {
 // mode's id: the same glyph on the mode switch, Opens in, the tab pill, the template mode filter
 // and the marketing site's mode pictures.
 export const EDITOR_MODE_ICONS: Readonly<Record<EditorMode, ComponentType<IconProps>>> = {
-  diagram: FlowchartIcon,
   draw: MarkerIcon,
+  diagram: FlowchartIcon,
   pages: PagesIcon,
   plan: PlanIcon,
+};
+
+// Each opening's mark (docs/specs/007-editor/templates-by-mode.md "The mode on a card"): the modes' own, the Workshop
+// control's flipchart and Plan's board. On a template card, the New Document wizard, default folders and the
+// Explorer's Opens in.
+export const TAB_OPENING_ICONS: Readonly<Record<TabOpening, ComponentType<IconProps>>> = {
+  ...EDITOR_MODE_ICONS,
   workshop: FlipchartIcon,
 };

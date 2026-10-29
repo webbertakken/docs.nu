@@ -1,4 +1,5 @@
 import { mirroredLogoPages } from '@/hooks/editor/useLogoTools';
+import { useEditorModeState } from '@/components/chrome/editor-mode/editor-mode-context';
 import { useViewportStore } from '@/hooks/canvas/useViewportStore';
 import { ViewZoomControls } from '@/components/canvas/view-readers';
 import { ES_LANES, votesSpentBy } from '@livedoc/document';
@@ -217,6 +218,8 @@ const DOCK_CORNER_CLASS: Record<PanelCorner, string> = {
 // Canvas's props plus the computed ChromeExtras.
 
 export function CanvasChrome(props: CanvasChromeProps) {
+  // The Workshop control brings the Session strip into any mode (docs/specs/012-collaboration/workshop-mode.md).
+  const editorModeState = useEditorModeState();
   const {
     activeDockPanel,
     canRedo,
@@ -383,7 +386,11 @@ export function CanvasChrome(props: CanvasChromeProps) {
   const clusterInset = elementCovers ? COVERED_CLUSTER_INSET : NO_CLUSTER_INSET;
   // Plan's Timer and Vote, only for a board made for voting (or a session running), never on a Dashboard.
   const planVoting = usePlanVoting(elements, !!props.tabVote || !!props.sessionTools?.timer);
-  const stripTools = sessionStripTools(props.editorMode, props.esBoard === true, planVoting);
+  const stripTools = sessionStripTools(props.editorMode, {
+    workshop: editorModeState?.workshop === true,
+    esBoard: props.esBoard === true,
+    planVoting,
+  });
   // Plan's card strip shows only while the tab has something that shows cards (items.md "The Plan strip").
   const tabShowsCards = useTabShowsCards(elements);
   // The card types the tab's boards take, so the palette greys out a card tile none would take (plan-mode.md).
@@ -681,9 +688,9 @@ export function CanvasChrome(props: CanvasChromeProps) {
                 ) : null}
                 {/* The Session strip (docs/specs/012-collaboration/session-tools.md "The Session strip"): left of
                 Layers, or of the mode's own strip. Kept in Zen: a running session is the one piece of
-                chrome a facilitator still needs there. Workshop has all three, Plan its Timer and
-                Vote, Pages a running Vote or Poll only; Diagram and Draw keep their bottom bar to
-                their own tools. */}
+                chrome a facilitator still needs there. With the Workshop control on, all three in any mode;
+                Plan its Timer and Vote, Pages a running Vote or Poll only; Structured and Sketch with the
+                control off keep their bottom bar to their own tools. */}
                 {props.sessionTools && stripTools ? (
                   <div className="contents">
                     <SessionClusterStrip

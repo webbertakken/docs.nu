@@ -13,7 +13,7 @@ is a change here, never a parser-local workaround.
 Content that lands on a whiteboard looks and behaves as if it had been drawn
 there: marker strokes with pressure, ink and stock colours that follow light
 and dark boards, text boxes that hug their text, stickies, shapes, lines,
-arrows, images and frames. See [Draw mode](../023-draw-mode/draw-mode.md)
+arrows, images and frames. See [Sketch mode](../023-draw-mode/draw-mode.md)
 "Imported and pasted content".
 
 ## Where it lives
@@ -254,7 +254,7 @@ the landing writes no more than the drawing needs:
   its images upload belongs to that tab, so it does not land on another.
 - **Import a board** (the Import dialog): replace the active tab (the
   Excalidraw card, one undo step), or make each board **its own new document**
-  with one tab that opens in Draw mode (the Microsoft Whiteboard card), named after the board
+  with one tab that opens in Sketch mode (the Microsoft Whiteboard card), named after the board
   and dated as it (the scene's `createdAt` / `modifiedAt`; a date that cannot
   be read is left out, so the document is dated today, and the report says so:
   "Board dates that couldn't be read were set to today"). An untitled board is

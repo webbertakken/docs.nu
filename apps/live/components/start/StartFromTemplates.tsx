@@ -33,7 +33,7 @@ import {
   lucideVote,
   lucideWorkflow,
 } from '@livedoc/icons/lucide';
-import type { EditorMode } from '@livedoc/document';
+import type { TabOpening } from '@livedoc/document';
 import type { TemplateKind } from '@livedoc/templates';
 import { useEditorModeState } from '@/components/chrome/editor-mode/editor-mode-context';
 import { dismissEmptyCard } from '@/components/canvas/empty-card-dismissed';
@@ -98,7 +98,7 @@ const COPY: Record<
     help: 'yourFirstDiagram',
   },
   draw: {
-    title: 'Start Drawing',
+    title: 'Start Sketching',
     line: 'Pick something to sketch on, or close this to start from a blank whiteboard.',
     noMatch: 'drawing templates',
     help: 'drawMode',
@@ -126,8 +126,8 @@ export function StartFromTemplates({
   mode: TemplateStartMode;
   tabId: string;
   onTemplate: (kind: TemplateKind) => void;
-  // A template found in another mode (start-diagramming.md "Found in other modes"): it lands, switching the tab there.
-  onOtherModeTemplate: (mode: EditorMode, kind: TemplateKind) => void;
+  // A template found under another start (start-diagramming.md "Found in other modes"): it lands, changing the tab.
+  onOtherModeTemplate: (mode: TabOpening, kind: TemplateKind) => void;
 }) {
   // The tab's own colours (start-palette.ts).
   const palette = useStartPalette();
@@ -147,7 +147,7 @@ export function StartFromTemplates({
   );
   // The × starts from nothing: the panel stays closed on this tab in this mode, for this person (empty-card-dismissed.ts),
   // until the palette tray's Show Templates brings it back (StartAgainTray). Remembered per mode: closing Start
-  // Diagramming leaves Start a Workshop to show when the tab switches to it.
+  // Diagramming leaves Start a Workshop to show when the Workshop control is turned on.
   const closedKey = startClosedKey(tabId, mode);
   const closed = useEmptyCardDismissed(closedKey);
   // On screen: the tours hold their offer until it goes (start-panel-open.ts).

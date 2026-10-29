@@ -7,16 +7,16 @@ import { EmptyCanvasArt } from './EmptyCanvasArt';
 afterEach(cleanup);
 
 describe('the empty-canvas picture', () => {
-  it('draws a different, decorative scene per mode', () => {
-    const scene = (mode: 'diagram' | 'workshop') => {
-      const { container, unmount } = render(<EmptyCanvasArt mode={mode} />);
+  it('draws a different, decorative scene with the Workshop control on', () => {
+    const scene = (workshop: boolean) => {
+      const { container, unmount } = render(<EmptyCanvasArt workshop={workshop} />);
       const svg = container.querySelector('svg')!;
       expect(svg.getAttribute('aria-hidden')).toBe('true');
       const html = svg.innerHTML;
       unmount();
       return html;
     };
-    const shown = new Set([scene('diagram'), scene('workshop')]);
+    const shown = new Set([scene(false), scene(true)]);
     expect(shown.size).toBe(2);
   });
 });

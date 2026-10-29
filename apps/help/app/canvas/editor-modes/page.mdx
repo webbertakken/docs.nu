@@ -5,55 +5,68 @@ import { ModeSwitchScene } from '@/components/illustrations/editor-mode-switch';
 export const metadata = helpMetadata({
   title: 'Editor Modes',
   description:
-    'Diagram, Draw, Workshop, Pages and Plan modes explained: what each is for, choosing one on the start of an empty tab, and why modes are shared.',
+    'Sketch, Structured and Pages modes explained: what each is for, switching on any tab, adding Plan tabs from the add menu, and the Workshop control.',
   path: '/help/canvas/editor-modes/',
 });
 
 <ArticleLayout
   title="Editor Modes"
-  description="Diagram, Draw, Workshop, Pages and Plan: five ways of working on the same tab."
+  description="Sketch, Structured and Pages: three ways of working on the same tab."
   categoryTitle="Canvas"
   categorySlug="canvas"
 >
 
-An **editor mode** is how you work on a tab right now. There are five: **Diagram**, **Draw**, **Workshop**, **Pages** and **Plan**. A mode decides which tools are in front of you. You choose it from the switch beside the menu button, on any tab, or from the top of a new tab's start, and everything on the tab stays exactly where it is.
+An **editor mode** is how you work on a tab right now. There are three: **Sketch**, **Structured** and **Pages**. A mode decides which tools are in front of you. You choose it from the switch beside the menu button, on any general tab, or from the top of a new tab's start, and everything on the tab stays exactly where it is.
+
+Two things sit beside the modes rather than among them: **Plan tabs** (a Board, a Sheet or a Dashboard, each a tab of its own, added from **+**) and the **Workshop control**, which brings the session kit into whichever mode the tab is in.
 
 Three words describe how documents and tabs differ, and they mean different things:
 
 - **Mode** is how a tab is worked on. It belongs to the tab, so everyone on the tab is in the same mode.
-- **Kind** is what a tab is. Almost every tab is a general tab that works in every mode; the [Event Storming board](/help/canvas/event-storming-boards/) is the one tab with its own kind, its own notation and no modes.
-- **Template** is what a document was made from. A Kanban board or a retrospective is a general tab made from a template, never a kind of tab of its own. See [Templates](/help/canvas/templates/).
+- **Kind** is what a tab is. Almost every tab is a general tab that works in every mode; the [Event Storming board](/help/canvas/event-storming-boards/) and the [Plan tabs](/help/canvas/plan-tabs/) (Board, Sheet, Dashboard and Form) are the tabs with a kind of their own, their own tools and no modes.
+- **Template** is what a document was made from. A Kanban board or a retrospective is made from a template, never a kind of tab of its own. See [Templates](/help/canvas/templates/).
 
-## The Five Modes
+## The Three Modes
 
-- **Diagram**: shapes, arrows, the palette and snapping. The palette offers Shapes, Write, Draw, Diagrams, Concepts, Layout, Icons, Tech and Media, and shapes snap into line with alignment guides. This is where every new document starts unless its template says otherwise.
-- **Draw**: pens, the eraser and shape recognition, for sketching by hand. The palette strip gives way to Draw's own tools: Select, three markers, Text, the Path tool, the Eraser (whole strokes or just part of one) and your pinned shapes, in a dock across the top. See [Draw Mode](/help/canvas/draw-mode/).
-- **Pages**: pages, for building a finished visual or writing an article. The tab is laid out as sheets in a row, each with a settings cog and a **+** after the last to add another, and the palette trades pens, tech icons and Collaborate for Components, Devices and Data charts. Export from Pages saves the pages. See [Pages Mode](/help/canvas/pages-mode/).
-- **Plan**: boards of items, for running work through columns of cards. There is no palette: boards, sheets and dashboards carry their own tools, and a new one comes from **Start Planning**. The tools group, at the bottom left, gains **Trash**, **New Card**, **Find a Card** and **Card Types** (labelled **New**, **Find** and **Types** on a wide screen), while the Layers and Quick Style panels step aside. See [Plan Mode](/help/canvas/plan-mode/).
-- **Workshop**: running a session with your team, such as a retro, a town hall or a workshop. The palette adds **Stickers**, **Data**, **Ask** and **Session** (timers, votes, polls, reveals, quizzes and the rest of the session kit), and the tools group gains the **Timer**, **Vote** and **Poll** buttons. See [Workshop Mode](/help/canvas/workshop-mode/).
+- **Sketch**: pens, the eraser and shape recognition, for sketching by hand. The palette strip gives way to Sketch's own tools: Select, three markers, Text, the Path tool, the Eraser (whole strokes or just part of one) and your pinned shapes, in a dock across the top. See [Sketch Mode](/help/canvas/sketch-mode/).
+- **Structured**: shapes, arrows, the palette and snapping. The palette offers Shapes, Write, Draw, Diagrams, Concepts, Layout, Icons, Tech and Media, and shapes snap into line with alignment guides. This is where every new document starts unless its template says otherwise.
+- **Pages**: pages, for building a finished visual or writing an article. The tab is laid out as sheets in a row, each with a settings cog and a **+** after the last to add another, and the palette trades pens and tech icons for Components, Devices and Data charts. Export from Pages saves the pages. See [Pages Mode](/help/canvas/pages-mode/).
 
 Every mode is on for everyone, with nothing to turn on in Settings.
 
 ## Choosing a Mode
 
-The mode switch sits right of the menu button at the top left, on every tab, and shows the mode you are in (on a phone, its icon alone). A new, empty tab also shows it at the top of its start's list (**Start Diagramming**, **Start Drawing**, **Start a Workshop**, **Start Making Pages** or **Start Planning**); the two always agree, so a change in either shows in both. Press it to open the mode menu: the five modes down the left, the current one ticked, and beside them a preview of the mode under your pointer, with a picture, a line on what it is for and its main tools. Choosing a mode in the list (a click, or **Enter** on the highlighted one) switches the tab and its start at once; **Escape** or a click elsewhere closes the menu without switching. On a narrow screen the preview is left out and each mode shows its line under its name.
+The mode switch sits right of the menu button at the top left, on every general tab, and shows the mode you are in (on a phone, its icon alone). A new, empty tab also shows it at the top of its start's list (**Start Sketching**, **Start Diagramming** or **Start Making Pages**); the two always agree, so a change in either shows in both. Press it to open the mode menu: the three modes, each with its icon and name, and a check on the one you are in. Choosing a mode (a click, or **Enter** on the highlighted one) switches the tab and its start at once; **Escape** or a click elsewhere closes the menu without switching. The arrow keys move through the menu, and **Home** and **End** jump to the first and last mode.
 
-<Figure caption="The mode switch at the top of Start Diagramming, open: the five modes, Diagram ticked, and a preview of Draw with ⇧D and its tools.">
+<Figure caption="The mode switch at the top of Start Diagramming, open: Sketch, Structured and Pages, with Structured checked.">
   <ModeSwitchScene />
 </Figure>
 
-**Shift+D** moves the tab to the next mode: on an empty tab Diagram, then Draw, Workshop, Pages, Plan and back to Diagram; on a tab with something on it, the same round without Plan, and on a Plan tab it does nothing. The preview shows **⇧D** on the mode it leads to, and screen readers announce the mode you land in ("Draw mode"). Shift+D is listed under **Settings** › **Keyboard**, and it stops working with every other shortcut when you [turn shortcuts off](/help/tips-and-tricks/keyboard-shortcuts/#turning-shortcuts-off).
+**Shift+D** moves the tab to the next mode: Sketch, then Structured, Pages and back to Sketch. Screen readers announce the mode you land in ("Sketch mode"). Shift+D is listed under **Settings** › **Keyboard**, and it stops working with every other shortcut when you [turn shortcuts off](/help/tips-and-tricks/keyboard-shortcuts/#turning-shortcuts-off).
 
-**A tab with something on it changes mode beside the menu button.** The palette and the tab's icon follow at once, and every element stays where it is. Plan is the exception: a tab with content never moves into or out of Plan, so choosing it (or, on a Plan tab, another mode) offers a new tab in that mode instead.
+**A tab with something on it changes mode beside the menu button.** The palette and the tab's icon follow at once, and every element stays where it is.
+
+## Adding Tabs and Plan Tabs
+
+The **+** after your tabs opens the **add menu**:
+
+- **Tab** adds a general tab, in the mode of the tab you are on (from a Pages tab, a Pages tab; from a Sketch tab, a Sketch tab), on that mode's start. Made from an Event Storming board or a Plan tab, it is a Structured tab.
+- **Board**, **Sheet** and **Dashboard** add a [Plan tab](/help/canvas/plan-tabs/), opening on **Start Planning** at boards, spreadsheets or dashboards, so one more pick makes it.
+
+The [tab list](/help/user-interface/tab-bar/)'s footer offers the same four as **New Tab**, **New Board**, **New Sheet** and **New Dashboard**. A Plan tab shows no mode switch, and Shift+D does nothing there: planning is a kind of tab, not a mode.
+
+## The Workshop Control
+
+**Workshop**, in the actions group at the top right, is a toggle, not a mode. Turned on, it brings the session kit into the tab's mode, Sketch, Structured or Pages: the **Timer**, **Vote** and **Poll** buttons, and in the palette the Collaborate categories and **Stickers**. Switching mode keeps it as it is. See [The Workshop Control](/help/canvas/workshop/).
 
 ## One Mode for Everyone
 
 - **The mode belongs to the tab.** Everyone on a tab works in the same mode at once, so what you see always matches what your collaborators see.
-- **Switching switches everyone.** When you choose a new mode for a tab, everyone on it follows straight away, and a message tells them who switched ("Ada switched this tab to Draw."). Anything they were typing is kept.
+- **Switching switches everyone.** When you choose a new mode for a tab, everyone on it follows straight away, and a message tells them who switched ("Ada switched this tab to Sketch."). Anything they were typing is kept.
 - **Undo switches back.** Switching is one step in your [undo history](/help/canvas/undo/): **Undo** puts the tab back in the mode it was in, exactly as it was, for everyone, and **Redo** switches again.
-- **The tab shows its mode.** The active tab, and each tab in the [tab list](/help/user-interface/tab-bar/), starts with the icon of its mode, the same icon the mode switch uses.
-- **A tab opens in its mode**, for everyone, Diagram unless something set it otherwise.
-- **New documents open in the mode you choose** in the New Document wizard, and **new tabs open in the mode of the tab you were on**, on that mode's own start (a Pages tab's **+** makes a Pages tab on **Start Making Pages**, a Plan tab's makes a Plan tab on **Start Planning**), unless the template you pick opens somewhere else: **Blank Whiteboard** opens in Draw, **Blank Illustration** in Pages, **Blank Plan** in Plan, and **Blank Session** and the session templates (the retrospectives, Town Hall Q&A, Lean Coffee, Crazy Eights and Meeting Agenda, plus the boards with a dot vote: Affinity map, Prioritization matrix and Risk matrix) in Workshop.
+- **The tab shows its mode.** The active tab, and each tab in the [tab list](/help/user-interface/tab-bar/), starts with the icon of its mode, the same icon the mode switch uses; a Plan tab shows its kind's icon instead.
+- **A tab opens in its mode**, for everyone, Structured unless something set it otherwise.
+- **New documents open as you choose** in the New Document wizard (Sketch, Structured, Pages, Workshop or Plan), and **new tabs open in the mode of the tab you were on**, on that mode's own start, unless the template you pick opens somewhere else: **Blank Whiteboard** opens in Sketch, **Blank Illustration** in Pages, **Blank Plan** as Plan tabs, and **Blank Session** and the session templates (the retrospectives, Town Hall Q&A, Lean Coffee, Crazy Eights and Meeting Agenda, plus the boards with a dot vote: Affinity map, Prioritization matrix and Risk matrix) in Structured with the Workshop control on.
 - In the Explorer, the **Opens in** filter finds documents by the mode they were created to open in. See [Filters](/help/explorer/filters/).
 
 ## On a Phone
@@ -62,15 +75,13 @@ A phone chooses a mode the same way, from the switch beside the menu button (its
 
 ## Who Can Switch
 
-- **Editors** of a general tab get the mode switch and Shift+D. **Participants** follow the tab's mode, with no switch.
+- **Editors** of a general tab get the mode switch, Shift+D and the Workshop control. **Participants** follow the tab's mode, with no switch.
 - **People who can only view** a tab follow its mode, with no switch, and Shift+D does nothing for them.
 - On a [locked tab](/help/tabs/locking-tabs/) nobody can switch: the tab stays in its mode until it is unlocked.
-- **Event Storming boards** have no modes: they keep their own tools and notation, and show no switch.
-
-Leaving **Plan** never asks: an empty tab has nothing on it to keep.
+- **Event Storming boards** and **Plan tabs** have no modes: they keep their own tools, and show no switch.
 
 ## Templates and Modes
 
-An empty tab opens on its mode's start (**Start Diagramming**, **Start Drawing**, **Start a Workshop**, **Start Making Pages**, **Start Planning**), where that mode's templates are, and the mode switch at the top of the start's list changes the tab's mode before you begin. Every template opens in one mode. A start's search also finds the other modes' templates, each card saying which mode it opens in, and choosing one switches the tab there. Each start's **Recommended** leads with a blank of its mode, to start from nothing. See [Finding Templates for a Mode](/help/canvas/templates/#finding-templates-for-a-mode).
+An empty tab opens on its start (**Start Sketching**, **Start Diagramming**, **Start Making Pages**, or **Start a Workshop** on a Structured tab with the Workshop control on), where its templates are, and the mode switch at the top of the start's list changes the tab's mode before you begin. Every template opens one way: in a mode, as a workshop, or as Plan tabs. A start's search also finds every other start's templates under **Elsewhere**, each card saying what it opens in, and choosing one changes the tab to match. Each start's **Recommended** leads with a blank, to start from nothing. See [Finding Templates for a Mode](/help/canvas/templates/#finding-templates-for-a-mode).
 
 </ArticleLayout>

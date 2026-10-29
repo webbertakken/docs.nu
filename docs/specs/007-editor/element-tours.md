@@ -6,7 +6,7 @@ only once a person has opted in to that type's tour in Settings (below): by defa
 changes the button, and the mode's own tour stays on it. It walks through the real element the person selected, not a
 sample.
 
-It sits beside the mode tours (the [Diagram tour](editor-tour.md) and its siblings) and [Show Me](show-me.md) (started
+It sits beside the mode tours (the [Structured tour](editor-tour.md) and its siblings) and [Show Me](show-me.md) (started
 from a button on one surface). Like the mode tours it never offers itself: until 28 October 2026 a small toolbar
 beside the selection offered it, for a kind opted in to; now the one way in is the Start Tour button ([Diagram
 tour](editor-tour.md) "Where it appears"). Element tours still wait to be asked for: the Settings switch is the ask.
@@ -22,13 +22,13 @@ The toured kinds: the [Sankey diagram](../009-elements/sankey.md), and the
 
 ## Domain language
 
-| Term                  | Means                                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------------- |
-| **Element tour**      | This pattern, and one tour of it (the **Sankey tour**)                                                |
-| **Start Tour button** | The actions group's button that starts every tour ([Diagram tour](editor-tour.md) "Where it appears") |
-| **Toured kind**       | An element type that has an element tour (`sankey`, `chart`, …)                                       |
-| **Opted-in kind**     | A toured kind whose Settings switch is on (`elementTourOffers`): the only kinds the button ever names |
-| **Selection toolbar** | The floating toolbar over a single selection ([Canvas](../008-canvas/canvas-and-palette.md))          |
+| Term                  | Means                                                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Element tour**      | This pattern, and one tour of it (the **Sankey tour**)                                                   |
+| **Start Tour button** | The actions group's button that starts every tour ([Structured tour](editor-tour.md) "Where it appears") |
+| **Toured kind**       | An element type that has an element tour (`sankey`, `chart`, …)                                          |
+| **Opted-in kind**     | A toured kind whose Settings switch is on (`elementTourOffers`): the only kinds the button ever names    |
+| **Selection toolbar** | The floating toolbar over a single selection ([Canvas](../008-canvas/canvas-and-palette.md))             |
 
 ## Naming
 
@@ -92,7 +92,7 @@ followed (a row missing) highlights the deepest part it reached.
 ## The page waits
 
 While an element tour's step is up the page takes no clicks or wheel, only the step card does, as on the
-[Diagram tour](editor-tour.md#the-page-waits).
+[Structured tour](editor-tour.md#the-page-waits).
 
 ## The tour
 

@@ -294,12 +294,12 @@ Where each is set, so a setting lives with what it changes, never in one central
 
 - **Header**: title, the count of items shown, a progress bar (cards in its done columns of all, when it has one), the
   avatars of people on the board and the quick filter.
-- **Renaming in place**: in Plan mode, someone who may edit double-clicks the board's title (or the header's
+- **Renaming in place**: on a Plan tab, someone who may edit double-clicks the board's title (or the header's
   empty space) and the title becomes a text field, its text selected. **Enter** or leaving the field saves the
   trimmed name (up to 80 characters, as the Board menu's **Title** takes it), one change; an empty name changes
   nothing; **Escape** puts the old name back. The double-click goes no further (it never reaches the canvas), and
   the field's own presses never move the board. A double-click on a widget or a button in the header does not
-  rename. Outside Plan mode, or to someone who may only view, a double-click does what it did before.
+  rename. Off a Plan tab, or to someone who may only view, a double-click does what it did before.
 - **Move handle**: while a board is selected, a grip before its title shows where to take hold of it: the
   header (and the empty part of its widget row) moves the board; columns and cards do not.
 - **Columns**: name, count, and the WIP limit as `3 / 4`. Over the limit, the count turns to a warning colour and
@@ -392,12 +392,12 @@ id), so a field added to a type (a Project's **Customer**) can set the rows stra
 
 Input follows the person's editor mode (the [Editor modes](../007-editor/editor-modes.md) rule):
 
-- **In Plan mode** the board is for working on items. Pressing a card picks the card up; pressing the board's
+- **On a Plan tab** the board is for working on items. Pressing a card picks the card up; pressing the board's
   header or border picks up the board.
-- **In Diagram and Draw modes** the board is an element like any other: pressing anywhere on it selects and moves
+- **In Structured and Sketch modes** the board is an element like any other: pressing anywhere on it selects and moves
   the board. Double-clicking a card still opens its item.
 
-In Plan mode:
+On a Plan tab:
 
 - **Drag a card** to another column, swimlane or place in a column. A placeholder opens where it will land; the
   move is one item write when it is dropped. Dropping on a swimlane also sets that swimlane's field (moving a
@@ -518,7 +518,7 @@ position 2 of 4").
 
 ## Option lists
 
-Every option picker in Plan mode is one **option list** (`OptionRows`): a bordered, rounded box holding a row per
+Every option picker on a Plan tab is one **option list** (`OptionRows`): a bordered, rounded box holding a row per
 choice, one to a row, each row its icon at the left, then its name (Title Case), a quiet second line where it helps
 (where a state is used), and at the right a marker. A one-of-a-set list (a radio group) ticks the chosen row and tints
 it in the brand colour (light and dark); an on-or-off list (checkboxes) shows a box at the right, filled and ticked
@@ -544,7 +544,7 @@ canvas, part of the palette's catalogue, not a setting).
 ## Focus
 
 - A board's header (and a Sheet's, [Sheet](../029-sheets/sheet.md#header)) holds **Focus** (a scan-eye glyph, with a
-  tooltip "Focus Board" / "Focus Sheet") left of Maximise (the header ends Focus, Maximise, then the cog), for anyone in Plan mode, not while it is maximised or fills
+  tooltip "Focus Board" / "Focus Sheet") left of Maximise (the header ends Focus, Maximise, then the cog), for anyone on a Plan tab, not while it is maximised or fills
   its tab. Pressed, the view glides (about 420 ms, eased; at once under reduced motion) to fit the element with the
   fit-to-screen margin, zooming in no further than 150%. Pressed again while the view already fits it, it glides out
   to fit everything on the tab. The view is the person's own, never saved or sent. Anything else moving the view
@@ -561,7 +561,7 @@ menu, the one the canvas opens, never the browser's; a card's own right-click ke
 
 A board can be maximised to work on it without the rest of the canvas around it.
 
-- In Plan mode, the board's header ends with **Maximise Board** (a maximise icon, with a tooltip) at its top
+- On a Plan tab, the board's header ends with **Maximise Board** (a maximise icon, with a tooltip) at its top
   right.
 - Maximised, the board fills the canvas area: it is drawn over the canvas and everything on it, while the
   editor's chrome stays as the person has it (the two lines and the palette,
@@ -681,7 +681,7 @@ A board can be maximised to work on it without the rest of the canvas around it.
 - It is a view for the person alone, like zen mode: the board element keeps its size and place, nothing is
   saved or sent to anyone else, and nothing enters undo. Collaborators see the board as it is on the canvas.
 - It ends on its own when the board leaves the screen: switching tab, the board being deleted (by anyone), or
-  leaving Plan mode. A zen mode the person had on before stays on after Restore.
+  leaving the Plan tab. A zen mode the person had on before stays on after Restore.
 - One board at a time: maximising another board (there is no way to reach one while maximised) is not offered.
 - It works the same on a phone and a tablet: the board fills the canvas area, and its body scrolls.
 - Telemetry: `Plan / Toggled / BoardMaximised` and `Plan / Toggled / BoardRestored`.
@@ -699,7 +699,7 @@ for a moment at most ([Maximised board](#maximised-board)).
   Plan tab makes it a Board tab ([Converting old Plan tabs](plan-tabs.md#converting-old-plan-tabs)).
 - **Filled**: whenever the tab is shown (opening the document, switching to the tab, a reload, a collaborator's or
   a share link's view), the board is drawn over the canvas area as a maximised board is (its header holding the top
-  row where there is room), in Plan mode. The editor's two lines and panels stay, so the person can
+  row where there is room), on a Plan tab. The editor's two lines and panels stay, so the person can
   move between tabs; the board sits clear of them. It appears at once (no grow). There is no Maximise/Restore, no
   Focus and no Add to Slides, and Escape restores nothing. Presses, wheel and right-click on it stay on the board,
   so the canvas under it is never selected, panned, zoomed or menu'd; the board's settings are its cog.

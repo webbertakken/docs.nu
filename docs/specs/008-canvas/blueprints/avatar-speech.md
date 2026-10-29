@@ -107,7 +107,7 @@ closes the composer, tracks `Canvas · Used · AvatarMessage` or `AvatarMessageP
 
 ### Tour
 
-As the Draw tour's host (`DrawTourHost`), with: on offer on the actions group's Start Tour button in Avatar mode, at
+As the Sketch tour's host (`DrawTourHost`), with: on offer on the actions group's Start Tour button in Avatar mode, at
 `TOUR_OFFER_RANK.tool`; `canWork` without the
 `isReadOnly` and lock gates; steps filtered by `{ canSpeak, mobile }`; `prepare` of `character` clicks the Avatar
 button when the popover is closed and waits for `avatar-character`; `prepare` of `push` closes the popover;

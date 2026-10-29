@@ -20,7 +20,7 @@ inside a category that has to be opened first.
 - Each button has a Tooltip naming it, runs its action and closes the menu, as the tiles it replaced did.
 
 The four attachments are offered only on boxed elements other than Plan items, as before
-([Plan mode](../026-plan/plan-mode.md) "Nothing attached to Plan items"); arrows take none. With nothing to offer (an
+([Working in Plan](../026-plan/plan-mode.md) "Nothing attached to Plan items"); arrows take none. With nothing to offer (an
 arrow that takes no quick style) the bar is not drawn.
 
 They had their own categories, **Collaborate** (Assign Action, Add Comment) and **Resources** (Add Link, Add Note), at

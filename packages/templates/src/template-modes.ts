@@ -1,11 +1,12 @@
-// The editor mode each template opens in (docs/specs/007-editor/templates-by-mode.md "A template's
-// mode"): declared once here, read by the template step (its mode filter and the glyph on every
-// card) and by templateCanvasOverrides (the tab's `opensIn`), so the two can never disagree.
-import type { EditorMode } from '@livedoc/document';
+// What each template opens as (docs/specs/007-editor/templates-by-mode.md "A template's mode"): Sketch, Structured,
+// Pages, a Workshop (Structured with the Workshop control on) or Plan. Declared once here, read by the starts, the
+// template filters (and the glyph on every card) and by templateCanvasOverrides (the tab's `opensIn` and `workshop`),
+// so the two can never disagree.
+import type { TabOpening } from '@livedoc/document';
 import type { TemplateKind } from './templates';
 
-// Every template not named here is a Diagram template.
-const TEMPLATE_MODES: Partial<Record<TemplateKind, EditorMode>> = {
+// Every template not named here is a Structured template.
+const TEMPLATE_OPENINGS: Partial<Record<TemplateKind, TabOpening>> = {
   whiteboard: 'draw',
   sketchnote: 'draw',
   'rich-picture': 'draw',
@@ -85,7 +86,7 @@ const TEMPLATE_MODES: Partial<Record<TemplateKind, EditorMode>> = {
   'job-application-form': 'plan',
   'contact-form': 'plan',
   // Session formats (docs/specs/012-collaboration/workshop-mode.md "Templates"): run with the room,
-  // so they open where the Collaborate kit and the Session strip are.
+  // so they open in Structured with the Workshop control on, the Collaborate kit and the Session strip there.
   'blank-session': 'workshop',
   retrospective: 'workshop',
   'start-stop-continue': 'workshop',
@@ -130,18 +131,18 @@ const TEMPLATE_MODES: Partial<Record<TemplateKind, EditorMode>> = {
   journey: 'workshop',
 };
 
-/** The mode a template's tab opens in. */
-export function templateEditorMode(kind: TemplateKind): EditorMode {
-  return TEMPLATE_MODES[kind] ?? 'diagram';
+/** What a template's tab opens as. */
+export function templateOpening(kind: TemplateKind): TabOpening {
+  return TEMPLATE_OPENINGS[kind] ?? 'diagram';
 }
 
-/** Each mode's blank (docs/specs/007-editor/templates-by-mode.md "Five blanks"). */
-export const BLANK_TEMPLATE_FOR_MODE: Readonly<Record<EditorMode, TemplateKind>> = {
-  diagram: 'blank',
+/** Each opening's blank (docs/specs/007-editor/templates-by-mode.md "Five blanks"), in the openings' order. */
+export const BLANK_TEMPLATE_FOR_OPENING: Readonly<Record<TabOpening, TemplateKind>> = {
   draw: 'whiteboard',
+  diagram: 'blank',
   pages: 'blank-illustration',
-  plan: 'blank-plan',
   workshop: 'blank-session',
+  plan: 'blank-plan',
 };
 
 // The blanks beyond each mode's own (docs/specs/007-editor/templates-by-mode.md "The blanks"): Blank Spreadsheet, an
@@ -165,6 +166,6 @@ export const EXTRA_BLANK_TEMPLATES: readonly TemplateKind[] = [
 /** True for the blanks: each mode's, Blank Spreadsheet and the blanks of a page kind. Quick-picks on Popular, never on a category shelf or tile. */
 export function isBlankTemplate(kind: TemplateKind): boolean {
   return (
-    Object.values(BLANK_TEMPLATE_FOR_MODE).includes(kind) || EXTRA_BLANK_TEMPLATES.includes(kind)
+    Object.values(BLANK_TEMPLATE_FOR_OPENING).includes(kind) || EXTRA_BLANK_TEMPLATES.includes(kind)
   );
 }

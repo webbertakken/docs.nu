@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { buildTemplate, buildTemplatedTab } from './template-builders';
 import {
-  BLANK_TEMPLATE_FOR_MODE,
+  BLANK_TEMPLATE_FOR_OPENING,
   isBlankTemplate,
-  templateEditorMode,
+  templateOpening,
   TEMPLATES,
   TEMPLATE_CATEGORIES,
   TEMPLATE_CONTENT_LAYER_ID,
@@ -336,12 +336,12 @@ describe('templateCanvasOverrides', () => {
       backgroundOpacity: 0.4,
     });
     // Layered templates (docs/specs/006-document/layers.md) additionally carry their Tab.layers.
-    // A sticky-note board the room fills in opens in Workshop (docs/specs/007-editor/templates-by-mode.md).
+    // A sticky-note board the room fills in opens with the Workshop control on (docs/specs/007-editor/templates-by-mode.md).
     expect(templateCanvasOverrides('swot')).toEqual({
       backgroundPattern: 'graph',
       backgroundOpacity: 0.4,
       layers: templateLayers('swot'),
-      opensIn: 'workshop',
+      workshop: true,
     });
     expect(templateCanvasOverrides('gantt')).toEqual({
       backgroundPattern: 'graph',
@@ -409,7 +409,7 @@ describe('templateCanvasOverrides', () => {
       // The quieter of the lines rule (0.6) and the stage softening (0.8).
       backgroundOpacity: 0.6,
       layers: templateLayers('journey'),
-      opensIn: 'workshop',
+      workshop: true,
     });
   });
 
@@ -1017,35 +1017,36 @@ describe('untitledNameForTemplate', () => {
   });
 });
 
-// Templates by mode (docs/specs/007-editor/templates-by-mode.md): the mode a card shows is the mode
-// its tab opens in, and each mode's blank is of that mode.
-describe('templateEditorMode', () => {
-  it('is the mode every template opens in', () => {
+// Templates by mode (docs/specs/007-editor/templates-by-mode.md): what a card shows is how its tab opens, and each
+// opening's blank opens as it.
+describe('templateOpening', () => {
+  it('is how every template opens: its mode, a Workshop with the control on', () => {
     for (const t of TEMPLATES) {
-      expect(templateEditorMode(t.kind), t.kind).toBe(
-        templateCanvasOverrides(t.kind).opensIn ?? 'diagram',
+      const o = templateCanvasOverrides(t.kind);
+      expect(templateOpening(t.kind), t.kind).toBe(
+        o.workshop ? 'workshop' : (o.opensIn ?? 'diagram'),
       );
     }
   });
 
   it('gives every mode a blank of its own mode', () => {
-    for (const [mode, kind] of Object.entries(BLANK_TEMPLATE_FOR_MODE)) {
-      expect(templateEditorMode(kind)).toBe(mode);
+    for (const [mode, kind] of Object.entries(BLANK_TEMPLATE_FOR_OPENING)) {
+      expect(templateOpening(kind)).toBe(mode);
     }
   });
 
   it('opens every paged template in Pages', () => {
     for (const t of TEMPLATES) {
-      if (templateCanvasOverrides(t.kind).pages) expect(templateEditorMode(t.kind)).toBe('pages');
+      if (templateCanvasOverrides(t.kind).pages) expect(templateOpening(t.kind)).toBe('pages');
     }
   });
 
-  // A session tool shipped on a Diagram tab could be started but never watched or ended: Diagram has
-  // no Session strip (docs/specs/012-collaboration/workshop-mode.md).
-  it('opens every template carrying a session tool in Workshop', () => {
+  // A session tool shipped on a Structured tab could be started but never watched or ended without the Workshop
+  // control's Session strip (docs/specs/012-collaboration/workshop-mode.md).
+  it('opens every template carrying a session tool with the Workshop control on', () => {
     for (const t of TEMPLATES) {
       if (buildTemplate(t.kind, 0, 0).some((e) => 'session' in e && e.session))
-        expect(templateEditorMode(t.kind), t.kind).toBe('workshop');
+        expect(templateOpening(t.kind), t.kind).toBe('workshop');
     }
   });
 });

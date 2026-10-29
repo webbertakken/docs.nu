@@ -58,12 +58,12 @@ describe('settings catalogue', () => {
     }
   });
 
-  it('offers the Draw mode dock position in the Editor › Draw sub-category', () => {
+  it('offers the Sketch mode dock position in the Editor › Sketch sub-category', () => {
     // docs/specs/023-draw-mode/draw-mode.md "Where the dock sits": top by default, bottom by choice;
     // the sub-category says Draw, as the mode switch does (docs/specs/007-editor/editor-modes.md
     // "Naming in the interface").
     const draw = SETTINGS_CATEGORIES.find((c) => c.id === 'draw')!;
-    expect(settingsCategoryPath(draw)).toBe('Editor › Draw');
+    expect(settingsCategoryPath(draw)).toBe('Editor › Sketch');
     const row = draw.rows.find((r) => r.key === 'whiteboardDockPosition');
     if (row?.kind !== 'choice') throw new Error('no Dock Position choice row');
     expect(row.section).toBeUndefined();
@@ -179,14 +179,14 @@ describe('settings catalogue', () => {
   it('gives the tours a category of their own, a switch each with its own article', () => {
     const tours = SETTINGS_CATEGORIES.find((c) => c.id === 'tours')!;
     expect(tours.rows.map((r) => [r.key, r.kind, r.label, r.helpArticle])).toEqual([
-      ['tourSeen', 'toggle', 'Diagram Tour', 'diagramTour'],
+      ['tourSeen', 'toggle', 'Structured Tour', 'diagramTour'],
       // A tour of several tracks: one switch over them all, then each track's own row beneath it.
       ['planTourSeen', 'toggle', 'Plan Tours', 'planTour'],
       ['planTourSeen-boards', 'toggle', 'Boards Tour', 'planTour'],
       ['planTourSeen-sheets', 'toggle', 'Sheets Tour', 'planTour'],
       ['planTourSeen-dashboards', 'toggle', 'Dashboards Tour', 'planDashboards'],
       ['workshopTourSeen', 'toggle', 'Workshop Tour', 'workshopTour'],
-      ['drawTourSeen', 'toggle', 'Draw Tour', 'drawTour'],
+      ['drawTourSeen', 'toggle', 'Sketch Tour', 'drawTour'],
       ['formTourSeen', 'toggle', 'Forms Tour', 'planForms'],
       ['avatarTourSeen', 'toggle', 'Avatar Tour', 'avatarTour'],
       ['pagesTourSeen', 'toggle', 'Pages Tours', 'pagesTour'],

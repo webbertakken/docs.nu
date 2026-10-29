@@ -50,7 +50,7 @@ PRIMARY KEY`, `prefs TEXT NOT NULL` (serialised JSON blob),
     the oldest hidden-from-Recent ids go first
     ([Hide from Recent](../013-workspace/hide-from-recent.md)), then the
     least recently used shape picks
-    ([Draw mode, Shape slots](../023-draw-mode/draw-mode.md)); every
+    ([Sketch mode, Shape slots](../023-draw-mode/draw-mode.md)); every
     other key stays whole. A full account measured 4,967 characters,
     past which every save was refused. A trim logs
     `[preferences] trimmed to fit dropped=<n> length=<n>`.
@@ -251,10 +251,10 @@ type UserPreferences = {
   // sent" email (sent to the team's admins). Defaults to true (notify).
   notifyInviteResponse?: boolean;
 
-  // The Diagram tour's taken record (docs/specs/007-editor/editor-tour.md; named for the welcome tour it
+  // The Structured tour's taken record (docs/specs/007-editor/editor-tour.md; named for the welcome tour it
   // was until October 2026). True once a run has ended (completed or skipped; until 28 October 2026
   // also declined, when it hid the offer). It no longer hides the actions group's Start Tour button: it only
-  // feeds Settings' Tours › "Diagram Tour" row (inverted); turning it on and closing
+  // feeds Settings' Tours › "Structured Tour" row (inverted); turning it on and closing
   // Settings reruns the tour when it is on offer. Missing / undefined === not seen.
   tourSeen?: boolean;
   // The Plan tour's seen record (docs/specs/026-plan/plan-tour.md): true counts both tracks as taken while Power user
@@ -267,8 +267,8 @@ type UserPreferences = {
   // The Workshop tour's taken record (docs/specs/012-collaboration/workshop-tour.md), as `planTourSeen`.
   // Surfaced in Settings as Tours › "Workshop Tour" (inverted). Missing / undefined === not seen.
   workshopTourSeen?: boolean;
-  // The Draw tour's taken record (docs/specs/023-draw-mode/draw-tour.md), as `workshopTourSeen`.
-  // Surfaced in Settings as Tours › "Draw Tour" (inverted). Missing / undefined === not seen.
+  // The Sketch tour's taken record (docs/specs/023-draw-mode/draw-tour.md), as `workshopTourSeen`.
+  // Surfaced in Settings as Tours › "Sketch Tour" (inverted). Missing / undefined === not seen.
   drawTourSeen?: boolean;
   // The Forms tour's record (docs/specs/030-forms/forms.md "The Forms tour"), written when a run ends; it feeds the
   // Settings row only. Show Me Around in the form's cog panel reruns it. Missing / undefined === not seen.
@@ -329,7 +329,7 @@ type UserPreferences = {
   // ('top'), a row along its bottom edge ('footer') or none ('off'). Unset, or anything
   // else, is Top (lib/element-indicator-style).
   elementIndicatorStyle?: 'top' | 'footer' | 'off';
-  // Draw mode's pattern, the person's own (./editor-modes.md "One look"): Plain, Dots
+  // Sketch mode's pattern, the person's own (./editor-modes.md "One look"): Plain, Dots
   // or Grid, as last chosen from the dock's Settings; never stored on a tab. Unset, or
   // anything else, is Grid (lib/whiteboard-dock-prefs).
   drawPattern?: 'blank' | 'grid' | 'graph';
@@ -409,7 +409,7 @@ Missing key === undefined === default behaviour. Concretely:
   whatever it says, so its Settings row is desktop only. Emits
   `UI`/`Toggled`/`DockButtonNames{On,Off}`.
 - `drawPattern` undefined → Grid (`graph`) behind every tab the person works
-  on in Draw mode. The dock's Background row writes it; it emits the same
+  on in Sketch mode. The dock's Background row writes it; it emits the same
   Background events as before and changes nothing on the tab.
 - `alignmentGuides` undefined → guides on (the default). Setting it
   to `false` hides the faint guide lines during a move / resize; the
@@ -652,11 +652,11 @@ and the dialog stays as the one complete, browsable index of them.
   A category can hold **sub-categories** (`parent` on the sub-category's
   spec). **Editor** holds one per editor mode whose settings apply only to
   that mode ([Editor modes](editor-modes.md)): **Draw** holds Dock Position,
-  since only Draw mode has a dock; **Pages** holds Contents and the logo
+  since only Sketch mode has a dock; **Pages** holds Contents and the logo
   guides. A setting that applies in both modes
   stays on Editor itself; quick-add on hover, alignment guides, auto-attach
   arrows, middle-mouse pan and power user mode all act in both. There is no
-  **Diagram** sub-category while no setting applies only to Diagram mode: a
+  **Diagram** sub-category while no setting applies only to Structured mode: a
   category with no rows is never shown, and one is added beside Draw the day
   a Diagram-only setting lands. **Account** holds **Notifications** and
   **API Tokens**: both belong to the person rather than the editor. Their
@@ -698,7 +698,7 @@ and the dialog stays as the one complete, browsable index of them.
   mark in the editor (Lucide layers for Layers, the Collaborate button's
   glyph; the Map and Quick Style, which have no
   toolbar button, take Lucide map and Lucide palette; Draw takes the
-  marker the editor mode switch shows for Draw mode; Notifications and
+  marker the editor mode switch shows for Sketch mode; Notifications and
   API Tokens keep the bell and key they carried as top-level tiles). Search matches a
   sub-category's rows on its parent's name too, and the canvas search names
   it by path ("in Panels › Layers", "in Editor › Draw", "in Account ›
@@ -772,7 +772,7 @@ and the dialog stays as the one complete, browsable index of them.
 
   **Tours** is a category of its own: one switch per guided tour, **Diagram
   Tour**, **Plan Tours** (over **Boards Tour**, **Sheets Tour** and **Dashboards Tour**), **Workshop Tour**,
-  **Draw Tour**, **Forms Tour**, **Avatar Tour** and **Pages Tours** (over **Slides Tour**, **Infographic Tour**,
+  **Sketch Tour**, **Forms Tour**, **Avatar Tour** and **Pages Tours** (over **Slides Tour**, **Infographic Tour**,
   **Article Tour** and **Logo Tour**), each with a line saying where it is on offer and a **Learn more**
   to its article, under one **Offer Again** section note: switch one back on
   and close Settings to take it again, straight away if it is on offer where you
@@ -780,7 +780,7 @@ and the dialog stays as the one complete, browsable index of them.
   28 October 2026 each tour offered itself once, and the switch decided whether
   it would offer itself again; now every tour is on the Start Tour button whenever
   it could run, taken or not, and the switch is a record of whether it was taken,
-  [Diagram tour](editor-tour.md) "Where it appears".) (The tours used
+  [Structured tour](editor-tour.md) "Where it appears".) (The tours used
   to be an Onboarding Tutorials grid of five switches inside
   Accessibility, where nobody looked for them: a tour is not an accessibility
   setting.) Every mode tour's switch is inverted: on means "not taken yet", the
@@ -788,10 +788,10 @@ and the dialog stays as the one complete, browsable index of them.
   PREFERENCE (switching on is `...SeenOff`), so each dashboard series keeps its
   meaning.
 
-  **Diagram Tour** (the [Diagram tour](editor-tour.md), labelled **Welcome** until October 2026) is inverted
+  **Structured Tour** (the [Structured tour](editor-tour.md), labelled **Welcome** until October 2026) is inverted
   against the stored `tourSeen`. Turning it on from off and closing the dialog relaunches the tour in place
-  on a Diagram tab where it is on offer (`livedoc:tour-relaunch`); on a tab in another mode it does
-  nothing, and the button offers it on a Diagram tab. (Until 28 October 2026 closing with the switch on also
+  on a Structured tab where it is on offer (`livedoc:tour-relaunch`); on a tab in another mode it does
+  nothing, and the button offers it on a Structured tab. (Until 28 October 2026 closing with the switch on also
   marked the per-tab pending flag the offer needed; the flag is gone.) The Plan tour is a
   tour of several tracks (`apps/live/lib/tour-tracks.ts`): **Plan Tours** is one switch over all of them
   (`tourTracksSwitch`, key `planTourSeen`: on while any track is untaken, off marks every track taken, on forgets
@@ -804,8 +804,8 @@ and the dialog stays as the one complete, browsable index of them.
   a board or Sheet is open, the Dashboards tour on a dashboard), so closing the dialog only reruns it, when a track
   became untaken while it was open and the tour is on offer ([Plan tour](../026-plan/plan-tour.md)). **Workshop
   Tour** works the same way against
-  `workshopTourSeen` ([Workshop tour](../012-collaboration/workshop-tour.md)), **Draw Tour** against
-  `drawTourSeen` ([Draw tour](../023-draw-mode/draw-tour.md)), **Forms Tour** against `formTourSeen` ([Forms](../030-forms/forms.md) "The Forms tour"), **Avatar Tour** against `avatarTourSeen`
+  `workshopTourSeen` ([Workshop tour](../012-collaboration/workshop-tour.md)), **Sketch Tour** against
+  `drawTourSeen` ([Sketch tour](../023-draw-mode/draw-tour.md)), **Forms Tour** against `formTourSeen` ([Forms](../030-forms/forms.md) "The Forms tour"), **Avatar Tour** against `avatarTourSeen`
   ([Avatar tour](../008-canvas/avatar-tour.md)), and the Pages tour is built as the Plan tour's
   rows are ([Pages tour](pages-tour.md)): **Pages Tours** over one row per page kind (**Slides Tour**,
   **Infographic Tour**, **Article Tour**, **Logo Tour**); `pagesTourKinds` lists the kinds taken. Closing the dialog

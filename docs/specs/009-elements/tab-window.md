@@ -16,7 +16,7 @@ showing it is up to date.
 ## The element
 
 - **What it shows** (`windowTabId`): one tab of the document, never the tab the window is on. A Plan tab (a Board,
-  Sheet or Dashboard tab, or any tab in Plan mode) is offered like any other. Absent until chosen.
+  Sheet or Dashboard tab, or any tab on a Plan tab) is offered like any other. Absent until chosen.
 - **The drawing**: the tab's content drawn as the editor shows it (the export renderer, in this person's appearance,
   the tab's own theme, its photos and the document's cards), **zoomed to fit** inside the window on the tab's own
   canvas, centred, never cropped: its paper and its pattern (dots, grid, lines, at the tab's pattern size and

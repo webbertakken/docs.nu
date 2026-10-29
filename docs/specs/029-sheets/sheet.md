@@ -1,7 +1,7 @@
 # Sheet
 
 A **Sheet** is a spreadsheet on the canvas: one tab of a workbook, as a person knows it from Google Sheets or
-Microsoft Excel. It is placed from Plan mode's **Sheet** palette category (under the **Spreadsheets** heading), moved and resized like a
+Microsoft Excel. It is placed from Plan's **Sheet** palette category (under the **Spreadsheets** heading), moved and resized like a
 [Plan board](../026-plan/plan-board.md), and maximised like one. Its cells are not stored on the canvas: the
 element frames one sheet of the document's [sheet store](sheet-store.md) (in the document's room,
 [Document storage](../006-document/document-storage.md)), and the [formulas](formulas.md) in its
@@ -19,7 +19,7 @@ cells are worked out in every browser that shows it.
 | **format**        | How a cell is drawn: its number format, font style, colours, alignment, wrap and borders   | style (an element's)     |
 | **range**         | A rectangle of cells, `A1:C5`, or whole columns `A:C` or rows `2:4`                        | area, block              |
 | **selection**     | The range a person has picked, with its **active cell** (where typing goes)                | focus                    |
-| **Spreadsheets**  | The heading of Plan mode's palette over the **Sheet** category, which holds the Sheet tile | Spreadsheet band         |
+| **Spreadsheets**  | The heading of Plan's palette over the **Sheet** category, which holds the Sheet tile      | Spreadsheet band         |
 | **the grid**      | The rows and columns a sheet has, filled or not (100 × 26 to start)                        | size, dimensions         |
 
 - A **table** stays the canvas's own element (`table`), whose cells are plain text on the element; a sheet is
@@ -29,7 +29,7 @@ cells are worked out in every browser that shows it.
 
 ## Placing a sheet
 
-- Plan mode's palette offers the **Sheet** category under its own **Spreadsheets** heading, after the **Boards &
+- Plan's palette offers the **Sheet** category under its own **Spreadsheets** heading, after the **Boards &
   Cards** heading, holding one tile, **Sheet** (a small grid with a header row and a highlighted cell; "A spreadsheet tab: cells, formulas,
   formatting, sort and filter").
 - Pressed, then placed (or dragged and dropped), it puts a Sheet element of 960 × 560 on the canvas, its top left
@@ -40,7 +40,7 @@ cells are worked out in every browser that shows it.
   free number). When the tab is renamed away from its default name ("Tab 4"), a sheet on it still
   titled that takes the new name, kept unique on the tab, as a board does
   ([Plan board](../026-plan/plan-board.md#the-boards-title)); a sheet not loaded yet keeps its title.
-- Dropping a `.csv` file on the canvas in Plan mode places a sheet filled from it, titled by the file's name
+- Dropping a `.csv` file on the canvas on a Plan tab places a sheet filled from it, titled by the file's name
   (CSV, below).
 - Placing one sends `Element · Added · PlanSheet`.
 - The [Plan tour](../026-plan/plan-tour.md)'s Spreadsheets track runs on the person's own Sheet and changes nothing
@@ -52,7 +52,7 @@ On a wide screen (1024 px and up) the card is up to 52 rem wide (36 rem elsewher
 the left beside Cell Size and Freeze Header Row on the right.
 
 - A sheet placed from the palette starts **awaiting setup** (`layout.setupPending`); a dropped CSV, a copy and a
-  sheet an agent makes do not. While it awaits setup and has no cells, in Plan mode, someone who may edit sees a
+  sheet an agent makes do not. While it awaits setup and has no cells, on a Plan tab, someone who may edit sees a
   **Setup Sheet** card in place of the grid (the header, cog and Maximise stay), as a new board shows Setup Board:
   the card in the Sheet's colours (a sheet glyph, "Setup Sheet", "Start from a layout, your cards or a blank grid.
   Everything can change later from its cog.", Help), with Setup Board's wizard stepper: **Start From**, then **Style** (Plan Cards adds **Cards** and **Columns** between). Someone who may only view
@@ -182,13 +182,13 @@ rule under it, gridlines off), **Plain** (no fills, colours or borders; bold and
 ## The Sheet element
 
 - It is a general-tab element: it exists in every mode and in exports; only input differs by mode, as for a board.
-- It is drawn top to bottom as: the **header** (the sheet's title, the **Sheet Settings** cog and **Maximise Sheet**), in Plan mode
+- It is drawn top to bottom as: the **header** (the sheet's title, the **Sheet Settings** cog and **Maximise Sheet**), on a Plan tab
   for someone who may edit the **toolbar** and the **formula bar**, and the **grid** (column letters across the top,
   row numbers down the left, the cells).
 - The element's frame is a window onto the grid: a sheet larger than its frame scrolls inside it (a mouse wheel,
   a trackpad, the scrollbars), with frozen rows and columns staying put. The scroll is the person's own, never
   saved or sent.
-- It moves by its header and resizes by its handles, like a board; its grid takes the pointer in Plan mode.
+- It moves by its header and resizes by its handles, like a board; its grid takes the pointer on a Plan tab.
 - Its look follows the tab's theme as a board's does: the theme's board colours make its surface, header, grid
   lines and ink; a cell's own colours draw over them. Quick Style, colour pickers and style presets set the
   element's colours; corners follow Corners (12 px by default).
@@ -208,7 +208,7 @@ rule under it, gridlines off), **Plain** (no fills, colours or borders; bold and
   Renaming changes every reference to it in the tab's other sheets ([Formulas](formulas.md#other-sheets)).
 - The header's buttons end **Focus** ([Focus](../026-plan/plan-board.md#focus)), **Maximise Sheet**, then the cog at the far
   right; a Sheet filling its tab has neither Focus nor Maximise ([Fill Tab](#fill-tab)).
-- The **Sheet Settings** cog (a settings glyph, with a tooltip, in Plan mode) opens a popover of collapsible
+- The **Sheet Settings** cog (a settings glyph, with a tooltip, on a Plan tab) opens a popover of collapsible
   sections, one open at a time, as a board's Board Settings ([Sheet Settings](#sheet-settings)); in a Dashboard slot
   it holds the slot's **Slot** section last ([Dashboard tab](../026-plan/plan-tabs.md#dashboard-tab)), and there is no
   ⋯ beside it. The element's own
@@ -239,7 +239,7 @@ rule under it, gridlines off), **Plain** (no fills, colours or borders; bold and
 
 ### Toolbar
 
-One row, shown for someone who may edit, in Plan mode: on its left a **category switcher** (the palette's own
+One row, shown for someone who may edit, on a Plan tab: on its left a **category switcher** (the palette's own
 category dropdown, in its toolbar style, a tile grid; in a header band it fills the band's height, flush to its
 inset, as the brand group's mode switch does), and to its right the chosen category's buttons only:
 
@@ -321,7 +321,7 @@ inset, as the brand group's mode switch does), and to its right the chosen categ
   it); the **right button** dragged (a right press that does not move still opens the menu, on release); and **one
   finger** on a touch screen (a tap still selects a cell, a second finger hands over to the canvas's pinch). A drag is
   a pan from 4 px.
-- The canvas's Hand tool leaves a plain left press to the cells (Plan mode is always in Hand): a click selects and a
+- The canvas's Hand tool leaves a plain left press to the cells (a Plan tab is always in Hand): a click selects and a
   drag selects a range, as on a board, where cards still drag under the Hand.
 - A pan is the person's own view: nothing is saved, sent or undoable, as a scroll.
 - Maximised, a finger scrolls the grid natively, with its momentum.
@@ -836,7 +836,7 @@ A sheet maximises exactly as a board does ([Maximised board](../026-plan/plan-bo
 - Nothing is lost either way: the selection, an edit in progress, scroll and an open menu carry over.
 - It animates both ways as a board does (250 ms, ease-out; at once with reduced motion).
 - It is the person's own view; nothing is saved, sent or undoable. It ends on its own when the sheet leaves the
-  screen (switching tab, the sheet deleted, leaving Plan mode).
+  screen (switching tab, the sheet deleted, leaving the Plan tab).
 - On a touch screen, a finger on the maximised grid scrolls it.
 - Telemetry: `Plan · Toggled · SheetMaximised` and `Plan · Toggled · SheetRestored`.
 
@@ -878,7 +878,7 @@ not in Sheet Settings, not anywhere.
   tag at its top right (hidden after 3 seconds still, shown again on hover). A cell someone is editing shows their
   outline thicker. It is sent as an ephemeral `sheet-presence` room op, never stored, and only while the person has
   a selection on a sheet. A selection is drawn only on the sheet and tab it names, so a person confined to one tab
-  never shows on a sheet of another; a late joiner hears it as a Plan card hold is said again ([Plan mode](../026-plan/plan-mode.md#collaboration)).
+  never shows on a sheet of another; a late joiner hears it as a Plan card hold is said again ([Working in Plan](../026-plan/plan-mode.md#collaboration)).
 - Two people typing in different cells never overwrite each other. Two saving the same cell: the later save
   wins. A cell being edited by you that someone else changes keeps your edit; saving it wins.
 - A row or column someone else inserts or deletes while you edit moves your edit with its cell; if your cell was
@@ -924,7 +924,7 @@ changeset onto one is refused. Its grid takes no input outside Plan, and a doubl
   has cut a quoted field apart, so it is never the separator), else comma-separated; on a sheet with filled cells it asks
   first: **Replace Sheet**, **Insert at Selection** or **Cancel**. Values are read as if typed; the grid grows to fit,
   up to its limit (past it: "Imported the first 10,000 rows").
-- Dropping a `.csv` on the canvas in Plan mode places a new sheet with it (above).
+- Dropping a `.csv` on the canvas on a Plan tab places a new sheet with it (above).
 - **Download CSV** saves `<title>.csv`: every row and column up to the last filled cell, each cell's value as shown
   (formatted), comma-separated with quotes as RFC 4180 (a field holding a semicolon or a tab quoted too, so it reads back
   as a comma file), UTF-8.

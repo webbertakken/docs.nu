@@ -9,22 +9,18 @@ import { ModeMenuChip } from './ModeMenuChip';
 // (StartModeSwitch) reads the same, so the two always agree.
 //
 // The same visibility and rules as the start's switch: nothing outside an editor or for a Participant or a Viewer
-// (canEdit is an Editor's alone), nothing on a locked tab or an event-storming board (canSwitch); a Board, Sheet or
-// Dashboard tab shows it with its lock, offering a new tab in another mode (lockedReason).
+// (canEdit is an Editor's alone), nothing on a locked tab, an event-storming board or a Plan tab (canSwitch).
 //
-// The chip takes only the width its content needs, so a short name (Draw) leaves no empty space. `iconOnly` (a phone,
+// The chip takes only the width its content needs, so a short name (Pages) leaves no empty space. `iconOnly` (a phone,
 // the strip's row) drops the name to save room; the chip keeps its accessible name.
 export function EditorModeSwitch({ iconOnly = false }: { iconOnly?: boolean }) {
   const editorMode = useEditorModeState();
-  if (!editorMode?.canEdit || (!editorMode.canSwitch && !editorMode.lockedReason)) return null;
+  if (!editorMode?.canEdit || !editorMode.canSwitch) return null;
   return (
     <div data-editor-mode-switch="" className="flex shrink-0">
       <ModeMenuChip
         mode={editorMode.mode}
         onChange={editorMode.setMode}
-        newTabIn={editorMode.newTabIn}
-        crossPlan={editorMode.crossPlan}
-        {...(editorMode.canSwitch ? {} : { lockedReason: editorMode.lockedReason })}
         compact
         iconOnly={iconOnly}
       />

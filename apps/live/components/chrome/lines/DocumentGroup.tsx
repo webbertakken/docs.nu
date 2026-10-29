@@ -4,10 +4,11 @@ import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 import { MenuErrorBoundary } from '@/components/primitives/MenuErrorBoundary';
 import { ToolbarGroup, ToolbarPart } from '@/components/chrome/ToolbarGroup';
-import { TOOLBAR_ICON_BUTTON } from '@/components/chrome/toolbar-surface';
 import { track } from '@/lib/telemetry';
 import type { Participant } from '@/lib/identity';
+import { newTabMode } from '@/lib/new-tab-seed';
 import { ActiveTabSegment } from './ActiveTabSegment';
+import { AddTabMenu } from './AddTabMenu';
 import { DocumentName, type DocumentNameProps } from './DocumentName';
 import { TabList } from './TabList';
 import { ContributorsButton, TabStackButton } from './TabListButtons';
@@ -29,8 +30,9 @@ function othersHere(byTab: Map<string, Participant[]>, selfId: string): Particip
 type Opener = { from: 'stack' | 'people'; button: HTMLElement };
 
 // The document group, the bottom line's right (docs/specs/007-editor/toolbar-layout.md "The bottom line"): the
-// document's share-state icon, name and role pill; the active tab; the tab stack; the contributors; Add tab. The
-// stack and the contributors open the same tab list.
+// document's share-state icon, name and role pill; the active tab; the tab stack; the contributors; Add tab, whose
+// menu adds a Tab, a Board, a Sheet or a Dashboard (AddTabMenu). The stack and the contributors open the same tab
+// list.
 export function DocumentGroup({ name, tabs }: { name: DocumentNameProps; tabs: TabsChromeProps }) {
   const chrome = useTabsChrome(tabs);
   const [opener, setOpener] = useState<Opener | null>(null);
@@ -84,17 +86,7 @@ export function DocumentGroup({ name, tabs }: { name: DocumentNameProps; tabs: T
               onToggle={toggle('people')}
             />
           ) : null}
-          {readOnly ? null : (
-            <button
-              type="button"
-              onClick={tabs.onAdd}
-              aria-label="Add tab"
-              data-tour-id="add-tab"
-              className={`${TOOLBAR_ICON_BUTTON} text-lg leading-none`}
-            >
-              +
-            </button>
-          )}
+          {readOnly ? null : <AddTabMenu onAdd={tabs.onAdd} tabMode={newTabMode(activeTab)} />}
         </ToolbarPart>
       </ToolbarGroup>
       {open ? (

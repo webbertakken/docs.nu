@@ -55,7 +55,7 @@ A **holder** is a document holding a shared tab; a **shared tab** is a tab with 
   always did.
 
 A tab with Plan content or a Sheet is never added to another document
-([Plan mode](../026-plan/plan-mode.md), [Sheet](../029-sheets/sheet.md)), so items and sheets are never shared.
+([Working in Plan](../026-plan/plan-mode.md), [Sheet](../029-sheets/sheet.md)), so items and sheets are never shared.
 
 ### Tab lifecycle
 

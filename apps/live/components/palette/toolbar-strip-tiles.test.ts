@@ -140,8 +140,8 @@ describe('phoneStripTileLimit', () => {
     expect(phoneStripTileLimit(320)).toBe(2);
   });
 
-  it('caps at the desktop limit however wide it gets', () => {
-    expect(phoneStripTileLimit(2000)).toBe(STRIP_TILE_LIMIT);
+  it('caps one past the desktop limit however wide it gets, so a full strip keeps its slack', () => {
+    expect(phoneStripTileLimit(2000)).toBe(STRIP_TILE_LIMIT + 1);
   });
 
   it('shows no more tiles than fit', () => {
@@ -153,9 +153,9 @@ describe('phoneStripTileLimit', () => {
 });
 
 describe('desktopStripTileLimit', () => {
-  it('shows the full twelve on an ordinary desktop window', () => {
-    expect(desktopStripTileLimit(1024)).toBe(STRIP_TILE_LIMIT);
-    expect(desktopStripTileLimit(1440)).toBe(STRIP_TILE_LIMIT);
+  it('has room for the full twelve on an ordinary desktop window', () => {
+    expect(desktopStripTileLimit(1024)).toBeGreaterThanOrEqual(STRIP_TILE_LIMIT);
+    expect(desktopStripTileLimit(1440)).toBe(STRIP_TILE_LIMIT + 1);
   });
 
   it('sheds tiles on a narrow window so the centred strip clears the menu button', () => {
@@ -168,9 +168,37 @@ describe('desktopStripTileLimit', () => {
   });
 });
 
+// docs/specs/007-editor/toolbar-layout.md "When a line runs out of room": an opener's chevron is paid for.
+describe('stripTilesFor with an opener', () => {
+  const opener = { ...tile12(11), action: { type: 'open' as const, category: 'technology' } };
+  function tile12(i: number) {
+    return {
+      id: `t${i}`,
+      label: `T${i}`,
+      description: '',
+      icon: null,
+      section: 'shapes' as const,
+      action: { type: 'text' as const },
+    };
+  }
+  const twelve = [...Array.from({ length: 10 }, (_, i) => tile12(i)), opener, tile12(11)];
+
+  it('shows all twelve once the room holds the chevron too', () => {
+    expect(
+      stripTilesFor('popular', { hasImage: true, limit: 12.4, tiles: twelve }).tiles,
+    ).toHaveLength(12);
+  });
+
+  it('drops a tile to More when the room holds twelve plain tiles but not the chevron', () => {
+    const got = stripTilesFor('popular', { hasImage: true, limit: 12.2, tiles: twelve });
+    expect(got.tiles).toHaveLength(11);
+    expect(got.hasMore).toBe(true);
+  });
+});
+
 describe('fitStripTiles (measured)', () => {
-  it("fits the room left after the strip's own chrome, capped at twelve", () => {
-    expect(fitStripTiles({ available: 1000, chrome: 250, pitch: 40 })).toBe(12);
+  it("fits the room left after the strip's own chrome, capped one past twelve", () => {
+    expect(fitStripTiles({ available: 1000, chrome: 250, pitch: 40 })).toBe(13);
     // Fractional: the part-tile left over can still hold a divider.
     expect(fitStripTiles({ available: 560, chrome: 250, pitch: 40 })).toBe(7.75);
   });

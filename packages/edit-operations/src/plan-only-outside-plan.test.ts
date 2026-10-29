@@ -49,8 +49,8 @@ describe('operations', () => {
     expect(refused(run(checkoutFlow(), [addSheet('s1')]))).toEqual(rejection);
   });
 
-  it('refuses it in every mode but Plan', () => {
-    for (const opensIn of ['draw', 'workshop', 'pages'] as const)
+  it('refuses it in every mode, and on a tab with the Workshop control on', () => {
+    for (const opensIn of ['draw', 'diagram', 'pages'] as const)
       expect(refused(run({ ...checkoutFlow(), opensIn }, [addSheet('s1')])).code).toBe(
         'invalid_value',
       );

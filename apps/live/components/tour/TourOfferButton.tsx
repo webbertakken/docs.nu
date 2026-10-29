@@ -16,7 +16,7 @@ export const PLAY_GLYPH_SHIFT_PX = -0.4;
 // Offers already counted as shown in this page load, so each host's telemetry says so once.
 const counted = new Set<string>();
 
-/** The button's words for a tour's name: "Draw" → "Start Draw Tour". */
+/** The button's words for a tour's name: "Sketch" → "Start Sketch Tour". */
 export const startTourLabel = (name: string) => `Start ${name} Tour`;
 
 // The bottom bar's Start Tour button (docs/specs/007-editor/editor-tour.md "Where it appears"): the one way into a

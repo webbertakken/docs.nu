@@ -247,8 +247,17 @@ export const EDITOR_MODE_SWITCHES = chart(
   'Editor',
   'Changed',
   'Editor Mode Switches',
-  'A tab switched to another editor mode by the person working on it.',
+  'A tab switched to another editor mode (Sketch, Structured or Pages) by the person working on it.',
   { types: ['ModeDiagram', 'ModeDraw', 'ModePages', 'ModePlan', 'ModeWorkshop'] },
+);
+
+// The Workshop control (docs/specs/012-collaboration/workshop-mode.md "Telemetry"): the session kit turned on or off.
+export const WORKSHOP_CONTROL_TURNED = chart(
+  'Editor',
+  'Toggled',
+  'Workshop Control',
+  'The Workshop control turned on or off for a tab, bringing or putting away the session kit.',
+  { types: ['WorkshopOn', 'WorkshopOff'] },
 );
 
 // The mode a tab opens in, set from the tab menu's Opens in (docs/specs/007-editor/editor-modes.md).
@@ -451,12 +460,12 @@ export const PAGE_BUILDING = chart(
 );
 
 // Leaving Pages past the pages warning (docs/specs/007-editor/editor-modes.md "Leaving
-// Pages"): how often people go on to Diagram or Draw once told their pages will not show.
+// Pages"): how often people go on to Structured or Sketch once told their pages will not show.
 export const LEAVE_PAGES_CONFIRMED = chart(
   'Editor',
   'Changed',
   'Pages Left Past the Warning',
-  'Someone switched a Pages tab with pages to Diagram or Draw after the warning that its pages do not show there.',
+  'Someone switched a Pages tab with pages to Structured or Sketch after the warning that its pages do not show there.',
   { types: ['LeavePagesConfirmed'] },
 );
 
@@ -540,6 +549,7 @@ export const WHITEBOARDS: MetricStack = {
   members: [
     WHITEBOARDS_CREATED,
     EDITOR_MODE_SWITCHES,
+    WORKSHOP_CONTROL_TURNED,
     LEAVE_PAGES_CONFIRMED,
     TAB_OPENS_IN,
     PAGE_ORIENTATION,

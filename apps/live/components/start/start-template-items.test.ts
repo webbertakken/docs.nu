@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TEMPLATES, popularKindsFor, templateEditorMode } from '@livedoc/templates';
+import { TEMPLATES, popularKindsFor, templateOpening } from '@livedoc/templates';
 import { TEMPLATE_STARTS, type TemplateStartMode } from './start-template-items';
 
 // docs/specs/007-editor/start-diagramming.md
@@ -8,7 +8,7 @@ const MODES: readonly TemplateStartMode[] = ['diagram', 'draw', 'workshop', 'pag
 describe.each(MODES)('the %s template start', (mode) => {
   const start = TEMPLATE_STARTS[mode];
   const listed = TEMPLATES.filter(
-    (t) => !t.hidden && t.kind !== start.blank && templateEditorMode(t.kind) === mode,
+    (t) => !t.hidden && t.kind !== start.blank && templateOpening(t.kind) === mode,
   ).map((t) => t.kind);
 
   it("leads with Recommended, the mode's Popular shelf, its blank first, Timeline left out", () => {
@@ -30,7 +30,7 @@ describe.each(MODES)('the %s template start', (mode) => {
   it('shows only groups holding a template, and only the mode’s templates', () => {
     for (const g of start.groups) {
       expect(g.kinds.length, g.id).toBeGreaterThan(0);
-      for (const k of g.kinds) expect(templateEditorMode(k), k).toBe(mode);
+      for (const k of g.kinds) expect(templateOpening(k), k).toBe(mode);
     }
   });
 
@@ -149,7 +149,7 @@ describe('every listed template on its own start', () => {
     const missing = TEMPLATES.filter(
       (t) =>
         !t.hidden &&
-        templateEditorMode(t.kind) === mode &&
+        templateOpening(t.kind) === mode &&
         !shown.has(t.kind) &&
         // Pages mode's own blank leaves the same empty tab the × does, so it is offered nowhere.
         !(mode === 'pages' && t.kind === 'blank-illustration'),

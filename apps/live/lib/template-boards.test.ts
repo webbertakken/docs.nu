@@ -2,7 +2,7 @@ import { normaliseBoardSetup, type PlanBoardSetup } from '@livedoc/items';
 import {
   PLAN_TEMPLATE_KINDS,
   isSpreadsheetPlanTemplate,
-  templateEditorMode,
+  templateOpening,
 } from '@livedoc/templates';
 import { describe, expect, it } from 'vitest';
 import type { Element } from '@livedoc/document';
@@ -50,13 +50,13 @@ describe('plan templates', () => {
       const els = buildTemplate(kind, 0, 0);
       expect(shapesOf(els, 'plan-sheet'), kind).toHaveLength(1);
       expect(shapesOf(els, 'plan-board'), kind).toHaveLength(0);
-      expect(templateEditorMode(kind), kind).toBe('plan');
+      expect(templateOpening(kind), kind).toBe('plan');
     }
   });
 
   it('makes Blank Plan an empty tab, opening in Plan', () => {
     expect(buildTemplate('blank-plan', 0, 0)).toEqual([]);
-    expect(templateEditorMode('blank-plan')).toBe('plan');
+    expect(templateOpening('blank-plan')).toBe('plan');
   });
 
   it('each make one Plan board with a valid set-up, opening in Plan', () => {
@@ -66,7 +66,7 @@ describe('plan templates', () => {
       ) as { planBoard?: unknown } | undefined;
       expect(board, kind).toBeDefined();
       expect(normaliseBoardSetup(board!.planBoard), kind).not.toBeNull();
-      expect(templateEditorMode(kind), kind).toBe('plan');
+      expect(templateOpening(kind), kind).toBe('plan');
     }
   });
 

@@ -9,11 +9,11 @@ on two lines over the canvas, a top line and a bottom line, each a single row wh
 ("When a line runs out of room"). The canvas runs the full height of the window under them.
 
 ```
- ┌‹ ◆ │ ☰ │ ⬡ Diagram ▾┐        ┌ the Palette strip ┐        ┌🔍 ⚙ ◐ │ Copy Present Share │ Sign in┐
+ ┌‹ ◆ │ ☰ │ ⬡ Structured ▾┐        ┌ the Palette strip ┐        ┌🔍 ⚙ ◐ │ Copy Present Share │ Sign in┐
 
  ┌Map┐
  └───┘
- ┌↶ ↷ │ Session │ Mode │ Collab │ Layers Theme │ − 100% + ┐  ┌ Draw's dock ┐  ┌◉ Name EDITING │ ⬡ Tab ⋯ │ ⧉ 7 │ ●●● │ +┐
+ ┌↶ ↷ │ Session │ Mode │ Collab │ Layers Theme │ − 100% + ┐  ┌ Sketch's dock ┐  ┌◉ Name EDITING │ ⬡ Tab ⋯ │ ⧉ 7 │ ●●● │ +┐
 ```
 
 ### The top line
@@ -31,10 +31,11 @@ on two lines over the canvas, a top line and a bottom line, each a single row wh
     the group's hover fill.
   - Where there is nowhere to go back to (a workbench frame with document scope) the caret is not drawn and the mark
     is not a link.
-- **Centre: the Palette strip** (below), or Draw's dock when it sits at the top ([Draw mode](../023-draw-mode/draw-mode.md)).
+- **Centre: the Palette strip** (below), or Sketch's dock when it sits at the top ([Sketch mode](../023-draw-mode/draw-mode.md)).
 - **Right: the actions group.** In order: Search, Settings, the appearance toggle (the `ChromeControls` trio, icon
   only; **Button Labels** names them, [User preferences](user-preferences.md)), a divider, the document actions that
-  apply (Start Tour while offered, Make a Copy, Present, Share or Share Form), then the account control (Sign in, or
+  apply (Start Tour while offered, the **Workshop control** for an Editor on a general unlocked tab
+  ([Workshop control](../012-collaboration/workshop-mode.md#the-control)), Make a Copy, Present, Share or Share Form), then the account control (Sign in, or
   the account menu). Each keeps its own rule for who sees it ([Live app](live-app.md)).
 
 ### The bottom line
@@ -44,7 +45,7 @@ on two lines over the canvas, a top line and a bottom line, each a single row wh
   ([Live app](live-app.md)). Its popovers hang above their buttons as before. The **Map** keeps its default corner,
   bottom left, stacked above this group ([Minimap](../008-canvas/minimap.md)); the Quick style panel keeps its
   collision rule, which lands it just above the Map when both are shown ([Quick style panel](../008-canvas/quick-style-panel.md#collisions)).
-- **Centre: Draw's dock** when it sits at the bottom, on the line, not lifted above it.
+- **Centre: Sketch's dock** when it sits at the bottom, on the line, not lifted above it.
 - **Right: the document group.** In order:
   1. the document's **share-state icon** (the 28 px badge, [The top bar's middle](live-app.md#the-top-bars-middle)), its
      **name** (click to rename, for someone who may) and the **role pill**, as they were in the header;
@@ -54,7 +55,10 @@ on two lines over the canvas, a top line and a bottom line, each a single row wh
   3. the **tab stack**: a stack glyph and the number of tabs in the session's scope. A press opens the **tab list**;
   4. the **contributors**: the avatars of everyone else in the document, up to three, then **+N**. A press opens the
      same tab list. Not drawn while nobody else is here;
-  5. **Add tab** (+), for someone who may add tabs.
+  5. **Add tab** (+), for someone who may add tabs: it opens the **add menu**, **Tab**, **Board**, **Sheet** and
+     **Dashboard**, below or above it as there is room, styled as the mode menu (36 px rows with each one's mark)
+     ([Editor modes](editor-modes.md#where-the-mode-lives)). A menu button (`aria-haspopup="menu"`, named "Add
+     tab"), its rows `menuitem`s, arrow keys, Home, End, Enter, Space and Escape as every menu.
 
 ### The tab list
 
@@ -67,7 +71,8 @@ the contributors), arrow at that button, kept 12 px inside the canvas, in the me
   and their tabs indented under them: each row is the tab's kind glyph, its name (cut short with an ellipsis), and
   the [presence stack](../012-collaboration/collaborator-enhancements.md) of who is on it. The active tab's row is
   tinted and carries its tab menu (⋯). Pressing a row switches to that tab and closes the list.
-- **Footer**: **New Tab**, for someone who may add tabs.
+- **Footer**: **New Tab**, **New Board**, **New Sheet** and **New Dashboard** (the add menu's four), for someone
+  who may add tabs.
 - Rows drag to reorder and into or out of a folder, and rename on a double-click, for someone who may change the
   document's tabs; every other tab-bar gesture lives here too, so nothing the tab bar did is lost.
 - It is a menu: the arrow keys walk the rows, Enter switches, Escape closes and returns focus to the button that
@@ -76,7 +81,7 @@ the contributors), arrow at that button, kept 12 px inside the canvas, in the me
 ### When a line runs out of room
 
 Each line is one row while its groups fit side by side with an 8 px gap. A line's **centre toolbar** (the Palette strip
-or Draw's dock on the top line, Draw's dock on the bottom line) sits on the line between the line's two side groups,
+or Sketch's dock on the top line, Sketch's dock on the bottom line) sits on the line between the line's two side groups,
 by one rule for both lines:
 
 1. **Centred** on the line, while it fits centred: 8 px or more clear of both side groups.
@@ -84,7 +89,7 @@ by one rule for both lines:
    group, still on the line.
 3. Else the document name shortens (bottom line), down to 72 px, with an ellipsis, and the Palette's tiles drop as
    they already do ("Decided in review"), until the toolbar fits between the groups, still on the line.
-4. Only when even the Palette's fewest tiles (or the whole of Draw's dock) do not fit between the groups does the
+4. Only when even the Palette's fewest tiles (or the whole of Sketch's dock) do not fit between the groups does the
    centre toolbar move to a row of its own, just inside the line (under the top line, above the bottom line),
    centred, and the side groups keep their corners.
 
@@ -94,16 +99,16 @@ The active tab never shortens. On a phone ("On a phone") the same order runs, an
 
 The editor's one panel layout, on every device (see "One layout" for the retired Floating
 layout). The Palette is a single horizontal strip pinned to the top centre of the canvas, the way
-Excalidraw's tool bar works. In Workshop and Pages the strip is the **category bar**
-(below): the mode's categories, each opening a flyout of its tiles. Diagram and Plan keep the category picker
+Excalidraw's tool bar works. In Pages, and in Structured with the Workshop control on, the strip is the **category bar**
+(below): the mode's categories, each opening a flyout of its tiles. Structured and Plan tabs keep the category picker
 and one category's tiles:
 
 ```
  ‹◆ ☰ ⬡  ┌──────────────────────────────────────────────────────────────────────┐
-    │    │ [↖ ▾] │ Shapes Write Draw │ Diagrams Concepts Layout │ Icons … │ [🔍] │   Workshop, Pages
+    │    │ [↖ ▾] │ Shapes Write Draw │ Diagrams Concepts Layout │ Icons … │ [🔍] │   Pages, Workshop on
     ▼    └──────────────────────────────────────────────────────────────────────┘
  ‹◆ ☰ ⬡  ┌──────────────────────────────────────────────────────┐
-          │ [↖ ▾] │ [Popular ▾] │ □ ○ ◇ T → ▤ … │ [⋯ ▾] │ [🔍] │                  Diagram
+          │ [↖ ▾] │ [Popular ▾] │ □ ○ ◇ T → ▤ … │ [⋯ ▾] │ [🔍] │                  Structured
           │ [↖ ▾] │ [Cards ▾] │ □ ◇ ○ → ─ ✎ A ▤ … │ [⋯ ▾] │ [🔍] │                  Plan
           └──────────────────────────────────────────────────────┘
     Explorer        (Undo/Redo, Layers, zoom: the tools group, bottom left)
@@ -117,21 +122,21 @@ and one category's tiles:
 - **Left: the selection mode.** The canvas-tool picker (Select / Hand /
   Eraser / Format / Laser / Spotlight / Isometric / Zen (Avatar only while in it), [Tile grids for the palette dropdowns](../004-interface-design/dropdown-tile-grid.md))
   as a compact icon trigger, opening the banded tile grid.
-- **Then, in Workshop and Pages, the category bar** ("The category bar").
-- **Then, in Diagram and Plan, the category picker.** The same banded category grid ([Palette top-level categories and bands](../010-palette/palette-top-level-categories.md)),
+- **Then, in Pages and with the Workshop control on, the category bar** ("The category bar").
+- **Then, in Structured and Plan tabs, the category picker.** The same banded category grid ([Palette top-level categories and bands](../010-palette/palette-top-level-categories.md)),
   as a compact trigger showing the current category's glyph and name. It
   sits directly before the tiles it chooses, so it reads as their label.
-- **Then the current category's first twelve tiles** (Diagram and Plan; fewer on a narrow window, see "Decided in review"), icon-only, each with its
+- **Then the current category's first twelve tiles** (Structured and Plan tabs; fewer on a narrow window, see "Decided in review"), icon-only, each with its
   hover card, shortcut letter, drag-to-place, theme tint and pressed state. They
   are the Palette's tiles (`palette-tile-defs`, arranged by the mode's palette layout, [Editor modes](editor-modes.md#the-palette-per-mode)),
   rendered by the shared `PaletteTile`, so the strip and its popovers stay alike.
-- **Right: More (⋯ ▾)** (Diagram and Plan), when the category has more than the strip shows.
+- **Right: More (⋯ ▾)** (Structured and Plan tabs), when the category has more than the strip shows.
 - **Far right: Search** (a magnifier), in every mode's strip but an event-storming board's (see
-  "Search: every element type"). Draw mode shows its dock instead of the strip, so it has none.
+  "Search: every element type"). Sketch mode shows its dock instead of the strip, so it has none.
 
 ## The category bar
 
-Workshop and Pages show their **categories** on the strip rather than one category's tiles, the way
+Pages, and Structured with the Workshop control on, show their **categories** on the strip rather than one category's tiles, the way
 the Icons category always showed its groups: the strip is a short row of named places, and each holds its tiles in
 a flyout. Finding a tile is one look along the bar, not a trip through a picker, and the strip never changes width
 under the pointer as a category is switched.
@@ -145,27 +150,25 @@ under the pointer as a category is switched.
   **Library**.
 - **No Popular.** With every category one press away, a pick from across them adds nothing. The layouts keep their
   Popular entry; the bar leaves it out (`barCategoriesFor`).
-- **Write and Draw are two categories**, each its own button, where both are offered (Diagram, Workshop). They were
+- **Write and Draw are two categories**, each its own button, where both are offered (Structured). They were
   once one button named Draw, but more than half of what it held was words and comments (Page, Text, Note,
   Annotation, Pointer note, Callout, Comment, Action), so the name no longer said what was inside. Write holds the
   words and the notes about the canvas; Draw holds only what is made by a stroke or a drag: the pens, Polygon, Arrow
   and Line.
-- **Diagram splits Build into Diagrams and Layout**: **Diagrams** holds the structures that grow as you type (Mind
+- **Structured splits Build into Diagrams and Layout**: **Diagrams** holds the structures that grow as you type (Mind
   node, Org chart, Flowchart, Sequence, Table, Entity), **Layout** what arranges and labels them (Lane, Frame,
   Stack, Boundary, Timeline, then Diagram key, Card, Badge, Step number), after Concepts: what you build comes first, the ideas laid out beside it, then what it is arranged in. Fifteen tiles under one name mixed what
-  you build with what you build it in. Workshop offers the same **Layout**: a board is laid out in frames and
-  lanes as a diagram is. Pages has **no Build**: its three page tiles moved beside their neighbours, the Stack
+  you build with what you build it in. Pages has **no Build**: its three page tiles moved beside their neighbours, the Stack
   into Components and the Timeline and Table into Data.
-- **Session** (Workshop): the Collaborate categories Tools, Record, React, Selection Mode and Navigate gathered
+- **Session** (the Workshop control on): the Collaborate categories Tools, Record, React, Selection Mode and Navigate gathered
   into one category, browsed as Icons is (the two-pane browse, below), searchable across all of them. **Ask** keeps
   its own button beside it: putting a question to the room is the session's main act, not one of its tools.
 - **The bars:**
 
-  | Mode     | Bar                                                                                   |
-  | -------- | ------------------------------------------------------------------------------------- |
-  | Diagram  | Shapes, Write, Draw · Diagrams, Concepts, Layout · Icons, Tech, Media                 |
-  | Workshop | Shapes, Write, Draw · Layout · Ask, Session · Icons, Stickers, Media · Data           |
-  | Pages    | (Logo,) Shapes, Write · Concepts, Components, Devices · Icons, Stickers, Media · Data |
+  | Mode                    | Bar                                                                                            |
+  | ----------------------- | ---------------------------------------------------------------------------------------------- |
+  | Structured, Workshop on | Shapes, Write, Draw · Diagrams, Concepts, Layout · Ask, Session · Icons, Stickers, Tech, Media |
+  | Pages                   | (Logo,) Shapes, Write · Concepts, Components, Devices · Icons, Stickers, Media · Data          |
 
   Library joins after Shapes while the person has a [shape library](../013-workspace/shape-libraries.md) to place
   from, as My shapes does in the picker.
@@ -262,7 +265,7 @@ A strip shows one category at a time, so finding an element means knowing which 
   Plan's Edit Cards), behind a divider, with a hover card ("Search Elements"). On a phone it
   stays put beside More while the tiles swipe.
 - **Not on an event-storming board:** the notation is the palette there, as the board hides the
-  pickers. Draw mode has no strip, so no Search.
+  pickers. Sketch mode has no strip, so no Search.
 - **Opening it clears the way**: a tile armed to place is let go (its "Click to drop" banner goes), and the
   session timer's pill stands aside while the panel is open, since both sit where the panel hangs.
 - **The popover** hangs from the button's right edge like More's, 26rem wide (spanning the
@@ -279,17 +282,17 @@ A strip shows one category at a time, so finding an element means knowing which 
   entry by entry, as their categories' own tiles (`palette-dynamic-tiles`, `palette-catalogue-search`):
   each catalogue at most **15** best matches (five rows; its category has the rest, with its browse),
   merged with the element tiles of the same section by how well the name matches (exact, prefix, substring, then keyword only; element tiles first among equals), so "chart" leads with the charts, not the flowchart shapes that only carry the word. A catalogue is this mode's when the mode's
-  palette offers its category (Icons and Stickers in Diagram and Pages, Technology in Diagram)
+  palette offers its category (Icons and Stickers in Structured and Pages, Technology in Structured)
   and another mode's otherwise. Before anything is typed, the entries already on the tab list with
   the element types (an icon or a technology mark is an icon shape carrying its id, a sticker a shape
   carrying its sticker id). The catalogues load as a chunk of their own; the popover asks for it on
   opening and fills in when it lands. My shapes stays in its own category: it is the person's
   libraries, not a catalogue of the product.
-  **Draw mode's markers** join them: Draw has no palette layout (its pens are the dock's), so its
+  **Sketch mode's markers** join them: Sketch has no palette layout (its pens are the dock's), so its
   Marker 1, 2 and 3 are built as tiles when the popover opens, from this browser's pens, each in
   its colour and width (`palette-marker-tiles`). They are always another mode's, since the strip is
-  never shown in Draw. Picking one picks the pen up as the dock does, held until another tool,
-  Escape or a mode switch ([Draw mode](../023-draw-mode/draw-mode.md#pens)). The dock's other
+  never shown in Sketch. Picking one picks the pen up as the dock does, held until another tool,
+  Escape or a mode switch ([Sketch mode](../023-draw-mode/draw-mode.md#pens)). The dock's other
   tools are the palette's own already (Text, the shapes, the eraser), all but the Path tool, which
   the search does not offer. A
   tile matches on its name, label, blurb, description and the same synonym line the global Search
@@ -304,13 +307,13 @@ A strip shows one category at a time, so finding an element means knowing which 
     the event-storming notation. **Closed by default** each time the popover opens: modes are
     tailored on purpose, so the rest is one deliberate click away, never hidden. Opened, it stays
     open while typing. It is absent when nothing outside the mode matches.
-  - **Another mode's own elements**, last, as an accordion titled **"Not Available in Diagram
+  - **Plan's own elements**, last, as an accordion titled **"Not Available in Structured
     Mode"** (the current mode's name), with a count, closed by default and absent when empty like
     the one above. These are the tiles of Plan's own categories (Cards, Boards, Metrics,
-    Visualisations, Sheet): made for Plan's boards and views, so only Plan adds them. They are
+    Visualisations, Sheet): made for Plan's boards and views, so only a Plan tab adds them. They are
     listed so a search for one still finds it and says where it lives, but each is greyed out
-    (`aria-disabled`, no press, no drag) with "Only in Plan Mode" in its hover card. Plan itself
-    has none here. Its line: "Made for another mode's own tools, so only that mode adds them."
+    (`aria-disabled`, no press, no drag) with "Only on Plan tabs" in its hover card. A Plan tab
+    itself has none here. Its line: "Made for another mode's own tools, so only that mode adds them."
 - **Before anything is typed** it lists only the element types **already on the tab**, under a
   small "On This Tab" label, each once, in layout order (other modes' ones in their accordions, as
   ever): the popover stays short, and the tools a tab is actually built from are one click away.
@@ -322,10 +325,10 @@ A strip shows one category at a time, so finding an element means knowing which 
   them all. Tiles that place no one element type (the icon, sticker and tech catalogue tiles, the
   shape pen, a board's header widget, the hero and avatar composites) never list here. An empty
   tab shows the shared empty state "No elements on this tab yet" ("Type to find any element."); one holding only
-  other modes' types, "No Diagram elements on this tab yet" (the mode's name).
+  other modes' types, "No Structured elements on this tab yet" (the mode's name).
 - **Nothing matches:** the mode's section shows the shared empty state
   ([Empty states](../004-interface-design/empty-states.md)), pointing at the accordion when that has matches ("No
-  Diagram elements match “pie chart”", "Other modes have 3 below."); with neither, "No elements match “<words>”" with
+  Structured elements match “pie chart”", "Other modes have 3 below."); with neither, "No elements match “<words>”" with
   **Clear Search**.
 - **Its heading** is "Search Elements", as More's is the category's name; the field reads "Search
   elements". The accordion's line under its title: "Elements other modes offer. Any of them works
@@ -347,7 +350,7 @@ A strip shows one category at a time, so finding an element means knowing which 
 
 ## More: the rest of the category
 
-The picker's strip only (Diagram, Plan): the category bar has no More, since every category's whole body is its flyout.
+The picker's strip only (Structured, Plan): the category bar has no More, since every category's whole body is its flyout.
 
 A strip has room for about a dozen tiles. Shapes fits; Icons (~180),
 Stickers and Technology do not. More opens the current
@@ -391,12 +394,12 @@ which moved things under the pointer after every add; it is gone, its stored lis
 
 - **Shapes**: the basics (Square, Circle, Diamond) | the flowchart shapes (Cylinder to Stadium) |
   the rest (Cloud to Bubble).
-- **Write**: Page, Text | Note, Annotation; Diagram's adds Pointer note and Callout to the notes, then Comment,
+- **Write**: Page, Text | Note, Annotation; Structured's adds Pointer note and Callout to the notes, then Comment,
   Action as a third group, **Comments**.
 - **Draw**: Freehand, Shape Pen | Polygon | Arrow, Line.
 - **Build**: Mind node, Table | Lane, Frame, Timeline.
-- **Diagrams** (Diagram): Mind node, Org chart, Flowchart, Sequence, Table | Entity.
-- **Layout** (Diagram): Lane, Frame, Stack, Boundary, Timeline | Diagram key, Card, Badge, Step number, headed
+- **Diagrams** (Structured): Mind node, Org chart, Flowchart, Sequence, Table | Entity.
+- **Layout** (Structured): Lane, Frame, Stack, Boundary, Timeline | Diagram key, Card, Badge, Step number, headed
   **Containers** and **Parts** in the flyout.
 - **Components**: the cards (Code, Checklist, Entity) | the website blocks.
 - **Devices**: desktop (Browser, Monitor, Laptop) | mobile (Phone, Tablet, Foldable, Watch).
@@ -414,7 +417,7 @@ More's own divider (`useEdgeDividers`, re-checked as the strip scrolls or resize
 a fifth of a tile each: a category that fits whole with them shows them; one whose tiles fit only
 without them drops them before any tile; one that overflows shows as many tiles as fit with their
 dividers between them, so a divider costs a tile only when the strip's spare part-tile can't hold
-it (a 430px phone shows four of Diagram's Popular and the divider after the diamond, not three).
+it (a 430px phone shows four of Structured's Popular and the divider after the diamond, not three).
 
 The chosen category lasts the page load: the strip is hidden rather than
 unmounted while zen or the welcome flow hides the chrome. Nothing is stored,
@@ -423,7 +426,7 @@ so a new page load starts on the mode's landing (Plan's Cards, or Boards while t
 ## The tab's name
 
 - The open tab's name is in the document group's **active tab** segment, bottom right ("The bottom line"), after
-  the tab's kind glyph, in every mode: Diagram, Draw, Pages and Plan alike, as a board's name rides there
+  the tab's kind glyph, in every mode: Sketch, Structured, Pages and on Plan tabs alike, as a board's name rides there
   ([The name rides in the active tab](../026-plan/plan-board.md)). It is the chrome's ink, 14 px at regular weight
   (never bold), never shortens ("When a line runs out of room"), and follows a rename at once. The brand group, top
   left, carries no name.
@@ -449,7 +452,7 @@ other panel (AI, the minimap, Poll, Vote and the tool panels) docks in its corne
 ([Panel docking](panel-docking.md)). Layers and Collaborate render outside
 the corner layer, since a popover positions against the canvas and a corner stack would move it.
 A popover opening up from a bottom-row button (Layers, the Vote, the Poll) grows no higher than 8 px under a
-toolbar across the canvas's top whose span meets its column, the strip or Draw's dock (`usePopoverTopClearance`), and
+toolbar across the canvas's top whose span meets its column, the strip or Sketch's dock (`usePopoverTopClearance`), and
 12 px from the canvas's top otherwise: on a phone the strip spans the width, and a tall panel ran up under it with its
 header hidden.
 
@@ -467,14 +470,14 @@ on screen sideways as well as vertically, whatever the trigger's position.
 
 There is no layout choice. An earlier version offered a second layout, **Floating**, as the
 desktop default: the Palette as a draggable corner panel, the Explorer as a corner panel, Layers
-minimising into its cluster button, and Draw mode's tools inside the Palette panel. It was retired
+minimising into its cluster button, and Sketch mode's tools inside the Palette panel. It was retired
 because every new feature had to be built and kept working twice, and the strip had become the
 better layout. Its parts went with it:
 
 - The `panelLayout` preference is gone ([User preferences](user-preferences.md)). A stored value
   (`'floating'`, `'toolbar'`, a legacy `'minimal'`) is ignored and left as it is.
-- Settings has no Panel Layout row, and the Diagram tour no layout picker (it was on the tour's welcome card, itself gone since 28 October 2026)
-  ([Diagram tour ("Start Diagram Tour")](editor-tour.md)).
+- Settings has no Panel Layout row, and the Structured tour no layout picker (it was on the tour's welcome card, itself gone since 28 October 2026)
+  ([Structured tour ("Start Structured Tour")](editor-tour.md)).
 - The Palette, the Explorer and Layers are no longer corner panels, so a stored panel placement
   that names them is ignored ([Panel docking](panel-docking.md)).
 - Telemetry's `PanelLayoutFloating` / `PanelLayoutToolbar` stay in the catalogue as retired
@@ -546,7 +549,7 @@ their bottom-row buttons. What changes to fit the width:
   - While a mode banner sits in the tray, the top-centre stack starts below the tray instead.
   - While one of the strip's popovers is open (a category's flyout, More, a catalogue group, Search) the tray steps aside, as it does
     for the Explorer: it would cover the popover's top.
-  - Without a strip (Draw mode's dock, zen, read-only, the welcome flow) the messages stay the
+  - Without a strip (Sketch mode's dock, zen, read-only, the welcome flow) the messages stay the
     top-centre pills they are elsewhere.
 - Event-storming boards ([Event storming](../021-event-storming/event-storming.md)) hide the strip's pickers, and the strip shows the notation's tiles, led by
   the board's **Add from Photo** (an icon button with a hover card) where the deployment offers
@@ -560,9 +563,9 @@ their bottom-row buttons. What changes to fit the width:
   shows in the tab list only above five tabs.
 - Tab-scoped share links: the tab list shows the tabs out of scope as "Not shared" rows, not switchable, and the
   tab stack counts the tabs in scope ([Tab-scoped share links](../013-workspace/tab-scoped-share-links.md)).
-- The Diagram tour ([Diagram tour ("Start Diagram Tour")](editor-tour.md)) follows the layout: its Palette step rings the
+- The Structured tour ([Structured tour ("Start Structured Tour")](editor-tour.md)) follows the layout: its Palette step rings the
   strip's card. (Its Explorer step, which opened the Explorer from the menu button, went when the
-  welcome tour became the Diagram tour.)
+  welcome tour became the Structured tour.)
 
 ## Motion
 
@@ -608,11 +611,11 @@ their bottom-row buttons. What changes to fit the width:
 - **Button Labels is off by default** (decided by Webber): the actions group shows Search, Report a Bug, Settings and
   the appearance toggle as icons, each named in its hover card, so the top line leaves the Palette strip its room;
   turning Button Labels on names them ([User preferences](user-preferences.md)).
-- **The strip opens on the mode's landing every time** (Diagram's Popular, Plan's Cards)
+- **The strip opens on the mode's landing every time** (Structured's Popular, Plan's Cards)
   ([Editor modes](editor-modes.md#the-palette-per-mode)). It does not remember the last category across documents.
-- **Diagram keeps the category picker**, not the category bar: Popular and its twelve tiles, one press from the
-  canvas, with the rest one pick away. The named bar made Diagram's strip read busier than the quiet row of
-  glyphs it replaced, and Diagram is where most people draw.
+- **Structured keeps the category picker**, not the category bar, while the Workshop control is off: Popular and its twelve tiles, one press from the
+  canvas, with the rest one pick away. The named bar made Structured's strip read busier than the quiet row of
+  glyphs it replaced, and Structured is where most people draw.
 - **Twelve tiles is enough** on desktop (raised from ten, which cut Shapes and
   Popular short). Below that, the strip shows as many as fit, **measured**
   rather than estimated (`useStripTileLimit`): its own chrome (the pickers,

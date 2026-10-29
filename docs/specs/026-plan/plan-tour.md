@@ -1,25 +1,25 @@
 # Plan tour
 
-A guided tour of [Plan mode](plan-mode.md) on the person's own board or Sheet, started from the actions group's
+A guided tour of [Working in Plan](plan-mode.md) on the person's own board or Sheet, started from the actions group's
 **Start Boards Tour** or **Start Sheets Tour** button while one is open. It runs on the shared tour engine
-([Diagram tour](../007-editor/editor-tour.md)): the same anchored step cards, glide, dimming, Skip, Back and last
+([Structured tour](../007-editor/editor-tour.md)): the same anchored step cards, glide, dimming, Skip, Back and last
 card as every other tour, so the tours read as one product. Where this spec is silent, the
-[Diagram tour](../007-editor/editor-tour.md) rules hold.
+[Structured tour](../007-editor/editor-tour.md) rules hold.
 
 ## Domain language
 
-| Term             | Means                                                                                             |
-| ---------------- | ------------------------------------------------------------------------------------------------- |
-| **Plan tour**    | This tour                                                                                         |
-| **Diagram tour** | The Diagram mode tour ("Start Diagram Tour"), [Diagram tour](../007-editor/editor-tour.md)        |
-| **tour track**   | Which half of Plan the tour shows: **Boards** or **Sheets**                                       |
-| **tour subject** | The board or [Sheet](../029-sheets/sheet.md) the tour shows: the person's own, on the open tab    |
-| **plan work**    | A board (`plan-board` element) or a Sheet (`plan-sheet` element) on the open tab, of any tab kind |
+| Term                | Means                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| **Plan tour**       | This tour                                                                                           |
+| **Structured tour** | The Structured mode tour ("Start Structured Tour"), [Structured tour](../007-editor/editor-tour.md) |
+| **tour track**      | Which half of Plan the tour shows: **Boards** or **Sheets**                                         |
+| **tour subject**    | The board or [Sheet](../029-sheets/sheet.md) the tour shows: the person's own, on the open tab      |
+| **plan work**       | A board (`plan-board` element) or a Sheet (`plan-sheet` element) on the open tab, of any tab kind   |
 
 ## Where it appears
 
 - **The actions group's Start Tour button.** The one way in is the button in the editor's actions group, leading the
-  document actions ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"). It never starts, prompts or offers
+  document actions ([Structured tour](../007-editor/editor-tour.md) "Where it appears"). It never starts, prompts or offers
   itself on its own. Until 28 October 2026 it offered itself once per track on a banner ("Getting started with
   boards?", **No** / **Yes**), and asked **Boards** or **Spreadsheets** on a choice card when both were on the tab.
 - **Only while there is plan work to show.** The tour is on offer while a person may edit a tab **with a board or
@@ -122,7 +122,7 @@ Six steps, on the tour's own example card (below).
    the + at their end, and a column's cog sets the board up.
 6. **Card Types**: highlights the Card Types button. Each type has its own colour and fields, changed or made
    there.
-7. **You're ready to plan** (outro): a help-centre link to the Plan mode article (new tab) and **Start
+7. **You're ready to plan** (outro): a help-centre link to the Plan tabs article (new tab) and **Start
    Planning**, which completes the tour.
 
 ### Spreadsheets
@@ -159,7 +159,7 @@ settings) is an Editor's to use.
 
 ## Telemetry ([Telemetry](../017-telemetry/telemetry.md))
 
-The Diagram tour's funnel, with its own tokens, so the tours chart apart:
+The Structured tour's funnel, with its own tokens, so the tours chart apart:
 
 - **Offer**: `UI` · `Opened` · `PlanTourOffer` the first time the Start Tour button shows this tour in a page
   load. Until 28 October 2026 it counted the welcome card showing, and `UI` · `Closed` · `PlanTourOffer` counted
@@ -172,11 +172,11 @@ The Diagram tour's funnel, with its own tokens, so the tours chart apart:
   `PlanTourStepSheetToolbar`, `PlanTourStepSheetSettings`; `PlanTourStepOutro` for either outro).
 - **End**: `UI` · `Ended` · `PlanTourCompleted` | `PlanTourSkipped`.
 - **Settings rows**: `UI` · `Toggled` · `BoardsTourSeenOn` | `BoardsTourSeenOff` and `SheetsTourSeenOn` |
-  `SheetsTourSeenOff`, describing the preference as the Diagram tour's row does (`PlanTourSeenOn` |
+  `SheetsTourSeenOff`, describing the preference as the Structured tour's row does (`PlanTourSeenOn` |
   `PlanTourSeenOff` until the row split per track in October 2026).
 - The tour sends no `Element`, `Plan` or `Sheet` events: opening a card's panel from the tour is not counted as
   the person opening it.
 
 ## Power user mode
 
-[Power user mode](../007-editor/power-user-mode.md) marks the Plan tour seen alongside the Diagram tour.
+[Power user mode](../007-editor/power-user-mode.md) marks the Plan tour seen alongside the Structured tour.

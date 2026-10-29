@@ -9,7 +9,7 @@ import { OTHER_MODE_CARDS_MAX } from './other-mode-matches';
 vi.mock('@/components/plan/PlanContext', () => ({ usePlan: () => null }));
 
 // docs/specs/007-editor/start-diagramming.md "Found in other modes": a start's search also finds every other mode's
-// templates, under In Other Modes, and choosing one switches the tab to that mode.
+// templates, under Elsewhere, and choosing one changes the tab to match.
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -35,7 +35,7 @@ function diagram(canSwitch = true) {
   return { onTemplate, onOtherModeTemplate, search };
 }
 
-const otherModes = () => screen.getByRole('region', { name: 'In Other Modes' });
+const otherModes = () => screen.getByRole('region', { name: 'Elsewhere' });
 
 describe('a start search, in other modes', () => {
   it("shows another mode's matches after the mode's own, and lands one in its mode", () => {
@@ -53,7 +53,7 @@ describe('a start search, in other modes', () => {
     const { search } = diagram();
     fireEvent.change(search, { target: { value: 'sailboat' } });
     expect(screen.getByRole('status').textContent).toBe(
-      'No diagram templates match “sailboat”. Found in other modes.',
+      'No diagram templates match “sailboat”. Found elsewhere.',
     );
     expect(otherModes()).toBeTruthy();
   });
@@ -63,7 +63,7 @@ describe('a start search, in other modes', () => {
     fireEvent.change(search, { target: { value: 'zzzz-nothing' } });
     expect(screen.getByText('No diagram templates match “zzzz-nothing”')).toBeTruthy();
     expect(screen.getByText('Try another word.')).toBeTruthy();
-    expect(screen.queryByRole('region', { name: 'In Other Modes' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Elsewhere' })).toBeNull();
   });
 
   it(`shows at most ${OTHER_MODE_CARDS_MAX} a mode, then Show All`, () => {
@@ -82,7 +82,7 @@ describe('a start search, in other modes', () => {
   it('keeps to its own mode where the mode may not change', () => {
     const { search } = diagram(false);
     fireEvent.change(search, { target: { value: 'sailboat' } });
-    expect(screen.queryByRole('region', { name: 'In Other Modes' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Elsewhere' })).toBeNull();
     expect(screen.getByText('Try another word.')).toBeTruthy();
   });
 

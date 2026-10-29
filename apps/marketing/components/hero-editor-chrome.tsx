@@ -50,7 +50,7 @@ function Lucide({
   );
 }
 
-// The extra group a mode adds to the cluster, as CanvasChrome lays it out: Workshop's session
+// The extra group a scene adds to the cluster, as CanvasChrome lays it out: the Workshop control's session
 // tools (timer, votes, poll) and a Plan board's own (delete, add, find, cards).
 const MODE_GROUP: Partial<Record<HeroMode, Parameters<typeof Prims>[0]['prims'][]>> = {
   workshop: [lucideTimer, lucideCircleCheck, lucideChartColumn],
@@ -137,10 +137,13 @@ export function ToolbarMenuButton({ mode, tab }: { mode: HeroMode; tab: string }
       <span className="flex h-6 w-6 items-center justify-center">
         <MenuIcon size={11} />
       </span>
-      <span className="flex h-6 items-center gap-0.5 rounded bg-brand-50 px-1.5 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">
-        <Icon size={11} />
-        <ChevronDownIcon size={7} />
-      </span>
+      {/* A Plan tab shows no mode switch (docs/specs/026-plan/plan-tabs.md "The kinds"). */}
+      {mode === 'plan' ? null : (
+        <span className="flex h-6 items-center gap-0.5 rounded bg-brand-50 px-1.5 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">
+          <Icon size={11} />
+          <ChevronDownIcon size={7} />
+        </span>
+      )}
       {/* The tab's name, where the canvas is wide enough that it clears the strip. */}
       <span className="hidden items-center @[720px]:flex">
         <span aria-hidden className="mx-0.5 h-4 w-px bg-slate-200 dark:bg-slate-700" />

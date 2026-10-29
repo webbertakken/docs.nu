@@ -44,7 +44,7 @@ const PagesTourHost = dynamic(() => import('./PagesTourHost').then((m) => m.Page
 export function EditorTours() {
   const { editorMode, activeTab, canvasTool } = useEditorContext();
   const mountPlanTour = useEverTrue(editorMode.mode === 'plan');
-  const mountWorkshopTour = useEverTrue(editorMode.mode === 'workshop');
+  const mountWorkshopTour = useEverTrue(editorMode.workshop);
   const mountDrawTour = useEverTrue(editorMode.mode === 'draw');
   const mountFormTour = useEverTrue(activeTab.kind === 'form');
   const mountAvatarTour = useEverTrue(canvasTool === 'avatar');

@@ -21,7 +21,7 @@ import { accentOn, type PlanPalette } from './plan-palette';
 import { BOARD_PREVIEWS } from './board-previews';
 import { StartPlanning } from './start/StartPlanning';
 import type { PlanTemplateKind, TemplateKind } from '@livedoc/templates';
-import type { EditorMode, Tab } from '@livedoc/document';
+import type { TabOpening, Tab } from '@livedoc/document';
 import type { SuggestedDashboard } from '@/lib/suggested-dashboards';
 import type { PlanVisualisation } from '@livedoc/items';
 
@@ -122,6 +122,7 @@ function GenericPreview({ preset, palette }: { preset: PlanBoardPresetId; palett
 // Start Planning (docs/specs/026-plan/plan-mode.md "Starting a board"): the panel lives in start/StartPlanning.tsx; the
 // pictures it draws stay here, where Add to Slot reads them too.
 export function PlanBoardPicker({
+  tabId,
   onPick,
   onPickSheet,
   onOtherModeTemplate,
@@ -133,6 +134,8 @@ export function PlanBoardPicker({
   onVisualisation,
   onForm,
 }: {
+  // The tab it starts (Start Planning's landing).
+  tabId?: string;
   onPick: (preset: string) => void;
   // Makes the tab a Form tab from a starter (Start Planning's Forms, docs/specs/030-forms/forms.md).
   onForm?: (starter: StarterId) => void;
@@ -149,7 +152,7 @@ export function PlanBoardPicker({
   // An empty sheet, or one of Start Planning's sheet types (Setup Sheet then opens on it).
   onPickSheet?: (start?: PlacedSheetStart) => void;
   // A template found in another mode (start-diagramming.md "Found in other modes"): it lands, switching the tab there.
-  onOtherModeTemplate?: (mode: EditorMode, kind: TemplateKind) => void;
+  onOtherModeTemplate?: (mode: TabOpening, kind: TemplateKind) => void;
 }) {
   // What Start Planning makes fills the tab: its view's chunk is fetched while the panel is read, so the choice
   // opens on the view rather than its loading cover (FillTabPending). Idle, so the panel's own paint is first.
@@ -168,6 +171,7 @@ export function PlanBoardPicker({
   }, []);
   return (
     <StartPlanning
+      tabId={tabId}
       onPickBoard={onPick}
       onPickSheet={onPickSheet}
       onDashboard={onDashboard}

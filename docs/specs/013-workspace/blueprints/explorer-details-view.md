@@ -57,7 +57,7 @@ outbox that pushes it, are the [document storage blueprint](../../006-document/b
   `elementCount = body.elements.length` (0 when not an array); `commentCount` sums
   `commentThread.comments.length` over the elements; `dataBytes` is the UTF-8 length of `data`.
 - `tabStatsOfData(data)` (api) parses a stored body and counts it; a body that is not a JSON object
-  counts as an empty Diagram tab with its bytes, flagged `corrupt`.
+  counts as an empty Structured tab with its bytes, flagged `corrupt`.
 - `tabStatsStatement(env, tabId, stats, writtenAt)` is
   `INSERT INTO tab_stats (...) VALUES (...) ON CONFLICT(tab_id) DO UPDATE SET` every column. It is
   placed in each batch **after** the `tabs` upsert (the foreign key needs the row):

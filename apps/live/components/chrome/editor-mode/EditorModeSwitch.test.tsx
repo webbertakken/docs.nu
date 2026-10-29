@@ -17,8 +17,6 @@ vi.mock('@/lib/telemetry', () => ({ track: vi.fn() }));
 vi.mock('@/lib/view-transition', () => ({
   startTypedTransition: (_type: string, change: () => void) => change(),
 }));
-const confirm = vi.hoisted(() => vi.fn(async () => false));
-vi.mock('@/hooks/ui/useConfirm', () => ({ useConfirm: () => confirm }));
 
 beforeEach(() => {
   vi.spyOn(console, 'info').mockImplementation(() => {});
@@ -35,7 +33,17 @@ function renderSwitch(
 ) {
   const setMode = vi.fn<(mode: EditorMode) => void>();
   const view = render(
-    <EditorModeProvider value={{ mode, setMode, canSwitch: true, canEdit: true, ...over }}>
+    <EditorModeProvider
+      value={{
+        mode,
+        setMode,
+        canSwitch: true,
+        canEdit: true,
+        workshop: false,
+        setWorkshop: vi.fn(),
+        ...over,
+      }}
+    >
       <EditorModeSwitch {...props} />
     </EditorModeProvider>,
   );
@@ -47,23 +55,23 @@ const chip = () => screen.getByRole('button', { name: /^Editor mode:/ });
 describe('EditorModeSwitch', () => {
   it('is a compact menu button named for the editor, showing the mode by icon and name', () => {
     renderSwitch('draw');
-    expect(chip().getAttribute('aria-label')).toBe('Editor mode: Draw');
+    expect(chip().getAttribute('aria-label')).toBe('Editor mode: Sketch');
     expect(chip().getAttribute('aria-haspopup')).toBe('menu');
     expect(chip().getAttribute('aria-keyshortcuts')).toBe('Shift+D');
-    expect(chip().textContent).toBe('Draw');
+    expect(chip().textContent).toBe('Sketch');
     expect(chip().className).toContain('h-9');
   });
 
   it('shows its icon alone on a phone, keeping its accessible name', () => {
-    renderSwitch('workshop', {}, { iconOnly: true });
-    expect(chip().getAttribute('aria-label')).toBe('Editor mode: Workshop');
+    renderSwitch('pages', {}, { iconOnly: true });
+    expect(chip().getAttribute('aria-label')).toBe('Editor mode: Pages');
     expect(chip().textContent).toBe('');
     expect(chip().querySelectorAll('svg').length).toBeGreaterThan(0);
   });
 
   it.each([
     ['a Participant or a Viewer', { canEdit: false, canSwitch: false }],
-    ['a locked tab or an event-storming board', { canEdit: true, canSwitch: false }],
+    ['a locked tab, an event-storming board or a Plan tab', { canEdit: true, canSwitch: false }],
   ])('renders nothing for %s', (_, gate) => {
     const { container } = renderSwitch('diagram', gate);
     expect(container.querySelector('[data-editor-mode-switch]')).toBeNull();
@@ -72,11 +80,6 @@ describe('EditorModeSwitch', () => {
   it('renders nothing outside an editor', () => {
     const { container } = render(<EditorModeSwitch />);
     expect(container.innerHTML).toBe('');
-  });
-
-  it('shows on a Board, Sheet or Dashboard tab, where another mode is a new tab', () => {
-    renderSwitch('plan', { canSwitch: false, lockedReason: 'Board is always in Plan.' });
-    expect(chip().getAttribute('aria-label')).toBe('Editor mode: Plan');
   });
 
   it('floats its menu in a portal, outside the menu card, and a press on it keeps it open', () => {
@@ -91,20 +94,16 @@ describe('EditorModeSwitch', () => {
     expect(screen.queryByRole('menu')).not.toBeNull();
   });
 
-  it('switches a tab with content between modes on its side of Plan', () => {
-    const { setMode } = renderSwitch('diagram', { crossPlan: false });
+  it('switches a tab between the three modes, and offers no other', () => {
+    const { setMode } = renderSwitch('diagram');
     fireEvent.click(chip());
-    fireEvent.click(screen.getByRole('menuitemradio', { name: /Draw/ }));
+    expect(screen.getAllByRole('menuitemradio').map((r) => r.textContent)).toEqual([
+      'Sketch',
+      'Structured',
+      'Pages',
+    ]);
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Sketch' }));
     expect(setMode).toHaveBeenCalledWith('draw');
-  });
-
-  it('never switches a tab with content into Plan: that row offers a new tab', () => {
-    const newTabIn = vi.fn();
-    const { setMode } = renderSwitch('diagram', { crossPlan: false, newTabIn });
-    fireEvent.click(chip());
-    fireEvent.click(screen.getByRole('menuitemradio', { name: /Plan/ }));
-    expect(setMode).not.toHaveBeenCalled();
-    expect(confirm).toHaveBeenCalled();
   });
 });
 
@@ -114,7 +113,14 @@ describe('EditorModeSwitch beside the start switch', () => {
     const [mode, setMode] = useState<EditorMode>('diagram');
     return (
       <EditorModeProvider
-        value={{ mode, setMode, canSwitch: true, canEdit: true, crossPlan: true }}
+        value={{
+          mode,
+          setMode,
+          canSwitch: true,
+          canEdit: true,
+          workshop: false,
+          setWorkshop: vi.fn(),
+        }}
       >
         <EditorModeSwitch />
         <StartModeSwitch />
@@ -126,9 +132,9 @@ describe('EditorModeSwitch beside the start switch', () => {
     render(<Both />);
     const start = () => screen.getByRole('button', { name: /^Tab mode:/ });
     fireEvent.click(chip());
-    fireEvent.click(screen.getByRole('menuitemradio', { name: /Workshop/ }));
-    expect(chip().getAttribute('aria-label')).toBe('Editor mode: Workshop');
-    expect(start().getAttribute('aria-label')).toBe('Tab mode: Workshop');
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Sketch' }));
+    expect(chip().getAttribute('aria-label')).toBe('Editor mode: Sketch');
+    expect(start().getAttribute('aria-label')).toBe('Tab mode: Sketch');
     fireEvent.click(start());
     fireEvent.click(screen.getByRole('menuitemradio', { name: /Pages/ }));
     expect(chip().getAttribute('aria-label')).toBe('Editor mode: Pages');

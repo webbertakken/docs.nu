@@ -6,10 +6,10 @@ Status: shipped
 
 A flattening of the palette's category structure.
 
-In Workshop and Pages the strip shows these categories as a **category bar**, each opening a
-flyout of its tiles, with no Popular, one-word names, Write and Draw apart, and Workshop's session tools gathered
-into Session ([Toolbar layout](../007-editor/toolbar-layout.md#the-category-bar)). The bands below are the bar's
-dividers there; the banded picker is Diagram's and Plan's.
+In Pages, and in Structured with the Workshop control on, the strip shows these categories as a **category bar**,
+each opening a flyout of its tiles, with no Popular, one-word names, Write and Draw apart, and the session tools
+gathered into Session ([Toolbar layout](../007-editor/toolbar-layout.md#the-category-bar)). The bands below are the
+bar's dividers there; the banded picker is Structured's with the control off.
 
 This is the category catalogue and each category's **default** tiles. Which
 categories a palette offers, under what names and holding which tiles, is now
@@ -160,10 +160,10 @@ which two groups they are. A rename that broke seven live links to say
 
 ## Collaborate: one category, fully grouped
 
-**Collaborate is Workshop's, as six categories.** Since [Workshop mode](../012-collaboration/workshop-mode.md#the-palette),
-only Workshop's layout offers the Collaborate elements, and it offers each group below as its
+**Collaborate is the Workshop control's, as six categories.** Since the [Workshop control](../012-collaboration/workshop-mode.md#the-palette),
+only a palette with the control on offers the Collaborate elements, and it offers each group below as its
 own category in a **Collaborate** band of its own (`collab-ask`, `collab-tools`, `collab-record`, `collab-react`,
-`collab-mode`, `collab-navigate`), so the parent category and its group browser are gone. Diagram
+`collab-mode`, `collab-navigate`), so the parent category and its group browser are gone. Structured
 keeps only the Comment panel and the Action card, in its Write category. Search still finds every
 Collaborate tile from any mode. What follows is how the groups came to be; they are unchanged as
 categories.

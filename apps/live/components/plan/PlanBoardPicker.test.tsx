@@ -207,3 +207,28 @@ describe('Start Planning’s Visualisations', () => {
     expect(onVisualisation).toHaveBeenCalledWith('gantt', 'Gantt Chart');
   });
 });
+
+// docs/specs/026-plan/plan-mode.md "Start Planning lands where it was asked for": the add menu's Board, Sheet or
+// Dashboard opens the Plan start on that category, once.
+describe('Start Planning, opened from the add menu', () => {
+  it.each([
+    ['boards', /^Boards/],
+    ['sheets', /^Spreadsheets/],
+    ['dashboards', /^Dashboards/],
+  ] as const)('lands on %s', async (landing, name) => {
+    const { setPlanStartLanding } = await import('@/lib/plan-start-landing');
+    setPlanStartLanding('p1', landing);
+    show({ tabId: 'p1' });
+    expect(rail(name).getAttribute('aria-current')).toBe('true');
+  });
+
+  it('lands on Recommended the next time, and with no landing asked for', () => {
+    show({ tabId: 'p1' });
+    expect(rail(/^Recommended/).getAttribute('aria-current')).toBe('true');
+  });
+
+  it('shows no mode switch on its rail', () => {
+    show();
+    expect(document.querySelector('[data-start-mode-switch]')).toBeNull();
+  });
+});

@@ -280,7 +280,7 @@ cancelled` (Escape, pointercancel). `pressed → idle` on pointerup without movi
   Board, or Escape (a capture-phase `window` listener, so it runs before the editor's deselect, then
   `preventDefault` + `stopPropagation`) with no `[aria-modal="true"]` open, calls `restorePlanElement()` and
   `Plan · Toggled · BoardRestored`. The board unmounting (tab switch, deletion,
-  culling) or `interactive` turning false (leaving Plan mode, losing edit input) restores without telemetry.
+  culling) or `interactive` turning false (leaving the Plan tab, losing edit input) restores without telemetry.
   The layer is a portal into the slot's closest `[data-canvas-a11y-root]` (the canvas `main`, found by a hidden
   marker's ref, `useCanvasRoot`), `absolute` at `CANVAS_LAYER_Z` (`--z-panel` − 1), its `top/right/bottom/left` from
   `useCanvasLayerInsets(canvas)` (hooks/ui): `apps/live/lib/canvas-layer-insets.ts` reads `[data-toolbar-menu]` (top row),

@@ -4,7 +4,7 @@ import {
   isBlankTemplate,
   newDocumentBlankOf,
   newDocumentTemplateMode,
-  templateEditorMode,
+  templateOpening,
 } from '@livedoc/templates';
 import { TEMPLATE_STARTS } from '@/components/start/start-template-items';
 import { paneGroupsFor } from './pane-groups';
@@ -31,7 +31,7 @@ describe('paneGroupsFor', () => {
       expect(kinds.some(isBlankTemplate), b.id).toBe(false);
       expect(kinds.length, b.id).toBeGreaterThan(0);
       for (const k of kinds)
-        expect(templateEditorMode(k), `${b.id} ${k}`).toBe(newDocumentTemplateMode(b.templates));
+        expect(templateOpening(k), `${b.id} ${k}`).toBe(newDocumentTemplateMode(b.templates));
     }
   });
 

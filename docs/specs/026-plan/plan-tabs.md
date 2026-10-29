@@ -22,17 +22,18 @@ it brings its own behaviour.
 
 ## The kinds
 
-- A Board, Sheet or Dashboard tab is always in **Plan** mode, whatever a stored or stale `opensIn` says (as an Event
-  Storming tab is always Diagram). Its start's mode switch still shows, reading Plan, with no line under the modes. Picking another mode asks
-  **Open a New <Mode> Tab?** ("A Dashboard is always in Plan. Its mode can’t change, but you can carry on in a new
-  <Mode> tab.", or "A Board tab ...", "A Sheet tab ...") and **New <Mode> Tab** opens a new tab in that mode
-  after the others; Shift+D does nothing there. No tab menu lists modes.
-- The kind is chosen on **Start Planning** ([Plan mode](plan-mode.md#starting-a-board)), four tiles two by two:
+- A Board, Sheet or Dashboard tab is always worked in **Plan** (`plan`), whatever a stored or stale `opensIn` says
+  (as an Event Storming tab is always Structured). It shows **no mode switch**, at the top or on its start, and
+  Shift+D does nothing there: Plan is not a mode ([Working in Plan](plan-mode.md)). Another kind of work is a new
+  tab from **+** (the add menu's **Tab** adds a Structured tab). No tab menu lists modes.
+- A Plan tab is added from **+**: the add menu's **Board**, **Sheet** and **Dashboard** open a Plan start on Start
+  Planning at that choice ([Working in Plan](plan-mode.md#adding-a-plan-tab)).
+- The kind is chosen on **Start Planning** ([Working in Plan](plan-mode.md#starting-a-board)), four tiles two by two:
   **Dashboard** a Dashboard tab, **Board** (then a preset) a Board tab, **Spreadsheet** (then a start) a Sheet tab,
   and a search reaches every template, another mode's included. The choice sets the tab's kind and adds its element in one change, one undo step.
   A Dashboard started on a tab still on its default name ("Tab 5") is named **Dashboard**; a name someone gave the tab
   stays.
-- Its tab pill leads with its **kind's glyph** rather than the Plan mode's: a kanban for a Board tab, a grid for a
+- Its tab pill leads with its **kind's glyph** rather than the Plan start's board mark: a kanban for a Board tab, a grid for a
   Sheet tab, a layout of tiles for a Dashboard; tinted with the tab's accent as any pill's is.
 - A tab's kind is stored on the tab (`kind`) and syncs as tab metadata. A Board or Sheet tab whose element is deleted
   shows Start Planning again; choosing anew sets the kind anew.
@@ -89,13 +90,13 @@ A Board tab and its board, and a Sheet tab and its sheet, share **one name**:
 ## Only in Plan
 
 A Plan board and a Sheet are placed only on a tab in Plan (`opensInOf(tab) === 'plan'`: a Board, Sheet or Dashboard
-tab, or a general tab in Plan). A tab keeps its mode once it has content
-([Editor modes](../007-editor/editor-modes.md#the-mode-switch)), and a board's cards and a Sheet's cells take input only
-in Plan, so one on a Diagram, Draw, Workshop or Pages tab could never be worked there. Every way in keeps to it
+tab, or a general tab stored in Plan). No tab switches into or out of Plan
+([Working in Plan](plan-mode.md#plan-and-the-modes)), and a board's cards and a Sheet's cells take input only
+in Plan, so one on a Sketch, Structured or Pages tab could never be worked there. Every way in keeps to it
 (`tabTakesPlanOnly`, `planOnlyAddedOutsidePlan` and `withoutPlanOnly` in `packages/document/src/plan-only.ts`):
 
-- **The palette, Search and a dropped CSV** are Plan mode's already: Search lists boards and Sheets in another mode
-  greyed out, "Only in Plan Mode".
+- **The palette, Search and a dropped CSV** are a Plan tab's already: Search lists boards and Sheets on any other
+  tab greyed out, "Only on Plan tabs".
 - **A paste** onto a tab in another mode leaves out every board and Sheet it holds, and the charts those Sheets draw,
   and pastes the rest. It says what it left out: "Boards and sheets stay on Plan tabs, so the board was left out"
   ("the sheet", "the boards", "the board and the sheets", ...). A paste holding nothing else pastes nothing, with the
@@ -519,7 +520,7 @@ only a run from the footer marks the `dashboards` track taken.
 
 A row may **fill the page** (`fill`): it takes the height the page has left (at least 24 rem) rather than its own,
 has no resize handle, and is as tall as anything needs (What fits). A **Visualisation tab** is a Dashboard of one such
-row holding one visualisation (Start Planning's Visualisations, [Plan mode](plan-mode.md#starting-a-board)): its
+row holding one visualisation (Start Planning's Visualisations, [Working in Plan](plan-mode.md#starting-a-board)): its
 chart fills the tab as a Board tab's board does (`fill-tab.ts`, `View`), its header holding the top row (its title in
 the active tab segment, its own controls in the card at the right, no Maximise), the page drawing nothing over it.
 
@@ -651,7 +652,7 @@ The Plan templates ([Plan templates](plan-templates.md)) make their tabs in thes
 
 ## Converting old Plan tabs
 
-When someone who may edit opens a tab in Plan mode of the general kind that holds only Plan elements (boards,
+When someone who may edit opens a general tab stored in Plan that holds only Plan elements (boards,
 Sheets and plan views), it becomes the new model, in one change and one undo step, with a toast saying so (**This tab
 was updated to the new Plan layout.**). An undo keeps the old tab for the rest of the session; it converts again the
 next time the document is opened:

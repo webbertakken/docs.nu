@@ -49,6 +49,7 @@ export {
 } from './badges';
 export {
   EDITOR_MODE_ICONS,
+  TAB_OPENING_ICONS,
   FlowchartIcon,
   PagesIcon,
   PlanCardsIcon,

@@ -97,7 +97,7 @@ export const ALTERNATIVES: Alternative[] = [
       { label: 'Real-time multiplayer', us: 'Yes', them: 'Yes' },
       {
         label: 'Ink',
-        us: 'Pressure-sensitive markers in Draw mode',
+        us: 'Pressure-sensitive markers in Sketch mode',
         them: 'Natural pen inking, strongest on Windows',
       },
       {
@@ -115,13 +115,13 @@ export const ALTERNATIVES: Alternative[] = [
     usBest: [
       'Your boards outlive the retirement: import a board export and each board becomes a document of its own, named and dated as the board, with pen strokes, colours, sticky notes, text, shapes and images all editable.',
       'No Microsoft account, no sign-up, no install: open a link and start drawing.',
-      'Draw mode is a plain whiteboard: three pressure-sensitive markers, text, an eraser and shapes on a plain, dotted or grid board, light or dark.',
+      'Sketch mode is a plain whiteboard: three pressure-sensitive markers, text, an eraser and shapes on a plain, dotted or grid board, light or dark.',
       'Real-time multiplayer with live cursors, comments and a laser pointer, for anyone with the link.',
       'Three kinds of link: Editor, Participant (add stickies, write and vote without reshaping the board, handy for a class) or view-only.',
       'For a class: quizzes with a countdown and a reveal of who got it right, live polls, an anonymous idea box and a shared timer.',
       'Run the lesson on the board: an agenda that starts the timer for each segment, a roll call, and a picker that chooses someone at random so nobody has to volunteer.',
       'Around 190 emoji stickers and 32 word badges like APPROVED and WIP, for reacting to work and marking it.',
-      'Switch the same tab to Diagram mode when a sketch needs to become a tidy flowchart, org chart or plan, and draw it in the Marker finish so it still looks like it came off the whiteboard.',
+      'Switch the same tab to Structured mode when a sketch needs to become a tidy flowchart, org chart or plan, and draw it in the Marker finish so it still looks like it came off the whiteboard.',
       '148 templates, including retrospectives, Lean Coffee, town hall Q&A and event storming boards.',
       'Free and MIT-licensed, so no future retirement can take your boards away: you can always run your own copy.',
     ],
@@ -143,8 +143,8 @@ export const ALTERNATIVES: Alternative[] = [
       {
         heading: 'A whiteboard that grows into more',
         paragraphs: [
-          'Draw mode is a plain whiteboard, close to what Whiteboard users are used to: pick a marker, draw, erase, add text and shapes. But the same tab can switch to Diagram mode when a sketch needs structure, with shapes and arrows that stay attached as you move things, and the Marker or Sketch finish keeps that structure looking hand-drawn. A document holds as many tabs as you need, grouped into folders, and Presentation mode turns elements from any tab into a slide deck, or Pages makes slides from ready-made layouts.',
-          'For sessions, switch a tab to Workshop, the mode for running a room: there are templates for retrospectives, Lean Coffee and town hall Q&A, and a facilitator can run a shared timer, votes, polls and quizzes for the room, with the right answer revealed when the time is up.',
+          'Sketch mode is a plain whiteboard, close to what Whiteboard users are used to: pick a marker, draw, erase, add text and shapes. But the same tab can switch to Structured mode when a sketch needs structure, with shapes and arrows that stay attached as you move things, and the Marker or Sketch finish keeps that structure looking hand-drawn. A document holds as many tabs as you need, grouped into folders, and Presentation mode turns elements from any tab into a slide deck, or Pages makes slides from ready-made layouts.',
+          'For sessions, turn on the Workshop control, which brings the session kit into any tab: there are templates for retrospectives, Lean Coffee and town hall Q&A, and a facilitator can run a shared timer, votes, polls and quizzes for the room, with the right answer revealed when the time is up.',
         ],
       },
       {
@@ -170,7 +170,7 @@ export const ALTERNATIVES: Alternative[] = [
       },
       {
         q: 'Does LiveDoc work with a pen or stylus?',
-        a: 'Yes. Draw mode has three pressure-sensitive markers, so a pen on a tablet or touchscreen draws thick and thin lines as you press. It runs in the browser, so there is nothing to install on any device.',
+        a: 'Yes. Sketch mode has three pressure-sensitive markers, so a pen on a tablet or touchscreen draws thick and thin lines as you press. It runs in the browser, so there is nothing to install on any device.',
       },
       {
         q: 'When should I stay with Microsoft Whiteboard?',
@@ -208,7 +208,7 @@ export const ALTERNATIVES: Alternative[] = [
       },
       {
         label: 'Focus',
-        us: 'One document, five modes: diagrams, whiteboards, Workshop sessions, designed pages and slides, and Plan boards and Sheets',
+        us: 'One document for whiteboards, diagrams, designed pages and slides, Workshop sessions, and Plan boards and Sheets',
         them: 'All-in-one visual workspace',
       },
     ],
@@ -222,10 +222,10 @@ export const ALTERNATIVES: Alternative[] = [
       "It's free and MIT-licensed, so you can self-host it instead of paying per seat.",
       'Open a link and draw, with no sign-up wall in front of the canvas, even to create a document.',
       'Real-time multiplayer, live cursors and comments come standard, not gated behind a plan.',
-      'Five ways to work one tab: Diagram for structure, Draw for freehand whiteboarding, Workshop for running a session with your team, Pages for slides, articles, posters and logos, and Plan for boards of cards, spreadsheets, forms and dashboards.',
+      'Three ways to work one tab, Sketch for freehand whiteboarding, Structured for diagrams and Pages for slides, articles, posters and logos, plus the Workshop control for running a session with your team and Plan tabs for boards of cards, spreadsheets, forms and dashboards.',
       'Participant links let a workshop add stickies, write and vote without being able to reshape the board.',
       'Assign action items to teammates on the canvas itself, tracked beside comments in the Collaborate panel.',
-      'Workshop tools built in: Workshop mode, a facilitator role, a shared timer, dot-voting, live polls, planning-poker estimate cards, temperature checks, quizzes, an anonymous idea box and a Q&A board.',
+      'Workshop tools built in: the Workshop control, a facilitator role, a shared timer, dot-voting, live polls, planning-poker estimate cards, temperature checks, quizzes, an anonymous idea box and a Q&A board.',
       'Run the meeting itself on the board: an agenda that starts the timer for each segment, a roll call, a random picker, reveal zones that cover work until the room is ready, and decision records that keep what was agreed.',
       '148 templates, 24 one-click whole-canvas themes and ready-made looks turn a blank canvas into a polished diagram fast, drawn clean, crisp and Professional, or by hand in Sketch or Marker.',
       'Forms built in: share a link, and every response lands as a card on a board or a row in a Sheet.',
@@ -237,7 +237,7 @@ export const ALTERNATIVES: Alternative[] = [
       {
         heading: 'One workspace, five ways to work',
         paragraphs: [
-          'Miro grew into a broad workspace: boards, workshops, docs, tables, video walkthroughs and a marketplace of apps. LiveDoc covers the same ground in one document with tabs, and each tab works in one of five modes. Diagram for structure, with arrows that stay attached and re-route as you move things. Draw for freehand whiteboarding with pressure-sensitive markers. Workshop for running the session itself: timers, dot votes, polls and reveals. Pages for designed pages: infographics, written documents, slide decks and logos. Plan for boards of cards with WIP limits and swimlanes, beside Sheets with real formulas that can read the cards, forms whose responses arrive as cards or rows, and dashboards that bring them together.',
+          'Miro grew into a broad workspace: boards, workshops, docs, tables, video walkthroughs and a marketplace of apps. LiveDoc covers the same ground in one document with tabs, and each tab works in one of three modes. Sketch for freehand whiteboarding with pressure-sensitive markers. Structured for diagrams, with arrows that stay attached and re-route as you move things. Pages for designed pages: infographics, written documents, slide decks and logos. The Workshop control brings the session itself into any of them: timers, dot votes, polls and reveals. Plan tabs hold boards of cards with WIP limits and swimlanes, beside Sheets with real formulas that can read the cards, forms whose responses arrive as cards or rows, and dashboards that bring them together.',
           'Every tab also has a finish, the way it is drawn: Flexible by default, Professional for crisp, print-ready work, Sketch for pencil on paper and Marker for felt-tip on a whiteboard. A look sets the theme, finish, font and canvas pattern in one click, and switching it never changes the content underneath.',
           'Workshops are built in rather than bolted on. A facilitator can run the room with a shared timer, dot-voting, live polls, planning-poker estimate cards, quizzes, a Q&A board and responses kept hidden until the reveal, and templates cover retrospectives, Lean Coffee, town hall Q&A and event storming, including turning a photo of a sticky-note wall into notes. When the session ends, the actions it produced are assigned on the board and the plan picks up on the next tab.',
         ],
@@ -279,7 +279,7 @@ export const ALTERNATIVES: Alternative[] = [
       },
       {
         q: 'Can LiveDoc run workshops the way Miro does?',
-        a: 'Sessions like retros, brainstorms, estimation and planning work well: switch a tab to Workshop and a facilitator can run a shared timer, dot-voting, live polls, a Q&A board and hidden responses that are revealed together, estimate cards run planning poker on the board, everyone can follow the facilitator’s view, and the document keeps the comments and assigned actions that came out of it. What LiveDoc does not have is Miro’s large-scale facilitation ecosystem (breakout-style sessions, a meeting-app marketplace), so for big multi-team workshops Miro is still the deeper toolkit.',
+        a: 'Sessions like retros, brainstorms, estimation and planning work well: turn on the Workshop control and a facilitator can run a shared timer, dot-voting, live polls, a Q&A board and hidden responses that are revealed together, estimate cards run planning poker on the board, everyone can follow the facilitator’s view, and the document keeps the comments and assigned actions that came out of it. What LiveDoc does not have is Miro’s large-scale facilitation ecosystem (breakout-style sessions, a meeting-app marketplace), so for big multi-team workshops Miro is still the deeper toolkit.',
       },
       {
         q: 'Can I self-host LiveDoc?',
@@ -367,7 +367,7 @@ export const ALTERNATIVES: Alternative[] = [
       {
         heading: 'One document for everything after the brainstorm',
         paragraphs: [
-          'A mind map is usually the start of something: the ideas become a plan, the plan becomes a flowchart or a board of tasks. In XMind that next step usually happens in a different tool. In LiveDoc it happens on the next tab: one document holds the mind map, the flowchart, the timeline, and the wireframe side by side, with tabs grouped into folders and per-tab layers when things get big. Plan mode turns a tab into a board of cards with columns, WIP limits and quick add, so the follow-up work can live next to the map that produced it.',
+          'A mind map is usually the start of something: the ideas become a plan, the plan becomes a flowchart or a board of tasks. In XMind that next step usually happens in a different tool. In LiveDoc it happens on the next tab: one document holds the mind map, the flowchart, the timeline, and the wireframe side by side, with tabs grouped into folders and per-tab layers when things get big. A Board tab from the + button holds a board of cards with columns, WIP limits and quick add, so the follow-up work can live next to the map that produced it.',
           'Templates cover the common shapes of that follow-up work (flowcharts, kanban, retros, org charts, timelines and more), and one-click themes restyle the whole canvas so everything stays visually consistent as the project grows. When it is time to walk people through it, Presentation mode turns elements from any tab into a slide deck, and a Pages tab adds designed slides from ready-made layouts.',
         ],
       },
@@ -404,7 +404,7 @@ export const ALTERNATIVES: Alternative[] = [
     description:
       'A more structured Excalidraw alternative: the same free, open-source, no-sign-up spirit, a hand-drawn Sketch finish, templates, tabs and free presentations.',
     h1: 'A more structured Excalidraw alternative',
-    lede: 'Excalidraw is a much-loved open-source whiteboard with a hand-drawn feel. LiveDoc shares the open-source, free, no-sign-up spirit, and can be drawn by hand too, in its Sketch and Marker finishes, but leans structured: start from a template, theme the whole canvas, split work across tabs, keep documents in folders and present them as slides, with a freehand Draw mode when you just want to sketch.',
+    lede: 'Excalidraw is a much-loved open-source whiteboard with a hand-drawn feel. LiveDoc shares the open-source, free, no-sign-up spirit, and can be drawn by hand too, in its Sketch and Marker finishes, but leans structured: start from a template, theme the whole canvas, split work across tabs, keep documents in folders and present them as slides, with Sketch mode for freehand drawing when you just want to sketch.',
     rows: [
       { label: 'Open source', us: 'Yes, MIT-licensed', them: 'Yes, MIT-licensed' },
       {
@@ -421,7 +421,7 @@ export const ALTERNATIVES: Alternative[] = [
       },
       {
         label: 'Structure',
-        us: 'Templates, tabs, folders, layers, themes, five editor modes',
+        us: 'Templates, tabs, folders, layers, themes, three editor modes',
         them: 'A freeform canvas (Excalidraw+ adds workspaces and presentations)',
       },
       {
@@ -446,8 +446,8 @@ export const ALTERNATIVES: Alternative[] = [
       'Start from a real template (flowchart, kanban, retro, org chart…) instead of a blank page: 150 of them.',
       'Keep a whole project together: several tabs in one document, organised in folders, with per-tab layers.',
       '24 themes recolour the whole canvas, shapes and arrows, in one click, and ready-made looks such as Doodle, Notebook and Flipchart set the theme, finish, font and canvas pattern together.',
-      'Draw mode is a plain whiteboard: pressure-sensitive markers, an eraser and shapes on a plain, dotted or grid board, light or dark.',
-      'Sketching tools beyond the marker: a Path tool for clean curves, optional shape recognition, an eraser that takes a whole stroke or just part of one, and Draw templates such as Sketchnote, Rich Picture and Comic Strip.',
+      'Sketch mode is a plain whiteboard: pressure-sensitive markers, an eraser and shapes on a plain, dotted or grid board, light or dark.',
+      'Sketching tools beyond the marker: a Path tool for clean curves, optional shape recognition, an eraser that takes a whole stroke or just part of one, and Sketch templates such as Sketchnote, Rich Picture and Comic Strip.',
       'Paste an Excalidraw copy straight onto a tab, or import .excalidraw files as documents of their own.',
       'Presentations free for everyone: build a deck from elements on any tab, or design slides from 61 layouts in Pages, then present with notes, time budgets, transitions, a laser pointer and a spotlight.',
       'Animate a drawing so it draws itself on, or export a Pages tab as an animated GIF.',
@@ -467,13 +467,13 @@ export const ALTERNATIVES: Alternative[] = [
         heading: 'Hand-drawn when you want it',
         paragraphs: [
           'Every LiveDoc tab has a finish, the way its elements are drawn, and two of the four are by hand. Sketch draws wobbly double-stroked outlines, pencil-shaded fills, arrowheads as two loose strokes and lettering in a handwriting font, like a diagram drawn on paper. Marker draws one bold, slightly see-through stroke per edge, darker where strokes cross, like a flip chart. Professional is the opposite: square corners, thin lines and crisp lettering for print. A finish is set per tab, or on one element, and it is only a look: switching back restores exactly what was there.',
-          "Excalidraw's own style is still its signature, with its own typeface and sloppiness controls, and if that exact aesthetic is the point, Excalidraw wins it. But sketching isn't exclusive to it. Any LiveDoc tab can also switch into Draw mode, a plain whiteboard with three pressure-sensitive markers, text, an eraser and shapes, on a plain, dotted or grid board in light or dark. In Diagram mode, the Freehand pen keeps a stroke exactly as drawn and the Shape Pen tidies a rough box into a clean element on release. Switching mode never changes the document: the same tab can hold a structured diagram and the freehand notes scribbled over it.",
+          "Excalidraw's own style is still its signature, with its own typeface and sloppiness controls, and if that exact aesthetic is the point, Excalidraw wins it. But sketching isn't exclusive to it. Any LiveDoc tab can also switch into Sketch mode, a plain whiteboard with three pressure-sensitive markers, text, an eraser and shapes, on a plain, dotted or grid board in light or dark. In Structured mode, the Freehand pen keeps a stroke exactly as drawn and the Shape Pen tidies a rough box into a clean element on release. Switching mode never changes the document: the same tab can hold a structured diagram and the freehand notes scribbled over it.",
         ],
       },
       {
         heading: 'Bring your Excalidraw boards along',
         paragraphs: [
-          'An Excalidraw copy pasted onto a tab, or a file dropped on it, lands as whiteboard-native content in Draw mode. A .excalidraw file (or a PNG or SVG exported with the scene embedded) imports with shapes, arrows, text and connections intact, and the Explorer can import Excalidraw files as documents of their own. Each import ends with a report of anything that changed on the way in.',
+          'An Excalidraw copy pasted onto a tab, or a file dropped on it, lands as whiteboard-native content in Sketch mode. A .excalidraw file (or a PNG or SVG exported with the scene embedded) imports with shapes, arrows, text and connections intact, and the Explorer can import Excalidraw files as documents of their own. Each import ends with a report of anything that changed on the way in.',
           'Excalidraw’s wobble and hatched fills are a matter of look, so an import draws its shapes in the tab’s own finish: switch the tab to Sketch to keep the hand-drawn feel. Export goes the other way too: any diagram or whiteboard tab saves back out as a .excalidraw file. Excalidraw has fewer element types, so richer LiveDoc elements simplify on the way out.',
         ],
       },
@@ -505,7 +505,7 @@ export const ALTERNATIVES: Alternative[] = [
       },
       {
         q: 'Can I get the hand-drawn look in LiveDoc?',
-        a: "Yes. Switch a tab, or a single element, to the Sketch finish for wobbly double-stroked outlines, pencil-shaded fills and handwriting, or to Marker for bold felt-tip strokes; ready-made looks such as Doodle and Flipchart set it up in one click. Draw mode adds a freehand whiteboard with pressure-sensitive markers. Excalidraw's own style, with its Excalifont lettering, stays distinct: if that exact aesthetic is what you want, Excalidraw is the better pick.",
+        a: "Yes. Switch a tab, or a single element, to the Sketch finish for wobbly double-stroked outlines, pencil-shaded fills and handwriting, or to Marker for bold felt-tip strokes; ready-made looks such as Doodle and Flipchart set it up in one click. Sketch mode adds a freehand whiteboard with pressure-sensitive markers. Excalidraw's own style, with its Excalifont lettering, stays distinct: if that exact aesthetic is what you want, Excalidraw is the better pick.",
       },
       {
         q: 'Can I import my Excalidraw files?',
@@ -787,10 +787,10 @@ export const ALTERNATIVES: Alternative[] = [
       'Free with no file limits and no seats: every feature, for everyone.',
       'Open a link and start, no account needed, even to create a document.',
       'Structured diagrams that stay tidy: shapes and arrows that stay attached, alignment guides, 24 one-click themes and 148 templates.',
-      'Five ways to work one tab: Diagram for structure, Draw for freehand whiteboarding, Workshop for running a session with your team, Pages for slides, articles, posters and logos, and Plan for boards of cards, Sheets and forms.',
+      'Three ways to work one tab, Sketch for freehand whiteboarding, Structured for diagrams and Pages for slides, articles, posters and logos, plus the Workshop control for running a session with your team and Plan tabs for boards of cards, Sheets and forms.',
       'Diagrams with a whiteboard feel: the Sketch and Marker finishes draw any tab by hand, and ready-made looks set theme, finish, font and pattern in one click.',
       'Meet on the board: everyone walks an avatar round a virtual office or team space, with speech bubbles and a status.',
-      'Workshop tools built in: Workshop mode, a facilitator role, a shared timer, dot-voting, live polls, planning-poker estimate cards, temperature checks, quizzes, an anonymous idea box and a Q&A board.',
+      'Workshop tools built in: the Workshop control, a facilitator role, a shared timer, dot-voting, live polls, planning-poker estimate cards, temperature checks, quizzes, an anonymous idea box and a Q&A board.',
       'Participant links: the room adds stickies, writes and votes, and nobody can reshape the board by accident.',
       'Run the meeting on the board: an agenda that starts the timer for each segment, a roll call, a random picker and decision records, plus around 190 emoji stickers and 32 word badges.',
       'Diagrams as code: Mermaid flowcharts import as editable diagrams and export back out.',
@@ -807,14 +807,14 @@ export const ALTERNATIVES: Alternative[] = [
       {
         heading: 'A whiteboard that keeps going',
         paragraphs: [
-          'FigJam is excellent for loose, freeform boards. LiveDoc’s Draw mode is a plain whiteboard too, with pressure-sensitive markers, sticky notes, text and shapes, but the same document carries on after the brainstorm. Switch a tab to Diagram when a sketch needs structure, with arrows that stay attached, themes that restyle the whole canvas in one click and a Marker or Sketch finish that keeps it looking hand-drawn; to Plan when the ideas become cards on a board, with a Sheet beside it and a form to gather more; or to Pages for the write-up and the slides.',
+          'FigJam is excellent for loose, freeform boards. LiveDoc’s Sketch mode is a plain whiteboard too, with pressure-sensitive markers, sticky notes, text and shapes, but the same document carries on after the brainstorm. Switch a tab to Structured when a sketch needs structure, with arrows that stay attached, themes that restyle the whole canvas in one click and a Marker or Sketch finish that keeps it looking hand-drawn, or to Pages for the write-up and the slides. When the ideas become cards, add a Board tab from the + button, with a Sheet beside it and a form to gather more.',
           'Start from one of 148 templates, from retrospectives and story maps to flowcharts and system architecture, and split larger work across tabs, folders and layers.',
         ],
       },
       {
         heading: 'Workshops built in',
         paragraphs: [
-          'Running a session needs more than sticky notes. LiveDoc gives sessions a mode of their own, Workshop, and one person the facilitator role, and with it a shared timer, dot-voting, live polls, a Q&A board and responses kept hidden until the reveal. Estimate cards run planning poker, a temperature check shows how the room feels, a quiz asks what it knows, and an idea box collects anonymous ideas until the reveal. There are templates for retrospectives in five formats, Lean Coffee, town hall Q&A and event storming, and comments and assigned actions keep the follow-ups with the board.',
+          'Running a session needs more than sticky notes. LiveDoc gives sessions a control of their own, Workshop, which brings the session kit into any tab, and one person the facilitator role, and with it a shared timer, dot-voting, live polls, a Q&A board and responses kept hidden until the reveal. Estimate cards run planning poker, a temperature check shows how the room feels, a quiz asks what it knows, and an idea box collects anonymous ideas until the reveal. There are templates for retrospectives in five formats, Lean Coffee, town hall Q&A and event storming, and comments and assigned actions keep the follow-ups with the board.',
         ],
       },
       {

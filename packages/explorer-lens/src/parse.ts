@@ -16,7 +16,7 @@ import {
   isLensDimension,
   type LensDimension,
 } from './dimensions';
-import { parseEditorMode } from '@livedoc/document';
+import { parseTabOpening } from '@livedoc/document';
 import type {
   Lens,
   LensContext,
@@ -115,7 +115,7 @@ function readValue(dimension: LensDimension, raw: string, context: LensContext):
   if (dimension === 'space') return readSpaceValue(raw, context);
   // A link shared before a mode's rename says `opens-in:facilitate`: read it as today's mode.
   const lower = raw.toLowerCase();
-  const value = dimension === 'opens-in' ? (parseEditorMode(lower) ?? lower) : lower;
+  const value = dimension === 'opens-in' ? (parseTabOpening(lower) ?? lower) : lower;
   if (inOrder<string>(FIXED_VALUES[dimension], [value]).length === 0) {
     return problem('unknown_value', dimension, raw);
   }

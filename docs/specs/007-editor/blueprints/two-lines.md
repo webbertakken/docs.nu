@@ -6,23 +6,23 @@ blueprint places the groups and says what each holds.
 
 ## Domain and naming
 
-| Term (spec)           | Identifier                                                       | File                                                         |
-| --------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------ |
-| the top line          | the canvas chrome's top row (no component of its own)            | `apps/live/components/canvas/CanvasChrome.tsx` places it     |
-| the bottom line       | `BottomLine`                                                     | `apps/live/components/chrome/lines/BottomLine.tsx`           |
-| the brand group       | `BrandGroup`                                                     | `apps/live/components/chrome/lines/BrandGroup.tsx`           |
-| Back (caret and mark) | `BrandBack`                                                      | `apps/live/components/chrome/lines/BrandBack.tsx`            |
-| the menu button       | `ToolbarExplorerButton` (the ☰ alone)                           | `apps/live/components/chrome/ToolbarExplorerButton.tsx`      |
-| the actions group     | `ActionsGroup`                                                   | `apps/live/components/chrome/lines/ActionsGroup.tsx`         |
-| the document actions  | `DocumentActions` (Copy, Present, Share or Share Form)           | `apps/live/components/chrome/lines/DocumentActions.tsx`      |
-| the tools group       | the `data-zoom-cluster` box, drawn as a `ToolbarGroup`           | `apps/live/components/canvas/CanvasChrome.tsx`               |
-| the document group    | `DocumentGroup`                                                  | `apps/live/components/chrome/lines/DocumentGroup.tsx`        |
-| the document's name   | `DocumentName` (share-state icon, name, role pill)               | `apps/live/components/chrome/lines/DocumentName.tsx`         |
-| the active tab        | `ActiveTabSegment`                                               | `apps/live/components/chrome/lines/ActiveTabSegment.tsx`     |
-| the tab stack         | `TabStackButton`                                                 | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
-| the contributors      | `ContributorsButton`                                             | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
-| the tab list          | `TabList` (popover), `TabListRow`, `FolderRows`                  | `chrome/lines/TabList*.tsx`                                  |
-| what the lines need   | `EditorLinesContext` (`actions`, `document` nodes from the page) | `apps/live/components/chrome/lines/editor-lines-context.tsx` |
+| Term (spec)           | Identifier                                                                   | File                                                         |
+| --------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| the top line          | the canvas chrome's top row (no component of its own)                        | `apps/live/components/canvas/CanvasChrome.tsx` places it     |
+| the bottom line       | `BottomLine`                                                                 | `apps/live/components/chrome/lines/BottomLine.tsx`           |
+| the brand group       | `BrandGroup`                                                                 | `apps/live/components/chrome/lines/BrandGroup.tsx`           |
+| Back (caret and mark) | `BrandBack`                                                                  | `apps/live/components/chrome/lines/BrandBack.tsx`            |
+| the menu button       | `ToolbarExplorerButton` (the ☰ alone)                                       | `apps/live/components/chrome/ToolbarExplorerButton.tsx`      |
+| the actions group     | `ActionsGroup`                                                               | `apps/live/components/chrome/lines/ActionsGroup.tsx`         |
+| the document actions  | `DocumentActions` (the Workshop control, Copy, Present, Share or Share Form) | `apps/live/components/chrome/lines/DocumentActions.tsx`      |
+| the tools group       | the `data-zoom-cluster` box, drawn as a `ToolbarGroup`                       | `apps/live/components/canvas/CanvasChrome.tsx`               |
+| the document group    | `DocumentGroup`                                                              | `apps/live/components/chrome/lines/DocumentGroup.tsx`        |
+| the document's name   | `DocumentName` (share-state icon, name, role pill)                           | `apps/live/components/chrome/lines/DocumentName.tsx`         |
+| the active tab        | `ActiveTabSegment`                                                           | `apps/live/components/chrome/lines/ActiveTabSegment.tsx`     |
+| the tab stack         | `TabStackButton`                                                             | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
+| the contributors      | `ContributorsButton`                                                         | `apps/live/components/chrome/lines/TabListButtons.tsx`       |
+| the tab list          | `TabList` (popover), `TabListRow`, `FolderRows`                              | `chrome/lines/TabList*.tsx`                                  |
+| what the lines need   | `EditorLinesContext` (`actions`, `document` nodes from the page)             | `apps/live/components/chrome/lines/editor-lines-context.tsx` |
 
 `EditorHeader` and `TabBar` are retired: their parts move into the groups above, their tests with them. `TabPill`,
 `TabFolderChip` and `OutOfScopeTabPill` go with the tab bar; their behaviour (select, rename, drag to reorder, folder,
@@ -95,7 +95,11 @@ drawn only between two parts that both render (`ToolbarGroup` parts, see the gro
    `aria-expanded`, name "All tabs (n)". Always drawn.
 4. `ContributorsButton`: up to `CONTRIBUTORS_SHOWN` avatars of the remote people present (agents folded as the
    presence rows fold them), then "+N"; name "n people here". Not drawn while nobody else is here.
-5. Add tab (+, `data-tour-id="add-tab"`, name "Add tab") for someone who may add tabs.
+5. Add tab (+, `data-tour-id="add-tab"`, name "Add tab", `aria-haspopup="menu"`) for someone who may add tabs: it opens
+   `AddTabMenu` (portalled, `data-add-tab-menu`, `MENU_PANEL`, 36 px rows) of `ADD_TAB_ROWS`: Tab, Board, Sheet,
+   Dashboard, each a `menuitem` with its mark; choosing closes the menu and calls `tabs.onAdd(choice)`. It hangs above
+   the button (the bottom line), its right edge on the button's, kept 8 px inside the viewport; `useMenu` keys.
+   Opening fires `UI · Opened · AddTabMenu`.
 
 ### The tab list
 
@@ -118,7 +122,8 @@ drawn only between two parts that both render (`ToolbarGroup` parts, see the gro
   rule above or below the row); a row dropped on a folder heading joins the folder (`onMoveTabToFolder`), one dragged
   out of its folder's rows leaves it (`onRemoveTabFromFolder`).
 - Right-click on a row opens the tab menu for that tab (switching to it first), as the tab pill did.
-- Footer: "+ New Tab" for someone who may add tabs; it adds, closes the list and focuses nothing else.
+- Footer: "New Tab", "New Board", "New Sheet", "New Dashboard" (`ADD_TAB_ROWS`, each its mark) for someone who may
+  add tabs; each adds its choice (`tabs.onAdd(choice)`), closes the list and focuses nothing else.
 - Keyboard (a menu, [Menus](../../004-interface-design/menus.md)): opening puts focus on the active row (or the filter
   when shown); ArrowDown / ArrowUp walk the rows (and the filter, and New Tab), Home / End jump, Enter or Space
   switch, F2 renames the focused row for someone who may, Escape closes and returns focus to the opener; Tab moves
@@ -132,31 +137,32 @@ drawn only between two parts that both render (`ToolbarGroup` parts, see the gro
 - `DocumentGroup` takes the tab props `TabBar` took (minus `onOpenSettings`, `onOpenSearch`, `workbenchLink`,
   `powerUser`) plus the document-name props `EditorHeader` took (`documentName`, `shareable`, `teamDocument`,
   `offline`, `showShare`, `onOpenShare`, `onRename`, `renameNonce`, `readOnly`, `rolePill`).
-- `ActionsGroup` takes `ChromeControls`' props and `DocumentActions`' (`onMakeCopy`, `copying`, `present`, `showShare`,
+- `ActionsGroup` takes `ChromeControls`' props and `DocumentActions`' (`onMakeCopy`, `copying`, `present`, `showShare`, `workshop`,
   `shareable`, `onOpenShare`), `onOpenAccount`, `workbenchOpenHref`, `documentActions` (false through the welcome flow).
 - `BrandBack`: `{ target: BackTarget; accent?: string }`, `BackTarget` one of `explorer`, `frame` (`back`, `backTitle`) or `none` (from `useBackTarget`, the workbench session); `none`
   draws the mark alone.
 
 ## Share roles
 
-| Control                      | Editor                                          | Participant                  | Viewer                  |
-| ---------------------------- | ----------------------------------------------- | ---------------------------- | ----------------------- |
-| Back                         | shown                                           | shown                        | shown                   |
-| ☰ (Explorer)                | shown                                           | shown                        | shown                   |
-| Mode switch                  | shown (`editorMode.canEdit`)                    | not drawn                    | not drawn               |
-| Search, Settings, appearance | shown                                           | shown                        | shown                   |
-| Start Tour                   | while offered                                   | while offered                | while offered           |
-| Copy                         | a visitor (`!canShareDocument`)                 | a visitor                    | a visitor               |
-| Present                      | shown with slides                               | shown with slides            | shown with slides       |
-| Share / Share Form           | the owner or a team member (`canShareDocument`) | not drawn                    | not drawn               |
-| Account                      | shown                                           | shown                        | shown                   |
-| Share-state icon             | manages sharing (`showShare`)                   | shows state only             | shows state only        |
-| Document name                | renames                                         | text (`isStructureReadOnly`) | text                    |
-| Role pill                    | shown                                           | shown                        | shown                   |
-| Active tab                   | renames, tab menu                               | name only, no menu           | name only, no menu      |
-| Tab stack, tab list          | shown; rows reorder, rename, menu               | shown; rows switch only      | shown; rows switch only |
-| Contributors                 | shown while others here                         | shown while others here      | shown while others here |
-| Add tab, New Tab             | shown                                           | not drawn                    | not drawn               |
+| Control                                   | Editor                                                    | Participant                  | Viewer                  |
+| ----------------------------------------- | --------------------------------------------------------- | ---------------------------- | ----------------------- |
+| Back                                      | shown                                                     | shown                        | shown                   |
+| ☰ (Explorer)                             | shown                                                     | shown                        | shown                   |
+| Mode switch                               | shown (`editorMode.canEdit`)                              | not drawn                    | not drawn               |
+| Search, Settings, appearance              | shown                                                     | shown                        | shown                   |
+| Start Tour                                | while offered                                             | while offered                | while offered           |
+| Copy                                      | a visitor (`!canShareDocument`)                           | a visitor                    | a visitor               |
+| Workshop control                          | a general unlocked tab, not Plan (`editorMode.canSwitch`) | not drawn                    | not drawn               |
+| Present                                   | shown with slides                                         | shown with slides            | shown with slides       |
+| Share / Share Form                        | the owner or a team member (`canShareDocument`)           | not drawn                    | not drawn               |
+| Account                                   | shown                                                     | shown                        | shown                   |
+| Share-state icon                          | manages sharing (`showShare`)                             | shows state only             | shows state only        |
+| Document name                             | renames                                                   | text (`isStructureReadOnly`) | text                    |
+| Role pill                                 | shown                                                     | shown                        | shown                   |
+| Active tab                                | renames, tab menu                                         | name only, no menu           | name only, no menu      |
+| Tab stack, tab list                       | shown; rows reorder, rename, menu                         | shown; rows switch only      | shown; rows switch only |
+| Contributors                              | shown while others here                                   | shown while others here      | shown while others here |
+| Add tab (and its menu), the footer's four | shown                                                     | not drawn                    | not drawn               |
 
 Gates read `can` / `isStructureReadOnly` and `canShareDocument` as the header and tab bar did, never `isReadOnly`
 alone ([gate a feature by share role](../../../instructions/gate-a-feature-by-share-role.md)).
