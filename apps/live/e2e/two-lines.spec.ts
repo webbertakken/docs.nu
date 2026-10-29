@@ -31,6 +31,13 @@ test.describe('the two lines', () => {
     const view = page.viewportSize()!;
     const b = await box(brand(page));
     const a = await box(actions(page));
+    // The strip settles once it has measured its room (useStripTileLimit): it sheds tiles to fit between the groups.
+    await expect
+      .poll(async () => {
+        const at = await box(strip(page));
+        return at.x > b.x + b.width && at.x + at.width < a.x;
+      })
+      .toBe(true);
     const s = await box(strip(page));
     const t = await box(tools(page));
     const d = await box(documentGroup(page));
