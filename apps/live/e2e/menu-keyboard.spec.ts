@@ -103,10 +103,11 @@ test.describe('menus by keyboard', () => {
     await expect(sub).toBeVisible();
     await expect(useAs).toHaveAttribute('aria-expanded', 'true');
     await expect(useAs).toHaveAttribute('aria-controls', (await sub.getAttribute('id'))!);
-    await expect(sub.getByRole('menuitemcheckbox', { name: 'Diagrams' })).toBeFocused();
+    // The openings in order: Whiteboards (Sketch) first, then Diagrams (Structured).
+    await expect(sub.getByRole('menuitemcheckbox', { name: 'Whiteboards' })).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press(' ');
-    await expect(sub.getByRole('menuitemcheckbox', { name: 'Whiteboards' })).toHaveAttribute(
+    await expect(sub.getByRole('menuitemcheckbox', { name: 'Diagrams' })).toHaveAttribute(
       'aria-checked',
       'true',
     );
@@ -240,7 +241,7 @@ test.describe('menus by keyboard', () => {
     await page.keyboard.press('u');
     await page.keyboard.press('Enter');
     const sub = page.getByRole('menu', { name: 'New documents that open as' });
-    await expect(sub.getByRole('menuitemcheckbox', { name: 'Diagrams' })).toBeFocused();
+    await expect(sub.getByRole('menuitemcheckbox', { name: 'Whiteboards' })).toBeFocused();
     // The drill-down's header draws first but reads last, so focus opened on the first entry.
     const items = await sub.getByRole('menuitem').or(sub.getByRole('menuitemcheckbox')).all();
     expect(await items.at(-1)!.getAttribute('aria-label')).toBe('Close Use as Default for');

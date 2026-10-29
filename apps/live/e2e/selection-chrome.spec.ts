@@ -99,7 +99,9 @@ test('the selection chrome follows the selection', async ({ page, pageErrors }) 
   // A tab switch leaves nothing selected, here or back on the first tab.
   await page.mouse.click(b.x, b.y);
   await expect(plus.first()).toBeVisible();
+  // + opens the add menu (docs/specs/007-editor/editor-modes.md "+ adds a tab or a Plan tab"); its Tab adds one.
   await page.locator('[data-tour-id="add-tab"]').click();
+  await page.getByRole('menuitem', { name: 'Tab', exact: true }).click();
   await expect(plus).toHaveCount(0);
   await switchToTab(page, 'Tab 1');
   await expect(box('b')).toBeVisible();

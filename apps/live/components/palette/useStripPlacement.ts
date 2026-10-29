@@ -28,7 +28,9 @@ export function useStripPlacement(
       const view = editorViewportOf(card);
       const at = measureTopLine(view, width);
       const inBand = !!card.closest('[data-strip-in-band]');
-      const shift = at.fits && !inBand ? Math.round(at.left + width / 2 - view.width / 2) : 0;
+      // The strip's left edge lands on a whole pixel, so the glyphs inside it stay crisp and optically centred
+      // whatever its (fractional) width: the shift is what moves the centred strip there.
+      const shift = at.fits && !inBand ? Math.round(at.left) + width / 2 - view.width / 2 : 0;
       const crowded = !at.fits;
       setPlacement((prev) =>
         prev.crowded === crowded && prev.shift === shift ? prev : { crowded, shift },

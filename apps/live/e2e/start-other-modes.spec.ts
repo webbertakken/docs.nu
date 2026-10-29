@@ -30,7 +30,7 @@ test('Start Diagramming finds a Workshop template and turns the Workshop control
   await expect(start).toBeHidden();
   await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
   await expect(mode(page)).toHaveAttribute('data-workshop', 'on');
-  await expect(page.getByRole('button', { name: 'Workshop' })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'Workshop', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
