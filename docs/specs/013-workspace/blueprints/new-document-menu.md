@@ -243,8 +243,10 @@ heldDocumentIn(url): string | null; // a pending id the url names
   which also logs `[new-document] opened ms=<n>`. The reader's profile and the lists settle in the background, as for
   an early open (`settleEarlyIdentity`).
 - **Transitions (D204):** the in-place store (`useInPlaceDocuments`) and the pending create (`usePendingCreate`) are
-  followed with `startTransition`, so the editor's reveal and a create that lands at once (This Browser's) re-render
-  after the first frame is painted, never before it.
+  followed with `startTransition`, so the reveal renders outside the click's own event and a create that lands at
+  once (This Browser's) re-renders after the first frame is painted, never before it. The reveal's commit mounts the
+  editor's effects: its layout effects run before the frame, and those that measure set state, so React renders once
+  more at once and runs the passive effects ahead of that render; all of it lands before the first frame.
 
 ### Standby
 
@@ -288,7 +290,9 @@ heldDocumentIn(url): string | null; // a pending id the url names
   mounted, hidden, until it is (checked every `IN_PLACE_SETTLE_POLL_MS`), so held changes still save; Forward shows
   it again. Logged `[new-document] back-while-pending`.
 - The editor's chunk is fetched on idle by `InPlaceEditor` and on pointer enter or focus of the button
-  (`prefetchNewDocumentOpen`, which also fetches the Plan template seeds' chunk).
+  (`prefetchNewDocumentOpen`, which also fetches the Plan template seeds' chunk and the icon catalogues,
+  `ensureIconCatalogs`). The hidden standby runs no effects, so the catalogues' own load (`useIconCatalogs`) would
+  otherwise start only at the click and land, with a render of every surface that draws them, after the first frame.
 
 ## Errors and edge cases
 

@@ -115,8 +115,8 @@ A blank is on screen, editable, **within 200 ms of the click**, and a template w
   runs behind it; the room connects, and what was done meanwhile is saved, once the create has landed. A document in
   This Browser opens the same way, its write to this browser running behind it, and its saves held until that write
   has landed ([Offline mode](../006-document/offline-mode.md#instant-open)).
-- **Nothing to fetch first.** The editor's code is fetched while the Explorer is idle, and again when the pointer
-  reaches the button.
+- **Nothing to fetch first.** The editor's code, and the icon catalogues it draws with, are fetched while the
+  Explorer is idle, and again when the pointer reaches the button.
 - **Nothing to build first.** While the Explorer is idle, the blank the face makes is made ready in the background,
   unseen and unsaved, so the face's click only shows it; nothing is created until the click.
 - **A create that fails loses nothing.** The editor stays open with what was done, says the document is not saved

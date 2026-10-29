@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   openInPlace: vi.fn(),
   setStandbyInPlace: vi.fn(),
   loadEditor: vi.fn(async () => () => null),
+  loadPlanSeeds: vi.fn(async () => ({})),
+  ensureIconCatalogs: vi.fn(async () => {}),
 }));
 vi.mock('@/lib/app-location', () => ({
   assignAppLocation: mocks.assign,
@@ -29,6 +31,8 @@ vi.mock('@/app/explorer/in-place-editor/in-place-editor-store', () => ({
   setStandbyInPlace: mocks.setStandbyInPlace,
 }));
 vi.mock('@/lib/editor-page-loader', () => ({ loadEditorPage: mocks.loadEditor }));
+vi.mock('@livedoc/templates/plan-template-seeds', () => mocks.loadPlanSeeds());
+vi.mock('@/lib/icon-registry', () => ({ ensureIconCatalogs: mocks.ensureIconCatalogs }));
 vi.mock('@/lib/api-client', () => ({
   apiLoadSelf: vi.fn(async () => null),
   ApiError: class ApiError extends Error {},
@@ -36,6 +40,7 @@ vi.mock('@/lib/api-client', () => ({
 
 import {
   newDocumentHref,
+  prefetchNewDocumentOpen,
   prepareStandbyDocument,
   resetNewDocumentStartForTests,
   startNewDocument,
@@ -194,6 +199,15 @@ describe('the standby', () => {
     await opened();
     expect(openedId()).not.toBe(id);
     expect(standbyDocument(id)).not.toBeNull();
+  });
+});
+
+describe('prefetchNewDocumentOpen', () => {
+  // The hidden standby runs no effects, so a load an effect would start (the icon catalogues) has to come in here.
+  it('fetches the editor and the icon catalogues the editor draws with', () => {
+    prefetchNewDocumentOpen();
+    expect(mocks.loadEditor).toHaveBeenCalledOnce();
+    expect(mocks.ensureIconCatalogs).toHaveBeenCalledOnce();
   });
 });
 
