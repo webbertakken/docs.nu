@@ -59,7 +59,7 @@ describe('settings catalogue', () => {
   });
 
   it('offers the Sketch mode dock position in the Editor › Sketch sub-category', () => {
-    // docs/specs/023-draw-mode/draw-mode.md "Where the dock sits": top by default, bottom by choice;
+    // docs/specs/023-draw-mode/draw-mode.md "Where the dock sits": bottom by default, top by choice;
     // the sub-category says Draw, as the mode switch does (docs/specs/007-editor/editor-modes.md
     // "Naming in the interface").
     const draw = SETTINGS_CATEGORIES.find((c) => c.id === 'draw')!;
@@ -75,8 +75,8 @@ describe('settings catalogue', () => {
       ['top', 'Top'],
       ['bottom', 'Bottom'],
     ]);
-    expect(row.read({})).toBe('top');
-    expect(row.write({}, 'bottom')).toEqual({ whiteboardDockPosition: 'bottom' });
+    expect(row.read({})).toBe('bottom');
+    expect(row.write({}, 'top')).toEqual({ whiteboardDockPosition: 'top' });
     expect(row.event).toEqual({ category: 'UI', changed: 'WhiteboardDockPosition' });
   });
 

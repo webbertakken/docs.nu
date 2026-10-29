@@ -321,8 +321,8 @@ type UserPreferences = {
   // (../004-interface-design/colour-picker.md). Kept because it is already stored.
   whiteboardYourColours?: string[];
   // Where a whiteboard's dock sits (../023-draw-mode/draw-mode.md "Where the
-  // dock sits"): 'top' or 'bottom'. Unset, or anything but 'bottom', is the
-  // top (lib/whiteboard-dock-prefs).
+  // dock sits"): 'top' or 'bottom'. Unset, or anything but 'top', is the
+  // bottom (lib/whiteboard-dock-prefs).
   whiteboardDockPosition?: 'top' | 'bottom';
   // How an element shows its link, note, action and comments
   // (../008-canvas/element-indicators.md): glyphs inside its top-right corner
@@ -386,8 +386,8 @@ Missing key === undefined === default behaviour. Concretely:
   Settings when the api worker advertises AI capability.
 - `panelLayout` and `minimalPanels`, which older blobs still carry, are
   ignored: there is one panel layout ([Toolbar layout](toolbar-layout.md#one-layout)).
-- `whiteboardDockPosition` undefined → a whiteboard's dock at the top (the
-  default). Only `'bottom'` moves it to the bottom.
+- `whiteboardDockPosition` undefined → a whiteboard's dock at the bottom (the
+  default). Only `'top'` moves it to the top.
 - `contentsPlacement` undefined → Pages mode's Contents docked as a sidebar
   flush against the canvas's edge on a desktop, with more than one page (the
   default). `'button'` minimises it to its cluster button; a phone always has

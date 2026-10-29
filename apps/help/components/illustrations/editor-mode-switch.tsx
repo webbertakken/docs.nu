@@ -174,10 +174,10 @@ function Marker({ cls }: { cls: string }) {
   );
 }
 
-/** Sketch mode's dock across the top of the canvas: the drawing tools, the pinned shapes and Shapes, and
- *  Settings, each with its key, over a board with a pen stroke on it. */
+/** Sketch mode's dock across the bottom of the canvas: the drawing tools, the pinned shapes and Shapes, and
+ *  Settings, each with its key, under a board with a pen stroke on it. */
 export function DrawDockScene() {
-  const y = 22;
+  const y = 120;
   return (
     <Scene w={440} h={170}>
       <rect
@@ -258,18 +258,18 @@ export function DrawDockScene() {
         </g>
       </DockTool>
       {/* Group captions */}
-      <Label x={140} y={78} anchor="middle" size={10} tone="muted">
+      <Label x={140} y={106} anchor="middle" size={10} tone="muted">
         Drawing tools
       </Label>
-      <Label x={321} y={78} anchor="middle" size={10} tone="muted">
+      <Label x={321} y={106} anchor="middle" size={10} tone="muted">
         Shapes
       </Label>
-      <Label x={400} y={78} anchor="middle" size={10} tone="muted">
+      <Label x={400} y={106} anchor="middle" size={10} tone="muted">
         Settings
       </Label>
       {/* A sketch on the board */}
       <path
-        d="M60 140 c20 -34 40 18 66 -8 s36 -24 52 4 c10 16 26 10 40 -6"
+        d="M60 66 c20 -34 40 18 66 -8 s36 -24 52 4 c10 16 26 10 40 -6"
         fill="none"
         className="stroke-slate-700"
         strokeWidth={2.6}
@@ -277,7 +277,7 @@ export function DrawDockScene() {
       />
       <rect
         x={270}
-        y={104}
+        y={30}
         width={90}
         height={50}
         rx={4}
@@ -285,8 +285,8 @@ export function DrawDockScene() {
         className="stroke-slate-700"
         strokeWidth={2}
       />
-      <path d="M218 128 L266 128" className="stroke-slate-700" strokeWidth={2} />
-      <path d="M258 122 l8 6 l-8 6" fill="none" className="stroke-slate-700" strokeWidth={2} />
+      <path d="M218 54 L266 54" className="stroke-slate-700" strokeWidth={2} />
+      <path d="M258 48 l8 6 l-8 6" fill="none" className="stroke-slate-700" strokeWidth={2} />
     </Scene>
   );
 }

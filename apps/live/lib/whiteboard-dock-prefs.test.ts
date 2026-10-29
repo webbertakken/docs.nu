@@ -91,16 +91,16 @@ describe('the dock position', () => {
     expect(WHITEBOARD_DOCK_POSITIONS).toEqual(['top', 'bottom']);
   });
 
-  it('sits at the top unless the bottom was chosen', () => {
-    expect(readWhiteboardDockPosition({})).toBe('top');
-    expect(readWhiteboardDockPosition({ whiteboardDockPosition: 'top' })).toBe('top');
+  it('sits at the bottom unless the top was chosen', () => {
+    expect(readWhiteboardDockPosition({})).toBe('bottom');
     expect(readWhiteboardDockPosition({ whiteboardDockPosition: 'bottom' })).toBe('bottom');
+    expect(readWhiteboardDockPosition({ whiteboardDockPosition: 'top' })).toBe('top');
   });
 
-  it('reads junk as the top', () => {
+  it('reads junk as the bottom', () => {
     for (const junk of ['left', '', 1, null, true]) {
       const prefs = { whiteboardDockPosition: junk } as unknown as UserPreferences;
-      expect(readWhiteboardDockPosition(prefs)).toBe('top');
+      expect(readWhiteboardDockPosition(prefs)).toBe('bottom');
     }
   });
 
