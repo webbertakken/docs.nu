@@ -2,11 +2,7 @@
 // which element tiles a query finds, split into the ones the current editor mode's palette offers
 // and the ones only another mode's (or the event-storming notation) does. Pure, so the split and
 // the ranking are tested without a strip.
-import {
-  componentShapeKind,
-  type EditorMode,
-  type Element,
-} from '@livedoc/document';
+import { componentShapeKind, type EditorMode, type Element } from '@livedoc/document';
 import { paletteRank } from '@livedoc/icons';
 import { tileKeywords } from '@/lib/palette-tile-keywords';
 import { PALETTE_LAYOUTS, paletteCategoriesFor } from './palette-layouts';
