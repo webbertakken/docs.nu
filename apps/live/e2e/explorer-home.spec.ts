@@ -284,9 +284,9 @@ test('with fewer than eight, only what exists shows, and nothing shifts', async 
 
   const list = jumpBackIn(page);
   await expect(list).toHaveCount(1);
-  // The grid keeps two rows' height (D131): 2 × 116 px and the 12 px gap. What Happened never moves.
+  // The grid keeps two rows' height (D131): 2 × 100 px and the 12 px gap. What Happened never moves.
   const grid = page.getByRole('region', { name: 'Jump Back In' }).getByRole('list');
-  expect(Math.round((await grid.boundingBox())!.height)).toBe(244);
+  expect(Math.round((await grid.boundingBox())!.height)).toBe(212);
   expect(await layoutShift(page)).toBe(0);
   expectNoPageErrors(pageErrors);
 });

@@ -4,8 +4,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Jump Back In (docs/specs/013-workspace/explorer-home.md "Jump Back In"): on a desktop or tablet one
-// 4 by 2 grid with no group titles, most used on top and recent below, each tile saying why it is
-// there, See More in the heading row; on a phone a strip that alternates and ends in a See More
+// 4 by 2 grid with no group titles, most used on top and recent below, each tile its thumbnail and
+// name, See More in the heading row; on a phone a strip that alternates and ends in a See More
 // tile. A local document carries the This Browser pill.
 
 const { track, wide } = vi.hoisted(() => ({ track: vi.fn(), wide: { value: true } }));
@@ -95,25 +95,24 @@ describe('JumpBackIn, desktop and tablet', () => {
     expect(within(list).getAllByRole('listitem')[0]!.className).not.toContain('col-start-1');
   });
 
-  it("says why each document is there, as the tile's description", () => {
+  it('draws each tile as its thumbnail and name alone, with no line saying why it is there', () => {
     const now = Date.now();
     renderIt({
-      mostUsed: [item('m1', { useDays: 1 }), item('m2', { useDays: 14 })],
+      mostUsed: [item('m1', { useDays: 14 })],
       recent: [item('r1', { lastUsedAt: now - 2 * 3_600_000 })],
     });
-    const line = (name: string) => {
+    for (const name of ['Doc m1', 'Doc r1']) {
       const link = screen.getByRole('link', { name });
-      return document.getElementById(link.getAttribute('aria-describedby')!)!.textContent;
-    };
-    expect(line('Doc m1')).toBe('Used on 1 day');
-    expect(line('Doc m2')).toBe('Used on 14 days');
-    expect(line('Doc r1')).toBe('Used 2 hours ago');
+      expect(link.getAttribute('aria-describedby')).toBeNull();
+      expect(link.textContent).toBe(name);
+    }
+    expect(screen.queryByText(/^Used /)).toBeNull();
   });
 
   it("keeps two rows' height whatever lands in it", () => {
     renderIt(set(['m1'], []));
     expect(screen.getByRole('list', { name: 'Jump Back In' }).className).toContain(
-      'min-h-[15.25rem]',
+      'min-h-[13.25rem]',
     );
   });
 
@@ -160,7 +159,7 @@ describe('JumpBackIn, desktop and tablet', () => {
     expect(screen.queryByRole('link', { name: 'See More' })).toBeNull();
     // In place of the first tiles: a tile's height, from the first column.
     const slot = screen.getByText('No documents yet').closest('[data-empty-state]')!.parentElement!;
-    expect(slot.className).toContain('h-[7.25rem]');
+    expect(slot.className).toContain('h-[6.25rem]');
     expect(slot.className).toContain('border-dashed');
     expect(slot.parentElement!.className).toContain('grid-cols-4');
   });

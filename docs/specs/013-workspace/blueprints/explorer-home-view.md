@@ -63,9 +63,8 @@ Scope, by file:
 | Home          | `{ kind: 'home' }`, `/explorer/home`, `HomePane` | The landing view                                              |
 | Timeline      | `{ kind: 'timeline' }`, `/explorer/timeline`     | The Timeline feed, its sidebar row and its page title         |
 | Jump Back In  | `JumpBackIn`, `JumpBackInSet`, `JumpBackInItem`  | The section and its within-reach set of documents             |
-| Group         | `JumpBackInGroup = 'mostUsed' \| 'recent'`       | Which half of the set an item belongs to; labelled when wide  |
-| Grid          | `JumpBackIn` wide branch                         | Desktop and tablet: Most Used tiles, then Recent tiles        |
-| Quiet line    | `jumpBackInLine(item, group, now)`               | "Used on N days" / "Used 2 hours ago" under a tile's name     |
+| Group         | `JumpBackInGroup = 'mostUsed' \| 'recent'`       | Which half of the set an item belongs to; only tracked        |
+| Grid          | `JumpBackIn` wide branch                         | Desktop and tablet: most used on top, recent below, untitled  |
 | Strip         | `JumpBackInStrip`                                | The phone's sideways row, alternating, ending in See More     |
 | Phone order   | `phoneOrder(set)`                                | Most Used, recent, alternating, then the rest                 |
 | Tile          | `JumpBackInTile`, `SeeMoreTile`                  | One document's thumbnail and name; the strip's last tile      |
@@ -160,9 +159,8 @@ it runs out; at most `2n` (8) items, each with the half it came from (`group`), 
 
 `JumpBackIn` reads `useMediaQuery(HOME_WIDE_QUERY)`. Wide: one `ul` of `JumpBackInTile`s, the most used then the
 recent, no group titles. The first recent `li` takes `col-start-1` when there is at least one most used, so the
-recent open the second row whatever the length of the first; with no most used, the recent take the top row. Each
-tile's `line`, its quiet line, is `jumpBackInLine(item, group, now)` (`now` from `useRelativeNow`): most used
-`Used on ${useDays} day(s)`, recent `Used ${relativeSince(lastUsedAt, now)}`. The list holds `GRID_MIN_HEIGHT`, so it
+recent open the second row whatever the length of the first; with no most used, the recent take the top row. A
+tile is its thumbnail and name, no quiet line. The list holds `GRID_MIN_HEIGHT`, so it
 keeps two rows' height with fewer items (`D131`).
 
 ### The ⋯ menu
@@ -343,10 +341,9 @@ font-semibold text-slate-900 dark:text-slate-100`. The quiet link at the end (Se
 font-medium text-brand-700 dark:text-brand-300 hover:underline`.
 - Grid tile (`JumpBackInTile`, `thumbClassName={GRID_THUMB}`): the thumbnail `h-20 w-full rounded-md border
 border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `slate-300` (dark `slate-500`) on hover;
-  the name `mt-1 h-4 text-xs truncate text-slate-700` (dark `slate-300`); the quiet line `h-4 text-[11px] truncate`
-  muted, the link's `aria-describedby`. 116 px high in all.
-- List: `grid grid-cols-4 content-start gap-3` (`GRID`) with `GRID_MIN_HEIGHT` (`min-h-[15.25rem]`: two tile rows,
-  2 × 116 px, and the 12 px gap), so neither the load nor a short group moves what follows (`D131`).
+  the name `mt-1 h-4 text-xs truncate text-slate-700` (dark `slate-300`). 100 px high in all.
+- List: `grid grid-cols-4 content-start gap-3` (`GRID`) with `GRID_MIN_HEIGHT` (`min-h-[13.25rem]`: two tile rows,
+  2 × 100 px, and the 12 px gap), so neither the load nor a short group moves what follows (`D131`).
   This Browser: `ThisBrowserPill asLabel` absolutely in the thumbnail's bottom-left corner (4 px inset).
 - Strip: a scroller `scrollbar-slim -mx-1 flex h-28 snap-x gap-3 overflow-x-auto px-1 pb-2 pt-1`; the `ul` inside it
   `flex gap-3`; tiles `w-32 shrink-0 snap-start` with a 128 × 80 thumbnail. See More tile: the same 128 × 80 box,
@@ -355,7 +352,7 @@ border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `s
   transition.
 - Empty states: the shared `CompactEmptyState` (docs/specs/004-interface-design/empty-states.md, "In place of one
   item") with the glyphs in `home-icons.tsx` (file for Jump Back In, history for What Happened). Jump Back In's is
-  regular size, `h-full w-full`, inside one slot a tile high and two columns wide (`col-span-2 h-[7.25rem]`,
+  regular size, `h-full w-full`, inside one slot a tile high and two columns wide (`col-span-2 h-[6.25rem]`,
   `EMPTY_SLOT`: `rounded-md` dashed `border-slate-300`, dark `border-slate-600`) at the start of `GRID`,
   no labels, no reserved height and no See More; the strip's is small size, `w-48`, heading alone, with no See More
   tile. What Happened has none: `WhatHappened` renders nothing once loaded with no day.
@@ -378,7 +375,7 @@ border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `s
 - Each section is a `section aria-labelledby` its `h2` (**Jump Back In**, **What Happened**): two region landmarks.
 - Jump Back In: one `ul aria-labelledby` the heading, grid or strip; each `li` one link whose accessible name is the
   document name ("Payments architecture", plus ", This Browser" for a local one, from the pill label); a `Tooltip`
-  shows the full name; the quiet line is the link's `aria-describedby`. No group carries a label of its own, on screen
+  shows the full name; the link has no description. No group carries a label of its own, on screen
   or for assistive technology.
 - A loaded document's tile also holds a `button` "Menu for ${name}" (`aria-haspopup="menu"`,
   `aria-expanded`), a sibling of the link rather than inside it; Down or Up Arrow on it opens the menu, which takes
@@ -426,7 +423,7 @@ border-slate-200 bg-white` (dark `border-slate-700 bg-slate-800`), its border `s
 | Sentences, people, verbs, updates, location                                         | `apps/live/app/explorer/home/home-copy.test.ts`                                      |
 | Read, error, retry, stale owner, unread clear, mark kept                            | `apps/live/app/explorer/home/useHome.test.tsx`                                       |
 | A clear outlives an unread count still in flight                                    | `apps/live/app/explorer/useTimelineUnread.test.tsx`                                  |
-| Grid and strip: one list, two rows, quiet lines, tiles, pill, fade, See More, telem | `apps/live/components/panels/home/JumpBackIn.test.tsx`                               |
+| Grid and strip: one list, two rows, no quiet line, pill, fade, See More, telemetry  | `apps/live/components/panels/home/JumpBackIn.test.tsx`                               |
 | ⋯ menu: button beside the link, right-click, rename in place, gone, unloaded, strip | `apps/live/components/panels/home/JumpBackInMenu.test.tsx`                           |
 | Menu props by id: lists, bound actions, shared dismiss, history, gone               | `apps/live/app/explorer/useDocumentEntryFor.test.tsx`                                |
 | Headings: the heading row, its rule and its link, per section                       | `apps/live/components/panels/home/HomePane.test.tsx`                                 |
