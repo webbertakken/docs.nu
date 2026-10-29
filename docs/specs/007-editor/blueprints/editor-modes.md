@@ -438,4 +438,4 @@ is covered by `useTabActions.addTab.test.tsx` and `new-tab-seed.test.ts`.
 
 ## Defaults ledger
 
-See [DEFAULTS.md](DEFAULTS.md), rows D15 to D22, D59 and D103 to D113.
+See [DEFAULTS.md](DEFAULTS.md), rows D15 to D22, D59 and D103 to D114.

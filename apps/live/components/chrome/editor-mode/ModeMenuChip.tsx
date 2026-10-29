@@ -83,7 +83,14 @@ export function ModeMenuChip({
         } ${TOOLBAR_TRIGGER_TONE}`}
       >
         <Icon aria-hidden />
-        {iconOnly ? null : <span className="text-optical-line flex-1 text-left">{label}</span>}
+        {/* The top chrome's chip names the mode from 1280px wide; narrower it is the mark alone (its accessible name
+            still says the mode), so the top line keeps its room for the Palette strip
+            (docs/specs/007-editor/editor-modes.md "The mode switch"). */}
+        {iconOnly ? null : (
+          <span className={`text-optical-line flex-1 text-left ${compact ? 'max-xl:hidden' : ''}`}>
+            {label}
+          </span>
+        )}
         <ChevronDownIcon
           aria-hidden
           className={`transition-transform duration-micro motion-reduce:transition-none ${

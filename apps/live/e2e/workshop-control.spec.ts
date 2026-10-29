@@ -10,7 +10,7 @@ const mode = (page: Page) => page.locator('[data-editor-mode]');
 const control = (page: Page) => page.getByRole('button', { name: 'Workshop', exact: true });
 const timer = (page: Page) => page.getByRole('button', { name: 'Open Timer' });
 const barButton = (page: Page, name: string) =>
-  page.locator('[data-category-bar-button]').filter({ hasText: new RegExp(`^${name}$`) });
+  page.locator('[data-category-bar-button]').and(page.getByRole('button', { name, exact: true }));
 
 async function open(page: Page, width = 1600, height = 900) {
   await page.setViewportSize({ width, height });

@@ -130,7 +130,9 @@ test.describe('editor modes', () => {
 
     await chooseBesideMenu(page, 'Pages');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'pages');
+    // Leaving Pages with something on the tab asks first (editor-modes.md "Leaving Pages").
     await chooseBesideMenu(page, 'Structured');
+    await page.getByRole('button', { name: 'Switch', exact: true }).click();
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'diagram');
     await expect(sketches(page)).toHaveCount(1);
 
@@ -148,6 +150,9 @@ test.describe('editor modes', () => {
     await page.locator(CANVAS).click({ position: { x: 800, y: 500 } });
     await page.keyboard.press('Shift+D');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'pages');
+    // Start Making Pages takes the keys (its search is focused): close it, then the canvas has them again.
+    await closeStart(page);
+    await page.locator(CANVAS).click({ position: { x: 1500, y: 500 } });
     await page.keyboard.press('Shift+D');
     await expect(mode(page)).toHaveAttribute('data-editor-mode', 'draw');
     expectNoPageErrors(pageErrors);

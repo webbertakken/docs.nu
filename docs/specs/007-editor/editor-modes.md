@@ -53,8 +53,8 @@ whichever mode the tab is in.
   directly to the right of the menu button, last in the brand group at the top left
   ([Toolbar layout](toolbar-layout.md#the-top-line)). A tab with content changes mode here: the palette and the
   active tab's glyph follow at once, and every element stays exactly where it is.
-  - **On a phone** it shows the icon and the chevron only, no name, to save room on the top line; its accessible
-    name still says the mode. It sits in the brand group, top left, whether or not the line holds a strip.
+  - **Under 1280px wide** (a laptop, a tablet, a phone) it shows the icon and the chevron only, no name, to save
+    room on the top line for the Palette strip; its accessible name still says the mode. It sits in the brand group, top left, whether or not the line holds a strip.
   - It stays up in every mode, so it never moves when the mode changes.
 - **And on an empty tab's start.** The switch also leads every start panel's rail ([Template
   starts](start-diagramming.md) "Changing mode"), named and full width (`StartModeSwitch`), so a tab begun in the
