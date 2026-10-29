@@ -54,7 +54,7 @@ async function importBoards(page: Page, boards: 1 | 2): Promise<void> {
   await expect(page.getByTestId('import-documents')).toContainText('Sprint board');
 }
 
-// Jump Back In's documents: the Most Used and Recent lists on a wide screen, the strip on a phone.
+// Jump Back In's documents: the grid on a wide screen, the strip on a phone.
 const jumpBackIn = (page: Page) =>
   page.getByRole('region', { name: 'Jump Back In' }).getByRole('listitem');
 

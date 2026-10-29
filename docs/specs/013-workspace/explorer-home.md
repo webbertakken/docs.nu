@@ -108,9 +108,10 @@ the **4 most used** and the **4 most recent**, no document twice.
     shared with you gets the shared-with-you menu.
   - A document the Explorer has not loaded (a team library the sidebar has not read yet) has no ⋯: a menu that
     guesses is worse than none, and the tile still opens on click.
-- **Two labelled groups** on a desktop or tablet: a small uppercase label (10 px), **Most Used** then **Recent**,
-  over each.
-  The documents are one list of links named **Jump Back In**; each group's label is its own list's name.
+- **No row titles.** "Jump Back In" is the section's only title: the two groups carry no visible label and no
+  extra screen-reader label, and their order (most used first, then recent) is left to people's intuition
+  ([Design principles: Calm by default](../004-interface-design/design-principles.md)). The documents are one list
+  of links, named **Jump Back In**, each named by its document's name.
 - **See More** opens the **Recent** page: a quiet link at the end of the section's heading row on a desktop or
   tablet, the strip's last tile on a phone. It shows only once Jump Back In has a document: not while it loads, and
   not when it is empty. The Recent page is `/explorer/recent`: every document the person can
@@ -120,27 +121,27 @@ the **4 most used** and the **4 most recent**, no document twice.
 
 ### Desktop and tablet
 
-- A grid of thumbnail tiles, **four across**: **Most Used** first, most used first from the left, then **Recent**
-  under it, newest first. Each thumbnail is the column's width and 80 px high, on a hairline-bordered white ground,
-  its edge darkening on hover. Nothing scrolls sideways.
+- A **4 by 2 grid** of thumbnail tiles that never scrolls sideways: the top row holds the most used, the bottom row
+  the recent, each most used or newest first from the left. Each thumbnail is the column's width and 80 px high, on
+  a hairline-bordered white ground, its edge darkening on hover, so the grid's height never depends on the width.
 
 ### Phone
 
 - One **sideways-scrolling strip** of at most **8** thumbnails: most used, recent, most used, recent, and so on;
-  when one group runs out, the rest of the other follows. The strip interleaves the groups, so it carries no group
-  labels and no quiet lines: each tile is its thumbnail and name.
+  when one group runs out, the rest of the other follows. Its tiles carry no quiet line: each tile is its thumbnail
+  and name.
 - The strip ends in a **See More** tile, the same size as a thumbnail, that opens the Recent page.
 - The strip scrolls sideways (touch, trackpad, Shift+wheel, and keyboard focus moving through it). Its trailing
   edge fades to say there is more, and only while there is more.
 
 ### Fewer than 8 documents
 
-- Only the documents that exist are drawn: no empty boxes. A short group leaves the rest of its row blank; a group
-  with no document at all is not drawn, label included.
-- Jump Back In keeps both groups' height whatever lands in it, so nothing below moves when Home loads.
+- Only the documents that exist are drawn: no empty boxes. A short group leaves the rest of its row blank; with no
+  most used document at all, the recent ones take the top row.
+- The grid keeps its two rows' height whatever lands in it, so nothing below moves when Home loads.
 - With **no document at all** it looks as if it held one: a single slot the height of one tile, two columns wide
   (from the first column, a dashed edge), holding the empty state ("No documents yet", "The documents you use most and last
-  will gather here."), and no group labels. Only then is Jump Back In shorter than its reserved height: What Happened
+  will gather here."). Only then is Jump Back In shorter than its reserved height: What Happened
   sits under the one row.
 - On a phone with no document at all, the strip holds the small [empty state](../004-interface-design/empty-states.md)'s
   heading alone, the size of one tile, and no See More tile.

@@ -4,15 +4,15 @@
 
 import {
   GRID,
+  GRID_MIN_HEIGHT,
   GRID_THUMB,
-  JUMP_BACK_IN_MIN_HEIGHT,
   SKELETON,
   STRIP_HEIGHT,
   STRIP_THUMB,
   STRIP_TILE,
 } from './home-styles';
 
-const GROUP_ITEMS = 4;
+const GRID_ITEMS = 8;
 const STRIP_ITEMS = 4;
 const ENTRY_ROWS = 3;
 
@@ -32,20 +32,13 @@ function TileSkeleton({ thumb, line = false }: { thumb: string; line?: boolean }
   );
 }
 
-/** Jump Back In on a wide screen: both groups' labels and tiles, in their reserved height. */
+/** Jump Back In on a wide screen: the grid's two rows of tiles, in its reserved height. */
 export function GridSkeleton() {
   return (
-    <div aria-hidden className={`flex flex-col gap-4 ${JUMP_BACK_IN_MIN_HEIGHT}`}>
-      {['w-20', 'w-16'].map((labelWidth) => (
-        <div key={labelWidth}>
-          <div className={`mb-2 h-4 ${labelWidth} ${SKELETON}`} />
-          <div className={GRID}>
-            {Array.from({ length: GROUP_ITEMS }, (_, i) => (
-              <div key={i} className="min-w-0">
-                <TileSkeleton thumb={GRID_THUMB} line />
-              </div>
-            ))}
-          </div>
+    <div aria-hidden className={`${GRID} ${GRID_MIN_HEIGHT}`}>
+      {Array.from({ length: GRID_ITEMS }, (_, i) => (
+        <div key={i} className="min-w-0">
+          <TileSkeleton thumb={GRID_THUMB} line />
         </div>
       ))}
     </div>

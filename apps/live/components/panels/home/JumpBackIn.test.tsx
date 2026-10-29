@@ -3,10 +3,10 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Jump Back In (docs/specs/013-workspace/explorer-home.md "Jump Back In"): on a desktop or tablet the
-// Most Used cards then the Recent cards, each group under its label, each card saying why it is
-// there, See More in the heading row; on a phone a strip that alternates, labels neither group and
-// ends in a See More tile. A local document carries the This Browser pill.
+// Jump Back In (docs/specs/013-workspace/explorer-home.md "Jump Back In"): on a desktop or tablet one
+// 4 by 2 grid with no group titles, most used on top and recent below, each tile saying why it is
+// there, See More in the heading row; on a phone a strip that alternates and ends in a See More
+// tile. A local document carries the This Browser pill.
 
 const { track, wide } = vi.hoisted(() => ({ track: vi.fn(), wide: { value: true } }));
 vi.mock('@/lib/telemetry', () => ({ track }));
@@ -51,29 +51,48 @@ describe('JumpBackIn, desktop and tablet', () => {
     wide.value = true;
   });
 
-  it('lists the most used, then the recent, each group a list named by its label', () => {
+  it('lists the most used on the top row, then the recent, as one list with no group titles', () => {
     renderIt(set(['m1', 'm2', 'm3', 'm4'], ['r1', 'r2', 'r3', 'r4']));
-    expect(screen.getAllByRole('list')).toHaveLength(2);
-    const used = screen.getByRole('list', { name: 'Most Used' });
-    const recent = screen.getByRole('list', { name: 'Recent' });
-    expect(names(within(used).getAllByRole('link'))).toEqual([
+    const list = screen.getByRole('list', { name: 'Jump Back In' });
+    expect(screen.getAllByRole('list')).toHaveLength(1);
+    expect(names(within(list).getAllByRole('link'))).toEqual([
       'Doc m1',
       'Doc m2',
       'Doc m3',
       'Doc m4',
-    ]);
-    expect(names(within(recent).getAllByRole('link'))).toEqual([
       'Doc r1',
       'Doc r2',
       'Doc r3',
       'Doc r4',
     ]);
-    expect(screen.getByRole('heading', { level: 3, name: 'Most Used' })).toBeTruthy();
-    const first = within(used).getAllByRole('link')[0]!;
+    // Calm by default: the section's heading is the only title.
+    expect(screen.queryByRole('heading', { level: 3 })).toBeNull();
+    expect(screen.queryByText('Most Used')).toBeNull();
+    expect(screen.queryByText('Recent')).toBeNull();
+    const first = within(list).getAllByRole('link')[0]!;
     expect(first.getAttribute('href')).toBe('/document/m1');
-    // Each a thumbnail tile, four across, as before the front-page restyle.
-    expect(used.className).toContain('grid-cols-4');
-    expect(recent.className).toContain('grid-cols-4');
+    // Thumbnail tiles, four across.
+    expect(list.className).toContain('grid-cols-4');
+  });
+
+  it('starts the recent on the second row, whatever the length of the first', () => {
+    renderIt(set(['m1', 'm2'], ['r1', 'r2']));
+    const items = within(screen.getByRole('list', { name: 'Jump Back In' })).getAllByRole(
+      'listitem',
+    );
+    expect(items.map((li) => li.className.includes('col-start-1'))).toEqual([
+      false,
+      false,
+      true,
+      false,
+    ]);
+  });
+
+  it('lets the recent take the top row when nothing is most used yet', () => {
+    renderIt(set([], ['r1', 'r2']));
+    const list = screen.getByRole('list', { name: 'Jump Back In' });
+    expect(names(within(list).getAllByRole('link'))).toEqual(['Doc r1', 'Doc r2']);
+    expect(within(list).getAllByRole('listitem')[0]!.className).not.toContain('col-start-1');
   });
 
   it("says why each document is there, as the tile's description", () => {
@@ -91,27 +110,11 @@ describe('JumpBackIn, desktop and tablet', () => {
     expect(line('Doc r1')).toBe('Used 2 hours ago');
   });
 
-  it('draws neither label nor list for a group with no document', () => {
-    renderIt(set([], ['r1', 'r2']));
-    expect(screen.queryByText('Most Used')).toBeNull();
-    expect(screen.queryByRole('list', { name: 'Most Used' })).toBeNull();
-    expect(
-      names(within(screen.getByRole('list', { name: 'Recent' })).getAllByRole('link')),
-    ).toEqual(['Doc r1', 'Doc r2']);
-  });
-
-  it("keeps both groups' height whatever lands in them", () => {
-    const { container } = render(
-      <JumpBackIn
-        ownerId="me"
-        set={set(['m1'], [])}
-        loading={false}
-        recentHref="/r"
-        onSeeMore={() => {}}
-      />,
+  it("keeps two rows' height whatever lands in it", () => {
+    renderIt(set(['m1'], []));
+    expect(screen.getByRole('list', { name: 'Jump Back In' }).className).toContain(
+      'min-h-[15.25rem]',
     );
-    const box = container.querySelector('[data-jump-back-in-group="mostUsed"]')!.parentElement!;
-    expect(box.className).toContain('min-h-[18.5rem]');
   });
 
   it('tracks which half a document was opened from', () => {
@@ -155,12 +158,11 @@ describe('JumpBackIn, desktop and tablet', () => {
     expect(screen.queryByRole('list')).toBeNull();
     // Nothing to see more of.
     expect(screen.queryByRole('link', { name: 'See More' })).toBeNull();
-    // In place of the first tiles: a tile's height, from the first column, no group labels.
+    // In place of the first tiles: a tile's height, from the first column.
     const slot = screen.getByText('No documents yet').closest('[data-empty-state]')!.parentElement!;
     expect(slot.className).toContain('h-[7.25rem]');
     expect(slot.className).toContain('border-dashed');
     expect(slot.parentElement!.className).toContain('grid-cols-4');
-    expect(screen.queryByText('Most Used')).toBeNull();
   });
 });
 

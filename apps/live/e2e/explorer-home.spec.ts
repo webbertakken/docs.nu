@@ -16,7 +16,7 @@ import {
 // Explorer Home (docs/specs/013-workspace/explorer-home.md), end to end against the real build and
 // api worker, as a guest, in dark mode: the Explorer lands on Home, its page header then one column of Jump
 // back in and What Happened, each opened by a heading with a rule; Jump Back In is a Within reach set (4
-// most used thumbnails under Most Used, 4 recent under Recent, none twice), or a phone strip that
+// most used thumbnails on top, 4 recent below, one list with no group titles, none twice), or a phone strip that
 // alternates, holds eight and ends in See More; See More opens Recent, under Home; nothing shifts as
 // Home lands.
 
@@ -40,7 +40,7 @@ async function layoutShift(page: Page): Promise<number> {
   );
 }
 
-// Jump Back In's documents: the Most Used and Recent lists on a wide screen, the strip on a phone.
+// Jump Back In's documents: the grid on a wide screen, the strip on a phone.
 const jumpBackIn = (page: Page) =>
   page.getByRole('region', { name: 'Jump Back In' }).getByRole('listitem');
 const names = async (list: Locator) =>
@@ -71,10 +71,10 @@ test('the Explorer lands on Home: Jump Back In, then What Happened, no Timeline'
   await expect(
     jumpBackIn(page).getByRole('link', { name: 'Payments architecture' }),
   ).toHaveAttribute('href', `/document/${payments}`);
-  // No Timeline column, no switch; the groups are labelled.
+  // No Timeline column, no switch; the groups carry no titles (Calm by default).
   await expect(page.getByRole('region', { name: 'Timeline' })).toHaveCount(0);
   await expect(page.getByRole('tablist')).toHaveCount(0);
-  await expect(jump.getByRole('heading', { level: 3 }).first()).toBeVisible();
+  await expect(jump.getByRole('heading', { level: 3 })).toHaveCount(0);
 
   // One column: What Happened sits under Jump Back In, the same width.
   const [a, b] = [await jump.boundingBox(), await happened.boundingBox()];
@@ -155,7 +155,7 @@ test('each section opens with a heading and a rule under it, in dark and light',
   expectNoPageErrors(pageErrors);
 });
 
-test('Jump Back In is 4 most used thumbnails, then 4 recent, none twice', async ({
+test('Jump Back In is 4 most used thumbnails over 4 recent, untitled, none twice', async ({
   page,
   baseURL,
   pageErrors,
@@ -168,22 +168,23 @@ test('Jump Back In is 4 most used thumbnails, then 4 recent, none twice', async 
 
   const list = jumpBackIn(page);
   await expect(list.getByRole('link')).toHaveCount(8);
-  expect(await names(page.getByRole('list', { name: 'Most Used' }))).toEqual([
+  // One list, no group titles: the most used, then the recent.
+  await expect(page.getByRole('region', { name: 'Jump Back In' }).getByRole('list')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Most Used' })).toHaveCount(0);
+  expect(await names(list)).toEqual([
     'Atlas, This Browser',
     'Beacon, This Browser',
     'Compass, This Browser',
     'Delta, This Browser',
-  ]);
-  expect(await names(page.getByRole('list', { name: 'Recent' }))).toEqual([
     'Server two',
     'Server one',
     'Echo, This Browser',
     'Foxtrot, This Browser',
   ]);
-  // Atlas is both the most used and the newest: it shows once, under most used.
+  // Atlas is both the most used and the newest: it shows once, among the most used.
   await expect(list.getByRole('link', { name: /^Atlas/ })).toHaveCount(1);
 
-  // Four across in each group; no sideways scrolling.
+  // A 4 by 2 grid: most used on top, recent below; no sideways scrolling.
   const tops = await list.evaluateAll((items) =>
     items.map((i) => Math.round(i.getBoundingClientRect().top)),
   );
@@ -283,9 +284,9 @@ test('with fewer than eight, only what exists shows, and nothing shifts', async 
 
   const list = jumpBackIn(page);
   await expect(list).toHaveCount(1);
-  // Jump Back In keeps both groups' height: a label and a row of tiles each (D168). What Happened never moves.
-  const groups = page.locator('[data-jump-back-in-group]').first().locator('..');
-  expect(Math.round((await groups.boundingBox())!.height)).toBe(296);
+  // The grid keeps two rows' height (D131): 2 × 116 px and the 12 px gap. What Happened never moves.
+  const grid = page.getByRole('region', { name: 'Jump Back In' }).getByRole('list');
+  expect(Math.round((await grid.boundingBox())!.height)).toBe(244);
   expect(await layoutShift(page)).toBe(0);
   expectNoPageErrors(pageErrors);
 });
