@@ -1,6 +1,6 @@
 # Diagram tour ("Start Diagram Tour")
 
-A bootstrap-style guided tour of [Diagram mode](editor-modes.md): a sequence of anchored popover steps that
+A bootstrap-style guided tour of [Structured mode](editor-modes.md): a sequence of anchored popover steps that
 spotlight one piece of the diagramming chrome at a time, opening the real panels and menus as it goes. Until
 October 2026 it was the **welcome tour**, offered whatever mode a tab was in; it is now about diagramming alone,
 and the other modes have tours of their own (the [Plan tour](../026-plan/plan-tour.md) and the
@@ -41,7 +41,7 @@ proved the better introduction.
   tour's own gating: a tour that needs an **Editor** (this one, the Draw, Workshop, Avatar, Pages, Plan, Forms
   and element tours) is never on offer to a **Participant** or a **Viewer**, in a read-only document, in an embed
   or on a locked tab. With nothing on offer to them, they see no button.
-- **Only in Diagram mode.** This tour is on offer, and runs, only while the open tab is in Diagram mode, to an
+- **Only in Structured mode.** This tour is on offer, and runs, only while the open tab is in Structured mode, to an
   Editor, once the editor is ready: hydrated, no welcome overlay, no start on screen ([Template
   starts](start-diagramming.md) "The tours wait"), not read-only and not an embed. It is never on offer on a Draw,
   Workshop, Pages or Plan tab, nor on a Board, Sheet or Dashboard tab (always in Plan). Leaving Diagram mid-tour

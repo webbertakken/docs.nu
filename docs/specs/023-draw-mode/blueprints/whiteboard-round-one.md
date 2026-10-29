@@ -1,7 +1,7 @@
-# Draw mode, round one: blueprint
+# Sketch mode, round one: blueprint
 
-Derived from [Draw mode](../draw-mode.md), with [Editor modes](../../007-editor/editor-modes.md) (and
-its [blueprint](../../007-editor/blueprints/editor-modes.md)) for how Draw mode is entered, left and
+Derived from [Sketch mode](../draw-mode.md), with [Editor modes](../../007-editor/editor-modes.md) (and
+its [blueprint](../../007-editor/blueprints/editor-modes.md)) for how Sketch mode is entered, left and
 stored, [Highlighter](../../008-canvas/highlighter.md) for the marker recipe,
 [Eraser panel](../../008-canvas/eraser-panel.md) for the erase gesture and
 [Two pens instead of a pen and a mode](../../008-canvas/two-pens.md) for recognition. The spec decides;
@@ -12,7 +12,7 @@ Scope, by file:
 
 | File                                                              | Role                                                                      |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `packages/document/src/editor-mode.ts`                            | `EditorMode`; Draw mode is `mode === 'draw'` (editor-modes blueprint)     |
+| `packages/document/src/editor-mode.ts`                            | `EditorMode`; Sketch mode is `mode === 'draw'` (editor-modes blueprint)   |
 | `packages/document/src/whiteboard.ts`                             | Tokens, backgrounds, `WHITEBOARD_INKED_SHAPES`, `nearestBorderStroke`     |
 | `packages/document/src/whiteboard-stroke.ts`                      | Stroke geometry: `strokeTouchesBrush`, `eraseStrokePart`                  |
 | `packages/document/src/pen-stroke.ts`                             | The pen's ink: perfect-freehand options, outline path, centre line        |
@@ -46,35 +46,35 @@ Scope, by file:
 | `apps/telemetry/app/*`                                            | `Whiteboard` colour, description, sentences and the Whiteboards stack     |
 | `apps/live/components/canvas/boxed-element-overlays.tsx`          | `FreehandSvg` honours `penWidth` on every stroke                          |
 | `apps/live/lib/style-presets.ts`                                  | A border width clears a stroke's `penWidth`                               |
-| `apps/live/lib/view-backdrop.ts`                                  | `resolveViewBackdrop`: the person's Draw pattern in Draw mode             |
+| `apps/live/lib/view-backdrop.ts`                                  | `resolveViewBackdrop`: the person's Draw pattern in Sketch mode           |
 | `apps/live/components/canvas/EditorCanvasHost.tsx`                | Ink projection; whiteboard props                                          |
 | `apps/live/components/canvas/CanvasChrome.tsx` and friends        | Hidden chrome; the dock's mount                                           |
 | `apps/live/hooks/canvas/useCanvasSurfaceGestures.ts`              | Pen versus touch; the eraser frame                                        |
 | `apps/live/components/canvas/useCanvasDrawGesture.ts`             | Hands a whiteboard pen press to `useWhiteboardPenGesture`                 |
-| `apps/live/components/palette/NewDocumentWizard.tsx`              | The Draw mode card (Blank Whiteboard); no theme step                      |
+| `apps/live/components/palette/NewDocumentWizard.tsx`              | The Sketch mode card (Blank Whiteboard); no theme step                    |
 | `apps/help/app/canvas/draw-mode/page.mdx`                         | Help article, registered in `packages/help-registry`                      |
 
 ## Domain and naming
 
-| Term             | Identifier                                       | Meaning                                                       |
-| ---------------- | ------------------------------------------------ | ------------------------------------------------------------- |
-| Whiteboard       | A tab in Draw mode, `editorMode.mode === 'draw'` | A tab worked on for freehand whiteboarding                    |
-| Board            | `WHITEBOARD_BOARD[appearance]`                   | The Default theme's canvas colour (off-white, dark canvas)    |
-| Ink              | `PEN_INK` / `WHITEBOARD_INK`, by name `'ink'`    | The drawing colour; unpainted strokes and text draw in it     |
-| Background       | `WhiteboardBackground` (`plain/dots/grid`)       | The person's Draw pattern, the synced `drawPattern`           |
-| Pen              | `WhiteboardPen`                                  | Main, second or third: id, colour (`null` = ink), width in px |
-| Pen width        | `WHITEBOARD_PEN_WIDTHS` (`PenWidthId`, 6 names)  | 1, 1.5, 2.5, 4, 6, 9 px, as `penWidth`; stored by name        |
-| Pen intent       | `PendingDraw` freehand `variant: 'whiteboard'`   | The held pen, with its colour, width and recognition          |
-| Dock             | `WhiteboardDock`                                 | Top- or bottom-centre tool groups (whiteboard-dock.md)        |
-| Dock tool        | `WhiteboardTool`                                 | `select/pen/eraser/sticky/text/shape`                         |
-| Flyout           | `WhiteboardFlyout`                               | A dock button's settings, off the dock or beside the panel    |
-| Eraser mode      | `WhiteboardEraserMode` (`stroke/partial`)        | Whole-stroke or part-of-stroke erase                          |
-| Pen seen         | `markPenSeen()`, `penSeen()`                     | A `pen` pointer has been used in this page session            |
-| Whiteboard prefs | `WhiteboardPrefs`                                | Pens, active pen, recognition, eraser mode; device-local      |
-| Live stroke      | `LiveStroke`                                     | The stroke being drawn: raw samples, pressures, subscribers   |
-| Pointer kind     | `PenPointerKind` (`pen/mouse/touch`)             | Which `PEN_STREAMLINE` a stroke uses; a pen records pressure  |
-| Pen ink          | `PenStroke`                                      | Points, pressures, width, streamline: perfect-freehand input  |
-| Centre line      | `penStrokeCentreline(stroke)`                    | The streamlined points the outline is drawn around            |
+| Term             | Identifier                                         | Meaning                                                       |
+| ---------------- | -------------------------------------------------- | ------------------------------------------------------------- |
+| Whiteboard       | A tab in Sketch mode, `editorMode.mode === 'draw'` | A tab worked on for freehand whiteboarding                    |
+| Board            | `WHITEBOARD_BOARD[appearance]`                     | The Default theme's canvas colour (off-white, dark canvas)    |
+| Ink              | `PEN_INK` / `WHITEBOARD_INK`, by name `'ink'`      | The drawing colour; unpainted strokes and text draw in it     |
+| Background       | `WhiteboardBackground` (`plain/dots/grid`)         | The person's Draw pattern, the synced `drawPattern`           |
+| Pen              | `WhiteboardPen`                                    | Main, second or third: id, colour (`null` = ink), width in px |
+| Pen width        | `WHITEBOARD_PEN_WIDTHS` (`PenWidthId`, 6 names)    | 1, 1.5, 2.5, 4, 6, 9 px, as `penWidth`; stored by name        |
+| Pen intent       | `PendingDraw` freehand `variant: 'whiteboard'`     | The held pen, with its colour, width and recognition          |
+| Dock             | `WhiteboardDock`                                   | Top- or bottom-centre tool groups (whiteboard-dock.md)        |
+| Dock tool        | `WhiteboardTool`                                   | `select/pen/eraser/sticky/text/shape`                         |
+| Flyout           | `WhiteboardFlyout`                                 | A dock button's settings, off the dock or beside the panel    |
+| Eraser mode      | `WhiteboardEraserMode` (`stroke/partial`)          | Whole-stroke or part-of-stroke erase                          |
+| Pen seen         | `markPenSeen()`, `penSeen()`                       | A `pen` pointer has been used in this page session            |
+| Whiteboard prefs | `WhiteboardPrefs`                                  | Pens, active pen, recognition, eraser mode; device-local      |
+| Live stroke      | `LiveStroke`                                       | The stroke being drawn: raw samples, pressures, subscribers   |
+| Pointer kind     | `PenPointerKind` (`pen/mouse/touch`)               | Which `PEN_STREAMLINE` a stroke uses; a pen records pressure  |
+| Pen ink          | `PenStroke`                                        | Points, pressures, width, streamline: perfect-freehand input  |
+| Centre line      | `penStrokeCentreline(stroke)`                      | The streamlined points the outline is drawn around            |
 
 Banned synonyms: "canvas kind" for tab kind, "marker" for a whiteboard pen (the highlighter is the
 marker), "rubber", "eraser size" on a whiteboard, "theme" for the whiteboard look.
@@ -83,7 +83,7 @@ marker), "rubber", "eraser size" on a whiteboard, "theme" for the whiteboard loo
 
 ### Mode
 
-- Draw mode is the person's effective editor mode on a general tab
+- Sketch mode is the person's effective editor mode on a general tab
   ([editor-modes blueprint](../../007-editor/blueprints/editor-modes.md)): `useEditorState` derives
   `drawMode = editorMode.mode === 'draw'` and hands it to every gate below. A tab stored with
   `kind: 'whiteboard'` is migrated on read to a general tab that opens in Draw.
@@ -129,11 +129,11 @@ marker), "rubber", "eraser size" on a whiteboard, "theme" for the whiteboard loo
     synced `drawPattern` preference (never the tab) and tracks `Background<Name>`.
 - Changing a pen's colour or width updates `pens[p]`, re-arms the intent when `p` is held, and tracks
   `Whiteboard / Changed / PenColour` or `PenWidth` (a pen is reported by its place, never its colour).
-- **Entering Draw mode** (a new active tab in Draw mode, or a switch into it; editable, no Draw
+- **Entering Sketch mode** (a new active tab in Sketch mode, or a switch into it; editable, no Draw
   intent armed, tool `select` or `pan`) arms the active pen when the tab has no elements, and leaves
   `select` in hand when it has any (D2). The hook keys this on the pair of tab id and `drawMode`.
   On a switch a palette-armed intent is cancelled and a held eraser is put down.
-- **Leaving Draw mode** cancels a Draw-only intent (pen, Path tool, dock shape) and, on a switch,
+- **Leaving Sketch mode** cancels a Draw-only intent (pen, Path tool, dock shape) and, on a switch,
   puts a held eraser down.
 - Only one flyout is open at a time; it closes on Escape (focus returns to its dock button), on an
   outside press, on a tool change and on a tab switch.
@@ -160,8 +160,8 @@ thicker (2 → `medium`, 4 → `thick`, 8 → `extra-thick`).
 
 ### Ink by name
 
-There is no display projection: what Draw mode makes is written with its colours, so it looks the
-same in Diagram mode and to every collaborator ([One look](../../007-editor/editor-modes.md#one-look)).
+There is no display projection: what Sketch mode makes is written with its colours, so it looks the
+same in Structured mode and to every collaborator ([One look](../../007-editor/editor-modes.md#one-look)).
 
 - `boardShape(el)` (`apps/live/lib/whiteboard-tool.ts`): a shape gets `penColour: 'ink'`,
   `penTextColour: 'ink'` and `fillColor: 'transparent'`; a path `penColour: 'ink'` and no fill; an
@@ -174,7 +174,7 @@ same in Diagram mode and to every collaborator ([One look](../../007-editor/edit
   `createStockColourProjector` (`apps/live/lib/stock-colour-projector.ts`, a per-object cache, so an
   unchanged element keeps its identity) on the canvas, and in every export, thumbnail and image.
 
-### Eraser in Draw mode
+### Eraser in Sketch mode
 
 - Brush radius in screen px: `WHITEBOARD_ERASER_RADIUS_PX = { stroke: 10, partial: 16 }`; canvas
   radius = screen radius / zoom. The eraser ring shows it.
@@ -538,7 +538,7 @@ chroma, contrast? }` in OKLCH: blue (255, 0.18), red (25, 0.19), orange (50, 0.1
 - A line or an arrow previews as the element it lands. `buildDressedDrawnArrow` (`lib/draw-commit.ts`)
   builds it for both `useShapeDrawing.commitDraw` and the preview, from the intent, the drag's two
   points, the board (`elements`, `theme`, `whiteboard`) and `styleNewElement`: `buildDrawnArrow`
-  (unpainted in Draw mode), then `boardShape` in Draw mode, then `styleNewElement`.
+  (unpainted in Sketch mode), then `boardShape` in Sketch mode, then `styleNewElement`.
 - `drawnArrowAsShown` (`lib/drawn-arrow-preview.ts`) adds what the canvas does to a landed element:
   `resolveStockColours(arrow, surface)` (its Ink and stock colours for the canvas), and the constant id
   `DRAWN_ARROW_PREVIEW_ID` so its markers and pass-behind mask keep their ids through the drag.
@@ -624,7 +624,7 @@ RDP commit (`simplifyPenStroke`) and the Catmull-Rom path. The recipe is Excalid
 4. `pointercancel` from the stroke's pointer: clear `penStroke`, commit nothing
    (`[whiteboard] stroke discarded: cancel`). The pen intent leaving mid-stroke (Escape, another
    tool) does the same (`[whiteboard] stroke discarded: pen put down`).
-   The tab leaving Draw mode mid-stroke (`whiteboard` true to false) instead commits the stroke as
+   The tab leaving Sketch mode mid-stroke (`whiteboard` true to false) instead commits the stroke as
    drawn so far, in an effect that runs before the editor's mode-change effect puts the pen down
    (child effects run first), so `commitFreehand` still sees the pen intent
    (`[whiteboard] stroke finished: mode switched`). Cost: one boolean compare per render.
@@ -856,7 +856,7 @@ their `strokeColor`.
 
 ## Errors and edge cases
 
-- A tab opened in Diagram mode: the same elements in the same colours (one look); Draw mode's
+- A tab opened in Structured mode: the same elements in the same colours (one look); Sketch mode's
   tools and rules are simply not in focus.
 - A stock colour stored by name, on any tab, in any export or server-side render: drawn in its
   version for the canvas surface it sits on.
@@ -867,7 +867,7 @@ their `strokeColor`.
 - Storage unavailable: prefs fall back to defaults (`readLocalStorageSafe`), nothing throws.
 - Narrow viewport: the dock scrolls horizontally; flyouts clamp to the viewport.
 - A pen stroke's pointer is cancelled by the browser: the stroke is discarded and logged.
-- The tab leaves Draw mode mid-stroke: the stroke lands as drawn so far; the lift that follows adds
+- The tab leaves Sketch mode mid-stroke: the stroke lands as drawn so far; the lift that follows adds
   nothing.
 - Another pointer's move or release during a stroke: ignored by the stroke.
 - Zoom or pan mid-stroke (wheel): samples convert with the zoom and rect of their event, so ink stays

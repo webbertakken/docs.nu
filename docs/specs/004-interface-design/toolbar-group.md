@@ -1,6 +1,6 @@
 # Toolbar group
 
-A **toolbar group** is the one container every editor toolbar is drawn in: the Palette strip, Draw mode's dock,
+A **toolbar group** is the one container every editor toolbar is drawn in: the Palette strip, Sketch mode's dock,
 the brand group, the top-right actions, the bottom-left tools and the bottom-right document group
 ([Toolbar layout](../007-editor/toolbar-layout.md#the-two-lines)). They look alike so the chrome reads as one set of
 tools, never as a header, a footer and some floating cards.

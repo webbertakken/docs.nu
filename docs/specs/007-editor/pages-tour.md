@@ -17,7 +17,7 @@ Draw tour's rules hold.
 | **Track**              | One page kind's steps: the **Slides**, **Infographic**, **Article** or **Logo** track    |
 | **Tour page**          | The page a track runs on: the person's own page of that kind, fixed when the tour starts |
 | **Page Show Me**       | The same track run on demand from a page's panel ([Show Me](show-me.md))                 |
-| **Diagram tour**       | The Diagram mode tour, [Diagram tour](editor-tour.md)                                    |
+| **Diagram tour**       | The Structured mode tour, [Diagram tour](editor-tour.md)                                 |
 | **Start Making Pages** | An empty Pages tab's template start, [Start Diagramming](start-diagramming.md)           |
 
 ## Where it appears

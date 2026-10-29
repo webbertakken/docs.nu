@@ -110,7 +110,7 @@ The group's title is **More**.
 
 ## Dragging to the Trash
 
-The sidebar's **Trash** row takes a document or a folder dragged onto it, the way Plan mode's Trash takes a card
+The sidebar's **Trash** row takes a document or a folder dragged onto it, the way Plan's Trash takes a card
 ([Plan items: Trash](../026-plan/items.md)).
 
 - **What drags.** Every document that drags to a folder today (its own, a team's, one in this browser; never one shared

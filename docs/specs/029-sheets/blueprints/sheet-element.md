@@ -168,7 +168,7 @@ Beside it, in the main bundle:
 
 ```
 hooks/sheets/useSheetsBridge.ts      the bridge
-hooks/sheets/useSheetCsvDrop.ts      a CSV dropped on the canvas in Plan mode
+hooks/sheets/useSheetCsvDrop.ts      a CSV dropped on the canvas on a Plan tab
 lib/sheet-seeds.ts                   placed sheets (placeNewSheet, takePlacedSheet) and clipboard seeds
 lib/download-blob.ts                 downloadBlob, the shared file save (Download CSV)
 components/plan/FocusElementButton.tsx  Focus in a board's or Sheet's header (plan-board blueprint "Focus")
@@ -202,8 +202,8 @@ freezeHeader, size, dark })`, then places the template's charts; Plan Cards buil
 ### Layout
 
 - Header 40 px; toolbar 44 px (36 px buttons, 20 px glyphs, so they read at the canvas's zoom); formula bar 28 px (to 3 lines); status bar 24 px (only with a multi-number
-  selection); grid takes the rest. Not in Plan mode or without edit: no toolbar, the formula bar read-only (still
-  shown in Plan mode), no status bar actions.
+  selection); grid takes the rest. Not on a Plan tab or without edit: no toolbar, the formula bar read-only (still
+  shown on a Plan tab), no status bar actions.
 - The grid is a scroll container (`overflow: auto`, `overscroll-behavior: contain`) whose inner size is the sum of
   visible row heights × column widths; frozen rows and columns are drawn in sticky panes (top, left, corner).
 - `visibleWindow(geometry, scroll, view)` (`sheet-geometry.ts`) binary-searches the offset prefix sums (rebuilt on
@@ -219,7 +219,7 @@ freezeHeader, size, dark })`, then places the template's charts; Plan Cards buil
 - `interactive = plan.planInput` (Plan mode) as boards; `canEdit` from the bridge. Not interactive: the grid's
   `pointer-events: none`, so the element moves and selects as any, and a double-click offers nothing (a Sheet goes
   only on a tab in Plan: [Sheet](../sheet.md#only-in-plan)).
-- In Plan mode the header drags the element (as the board header); the grid takes pointer and wheel (wheel
+- On a Plan tab the header drags the element (as the board header); the grid takes pointer and wheel (wheel
   `stopPropagation` while the grid can scroll that way, else the canvas pans).
 
 ### Keyboard and focus
@@ -344,7 +344,7 @@ non-top-left cell holds an input.
 - `pushPlan` reads a write's cells top to bottom; `tableOfRow` takes a row directly under the header, a linked row,
   a draft row, or a row this write already drafted into the table.
 - `SheetCardRows`: the draft tint and the Save / Cancel strip (`STRIP_PX`, in the Controls column when there is one)
-  draw for someone who may edit; Open Card in Plan mode; the active cell's dropdown (`cardFieldChoice`,
+  draw for someone who may edit; Open Card on a Plan tab; the active cell's dropdown (`cardFieldChoice`,
   `card-field-options.ts`) for an editor. On a date field the arrow calls `openDatePicker` on a hidden `DateInput`
   (`@livedoc/ui`) laid over the cell, and a picked day before `DATE_YEAR_MIN` (1900) is dropped. Nothing is
   drawn over the frozen rows or columns a row has scrolled under.
@@ -443,7 +443,7 @@ element.cellComments }`.
 - Sheet Settings **Import CSV…**: `<input type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values">`, read as text
   (UTF-8, BOM stripped), `parseCsv`, then Replace Sheet (a write clearing the filled range then the cells) or Insert
   at Selection, split into writes; toast when truncated; `track('Sheet', 'Imported', 'Csv')`.
-- Canvas drop: the editor's file drop handler, in Plan mode, for `text/csv` / `.csv`, places a sheet at the drop
+- Canvas drop: the editor's file drop handler, on a Plan tab, for `text/csv` / `.csv`, places a sheet at the drop
   point with the file's cells (title: file name without extension, made unique).
 - Sheet Settings **Download CSV**: `toCsv` of displayed values up to the filled extent, saved through the shared download helper
   as `<title>.csv`; `track('Sheet', 'Exported', 'Csv')`.
@@ -515,7 +515,7 @@ Editor logs (`[sheets]`): `sheets.load.failed`, `sheets.write.failed <error>`, `
 | Element validation, factory size, labels; static SVG render | `packages/document/src/plan-sheet.test.ts`                                                                                                     |
 | Palette category, tile, layout order, keywords              | `apps/live/components/palette/palette-tile-defs.test.tsx`, `palette-layouts.test.ts`                                                           |
 | Placement names a new sheet; placed and copied sheets made  | `apps/live/lib/draw-commit.test.ts`, `lib/sheet-seeds.test.ts`, `components/sheets/useSheetModel.test.tsx`                                     |
-| A CSV dropped in Plan mode places a filled Sheet            | `apps/live/hooks/sheets/useSheetCsvDrop.test.ts`                                                                                               |
+| A CSV dropped on a Plan tab places a filled Sheet           | `apps/live/hooks/sheets/useSheetCsvDrop.test.ts`                                                                                               |
 | Geometry: offsets, frozen, hidden, merges, hit testing      | `apps/live/components/sheets/sheet-geometry.test.ts`                                                                                           |
 | Keyboard map: every row of the spec's table                 | `apps/live/components/sheets/sheet-keys.test.ts`, `SheetGrid.test.tsx`                                                                         |
 | Pointer: select, drag, fill, resize, move, freeze, pointing | `apps/live/components/sheets/useSheetPointer.test.tsx`, `sheet-pointing.test.ts`                                                               |

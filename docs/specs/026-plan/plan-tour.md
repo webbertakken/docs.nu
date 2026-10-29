@@ -1,6 +1,6 @@
 # Plan tour
 
-A guided tour of [Plan mode](plan-mode.md) on the person's own board or Sheet, started from the actions group's
+A guided tour of [Working in Plan](plan-mode.md) on the person's own board or Sheet, started from the actions group's
 **Start Boards Tour** or **Start Sheets Tour** button while one is open. It runs on the shared tour engine
 ([Diagram tour](../007-editor/editor-tour.md)): the same anchored step cards, glide, dimming, Skip, Back and last
 card as every other tour, so the tours read as one product. Where this spec is silent, the
@@ -11,7 +11,7 @@ card as every other tour, so the tours read as one product. Where this spec is s
 | Term             | Means                                                                                             |
 | ---------------- | ------------------------------------------------------------------------------------------------- |
 | **Plan tour**    | This tour                                                                                         |
-| **Diagram tour** | The Diagram mode tour ("Start Diagram Tour"), [Diagram tour](../007-editor/editor-tour.md)        |
+| **Diagram tour** | The Structured mode tour ("Start Diagram Tour"), [Diagram tour](../007-editor/editor-tour.md)     |
 | **tour track**   | Which half of Plan the tour shows: **Boards** or **Sheets**                                       |
 | **tour subject** | The board or [Sheet](../029-sheets/sheet.md) the tour shows: the person's own, on the open tab    |
 | **plan work**    | A board (`plan-board` element) or a Sheet (`plan-sheet` element) on the open tab, of any tab kind |
@@ -122,7 +122,7 @@ Six steps, on the tour's own example card (below).
    the + at their end, and a column's cog sets the board up.
 6. **Card Types**: highlights the Card Types button. Each type has its own colour and fields, changed or made
    there.
-7. **You're ready to plan** (outro): a help-centre link to the Plan mode article (new tab) and **Start
+7. **You're ready to plan** (outro): a help-centre link to the Plan tabs article (new tab) and **Start
    Planning**, which completes the tour.
 
 ### Spreadsheets

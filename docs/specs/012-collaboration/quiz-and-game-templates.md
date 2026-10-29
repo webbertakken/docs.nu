@@ -1,7 +1,7 @@
 # Quiz and game templates
 
 Five session templates for the lighter end of running a room: a pub quiz, icebreakers and three party games.
-They open in Workshop ([Workshop mode](workshop-mode.md#templates)) and live in their own catalogue
+They open in Workshop ([Workshop control](workshop-mode.md#templates)) and live in their own catalogue
 category, **Quizzes & Games** ([Template categories](../008-canvas/canvas-and-palette.md#template-categories)).
 
 ## Why

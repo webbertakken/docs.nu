@@ -59,11 +59,11 @@ the canvas tool switches that do not write to the document); mutating
 commands and the Eraser and Format painter tools stay editor-only. `CommandContext` carries `isReadOnly` so the gating lives
 in the pure builder where it's unit-tested.
 
-## Locked tabs and Plan mode
+## Locked tabs and Plan tabs
 
 The palette offers only what would do something. On a **locked tab** (`tabLocked`) the element
 verbs, layout cleanup, the photo reader and the Eraser and Format tools are withheld, since the
-tab refuses every element edit; the document, tab and view commands stay. In **Plan mode**
+tab refuses every element edit; the document, tab and view commands stay. On a **Plan tab**
 (`planMode`) Eraser and Format are left out, as the tool dropdown leaves them out.
 
 ## Unchanged on purpose

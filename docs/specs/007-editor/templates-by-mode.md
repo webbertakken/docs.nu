@@ -1,58 +1,60 @@
 # Templates by mode
 
-Every template opens in one [editor mode](editor-modes.md): **Diagram**, **Draw**,
-**Workshop**, **Pages** or **Plan**. The New Document wizard asks for the mode itself
-([New document route](new-document-route.md) "Choosing a mode"), and each mode's templates wait on an empty tab in
-its own start ([Template starts](start-diagramming.md)), so someone who came to sketch or to make a poster sees only
-what starts there. A search on a start also finds the other modes' templates, each saying which mode it opens in
+Every template opens as one of five **openings**: in an [editor mode](editor-modes.md), **Sketch**, **Structured**
+or **Pages**; as a **Workshop** (Structured with the [Workshop control](../012-collaboration/workshop-mode.md) on);
+or as **Plan** tabs. The New Document wizard asks for the opening itself
+([New document route](new-document-route.md) "Choosing a mode"), and each opening's templates wait on an empty tab
+in its own start ([Template starts](start-diagramming.md)), so someone who came to sketch or to make a poster sees
+only what starts there. A search on a start also finds the other starts' templates, each saying what it opens as
 ([Found in other modes](start-diagramming.md#found-in-other-modes)).
 
 ## A template's mode
 
-- A template's mode is the mode its tab **opens in** (`Tab.opensIn`, absent = Diagram).
-- `templateEditorMode(kind)` in `packages/templates` is the one place it is declared. The template's
-  canvas overrides (`templateCanvasOverrides`) take `opensIn` from it, so the mode a card shows and
-  the mode the tab opens in can never disagree.
-- Draw templates: Blank Whiteboard and the eight [Draw templates](#draw-templates) below.
+- A template's **opening** (`TabOpening`: `'draw' | 'diagram' | 'pages' | 'workshop' | 'plan'`, in that interface
+  order) says how its tab opens: in that mode (`Tab.opensIn`, absent = Structured), `'workshop'` in Structured
+  with `Tab.workshop` on, `'plan'` as Plan tabs.
+- `templateOpening(kind)` in `packages/templates` is the one place it is declared. The template's
+  canvas overrides (`templateCanvasOverrides`) take `opensIn` and `workshop` from it, so what a card shows and
+  how the tab opens can never disagree.
+- Sketch templates: Blank Whiteboard and the eight [Sketch templates](#sketch-templates) below.
 - Pages templates: Blank Illustration, the four [blanks of a page kind](#blanks-of-a-page-kind), Article,
   Slide deck, Logo design, Group card and the
   eight [Pages templates](#pages-templates) below.
 - Plan templates: Blank Plan and the twenty-two [Plan templates](../026-plan/plan-templates.md), Kanban Board
   among them. Plan templates open on a worked example of cards: each but Blank Plan sets up a way of working across
   several tabs, or a ready-made spreadsheet (the twelve
-  [spreadsheet templates](../026-plan/plan-templates.md#spreadsheet-templates)), every tab opening in Plan.
+  [spreadsheet templates](../026-plan/plan-templates.md#spreadsheet-templates)), every tab a Plan tab.
 - Workshop templates: Blank Session and the [Workshop templates](#workshop-templates)
   below.
-- Every other template is a Diagram template.
+- Every other template is a Structured template.
 
 ## The mode on a card
 
-- On its own mode's start a card needs no mode: every card there opens in it.
-- Found from another mode's start, a card says where it leads: a quiet chip under its line, the mode's glyph
-  (`EDITOR_MODE_ICONS`, the glyphs of the mode switch) and "Opens in <Mode>", and a screen reader hears "in <Mode>"
-  **after** the title, so a card's accessible name still starts with its title
-  ([Found in other modes](start-diagramming.md#found-in-other-modes)).
+- On its own start a card needs no label: every card there opens as it does.
+- Found from another start, a card says where it leads: a quiet chip under its line, the opening's glyph
+  (`TAB_OPENING_ICONS`: the mode switch's glyphs, the Workshop flipchart and the Plan board) and "Opens in
+  <Opening>", and a screen reader hears "in <Opening>" **after** the title, so a card's accessible name still starts
+  with its title ([Found in other modes](start-diagramming.md#found-in-other-modes)).
 
 ## Five blanks
 
-Popular opens with one blank per mode, in mode order. Each blank also leads its mode's Recommended in that mode's
-start ([Template starts](start-diagramming.md)), and is what the New Document wizard creates for the mode chosen:
+Popular opens with one blank per opening, in that order. Each blank also leads its start's Recommended
+([Template starts](start-diagramming.md)), and is what the New Document wizard creates for the choice made:
 
-| Template           | Kind id              | Opens in | What it makes                                                                             |
-| ------------------ | -------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| Blank Diagram      | `blank`              | Diagram  | An empty canvas (was "Blank Canvas").                                                     |
-| Blank Whiteboard   | `whiteboard`         | Draw     | An empty board to draw on (was "Whiteboard").                                             |
-| Blank Session      | `blank-session`      | Workshop | An empty tab in Workshop, named "Untitled Session".                                       |
-| Blank Illustration | `blank-illustration` | Pages    | One empty page that asks what it is for (Infographic, Article, Slide, Logo or Wireframe). |
-| Blank Plan         | `blank-plan`         | Plan     | An empty Plan tab that opens on Start Planning.                                           |
-
-**Blank Spreadsheet** (`blank-spreadsheet`, Plan) is a sixth blank beside them (`EXTRA_BLANK_TEMPLATES`): one tab
-holding an empty Sheet that fills it, made from the `blank-spreadsheet` start, an empty grid with no template, no
-charts and no setup to await ([Sheet store](../029-sheets/sheet-store.md#template-starts)). It is a blank like the five
-(`isBlankTemplate`): in no category and on no category shelf. It is not a mode's blank, so it leads no start and is
-not what the New Document wizard creates; the editor's Popular lists are unchanged (a start's search finds it, under
-Plan in [other modes](start-diagramming.md#found-in-other-modes)), and Start Planning, which has its own Empty Sheet, does not offer it. The landing page's **Blank Slate**
-shelf lists it after Blank Plan ([Marketing site](../019-marketing/marketing-site.md)).
+| Template                                                                                                                                                                    | Kind id              | Opens as   | What it makes                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------- | ----------------------------------------------------------------------------------------- |
+| Blank Whiteboard                                                                                                                                                            | `whiteboard`         | Sketch     | An empty board to draw on (was "Whiteboard").                                             |
+| Blank Diagram                                                                                                                                                               | `blank`              | Structured | An empty canvas (was "Blank Canvas").                                                     |
+| Blank Illustration                                                                                                                                                          | `blank-illustration` | Pages      | One empty page that asks what it is for (Infographic, Article, Slide, Logo or Wireframe). |
+| Blank Session                                                                                                                                                               | `blank-session`      | Workshop   | An empty Structured tab with the Workshop control on, named "Untitled Session".           |
+| Blank Plan                                                                                                                                                                  | `blank-plan`         | Plan       | A Plan start: an empty tab that opens on Start Planning.                                  |
+| **Blank Spreadsheet** (`blank-spreadsheet`, Plan) is a sixth blank beside them (`EXTRA_BLANK_TEMPLATES`): one tab                                                           |
+| holding an empty Sheet that fills it, made from the `blank-spreadsheet` start, an empty grid with no template, no                                                           |
+| charts and no setup to await ([Sheet store](../029-sheets/sheet-store.md#template-starts)). It is a blank like the five                                                     |
+| (`isBlankTemplate`): in no category and on no category shelf. It is not a mode's blank, so it leads no start and is                                                         |
+| not what the New Document wizard creates; the editor's Popular lists are unchanged (a start's search finds it, under                                                        |
+| Plan in [other modes](start-diagramming.md#found-in-other-modes)), and Start Planning, which has its own Empty Sheet, does not offer it. The landing page's **Blank Slate** |
+| shelf lists it after Blank Plan ([Marketing site](../019-marketing/marketing-site.md)).                                                                                     |
 
 **Blank Board** (`blank-board`, Plan) is a blank of the same sort: one Board tab holding a Blank board that fills
 it, with no columns, no card types and no example cards, so it opens on Setup Board
@@ -96,13 +98,13 @@ Spreadsheet):
 - The kind ids of the first two are unchanged, so `/new?template=blank` and
   `/new?template=whiteboard` links keep working.
 - None of the blanks is on a category shelf or a category tile.
-- Popular under Everything, in order: Blank Diagram, Blank Whiteboard, Blank Session, Blank Illustration, Blank Plan,
+- Popular under Everything, in order: Blank Whiteboard, Blank Diagram, Blank Illustration, Blank Session, Blank Plan,
   Mind map, Flowchart, Kanban Board, Sailboat retrospective, Budget Planner, Org chart, Sketchnote, Article. Under a
   mode, its own list ([Template categories](../008-canvas/canvas-and-palette.md#template-categories)).
 
-## Draw templates
+## Sketch templates
 
-Drawn with the marks a person makes in Draw mode: freehand strokes (with a slight hand wobble, so
+Drawn with the marks a person makes in Sketch mode: freehand strokes (with a slight hand wobble, so
 the board reads as drawn, not ruled), sticky notes, text and stickers. Each is a real example to
 draw over, not an empty frame.
 
@@ -158,7 +160,7 @@ already infographic pages, built with the page layouts' kit.
 ### Design templates
 
 Two templates for showing a design open in Pages, each on one infographic page sized for what it is
-(`template-design-pages.ts`). Their drawings are the ones they had as Diagram templates, built by the same builders
+(`template-design-pages.ts`). Their drawings are the ones they had as Structured templates, built by the same builders
 at the same size (the Floor plan is drawn to a captioned metric scale, so none is scaled) and centred on the page.
 Start Making Pages lists them in their own group, **Design** ("Storyboards and floor plans, drawn to show."), after
 Wireframes; their catalogue category stays Design.
@@ -203,9 +205,9 @@ one device, each named for its screen and laid out from a wireframe layout:
 
 ## Workshop templates
 
-Session formats open in Workshop ([Workshop mode](../012-collaboration/workshop-mode.md#templates)),
-so the Collaborate kit and the Session strip are there when the session starts. Their content is
-unchanged; only the mode they open in moved from Diagram.
+Session formats open in Structured with the Workshop control on
+([Workshop control](../012-collaboration/workshop-mode.md#templates)), so the Collaborate kit and the Session strip
+are there when the session starts. Their content is unchanged.
 
 - The Retrospectives family's **Retrospective** (`retrospective`), **Start, Stop, Continue**
   (`start-stop-continue`), **Mad, Sad, Glad** (`mad-sad-glad`), **4Ls** (`four-ls`) and **Sailboat**
@@ -214,9 +216,9 @@ unchanged; only the mode they open in moved from Diagram.
   (`crazy-eights`), **Meeting Agenda** (`meeting-agenda`), **Workshop Board** (`workshop-board`) and
   **Brainstorm Board** (`brainstorm`).
 - The boards that ship a dot vote: **Affinity Map** (`affinity-map`), **Prioritization Matrix**
-  (`prioritization-matrix`) and **Risk Matrix** (`risk-matrix`). Diagram has no Session strip, so a
-  vote on a Diagram tab could be started but not watched, ended or kept; every template carrying a
-  session tool opens in Workshop.
+  (`prioritization-matrix`) and **Risk Matrix** (`risk-matrix`). Structured has no Session strip with the Workshop control off, so a
+  vote there could be started but not watched, ended or kept; every template carrying a
+  session tool opens with the control on.
 - The boards a team fills in together in a session, rather than a diagram one person draws: **Incident
   postmortem** (`incident-postmortem`, a look back, under Retrospectives), **User Persona** (`user-persona`),
   **Empathy Map** (`empathy-map`) and **User Journey** (`journey`), under Workshops, the **Planning** group's **Objectives Planner** (`objectives-planner`), **Roadmap** (`roadmap`),
@@ -224,8 +226,8 @@ unchanged; only the mode they open in moved from Diagram.
   Model Canvas** (`business-model-canvas`), **Value Proposition Canvas** (`value-proposition-canvas`), **Stakeholder
   map** (`stakeholder-map`) and **Opportunity Solution Tree** (`opportunity-solution-tree`). Their catalogue
   categories are unchanged. **A board built from sticky notes for a group to add theirs to is a Workshop
-  template**: a note per voice is the room's work. SWOT, Empathy Map and User Journey moved from Diagram for it; a
-  Diagram template may still carry a sticky or two as an annotation (Family Tree, Flywheel, Sequence Diagram) and
+  template**: a note per voice is the room's work. SWOT, Empathy Map and User Journey moved from Structured for it; a
+  Structured template may still carry a sticky or two as an annotation (Family Tree, Flywheel, Sequence Diagram) and
   stays a diagram. Event Storming is its own kind of tab and keeps its own mode.
 - The **Spaces** group, after Meetings: **Virtual Office** (`virtual-office`), **Coworking Space**
   (`coworking-space`), **Team Pod** (`team-pod`) and **All-Hands Hall** (`all-hands-hall`), "Offices and halls to walk
@@ -238,7 +240,7 @@ unchanged; only the mode they open in moved from Diagram.
 ## Testing
 
 - Every template's mode equals the mode its overrides open it in (`templates.test.ts`).
-- Every template carrying a session tool (timer, vote, poll) opens in Workshop (`templates.test.ts`).
+- Every template carrying a session tool (timer, vote, poll) opens with the Workshop control on (`templates.test.ts`).
 - Every Popular list starts with its mode's blank and holds only that mode's templates (`popular.test.ts`).
 - Every category holds a template in at least one mode (`template-categories.test.ts`).
 - A card found from another mode's start shows "Opens in <Mode>" (`StartPanel.test.tsx`).

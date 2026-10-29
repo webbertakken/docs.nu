@@ -19,7 +19,7 @@ changing what the document is.
 | **document**             | The top-level container: its name, owner, location, share links and tabs.                        |
 | **tab**                  | One page of a document, with its own canvas, layers and elements.                                |
 | **tab kind**             | What a tab is for (`TabKind`, `packages/document/src/tab-kind.ts`).                              |
-| **diagram**              | The general tab kind: every element type, worked on in Diagram or Draw mode.                     |
+| **diagram**              | The general tab kind: every element type, worked on in Diagram or Sketch mode.                   |
 | **event-storming board** | The tab kind for event storming ([Event storming](../021-event-storming/event-storming.md)).     |
 | **markdown**             | The tab kind holding one markdown text ([Markdown tab](../031-markdown/markdown-tab.md)).        |
 | **file**                 | The tab kind holding one file's bytes ([File tab](file-tab.md)).                                 |
@@ -27,7 +27,7 @@ changing what the document is.
 | **document branch**      | A named, live copy of a document beside its main ([Document branches](document-branches.md)).    |
 | **main**                 | The document itself, as its branches see it.                                                     |
 | **editor mode**          | How a general tab is worked on: Diagram or Draw ([Editor modes](../007-editor/editor-modes.md)). |
-| **whiteboard**           | The activity of Draw mode ([Draw mode](../023-draw-mode/draw-mode.md)); not a tab kind.          |
+| **whiteboard**           | The activity of Sketch mode ([Sketch mode](../023-draw-mode/draw-mode.md)); not a tab kind.      |
 
 - As a term, "diagram" names the tab kind, never the container. Prose may still say diagram
   where the text is about drawing ([Choosing the word in prose](#choosing-the-word-in-prose)).

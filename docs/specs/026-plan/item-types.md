@@ -7,7 +7,7 @@ the document's own: none is set apart as built in. Each is a name, a colour, a g
 offer, including fields a person makes up. People edit them from the **Card Types** panel; every card, board,
 item panel and the palette's Cards category reads them from the document.
 
-Builds on [Items](items.md) (the item store, fields) and [Plan mode](plan-mode.md) (the palette).
+Builds on [Items](items.md) (the item store, fields) and [Working in Plan](plan-mode.md) (the palette).
 
 ## Domain language
 
@@ -191,10 +191,10 @@ Builds on [Items](items.md) (the item store, fields) and [Plan mode](plan-mode.m
 
 ## The Card Types panel
 
-- In Plan mode, the tools group has a **Card Types** button (the Cards glyph) where Diagram has Layers,
+- On a Plan tab, the tools group has a **Card Types** button (the Cards glyph) where Diagram has Layers,
   the second of one strip with **Find a Card**.
   It opens the panel as a popover hanging above the button, as Layers does from its button; it closes on a
-  press outside, a second press of the button, or leaving Plan mode.
+  press outside, a second press of the button, or leaving the Plan tab.
 - **Edit Cards** opens it too: a button at the end of the Toolbar strip while Cards is chosen.
 - The panel is 34 rem (544 px) wide on desktop, two types to a row; on a phone the screen's width less a margin,
   one to a row. It lists the

@@ -74,9 +74,9 @@ Each scaled surface reads its part's scale with `useUiScale(part)`, spreads
 `uiScaleStyle(scale)` into its ROOT's `style`, and converts every JS-computed
 screen-px length it writes on that root or a descendant with `toSurfacePx`.
 `panels`: `MovablePanel`, `QuickStylePanel`, `useDockPopovers`.
-`toolbar`: `ToolbarPalette`, `ToolbarExplorerButton`, and Draw mode's dock
+`toolbar`: `ToolbarPalette`, `ToolbarExplorerButton`, and Sketch mode's dock
 (`WhiteboardDock`, its `dock` variant; from
-[Draw mode](../../023-draw-mode/draw-mode.md#what-a-whiteboard-shows), which
+[Sketch mode](../../023-draw-mode/draw-mode.md#what-a-whiteboard-shows), which
 the spec's "Nothing else scales" list names: the dock at the toolbar scale,
 its flyouts at design size).
 `cornerButtons`: the cluster in `CanvasChrome`, `usePanelDock`.

@@ -193,7 +193,7 @@ instead; releasing Space resumes shaping from the node's new place. Release ends
   draft ending, empties the redo list. `usePathDrawGesture.history`
   (`{ canUndo: true, canRedo, undo, redo }`, null without a draft) replaces `canUndo` / `canRedo` /
   `onUndo` / `onRedo` on `CanvasChrome`, so the corner cluster (the only Undo and Redo buttons, in
-  Draw mode too) steps through the draft too.
+  Sketch mode too) steps through the draft too.
 - Space, Alt, Shift: read from the pointer events and a Space key flag.
 
 **Rubber band**: while not dragging, the last node to `cursor` (Shift: constrained) as a cubic
@@ -342,8 +342,8 @@ With the Path tool in hand, the draft is editable (as in Figma):
 ### Style
 
 - Created in Ink by name, unfilled: `boardShape(createPath(...))` writes `penColour: 'ink'` and
-  `fillColor: 'transparent'` (the Path tool is a Draw mode tool), then the remembered Draw style; it
-  looks the same in Diagram mode ([One look](../../007-editor/editor-modes.md#one-look)).
+  `fillColor: 'transparent'` (the Path tool is a Sketch mode tool), then the remembered Draw style; it
+  looks the same in Structured mode ([One look](../../007-editor/editor-modes.md#one-look)).
 - Quick style: `isQuickStyleTarget` includes an unlocked path. Sections: stroke, width, style (solid,
   dashed, dotted) always; background when `closed`. Apply and clear as for a shape.
 - Style memory kind `path` (`board:path` on a whiteboard), fields `strokeColor`, `strokeSwatch`,

@@ -1,6 +1,6 @@
 # Text boxes: blueprint
 
-Derived from [Draw mode](../draw-mode.md) "Text boxes". The spec decides; this file adds
+Derived from [Sketch mode](../draw-mode.md) "Text boxes". The spec decides; this file adds
 engineering precision. Defaults applied where the spec is silent are ledgered in
 [DEFAULTS.md](DEFAULTS.md) and cited as `Tn`.
 
@@ -23,7 +23,7 @@ Scope, by file:
 | `apps/live/components/canvas/useRichTextSession.ts`     | Scaled px; reports the editor node after every change                                    |
 | `apps/live/components/rich-text/useRichTextDocument.ts` | Re-sets the caret when an Enter at the end opens the empty last line                     |
 | `apps/live/components/rich-text/rich-text-dom.ts`       | `reconcileTrailingNewline` says whether it added the line; `reassertSelection`           |
-| `apps/live/lib/draw-commit.ts`                          | `buildDrawnBoxed` places a Draw mode text box through `placedTextBox`                    |
+| `apps/live/lib/draw-commit.ts`                          | `buildDrawnBoxed` places a Sketch mode text box through `placedTextBox`                  |
 | `apps/live/app/document/[id]/useSelectionEditing.ts`    | `commitLabel` hugs or removes, in the label's one commit                                 |
 | `apps/live/hooks/canvas/boxed-drag-resolve.ts`          | `resizedElement`, `TextHugResize`                                                        |
 | `apps/live/hooks/canvas/useEditorDrag.ts`               | A lone hugging text box resizes through `resizedElement`                                 |
@@ -162,8 +162,8 @@ export function resizedElement(
 - Empty or whitespace-only on commit: removed (above). Undo brings the empty box back, one step.
 - A word longer than the wrap width breaks inside the word (`overflow-wrap: break-word`).
 - Rotated box, multi-selection resize: the frame's bounds as on any tab (T3).
-- A fixed box (no `sizing`, made in Diagram mode): no hug anywhere (`hugsText` is false), in
-  either mode; a hugging box keeps hugging in Diagram mode too.
+- A fixed box (no `sizing`, made in Structured mode): no hug anywhere (`hugsText` is false), in
+  either mode; a hugging box keeps hugging in Structured mode too.
 - An explicit padding preset: that padding on every side (T2).
 
 ## Security and trust

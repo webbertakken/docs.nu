@@ -31,7 +31,7 @@ Everything a document holds as content, in its SQLite, made on first use and ver
 - **Tab stats**: each tab's mode, element count, comment count and size, for the Details view.
 - **Image references**: which gallery images each tab places ([Images](../009-elements/images.md)).
 - **Agent changesets**: the changeset log and its parts ([Agent changesets](../024-agents/agent-changesets.md)).
-- **Items**: the document's cards and their fields ([Plan mode](../026-plan/plan-mode.md)).
+- **Items**: the document's cards and their fields ([Working in Plan](../026-plan/plan-mode.md)).
 - **Plan board statuses**: which statuses each board shows, derived from the tab, for the document's own reads.
 - **Sheets**: each sheet, its cells and which tabs reference it ([Sheet](../029-sheets/sheet.md)).
 - **Tab shares**: the other holders of each shared tab, and what they are still to hear.

@@ -7,24 +7,28 @@ interchangeable. These are design decisions, taken before any feature that uses 
 
 | Term         | Answers                        | Values                                                                   | Where it lives                                |
 | ------------ | ------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------- |
-| **mode**     | How is a tab worked on?        | Diagram, Draw, Workshop, Pages, Plan (`EditorMode`)                      | Per tab, the same for everyone; `Tab.opensIn` |
+| **mode**     | How is a tab worked on?        | Sketch, Structured, Pages (`EditorMode` `draw`, `diagram`, `pages`)      | Per tab, the same for everyone; `Tab.opensIn` |
 | **kind**     | What is a tab?                 | the general diagram tab, Event Storming, Markdown, File, ... (`TabKind`) | `Tab.kind`                                    |
 | **template** | What was a document made from? | a template (`TemplateKind`), grouped into template families              | Captured once, at creation                    |
 
 ### Mode
 
-- An **editor mode** is how a general tab is worked on right now, by everyone on it: Diagram, Draw, Workshop, Pages or Plan.
-  (the Editor modes spec in 007-editor).
+- An **editor mode** is how a general tab is worked on right now, by everyone on it: Sketch, Structured or Pages
+  (the Editor modes spec in 007-editor). The stored values keep their names: `draw` is Sketch, `diagram` Structured.
 - A mode is never a type of document or tab. Switching mode changes no content: it sets the tab's mode (one undo step) and everyone on the tab follows.
 - A tab stores the mode it **opens in**. "Opens in" is a choice among modes, not a binary, so a new mode needs no
   new concept.
-- Whiteboarding is Draw mode. There is no whiteboard tab kind and no whiteboard document type.
-- Running a session (a retro, a town hall) is Workshop mode. A session is an activity, never a tab kind or a
-  stored thing; "Session" and "Collaborate" never name the mode, and neither does its old name, "Facilitate".
-- "Workshop" names the mode; a start's template group is never called Workshops (Workshop mode's is **Ideation**,
-  Draw's **Exercises**). The template catalogue's **Workshops** category
-  stays: it says what a template is for, as **Planning** does beside Plan mode, and most of its templates open in
-  Workshop mode.
+- Whiteboarding is Sketch mode. There is no whiteboard tab kind and no whiteboard document type.
+- Running a session (a retro, a town hall) is the **Workshop control**, never a mode: a toggle on the tab that
+  brings the session kit into its mode (`Tab.workshop`). A session is an activity, never a tab kind or a stored
+  thing; "Session" and "Collaborate" never name the control, and neither does its old name, "Facilitate".
+- Planning is **Plan tabs** (Board, Sheet, Dashboard, Form kinds), never a mode.
+- What a template or a blank opens as is its **opening** (`TabOpening`): Sketch, Structured, Pages, Workshop or
+  Plan. It is a choice of what to make, never a mode.
+- "Workshop" names the control and its start; a start's template group is never called Workshops (Start a
+  Workshop's is **Ideation**, Start Sketching's **Exercises**). The template catalogue's **Workshops** category
+  stays: it says what a template is for, as **Planning** does beside the Plan tabs, and most of its templates open
+  with the Workshop control on.
 
 ### Kind
 
@@ -67,7 +71,8 @@ The words for the work a Plan board frames ([Items](../026-plan/items.md), [Plan
 | **Plan board** | The element that draws items as columns of cards from a stored set-up   | Kanban element, board tab   |
 | **card**       | How an item is drawn, on a Plan board or alone as a Plan card           | item (the data is the item) |
 
-- **Plan** is an editor mode, never a kind: a Plan board is an element on a general tab.
+- **Plan** names the Plan tabs, never a mode: a Plan board fills a Board tab (an older one may sit on a general tab
+  stored in Plan).
 - A **column** belongs to a Plan board and stands for a status; a **lane** is the Lane element.
 
 ## Diagram elements
@@ -89,7 +94,7 @@ The words for the diagram-building elements ([The card](../009-elements/card.md)
 | **row**             | One layer, tier or step of a concept graphic (`conceptRows`)                            | item (that is a Plan record)              |
 
 - A Plan **card** draws an item and is always called a Plan card where the two could meet; the diagram **Card** is
-  never offered in Plan mode.
+  never offered on a Plan tab.
 
 ## Agents
 

@@ -3,7 +3,7 @@
 A facilitator-run **poll**: ask the room a question, everyone viewing the
 document gets a prompt, answers tally live, and when the host ends it the whole
 thing evaporates. Sits beside the timer and dot-vote in the tools group's
-[Session strip](session-tools.md#the-session-strip) (Diagram mode only) but is deliberately **not** built like them.
+[Session strip](session-tools.md#the-session-strip) (Structured mode only) but is deliberately **not** built like them.
 
 ## Why it is NOT a session tool on the Tab
 

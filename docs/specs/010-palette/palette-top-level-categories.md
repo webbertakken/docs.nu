@@ -160,7 +160,7 @@ which two groups they are. A rename that broke seven live links to say
 
 ## Collaborate: one category, fully grouped
 
-**Collaborate is Workshop's, as six categories.** Since [Workshop mode](../012-collaboration/workshop-mode.md#the-palette),
+**Collaborate is Workshop's, as six categories.** Since [Workshop control](../012-collaboration/workshop-mode.md#the-palette),
 only Workshop's layout offers the Collaborate elements, and it offers each group below as its
 own category in a **Collaborate** band of its own (`collab-ask`, `collab-tools`, `collab-record`, `collab-react`,
 `collab-mode`, `collab-navigate`), so the parent category and its group browser are gone. Diagram

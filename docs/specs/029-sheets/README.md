@@ -3,7 +3,7 @@
 Follow the references below only as needed; never upfront.
 
 A **sheet** is a spreadsheet tab on the canvas: a grid of cells with formulas, formatting, sorting and filtering,
-placed from Plan mode's **Sheet** palette category and worked on like a Plan board. Its cells live in the
+placed from Plan's **Sheet** palette category and worked on like a Plan board. Its cells live in the
 document's sheet store, apart from the canvas.
 
 - ./sheet.md - when working on the Sheet element: placing it, its header, toolbar, formula bar and grid, selection, editing, keyboard, clipboard, fill, rows and columns, formatting, freeze, sort, filter, find, maximise, presence, other modes, exports, CSV

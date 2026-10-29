@@ -118,7 +118,7 @@ The **Visualisations** palette category charts the cards. Each is resizable (720
 
 ### Maximised view
 
-- A visualisation can be maximised like a board ([Maximised board](plan-board.md#maximised-board)): in Plan mode
+- A visualisation can be maximised like a board ([Maximised board](plan-board.md#maximised-board)): on a Plan tab
   its header ends with **Maximise View** (a maximise icon, with a tooltip). Maximised, it fills the canvas area,
   the editor's chrome staying as the person has it (as a maximised board does); everything in it works as on the canvas (the Gantt's scale, scrolling and date drags, the
   calendar's months, opening a card). **Restore View** in the same place, or **Escape** when no dialog is open,
@@ -127,7 +127,7 @@ The **Visualisations** palette category charts the cards. Each is resizable (720
   calendar's fit), not the element's; restored, at the element's again. Maximising and restoring keep its state:
   the Gantt's scale, window and collapsed lanes, and a drag in progress, carry over.
 - It is the person's own view: nothing is saved or sent, the element keeps its size and place, and it ends on its
-  own when the view leaves the screen or Plan mode. A metric is too small to need it and has no button.
+  own when the view leaves the screen or the Plan tab. A metric is too small to need it and has no button.
 - Telemetry: `Plan` · `Toggled` · `ViewMaximised` and `ViewRestored`.
 
 ### Gantt Chart
@@ -189,7 +189,7 @@ The **Visualisations** palette category charts the cards. Each is resizable (720
   in, at the current scale. Changing the scale keeps the window's middle where it was.
 - The scale and the window are the viewer's own, like the Due Calendar's month: never saved, never sent to
   others, and back to the opening fit when the chart is next drawn fresh. They answer only while the chart takes
-  input (Plan mode); elsewhere the chart shows its opening fit and the canvas keeps the wheel.
+  input (on a Plan tab); elsewhere the chart shows its opening fit and the canvas keeps the wheel.
 - **Status**: a row shows its project's status after the title, before `done/total`: a small pill naming the
   status (as the boards name it), tinted by its status phase (Not Started, In Progress or Done, the phase colours
   of the views' key). The title truncates first so the pill stays whole; where the names column is under 160 px
@@ -276,7 +276,7 @@ The **Visualisations** palette category charts the cards. Each is resizable (720
 #### Moving a card on a calendar
 
 - Someone who may edit cards (an Editor or a Participant; never a Viewer, gated on `can`'s card editing) moves a
-  card's date by dragging its entry onto another day, while the view takes input (Plan mode). On the Due Calendar
+  card's date by dragging its entry onto another day, while the view takes input (on a Plan tab). On the Due Calendar
   the drag moves its **Due**; on the Start Calendar its **Start**.
 - A press that travels no more than 3 px is a press, and opens the card as before. Past that, a lifted copy of the
   entry follows the pointer (tilted and a little larger, flat when the viewer prefers reduced motion), the entry
@@ -360,7 +360,7 @@ The **Visualisations** palette category charts the cards. Each is resizable (720
   filter ever leaves nothing; picking a value adds the filter and closes it. A list longer than 8 has a box to
   narrow it. **Clear All** removes every filter.
 - The filters are the view's own, saved with it (`filters`: `{ by, field?, key }`), so everyone sees the same
-  search. Someone who may only view, or a view outside Plan mode, shows the chips without crosses or Add Filter.
+  search. Someone who may only view, or a view off a Plan tab, shows the chips without crosses or Add Filter.
 - Empty: the shared empty state in the board's colours ([Empty states](../004-interface-design/empty-states.md)):
   "No cards match these filters" with **Clear Filters** for an Editor (with filters), "No cards yet" ("Add cards to a
   board.") without.

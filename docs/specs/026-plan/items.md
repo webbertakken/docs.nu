@@ -174,7 +174,7 @@ The five **default types** ([Item types](item-types.md#the-type-catalogue)), eac
 
 ## The Plan strip
 
-- Plan mode's strip in the tools group (**Trash**, **New Card**, **Find a Card**, **Card Types**, each below) shows only
+- Plan's strip in the tools group (**Trash**, **New Card**, **Find a Card**, **Card Types**, each below) shows only
   while the open tab has something that shows cards: a board, a view, or a Sheet holding a card table
   ([Card tables](../029-sheets/sheet.md#card-tables)). On an empty tab, or one of only diagrams, stickies and plain
   Sheets, it is hidden: those buttons would be noise there. It comes back the moment such an element arrives (a board
@@ -187,7 +187,7 @@ The five **default types** ([Item types](item-types.md#the-type-catalogue)), eac
 
 - **Trash** is a status, `trash`, that no board shows (not in a column, not counted, not "not on this board", not
   on All Cards). A trashed item keeps the status it had under `trashedFrom`.
-- In Plan mode a **Trash** button leads the tools group's Plan strip, on its left before **Find a
+- On a Plan tab a **Trash** button leads the tools group's Plan strip, on its left before **Find a
   Card** and **Card Types** (not on a phone, whose cluster has no room for it: a card's menu still sends it to
   the Trash), its count tucked into its corner (beside its name where the strip is named, The Plan strip); with a grey badge of how many cards
   it holds. While a card is dragged the button opens out into a dashed **Drop to Trash** target, and while the
@@ -265,7 +265,7 @@ author redaction, and the same thread list, composer and resolve control the com
 
 ## New Card
 
-- Plan mode's strip in the tools group holds, for someone who may edit, a **+** (**New Card**, with a hover card) between
+- Plan's strip in the tools group holds, for someone who may edit, a **+** (**New Card**, with a hover card) between
   the Trash and Find a Card. It opens the **New Card** panel above it, pointing at it as the strip's other panels
   do: a tile per card type of the document (no Add New Card Type here). A pick makes a card of that type, off any
   board, in its type's starting status (its Default State, else the first status the type
@@ -274,7 +274,7 @@ author redaction, and the same thread list, composer and resolve control the com
 
 ## Finding a card
 
-- **Cards** is a button in Plan mode's tools group, after the Trash in one strip with Card Types
+- **Cards** is a button on a Plan tab's tools group, after the Trash in one strip with Card Types
   (buttons in one frame, as Undo and Redo are, each opening its own panel); it opens a popover of every card
   in the document that is neither archived nor in the Trash, 44 rem wide on desktop (the screen less a margin on
   a phone) with a list 32 rem tall (less on a short screen) whatever it holds, so the panel keeps its size as a search

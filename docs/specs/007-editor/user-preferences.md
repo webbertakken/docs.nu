@@ -50,7 +50,7 @@ PRIMARY KEY`, `prefs TEXT NOT NULL` (serialised JSON blob),
     the oldest hidden-from-Recent ids go first
     ([Hide from Recent](../013-workspace/hide-from-recent.md)), then the
     least recently used shape picks
-    ([Draw mode, Shape slots](../023-draw-mode/draw-mode.md)); every
+    ([Sketch mode, Shape slots](../023-draw-mode/draw-mode.md)); every
     other key stays whole. A full account measured 4,967 characters,
     past which every save was refused. A trim logs
     `[preferences] trimmed to fit dropped=<n> length=<n>`.
@@ -329,7 +329,7 @@ type UserPreferences = {
   // ('top'), a row along its bottom edge ('footer') or none ('off'). Unset, or anything
   // else, is Top (lib/element-indicator-style).
   elementIndicatorStyle?: 'top' | 'footer' | 'off';
-  // Draw mode's pattern, the person's own (./editor-modes.md "One look"): Plain, Dots
+  // Sketch mode's pattern, the person's own (./editor-modes.md "One look"): Plain, Dots
   // or Grid, as last chosen from the dock's Settings; never stored on a tab. Unset, or
   // anything else, is Grid (lib/whiteboard-dock-prefs).
   drawPattern?: 'blank' | 'grid' | 'graph';
@@ -409,7 +409,7 @@ Missing key === undefined === default behaviour. Concretely:
   whatever it says, so its Settings row is desktop only. Emits
   `UI`/`Toggled`/`DockButtonNames{On,Off}`.
 - `drawPattern` undefined → Grid (`graph`) behind every tab the person works
-  on in Draw mode. The dock's Background row writes it; it emits the same
+  on in Sketch mode. The dock's Background row writes it; it emits the same
   Background events as before and changes nothing on the tab.
 - `alignmentGuides` undefined → guides on (the default). Setting it
   to `false` hides the faint guide lines during a move / resize; the
@@ -652,11 +652,11 @@ and the dialog stays as the one complete, browsable index of them.
   A category can hold **sub-categories** (`parent` on the sub-category's
   spec). **Editor** holds one per editor mode whose settings apply only to
   that mode ([Editor modes](editor-modes.md)): **Draw** holds Dock Position,
-  since only Draw mode has a dock; **Pages** holds Contents and the logo
+  since only Sketch mode has a dock; **Pages** holds Contents and the logo
   guides. A setting that applies in both modes
   stays on Editor itself; quick-add on hover, alignment guides, auto-attach
   arrows, middle-mouse pan and power user mode all act in both. There is no
-  **Diagram** sub-category while no setting applies only to Diagram mode: a
+  **Diagram** sub-category while no setting applies only to Structured mode: a
   category with no rows is never shown, and one is added beside Draw the day
   a Diagram-only setting lands. **Account** holds **Notifications** and
   **API Tokens**: both belong to the person rather than the editor. Their
@@ -698,7 +698,7 @@ and the dialog stays as the one complete, browsable index of them.
   mark in the editor (Lucide layers for Layers, the Collaborate button's
   glyph; the Map and Quick Style, which have no
   toolbar button, take Lucide map and Lucide palette; Draw takes the
-  marker the editor mode switch shows for Draw mode; Notifications and
+  marker the editor mode switch shows for Sketch mode; Notifications and
   API Tokens keep the bell and key they carried as top-level tiles). Search matches a
   sub-category's rows on its parent's name too, and the canvas search names
   it by path ("in Panels › Layers", "in Editor › Draw", "in Account ›

@@ -284,9 +284,9 @@ Ending a vote persists the host's final state. Server-side merge of the map is
 
 ## The Session strip
 
-The running session tools live in **one strip in the tools group**, the way Plan mode's
+The running session tools live in **one strip in the tools group**, the way Plan's
 New Card, Find a Card and Card Types share one strip. It sits **left of Layers** (or of the mode's
-own strip: Slides in Pages mode, the Plan strip in Plan mode), right
+own strip: Slides in Pages mode, the Plan strip on a Plan tab), right
 after Undo and Redo. **An editor always has all three buttons**, running or not, so a session tool
 is one press away. Idle, a button is just its glyph and opens that tool's set-up pane, the same form a session
 button element's menu offers; running, it opens the live tool:
@@ -308,7 +308,7 @@ running they get no strip. While somebody else [facilitates](facilitator.md), an
 panes are disabled under a note naming them.
 
 **Which tools a mode offers** (`sessionStripTools`): **Workshop** has all three
-([Workshop mode](workshop-mode.md#the-session-strip-per-mode)) and on an event-storming board, a
+([Workshop control](workshop-mode.md#the-session-strip-per-mode)) and on an event-storming board, a
 workshop that is always Diagram; **Plan** has Timer and
 Vote (cards take the dots, [Voting on Plan cards](#voting-on-plan-cards)) only on a tab with a board made for voting,
 one taking a card type with a **Votes** field (a Retro's Notes and Ideas, or a type someone gave Votes), and never on

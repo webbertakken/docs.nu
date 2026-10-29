@@ -1,21 +1,21 @@
 # Draw tour ("Start Draw Tour")
 
-A short, optional guided tour of [Draw mode](draw-mode.md), started from the actions group's **Start Draw Tour** button. It
+A short, optional guided tour of [Sketch mode](draw-mode.md), started from the actions group's **Start Draw Tour** button. It
 is the [Workshop tour](../012-collaboration/workshop-tour.md)'s sibling: the same Start Tour button, anchored step
 cards, glide, dimming ring, Skip, Back and closing card, driven by the same engine. Where this spec is silent, the
 Workshop tour's rules hold.
 
 ## Domain language
 
-| Term             | Means                                                               |
-| ---------------- | ------------------------------------------------------------------- |
-| **Draw tour**    | This tour. On the Start Tour button: **Start Draw Tour**            |
-| **Diagram tour** | The Diagram mode tour, [Diagram tour](../007-editor/editor-tour.md) |
-| **Dock**         | Draw mode's floating bar of tool groups ([Draw mode](draw-mode.md)) |
+| Term             | Means                                                                   |
+| ---------------- | ----------------------------------------------------------------------- |
+| **Draw tour**    | This tour. On the Start Tour button: **Start Draw Tour**                |
+| **Diagram tour** | The Structured mode tour, [Diagram tour](../007-editor/editor-tour.md)  |
+| **Dock**         | Sketch mode's floating bar of tool groups ([Sketch mode](draw-mode.md)) |
 
 ## Where it appears
 
-- **On the Start Tour button, in Draw mode.** The actions group's button, leading the document actions
+- **On the Start Tour button, in Sketch mode.** The actions group's button, leading the document actions
   ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Draw Tour** while the open tab is in
   Draw on a tab the person may edit, unless something more specific is on offer. The editor has to be usable
   (hydrated, no welcome overlay, not read-only, not an embed), and the tab not locked. It is not on offer while a
@@ -53,7 +53,7 @@ group as `dock-<group>`); one rings the [Quick style panel](../008-canvas/quick-
    a search, and favourites pin to the dock.
 4. **Board Settings**: rings the Settings cog. The board's background, the cursor, and whether rough shapes snap
    into clean ones.
-5. **You're ready to draw** (outro): a help-centre link to the Draw mode article (new tab) and **Start**,
+5. **You're ready to draw** (outro): a help-centre link to the Sketch mode article (new tab) and **Start**,
    which completes the tour.
 
 - The dock shows on every surface, a phone included (its groups scroll sideways); Quick Style, a desktop's panel,

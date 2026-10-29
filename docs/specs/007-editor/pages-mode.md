@@ -49,7 +49,7 @@ one category (Popular, a pick from across them, aside).
   (a divider after Elements), then the rest without **Concepts** and **Devices**
   ([Wireframe pages](wireframe-pages.md) "The Elements palette").
 - **Logo** (logo pages): **Draw** (Pens: the
-  Pen, the Pencil, the Shape Pen; Outlines: the Polygon; Markers: Draw mode's three), **Shapes**,
+  Pen, the Pencil, the Shape Pen; Outlines: the Polygon; Markers: Sketch mode's three), **Shapes**,
   **Write** (Text for a wordmark, a sticky note for a comment), **Icons**, **Library** and **Media**
   (an Image to trace); no charts, blocks, frames, stickers or embeds, and no Logo category
   ([Logo pages](logo-pages.md) "The Logo palette").
@@ -645,7 +645,7 @@ An infographic or slide page's title bar holds a **Tidy** button, its icon alone
 on a desktop or a phone), right after Background and left of the lock and the cog, shown only
 while a press would change something (a page already tidy, or empty, shows none), the cog's
 size with a tooltip ("Tidy: align and space what is on this page"), its glyph a broom. A logo page's Tidy (for drawn lines) sits in the same place, after Mirror and
-Guides, its icon alone too. It is Diagram mode's Auto Layout ([Layout cleanup](../008-canvas/layout-cleanup.md))
+Guides, its icon alone too. It is Structured mode's Auto Layout ([Layout cleanup](../008-canvas/layout-cleanup.md))
 for a page: where the diagram one lays shapes out from their arrows, a page has no graph, so this
 one keeps the author's layout and straightens it.
 
@@ -1362,8 +1362,8 @@ lies on; one between pages is on none.
   end stays free where it is dropped.
 - **Connect** (an arrow from a selected element to the next one clicked): clicking an element on
   another page draws no arrow and ends the connect.
-- An arrow already joining two pages (made before this rule, in Diagram or Draw mode, or by an AI
-  tool or a collaborator) stays as it is. Diagram and Draw mode draw arrows as ever.
+- An arrow already joining two pages (made before this rule, in Diagram or Sketch mode, or by an AI
+  tool or a collaborator) stays as it is. Diagram and Sketch mode draw arrows as ever.
 
 ## Locking a page
 
@@ -1394,7 +1394,7 @@ is while the rest of the tab is worked on.
     lock never holds it.
 - **What a lock does not do**: pages around it can still be added, moved or deleted (its content
   moves with it as pages close up or open around it), and the tab's theme still applies to it.
-  The lock is Pages mode's, on the active tab's edits made here: in Diagram or Draw mode a
+  The lock is Pages mode's, on the active tab's edits made here: in Diagram or Sketch mode a
   page's elements are edited as ever, and an AI tool's or a collaborator's edit is not refused.
 - **Telemetry**: `Tab · Changed · PageLocked` / `PageUnlocked`.
 

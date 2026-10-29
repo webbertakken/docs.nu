@@ -1,22 +1,22 @@
 # Workshop tour ("Start Workshop Tour")
 
-A short, optional guided tour of [Workshop mode](workshop-mode.md), started from the actions group's **Start Workshop Tour**
+A short, optional guided tour of the [Workshop control](workshop-mode.md)'s session kit, started from the actions group's **Start Workshop Tour**
 button. It is the [Diagram tour](../007-editor/editor-tour.md)'s sibling, as the
 [Plan tour](../026-plan/plan-tour.md) is: the same Start Tour button, anchored step cards, glide, dimming ring,
 Skip, Back and closing card, driven by the same engine. Where this spec is silent, the Plan tour's rules hold.
 
 ## Domain language
 
-| Term              | Means                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------ |
-| **Workshop tour** | This tour. On the Start Tour button: **Start Workshop Tour**                               |
-| **Diagram tour**  | The Diagram mode tour ("Start Diagram Tour"), [Diagram tour](../007-editor/editor-tour.md) |
+| Term              | Means                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| **Workshop tour** | This tour. On the Start Tour button: **Start Workshop Tour**                                  |
+| **Diagram tour**  | The Structured mode tour ("Start Diagram Tour"), [Diagram tour](../007-editor/editor-tour.md) |
 
 ## Where it appears
 
-- **On the Start Tour button, in Workshop mode.** The actions group's button, leading the document actions
+- **On the Start Tour button, with the Workshop control on.** The actions group's button, leading the document actions
   ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Workshop Tour** while the open tab
-  is in Workshop on a tab the person may edit, unless something more specific is on offer (a selected element's own
+  has the Workshop control on and the person may edit it, unless something more specific is on offer (a selected element's own
   tour). The editor has to be usable, as for the Diagram tour (hydrated, no welcome overlay, no start on screen, not
   read-only, not an embed), and the tab not locked.
 - **Never on its own.** The tour does not offer or start itself. Until 28 October 2026 it offered itself, once ever,
@@ -29,7 +29,7 @@ Skip, Back and closing card, driven by the same engine. Where this spec is silen
   button.
 - **Rerun from Settings**: the **Workshop Tour** switch in Settings' **Tours** category, beside **Plan** and
   built the same way (on means "not seen yet"). Turning it on from off and closing Settings runs the tour straight
-  away when the person is in Workshop and it is on offer; otherwise the button is there when they get there.
+  away when the open tab has the Workshop control on and it is on offer; otherwise the button is there when they get there.
 
 ## Tour content
 
@@ -44,7 +44,8 @@ starts the first step. The palette
 itself is the Diagram tour's, so this tour does not repeat it. The exact strings live in `apps/live/components/tour/workshop-tour-steps.ts`.
 
 1. **Collaborate**: rings **Ask** and **Session** on the palette's category bar
-   ([Toolbar layout](../007-editor/toolbar-layout.md#the-category-bar)), the session kit: Ask puts a question to
+   ([Toolbar layout](../007-editor/toolbar-layout.md#the-category-bar), Structured and Pages with the control on;
+   left out in Sketch, which has no palette), the session kit: Ask puts a question to
    the room, and Session holds the timers, reveals, records, reactions, selection modes and places to go. It opens
    nothing (the bar's buttons carry the anchors `bar-collab-ask` and `bar-session`).
 2. **A Timer for the Room**: places the three session elements (Tour content) and highlights the Timer: it counts down
@@ -57,13 +58,13 @@ itself is the Diagram tour's, so this tour does not repeat it. The exact strings
    placing anything on the canvas.
 6. **Bring People In**: opens the Share dialog and highlights it, closing it again after. A Participant link lets people add notes, vote and
    answer without changing the rest of the board.
-7. **You're ready to run a workshop** (outro): a help-centre link to the Workshop mode article (new tab) and
+7. **You're ready to run a workshop** (outro): a help-centre link to the Workshop control article (new tab) and
    **Start**, which completes the tour.
 
 - Back from a step goes to the step before. Leaving a step closes what it opened (the category picker).
 - A step whose target is missing on this surface (no Share button for this person, a phone layout without it) is
   left out up front, so the count stays honest; one that never appears is skipped, as in the Diagram tour.
-- If the tour can no longer run where it started (the person's edit rights go, they leave Workshop, or they
+- If the tour can no longer run where it started (the person's edit rights go, the Workshop control is turned off, or they
   open another tab) it ends as skipped.
 
 ## Share roles
