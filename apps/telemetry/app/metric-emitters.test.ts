@@ -128,9 +128,9 @@ describe('the emitter scan', () => {
     expect(has('Session', 'SignedUp', null)).toBe(true); // reportServerEvent(env, ...), const action
     expect(has('Email', 'Sent', COMPUTED as never)).toBe(true);
     expect(KNOWN.some((e) => e.category === 'Error' && e.path.startsWith('apps/mcp/'))).toBe(true);
-    expect(KNOWN.some((e) => e.category === 'Error' && e.path === 'apps/api/src/index.ts')).toBe(
-      true,
-    );
+    expect(
+      KNOWN.some((e) => e.category === 'Error' && e.path === 'apps/api/src/request-failure.ts'),
+    ).toBe(true);
     expect(UNTYPED.length).toBeGreaterThan(0);
     expect(TYPED.length).toBeGreaterThan(0);
   });
