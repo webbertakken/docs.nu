@@ -18,15 +18,9 @@ export function useToastFloor(active: boolean, count: number): number {
 
 /**
  * Where a centred column stands over the bottom chrome `selector` names (toast-floor.ts): the toast stack's floor, and
- * the editor's sign-in banner's (docs/specs/014-identity/sign-in-encouragement.md). `key` re-measures when the column's
- * own content changes (the toast count).
+ * the start panel's. `key` re-measures when the column's own content changes (the toast count).
  */
-export function useChromeFloor(
-  active: boolean,
-  key: number,
-  selector: string,
-  columnWidth?: number,
-): number {
+export function useChromeFloor(active: boolean, key: number, selector: string): number {
   const [floor, setFloor] = useState(TOAST_EDGE_PX);
   useLayoutEffect(() => {
     if (!active) return;
@@ -47,7 +41,6 @@ export function useChromeFloor(
         viewportWidth: window.innerWidth,
         viewportHeight: window.innerHeight,
         obstacles: found.map((el) => el.getBoundingClientRect()),
-        ...(columnWidth !== undefined ? { columnWidth } : {}),
       });
       setFloor((prev) => (prev === next ? prev : next));
     }
@@ -61,6 +54,6 @@ export function useChromeFloor(
       window.removeEventListener(TOAST_FLOOR_CHANGED_EVENT, measure);
       document.removeEventListener('animationend', measure, true);
     };
-  }, [active, key, selector, columnWidth]);
+  }, [active, key, selector]);
   return floor;
 }

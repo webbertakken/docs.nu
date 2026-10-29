@@ -128,7 +128,7 @@ hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-
 | `TOAST_PHONE_MAX_PX`       | 639   | Below Tailwind `sm`                          | = `sm` - 1    |
 
 `TOAST_FLOOR_SELECTOR`: `[data-toast-floor], [data-document-group], [data-zoom-cluster], [data-whiteboard-dock]`. The
-Explorer bottom bar and the sign-in banner's card carry `data-toast-floor`.
+Explorer bottom bar and the new-version prompt carry `data-toast-floor`.
 
 ## Floor
 
@@ -143,7 +143,7 @@ rect:
   inset is added in CSS: `bottom: max(<floor>px, calc(16px + env(safe-area-inset-bottom)))`.
 
 Bottom chrome that comes or goes without resizing anything the stack watches dispatches `TOAST_FLOOR_CHANGED_EVENT`
-on `window` (`announceToastFloorChange()`): the sign-in banner on mount and unmount, the whiteboard dock on mount,
+on `window` (`announceToastFloorChange()`): the whiteboard dock on mount,
 move and unmount, the new-version prompt when it shows or hides.
 
 ## Errors and edge cases

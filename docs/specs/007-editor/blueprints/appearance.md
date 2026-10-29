@@ -139,7 +139,6 @@ layout inlines the real string rather than a client-reference stub.
 - Surfaces covered: body backdrop, the two lines' toolbar groups, TemplatePicker, the `/new` backdrop, `DocumentLoading`, and the
   `MovablePanel` frame. Panel contents gain `dark:` variants one panel at a time.
 - Preview tiles re-light through `.preview-art-tile`; colour-scheme swatches are excluded.
-- The match nudge sits bottom-centre, yields to the sign-in banner, hides in zen and embed, and never shows for Default.
 
 ## Accessibility
 

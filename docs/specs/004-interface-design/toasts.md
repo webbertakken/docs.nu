@@ -101,7 +101,7 @@ lists its decline before its confirm.
   indicator), and above anything that occupies the bottom of the screen beneath it: the editor's bottom line (its tools
   group, its document group and the whiteboard dock on it,
   [Toolbar layout](../007-editor/toolbar-layout.md#the-bottom-line)), the Explorer's bottom bar, and the
-  [sign-in banner](../014-identity/sign-in-encouragement.md). It lifts 8px clear of the highest of those that
+  [new version prompt](../016-platform/new-version-prompt.md). It lifts 8px clear of the highest of those that
   overlaps its column, measured as they move or resize, so a toast never lands on a button or on a banner's words.
   Chrome off to the side of the column (the cluster on a wide desktop) does not lift it.
 - **Stacking order.** Toasts sit at the top of the stacking ladder (`--z-toast`), over dialogs, so a failure shows

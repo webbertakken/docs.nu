@@ -1167,18 +1167,6 @@ export const SLIDE_DECK_OPENED = opened(
   (t) => t === 'SlideDeck' || t === 'PresentationSettings',
 );
 
-export const EXPLORER_REASONS_OPENED = opened(
-  'Explorer Banner: Learn More',
-  'The Explorer\u2019s sign-in banner: Learn more opened the reasons to sign in.',
-  (t) => t === 'SignInReasonsExplorer',
-);
-
-export const EDITOR_REASONS_OPENED = opened(
-  'Editor Banner: Learn More',
-  'The editor\u2019s sign-in banner (shown after about five minutes of drawing as a guest): Learn more opened the reasons.',
-  (t) => t === 'SignInReasonsEditor',
-);
-
 // The Session strip's buttons in the bottom-right cluster (docs/specs/012-collaboration/session-tools.md
 // "The Session strip"), each opening its tool: the set-up while idle, the live tool while running.
 export const SESSION_TIMER_OPENED = opened(
@@ -1235,6 +1223,7 @@ export const PANELS_OPENED: MetricStack = {
     HELP_FROM_EDITOR,
     SHORTCUTS_OPENED,
     MIND_OUTLINE_OPENED,
+    ACTION_SIGN_IN_NUDGE,
     OTHER_OPENED,
   ],
   seeAlso: { section: 'editing', label: 'See Each Dialog in Features › Editing' },

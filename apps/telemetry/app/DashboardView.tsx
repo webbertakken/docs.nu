@@ -32,7 +32,6 @@ import {
   RETURNING_VISITORS,
   SHARING_AND_JOINING,
   SHEETS,
-  SIGN_IN_PROMPTS,
   SIGN_UPS,
   TAB_ACTIONS,
   TIMELINE_AND_ACTIVITY,
@@ -73,7 +72,7 @@ export const GROUPS: MetricGroup[] = [
   },
   {
     title: 'Visitors',
-    metrics: [ALL_VISITORS, ACCOUNT_ACTIVITY, PAGE_VIEWS_BY_APP, SIGN_IN_PROMPTS, ONBOARDING_TOURS],
+    metrics: [ALL_VISITORS, ACCOUNT_ACTIVITY, PAGE_VIEWS_BY_APP, ONBOARDING_TOURS],
   },
   {
     title: 'Content',
