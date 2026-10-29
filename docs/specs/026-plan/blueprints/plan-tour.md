@@ -2,7 +2,7 @@
 
 Derived from [Plan tour](../plan-tour.md). The engine, stage, popover, spotlight, shield, tour colours and the
 actions group's Start Tour button live once in `apps/live/components/tour`
-([Diagram tour](../../007-editor/editor-tour.md)), shared rather than copied.
+([Structured tour](../../007-editor/editor-tour.md)), shared rather than copied.
 
 ## Domain and naming
 
@@ -27,7 +27,7 @@ actions group's Start Tour button live once in `apps/live/components/tour`
 | `apps/live/components/tour/TourOfferButton.tsx` | The actions group's Start Tour button, leading the document actions (`ChromeControls`)                                                                  |
 | `apps/live/components/tour/TourStage.tsx`       | The shared overlay: highlight ring, `TourPopover`                                                                                                       |
 | `apps/live/components/tour/TourPopover.tsx`     | `copy` (`TourCardCopy`): the step card, the last card included                                                                                          |
-| `apps/live/components/tour/TourHost.tsx`        | The Diagram tour on the engine; publishes itself to `tour-active`                                                                                       |
+| `apps/live/components/tour/TourHost.tsx`        | The Structured tour on the engine; publishes itself to `tour-active`                                                                                    |
 | `apps/live/components/tour/plan-tour-steps.ts`  | `planTourSteps`, `BOARD_STEPS`, `SHEET_STEPS`, `PlanTourApi`, `boardRoot`, `sheetRoot`, `firstCardOn`, `visiblePlanWork`, `needsReveal`, telemetry type |
 | `apps/live/components/tour/PlanTourHost.tsx`    | On the button (`useOfferTour`), subject, relaunch, end; builds `PlanTourApi`                                                                            |
 | `apps/live/lib/tour-tracks.ts`                  | `tourTrackSeen`, `withTracksAnswered`: the tracks a person has taken                                                                                    |
@@ -37,7 +37,7 @@ actions group's Start Tour button live once in `apps/live/components/tour`
 
 Also touched: `ClusterPopoverButton` (a `dataTourId` prop; Card Types passes `card-types`), the Settings catalogue
 and dialog, `power-user-mode.ts`, `help-articles.ts`, the help article
-`apps/help/app/canvas/plan-mode/plan-tour/page.mdx` with its registry entry, icon and colour, and the telemetry
+`apps/help/app/canvas/plan-tabs/plan-tour/page.mdx` with its registry entry, icon and colour, and the telemetry
 dashboard (`apps/telemetry/app/catalogue/features.ts`, `apps/telemetry/app/catalogue/visitors.ts`,
 `apps/telemetry/app/catalogue/settings.ts`, `apps/telemetry/app/DashboardView.tsx`,
 `apps/telemetry/app/computed-emitters.ts`, `apps/telemetry/app/event-explanations.ts`).
@@ -105,7 +105,7 @@ End: close the item panel, take the example card away (`removeTourCard`), write
 
 The engine's `steps` are `planTourSteps(tourTrack)`: that track's steps and its last card. Every board has the card
 steps: the tour adds its own card to show them on. The last card's help link follows the track
-(`/help/canvas/plan-mode/` or `/help/canvas/plan-mode/sheets/`). There is no welcome card and no choice card.
+(`/help/canvas/plan-tabs/` or `/help/canvas/plan-tabs/sheets/`). There is no welcome card and no choice card.
 
 Boards steps, each scoped to the board's drawn body `[data-plan-board="<board>"]` (`boardRoot`; never its
 `data-element-id` canvas node, hidden under a maximised or tab-filling body): `board` (no anchor, a centred card; prepare
@@ -212,7 +212,7 @@ button for it (`isReadOnly`).
 
 ## Presentation and UX
 
-As the Diagram tour ([Diagram tour](../../007-editor/editor-tour.md)). The actions group's button reads **Start Boards
+As the Structured tour ([Structured tour](../../007-editor/editor-tour.md)). The actions group's button reads **Start Boards
 Tour** or **Start Sheets Tour**. The cards' `ariaPrefix` is **Boards tour** or **Sheets tour**. The last card is a
 step card in `TourPopover`, with **Help** linking the track's article (`BOARDS_TOUR_COPY` or `SHEETS_TOUR_COPY`)
 and **Start** (`TOUR_FINISH`). The tour has no art.

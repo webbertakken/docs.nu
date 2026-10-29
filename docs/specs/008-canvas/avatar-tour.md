@@ -1,9 +1,9 @@
 # Avatar tour ("Start Avatar Tour")
 
 A short, optional guided tour of [Avatar mode](avatar-mode.md), started from the actions group's **Start Avatar Tour**
-button. It is the [Draw tour](../023-draw-mode/draw-tour.md)'s sibling: the same Start Tour button, anchored step
+button. It is the [Sketch tour](../023-draw-mode/draw-tour.md)'s sibling: the same Start Tour button, anchored step
 cards, glide, dimming ring, Skip, Back and closing card, driven by the same engine. Where this spec is silent, the
-Draw tour's rules hold.
+Sketch tour's rules hold.
 
 ## Domain language
 
@@ -17,9 +17,9 @@ Draw tour's rules hold.
 
 - **On the Start Tour button, in Avatar mode**, which a person enters by pressing a
   [Selection Mode button](../009-elements/mode-button.md) set to Avatar. The actions group's button, leading the document actions
-  ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Avatar Tour** while the avatar is
+  ([Structured tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Avatar Tour** while the avatar is
   the tool in hand: ahead of the tab's mode tour, behind a selected element's own tour (`TOUR_OFFER_RANK.tool`). The
-  editor has to be usable (hydrated, no welcome overlay, no start panel on screen, not an embed). Unlike the Draw tour
+  editor has to be usable (hydrated, no welcome overlay, no start panel on screen, not an embed). Unlike the Sketch tour
   it is on offer **whatever the person's role**: the mode is a Viewer's as much as an Editor's, and a read-only
   canvas is the mode's normal state, not a reason to hold off.
 - **Never on its own.** Until 28 October 2026 it offered itself, once ever, the first time a person walked as an
@@ -59,7 +59,7 @@ element by its `data-tour-id`. The exact strings live in `apps/live/components/t
 6. **You're Ready to Roam** (outro): a help-centre link to the Avatar mode article (new tab) and **Start**,
    which completes the tour.
 
-- A step whose target never appears is skipped, as in the Draw tour.
+- A step whose target never appears is skipped, as in the Sketch tour.
 - Step 2 opens the panel the way a person would (pressing the Avatar button); step 5 closes it so the character is
   in view. Back from step 5 opens it again. Leaving the tour (Skip, the outro) closes it if the tour opened it.
 - If the tour can no longer run where it started (the person leaves Avatar mode, or opens another tab) it ends as
@@ -77,7 +77,7 @@ two lines as the other tours' do.
 
 ## Telemetry ([Telemetry](../017-telemetry/telemetry.md))
 
-The Draw tour's funnel, with its own tokens:
+The Sketch tour's funnel, with its own tokens:
 
 - **Offer**: `UI` · `Opened` · `AvatarTourOffer` the first time the Start Tour button shows this tour in a page
   load. Until 28 October 2026 it counted the welcome card showing, and `UI` · `Closed` · `AvatarTourOffer` counted
@@ -92,4 +92,4 @@ The Draw tour's funnel, with its own tokens:
 ## Power user mode
 
 [Power user mode](../007-editor/power-user-mode.md) marks the Avatar tour seen alongside the Diagram, Plan,
-Workshop and Draw tours.
+Workshop and Sketch tours.

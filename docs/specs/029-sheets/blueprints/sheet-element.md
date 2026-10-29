@@ -191,7 +191,7 @@ shares with DiagramBuildAnimation) and `packages/ui/src/LoadingSweep.tsx` (the p
 ### Setup Sheet
 
 - `layout.setupPending` (sheets-engine blueprint) marks a sheet awaiting setup. `PlanSheetView` shows `SheetSetup`
-  in place of the grid while it is set, the sheet has no cells, Plan mode is on and the person may edit; any cell
+  in place of the grid while it is set, the sheet has no cells, the tab is a Plan tab and the person may edit; any cell
   arriving clears it (`{ k: 'options', setupPending: false }`), and Sheet Settings' **Setup Sheet** sets it again.
 - Create Sheet writes a template start through `designWrite(workbook, sheetId, sheetTemplate(start, today), { look,
 freezeHeader, size, dark })`, then places the template's charts; Plan Cards builds `cardsStarter(...)` and a blank
@@ -216,7 +216,7 @@ freezeHeader, size, dark })`, then places the template's charts; Plan Cards buil
 
 ### Input by mode
 
-- `interactive = plan.planInput` (Plan mode) as boards; `canEdit` from the bridge. Not interactive: the grid's
+- `interactive = plan.planInput` (a Plan tab) as boards; `canEdit` from the bridge. Not interactive: the grid's
   `pointer-events: none`, so the element moves and selects as any, and a double-click offers nothing (a Sheet goes
   only on a tab in Plan: [Sheet](../sheet.md#only-in-plan)).
 - On a Plan tab the header drags the element (as the board header); the grid takes pointer and wheel (wheel

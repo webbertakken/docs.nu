@@ -1362,7 +1362,7 @@ lies on; one between pages is on none.
   end stays free where it is dropped.
 - **Connect** (an arrow from a selected element to the next one clicked): clicking an element on
   another page draws no arrow and ends the connect.
-- An arrow already joining two pages (made before this rule, in Diagram or Sketch mode, or by an AI
+- An arrow already joining two pages (made before this rule, in Structured or Sketch mode, or by an AI
   tool or a collaborator) stays as it is. Diagram and Sketch mode draw arrows as ever.
 
 ## Locking a page
@@ -1394,7 +1394,7 @@ is while the rest of the tab is worked on.
     lock never holds it.
 - **What a lock does not do**: pages around it can still be added, moved or deleted (its content
   moves with it as pages close up or open around it), and the tab's theme still applies to it.
-  The lock is Pages mode's, on the active tab's edits made here: in Diagram or Sketch mode a
+  The lock is Pages mode's, on the active tab's edits made here: in Structured or Sketch mode a
   page's elements are edited as ever, and an AI tool's or a collaborator's edit is not refused.
 - **Telemetry**: `Tab · Changed · PageLocked` / `PageUnlocked`.
 

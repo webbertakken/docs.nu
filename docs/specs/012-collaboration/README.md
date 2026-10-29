@@ -4,7 +4,7 @@ Follow the references below only as needed; never upfront.
 
 - ./blueprints/README.md - when implementing a collaboration spec from its blueprint
 - ./presentation-mode.md - when working on Presentation mode: Full-screen slide deck of author-picked element sets, each slide from one tab, built and run from a Slide Deck panel
-- ./workshop-tour.md - when working on the Workshop tour: the optional guided tour on the actions group's Start Workshop Tour button while someone is in Workshop (the Diagram tour never runs in Workshop)
+- ./workshop-tour.md - when working on the Workshop tour: the optional guided tour on the actions group's Start Workshop Tour button while the Workshop control is on (the Structured tour never runs with the control on)
 - ./workshop-mode.md - when working on the Workshop control: the toggle in the actions group that brings the session kit (the Session strip, the Collaborate and Stickers categories) into any editor mode, its templates, share roles and the migration of Workshop-mode tabs
 - ./session-tools.md - when working on Session tools (timer + voting): Per-tab facilitator countdown/stopwatch + live dot-voting, synced to every participant
 - ./assigned-actions.md - when working on Assigned actions: Implemented: Assign Action tile attaches a named/described action on an element to a teammate (any joined team), optional opt-out email notification, on-element badge + popover (complete/edit/delete), a merged Collaborate Panel listing open/resolved actions + comment threads, and the menu's collaboration band split into Collaborate (actions/comments) + Resources (link/note)

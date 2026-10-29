@@ -30,7 +30,7 @@ Scope, by file (all under `apps/live/` unless stated):
 | `components/canvas/CanvasChrome.tsx`                 | The dock; top corners and stack clear a top dock                                         |
 | `hooks/ui/useStripCrowdsCorners.ts`                  | Whether a top bar (the strip or a top dock) reaches a top corner                         |
 | `components/chrome/TopCenter.tsx`                    | `TopCenterStack` `below`: under the strip or under a top dock                            |
-| `components/dialogs/settings/settings-catalogue.ts`  | Editor › Draw sub-category: the Dock Position row                                        |
+| `components/dialogs/settings/settings-catalogue.ts`  | Editor › Sketch sub-category: the Dock Position row                                      |
 | `hooks/canvas/useWhiteboardDockPrefs.ts`             | Those preferences as state, written like every synced preference                         |
 | `hooks/canvas/useWhiteboard.ts`                      | `pickShape`, `pickSearchedShape`, `openShapes` and the dock prefs                        |
 | `lib/palette-search.ts`, `lib/search.ts`             | `SHAPE_TILES`, `shapeTileSearchItem`; `paletteRank` from `@livedoc/icons`, shared        |

@@ -404,7 +404,7 @@ the cards are not focused until the wizard mounts.
 The **empty-canvas hint** is a calm **card in the middle of the canvas** (`EmptyCanvasBanner`), shown while the
 active tab has no elements to someone who cannot edit it: an Editor gets the mode's start instead ([Template
 starts](start-diagramming.md)). A **Viewer** reads "Nothing here yet. The owner can build it out, and your view
-updates live."; a **Participant** is pointed at a sticky, text or an image. It shows in Diagram and Workshop; Draw
+updates live."; a **Participant** is pointed at a sticky, text or an image. It shows in Structured, the Workshop control on or off; Sketch
 (its dock is the hint, [Sketch mode](../023-draw-mode/draw-mode.md)), Pages and Plan show none. It offers no action
 of its own: an Editor's empty tab shows its start instead, and **Help** on a desktop. It goes once the
 canvas has content, and a **Close** (×) in its top right corner closes it for good on that tab for this person in
@@ -452,7 +452,7 @@ default document name) without walking the wizard:
     another blank document or trapping the user behind a page that always
     navigates forward again.
   - No tour is queued on this path, nor on any other: since 28 October 2026 tours start only from
-    the actions group's Start Tour button ([Diagram tour ("Start Diagram Tour")](editor-tour.md) "Handoff"),
+    the actions group's Start Tour button ([Structured tour ("Start Structured Tour")](editor-tour.md) "Handoff"),
     so no create waits for the document count.
   - **The wizard must never paint on this path, not even for a frame.**
     `/new` is a static export, so its prerendered HTML is the wizard and
@@ -674,7 +674,7 @@ theme for a new tab.
 - `/new?template=not-a-kind` → the plain wizard.
 - `/new?template=whiteboard` → no wizard; a document created whose tab opens
   in Sketch mode ([Editor modes](editor-modes.md)), the Ink pen in hand.
-- `/new?mode=draw` → the wizard, the Draw card chosen; Create makes a Draw tab.
+- `/new?mode=draw` → the wizard, the Sketch card chosen; Create makes a Sketch tab.
 - `/new?mode=pages&q=article` → the wizard, Pages chosen; on the new document Start Making Pages
   opens with its search reading "article".
 - `/new?mode=sideways` → the plain wizard, no card chosen.

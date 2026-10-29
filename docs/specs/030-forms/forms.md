@@ -357,7 +357,7 @@ number).
 
 A guided tour, as [Plan's](../026-plan/plan-tour.md) is (`components/tour/FormTourHost.tsx`, its steps in
 `form-tour-steps.ts`), started from the actions group's **Start Forms Tour** button, leading the document actions
-([Diagram tour](../007-editor/editor-tour.md) "Where it appears"). It is on offer while an Editor has a Form tab open
+([Structured tour](../007-editor/editor-tour.md) "Where it appears"). It is on offer while an Editor has a Form tab open
 and the editor is ready (hydrated, no start panel, not read-only, not locked, not embedded); it stays on offer once
 taken, and a press while another tour is on screen does nothing. It never starts or offers itself: until 25 October
 2026 it offered itself once, on a banner asking "Getting started with Forms?", 800 ms after a Form tab first opened.
@@ -382,7 +382,7 @@ A run ending (completed or skipped) writes `formTourSeen` (synced preferences), 
 **Forms Tour** row; it never hides the button. **Show Me Around** at the foot of the cog's panel starts it at once,
 taken or not, as Settings' row does, when it is on offer. Its events are `UI` `Opened` `FormTourOffer` (the first
 time the button shows it in a page load), `Started` `FormTour` (a press), `View` `FormTourStep<Step>` and `Ended`
-`FormTourCompleted`/`FormTourSkipped`, charted as the **Forms Tour** stack beside the Draw tour's. `Closed` `FormTourOffer` (No on the old
+`FormTourCompleted`/`FormTourSkipped`, charted as the **Forms Tour** stack beside the Sketch tour's. `Closed` `FormTourOffer` (No on the old
 banner) is no longer sent.
 
 ## Publishing and the form link

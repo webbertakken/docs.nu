@@ -1,7 +1,7 @@
 # Quiz and game templates
 
 Five session templates for the lighter end of running a room: a pub quiz, icebreakers and three party games.
-They open in Workshop ([Workshop control](workshop-mode.md#templates)) and live in their own catalogue
+They open in Structured with the Workshop control on ([Workshop control](workshop-mode.md#templates)) and live in their own catalogue
 category, **Quizzes & Games** ([Template categories](../008-canvas/canvas-and-palette.md#template-categories)).
 
 ## Why
@@ -22,11 +22,11 @@ Workshops beside the retros is hard to find. They get a category of their own.
 - In Start a Workshop ([Templates by mode](../007-editor/templates-by-mode.md#workshop-templates)) the five
   form their own group, **Quizzes & Games**, "Quizzes, icebreakers and games to warm up the room.", after
   Meetings.
-- **Pub Quiz** joins Workshop's Popular, after Crazy 8s.
+- **Pub Quiz** joins Start a Workshop's Popular, after Crazy 8s.
 
 ## The templates
 
-Every template opens on the dot grid (`grid`), in Workshop, with the session boards' heading (a title with a
+Every template opens on the dot grid (`grid`), with the Workshop control on, with the session boards' heading (a title with a
 sticker, a one-line how-to) and section labels (`template-session-parts.ts`). Every tool sits beside the words
 that say when to press it, as the other session boards do. The worked content is real and checkable: every quiz
 answer marked correct is correct.
@@ -120,7 +120,7 @@ new behaviour: each role does what the elements they are built from already allo
 
 All in `packages/templates/src/template-quiz-games.test.ts` unless named:
 
-- Every template builds, opens in Workshop and sits in `games`.
+- Every template builds, opens with the Workshop control on and sits in `games`.
 - Every Pub Quiz card is set up (`quizPhase` is `ready`): four answers, a correct index in range, 30 seconds; the
   right answers are spread over A to D (no letter right more than three times in nine, no round all one letter).
 - Every poll button can start (`sessionButtonPlan` is not null), its answers within the wire's `POLL_OPTION_MAX`, and

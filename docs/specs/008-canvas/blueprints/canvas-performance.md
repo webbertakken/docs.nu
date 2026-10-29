@@ -244,7 +244,7 @@ queryElementGrid(grid, arrowBounds))`. `arrowViewPropsEqual` compares `frame` wi
 - `useBoxedElementAnimation`: `entered` starts as `still || arrivesWithBoard`. Only an element
   that starts not entered arms the 400 ms timer that drops `animate-element-pop-in`; an element
   that starts entered arms nothing, so opening a board sets no timers and re-renders no view
-  afterwards. An element mounted on a still canvas stays entered if the tab switches to Diagram
+  afterwards. An element mounted on a still canvas stays entered if the tab switches to Structured
   mode.
 
 ### The Map is one image

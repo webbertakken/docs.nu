@@ -13,8 +13,8 @@ A stored tab that carries it reads as a general tab that opens in Sketch mode
 The mode tunes **tools and rules**; it does not fork the document model.
 Strokes are `freehand` elements, notes are stickies, text is `text`, shapes
 are shapes. So realtime, comments, layers, export, share links, Offline Mode
-and the [Google Drive mirror](../022-drive-mirror/drive-mirror.md) work in Draw
-mode without Draw-specific code.
+and the [Google Drive mirror](../022-drive-mirror/drive-mirror.md) work in Sketch
+mode without Sketch-specific code.
 
 In the rest of this spec, **a whiteboard** means a general tab in Sketch mode.
 
@@ -27,7 +27,7 @@ pen widths, dock spacing) are named constants, tuned in place.
 - **Mixable.** A workshop often needs a free sketch next to a tidy diagram,
   often on the same canvas. A mode lets one tab hold both, and lets a person
   move between drawing and diagramming without a new tab.
-- **No second editor.** Every editor feature reads the same elements, so Draw
+- **No second editor.** Every editor feature reads the same elements, so Sketch
   mode inherits fixes and features for free and nothing drifts.
 - **Kinds stay rare.** A tab kind is kept for a very specific use with its own
   notation, as event storming has; whiteboarding needs only other tools in
@@ -35,28 +35,28 @@ pen widths, dock spacing) are named constants, tuned in place.
 
 ## Creating one
 
-- **New Document wizard:** choosing **Draw** on the wizard's Mode step ([New document
+- **New Document wizard:** choosing **Sketch** on the wizard's Mode step ([New document
   route](../007-editor/new-document-route.md) "Choosing a mode") makes a document with one tab in Sketch mode, from the
   **Blank Whiteboard** template (kind id `whiteboard`, a blank builder and a preview tile, `packages/templates`).
-- **Start Drawing:** an empty Draw tab offers its templates in **Start Drawing** ([Template
+- **Start Sketching:** an empty Sketch tab offers its templates in **Start Sketching** ([Template
   starts](../007-editor/start-diagramming.md)): Blank Whiteboard first under Recommended, then **Visual Notes**,
   **Exercises** and **Prototypes**, with the pen staying in hand around it. The × starts from the blank whiteboard,
   and a top-centre pill brings it back while the tab is empty.
 - **New tab:** a new tab opens on its mode's start; another mode's start finds **Blank Whiteboard** and every
-  Draw template by search ([Template starts](../007-editor/start-diagramming.md#found-in-other-modes)).
+  Sketch template by search ([Template starts](../007-editor/start-diagramming.md#found-in-other-modes)).
 - **No theme step.** A new whiteboard starts on the default theme; the tab looks the same in either mode
   ([Appearance](#appearance)).
 - **Import:** a Microsoft Whiteboard import makes each board its own new
   document with one tab that opens in Sketch mode, named and dated after the board, and Excalidraw pasted onto a whiteboard lands as its own
   marks (see [Imported and pasted content](#imported-and-pasted-content)).
 - **Any empty tab:** the mode switch on its start turns a general tab into a whiteboard before anything is on it,
-  and a new tab made from a Draw tab opens in Draw ([Editor modes](../007-editor/editor-modes.md)).
+  and a new tab made from a Sketch tab opens in Sketch ([Editor modes](../007-editor/editor-modes.md)).
 
 ## What a whiteboard shows
 
-A whiteboard trades the palette for Draw's own tools: one **floating dock**, centred across the
+A whiteboard trades the palette for Sketch's own tools: one **floating dock**, centred across the
 **top** of the canvas by default (see [Where the dock sits](#where-the-dock-sits)), like Microsoft
-Whiteboard's. It is the strip's twin: the **same height** as the Diagram strip (its buttons the
+Whiteboard's. It is the strip's twin: the **same height** as the Structured strip (its buttons the
 strip's tile size) and drawn at the **toolbar UI scale** ([UI scale](../007-editor/ui-scale.md)), so
 switching modes never changes the size of the bar at the top. Its flyouts are not scaled: they open
 at their design size, like every menu opened from a scaled surface. Every flyout has a **tip**
@@ -105,8 +105,8 @@ pointing at the button that opened it, on the edge facing the dock, over its but
   tools**, **shapes** and **settings** (the cog on its own). **It looks like the other modes'
   palette** ([Toolbar layout](../007-editor/toolbar-layout.md)): the same card, the same 36 px
   tiles and hairlines, and a tool in hand marked as the palette marks its active tool (a soft
-  brand fill with a hairline ring), so Draw reads as the same product. What it holds and how it
-  behaves stay Draw's own (pens that stay in hand, flyouts, pinned shapes). Each group is still
+  brand fill with a hairline ring), so Sketch reads as the same product. What it holds and how it
+  behaves stay Sketch's own (pens that stay in hand, flyouts, pinned shapes). Each group is still
   its own toolbar for assistive technology ("Drawing tools", "Shapes", "Settings"), each one Tab
   stop with arrow keys moving within it.
 - **Drawing tools, left to right:**
@@ -366,7 +366,7 @@ Explorer Home's Jump Back In.
   stay as drawn**: a stroke keeps the exact colour it was drawn in; only
   strokes drawn after this record a named colour.
 - **A pen stays in hand.** After a stroke the pen is still armed (unlike the
-  Diagram palette's one-shot pens, [Highlighter](../008-canvas/highlighter.md)
+  Structured palette's one-shot pens, [Highlighter](../008-canvas/highlighter.md)
   among them): the next drag draws again, and the stroke just drawn is not selected. Select, Escape or
   another tool puts it down.
 - **Ink like Excalidraw's, with pressure.** A pen stroke is drawn the way
@@ -463,7 +463,7 @@ Explorer Home's Jump Back In.
   whiteboarding is a different activity, so Sketch mode's styles never dress a
   Structured mode shape, nor Structured mode's a Sketch mode one, for any shape kind,
   tool style or restyle, in the same document or another. Leaving Sketch mode
-  puts its shape, line or arrow tool down, as it puts a pen down, so Diagram
+  puts its shape, line or arrow tool down, as it puts a pen down, so Structured
   mode never previews or names its next shape the Draw way; the panel's
   "Next rectangle" always shows the style of the mode you are in.
 - A **recognised** shape (see [Shape recognition](#shape-recognition)) is
@@ -630,7 +630,7 @@ The eraser offers **both** modes, switched in its flyout:
   brush is untouched.
 - The brush is a fixed size per mode (`WHITEBOARD_ERASER_RADIUS_PX`), shown
   as the eraser's ring; a whiteboard eraser has no size, target or Tap
-  setting, and always sweeps: the Diagram eraser's panel settings never reach
+  setting, and always sweeps: the Structured eraser's panel settings never reach
   it.
 - The brush stays under the pointer through a pan or zoom mid-sweep (a wheel
   or a pinch while erasing).
@@ -704,7 +704,7 @@ The eraser offers **both** modes, switched in its flyout:
   synced preferences as `drawPattern`
   ([User preferences](../007-editor/user-preferences.md)) and **Grid** until
   chosen. It is never stored on the tab, so choosing it changes nothing for
-  anyone else, and it is the pattern of every tab that person works on in Draw
+  anyone else, and it is the pattern of every tab that person works on in Sketch
   mode ([One look](../007-editor/editor-modes.md#one-look)).
 - In Structured mode the tab's own stored pattern shows again, shared by
   everyone. Exports, thumbnails and api or MCP images always use the tab's
@@ -861,8 +861,8 @@ through the ordinary `Element` / `Added` events.
 
 ## Help centre ([Help app](../018-help/help-app.md))
 
-One article, **Sketch mode** (`/help/canvas/draw-mode/`; the old `/help/canvas/whiteboards/`
-redirects to it): choosing the mode from the switch beside the menu button, an empty tab's start or Shift+D, starting a
+One article, **Sketch mode** (`/help/canvas/sketch-mode/`; the old `/help/canvas/draw-mode/` and `/help/canvas/whiteboards/`
+redirect to it): choosing the mode from the switch beside the menu button, an empty tab's start or Shift+D, starting a
 drawing, the dock, pens, pen versus touch, the two erasers, shape recognition, backgrounds, light
 and dark and snapping custom colours. Registered per
 [Register a help article](../../instructions/register-a-help-article.md).

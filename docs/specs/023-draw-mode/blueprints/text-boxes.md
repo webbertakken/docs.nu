@@ -71,7 +71,7 @@ Scope, by file:
   `height = h`.
 - Drag: `label ''`, `sizing: 'wrap'`, the dragged box's `x`, `y` and `width`, `height = h`.
 - Either opens for typing (`opensForTyping`). No placeholder is shown: the caret is the box.
-- Diagram tabs: unchanged (`createText`'s 220 × 64 and "Text").
+- Structured tabs: unchanged (`createText`'s 220 × 64 and "Text").
 
 ### Typing
 

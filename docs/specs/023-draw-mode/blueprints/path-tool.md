@@ -52,7 +52,7 @@ Scope, by file:
 | `apps/live/components/canvas/whiteboard/WhiteboardDock.tsx` | The Path tool button (`ShapePenIcon`); Select's edit-mode glyph (`EditPointsIcon`)                                                |
 | `apps/live/components/palette/palette-icons.tsx`            | `ShapePenIcon` (the Shape Pen tile's icon, shared with the dock), `EditPointsIcon`                                                |
 | `apps/telemetry/app/event-explanations.ts`                  | Sentences for the four events                                                                                                     |
-| `apps/help/app/canvas/draw-mode/page.mdx`                   | The Path tool section                                                                                                             |
+| `apps/help/app/canvas/sketch-mode/page.mdx`                 | The Path tool section                                                                                                             |
 
 ## Domain and naming
 
@@ -317,7 +317,7 @@ With the Path tool in hand, the draft is editable (as in Figma):
 - `pathEditing` (the edited element is a path): the Select button is pressed, labelled "Select,
   editing a path", icon `EditPointsIcon` (the selection toolbar's Edit points glyph); pressing it
   calls `leavePathEdit`.
-- `WHITEBOARD_EDIT_KEYS.p` → `pickPath`; `WHITEBOARD_TOOL_KEYS.path = 'P'`. Diagram tabs keep `P` as
+- `WHITEBOARD_EDIT_KEYS.p` → `pickPath`; `WHITEBOARD_TOOL_KEYS.path = 'P'`. Structured tabs keep `P` as
   the pencil.
 - `typeIntoSelected` returns false for a path (no typed label, P1).
 
@@ -398,7 +398,7 @@ export function openPathAt(anchors: readonly PathAnchor[], i: number): PathAncho
 export function dragNodes(base, moving, pressed, delta: Point, shift: boolean, snapRadius: number): { anchors: PathAnchor[]; guides: PathGuides | null };
 export function pathEditKey(key: { key: string; shiftKey: boolean; mod: boolean }, anchors, closed, selected): PathKeyOutcome;
 export function toLocal(el, p: Point): Point; export function toWorld(el, p: Point): Point;
-export function tabAsSeen(tab: Tab, appearance?: Appearance): Tab; // the tab's Diagram backdrop, stock colours resolved
+export function tabAsSeen(tab: Tab, appearance?: Appearance): Tab; // the tab's Structured backdrop, stock colours resolved
 export function editingLook(element: { type: string }, isEditing: boolean): { raise: boolean; textCursor: boolean };
 // CanvasProps
 onCommitPath: (draft: { anchors: PathAnchor[]; closed: boolean; continuing: { id: string } | null }) => void;

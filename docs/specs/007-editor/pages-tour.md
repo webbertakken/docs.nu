@@ -5,9 +5,9 @@ infographic, an article or a logo. Like every tour it is started from the action
 and never offers itself; [Show Me](show-me.md) runs the same track from a page's panel. Each kind has its own
 **track**, which shows how that kind of page is made by opening the real controls on the person's own page (a
 slide's Layout and Background popovers, its deck button, the Slide Deck and Present) rather than only pointing at
-them. It is the [Draw tour](../023-draw-mode/draw-tour.md)'s sibling: the same Start Tour button, anchored step
+them. It is the [Sketch tour](../023-draw-mode/draw-tour.md)'s sibling: the same Start Tour button, anchored step
 cards, glide, dimming ring, Skip, Back and closing card, driven by the same engine. Where this spec is silent, the
-Draw tour's rules hold.
+Sketch tour's rules hold.
 
 ## Domain language
 
@@ -17,7 +17,7 @@ Draw tour's rules hold.
 | **Track**              | One page kind's steps: the **Slides**, **Infographic**, **Article** or **Logo** track    |
 | **Tour page**          | The page a track runs on: the person's own page of that kind, fixed when the tour starts |
 | **Page Show Me**       | The same track run on demand from a page's panel ([Show Me](show-me.md))                 |
-| **Diagram tour**       | The Structured mode tour, [Diagram tour](editor-tour.md)                                 |
+| **Structured tour**    | The Structured mode tour, [Structured tour](editor-tour.md)                              |
 | **Start Making Pages** | An empty Pages tab's template start, [Start Diagramming](start-diagramming.md)           |
 
 ## Where it appears
@@ -136,7 +136,7 @@ their union go when the tour ends.
 
 - A step whose control is not on screen when the tour starts (a slide's deck button and the Slides button on a
   phone; the + when neither the one after the last page nor the Toolbar strip's is in the window) is left out up front, so the count stays honest; one that goes before its
-  turn is skipped, as in the Diagram tour.
+  turn is skipped, as in the Structured tour.
 - If the tour can no longer run where it started (the person's edit rights go, they leave Pages, they open
   another tab, or the tour page is deleted or locked) it ends as skipped, closing whatever it opened.
 
@@ -147,7 +147,7 @@ Only someone who may edit the tab sees Start Pages Tour, or Show Me: an **Editor
 
 ## Telemetry ([Telemetry](../017-telemetry/telemetry.md))
 
-The Draw tour's funnel, with its own tokens; the track shows in the step tokens:
+The Sketch tour's funnel, with its own tokens; the track shows in the step tokens:
 
 - **Offer**: `UI` · `Opened` · `PagesTourOffer` the first time the Start Tour button shows this tour in a page load.
   Until 28 October 2026 it counted the welcome card showing, and `UI` · `Closed` · `PagesTourOffer` counted **No**;
@@ -166,7 +166,7 @@ The Draw tour's funnel, with its own tokens; the track shows in the step tokens:
 ## Power user mode
 
 [Power user mode](power-user-mode.md) marks the Pages tour seen (`pagesTourSeen`, every kind while the mode
-is on) alongside the Diagram, Plan, Workshop and Draw tours.
+is on) alongside the Diagram, Plan, Workshop and Sketch tours.
 
 ## Code
 

@@ -19,10 +19,10 @@ Switching the mode **on** writes these values, once:
 | -------------------- | -------------------- | ----- |
 | Alignment guides     | `alignmentGuides`    | on    |
 | Auto-attach arrows   | `autoRebindArrows`   | on    |
-| Diagram tour         | `tourSeen`           | seen  |
+| Structured tour      | `tourSeen`           | seen  |
 | Plan tour            | `planTourSeen`       | seen  |
 | Workshop tour        | `workshopTourSeen`   | seen  |
-| Draw tour            | `drawTourSeen`       | seen  |
+| Sketch tour          | `drawTourSeen`       | seen  |
 | Forms tour           | `formTourSeen`       | seen  |
 | Avatar tour          | `avatarTourSeen`     | seen  |
 | Pages tour           | `pagesTourSeen`      | seen  |
@@ -33,7 +33,7 @@ Switching the mode **on** writes these values, once:
 The Plan and Pages tours record each of their tracks once taken (`planTourTracks`, `pagesTourKinds`); their seen
 flag counts every track as taken only while the mode is on, so switching it off gives back every Settings row not
 yet taken. Marking a tour seen only changes its Settings row (and which Plan track the actions group's Start Tour
-button names): every mode tour stays on the button ([Diagram tour](editor-tour.md) "Where it appears"). An
+button names): every mode tour stays on the button ([Structured tour](editor-tour.md) "Where it appears"). An
 [element tour](element-tours.md) is on the button only for a kind opted in to (`elementTourOffers`), which the mode
 never changes, so for someone who never opted in it changes nothing there.
 

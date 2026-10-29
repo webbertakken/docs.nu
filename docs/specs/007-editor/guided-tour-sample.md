@@ -1,7 +1,7 @@
 # Guided tour sample ("Take the guided tour") — RETIRED
 
 > **Retired, July 2026.** The interactive editor tour
-> ([Diagram tour ("Start Diagram Tour")](editor-tour.md)) superseded this sample: the annotated
+> ([Structured tour ("Start Structured Tour")](editor-tour.md)) superseded this sample: the annotated
 > sample diagram, its hidden `'guided-tour'` template kind + builder, and
 > the "Take the guided tour" card on `/new` were all removed. The generic
 > `TemplateDescriptor.hidden` flag this spec introduced remains (nothing

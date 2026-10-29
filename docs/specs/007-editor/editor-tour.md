@@ -1,8 +1,9 @@
-# Diagram tour ("Start Diagram Tour")
+# Structured tour ("Start Structured Tour")
 
 A bootstrap-style guided tour of [Structured mode](editor-modes.md): a sequence of anchored popover steps that
 spotlight one piece of the diagramming chrome at a time, opening the real panels and menus as it goes. Until
-October 2026 it was the **welcome tour**, offered whatever mode a tab was in; it is now about diagramming alone,
+October 2026 it was the **welcome tour**, offered whatever mode a tab was in, and then the **Diagram tour** ("Start
+Diagram Tour") until Diagram mode became Structured; it is now about diagramming alone,
 and the other modes have tours of their own (the [Plan tour](../026-plan/plan-tour.md) and the
 [Workshop tour](../012-collaboration/workshop-tour.md)). It superseded the guided-tour **sample diagram**
 ([Guided tour sample ("Take the guided tour"), RETIRED](guided-tour-sample.md)), which taught through
@@ -11,20 +12,21 @@ proved the better introduction.
 
 ## Domain language
 
-| Term             | Means                                                                                           |
-| ---------------- | ----------------------------------------------------------------------------------------------- |
-| **Diagram tour** | This tour. In the interface: **Diagram Tour**, and **Diagram Tour** in Settings' Tours category |
-| **welcome tour** | Its name until October 2026; kept only in code identifiers and telemetry tokens                 |
-| **Diagram tab**  | A tab whose mode is Diagram, an event-storming board included (one is always in Diagram)        |
+| Term                | Means                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Structured tour** | This tour. In the interface: **Structured Tour**, and **Structured Tour** in Settings' Tours category |
+| **welcome tour**    | Its name until October 2026; kept only in code identifiers and telemetry tokens                       |
+| **Diagram tour**    | Its name until the modes were renamed; kept in code identifiers (`diagram-tour`)                      |
+| **Structured tab**  | A tab whose mode is Structured, an event-storming board included (one is always Structured)           |
 
 ## Where it appears
 
 - **The actions group's Start Tour button is the one way in.** Every tour (this one, the mode tours, the element
   tours, the avatar, Plan, Forms, Pages and Dashboards tours) is started from one button in the editor's actions
   group, top right ([Toolbar layout](toolbar-layout.md#the-top-line)): a contained chip with a play glyph in a small accent disc, reading **Start
-  Diagram Tour** (`TourOfferButton`, `apps/live/components/tour`). It is as tall as its neighbours and set in their
+  Structured Tour** (`TourOfferButton`, `apps/live/components/tour`). It is as tall as its neighbours and set in their
   type, its hover runs at `duration-micro`, it has a visible focus ring, and it has light and dark looks. On a phone
-  (below `sm`), and wherever its neighbours drop their words, it shows the glyph alone and keeps **Start Diagram
+  (below `sm`), and wherever its neighbours drop their words, it shows the glyph alone and keeps **Start Structured
   Tour** as its accessible name; it never widens the group past the screen. A tour never starts, prompts or offers
   itself on its own: no banner, no card, no toolbar beside an element. This replaced the offer banners ("Getting
   started with Diagrams?"), which people found they had to keep turning down.
@@ -35,16 +37,17 @@ proved the better introduction.
 - **Which tour it offers.** Each tour's host publishes its tour while the person could take it (`useOfferTour`,
   `tour-offer.ts`), and the button offers the most specific one (`TOUR_OFFER_RANK`): the selected element's own
   tour first, then a tool in hand or a surface on the tab (the Avatar tour, the Dashboards tour, a card type's
-  tour), then the tab's mode (Diagram, Draw, Workshop, Pages, Plan, Forms). Between two of the same rank, the one
+  tour), then the tab's mode or control (Structured, Sketch, Pages, the Workshop control, Plan, Forms). Between two of the same rank, the one
   published last wins. With no tour on offer the button is not drawn.
 - **Who sees it.** The button shows only what a host offers to the person in front of it, so it follows each
-  tour's own gating: a tour that needs an **Editor** (this one, the Draw, Workshop, Avatar, Pages, Plan, Forms
+  tour's own gating: a tour that needs an **Editor** (this one, the Sketch, Workshop, Avatar, Pages, Plan, Forms
   and element tours) is never on offer to a **Participant** or a **Viewer**, in a read-only document, in an embed
   or on a locked tab. With nothing on offer to them, they see no button.
 - **Only in Structured mode.** This tour is on offer, and runs, only while the open tab is in Structured mode, to an
   Editor, once the editor is ready: hydrated, no welcome overlay, no start on screen ([Template
-  starts](start-diagramming.md) "The tours wait"), not read-only and not an embed. It is never on offer on a Draw,
-  Workshop, Pages or Plan tab, nor on a Board, Sheet or Dashboard tab (always in Plan). Leaving Diagram mid-tour
+  starts](start-diagramming.md) "The tours wait"), not read-only and not an embed. It is never on offer on a Sketch,
+  Pages or Plan tab, nor on a Board, Sheet or Dashboard tab (always in Plan), nor while the Workshop control is on,
+  where the Workshop tour is offered instead. Leaving Structured mid-tour
   (switching the tab's mode, or opening a tab in another mode) ends it as skipped, since its steps point at chrome
   the other modes do not show.
 - **It stays on offer once taken.** Finishing or skipping the tour does not take the button away: pressing it again
@@ -66,14 +69,14 @@ proved the better introduction.
   (`TourPopover`), so this holds for all of them. It leaves the key alone while it is editing a field, where an
   element tour asks for Escape to put text back, and when another surface has already taken it.
 - **Taken, on every device.** However a run ends (skipped mid-tour or completed), the synced `tourSeen` user
-  preference ([User preferences](user-preferences.md)) records it, so Settings' **Diagram Tour** row reads off. It no
+  preference ([User preferences](user-preferences.md)) records it, so Settings' **Structured Tour** row reads off. It no
   longer hides the button: it is a record, kept for the Settings row. The preference keeps the welcome tour's name.
-- **Rerun from Settings.** The Settings dialog's **Tours** category has a **Diagram Tour** switch that surfaces
+- **Rerun from Settings.** The Settings dialog's **Tours** category has a **Structured Tour** switch that surfaces
   `tourSeen` (inverted: on means not seen). Turning a previously-off switch on and closing Settings starts the tour
-  from the top when the open tab is in Diagram and the tour is on offer there; otherwise it does nothing, and the
-  button is there when the person reaches a Diagram tab. Finishing the rerun turns it off again.
+  from the top when the open tab is in Structured and the tour is on offer there; otherwise it does nothing, and the
+  button is there when the person reaches a Structured tab. Finishing the rerun turns it off again.
 - **One tour at a time.** The [Plan tour](../026-plan/plan-tour.md), the
-  [Workshop tour](../012-collaboration/workshop-tour.md), the [Draw tour](../023-draw-mode/draw-tour.md) and
+  [Workshop tour](../012-collaboration/workshop-tour.md), the [Sketch tour](../023-draw-mode/draw-tour.md) and
   the [Pages tour](pages-tour.md) are this tour's siblings; while any is on screen the others do not start.
   Each belongs to its own mode, so the button offers the open tab's.
 - **Dialogs come first.** A tour never lands over a dialog the person has open (Share, Settings, Export, Share
@@ -133,7 +136,7 @@ words too (`touchBody`), which a touch screen (a coarse pointer) reads instead: 
 
 Retired steps: **Tab Mode** (opening the editor mode switch's menu, step 4 until October 2026) was cut to keep
 the tour on diagramming; each mode now has a tour of its own, on the Start Tour button while the person is in it. **The Explorer** (the document browser behind the top-left menu button) was step 5 of the
-welcome tour; it describes the whole app rather than diagramming, so the Diagram tour left it out. A **Search**
+welcome tour; it describes the whole app rather than diagramming, so the Structured tour left it out. A **Search**
 step (opening the Cmd/Ctrl+K panel) once followed Theme & Canvas until it was cut to keep the tour short; the
 search panel has its own help article.
 
@@ -157,7 +160,7 @@ full-screen layer with a rounded hole cut out of it (`TourSpotlight`).
 
 ### The page waits
 
-While a step is up, the Diagram tour and element tours take no clicks or wheel on the page, only on the step card:
+While a step is up, the Structured tour and element tours take no clicks or wheel on the page, only on the step card:
 a press on what a step opened (a palette category's shape) closed it and the step reopened it, flickering the page.
 A shield under the card stops presses on the window in the capture phase, ahead of every document listener, and
 shows the not-allowed cursor. The keyboard still reaches the card. The other tours leave the page usable, as some
@@ -231,7 +234,7 @@ of their steps ask the person to try things.
 - **The primary buttons stay readable**: their label is white or near-black, whichever contrasts more with the
   accent.
 - **The spotlight** is the dim alone, with no outline in the accent; the step card wears the tab's colours.
-- This holds for the Diagram, Plan, Workshop, Draw and Pages tours and the card type editor's Show Me,
+- This holds for the Structured, Plan, Workshop, Sketch and Pages tours and the card type editor's Show Me,
   which all draw through `TourStage` and `TourPopover`.
 
 ## Share roles
@@ -253,5 +256,5 @@ The welcome tour's tokens, unchanged, so the funnel's history reads straight thr
   `TourStepThemeCanvas`, `TourStepOutro`, derived from the fixed step ids, never content; a Back re-entry
   counts as a view). The last View before an `Ended/TourSkipped` marks the drop-off stage.
   `TourStepExplorer`, `TourStepSearch` and `TourStepEditorMode` are retired with their steps, and stay explained for the history.
-- **End**: `'UI'/'Ended'/'TourCompleted' | 'TourSkipped'` (leaving Diagram mid-tour is a skip).
+- **End**: `'UI'/'Ended'/'TourCompleted' | 'TourSkipped'` (leaving Structured mid-tour is a skip).
 - **Settings row**: `'UI'/'Toggled'/'TourSeenOn' | 'TourSeenOff'`.

@@ -52,7 +52,7 @@ Scope, by file:
 | `apps/live/hooks/canvas/useCanvasSurfaceGestures.ts`              | Pen versus touch; the eraser frame                                        |
 | `apps/live/components/canvas/useCanvasDrawGesture.ts`             | Hands a whiteboard pen press to `useWhiteboardPenGesture`                 |
 | `apps/live/components/palette/NewDocumentWizard.tsx`              | The Sketch mode card (Blank Whiteboard); no theme step                    |
-| `apps/help/app/canvas/draw-mode/page.mdx`                         | Help article, registered in `packages/help-registry`                      |
+| `apps/help/app/canvas/sketch-mode/page.mdx`                       | Help article, registered in `packages/help-registry`                      |
 
 ## Domain and naming
 
@@ -86,18 +86,18 @@ marker), "rubber", "eraser size" on a whiteboard, "theme" for the whiteboard loo
 - Sketch mode is the person's effective editor mode on a general tab
   ([editor-modes blueprint](../../007-editor/blueprints/editor-modes.md)): `useEditorState` derives
   `drawMode = editorMode.mode === 'draw'` and hands it to every gate below. A tab stored with
-  `kind: 'whiteboard'` is migrated on read to a general tab that opens in Draw.
+  `kind: 'whiteboard'` is migrated on read to a general tab that opens in Sketch.
 
 ### Creation
 
 - `templateCanvasOverrides('whiteboard')` returns `{ opensIn: 'draw', backgroundPattern: WHITEBOARD_DEFAULT_PATTERN }`
-  (`'graph'`, Grid, the tab's Diagram pattern): every creation path (the /new wizard, a start on a
+  (`'graph'`, Grid, the tab's Structured pattern): every creation path (the /new wizard, a start on a
   tab, the MCP worker) goes through it.
   `buildTemplate('whiteboard', …)` returns `[]`. Category: `design` (nominal, like Blank: the picker
   shows it only as a quick-pick) (D1).
-- The wizard's Draw card creates a Blank Whiteboard at once, on the `brand` theme (`NewDocumentWizard`).
+- The wizard's Sketch card creates a Blank Whiteboard at once, on the `brand` theme (`NewDocumentWizard`).
 - `chooseTemplate` (a start's pick, Blank Whiteboard found from another mode's search included) tracks
-  `Draw / Created / NewTab` when `kind === 'whiteboard'` and releases the tab's pinned opening mode, so its maker enters Draw; the /new
+  `Draw / Created / NewTab` when `kind === 'whiteboard'` and releases the tab's pinned opening mode, so its maker enters Sketch; the /new
   route tracks `Draw / Created / Template`.
 
 ### Dock state
@@ -165,7 +165,7 @@ same in Structured mode and to every collaborator ([One look](../../007-editor/e
 
 - `boardShape(el)` (`apps/live/lib/whiteboard-tool.ts`): a shape gets `penColour: 'ink'`,
   `penTextColour: 'ink'` and `fillColor: 'transparent'`; a path `penColour: 'ink'` and no fill; an
-  arrow or line `penColour: 'ink'`. Applied by `useShapeDrawing` and the drawn-arrow builder in Draw
+  arrow or line `penColour: 'ink'`. Applied by `useShapeDrawing` and the drawn-arrow builder in Sketch
   mode, before `styleNewElement`.
 - A pen stroke and a text box with no colour of their own draw in Ink in both modes; nothing is
   written for them.
@@ -438,7 +438,7 @@ chroma, contrast? }` in OKLCH: blue (255, 0.18), red (25, 0.19), orange (50, 0.1
   `pickedByOutline` shape that is not `locked`, not inert, `opensInlineLabelEditor(kind)`, and
   `pointInsideOutline(el, point, 0)` (its anchor outline, rotation undone); found, it logs
   `[whiteboard] double-click inside <kind> edits it` and calls `onBeginEdit(id)` (which selects
-  it and keeps every guard: read-only, held by another, format painter). Not found, or in Diagram
+  it and keeps every guard: read-only, held by another, format painter). Not found, or in Structured
   mode: `onCanvasDoubleClick` (a new text box). A selected shape's first click settles as a
   deselect, so the second click and the double-click reach the board and take this path.
 
@@ -965,7 +965,7 @@ validated saves (`validate.ts` bounds `penWidth`). Colours written by a pen come
 
 | Rule                                                                                          | Test                                                                                     |
 | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| A stored whiteboard opens in Draw                                                             | `packages/document/src/legacy-whiteboard-tab.test.ts`                                    |
+| A stored whiteboard opens in Sketch                                                           | `packages/document/src/legacy-whiteboard-tab.test.ts`                                    |
 | Tokens meet contrast                                                                          | `packages/document/src/whiteboard.test.ts`                                               |
 | Stock colours drawn for the canvas                                                            | `packages/document/src/stock-colours.test.ts`                                            |
 | Stroke touch and partial split                                                                | `packages/document/src/whiteboard-stroke.test.ts`                                        |
@@ -987,7 +987,7 @@ validated saves (`validate.ts` bounds `penWidth`). Colours written by a pen come
 | Partial erase keeps pressures and streamline                                                  | `packages/document/src/whiteboard-stroke.test.ts`                                        |
 | Partial erase keeps the kept ink in place and never grows the point count                     | `packages/document/src/whiteboard-stroke.test.ts`                                        |
 | Partial erase frees arrow ends pinned to a split stroke, drops those of an erased one         | `apps/live/lib/whiteboard-erase.test.ts`                                                 |
-| The whiteboard eraser sweeps whatever the Diagram Tap setting                                 | `apps/live/hooks/canvas/useCanvasEraser.test.tsx`                                        |
+| The whiteboard eraser sweeps whatever the Structured Tap setting                              | `apps/live/hooks/canvas/useCanvasEraser.test.tsx`                                        |
 | A mode switch mid-stroke lands the stroke; Escape still discards it                           | `apps/live/components/canvas/useWhiteboardPenGesture.test.tsx`                           |
 | The whiteboard eraser follows a pan or zoom mid-sweep, reading the rect only on a view change | `apps/live/lib/erase-frame.test.ts`, `apps/live/hooks/canvas/useCanvasEraser.test.tsx`   |
 | Live stroke samples and pressures                                                             | `apps/live/lib/live-stroke.test.ts`                                                      |

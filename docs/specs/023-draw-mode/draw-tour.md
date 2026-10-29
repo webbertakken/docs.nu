@@ -1,35 +1,35 @@
-# Draw tour ("Start Draw Tour")
+# Sketch tour ("Start Sketch Tour")
 
-A short, optional guided tour of [Sketch mode](draw-mode.md), started from the actions group's **Start Draw Tour** button. It
+A short, optional guided tour of [Sketch mode](draw-mode.md), started from the actions group's **Start Sketch Tour** button. It
 is the [Workshop tour](../012-collaboration/workshop-tour.md)'s sibling: the same Start Tour button, anchored step
 cards, glide, dimming ring, Skip, Back and closing card, driven by the same engine. Where this spec is silent, the
-Workshop tour's rules hold.
+Workshop tour's rules hold. It was the **Draw tour** ("Start Draw Tour") until Draw mode became Sketch.
 
 ## Domain language
 
-| Term             | Means                                                                   |
-| ---------------- | ----------------------------------------------------------------------- |
-| **Draw tour**    | This tour. On the Start Tour button: **Start Draw Tour**                |
-| **Diagram tour** | The Structured mode tour, [Diagram tour](../007-editor/editor-tour.md)  |
-| **Dock**         | Sketch mode's floating bar of tool groups ([Sketch mode](draw-mode.md)) |
+| Term                | Means                                                                     |
+| ------------------- | ------------------------------------------------------------------------- |
+| **Sketch tour**     | This tour. On the Start Tour button: **Start Sketch Tour**                |
+| **Structured tour** | The Structured mode tour, [Structured tour](../007-editor/editor-tour.md) |
+| **Dock**            | Sketch mode's floating bar of tool groups ([Sketch mode](draw-mode.md))   |
 
 ## Where it appears
 
 - **On the Start Tour button, in Sketch mode.** The actions group's button, leading the document actions
-  ([Diagram tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Draw Tour** while the open tab is in
-  Draw on a tab the person may edit, unless something more specific is on offer. The editor has to be usable
+  ([Structured tour](../007-editor/editor-tour.md) "Where it appears"), reads **Start Sketch Tour** while the open tab is in
+  Sketch on a tab the person may edit, unless something more specific is on offer. The editor has to be usable
   (hydrated, no welcome overlay, not read-only, not an embed), and the tab not locked. It is not on offer while a
-  template start panel is on screen ([Start Diagramming](../007-editor/start-diagramming.md) "The tours wait"); Draw
-  has no start panel of its own, since it offers no templates, so this only matters mid-switch.
+  template start panel, such as Start Sketching, is on screen ([Template starts](../007-editor/start-diagramming.md)
+  "The tours wait").
 - **Never on its own.** Until 28 October 2026 it offered itself, once ever, the first time a person was in Draw
   ("Getting started with Draw?", **No** / **Yes**); the button replaced that offer.
 - **It stays on offer once taken.** Pressing the button again reruns it; a press while another tour is on screen
   does nothing. A press starts the first step.
 - **Taken, on every device.** However a run ends, the synced `drawTourSeen` user preference
   ([User preferences](../007-editor/user-preferences.md)) records it, for Settings' row only.
-- **Rerun from Settings**: the **Draw Tour** switch in Settings' **Tours** category, beside **Workshop** and built
+- **Rerun from Settings**: the **Sketch Tour** switch in Settings' **Tours** category, beside **Workshop** and built
   the same way (on means "not seen yet"). Turning it on from off and closing Settings runs the tour straight away
-  when the person is in Draw and it is on offer; otherwise the button is there when they get there.
+  when the person is in Sketch and it is on offer; otherwise the button is there when they get there.
 
 ## Tour content
 
@@ -58,8 +58,8 @@ group as `dock-<group>`); one rings the [Quick style panel](../008-canvas/quick-
 
 - The dock shows on every surface, a phone included (its groups scroll sideways); Quick Style, a desktop's panel,
   is left out on a phone up front, so the count stays honest. A step whose target never appears is skipped, as in
-  the Diagram tour.
-- If the tour can no longer run where it started (the person's edit rights go, they leave Draw, or they open
+  the Structured tour.
+- If the tour can no longer run where it started (the person's edit rights go, they leave Sketch, or they open
   another tab) it ends as skipped.
 
 ## Share roles
@@ -82,5 +82,5 @@ The Workshop tour's funnel, with its own tokens:
 
 ## Power user mode
 
-[Power user mode](../007-editor/power-user-mode.md) marks the Draw tour seen alongside the Diagram, Plan and
+[Power user mode](../007-editor/power-user-mode.md) marks the Sketch tour seen alongside the Structured, Plan and
 Workshop tours.

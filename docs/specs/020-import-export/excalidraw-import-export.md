@@ -2,7 +2,7 @@
 
 Excalidraw content reaches LiveDoc four ways, all through **one parser**:
 
-- **Paste**: copy in Excalidraw, press Cmd/Ctrl+V on a LiveDoc canvas. In Draw
+- **Paste**: copy in Excalidraw, press Cmd/Ctrl+V on a LiveDoc canvas. In Sketch
   mode it lands as whiteboard-native content (marker strokes, shapes,
   text boxes that hug, stickies, arrows, a frame) as if drawn there; in
   Structured mode it lands as diagram elements.
