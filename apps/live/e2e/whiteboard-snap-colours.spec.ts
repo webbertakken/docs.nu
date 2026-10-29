@@ -96,7 +96,7 @@ async function openSettings(page: Page) {
   return page.locator('#whiteboard-flyout-settings');
 }
 
-// The dock at the top (the default) or the bottom (docs/specs/023-draw-mode/draw-mode.md "Where
+// The dock at the bottom (the default) or the top (docs/specs/023-draw-mode/draw-mode.md "Where
 // the dock sits"), chosen before the editor loads, as the synced preference stores it.
 async function placeDock(page: Page, position: 'top' | 'bottom') {
   await page.addInitScript(

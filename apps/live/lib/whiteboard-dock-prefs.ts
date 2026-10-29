@@ -65,12 +65,12 @@ export function withWhiteboardDockPrefs(
   return next;
 }
 
-// Where the dock sits: the top unless the user chose the bottom.
+// Where the dock sits: the bottom unless the user chose the top.
 export const WHITEBOARD_DOCK_POSITIONS = ['top', 'bottom'] as const;
 export type WhiteboardDockPosition = (typeof WHITEBOARD_DOCK_POSITIONS)[number];
 
 export function readWhiteboardDockPosition(prefs: UserPreferences): WhiteboardDockPosition {
-  return prefs.whiteboardDockPosition === 'bottom' ? 'bottom' : 'top';
+  return prefs.whiteboardDockPosition === 'top' ? 'top' : 'bottom';
 }
 
 export function withWhiteboardDockPosition(

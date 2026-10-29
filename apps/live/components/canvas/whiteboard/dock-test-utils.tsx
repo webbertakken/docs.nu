@@ -36,7 +36,7 @@ export function dockModel(
       recent: ['parallelogram', 'hexagon', 'document'],
     },
     applySlotOutcome: vi.fn(),
-    position: 'top',
+    position: 'bottom',
     pickPath: vi.fn(),
     pathEditing: false,
     leavePathEdit: vi.fn(),

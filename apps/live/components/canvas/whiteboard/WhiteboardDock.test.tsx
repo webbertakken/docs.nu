@@ -394,8 +394,21 @@ describe('WhiteboardDock position', () => {
     return document.querySelector<HTMLElement>('[data-dock-hint]')!;
   }
 
-  it('sits at the top by default, its flyouts and hint opening below it', () => {
+  it('sits at the bottom by default, its flyouts and hint opening above it', () => {
     renderDock(model('select', { pinnedShapes: [...SEVEN] }));
+    expect(dock().dataset.dockPosition).toBe('bottom');
+    // On the bottom line, 12px up, not lifted above it.
+    expect(dock().style.bottom).toBe('12px');
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    const flyout = screen.getByRole('group', { name: 'Settings' });
+    expect(flyout.dataset.side).toBe('above');
+    expect(flyout.className).toContain('fixed');
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    expect(refusePin().dataset.side).toBe('above');
+  });
+
+  it('sits at the top when chosen, its flyouts and hint opening below it', () => {
+    renderDock(model('select', { position: 'top', pinnedShapes: [...SEVEN] }));
     expect(dock().dataset.dockPosition).toBe('top');
     // On the top line, 12px down, until measured (useDockLinePlacement).
     expect(dock().style.top).toBe('12px');
@@ -411,19 +424,6 @@ describe('WhiteboardDock position', () => {
     expect(refusePin().dataset.side).toBe('below');
   });
 
-  it('sits at the bottom when chosen, its flyouts and hint opening above it', () => {
-    renderDock(model('select', { position: 'bottom', pinnedShapes: [...SEVEN] }));
-    expect(dock().dataset.dockPosition).toBe('bottom');
-    // On the bottom line, 12px up, not lifted above it.
-    expect(dock().style.bottom).toBe('12px');
-    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
-    const flyout = screen.getByRole('group', { name: 'Settings' });
-    expect(flyout.dataset.side).toBe('above');
-    expect(flyout.className).toContain('fixed');
-    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
-    expect(refusePin().dataset.side).toBe('above');
-  });
-
   it('sits centred until it is measured onto its line', () => {
     renderDock(model('select', { pinnedShapes: [...SEVEN] }));
     const cls = dock().className.split(' ');
@@ -434,8 +434,8 @@ describe('WhiteboardDock position', () => {
   it('moves between top and bottom in place, keeping its groups', () => {
     const { view } = renderDock();
     const before = screen.getByRole('button', { name: 'Select' });
-    view.rerender(<WhiteboardDock model={model('pen', { position: 'bottom' })} ink="#1c1917" />);
-    expect(dock().dataset.dockPosition).toBe('bottom');
+    view.rerender(<WhiteboardDock model={model('pen', { position: 'top' })} ink="#1c1917" />);
+    expect(dock().dataset.dockPosition).toBe('top');
     expect(screen.getByRole('button', { name: 'Select' })).toBe(before);
   });
 });
@@ -444,10 +444,10 @@ describe('WhiteboardDock position log', () => {
   it('logs the position once the dock is shown, and again when it moves', () => {
     const debug = vi.spyOn(console, 'info').mockImplementation(() => {});
     const { view } = renderDock();
-    expect(debug).toHaveBeenCalledWith('[whiteboard-dock] position', 'top');
-    debug.mockClear();
-    view.rerender(<WhiteboardDock model={model('pen', { position: 'bottom' })} ink="#1c1917" />);
     expect(debug).toHaveBeenCalledWith('[whiteboard-dock] position', 'bottom');
+    debug.mockClear();
+    view.rerender(<WhiteboardDock model={model('pen', { position: 'top' })} ink="#1c1917" />);
+    expect(debug).toHaveBeenCalledWith('[whiteboard-dock] position', 'top');
     debug.mockRestore();
   });
 });

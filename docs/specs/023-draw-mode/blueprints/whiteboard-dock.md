@@ -126,8 +126,8 @@ slots are Most used and Recent), "More shapes" (merged into Shapes), "toolbar" f
 
 ### Position
 
-- `readWhiteboardDockPosition(prefs)`: `'bottom'` only for a stored `'bottom'`; anything else
-  (unset, junk) is `'top'`. `withWhiteboardDockPosition(prefs, position)` writes it.
+- `readWhiteboardDockPosition(prefs)`: `'top'` only for a stored `'top'`; anything else
+  (unset, junk) is `'bottom'`. `withWhiteboardDockPosition(prefs, position)` writes it.
 - The dock model carries `position` (from the synced preferences); the Settings row writes it
   through the dialog's own preference round-trip, and the editor's `PREFERENCES_CHANGED_EVENT`
   listener re-renders the dock in place, still mounted.
@@ -327,7 +327,7 @@ and warns.
 | ------------------------ | -------------------------------------------------------- | --------------- | -------------- |
 | `whiteboardPinnedShapes` | user preferences blob (unset = defaults; `[]` = emptied) | synced per user | across devices |
 | `whiteboardShapePicks`   | user preferences blob (unset = none)                     | synced per user | across devices |
-| `whiteboardDockPosition` | user preferences blob (unset = top)                      | synced per user | across devices |
+| `whiteboardDockPosition` | user preferences blob (unset = bottom)                   | synced per user | across devices |
 
 Written through `useWhiteboardDockPrefs` off the freshest stored preferences
 (`readUserPreferences()`), then `setUserPreferences` and `writeUserPreferences(prefs, ownerId)`
@@ -462,7 +462,7 @@ to measure` (warn).
 | Off the dock: board side, centred, in viewport, tip over  | `WhiteboardDock.test.tsx` "offDock"                                        |
 | Pinned bar, pressed state, Unpin menu, drags both ways    | `apps/live/components/canvas/whiteboard/ShapesGroup.test.tsx`              |
 | Shapes flyout: hover focus, slots, results, menu, closing | `apps/live/components/canvas/whiteboard/ShapesFlyout.test.tsx`             |
-| Dock position: parse, write, default top                  | `apps/live/lib/whiteboard-dock-prefs.test.ts`                              |
+| Dock position: parse, write, default bottom               | `apps/live/lib/whiteboard-dock-prefs.test.ts`                              |
 | Top and bottom wrapper, flyout and hint below or above    | `apps/live/components/canvas/whiteboard/WhiteboardDock.test.tsx`           |
 | A top bar (strip or dock) crowding the top corners        | `apps/live/hooks/ui/useStripCrowdsCorners.test.tsx`                        |
 | Settings row: Top / Bottom round trip, section, token     | `apps/live/components/dialogs/settings/settings-catalogue.test.ts`         |

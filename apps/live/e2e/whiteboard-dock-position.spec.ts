@@ -2,11 +2,20 @@ import type { Page } from '@playwright/test';
 import { expect, expectNoPageErrors, seedTab, settledBox, test } from './fixtures';
 
 // Where the whiteboard dock sits (docs/specs/023-draw-mode/draw-mode.md "Where the dock sits"):
-// the top by default, the bottom by choice in Settings, Editor › Draw; flyouts open on the board
+// the bottom by default, the top by choice in Settings, Editor › Sketch; flyouts open on the board
 // side, take the focus on a press and give it back on Escape; top corner panels give way to a top
 // dock.
 
 const dock = (page: Page) => page.locator('[data-whiteboard-dock]');
+
+// The top, chosen before the editor loads, as the synced preference stores it.
+async function chooseTopDock(page: Page) {
+  await page.addInitScript(() => {
+    const key = 'livedoc:user-preferences:v1';
+    const prefs = JSON.parse(localStorage.getItem(key) ?? '{}');
+    localStorage.setItem(key, JSON.stringify({ ...prefs, whiteboardDockPosition: 'top' }));
+  });
+}
 
 async function openWhiteboard(page: Page, viewport = { width: 1600, height: 900 }) {
   await page.setViewportSize(viewport);
@@ -17,20 +26,21 @@ async function openWhiteboard(page: Page, viewport = { width: 1600, height: 900 
 }
 
 test.describe('whiteboard dock position', () => {
-  test('sits at the top, opens its flyouts below, and moves to the bottom from Settings', async ({
+  test('sits at the bottom, opens its flyouts above, and moves to the top from Settings', async ({
     page,
     pageErrors,
   }) => {
     await openWhiteboard(page);
-    await expect(dock(page)).toHaveAttribute('data-dock-position', 'top');
-    const top = (await dock(page).boundingBox())!;
-    expect(top.y).toBeLessThan(120);
+    await expect(dock(page)).toHaveAttribute('data-dock-position', 'bottom');
+    const bottom = (await dock(page).boundingBox())!;
+    expect(bottom.y).toBeGreaterThan(600);
 
     const opener = dock(page).getByRole('button', { name: 'Settings' });
     await opener.click();
     const flyout = page.locator('#whiteboard-flyout-settings');
-    await expect(flyout).toHaveAttribute('data-side', 'below');
-    expect((await settledBox(flyout)).y).toBeGreaterThan(top.y + top.height);
+    await expect(flyout).toHaveAttribute('data-side', 'above');
+    const above = await settledBox(flyout);
+    expect(above.y + above.height).toBeLessThan(bottom.y);
     // A press hands the focus to the flyout (its choice in force), and Escape hands it back.
     await expect(flyout.locator('[aria-pressed="true"]').first()).toBeFocused();
     await page.keyboard.press('Escape');
@@ -45,22 +55,21 @@ test.describe('whiteboard dock position', () => {
       .getByRole('button', { name: 'Sketch', exact: true })
       .click();
     await dialog.getByText('Dock Position', { exact: true }).scrollIntoViewIfNeeded();
-    await dialog.getByRole('radio', { name: 'Bottom' }).click();
-    await expect(dock(page)).toHaveAttribute('data-dock-position', 'bottom');
+    await dialog.getByRole('radio', { name: 'Top' }).click();
+    await expect(dock(page)).toHaveAttribute('data-dock-position', 'top');
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
 
-    const bottom = (await dock(page).boundingBox())!;
-    expect(bottom.y).toBeGreaterThan(600);
+    const top = (await dock(page).boundingBox())!;
+    expect(top.y).toBeLessThan(120);
     await dock(page).getByRole('button', { name: 'Settings' }).click();
-    await expect(flyout).toHaveAttribute('data-side', 'above');
-    const above = await settledBox(flyout);
-    expect(above.y + above.height).toBeLessThan(bottom.y);
+    await expect(flyout).toHaveAttribute('data-side', 'below');
+    expect((await settledBox(flyout)).y).toBeGreaterThan(top.y + top.height);
 
     // Synced like every preference: a reload keeps the choice.
     await page.reload();
     await dock(page).waitFor();
-    await expect(dock(page)).toHaveAttribute('data-dock-position', 'bottom');
+    await expect(dock(page)).toHaveAttribute('data-dock-position', 'top');
     expectNoPageErrors(pageErrors);
   });
 
@@ -84,6 +93,7 @@ test.describe('whiteboard dock position', () => {
         }),
       ),
     );
+    await chooseTopDock(page);
     await openWhiteboard(page, { width: 1024, height: 768 });
     await seedTab(
       page,
@@ -119,6 +129,7 @@ test.describe('whiteboard dock position', () => {
     page,
     pageErrors,
   }) => {
+    await chooseTopDock(page);
     await openWhiteboard(page, { width: 820, height: 1180 });
     const scroller = dock(page).locator('[data-dock-scroller]');
     const overflow = await scroller.evaluate((el) => el.scrollWidth - el.clientWidth);

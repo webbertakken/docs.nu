@@ -55,8 +55,8 @@ pen widths, dock spacing) are named constants, tuned in place.
 ## What a whiteboard shows
 
 A whiteboard trades the palette for Sketch's own tools: one **floating dock**, centred across the
-**top** of the canvas by default (see [Where the dock sits](#where-the-dock-sits)), like Microsoft
-Whiteboard's. It is the strip's twin: the **same height** as the Structured strip (its buttons the
+**bottom** of the canvas by default (see [Where the dock sits](#where-the-dock-sits)), close to hand
+when drawing on a tablet. It is the strip's twin: the **same height** as the Structured strip (its buttons the
 strip's tile size) and drawn at the **toolbar UI scale** ([UI scale](../007-editor/ui-scale.md)), so
 switching modes never changes the size of the bar at the top. Its flyouts are not scaled: they open
 at their design size, like every menu opened from a scaled surface. Every flyout has a **tip**
@@ -180,19 +180,17 @@ pointing at the button that opened it, on the edge facing the dock, over its but
 
 ## Where the dock sits
 
-- **Top by default**, centred on the top line, where the
-  Toolbar strip sits in Structured mode
-  ([Toolbar layout](../007-editor/toolbar-layout.md)), so a whiteboard's tools
-  are where the rest of the product keeps them.
-- **Bottom by choice**: Settings, **Editor › Draw** (the sub-category for
+- **Bottom by default**, centred on the bottom line: closer to hand when
+  drawing on a tablet, and it leaves the top of the board free.
+- **Top by choice**: Settings, **Editor › Sketch** (the sub-category for
   settings that apply only in Sketch mode,
   [User preferences](../007-editor/user-preferences.md)), the row **Dock
-  Position** (**Top** / **Bottom**). The bottom is closer to
-  hand when drawing on a tablet and leaves the top of the board free. Only
+  Position** (**Top** / **Bottom**). The top is where the Toolbar strip sits in
+  Structured mode ([Toolbar layout](../007-editor/toolbar-layout.md)). Only
   Sketch mode has a dock, so nothing in Structured mode moves with it.
 - **Stored per user** in the synced preferences
   ([User preferences](../007-editor/user-preferences.md)) as
-  `whiteboardDockPosition`; unset, or any value but `bottom`, is the top. A
+  `whiteboardDockPosition`; unset, or any value but `top`, is the bottom. A
   change applies at once, on every tab in Sketch mode.
 - **At the top:**
   - it sits between the brand group and the actions group (Back, the menu button and the editor mode switch,
@@ -879,7 +877,7 @@ Sketch mode is built in rounds and tuned with the operator between them.
   the empty tab makes it one with content, so the pen is put down for Select:
   its Quick Style panel doesn't sit over the board and the first click selects
   (`useTemplateFlow`'s `putToolDown`). Blank lands nothing and keeps the pen.
-  The dock sits at the top, or at the bottom by choice
+  The dock sits at the bottom, or at the top by choice
   ([Where the dock sits](#where-the-dock-sits)).
 - **Still ahead:** the trimmed element menu (colour, width, delete, stacking,
   duplicate, comment); until then a whiteboard element opens the ordinary
