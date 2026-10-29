@@ -8,6 +8,7 @@ import {
   STRIP_TILE_LIMIT,
   desktopStripTileLimit,
   fitStripTiles,
+  stripTilePitch,
   stripCrowdsCorners,
   phoneStripTileLimit,
   stripTilesFor,
@@ -165,6 +166,20 @@ describe('desktopStripTileLimit', () => {
       expect(tiles).toBeLessThan(STRIP_TILE_LIMIT);
       expect(280 + tiles * 38).toBeLessThanOrEqual(width - 2 * 116);
     }
+  });
+});
+
+describe('stripTilePitch', () => {
+  it('pays for a wider item on the rail, so a strip a few px over its room drops a tile', () => {
+    // Twelve tiles of 41.4px, one an opener of 52.9px, 2px gaps, the rail's share 534.5px (a 1440px window).
+    const pitch = stripTilePitch({ tileWidth: 41.4, gap: 2, railShare: 534.5, count: 12 });
+    expect(pitch).toBeCloseTo(44.54, 2);
+    expect(fitStripTiles({ available: 776, chrome: 243.6, pitch })).toBeLessThan(12);
+  });
+
+  it('is the narrowest tile and its gap when the rail is even', () => {
+    expect(stripTilePitch({ tileWidth: 40, gap: 2, railShare: 400, count: 10 })).toBe(42);
+    expect(stripTilePitch({ tileWidth: 40, gap: 2, railShare: 0, count: 0 })).toBe(42);
   });
 });
 

@@ -30,6 +30,14 @@ describe('WorkshopControl', () => {
     expect(button().className).toContain('bg-brand-700');
   });
 
+  it('is its mark alone unless Button Labels is on, its name read out either way', () => {
+    const { rerender } = render(<WorkshopControl on={false} onToggle={vi.fn()} />);
+    expect(button().querySelector('span')!.className).toContain('sr-only');
+    rerender(<WorkshopControl on={false} onToggle={vi.fn()} labelled />);
+    expect(button().querySelector('span')!.className).not.toMatch(/(^|\s)sr-only/);
+    expect(button().querySelector('span')!.className).toContain('phone:sr-only');
+  });
+
   it('asks to turn it the other way', () => {
     const onToggle = vi.fn();
     const { rerender } = render(<WorkshopControl on={false} onToggle={onToggle} />);

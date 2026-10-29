@@ -36,8 +36,10 @@ replaces the tools.
 
 - **Where:** in the top line's actions group, first in its document actions, before Make a Copy, Present and Share
   ([Toolbar layout](../007-editor/toolbar-layout.md#the-top-line)). It is the group's flat button: the Workshop mark
-  (a flipchart on an easel, `FlipchartIcon`) and the name **Workshop**, shown from 1280px wide; narrower (a
-  1024px laptop, a phone) the name is read out only, so the top line keeps its room for the Palette strip.
+  (a flipchart on an easel, `FlipchartIcon`), named **Workshop**. Like Search and Settings it shows its mark
+  alone, its name in its hover card and read out, unless **Button Labels** is on
+  ([User preferences](../007-editor/user-preferences.md)), when the name shows beside it (never on a phone). So the
+  top line keeps its room and the Palette strip stays centred, and opening a document costs no extra layout pass.
 - **A toggle button** (`aria-pressed`): pressed while Workshop is on, drawn with the brand fill Share uses for a
   shared document, so the state reads at a glance. The label never changes, so turning it on or off moves nothing
   (no layout shift); the fill, `aria-pressed` and the strip appearing carry the state.

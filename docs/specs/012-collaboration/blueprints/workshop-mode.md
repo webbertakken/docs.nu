@@ -52,7 +52,7 @@ categories keep their ids: `collab-ask`, `collab-tools`, `collab-record`, `colla
 - **The control:** `ActionsGroup` passes `workshop={{ on, onToggle }}` to `DocumentActions` only when
   `editorMode.canSwitch` (an Editor, a general unlocked tab, not in `plan`, not an event-storming board) and the
   document actions show. `WorkshopControl` renders the group's flat button (`TOOLBAR_BUTTON`), `aria-pressed={on}`,
-  `data-workshop-control`, the `FlipchartIcon` (14 px) and "Workshop" (`phone:sr-only`), the `SHARED` brand fill
+  `data-workshop-control`, the `FlipchartIcon` (14 px) and "Workshop" (`sr-only`, or `phone:sr-only` with Button Labels on, `labelled`), the `SHARED` brand fill
   while on, in a `HoverCard` titled "Workshop".
 - **Palette:** `paletteCategoriesFor(mode, { esBoard, pagesKind, workshop })` resolves `withWorkshopKit(layout)`
   when `workshop`; `paletteCategoryOffered(mode, id, workshop)` likewise. The palette's chosen category re-lands on

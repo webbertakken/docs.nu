@@ -67,6 +67,23 @@ export function fitStripTiles({
   return Math.min(STRIP_TILE_LIMIT, Math.max(MIN_STRIP_TILES, (available - chrome) / pitch));
 }
 
+// One tile's share of the rail, as fitStripTiles spends it: never less than the narrowest tile and its gap, and no
+// less than the rail's own average, so a wider item on it (an opener's chevron, a divider) is paid for and a strip a
+// few px too wide for its room drops a tile rather than leaving the line.
+export function stripTilePitch({
+  tileWidth,
+  gap,
+  railShare,
+  count,
+}: {
+  tileWidth: number;
+  gap: number;
+  railShare: number;
+  count: number;
+}): number {
+  return Math.max(tileWidth + gap, count > 0 ? railShare / count : 0);
+}
+
 // Whether the strip reaches into a top-corner panel stack, horizontally, with
 // `gap` to spare. An empty corner (zero width) never counts. The canvas chrome
 // then starts its top corner stacks below the strip (docs/specs/007-editor/toolbar-layout.md).

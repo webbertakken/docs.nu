@@ -14,7 +14,7 @@
 // first measurement the estimated limit (`fallback`) stands in.
 
 import { useLayoutEffect, useState, type RefObject } from 'react';
-import { fitStripTiles } from './toolbar-strip-tiles';
+import { fitStripTiles, stripTilePitch } from './toolbar-strip-tiles';
 import { editorViewportOf } from '@/lib/editor-viewport';
 import { measureTopLine, topLineGroups } from '@/lib/top-line-clearance';
 
@@ -66,7 +66,7 @@ export function useStripTileLimit(
         (parseFloat(railStyle.marginLeft) || 0) +
         (parseFloat(railStyle.marginRight) || 0);
       const chrome = cardWidth - railShare;
-      const pitch = tileWidth + gap;
+      const pitch = stripTilePitch({ tileWidth, gap, railShare, count: items.length });
       // The room is the editor's: the window, or its pane in a side by side split
       // (docs/specs/007-editor/split-view.md), measured from the pane's own left edge.
       const view = editorViewportOf(card);

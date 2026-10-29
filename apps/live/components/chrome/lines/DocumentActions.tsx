@@ -12,6 +12,8 @@ export type PresentAction = { slideCount: number; starting: boolean; onPresent: 
 export type DocumentActionsProps = {
   // The Workshop control (docs/specs/012-collaboration/workshop-mode.md), given only where an Editor may turn it.
   workshop?: { on: boolean; onToggle: (on: boolean) => void } | undefined;
+  // Button Labels (docs/specs/007-editor/user-preferences.md): the Workshop control shows its name beside its mark.
+  labelled?: boolean;
   // Make a Copy, for a visitor (someone who may not share): the same slot as Share, a different action.
   onMakeCopy?: () => void;
   copying?: boolean;
@@ -32,6 +34,7 @@ const LABEL = 'text-optical-centre phone:sr-only';
 // control, Make a Copy, Present, then Share or Share Form, each the group's flat button with its name.
 export function DocumentActions({
   workshop,
+  labelled = false,
   onMakeCopy,
   copying = false,
   present,
@@ -42,7 +45,9 @@ export function DocumentActions({
   const formShare = useFormShareHost();
   return (
     <>
-      {workshop ? <WorkshopControl on={workshop.on} onToggle={workshop.onToggle} /> : null}
+      {workshop ? (
+        <WorkshopControl on={workshop.on} onToggle={workshop.onToggle} labelled={labelled} />
+      ) : null}
       {onMakeCopy ? (
         <HoverCard title="Make a copy" description="Duplicate this document into your own files.">
           <button
