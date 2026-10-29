@@ -96,7 +96,7 @@ drawn only between two parts that both render (`ToolbarGroup` parts, see the gro
 4. `ContributorsButton`: up to `CONTRIBUTORS_SHOWN` avatars of the remote people present (agents folded as the
    presence rows fold them), then "+N"; name "n people here". Not drawn while nobody else is here.
 5. Add tab (+, `data-tour-id="add-tab"`, name "Add tab", `aria-haspopup="menu"`) for someone who may add tabs: it opens
-   `AddTabMenu` (portalled, `data-add-tab-menu`, `MENU_PANEL`, 36 px rows) of `ADD_TAB_ROWS`: Tab, Board, Sheet,
+   `AddTabMenu` (portalled, `data-add-tab-menu`, `CHROME_MENU_SURFACE`, `CHROME_MENU_ROW` 36 px rows) of `ADD_TAB_ROWS`: Tab, Board, Sheet,
    Dashboard, each a `menuitem` with its mark; choosing closes the menu and calls `tabs.onAdd(choice)`. It hangs above
    the button (the bottom line), its right edge on the button's, kept 8 px inside the viewport; `useMenu` keys.
    Opening fires `UI · Opened · AddTabMenu`.

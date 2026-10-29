@@ -21,7 +21,7 @@ tab is worked in, never switched to), adding them from **+**, the Plan palette a
   `editorModeSwitchable(tab)` is false for every tab in `plan`, so no switch, no Shift+D and no Workshop control.
 - Every `Record<EditorMode, …>` keeps a `plan` entry where it draws a Plan tab (`EDITOR_MODE_ICONS`, `MODE_PATTERNS`);
   `MODE_EVENT` has none (`ModePlan` is history). What a template or document is made as is `TabOpening` `'plan'`
-  (`BLANK_TEMPLATE_FOR_OPENING`, `MODE_WORDS` (Plan, "Plan boards"), `POPULAR_BY_OPENING`, the template filter's
+  (`BLANK_TEMPLATE_FOR_OPENING`, `MODE_WORDS` (Plan, "Plan boards"), `POPULAR_BY_MODE` (keyed by `TabOpening`), the template filter's
   `TemplateModePlan`, explorer `VALUE_LABELS['opens-in'].plan`).
 - **The landing:** `addTab('board' | 'sheet' | 'dashboard')` writes the tab with `opensIn: 'plan'` and calls
   `setPlanStartLanding(tab.id, 'boards' | 'sheets' | 'dashboards')` (an in-memory map, never stored or synced).
@@ -114,7 +114,7 @@ elements)` to the create (cloud and Offline Mode), so a template's document has 
   elements: 87 ms the first read, 0.11 ms a render after. `PlanSheetsHost`'s status picker reads
   `statusNames`. `usePlanTabSweep` calls `loadAllTabs` once a session when Plan is in play and the document
   has 2 to `PLAN_SWEEP_MAX_TABS` (12) tabs.
-- `TEMPLATE_MODES` maps each kind to `'plan'`; previews in `packages/template-previews` (group 15), a tab strip
+- `TEMPLATE_OPENINGS` maps each kind to `'plan'`; previews in `packages/template-previews` (group 15), a tab strip
   for a template of several tabs and a Gantt panel under a board of projects.
 
 ## Testing
