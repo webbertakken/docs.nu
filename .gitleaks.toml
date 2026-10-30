@@ -1,0 +1,39 @@
+# Secret scanning: gitleaks' default rules, minus the known fake values below.
+# Allow exact values only, never paths: a real key in a test file must still be caught.
+# Run: gitleaks git .  (history)  or  gitleaks dir . (working tree)
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Test fixtures: made-up signing secrets, join tokens and community keys"
+targetRules = ["generic-api-key"]
+regexTarget = "secret"
+regexes = [
+  '''^a-test-secret-long-enough-to-sign-with-123$''',
+  '''^uuid-1\.secret_2$''',
+  '''^0b7a2b6e-3f1c-4d2a-8e9b-1a2b3c4d5e6f$''',
+  '''^1b7a2b6e-3f1c-4d2a-8e9b-1a2b3c4d5e6f$''',
+  '''^2b7a2b6e-3f1c-4d2a-8e9b-1a2b3c4d5e6f$''',
+  '''^3f2b8c1e-9a4d-4e7f-8b21-0c5d6e7f8a9b$''',
+  '''^4a2b8c1e-9a4d-4e7f-8b21-0c5d6e7f8a9b$''',
+]
+
+[[allowlists]]
+description = "Help centre docs: the placeholder API token in curl examples"
+targetRules = ["curl-auth-header"]
+regexTarget = "secret"
+regexes = ['''^lvd_your_token_here$''']
+
+[[allowlists]]
+description = "Build output and dependencies, gitignored (mirrors .gitignore)"
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)dist/''',
+  '''^build/''',
+  '''(^|/)\.next(-dev|-analyze)?/''',
+  '''(^|/)\.turbo/''',
+  '''(^|/)\.wrangler/''',
+  '''(^|/)coverage/''',
+  '''(^|/)out/''',
+]
