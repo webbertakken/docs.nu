@@ -91,10 +91,13 @@ NEXT_PUBLIC_API_BASE=
 - It allows exact values, never test paths, so a real key pasted into a test or a doc is still caught.
 - A new fixture that trips a rule gets its exact value added there, after confirming it is fake.
 - Gitignored build output (`node_modules/`, `dist/`, `.next/`, ...) is skipped, mirroring `.gitignore`.
+- CI's **Secrets** job scans the whole history on every pull request and every push to `main`.
+- It installs a pinned gitleaks release and checks its SHA-256 before running it.
+- The pre-push hook scans the commits a push sends first ([Before a push](../003-system-architecture/testing.md#before-a-push)).
+- Without gitleaks installed, the hook says so and skips; CI stays the gate.
 
 ## Tooling (to be added)
 
-- A pre-push or CI step running `gitleaks git` on each change, so a leak fails before it lands.
 - CI check that no `NEXT_PUBLIC_*`-bundled value matches a known secret-key prefix (e.g. `sk_`, Resend's `re_`).
 
 ## Photo bytes never leave the browser

@@ -1,6 +1,6 @@
 // The pre-push hook (docs/specs/003-system-architecture/testing.md "Before a push"): runs what CI's
-// Checks and Tests would fail on, for what the push changes since its merge base with origin/main,
-// so a deterministic failure surfaces on the machine first. CI still runs everything.
+// Checks, Tests and Secrets would fail on, for what the push changes since its merge base with
+// origin/main, so a deterministic failure surfaces on the machine first. CI still runs everything.
 //
 //   .githooks/pre-push -> node scripts/git-hooks/pre-push.mjs (the push's refs on stdin)
 
@@ -21,10 +21,36 @@ const FORMATTED = /\.(?:ts|tsx|js|jsx|json|md|yml|yaml)$/;
 // A file in no workspace: docs, root config, workflows. Only the help app's guards read these.
 const OUTSIDE_WORKSPACES = /^(?!apps\/|packages\/)/;
 
-/** @typedef {{ label: string, args: string[] }} Step */
+/**
+ * One check: `<command> <args>`. An optional step whose command is not installed is skipped, saying so.
+ * @typedef {{ label: string, command: 'pnpm' | 'gitleaks', args: string[], optional?: boolean }} Step
+ */
 
 /**
- * The checks for a push, in the order they run; each is `pnpm <args>`.
+ * @param {string} label
+ * @param {string[]} args
+ * @returns {Step}
+ */
+const pnpmStep = (label, args) => ({ label, command: 'pnpm', args });
+
+/**
+ * The secret scan of every commit the push sends, intermediate ones included: a secret added and
+ * removed again still lands in the public history. It runs whatever the net diff, and first, being
+ * the cheapest check and the one whose failure cannot be undone by a later commit.
+ * @param {string} base the merge base with origin/main
+ * @returns {Step}
+ */
+export function secretScanStep(base) {
+  return {
+    label: 'secret scan',
+    command: 'gitleaks',
+    args: ['git', '--no-banner', '--redact', `--log-opts=${base}..HEAD`],
+    optional: true,
+  };
+}
+
+/**
+ * The checks for a push's changed files, in the order they run; each is `pnpm <args>`.
  * @param {string[]} changedFiles repo-relative paths changed since the merge base, deletions excluded
  * @param {string[]} coverageFilters `--filter=!<name>` per workspace with test:coverage
  * @returns {Step[]}
@@ -35,27 +61,38 @@ export function prePushPlan(changedFiles, coverageFilters) {
   const steps = [];
   const formatted = changedFiles.filter((f) => FORMATTED.test(f));
   if (formatted.length > 0) {
-    steps.push({ label: 'format', args: ['exec', 'prettier', '--check', ...formatted] });
+    steps.push(pnpmStep('format', ['exec', 'prettier', '--check', ...formatted]));
   }
   steps.push(
-    {
-      label: 'lint and typecheck',
-      args: ['exec', 'turbo', 'run', 'lint', 'typecheck', '--affected'],
-    },
-    {
-      label: 'tests',
-      args: ['exec', 'turbo', 'run', 'test', '--affected', '--concurrency=2', ...coverageFilters],
-    },
-    {
-      label: 'tests with coverage thresholds',
-      args: ['exec', 'turbo', 'run', 'test:coverage', '--affected', '--concurrency=2'],
-    },
+    pnpmStep('lint and typecheck', ['exec', 'turbo', 'run', 'lint', 'typecheck', '--affected']),
+    pnpmStep('tests', [
+      'exec',
+      'turbo',
+      'run',
+      'test',
+      '--affected',
+      '--concurrency=2',
+      ...coverageFilters,
+    ]),
+    pnpmStep('tests with coverage thresholds', [
+      'exec',
+      'turbo',
+      'run',
+      'test:coverage',
+      '--affected',
+      '--concurrency=2',
+    ]),
   );
   if (changedFiles.some((f) => OUTSIDE_WORKSPACES.test(f))) {
-    steps.push({
-      label: 'help guards (repo-wide references)',
-      args: ['exec', 'turbo', 'run', 'test:coverage', '--filter=@livedoc/help'],
-    });
+    steps.push(
+      pnpmStep('help guards (repo-wide references)', [
+        'exec',
+        'turbo',
+        'run',
+        'test:coverage',
+        '--filter=@livedoc/help',
+      ]),
+    );
   }
   return steps;
 }
@@ -106,20 +143,32 @@ function main() {
   const changed = git('diff', '--name-only', '--diff-filter=d', base, 'HEAD')
     .split('\n')
     .filter(Boolean);
-  const steps = prePushPlan(changed, plainTestFilters(workspaceManifests()));
-  if (steps.length === 0) {
+  const plan = prePushPlan(changed, plainTestFilters(workspaceManifests()));
+  if (plan.length === 0) {
     console.log(`[pre-push] nothing changed since ${BASE_REF} (${base.slice(0, 9)})`);
-    return 0;
+  } else {
+    console.log(
+      `[pre-push] ${changed.length} files changed since ${BASE_REF} (${base.slice(0, 9)})`,
+    );
   }
-  console.log(`[pre-push] ${changed.length} files changed since ${BASE_REF} (${base.slice(0, 9)})`);
+  const steps = [secretScanStep(base), ...plan];
   const started = Date.now();
   for (const step of steps) {
-    console.log(`[pre-push] ${step.label}: pnpm ${step.args.slice(0, 6).join(' ')}`);
-    const run = spawnSync('pnpm', step.args, {
+    console.log(`[pre-push] ${step.label}: ${step.command} ${step.args.slice(0, 6).join(' ')}`);
+    const run = spawnSync(step.command, step.args, {
       cwd: ROOT,
       stdio: 'inherit',
       env: { ...process.env, TURBO_SCM_BASE: base, TURBO_SCM_HEAD: 'HEAD' },
     });
+    if (
+      step.optional &&
+      /** @type {NodeJS.ErrnoException | undefined} */ (run.error)?.code === 'ENOENT'
+    ) {
+      console.warn(
+        `[pre-push] skipped: ${step.label}; ${step.command} is not installed (CI still runs it)`,
+      );
+      continue;
+    }
     if (run.status !== 0) {
       console.error(`[pre-push] failed: ${step.label} (exit ${run.status ?? run.signal})`);
       return 1;
