@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { hooksPathAction } from '../../../scripts/git-hooks/install.mjs';
-import { prePushPlan, pushedShas } from '../../../scripts/git-hooks/pre-push.mjs';
+import { prePushPlan, pushedShas, secretScanStep } from '../../../scripts/git-hooks/pre-push.mjs';
 
 // The pre-push hook (docs/specs/003-system-architecture/testing.md "Before a push") runs what CI's
 // Checks and Tests would fail on, for what a push changes. It lives with the other repo-wide guards
@@ -47,6 +47,11 @@ describe('prePushPlan', () => {
     );
   });
 
+  it('runs every step through pnpm', () => {
+    const steps = prePushPlan(['docs/x.md', 'apps/live/a.ts'], COVERAGE_FILTERS);
+    expect(steps.map((s) => s.command)).toEqual(steps.map(() => 'pnpm'));
+  });
+
   it('runs the help guards last, after the affected suites', () => {
     const steps = prePushPlan(['docs/x.md'], COVERAGE_FILTERS);
     expect(steps.at(-1)!.args).toEqual([
@@ -56,6 +61,22 @@ describe('prePushPlan', () => {
       'test:coverage',
       '--filter=@livedoc/help',
     ]);
+  });
+});
+
+describe('secretScanStep', () => {
+  const BASE = 'a'.repeat(40);
+
+  it('scans only the commits since the merge base, redacting what it finds', () => {
+    expect(secretScanStep(BASE)).toMatchObject({
+      label: 'secret scan',
+      command: 'gitleaks',
+      args: ['git', '--no-banner', '--redact', `--log-opts=${BASE}..HEAD`],
+    });
+  });
+
+  it('is skippable where gitleaks is not installed, since CI scans every push', () => {
+    expect(secretScanStep(BASE).optional).toBe(true);
   });
 });
 

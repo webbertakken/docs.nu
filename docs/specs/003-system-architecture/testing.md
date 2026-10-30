@@ -180,7 +180,8 @@ suite exactly once (a workspace with `test:coverage` runs only that), for every
 workspace but the editor; **Editor unit tests i/3** run the editor's suite
 (`apps/live`, most of the repository's tests) under coverage, a third of its
 files each (`vitest run --shard=i/3`); **Build** runs the build and the deploy
-config check (`pnpm deploy:check`). No CI change is needed to start running
+config check (`pnpm deploy:check`); **Secrets** scans the whole history with gitleaks
+([Secrets policy](../002-project-scope/secrets-policy.md#secret-scanning)). No CI change is needed to start running
 tests; adding a `test` script to a workspace is enough for Turborepo to pick
 it up.
 
@@ -247,13 +248,16 @@ a deterministic failure surfaces in seconds on the machine rather than minutes l
   `CI` is set or outside a git work tree.
 - `.githooks/pre-push` runs `scripts/git-hooks/pre-push.mjs`, which takes the files changed since
   the merge base with `origin/main` and runs, stopping at the first failure:
-  1. `prettier --check` on the changed files Prettier formats;
-  2. `turbo run lint typecheck test --affected`, against that merge base, for the workspaces the
+  1. `gitleaks git` on every commit since that merge base, whatever the net diff, since a secret
+     added and removed again is still pushed; where gitleaks is not installed it says so and skips,
+     leaving the gate to CI's Secrets job;
+  2. `prettier --check` on the changed files Prettier formats;
+  3. `turbo run lint typecheck test --affected`, against that merge base, for the workspaces the
      change touches and their dependants;
-  3. the help app's suite whenever a changed file sits outside `apps/` and `packages/`, since
+  4. the help app's suite whenever a changed file sits outside `apps/` and `packages/`, since
      its guards (repo paths and spec links in docs and code) read the whole repository and
      `--affected` assigns a root file to no workspace.
-- Nothing changed since the merge base: it prints that and passes.
+- Nothing changed since the merge base: it prints that, runs only the secret scan, and passes.
 - The hook is a fast shift-left, not the gate: CI still runs everything, and the E2E suite stays
   in CI.
 
