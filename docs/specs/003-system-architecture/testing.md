@@ -185,7 +185,7 @@ config check (`pnpm deploy:check`); **Secrets** scans the whole history with git
 tests; adding a `test` script to a workspace is enough for Turborepo to pick
 it up.
 
-Checks, Tests, every Editor unit tests job and Build are required status checks on `main`, with every E2E Smoke job
+Checks, Tests, every Editor unit tests job, Build and Secrets are required status checks on `main`, with every E2E Smoke job
 ([End-to-end tests](e2e-smoke.md#when-it-runs)). Only runs started by the pull request count: a
 `workflow_dispatch` run on the same commit is not attached to it.
 
