@@ -31,11 +31,11 @@
     "@livedoc/oxlint-config": "workspace:*",
     "@livedoc/vitest-config": "workspace:*",
     "@types/node": "^26.6.4",
-    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/coverage-v8": "^5.0.5",
     "lucide-static": "1.52.0",
     "oxlint": "^1.88.0",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   },
   "dependencies": {
     "svg-path-bbox": "2.1.0"
