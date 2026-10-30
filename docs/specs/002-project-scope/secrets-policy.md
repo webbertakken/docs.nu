@@ -84,9 +84,17 @@ NEXT_PUBLIC_API_BASE=
 3. Force-push and `git filter-repo` are **not** sufficient — rotation comes first because Git history is forever public.
 4. Handle the rest as an incident: [Respond to a security incident](../../instructions/respond-to-a-security-incident.md).
 
+## Secret scanning
+
+- `gitleaks git .` scans the history and `gitleaks dir .` the working tree; both report no leaks.
+- [`.gitleaks.toml`](../../../.gitleaks.toml) keeps gitleaks' default rules and allows only known fake values.
+- It allows exact values, never test paths, so a real key pasted into a test or a doc is still caught.
+- A new fixture that trips a rule gets its exact value added there, after confirming it is fake.
+- Gitignored build output (`node_modules/`, `dist/`, `.next/`, ...) is skipped, mirroring `.gitignore`.
+
 ## Tooling (to be added)
 
-- Pre-commit hook scanning for likely secrets (`gitleaks` or similar) — to be added when there are enough secrets in dev that scanning earns its keep.
+- A pre-push or CI step running `gitleaks git` on each change, so a leak fails before it lands.
 - CI check that no `NEXT_PUBLIC_*`-bundled value matches a known secret-key prefix (e.g. `sk_`, Resend's `re_`).
 
 ## Photo bytes never leave the browser
